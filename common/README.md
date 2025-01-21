@@ -1,9 +1,8 @@
-# Products
+# Common Libraries
 
-This file contains PostHog products. 
+This folder contains projects, tools and utilities, which are `common/` and shared amongst all the `products/`.
 
 - Internal RFC: https://github.com/PostHog/product-internal/pull/703
-- Mergerd in PR: https://github.com/PostHog/posthog/pull/26693
 
 ## Dev guidelines
 
