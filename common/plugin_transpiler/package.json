@@ -1,5 +1,5 @@
 {
-    "name": "plugin-transpiler",
+    "name": "plugin_transpiler",
     "version": "1.0.0",
     "description": "Transpiles site apps TSX to browser JS via stdin/stdout",
     "main": "transpile.mjs",
