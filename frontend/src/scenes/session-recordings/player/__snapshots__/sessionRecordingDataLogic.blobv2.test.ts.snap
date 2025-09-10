@@ -60,6 +60,7 @@ exports[`sessionRecordingDataLogic blobby v2 loading session core loads all data
     },
   ],
   "sessionRecordingId": "2",
+  "sessionRetentionPeriodDays": null,
   "snapshotsByWindowId": {
     "0196e180-73bd-7b72-869b-35ee20bbbcd1": [
       {
