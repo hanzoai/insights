@@ -6,11 +6,10 @@ import { LemonButton, LemonCheckbox, LemonInput, LemonSnack, LemonTable } from '
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
 import { pluralize } from 'lib/utils'
 
-import { PipelineNodeLogicProps } from './pipelineNodeLogic'
-import { ALL_LOG_LEVELS, pipelineNodeLogsLogic } from './pipelineNodeLogsLogic'
+import { ALL_LOG_LEVELS, PipelineNodeLogsLogicProps, pipelineNodeLogsLogic } from './pipelineNodeLogsLogic'
 
-export function PipelineNodeLogs({ id, stage }: PipelineNodeLogicProps): JSX.Element {
-    const logic = pipelineNodeLogsLogic({ id, stage })
+export function PipelineNodeLogs({ id }: PipelineNodeLogsLogicProps): JSX.Element {
+    const logic = pipelineNodeLogsLogic({ id })
 
     const { logs, logsLoading, backgroundLogs, columns, isThereMoreToLoad, selectedLogLevels, instanceId } =
         useValues(logic)

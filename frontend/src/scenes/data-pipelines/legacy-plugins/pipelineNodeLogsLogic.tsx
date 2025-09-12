@@ -6,25 +6,67 @@ import { LemonTableColumns, Link } from '@posthog/lemon-ui'
 import { TZLabel } from 'lib/components/TZLabel'
 import { LOGS_PORTION_LIMIT } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
-import { PipelineNodeLogicProps, pipelineNodeLogic } from 'scenes/pipeline/pipelineNodeLogic'
+import { teamLogic } from 'scenes/teamLogic'
 
 import api from '~/lib/api'
 import { LogEntry, LogEntryLevel, LogEntryRequestParams } from '~/types'
 
-import { teamLogic } from '../teamLogic'
 import type { pipelineNodeLogsLogicType } from './pipelineNodeLogsLogicType'
-import { PipelineBackend } from './types'
-import { LogLevelDisplay } from './utils'
+
+export function LogLevelDisplay(level: LogEntryLevel): JSX.Element {
+    let color: string | undefined
+    switch (level) {
+        case 'DEBUG':
+            color = 'text-muted'
+            break
+        case 'LOG':
+            color = 'text-text-3000'
+            break
+        case 'INFO':
+            color = 'text-accent'
+            break
+        case 'WARNING':
+        case 'WARN':
+            color = 'text-warning'
+            break
+        case 'ERROR':
+            color = 'text-danger'
+            break
+        default:
+            break
+    }
+    return <span className={color}>{level}</span>
+}
 
 export const ALL_LOG_LEVELS: LogEntryLevel[] = ['DEBUG', 'LOG', 'INFO', 'WARNING', 'ERROR']
 export const DEFAULT_LOG_LEVELS: LogEntryLevel[] = ['LOG', 'INFO', 'WARNING', 'ERROR']
 
+export enum PipelineBackend {
+    BatchExport = 'batch_export',
+    Plugin = 'plugin',
+}
+
+export interface PipelineNodeLogsLogicProps {
+    id: number | string
+}
+
+type PluginNodeId = {
+    backend: PipelineBackend.Plugin
+    id: number
+}
+type BatchExportNodeId = {
+    backend: PipelineBackend.BatchExport
+    id: string
+}
+
+export type PipelineNodeLimitedType = PluginNodeId | BatchExportNodeId
+
 export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
-    props({} as PipelineNodeLogicProps), // TODO: Remove `stage` from props, it isn't needed here for anything
+    props({} as PipelineNodeLogsLogicProps),
     key(({ id }) => id),
     path((key) => ['scenes', 'pipeline', 'pipelineNodeLogsLogic', key]),
-    connect((props: PipelineNodeLogicProps) => ({
-        values: [teamLogic(), ['currentTeamId'], pipelineNodeLogic(props), ['node']],
+    connect(() => ({
+        values: [teamLogic(), ['currentTeamId']],
     })),
     actions({
         setSelectedLogLevels: (levels: LogEntryLevel[]) => ({
@@ -51,9 +93,6 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
                     if (values.node.backend === PipelineBackend.BatchExport) {
                         const res = await api.batchExports.logs(values.node.id, logParams)
                         results = res.results
-                    } else if (values.node.backend === PipelineBackend.HogFunction) {
-                        const res = await api.hogFunctions.logs(values.node.id, logParams)
-                        results = res.results
                     } else {
                         results = await api.pluginConfigs.logs(Number(values.node.id), logParams)
                     }
@@ -75,9 +114,6 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
                     }
                     if (values.node.backend === PipelineBackend.BatchExport) {
                         const res = await api.batchExports.logs(values.node.id, logParams)
-                        results = res.results
-                    } else if (values.node.backend === PipelineBackend.HogFunction) {
-                        const res = await api.hogFunctions.logs(values.node.id, logParams)
                         results = res.results
                     } else {
                         results = await api.pluginConfigs.logs(Number(values.node.id), logParams)
@@ -116,9 +152,6 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
 
                     if (values.node.backend === PipelineBackend.BatchExport) {
                         const res = await api.batchExports.logs(values.node.id, logParams)
-                        results = res.results
-                    } else if (values.node.backend === PipelineBackend.HogFunction) {
-                        const res = await api.hogFunctions.logs(values.node.id, logParams)
                         results = res.results
                     } else {
                         results = await api.pluginConfigs.logs(Number(values.node.id), logParams)
@@ -163,6 +196,16 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
         ],
     }),
     selectors(({ actions, values }) => ({
+        node: [
+            (_, p) => [p.id],
+            (id): PipelineNodeLimitedType => {
+                if (typeof id === 'string') {
+                    return { backend: PipelineBackend.BatchExport, id }
+                }
+
+                return { backend: PipelineBackend.Plugin, id }
+            },
+        ],
         leadingEntry: [
             (s) => [s.logs, s.backgroundLogs],
             (logs: LogEntry[], backgroundLogs: LogEntry[]): LogEntry | null => {
@@ -201,12 +244,7 @@ export const pipelineNodeLogsLogic = kea<pipelineNodeLogsLogicType>([
                     },
                     {
                         width: 0,
-                        title:
-                            node.backend == PipelineBackend.HogFunction
-                                ? 'Invocation'
-                                : node.backend == PipelineBackend.BatchExport
-                                  ? 'Run Id'
-                                  : 'Source',
+                        title: node.backend == PipelineBackend.BatchExport ? 'Run Id' : 'Source',
                         dataIndex: 'instance_id',
                         key: 'instance_id',
                         render: (instanceId: string) => (
