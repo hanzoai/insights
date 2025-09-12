@@ -3,14 +3,12 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { beforeUnload, router } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
-
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { PipelineNodeTab, PipelineStage, PluginConfigWithPluginInfoNew, PluginType } from '~/types'
+import { PluginConfigWithPluginInfoNew, PluginType } from '~/types'
 
 import {
     defaultConfigForPlugin,
@@ -18,16 +16,9 @@ import {
     determineRequiredFields,
     getPluginConfigFormData,
 } from './configUtils'
-import { DESTINATION_TYPES, SITE_APP_TYPES } from './destinations/constants'
-import { pipelineDestinationsLogic } from './destinations/destinationsLogic'
-import { importAppsLogic } from './importAppsLogic'
-import { pipelineAccessLogic } from './pipelineAccessLogic'
 import type { pipelinePluginConfigurationLogicType } from './pipelinePluginConfigurationLogicType'
-import { pipelineTransformationsLogic } from './transformationsLogic'
-import { loadPluginsFromUrl } from './utils'
 
 export interface PipelinePluginConfigurationLogicProps {
-    stage: PipelineStage | null
     pluginId: number | null
     pluginConfigId: number | null
 }
@@ -61,16 +52,7 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
     }),
     path((id) => ['scenes', 'pipeline', 'pipelinePluginConfigurationLogic', id]),
     connect(() => ({
-        values: [
-            teamLogic,
-            ['currentTeamId'],
-            pipelineTransformationsLogic,
-            ['plugins as transformationPlugins', 'nextAvailableOrder'],
-            featureFlagLogic,
-            ['featureFlags'],
-            pipelineAccessLogic,
-            ['canEnableNewDestinations'],
-        ],
+        values: [teamLogic, ['currentTeamId'], featureFlagLogic, ['featureFlags']],
     })),
     loaders(({ props, values }) => ({
         pluginFromPluginId: [
@@ -81,15 +63,7 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
                         return null
                     }
 
-                    let plugins: Record<number, PluginType> = {}
-
-                    // TRICKY: We load from the list as the permissions are a not quite right for getting one.
-                    // As we are moving away from plugins opting for this quick fix for now.
-                    if (props.stage === PipelineStage.Transformation) {
-                        plugins = await loadPluginsFromUrl('api/organizations/@current/pipeline_transformations')
-                    } else if (props.stage === PipelineStage.Destination) {
-                        plugins = await loadPluginsFromUrl('api/organizations/@current/pipeline_destinations')
-                    }
+                    const plugins: Record<number, PluginType> = {}
 
                     return plugins[props.pluginId] || api.get(`api/organizations/@current/plugins/${props.pluginId}`)
                 },
@@ -105,16 +79,8 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
                     return null
                 },
                 updatePluginConfig: async (formdata: Record<string, any>) => {
-                    if (!values.plugin || !props.stage) {
+                    if (!values.plugin) {
                         return null
-                    }
-                    if (
-                        (!values.pluginConfig || (!values.pluginConfig.enabled && formdata.enabled)) &&
-                        props.stage === PipelineStage.Destination &&
-                        !values.canEnableNewDestinations
-                    ) {
-                        lemonToast.error('Data pipelines add-on is required for enabling new destinations.')
-                        return values.pluginConfig
                     }
                     const { enabled, order, name, description, ...config } = formdata
 
@@ -130,17 +96,13 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
                     // if enabling a transformation we need to set the order to be last
                     // if already enabled we don't want to change the order
                     // it doesn't matter for other stages so we can use any value
-                    const orderFixed =
-                        enabled && values.pluginConfig && !values.pluginConfig.enabled
-                            ? values.nextAvailableOrder
-                            : order || 0
-                    formData.append('order', orderFixed)
+                    formData.append('order', '0')
                     if (props.pluginConfigId) {
                         return await api.pluginConfigs.update(props.pluginConfigId, formData)
                     }
                     formData.append('plugin', values.plugin.id.toString())
                     const res = await api.pluginConfigs.create(formData)
-                    router.actions.replace(urls.pipelineNode(props.stage, res.id, PipelineNodeTab.Configuration))
+                    router.actions.replace(urls.legacyPlugin(res.id.toString()))
                     return res
                 },
 
@@ -150,14 +112,14 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
                     }
                     const hogFunction = await api.pluginConfigs.migrate(props.pluginConfigId)
 
-                    router.actions.replace(urls.pipelineNode(PipelineStage.Destination, `hog-${hogFunction.id}`))
+                    router.actions.replace(urls.hogFunction(hogFunction.id))
 
                     return values.pluginConfig
                 },
             },
         ],
     })),
-    listeners(({ props, actions, values }) => ({
+    listeners(({ actions, values }) => ({
         updatePluginConfigSuccess: ({ pluginConfig }) => {
             if (!pluginConfig) {
                 return
@@ -165,21 +127,6 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
 
             // Reset the form so that it doesn't think there are unsaved changes
             actions.resetConfiguration(values.configuration)
-
-            // Navigating back to the list views gets the updated plugin info without refreshing
-            if (props.stage === PipelineStage.Transformation) {
-                pipelineTransformationsLogic.findMounted()?.actions.updatePluginConfig(pluginConfig)
-            } else if (props.stage === PipelineStage.Destination) {
-                pipelineDestinationsLogic
-                    .findMounted({ types: DESTINATION_TYPES })
-                    ?.actions.updatePluginConfig(pluginConfig)
-            } else if (props.stage === PipelineStage.SiteApp) {
-                pipelineDestinationsLogic
-                    .findMounted({ types: SITE_APP_TYPES })
-                    ?.actions.updatePluginConfig(pluginConfig)
-            } else if (props.stage === PipelineStage.ImportApp) {
-                importAppsLogic.findMounted()?.actions.updatePluginConfig(pluginConfig)
-            }
         },
     })),
     reducers(() => ({
@@ -251,7 +198,6 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
             },
         ],
         isNew: [(_, p) => [p.pluginConfigId], (pluginConfigId): boolean => !pluginConfigId],
-        stage: [(_, p) => [p.stage], (stage) => stage],
     })),
     forms(({ asyncActions, values }) => ({
         configuration: {
