@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`sessionRecordingDataLogic deduplicateSnapshots should match snapshot 1`] = `
+exports[`sessionRecordingDataCoordinatorLogic deduplicateSnapshots should match snapshot 1`] = `
 [
   {
     "data": {
@@ -2030,7 +2030,7 @@ exports[`sessionRecordingDataLogic deduplicateSnapshots should match snapshot 1`
 ]
 `;
 
-exports[`sessionRecordingDataLogic loading session events load events after metadata with 5 minute buffer 1`] = `
+exports[`sessionRecordingDataCoordinatorLogic loading session events load events after metadata with 5 minute buffer 1`] = `
 [
   [
     "api/environments/997/query",
