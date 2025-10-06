@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`sessionRecordingDataLogic blobby v2 loading session core loads all data 1`] = `
+exports[`sessionRecordingDataCoordinatorLogic blobby v2 loading session core loads all data 1`] = `
 {
   "bufferedToTime": 64587933939,
   "durationMs": 64587933939,

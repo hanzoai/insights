@@ -3,7 +3,7 @@ import { api } from 'lib/api.mock'
 import { expectLogic } from 'kea-test-utils'
 
 import { convertSnapshotsByWindowId } from 'scenes/session-recordings/__mocks__/recording_snapshots'
-import { sessionRecordingDataLogic } from 'scenes/session-recordings/player/sessionRecordingDataLogic'
+import { sessionRecordingDataCoordinatorLogic } from 'scenes/session-recordings/player/sessionRecordingDataCoordinatorLogic'
 import { ViewportResolution } from 'scenes/session-recordings/player/snapshot-processing/patch-meta-event'
 import { processAllSnapshots } from 'scenes/session-recordings/player/snapshot-processing/process-all-snapshots'
 import { SourceKey } from 'scenes/session-recordings/player/snapshot-processing/source-key'
@@ -11,72 +11,41 @@ import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
 
 import { resumeKeaLoadersErrors, silenceKeaLoadersErrors } from '~/initKea'
-import { useAvailableFeatures } from '~/mocks/features'
-import { useMocks } from '~/mocks/jest'
 import { HogQLQueryResponse } from '~/queries/schema/schema-general'
-import { initKeaTests } from '~/test/init'
 import {
-    AvailableFeature,
     RecordingSnapshot,
     SessionRecordingSnapshotSource,
     SessionRecordingSnapshotSourceResponse,
     SnapshotSourceType,
 } from '~/types'
 
-import recordingEventsJson from '../__mocks__/recording_events_query'
-import { recordingMetaJson } from '../__mocks__/recording_meta'
-import { snapshotsAsJSONLines, sortedRecordingSnapshots } from '../__mocks__/recording_snapshots'
+import { sortedRecordingSnapshots } from '../__mocks__/recording_snapshots'
 import { sessionRecordingEventUsageLogic } from '../sessionRecordingEventUsageLogic'
+import {
+    createDifferentiatedQueryHandler,
+    overrideSessionRecordingMocks,
+    recordingEventsJson,
+    recordingMetaJson,
+    setupSessionRecordingTest,
+} from './__mocks__/test-setup'
 import { snapshotDataLogic } from './snapshotDataLogic'
 
 const sortedRecordingSnapshotsJson = sortedRecordingSnapshots()
 
-const BLOB_SOURCE: SessionRecordingSnapshotSource = {
-    source: 'blob_v2',
-    start_timestamp: '2023-08-11T12:03:36.097000Z',
-    end_timestamp: '2023-08-11T12:04:52.268000Z',
-    blob_key: '0',
-}
-
-describe('sessionRecordingDataLogic', () => {
-    let logic: ReturnType<typeof sessionRecordingDataLogic.build>
+describe('sessionRecordingDataCoordinatorLogic', () => {
+    let logic: ReturnType<typeof sessionRecordingDataCoordinatorLogic.build>
     let snapshotLogic: ReturnType<typeof snapshotDataLogic.build>
 
     beforeEach(() => {
-        useAvailableFeatures([AvailableFeature.RECORDINGS_PERFORMANCE])
-        useMocks({
-            get: {
-                '/api/environments/:team_id/session_recordings/:id/snapshots': async (req, res, ctx) => {
-                    // with no sources, returns sources...
-                    if (req.url.searchParams.get('source') === 'blob_v2') {
-                        return res(ctx.text(snapshotsAsJSONLines()))
-                    }
+        setupSessionRecordingTest()
 
-                    return [
-                        200,
-                        {
-                            sources: [BLOB_SOURCE],
-                        },
-                    ]
-                },
-                '/api/environments/:team_id/session_recordings/:id': recordingMetaJson,
-            },
-            post: {
-                '/api/environments/:team_id/query': recordingEventsJson,
-            },
-            patch: {
-                '/api/environments/:team_id/session_recordings/:id': { success: true },
-            },
-        })
-        initKeaTests()
         const props = {
             sessionRecordingId: '2',
             blobV2PollingDisabled: true,
         }
-        logic = sessionRecordingDataLogic(props)
+        logic = sessionRecordingDataCoordinatorLogic(props)
         snapshotLogic = snapshotDataLogic(props)
         logic.mount()
-        // Most of these tests assume the metadata is being loaded upfront which is the typical case
         logic.actions.loadRecordingMeta()
         jest.spyOn(api, 'get')
         jest.spyOn(api, 'create')
@@ -94,7 +63,6 @@ describe('sessionRecordingDataLogic', () => {
                 end: null,
                 segments: [],
                 sessionEventsData: null,
-                filters: {},
                 sessionEventsDataLoading: false,
             })
         })
@@ -126,10 +94,9 @@ describe('sessionRecordingDataLogic', () => {
 
         it('fetch metadata error', async () => {
             silenceKeaLoadersErrors()
-            // Unmount and remount the logic to trigger fetching the data again after the mock change
             logic.unmount()
-            useMocks({
-                get: {
+            overrideSessionRecordingMocks({
+                getMocks: {
                     '/api/environments/:team_id/session_recordings/:id': () => [500, { status: 0 }],
                 },
             })
@@ -158,10 +125,9 @@ describe('sessionRecordingDataLogic', () => {
 
         it('fetch metadata success and snapshots error', async () => {
             silenceKeaLoadersErrors()
-            // Unmount and remount the logic to trigger fetching the data again after the mock change
             logic.unmount()
-            useMocks({
-                get: {
+            overrideSessionRecordingMocks({
+                getMocks: {
                     '/api/environments/:team_id/session_recordings/:id/snapshots': () => [500, { status: 0 }],
                 },
             })
@@ -185,39 +151,31 @@ describe('sessionRecordingDataLogic', () => {
 
     describe('loading session events', () => {
         beforeEach(async () => {
-            // Test session events loading in isolation from other features
-            useAvailableFeatures([])
-            initKeaTests()
-            useAvailableFeatures([])
-            initKeaTests()
+            logic?.unmount()
+            snapshotLogic?.unmount()
+
+            setupSessionRecordingTest({
+                features: [],
+                customQueryHandler: createDifferentiatedQueryHandler(),
+            })
+
             const props = {
                 sessionRecordingId: '2',
                 blobV2PollingDisabled: true,
             }
-            logic = sessionRecordingDataLogic(props)
+            logic = sessionRecordingDataCoordinatorLogic(props)
             snapshotLogic = snapshotDataLogic(props)
             logic.mount()
-            logic.actions.loadRecordingMeta()
-            await expectLogic(logic).toFinishAllListeners()
-            api.get.mockClear()
-            api.create.mockClear()
+            jest.spyOn(api, 'get')
+            jest.spyOn(api, 'create')
         })
 
         it('load events after metadata with 5 minute buffer', async () => {
-            api.create
-                .mockImplementationOnce(async () => {
-                    return recordingEventsJson
-                })
-                .mockImplementationOnce(async () => {
-                    // Once is the server events
-                    return {
-                        results: [],
-                    }
-                })
-
             await expectLogic(logic, () => {
-                logic.actions.loadSnapshots()
-            }).toDispatchActions(['loadEvents', 'loadEventsSuccess'])
+                logic.actions.loadRecordingMeta()
+            })
+                .toDispatchActions(['loadRecordingMetaSuccess', 'loadEvents'])
+                .toFinishAllListeners()
 
             expect(api.create).toHaveBeenCalledTimes(2)
 
@@ -248,6 +206,8 @@ describe('sessionRecordingDataLogic', () => {
                     snapshotLogic.actionTypes.loadSnapshotsForSourceSuccess,
                     'loadEvents',
                     'loadEventsSuccess',
+                    'loadRecordingCommentsSuccess',
+                    'loadRecordingNotebookCommentsSuccess',
                 ])
                 .toDispatchActions([sessionRecordingEventUsageLogic.actionTypes.reportRecordingLoaded])
         })
