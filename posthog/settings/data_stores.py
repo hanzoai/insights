@@ -202,76 +202,78 @@ if IN_EVAL_TESTING:
 elif TEST:
     SUFFIX = "_test" + XDIST_SUFFIX
 
-# Clickhouse Settings
+# Hanzo Datastore (ClickHouse) — read DATASTORE_* with CLICKHOUSE_* fallback
+# Internal Python variable names remain CLICKHOUSE_* for upstream compatibility.
+# All env vars prefer DATASTORE_* but fall back to CLICKHOUSE_* for backward compat.
 CLICKHOUSE_TEST_DB: str = "posthog" + SUFFIX
 
-CLICKHOUSE_HOST: str = os.getenv("CLICKHOUSE_HOST", "localhost")
-CLICKHOUSE_OFFLINE_CLUSTER_HOST: str | None = os.getenv("CLICKHOUSE_OFFLINE_CLUSTER_HOST", None)
-CLICKHOUSE_MIGRATIONS_HOST: str = os.getenv("CLICKHOUSE_MIGRATIONS_HOST", CLICKHOUSE_HOST)
-CLICKHOUSE_ENDPOINTS_HOST: str = os.getenv("CLICKHOUSE_ENDPOINTS_HOST", CLICKHOUSE_HOST)
-CLICKHOUSE_USER: str = os.getenv("CLICKHOUSE_USER", "default")
-CLICKHOUSE_PASSWORD: str = os.getenv("CLICKHOUSE_PASSWORD", "")
-CLICKHOUSE_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("CLICKHOUSE_DATABASE", "default")
-CLICKHOUSE_CLUSTER: str = os.getenv("CLICKHOUSE_CLUSTER", "posthog")
-CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("CLICKHOUSE_MIGRATIONS_CLUSTER", "posthog_migrations")
-CLICKHOUSE_CA: str | None = os.getenv("CLICKHOUSE_CA", None)
-CLICKHOUSE_SECURE: bool = get_from_env("CLICKHOUSE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool)
-CLICKHOUSE_VERIFY: bool = get_from_env("CLICKHOUSE_VERIFY", True, type_cast=str_to_bool)
-CLICKHOUSE_ENABLE_STORAGE_POLICY: bool = get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool)
-CLICKHOUSE_SINGLE_SHARD_CLUSTER: str = os.getenv("CLICKHOUSE_SINGLE_SHARD_CLUSTER", "posthog_single_shard")
-CLICKHOUSE_WRITABLE_CLUSTER: str = os.getenv("CLICKHOUSE_WRITABLE_CLUSTER", "posthog_writable")
-CLICKHOUSE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("CLICKHOUSE_PRIMARY_REPLICA_CLUSTER", "posthog_primary_replica")
+CLICKHOUSE_HOST: str = os.getenv("DATASTORE_HOST", os.getenv("CLICKHOUSE_HOST", "localhost"))
+CLICKHOUSE_OFFLINE_CLUSTER_HOST: str | None = os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", os.getenv("CLICKHOUSE_OFFLINE_CLUSTER_HOST", None))
+CLICKHOUSE_MIGRATIONS_HOST: str = os.getenv("DATASTORE_MIGRATIONS_HOST", os.getenv("CLICKHOUSE_MIGRATIONS_HOST", CLICKHOUSE_HOST))
+CLICKHOUSE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", os.getenv("CLICKHOUSE_ENDPOINTS_HOST", CLICKHOUSE_HOST))
+CLICKHOUSE_USER: str = os.getenv("DATASTORE_USER", os.getenv("CLICKHOUSE_USER", "default"))
+CLICKHOUSE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", os.getenv("CLICKHOUSE_PASSWORD", ""))
+CLICKHOUSE_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", os.getenv("CLICKHOUSE_DATABASE", "default"))
+CLICKHOUSE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", os.getenv("CLICKHOUSE_CLUSTER", "posthog"))
+CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", os.getenv("CLICKHOUSE_MIGRATIONS_CLUSTER", "posthog_migrations"))
+CLICKHOUSE_CA: str | None = os.getenv("DATASTORE_CA", os.getenv("CLICKHOUSE_CA", None))
+CLICKHOUSE_SECURE: bool = get_from_env("DATASTORE_SECURE", get_from_env("CLICKHOUSE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool), type_cast=str_to_bool)
+CLICKHOUSE_VERIFY: bool = get_from_env("DATASTORE_VERIFY", get_from_env("CLICKHOUSE_VERIFY", True, type_cast=str_to_bool), type_cast=str_to_bool)
+CLICKHOUSE_ENABLE_STORAGE_POLICY: bool = get_from_env("DATASTORE_ENABLE_STORAGE_POLICY", get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool), type_cast=str_to_bool)
+CLICKHOUSE_SINGLE_SHARD_CLUSTER: str = os.getenv("DATASTORE_SINGLE_SHARD_CLUSTER", os.getenv("CLICKHOUSE_SINGLE_SHARD_CLUSTER", "posthog_single_shard"))
+CLICKHOUSE_WRITABLE_CLUSTER: str = os.getenv("DATASTORE_WRITABLE_CLUSTER", os.getenv("CLICKHOUSE_WRITABLE_CLUSTER", "posthog_writable"))
+CLICKHOUSE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("DATASTORE_PRIMARY_REPLICA_CLUSTER", os.getenv("CLICKHOUSE_PRIMARY_REPLICA_CLUSTER", "posthog_primary_replica"))
 CLICKHOUSE_FALLBACK_CANCEL_QUERY_ON_CLUSTER = get_from_env(
-    "CLICKHOUSE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=False, type_cast=str_to_bool
+    "DATASTORE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=get_from_env("CLICKHOUSE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=False, type_cast=str_to_bool), type_cast=str_to_bool
 )
 
-CLICKHOUSE_USE_HTTP: str = get_from_env("CLICKHOUSE_USE_HTTP", False, type_cast=str_to_bool)
+CLICKHOUSE_USE_HTTP: str = get_from_env("DATASTORE_USE_HTTP", get_from_env("CLICKHOUSE_USE_HTTP", False, type_cast=str_to_bool), type_cast=str_to_bool)
 CLICKHOUSE_USE_HTTP_PER_TEAM = set[int]([])
 with suppress(Exception):
-    as_json = json.loads(os.getenv("CLICKHOUSE_USE_HTTP_PER_TEAM", "[]"))
+    as_json = json.loads(os.getenv("DATASTORE_USE_HTTP_PER_TEAM", os.getenv("CLICKHOUSE_USE_HTTP_PER_TEAM", "[]")))
     CLICKHOUSE_USE_HTTP_PER_TEAM = {int(v) for v in as_json}
 
 QUERYSERVICE_HOST: str = get_from_env("QUERYSERVICE_HOST", CLICKHOUSE_HOST)
 QUERYSERVICE_SECURE: bool = get_from_env("QUERYSERVICE_SECURE", CLICKHOUSE_SECURE, type_cast=str_to_bool)
 QUERYSERVICE_VERIFY: bool = get_from_env("QUERYSERVICE_VERIFY", CLICKHOUSE_VERIFY, type_cast=str_to_bool)
 
-CLICKHOUSE_CONN_POOL_MIN: int = get_from_env("CLICKHOUSE_CONN_POOL_MIN", 20, type_cast=int)
-CLICKHOUSE_CONN_POOL_MAX: int = get_from_env("CLICKHOUSE_CONN_POOL_MAX", 1000, type_cast=int)
+CLICKHOUSE_CONN_POOL_MIN: int = get_from_env("DATASTORE_CONN_POOL_MIN", get_from_env("CLICKHOUSE_CONN_POOL_MIN", 20, type_cast=int), type_cast=int)
+CLICKHOUSE_CONN_POOL_MAX: int = get_from_env("DATASTORE_CONN_POOL_MAX", get_from_env("CLICKHOUSE_CONN_POOL_MAX", 1000, type_cast=int), type_cast=int)
 
-CLICKHOUSE_STABLE_HOST: str = get_from_env("CLICKHOUSE_STABLE_HOST", CLICKHOUSE_HOST)
+CLICKHOUSE_STABLE_HOST: str = get_from_env("DATASTORE_STABLE_HOST", get_from_env("CLICKHOUSE_STABLE_HOST", CLICKHOUSE_HOST))
 # If enabled, some queries will use system.cluster table to query each shard
 CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION: bool = get_from_env(
-    "CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION", False, type_cast=str_to_bool
+    "DATASTORE_ALLOW_PER_SHARD_EXECUTION", get_from_env("CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION", False, type_cast=str_to_bool), type_cast=str_to_bool
 )
 
-CLICKHOUSE_LOGS_CLUSTER: str = os.getenv("CLICKHOUSE_LOGS_CLUSTER", "posthog_single_shard")
-CLICKHOUSE_LOGS_CLUSTER_HOST: str = os.getenv("CLICKHOUSE_LOGS_CLUSTER_HOST", "localhost")
-CLICKHOUSE_LOGS_CLUSTER_PORT: str = os.getenv("CLICKHOUSE_LOGS_CLUSTER_PORT", "9000")
-CLICKHOUSE_LOGS_CLUSTER_USER: str = os.getenv("CLICKHOUSE_LOGS_CLUSTER_USER", "default")
-CLICKHOUSE_LOGS_CLUSTER_PASSWORD: str = os.getenv("CLICKHOUSE_LOGS_CLUSTER_PASSWORD", "")
-CLICKHOUSE_LOGS_CLUSTER_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("CLICKHOUSE_LOGS_DATABASE", "default")
+CLICKHOUSE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", os.getenv("CLICKHOUSE_LOGS_CLUSTER", "posthog_single_shard"))
+CLICKHOUSE_LOGS_CLUSTER_HOST: str = os.getenv("DATASTORE_LOGS_CLUSTER_HOST", os.getenv("CLICKHOUSE_LOGS_CLUSTER_HOST", "localhost"))
+CLICKHOUSE_LOGS_CLUSTER_PORT: str = os.getenv("DATASTORE_LOGS_CLUSTER_PORT", os.getenv("CLICKHOUSE_LOGS_CLUSTER_PORT", "9000"))
+CLICKHOUSE_LOGS_CLUSTER_USER: str = os.getenv("DATASTORE_LOGS_CLUSTER_USER", os.getenv("CLICKHOUSE_LOGS_CLUSTER_USER", "default"))
+CLICKHOUSE_LOGS_CLUSTER_PASSWORD: str = os.getenv("DATASTORE_LOGS_CLUSTER_PASSWORD", os.getenv("CLICKHOUSE_LOGS_CLUSTER_PASSWORD", ""))
+CLICKHOUSE_LOGS_CLUSTER_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_LOGS_DATABASE", os.getenv("CLICKHOUSE_LOGS_DATABASE", "default"))
 CLICKHOUSE_LOGS_CLUSTER_SECURE: bool = get_from_env(
-    "CLICKHOUSE_LOGS_CLUSTER_SECURE", not TEST and not DEBUG, type_cast=str_to_bool
+    "DATASTORE_LOGS_CLUSTER_SECURE", get_from_env("CLICKHOUSE_LOGS_CLUSTER_SECURE", not TEST and not DEBUG, type_cast=str_to_bool), type_cast=str_to_bool
 )
 CLICKHOUSE_LOGS_ENABLE_STORAGE_POLICY: bool = get_from_env(
-    "CLICKHOUSE_LOGS_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool
+    "DATASTORE_LOGS_ENABLE_STORAGE_POLICY", get_from_env("CLICKHOUSE_LOGS_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool), type_cast=str_to_bool
 )
 
-CLICKHOUSE_KAFKA_NAMED_COLLECTION: str = os.getenv("CLICKHOUSE_KAFKA_NAMED_COLLECTION", "msk_cluster")
+CLICKHOUSE_KAFKA_NAMED_COLLECTION: str = os.getenv("DATASTORE_KAFKA_NAMED_COLLECTION", os.getenv("CLICKHOUSE_KAFKA_NAMED_COLLECTION", "msk_cluster"))
 CLICKHOUSE_KAFKA_WARPSTREAM_NAMED_COLLECTION: str = os.getenv(
-    "CLICKHOUSE_KAFKA_WARPSTREAM_NAMED_COLLECTION", "warpstream_ingestion"
+    "DATASTORE_KAFKA_WARPSTREAM_NAMED_COLLECTION", os.getenv("CLICKHOUSE_KAFKA_WARPSTREAM_NAMED_COLLECTION", "warpstream_ingestion")
 )
 
 # Per-team settings used for client/pool connection parameters. Note that this takes precedence over any workload-based
 # routing. Keys should be strings, not numbers.
 try:
-    CLICKHOUSE_PER_TEAM_SETTINGS: dict = json.loads(os.getenv("CLICKHOUSE_PER_TEAM_SETTINGS", "{}"))
+    CLICKHOUSE_PER_TEAM_SETTINGS: dict = json.loads(os.getenv("DATASTORE_PER_TEAM_SETTINGS", os.getenv("CLICKHOUSE_PER_TEAM_SETTINGS", "{}")))
 except Exception:
     CLICKHOUSE_PER_TEAM_SETTINGS = {}
 
 # Per-team settings used for query execution. Keys should be strings, not numbers.
 try:
-    CLICKHOUSE_PER_TEAM_QUERY_SETTINGS: dict = json.loads(os.getenv("CLICKHOUSE_PER_TEAM_QUERY_SETTINGS", "{}"))
+    CLICKHOUSE_PER_TEAM_QUERY_SETTINGS: dict = json.loads(os.getenv("DATASTORE_PER_TEAM_QUERY_SETTINGS", os.getenv("CLICKHOUSE_PER_TEAM_QUERY_SETTINGS", "{}")))
 except Exception:
     CLICKHOUSE_PER_TEAM_QUERY_SETTINGS = {}
 
@@ -299,13 +301,13 @@ CLICKHOUSE_OFFLINE_HTTP_URL: str = (
     f"{_clickhouse_http_protocol}{CLICKHOUSE_OFFLINE_CLUSTER_HOST}:{_clickhouse_http_port}/"
 )
 
-if TEST or DEBUG or os.getenv("CLICKHOUSE_OFFLINE_CLUSTER_HOST", None) is None:
+if TEST or DEBUG or os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", os.getenv("CLICKHOUSE_OFFLINE_CLUSTER_HOST", None)) is None:
     # When testing, there is no offline cluster.
     # Also in EU, there is no offline cluster.
     CLICKHOUSE_OFFLINE_HTTP_URL = CLICKHOUSE_HTTP_URL
 
-READONLY_CLICKHOUSE_USER: str | None = os.getenv("READONLY_CLICKHOUSE_USER", None)
-READONLY_CLICKHOUSE_PASSWORD: str | None = os.getenv("READONLY_CLICKHOUSE_PASSWORD", None)
+READONLY_CLICKHOUSE_USER: str | None = os.getenv("READONLY_DATASTORE_USER", os.getenv("READONLY_CLICKHOUSE_USER", None))
+READONLY_CLICKHOUSE_PASSWORD: str | None = os.getenv("READONLY_DATASTORE_PASSWORD", os.getenv("READONLY_CLICKHOUSE_PASSWORD", None))
 
 
 def _parse_kafka_hosts(hosts_string: str) -> list[str]:
@@ -508,4 +510,4 @@ PATCH_EVENT_LIST_MAX_OFFSET_PER_TEAM: set[int] = get_from_env(
     "PATCH_EVENT_LIST_MAX_OFFSET_PER_TEAM", default=set[int]([]), type_cast=str_to_int_set
 )
 
-CLICKHOUSE_EVENT_LIST_MAX_THREADS: int = get_from_env("CLICKHOUSE_EVENT_LIST_MAX_THREADS", 50, type_cast=int)
+CLICKHOUSE_EVENT_LIST_MAX_THREADS: int = get_from_env("DATASTORE_EVENT_LIST_MAX_THREADS", get_from_env("CLICKHOUSE_EVENT_LIST_MAX_THREADS", 50, type_cast=int), type_cast=int)
