@@ -40,14 +40,14 @@ SANDBOX_LLM_GATEWAY_URL: str | None = get_from_env("SANDBOX_LLM_GATEWAY_URL", No
 TEMPORAL_LOG_LEVEL_PRODUCE: str = os.getenv("TEMPORAL_LOG_LEVEL_PRODUCE", "DEBUG")
 TEMPORAL_EXTERNAL_LOGS_QUEUE_SIZE: int = get_from_env("TEMPORAL_EXTERNAL_LOGS_QUEUE_SIZE", 0, type_cast=int)
 
-CLICKHOUSE_MAX_EXECUTION_TIME: int = get_from_env("CLICKHOUSE_MAX_EXECUTION_TIME", 86400, type_cast=int)  # 1 day
+CLICKHOUSE_MAX_EXECUTION_TIME: int = get_from_env("DATASTORE_MAX_EXECUTION_TIME", get_from_env("CLICKHOUSE_MAX_EXECUTION_TIME", 86400, type_cast=int), type_cast=int)  # 1 day
 CLICKHOUSE_MAX_MEMORY_USAGE: int = get_from_env(
-    "CLICKHOUSE_MAX_MEMORY_USAGE", 150 * 1000 * 1000 * 1000, type_cast=int
+    "DATASTORE_MAX_MEMORY_USAGE", get_from_env("CLICKHOUSE_MAX_MEMORY_USAGE", 150 * 1000 * 1000 * 1000, type_cast=int), type_cast=int
 )  # 150GB
-CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT: int = get_from_env("CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT", 10000, type_cast=int)
+CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT: int = get_from_env("DATASTORE_MAX_BLOCK_SIZE_DEFAULT", get_from_env("CLICKHOUSE_MAX_BLOCK_SIZE_DEFAULT", 10000, type_cast=int), type_cast=int)
 # Comma separated list of overrides in the format "team_id:block_size"
 CLICKHOUSE_MAX_BLOCK_SIZE_OVERRIDES: dict[int, int] = dict(
-    [map(int, o.split(":")) for o in os.getenv("CLICKHOUSE_MAX_BLOCK_SIZE_OVERRIDES", "").split(",") if o]  # type: ignore
+    [map(int, o.split(":")) for o in os.getenv("DATASTORE_MAX_BLOCK_SIZE_OVERRIDES", os.getenv("CLICKHOUSE_MAX_BLOCK_SIZE_OVERRIDES", "")).split(",") if o]  # type: ignore
 )
 
 
