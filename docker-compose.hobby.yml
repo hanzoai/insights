@@ -13,29 +13,28 @@ services:
         extends:
             file: docker-compose.base.yml
             service: db
-        image: ${DOCKER_REGISTRY_PREFIX:-}postgres:15.12-alpine
+        image: ${DOCKER_REGISTRY_PREFIX:-}ghcr.io/hanzoai/sql:latest
         volumes:
             - postgres-data:/var/lib/postgresql/data
 
-    redis7:
+    kv:
         extends:
             file: docker-compose.base.yml
-            service: redis7
+            service: kv
         volumes:
-            - redis7-data:/data
+            - kv-data:/data
 
-    clickhouse:
+    datastore:
         #
         # Note: please keep the default version in sync across
         #       `posthog` and the `charts-clickhouse` repos
         #
         extends:
             file: docker-compose.base.yml
-            service: clickhouse
+            service: datastore
         restart: on-failure
         depends_on:
             - kafka
-            - zookeeper
         volumes:
             - ./posthog/posthog/idl:/idl
             - ./posthog/docker/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
@@ -46,20 +45,10 @@ services:
             - ./posthog/posthog/user_scripts:/var/lib/clickhouse/user_scripts
             - clickhouse-data:/var/lib/clickhouse
 
-    zookeeper:
-        extends:
-            file: docker-compose.base.yml
-            service: zookeeper
-        volumes:
-            - zookeeper-datalog:/datalog
-            - zookeeper-data:/data
-            - zookeeper-logs:/logs
     kafka:
         extends:
             file: docker-compose.base.yml
             service: kafka
-        depends_on:
-            - zookeeper
         environment:
             KAFKA_LOG_RETENTION_MS: 3600000
             KAFKA_LOG_RETENTION_CHECK_INTERVAL_MS: 300000
@@ -88,9 +77,9 @@ services:
         depends_on:
             db:
                 condition: service_healthy
-            redis7:
+            kv:
                 condition: service_healthy
-            clickhouse:
+            datastore:
                 condition: service_started
             kafka:
                 condition: service_healthy
@@ -126,8 +115,8 @@ services:
             DEPLOYMENT: 'hobby'
         depends_on:
             - db
-            - redis7
-            - clickhouse
+            - kv
+            - datastore
             - kafka
             - objectstorage
             - seaweedfs
@@ -145,14 +134,14 @@ services:
             SESSION_RECORDING_V2_S3_ACCESS_KEY_ID: 'any'
             SESSION_RECORDING_V2_S3_SECRET_ACCESS_KEY: 'any'
             SESSION_RECORDING_V2_S3_TIMEOUT_MS: 120000
-            SESSION_RECORDING_API_REDIS_HOST: redis7
+            SESSION_RECORDING_API_REDIS_HOST: kv
             SESSION_RECORDING_API_REDIS_PORT: 6379
             OBJECT_STORAGE_ENDPOINT: http://objectstorage:19000
             SESSION_RECORDING_V2_S3_ENDPOINT: http://seaweedfs:8333
             OBJECT_STORAGE_ENABLED: true
-            CDP_REDIS_HOST: redis7
+            CDP_REDIS_HOST: kv
             CDP_REDIS_PORT: 6379
-            LOGS_REDIS_HOST: redis7
+            LOGS_REDIS_HOST: kv
             LOGS_REDIS_PORT: 6379
             LOGS_REDIS_TLS: 'false'
             ENCRYPTION_SALT_KEYS: $ENCRYPTION_SALT_KEYS
@@ -164,8 +153,8 @@ services:
             - ./share:/share
         depends_on:
             - db
-            - redis7
-            - clickhouse
+            - kv
+            - datastore
             - kafka
             - objectstorage
             - seaweedfs
@@ -273,8 +262,8 @@ services:
             SECRET_KEY: $POSTHOG_SECRET
         depends_on:
             - db
-            - redis7
-            - clickhouse
+            - kv
+            - datastore
             - kafka
             - objectstorage
             - seaweedfs
@@ -338,10 +327,10 @@ services:
             service: feature-flags
         depends_on:
             - db
-            - redis7
+            - kv
 
     kafka-init:
-        image: docker.redpanda.com/redpandadata/redpanda:v25.1.9
+        image: ghcr.io/hanzoai/kafka:latest
         entrypoint: /bin/sh
         command:
             - -c
@@ -408,8 +397,8 @@ services:
             DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
             PERSONS_URL: 'postgres://posthog:posthog@db:5432/posthog'
             MAXMIND_DB_PATH: '/share/GeoLite2-City.mmdb'
-            REDIS_URL: 'redis://redis7:6379/'
-            ISSUE_BUCKETS_REDIS_URL: 'redis://redis7:6379/'
+            REDIS_URL: 'redis://kv:6379/'
+            ISSUE_BUCKETS_REDIS_URL: 'redis://kv:6379/'
             RUST_LOG: 'info'
         depends_on:
             kafka-init:
@@ -418,19 +407,16 @@ services:
                 condition: service_healthy
             db:
                 condition: service_healthy
-            redis7:
+            kv:
                 condition: service_healthy
 
 volumes:
-    zookeeper-data:
-    zookeeper-datalog:
-    zookeeper-logs:
     objectstorage:
     seaweedfs:
     postgres-data:
     clickhouse-data:
     caddy-data:
     caddy-config:
-    redis7-data:
+    kv-data:
     kafka-data:
     redpanda-data:

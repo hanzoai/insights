@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
     postgres:
-        image: postgres:16-alpine
+        image: ghcr.io/hanzoai/sql:latest
         restart: always
         ports:
             - '127.0.0.1:5432:5432'
@@ -16,13 +16,13 @@ services:
             timeout: 5s
 
     redis:
-        image: redis:alpine
+        image: ghcr.io/hanzoai/kv:latest
         restart: always
         ports:
             - '127.0.0.1:6379:6379'
 
     redpanda:
-        image: vectorized/redpanda:v23.2.17
+        image: ghcr.io/hanzoai/kafka:latest
         command:
             - redpanda start
             - --smp 1
