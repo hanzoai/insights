@@ -106,7 +106,7 @@ jobs:
                   separator: ' '
 
             - name: Lint changed Dockerfile(s) with Hadolint
-              uses: jbergstroem/hadolint-gh-action@2b00b87f8a56783930b6a4749837d7c45c567ff2 # v1.13.0
+              uses: jbergstroem/hadolint-gh-action@d2f58da7f4f242dc0b6c5ef882ad4f8e871ba96b # v1.15.0
               if: steps.changed-files.outputs.any_changed == 'true'
               with:
                   dockerfile: '${{ steps.changed-files.outputs.all_modified_files }}'
