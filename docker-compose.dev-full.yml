@@ -29,17 +29,17 @@ services:
         volumes:
             - postgres-15-data:/var/lib/postgresql/data
 
-    redis7:
+    kv:
         extends:
             file: docker-compose.base.yml
-            service: redis7
+            service: kv
         ports:
             - '6379:6379'
 
-    clickhouse:
+    datastore:
         extends:
             file: docker-compose.base.yml
-            service: clickhouse
+            service: datastore
         ports:
             - '8123:8123'
             - '9000:9000'
@@ -55,12 +55,6 @@ services:
             - ./posthog/user_scripts:/var/lib/clickhouse/user_scripts
         depends_on:
             - kafka
-            - zookeeper
-
-    zookeeper:
-        extends:
-            file: docker-compose.base.yml
-            service: zookeeper
 
     kafka:
         extends:
@@ -68,8 +62,6 @@ services:
             service: kafka
         ports:
             - '9092:9092'
-        depends_on:
-            - zookeeper
 
     objectstorage:
         extends:
@@ -124,8 +116,8 @@ services:
             - JS_URL=http://localhost:8000
         depends_on:
             - db
-            - redis7
-            - clickhouse
+            - kv
+            - datastore
             - kafka
         links:
             - objectstorage:objectstorage
@@ -137,7 +129,7 @@ services:
         environment:
             - DEBUG=1
         depends_on:
-            - redis7
+            - kv
             - kafka
 
     replay-capture:
@@ -145,7 +137,7 @@ services:
             file: docker-compose.base.yml
             service: replay-capture
         depends_on:
-            - redis7
+            - kv
             - kafka
 
     property-defs-rs:
@@ -160,7 +152,7 @@ services:
             file: docker-compose.base.yml
             service: feature-flags
         depends_on:
-            - redis7
+            - kv
             - db
 
     plugins:
@@ -176,8 +168,8 @@ services:
             - DOCKER=1
         depends_on:
             - db
-            - redis7
-            - clickhouse
+            - kv
+            - datastore
             - kafka
             - objectstorage
 
@@ -230,8 +222,8 @@ services:
             - .:/app/posthog
         depends_on:
             - db
-            - redis7
-            - clickhouse
+            - kv
+            - datastore
             - kafka
             - objectstorage
             - temporal
