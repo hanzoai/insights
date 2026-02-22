@@ -74,7 +74,7 @@ OVERRIDE_TIMESTAMP_TEAM_IDS: dict[int, int] = dict(
     [map(int, o.split(":")) for o in os.getenv("OVERRIDE_TIMESTAMP_TEAM_IDS", "").split(",") if o]  # type: ignore
 )
 
-CLICKHOUSE_OFFLINE_5MIN_CLUSTER_HOST: str | None = os.getenv("CLICKHOUSE_OFFLINE_5MIN_CLUSTER_HOST", None)
+CLICKHOUSE_OFFLINE_5MIN_CLUSTER_HOST: str | None = os.getenv("DATASTORE_OFFLINE_5MIN_CLUSTER_HOST", os.getenv("CLICKHOUSE_OFFLINE_5MIN_CLUSTER_HOST", None))
 
 BATCH_EXPORT_OBJECT_STORAGE_ENDPOINT: str = os.getenv(
     "BATCH_EXPORT_OBJECT_STORAGE_ENDPOINT", "http://objectstorage:19000"
@@ -82,7 +82,7 @@ BATCH_EXPORT_OBJECT_STORAGE_ENDPOINT: str = os.getenv(
 BATCH_EXPORT_OBJECT_STORAGE_REGION: str = os.getenv("BATCH_EXPORT_OBJECT_STORAGE_REGION", "us-east-1")
 BATCH_EXPORT_INTERNAL_STAGING_BUCKET: str = os.getenv("BATCH_EXPORT_INTERNAL_STAGING_BUCKET", "posthog")
 # The number of partitions controls how many files ClickHouse writes to concurrently
-BATCH_EXPORT_CLICKHOUSE_S3_PARTITIONS: int = get_from_env("BATCH_EXPORT_CLICKHOUSE_S3_PARTITIONS", 10, type_cast=int)
+BATCH_EXPORT_CLICKHOUSE_S3_PARTITIONS: int = get_from_env("BATCH_EXPORT_DATASTORE_S3_PARTITIONS", get_from_env("BATCH_EXPORT_CLICKHOUSE_S3_PARTITIONS", 10, type_cast=int), type_cast=int)
 BATCH_EXPORT_TRANSFORMER_MAX_WORKERS: int = get_from_env("BATCH_EXPORT_TRANSFORMER_MAX_WORKERS", 2, type_cast=int)
 
 BATCH_EXPORTS_ENABLE_BILLING_CHECK: bool = get_from_env(
