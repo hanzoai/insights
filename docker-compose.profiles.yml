@@ -49,4 +49,4 @@ services:
     objectstorage-azure:
         profiles: [azure]
 # Core services NOT listed = always start:
-# - proxy, db, redis, redis7, clickhouse, zookeeper, kafka, objectstorage, echo_server, feature-flags
+# - proxy, db, kv, datastore, kafka, objectstorage, echo_server, feature-flags
