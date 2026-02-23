@@ -12,7 +12,7 @@ ADD COLUMN IF NOT EXISTS expires_at DateTime64(6, 'UTC') DEFAULT now() + INTERVA
 
 ADD_TTL = """
 ALTER TABLE {table}
-MODIFY TTL expires_at
+MODIFY TTL toDateTime(expires_at)
 """
 
 operations = [
