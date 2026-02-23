@@ -148,11 +148,14 @@ class ClickhouseCluster:
         self.__retry_policy = retry_policy
 
     def __get_cluster_hosts(self, client: Client, cluster: str, retry_policy: RetryPolicy | None = None):
+        # For self-hosted (non-cloud) single-node deployments, skip is_local filter
+        # because the service DNS name may not resolve as local on the ClickHouse node.
+        is_local_filter = "and is_local" if settings.CLOUD_DEPLOYMENT else ""
         get_cluster_hosts_fn = lambda client: client.execute(
             f"""
             SELECT host_name, port, shard_num, replica_num, getMacro('hostClusterType') as host_cluster_type, getMacro('hostClusterRole') as host_cluster_role
             FROM clusterAllReplicas(%(name)s, system.clusters)
-            WHERE name = %(name)s and is_local
+            WHERE name = %(name)s {is_local_filter}
             ORDER BY shard_num, replica_num
             """,
             {"name": cluster},
