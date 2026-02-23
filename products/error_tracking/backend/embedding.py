@@ -53,7 +53,7 @@ def DOCUMENT_EMBEDDINGS_TABLE_SQL():
     --  - Documents with the same ID whose timestamp is in the same day are the same document, and the later inserted one should be retained
     PARTITION BY toMonday(timestamp)
     ORDER BY (team_id, toDate(timestamp), product, document_type, model_name, rendering, cityHash64(document_id))
-    TTL timestamp + INTERVAL 3 MONTH
+    TTL toDateTime(timestamp) + INTERVAL 3 MONTH
     SETTINGS index_granularity = 512, ttl_only_drop_parts = 1
     """
     ).format(
