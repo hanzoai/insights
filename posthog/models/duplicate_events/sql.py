@@ -67,7 +67,7 @@ def DUPLICATE_EVENTS_TABLE_SQL():
         + """
     PARTITION BY toYYYYMMDD(inserted_at)
     ORDER BY (team_id, distinct_id, event, inserted_at)
-    TTL inserted_at + INTERVAL 7 DAY DELETE
+    TTL toDateTime(inserted_at) + INTERVAL 7 DAY DELETE
     SETTINGS index_granularity = 512
     """
     ).format(
