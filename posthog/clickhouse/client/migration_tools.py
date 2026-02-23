@@ -12,13 +12,14 @@ from posthog.settings.data_stores import CLICKHOUSE_MIGRATIONS_CLUSTER, CLICKHOU
 
 logger = logging.getLogger("migrations")
 
-# ClickHouse error codes that indicate an idempotent DDL operation is already applied.
-# These are safe to ignore during migrations (e.g., ADD INDEX when index already exists,
-# DROP TABLE when table doesn't exist, ADD COLUMN when column already exists).
+# Datastore error codes that are safe to ignore during migrations.
+# These cover idempotent DDL operations (e.g., ADD INDEX when index already exists)
+# and version-compatibility issues with non-essential features.
 _IDEMPOTENT_CH_ERROR_CODES = {
+    36,   # TABLE_ALREADY_EXISTS (CREATE TABLE IF NOT EXISTS in ON CLUSTER)
     44,   # ILLEGAL_COLUMN (column/index already exists)
     60,   # UNKNOWN_TABLE (table doesn't exist — OK for DROP IF EXISTS)
-    36,   # TABLE_ALREADY_EXISTS (only when using CREATE TABLE IF NOT EXISTS in ON CLUSTER)
+    80,   # INCORRECT_DATA (vector_similarity index arg mismatch across versions — non-essential)
 }
 
 
