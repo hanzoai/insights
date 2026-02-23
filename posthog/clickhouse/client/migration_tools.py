@@ -2,6 +2,7 @@ import logging
 from functools import cache
 from typing import Optional
 
+from clickhouse_driver.errors import ServerException
 from infi.clickhouse_orm import migrations
 
 from posthog import settings
@@ -10,6 +11,15 @@ from posthog.clickhouse.cluster import Query, get_cluster
 from posthog.settings.data_stores import CLICKHOUSE_MIGRATIONS_CLUSTER, CLICKHOUSE_MIGRATIONS_HOST
 
 logger = logging.getLogger("migrations")
+
+# ClickHouse error codes that indicate an idempotent DDL operation is already applied.
+# These are safe to ignore during migrations (e.g., ADD INDEX when index already exists,
+# DROP TABLE when table doesn't exist, ADD COLUMN when column already exists).
+_IDEMPOTENT_CH_ERROR_CODES = {
+    44,   # ILLEGAL_COLUMN (column/index already exists)
+    60,   # UNKNOWN_TABLE (table doesn't exist — OK for DROP IF EXISTS)
+    36,   # TABLE_ALREADY_EXISTS (only when using CREATE TABLE IF NOT EXISTS in ON CLUSTER)
+}
 
 
 @cache
@@ -72,16 +82,33 @@ def run_sql_with_exceptions(
 
         query = Query(sql)
 
-        if sharded and is_alter_on_replicated_table:
-            assert (NodeRole.DATA in node_roles and len(node_roles) == 1) or (
-                settings.E2E_TESTING or settings.DEBUG or not settings.CLOUD_DEPLOYMENT
-            ), "When running migrations on sharded tables, the node_role must be NodeRole.DATA"
-            return cluster.map_one_host_per_shard(query).result()
-        elif is_alter_on_replicated_table:
-            logger.info("       Running ALTER on replicated table on just one host")
-            return cluster.any_host_by_roles(query, node_roles=node_roles).result()
-        else:
-            return cluster.map_hosts_by_roles(query, node_roles=node_roles).result()
+        try:
+            if sharded and is_alter_on_replicated_table:
+                assert (NodeRole.DATA in node_roles and len(node_roles) == 1) or (
+                    settings.E2E_TESTING or settings.DEBUG or not settings.CLOUD_DEPLOYMENT
+                ), "When running migrations on sharded tables, the node_role must be NodeRole.DATA"
+                return cluster.map_one_host_per_shard(query).result()
+            elif is_alter_on_replicated_table:
+                logger.info("       Running ALTER on replicated table on just one host")
+                return cluster.any_host_by_roles(query, node_roles=node_roles).result()
+            else:
+                return cluster.map_hosts_by_roles(query, node_roles=node_roles).result()
+        except ServerException as e:
+            if e.code in _IDEMPOTENT_CH_ERROR_CODES:
+                logger.info("       Ignoring idempotent DDL error (code %d): %s", e.code, e.message)
+                return None
+            raise
+        except ExceptionGroup as eg:
+            # cluster .result() wraps errors in ExceptionGroup — check if ALL are idempotent
+            non_idempotent = []
+            for exc in eg.exceptions:
+                if isinstance(exc, ServerException) and exc.code in _IDEMPOTENT_CH_ERROR_CODES:
+                    logger.info("       Ignoring idempotent DDL error (code %d): %s", exc.code, exc.message)
+                else:
+                    non_idempotent.append(exc)
+            if non_idempotent:
+                raise ExceptionGroup(eg.message, non_idempotent) from eg
+            return None
 
     operation = migrations.RunPython(lambda _: run_migration())
 
