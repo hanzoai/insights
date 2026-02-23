@@ -114,6 +114,14 @@ class ClickhouseCluster:
 
         for row in cluster_hosts:
             (host_name, port, shard_num, replica_num, host_cluster_type, host_cluster_role) = row
+
+            # For self-hosted single-node deployments, cluster config uses localhost
+            # for DDL coordination, but the web/worker pod must connect via the
+            # service DNS name (CLICKHOUSE_HOST).  Override the host from
+            # system.clusters so connections go to the right place.
+            if not settings.CLOUD_DEPLOYMENT and host_name in ("localhost", "127.0.0.1"):
+                host_name = settings.CLICKHOUSE_HOST
+
             host_info = HostInfo(
                 ConnectionInfo(
                     host_name,
