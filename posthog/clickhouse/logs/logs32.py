@@ -86,11 +86,9 @@ ORDER BY (team_id, time_bucket, service_name, resource_fingerprint, severity_tex
 SETTINGS
     storage_policy = '{STORAGE_POLICY()}',
     allow_remote_fs_zero_copy_replication = 1,
-    allow_experimental_reverse_key = 1,
     index_granularity_bytes = 104857600,
     index_granularity = 8192,
-    ttl_only_drop_parts = 1,
-    add_minmax_index_for_numeric_columns = 1
+    ttl_only_drop_parts = 1
 """
 
 
