@@ -37,7 +37,7 @@ jobs:
         with:
           images: ghcr.io/hanzoai/insights
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
             type=sha,prefix=sha-
 
       - uses: docker/build-push-action@v5
