@@ -196,7 +196,7 @@ describe.each([
 
                 expect(mockQueueInvocations).toHaveBeenCalledWith(invocations)
 
-                const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
 
                 // Check triggered metrics (one per destination)
                 const triggeredMetrics = metrics.filter((m: any) => m.value.metric_name === 'triggered')
@@ -248,11 +248,11 @@ describe.each([
 
                 // Still verify the metric for the filtered function
                 expect(
-                    mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                    mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 ).toMatchObject([
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: fnPrinterPageviewFilters.id,
@@ -265,7 +265,7 @@ describe.each([
                     },
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: fnFetchNoFilters.id,
@@ -282,7 +282,7 @@ describe.each([
                         : [
                               {
                                   key: expect.any(String),
-                                  topic: 'clickhouse_app_metrics2_test',
+                                  topic: 'datastore_app_metrics2_test',
                                   value: {
                                       app_source: 'hog_function',
                                       app_source_id: '_event_trigger',
@@ -309,7 +309,7 @@ describe.each([
 
                 expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
                     {
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: fnFetchNoFilters.id,
@@ -320,7 +320,7 @@ describe.each([
                         },
                     },
                     {
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: fnPrinterPageviewFilters.id,
@@ -357,7 +357,7 @@ describe.each([
                     expect(invocations).toHaveLength(4)
 
                     const billingMetrics = mockProducerObserver
-                        .getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                        .getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                         .filter((m: any) => m.value.metric_name === 'billable_invocation')
 
                     // 2 events = 2 billable_invocations (not 4)
@@ -436,11 +436,11 @@ describe.each([
                 expect(invocations).toHaveLength(0)
 
                 // Check that quota_limited metrics were produced
-                const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 expect(metrics).toEqual(
                     expect.arrayContaining([
                         expect.objectContaining({
-                            topic: 'clickhouse_app_metrics2_test',
+                            topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
                                 app_source: 'hog_function',
                                 app_source_id: fnFetchNoFilters.id,
@@ -451,7 +451,7 @@ describe.each([
                             }),
                         }),
                         expect.objectContaining({
-                            topic: 'clickhouse_app_metrics2_test',
+                            topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
                                 app_source: 'hog_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
@@ -476,11 +476,11 @@ describe.each([
                 expect(hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(team2.id, 'cdp_trigger_events')
 
                 // Check that triggered metrics were produced instead
-                const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 expect(metrics).toEqual(
                     expect.arrayContaining([
                         expect.objectContaining({
-                            topic: 'clickhouse_app_metrics2_test',
+                            topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
                                 app_source: 'hog_function',
                                 app_source_id: fnFetchNoFilters.id,
@@ -491,7 +491,7 @@ describe.each([
                             }),
                         }),
                         expect.objectContaining({
-                            topic: 'clickhouse_app_metrics2_test',
+                            topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
                                 app_source: 'hog_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
@@ -535,7 +535,7 @@ describe.each([
                 expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: erroringFunction.id,
@@ -709,7 +709,7 @@ describe('hog flow processing', () => {
             await processor['createHogFlowInvocations']([globals])
 
             const producedMetrics =
-                mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(producedMetrics).not.toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
@@ -803,7 +803,7 @@ describe('hog flow processing', () => {
 
             // Should have queued a quota limited metric
             const producedMetrics =
-                mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(producedMetrics).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({

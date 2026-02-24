@@ -1,7 +1,7 @@
 import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import express from 'ultimate-express'
 
-import { KAFKA_CLICKHOUSE_SESSION_REPLAY_EVENTS } from '../../config/kafka-topics'
+import { KAFKA_DATASTORE_SESSION_REPLAY_EVENTS } from '../../config/kafka-topics'
 import { KafkaProducerWrapper } from '../../kafka/producer'
 import {
     HealthCheckResult,
@@ -107,7 +107,7 @@ export class RecordingApi {
 
         // Initialize Kafka producer for emitting deletion events
         this.kafkaProducer = await KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK)
-        const metadataStore = new SessionMetadataStore(this.kafkaProducer, KAFKA_CLICKHOUSE_SESSION_REPLAY_EVENTS)
+        const metadataStore = new SessionMetadataStore(this.kafkaProducer, KAFKA_DATASTORE_SESSION_REPLAY_EVENTS)
 
         // Create the service layer
         this.recordingService = new RecordingService(

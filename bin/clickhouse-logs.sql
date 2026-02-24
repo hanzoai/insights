@@ -189,7 +189,7 @@ CREATE OR REPLACE TABLE kafka_logs_avro
     `event_name` String,
     `attributes` Map(LowCardinality(String), String)
 )
-ENGINE = Kafka('kafka:9092', 'clickhouse_logs', 'clickhouse-logs-avro', 'Avro')
+ENGINE = Kafka('kafka:9092', 'datastore_logs', 'clickhouse-logs-avro', 'Avro')
 SETTINGS
     kafka_skip_broken_messages = 100,
     kafka_security_protocol = 'PLAINTEXT',

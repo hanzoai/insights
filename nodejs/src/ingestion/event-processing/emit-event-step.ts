@@ -11,7 +11,7 @@ import { ProcessingStep } from '../pipelines/steps'
 
 export interface EmitEventStepConfig {
     kafkaProducer: KafkaProducerWrapper
-    clickhouseJsonEventsTopic: string
+    datastoreJsonEventsTopic: string
     groupId: string
 }
 
@@ -26,7 +26,7 @@ export function createEmitEventStep<T extends EmitEventStepInput>(
 ): ProcessingStep<T, void> {
     return function emitEventStep(input: T): Promise<PipelineResult<void>> {
         const { eventToEmit, inputHeaders, inputMessage } = input
-        const { kafkaProducer, clickhouseJsonEventsTopic, groupId } = config
+        const { kafkaProducer, datastoreJsonEventsTopic, groupId } = config
 
         // Record ingestion lag metric if we have the required data
         if (inputHeaders?.now && inputMessage?.topic !== undefined && inputMessage?.partition !== undefined) {
@@ -42,7 +42,7 @@ export function createEmitEventStep<T extends EmitEventStepInput>(
         //       We should investigate this later.
         const emitPromise = kafkaProducer
             .produce({
-                topic: clickhouseJsonEventsTopic,
+                topic: datastoreJsonEventsTopic,
                 key: eventToEmit.uuid,
                 value: Buffer.from(JSON.stringify(eventToEmit)),
                 headers: { productTrack: productTrackHeader(eventToEmit) },

@@ -63,7 +63,7 @@ describe('emit-event-step', () => {
 
         config = {
             kafkaProducer: mockKafkaProducer,
-            clickhouseJsonEventsTopic: 'clickhouse_events_json',
+            datastoreJsonEventsTopic: 'clickhouse_events_json',
             groupId: 'test-group-id',
         }
 
@@ -173,7 +173,7 @@ describe('emit-event-step', () => {
         it('should use the correct topic from config', async () => {
             const customConfig = {
                 ...config,
-                clickhouseJsonEventsTopic: 'custom_topic',
+                datastoreJsonEventsTopic: 'custom_topic',
             }
             const step = createEmitEventStep(customConfig)
             const input = { eventToEmit: mockRawEvent, inputHeaders: mockHeaders, inputMessage: mockMessage }
