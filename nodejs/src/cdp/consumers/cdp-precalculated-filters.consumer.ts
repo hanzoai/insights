@@ -8,8 +8,8 @@ import {
 } from '~/utils/realtime-supported-filter-manager-cdp'
 
 import {
-    KAFKA_CDP_CLICKHOUSE_PRECALCULATED_PERSON_PROPERTIES,
-    KAFKA_CDP_CLICKHOUSE_PREFILTERED_EVENTS,
+    KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
+    KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS,
     KAFKA_EVENTS_JSON,
 } from '../../config/kafka-topics'
 import { KafkaConsumer } from '../../kafka/consumer'
@@ -84,7 +84,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
                 key: event.key,
             }))
 
-            await this.kafkaProducer.queueMessages({ topic: KAFKA_CDP_CLICKHOUSE_PREFILTERED_EVENTS, messages })
+            await this.kafkaProducer.queueMessages({ topic: KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS, messages })
         } catch (error) {
             logger.error('Error publishing behavioral events', {
                 error,
@@ -107,7 +107,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
             }))
 
             await this.kafkaProducer.queueMessages({
-                topic: KAFKA_CDP_CLICKHOUSE_PRECALCULATED_PERSON_PROPERTIES,
+                topic: KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
                 messages,
             })
         } catch (error) {

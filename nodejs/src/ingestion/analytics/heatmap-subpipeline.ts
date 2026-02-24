@@ -22,7 +22,7 @@ export interface HeatmapSubpipelineInput {
 
 export interface HeatmapSubpipelineConfig {
     options: EventPipelineRunnerOptions & {
-        CLICKHOUSE_HEATMAPS_KAFKA_TOPIC: string
+        DATASTORE_HEATMAPS_KAFKA_TOPIC: string
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
@@ -53,7 +53,7 @@ export function createHeatmapSubpipeline<TInput extends HeatmapSubpipelineInput,
         .pipe(
             createExtractHeatmapDataStep({
                 kafkaProducer,
-                CLICKHOUSE_HEATMAPS_KAFKA_TOPIC: options.CLICKHOUSE_HEATMAPS_KAFKA_TOPIC,
+                DATASTORE_HEATMAPS_KAFKA_TOPIC: options.DATASTORE_HEATMAPS_KAFKA_TOPIC,
             })
         )
         .pipe(createSkipEmitEventStep())

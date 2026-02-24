@@ -500,7 +500,7 @@ services:
         environment:
             DATABASE_URL: 'postgres://posthog:posthog@db:5432/cyclotron'
             KAFKA_HOSTS: 'kafka:9092'
-            KAFKA_TOPIC: 'clickhouse_app_metrics2'
+            KAFKA_TOPIC: 'datastore_app_metrics2'
         depends_on:
             db:
                 condition: service_healthy

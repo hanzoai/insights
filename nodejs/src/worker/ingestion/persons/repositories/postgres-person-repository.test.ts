@@ -212,8 +212,8 @@ describe('PostgresPersonRepository', () => {
             )
 
             expect(kafkaMessages).toHaveLength(2) // One for person, one for distinct ID
-            expect(kafkaMessages[0].topic).toBe('clickhouse_person_test')
-            expect(kafkaMessages[1].topic).toBe('clickhouse_person_distinct_id_test')
+            expect(kafkaMessages[0].topic).toBe('datastore_person_test')
+            expect(kafkaMessages[1].topic).toBe('datastore_person_distinct_id_test')
         })
 
         it('creates a person with multiple distinct IDs', async () => {
@@ -252,9 +252,9 @@ describe('PostgresPersonRepository', () => {
             )
 
             expect(kafkaMessages).toHaveLength(3) // One for person, two for distinct IDs
-            expect(kafkaMessages[0].topic).toBe('clickhouse_person_test')
-            expect(kafkaMessages[1].topic).toBe('clickhouse_person_distinct_id_test')
-            expect(kafkaMessages[2].topic).toBe('clickhouse_person_distinct_id_test')
+            expect(kafkaMessages[0].topic).toBe('datastore_person_test')
+            expect(kafkaMessages[1].topic).toBe('datastore_person_distinct_id_test')
+            expect(kafkaMessages[2].topic).toBe('datastore_person_distinct_id_test')
 
             const distinctIds = await fetchDistinctIdValues(hub.postgres, person)
             expect(distinctIds).toHaveLength(2)
@@ -327,7 +327,7 @@ describe('PostgresPersonRepository', () => {
             const messages = await repository.addDistinctId(person, newDistinctId, version)
 
             expect(messages).toHaveLength(1)
-            expect(messages[0].topic).toBe('clickhouse_person_distinct_id_test')
+            expect(messages[0].topic).toBe('datastore_person_distinct_id_test')
             expect(messages[0].messages).toHaveLength(1)
 
             const messageValue = parseJSON(messages[0].messages[0].value as string)
@@ -349,7 +349,7 @@ describe('PostgresPersonRepository', () => {
             const messages = await repository.addDistinctId(person, newDistinctId, version)
 
             expect(messages).toHaveLength(1)
-            expect(messages[0].topic).toBe('clickhouse_person_distinct_id_test')
+            expect(messages[0].topic).toBe('datastore_person_distinct_id_test')
             expect(messages[0].messages).toHaveLength(1)
 
             const messageValue = parseJSON(messages[0].messages[0].value as string)
@@ -394,7 +394,7 @@ describe('PostgresPersonRepository', () => {
 
             // Verify kafka messages are generated
             expect(deleteMessages).toHaveLength(1)
-            expect(deleteMessages[0].topic).toBe('clickhouse_person_test')
+            expect(deleteMessages[0].topic).toBe('datastore_person_test')
             expect(deleteMessages[0].messages).toHaveLength(1)
 
             const messageValue = parseJSON(deleteMessages[0].messages[0].value as string)
@@ -450,7 +450,7 @@ describe('PostgresPersonRepository', () => {
 
                 // Verify the messages have the correct structure
                 for (const message of result.messages) {
-                    expect(message.topic).toBe('clickhouse_person_distinct_id_test')
+                    expect(message.topic).toBe('datastore_person_distinct_id_test')
                     expect(message.messages).toHaveLength(1)
 
                     const messageValue = parseJSON(message.messages[0].value as string)
@@ -537,7 +537,7 @@ describe('PostgresPersonRepository', () => {
 
                 // Verify the messages have the correct structure
                 for (const message of result.messages) {
-                    expect(message.topic).toBe('clickhouse_person_distinct_id_test')
+                    expect(message.topic).toBe('datastore_person_distinct_id_test')
                     expect(message.messages).toHaveLength(1)
 
                     const messageValue = parseJSON(message.messages[0].value as string)
@@ -668,7 +668,7 @@ describe('PostgresPersonRepository', () => {
 
                 // Verify the messages have the correct structure
                 for (const message of result.messages) {
-                    expect(message.topic).toBe('clickhouse_person_distinct_id_test')
+                    expect(message.topic).toBe('datastore_person_distinct_id_test')
                     expect(message.messages).toHaveLength(1)
 
                     const messageValue = parseJSON(message.messages[0].value as string)

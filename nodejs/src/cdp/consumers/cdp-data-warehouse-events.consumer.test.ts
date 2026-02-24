@@ -254,7 +254,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
             expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
                 {
-                    topic: 'clickhouse_app_metrics2_test',
+                    topic: 'datastore_app_metrics2_test',
                     value: {
                         app_source: 'hog_function',
                         app_source_id: fnFetchNoFilters.id,
@@ -281,11 +281,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
             expect(invocations).toHaveLength(1)
 
-            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')).toMatchObject(
+            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')).toMatchObject(
                 [
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: fnFetchNoFilters.id,
@@ -299,7 +299,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                     // Billing is per-event, not per-destination
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: '_event_trigger',
@@ -332,7 +332,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             )
 
             const billingMetrics = mockProducerObserver
-                .getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                .getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 .filter((m: any) => m.value.metric_name === 'billable_invocation')
 
             // 1 event = 1 billable_invocation (not 2)
@@ -385,11 +385,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(invocations).toHaveLength(0)
 
             // Check that quota_limited metrics were produced
-            const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+            const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(metrics).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
                             app_source: 'hog_function',
                             app_source_id: fnFetchNoFilters.id,
@@ -400,7 +400,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                         }),
                     }),
                     expect.objectContaining({
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
                             app_source: 'hog_function',
                             app_source_id: fnDataWarehouseFunction.id,
@@ -425,11 +425,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(team2.id, 'cdp_trigger_events')
 
             // Check that triggered metrics were produced instead
-            const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+            const metrics = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             expect(metrics).toEqual(
                 expect.arrayContaining([
                     expect.objectContaining({
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
                             app_source: 'hog_function',
                             app_source_id: fnFetchNoFilters.id,
@@ -440,7 +440,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                         }),
                     }),
                     expect.objectContaining({
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
                             app_source: 'hog_function',
                             app_source_id: fnDataWarehouseFunction.id,
