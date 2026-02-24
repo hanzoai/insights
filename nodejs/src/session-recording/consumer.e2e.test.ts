@@ -16,7 +16,7 @@ import { forSnapshot } from '../../tests/helpers/snapshots'
 import { createOrganization, createTeam, getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { defaultConfig, overrideWithEnv } from '../config/config'
 import {
-    KAFKA_CLICKHOUSE_SESSION_REPLAY_EVENTS,
+    KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
     KAFKA_SESSION_RECORDING_SNAPSHOT_ITEM_EVENTS,
 } from '../config/kafka-topics'
 import { KafkaProducerWrapper } from '../kafka/producer'
@@ -915,7 +915,7 @@ describe('Session Recording Consumer Integration', () => {
             SESSION_RECORDING_MAX_BATCH_SIZE_KB: 1,
             SESSION_RECORDING_MAX_BATCH_AGE_MS: 1000,
             // Use the test topic (with _test suffix) to match ClickHouse's Kafka engine table
-            SESSION_RECORDING_V2_REPLAY_EVENTS_KAFKA_TOPIC: KAFKA_CLICKHOUSE_SESSION_REPLAY_EVENTS,
+            SESSION_RECORDING_V2_REPLAY_EVENTS_KAFKA_TOPIC: KAFKA_DATASTORE_SESSION_REPLAY_EVENTS,
         })
 
         team = await getFirstTeam(hub)

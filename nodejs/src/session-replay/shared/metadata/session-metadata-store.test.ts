@@ -14,7 +14,7 @@ describe('SessionMetadataStore', () => {
             flush: jest.fn().mockResolvedValue(undefined),
         } as unknown as jest.Mocked<KafkaProducerWrapper>
 
-        store = new SessionMetadataStore(mockProducer, 'clickhouse_session_replay_events')
+        store = new SessionMetadataStore(mockProducer, 'datastore_session_replay_events')
     })
 
     it('should queue events to kafka with correct data', async () => {
@@ -103,7 +103,7 @@ describe('SessionMetadataStore', () => {
 
         expect(mockProducer.queueMessages).toHaveBeenCalledTimes(1)
         const queuedMessage = mockProducer.queueMessages.mock.calls[0][0] as TopicMessage
-        expect(queuedMessage.topic).toBe('clickhouse_session_replay_events')
+        expect(queuedMessage.topic).toBe('datastore_session_replay_events')
         const queuedMessages = queuedMessage.messages
         const parsedEvents = queuedMessages.map((msg) => parseJSON(msg.value as string))
 
@@ -201,7 +201,7 @@ describe('SessionMetadataStore', () => {
     it('should handle empty blocks array', async () => {
         await store.storeSessionBlocks([])
         expect(mockProducer.queueMessages).toHaveBeenCalledWith({
-            topic: 'clickhouse_session_replay_events',
+            topic: 'datastore_session_replay_events',
             messages: [],
         })
         expect(mockProducer.flush).toHaveBeenCalledTimes(1)

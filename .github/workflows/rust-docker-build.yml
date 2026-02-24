@@ -1,13 +1,8 @@
-name: Build and deploy rust container images
+name: Build and deploy rust container images (upstream - disabled)
 
+# Disabled: replaced by deploy-capture.yml which pushes to ghcr.io/hanzoai/insights/capture
 on:
     workflow_dispatch:
-    push:
-        paths:
-            - 'rust/**'
-            - '.github/workflows/rust-docker-build.yml'
-        branches:
-            - 'master'
 
 jobs:
     build:
