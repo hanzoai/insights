@@ -3,7 +3,7 @@ import { mockProducerObserver } from '~/tests/helpers/mocks/producer.mock'
 import { resetKafka } from '~/tests/helpers/kafka'
 
 import { buildInlineFiltersForCohorts, createCohort, getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
-import { KAFKA_CDP_CLICKHOUSE_PREFILTERED_EVENTS } from '../../config/kafka-topics'
+import { KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS } from '../../config/kafka-topics'
 import { Hub, RawClickHouseEvent, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import { CdpPrecalculatedFiltersConsumer } from './cdp-precalculated-filters.consumer'
@@ -249,7 +249,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
 
             // Check published messages to Kafka
             const kafkaMessages = mockProducerObserver.getProducedKafkaMessagesForTopic(
-                KAFKA_CDP_CLICKHOUSE_PREFILTERED_EVENTS
+                KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS
             )
             expect(kafkaMessages).toHaveLength(1)
 
@@ -297,7 +297,7 @@ describe('CdpPrecalculatedFiltersConsumer', () => {
             // Verify nothing was published to Kafka
             await processor['publishBehavioralEvents'](precalculatedEvents)
             const kafkaMessages = mockProducerObserver.getProducedKafkaMessagesForTopic(
-                KAFKA_CDP_CLICKHOUSE_PREFILTERED_EVENTS
+                KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS
             )
             expect(kafkaMessages).toHaveLength(0)
         })

@@ -285,8 +285,8 @@ export type IngestionConsumerConfig = {
     TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE: number
 
     // Clickhouse topics
-    CLICKHOUSE_JSON_EVENTS_KAFKA_TOPIC: string
-    CLICKHOUSE_HEATMAPS_KAFKA_TOPIC: string
+    DATASTORE_JSON_EVENTS_KAFKA_TOPIC: string
+    DATASTORE_HEATMAPS_KAFKA_TOPIC: string
 
     // Cookieless server hash mode config
     COOKIELESS_DISABLED: boolean
@@ -305,7 +305,7 @@ export type LogsIngestionConsumerConfig = {
     LOGS_INGESTION_CONSUMER_CONSUME_TOPIC: string
     LOGS_INGESTION_CONSUMER_OVERFLOW_TOPIC: string
     LOGS_INGESTION_CONSUMER_DLQ_TOPIC: string
-    LOGS_INGESTION_CONSUMER_CLICKHOUSE_TOPIC: string
+    LOGS_INGESTION_CONSUMER_DATASTORE_TOPIC: string
     LOGS_REDIS_HOST: string
     LOGS_REDIS_PORT: number
     LOGS_REDIS_PASSWORD: string

@@ -11,7 +11,7 @@ from structlog.contextvars import bind_contextvars
 
 from posthog.clickhouse.query_tagging import Feature, Product, tags_context
 from posthog.kafka_client.client import KafkaProducer
-from posthog.kafka_client.topics import KAFKA_CDP_CLICKHOUSE_PRECALCULATED_PERSON_PROPERTIES
+from posthog.kafka_client.topics import KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES
 from posthog.temporal.common.base import PostHogWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.heartbeat import Heartbeater
@@ -294,7 +294,7 @@ async def backfill_precalculated_person_properties_activity(
                                 # Produce to Kafka without blocking - collect send results for later flushing
                                 try:
                                     send_result = kafka_producer.produce(
-                                        topic=KAFKA_CDP_CLICKHOUSE_PRECALCULATED_PERSON_PROPERTIES,
+                                        topic=KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
                                         key=event["distinct_id"],
                                         data=event,
                                     )

@@ -29,8 +29,8 @@ export interface EventSubpipelineInput {
 
 export interface EventSubpipelineConfig {
     options: EventPipelineRunnerOptions & {
-        CLICKHOUSE_JSON_EVENTS_KAFKA_TOPIC: string
-        CLICKHOUSE_HEATMAPS_KAFKA_TOPIC: string
+        DATASTORE_JSON_EVENTS_KAFKA_TOPIC: string
+        DATASTORE_HEATMAPS_KAFKA_TOPIC: string
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
@@ -66,14 +66,14 @@ export function createEventSubpipeline<TInput extends EventSubpipelineInput, TCo
         .pipe(
             createExtractHeatmapDataStep({
                 kafkaProducer,
-                CLICKHOUSE_HEATMAPS_KAFKA_TOPIC: options.CLICKHOUSE_HEATMAPS_KAFKA_TOPIC,
+                DATASTORE_HEATMAPS_KAFKA_TOPIC: options.DATASTORE_HEATMAPS_KAFKA_TOPIC,
             })
         )
         .pipe(createCreateEventStep())
         .pipe(
             createEmitEventStep({
                 kafkaProducer,
-                clickhouseJsonEventsTopic: options.CLICKHOUSE_JSON_EVENTS_KAFKA_TOPIC,
+                datastoreJsonEventsTopic: options.DATASTORE_JSON_EVENTS_KAFKA_TOPIC,
                 groupId,
             })
         )
