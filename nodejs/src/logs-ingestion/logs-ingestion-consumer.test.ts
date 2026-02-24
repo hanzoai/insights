@@ -194,7 +194,7 @@ describe('LogsIngestionConsumer', () => {
             expect(consumer['name']).toEqual('LogsIngestionConsumer')
             expect(consumer['groupId']).toEqual('ingestion-logs')
             expect(consumer['topic']).toEqual('logs_ingestion_test')
-            expect(consumer['clickhouseTopic']).toEqual('clickhouse_logs_test')
+            expect(consumer['clickhouseTopic']).toEqual('datastore_logs_test')
             expect(consumer['overflowTopic']).toEqual('logs_ingestion_overflow_test')
             expect(consumer['dlqTopic']).toEqual('logs_ingestion_dlq_test')
         })
@@ -203,13 +203,13 @@ describe('LogsIngestionConsumer', () => {
             const overrides = {
                 LOGS_INGESTION_CONSUMER_GROUP_ID: 'custom-group',
                 LOGS_INGESTION_CONSUMER_CONSUME_TOPIC: 'custom-topic',
-                LOGS_INGESTION_CONSUMER_CLICKHOUSE_TOPIC: 'custom-clickhouse-topic',
+                LOGS_INGESTION_CONSUMER_DATASTORE_TOPIC: 'custom-datastore-topic',
             }
             const customConsumer = await createLogsIngestionConsumer(hub, overrides)
 
             expect(customConsumer['groupId']).toBe('custom-group')
             expect(customConsumer['topic']).toBe('custom-topic')
-            expect(customConsumer['clickhouseTopic']).toBe('custom-clickhouse-topic')
+            expect(customConsumer['clickhouseTopic']).toBe('custom-datastore-topic')
 
             await customConsumer.stop()
         })
@@ -348,7 +348,7 @@ describe('LogsIngestionConsumer', () => {
 
             const producedMessages = getProducedKafkaMessages()
             expect(producedMessages).toHaveLength(1)
-            expect(producedMessages[0].topic).toBe('clickhouse_logs_test')
+            expect(producedMessages[0].topic).toBe('datastore_logs_test')
             expect(producedMessages[0].headers).toEqual({
                 token: team.api_token,
                 team_id: team.id.toString(),
@@ -369,7 +369,7 @@ describe('LogsIngestionConsumer', () => {
             expect(producedMessages).toHaveLength(1)
 
             const message = producedMessages[0]
-            expect(message.topic).toBe('clickhouse_logs_test')
+            expect(message.topic).toBe('datastore_logs_test')
             expect(message.key).toBeNull()
             expect(message.headers).toEqual({
                 token: team.api_token,
@@ -461,7 +461,7 @@ describe('LogsIngestionConsumer', () => {
             // Mock the produce method to throw an error for main topic but succeed for DLQ
             const originalProduce = consumer['kafkaProducer']!.produce
             const produceSpy = jest.fn().mockImplementation((args) => {
-                if (args.topic === 'clickhouse_logs_test') {
+                if (args.topic === 'datastore_logs_test') {
                     throw new Error('Producer error')
                 }
                 return originalProduce(args)
@@ -501,7 +501,7 @@ describe('LogsIngestionConsumer', () => {
 
             const producedMessages = getProducedKafkaMessages()
             expect(producedMessages).toHaveLength(1)
-            expect(producedMessages[0].topic).toBe('clickhouse_logs_test')
+            expect(producedMessages[0].topic).toBe('datastore_logs_test')
         })
 
         it('should handle messages from different teams', async () => {
@@ -624,7 +624,7 @@ describe('LogsIngestionConsumer', () => {
             await waitForBackgroundTasks(consumer.processKafkaBatch(messages))
 
             // Filter to only the logs topic (excludes app_metrics2 messages)
-            const logsMessages = getProducedKafkaMessages().filter((m) => m.topic === 'clickhouse_logs_test')
+            const logsMessages = getProducedKafkaMessages().filter((m) => m.topic === 'datastore_logs_test')
             expect(logsMessages).toHaveLength(1)
             expect(bytesReceivedSpy).toHaveBeenCalledWith(3072)
             expect(bytesAllowedSpy).toHaveBeenCalledWith(1024)

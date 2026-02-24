@@ -121,7 +121,7 @@ describe('SourceWebhooksConsumer', () => {
             return res.map((x) => x.value.message) as string[]
         }
         const getMetrics = (): any[] => {
-            const res = mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+            const res = mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
             return res.map((x) => x.value) as any[]
         }
 

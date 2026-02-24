@@ -244,13 +244,13 @@ describe('IngestionConsumer', () => {
             const messages = mockProducerObserver.getProducedKafkaMessages()
             const eventsA = messages.filter(
                 (m) =>
-                    m.topic === 'clickhouse_events_json_test' &&
+                    m.topic === 'datastore_events_json_test' &&
                     m.value.person_properties &&
                     parseJSON(m.value.person_properties as any)?.a
             )
             const eventsB = messages.filter(
                 (m) =>
-                    m.topic === 'clickhouse_events_json_test' &&
+                    m.topic === 'datastore_events_json_test' &&
                     m.value.person_properties &&
                     parseJSON(m.value.person_properties as any)?.b
             )
@@ -275,7 +275,7 @@ describe('IngestionConsumer', () => {
                 const overflowMessages = createKafkaMessages([createEvent({ distinct_id: 'overflow-distinct-id' })])
                 await ingester.handleKafkaBatch(overflowMessages)
                 expect(
-                    mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                    mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                 ).toHaveLength(0)
                 expect(
                     mockProducerObserver.getProducedKafkaMessagesForTopic('events_plugin_ingestion_overflow_test')
@@ -304,7 +304,7 @@ describe('IngestionConsumer', () => {
                     mockProducerObserver.getProducedKafkaMessagesForTopic('events_plugin_ingestion_overflow_test')
                 ).toHaveLength(0)
                 expect(
-                    mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                    mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                 ).toHaveLength(1)
 
                 await overflowIngester.stop()
@@ -348,7 +348,7 @@ describe('IngestionConsumer', () => {
 
                     // Verify the event was still processed normally
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(1)
 
                     await hub.redisPool.release(redis)
@@ -381,7 +381,7 @@ describe('IngestionConsumer', () => {
 
                     // Verify the event was still processed
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(1)
 
                     await hub.redisPool.release(redis)
@@ -413,7 +413,7 @@ describe('IngestionConsumer', () => {
                         mockProducerObserver.getProducedKafkaMessagesForTopic('events_plugin_ingestion_overflow_test')
                     ).toHaveLength(1)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(2)
 
                     // Verify the right event went to overflow and the right events were processed normally
@@ -421,7 +421,7 @@ describe('IngestionConsumer', () => {
                         'events_plugin_ingestion_overflow_test'
                     )
                     const normalMessages =
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
 
                     expect(overflowMessages[0].value.distinct_id).toEqual('team1-user')
                     expect(overflowMessages[0].value.token).toEqual(team.api_token)
@@ -449,7 +449,7 @@ describe('IngestionConsumer', () => {
                         mockProducerObserver.getProducedKafkaMessagesForTopic('events_plugin_ingestion_overflow_test')
                     ).toHaveLength(2)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(2)
 
                     // Verify both matching events went to overflow
@@ -457,7 +457,7 @@ describe('IngestionConsumer', () => {
                         'events_plugin_ingestion_overflow_test'
                     )
                     const normalMessages =
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
 
                     // Sort messages by distinct_id to make the test deterministic
                     const sortedOverflowMessages = [...overflowMessages].sort((a, b) =>
@@ -497,7 +497,7 @@ describe('IngestionConsumer', () => {
                             )
                         ).toHaveLength(1)
                         expect(
-                            mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                            mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                         ).toHaveLength(0)
                     })
 
@@ -561,7 +561,7 @@ describe('IngestionConsumer', () => {
 
             await ingester.handleKafkaBatch(messages)
 
-            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')).toHaveLength(0)
+            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')).toHaveLength(0)
             expect(
                 mockProducerObserver.getProducedKafkaMessagesForTopic('events_plugin_ingestion_dlq_test')
             ).toHaveLength(0)
@@ -584,11 +584,11 @@ describe('IngestionConsumer', () => {
             await backgroundTask
 
             // Event should be dropped
-            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')).toHaveLength(0)
+            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')).toHaveLength(0)
 
             // Should produce ingestion warning
             const warningMessages = mockProducerObserver.getProducedKafkaMessagesForTopic(
-                'clickhouse_ingestion_warnings_test'
+                'datastore_ingestion_warnings_test'
             )
             expect(warningMessages).toHaveLength(1)
             expect(warningMessages[0].value).toMatchObject({
@@ -635,7 +635,7 @@ describe('IngestionConsumer', () => {
                     addMessageHeaders(messages[0], team.api_token, 'distinct-id-to-ignore')
                     await ingester.handleKafkaBatch(messages)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(0)
                 })
 
@@ -651,7 +651,7 @@ describe('IngestionConsumer', () => {
                     addMessageHeaders(messages[0], team2.api_token, 'distinct-id-to-ignore')
                     await ingester.handleKafkaBatch(messages)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).not.toHaveLength(0)
                 })
 
@@ -664,7 +664,7 @@ describe('IngestionConsumer', () => {
                     addMessageHeaders(messages[0], team.api_token, 'not-ignored')
                     await ingester.handleKafkaBatch(messages)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).not.toHaveLength(0)
                 })
             })
@@ -686,7 +686,7 @@ describe('IngestionConsumer', () => {
                     addMessageHeaders(messages[0], team.api_token, distinct_id_to_drop)
                     await ingester.handleKafkaBatch(messages)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(0)
                 })
 
@@ -700,7 +700,7 @@ describe('IngestionConsumer', () => {
                     addMessageHeaders(messages[0], team.api_token, unlisted_distinct_id)
                     await ingester.handleKafkaBatch(messages)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).not.toHaveLength(0)
                 })
 
@@ -724,7 +724,7 @@ describe('IngestionConsumer', () => {
 
                     await ingester.handleKafkaBatch(messages)
                     expect(
-                        mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')
+                        mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')
                     ).toHaveLength(0)
                 })
             })
@@ -784,7 +784,7 @@ describe('IngestionConsumer', () => {
             await ingester.handleKafkaBatch(messages)
 
             const producedMessages = mockProducerObserver.getProducedKafkaMessages()
-            const eventsTopicMessages = producedMessages.filter((m) => m.topic === 'clickhouse_events_json_test')
+            const eventsTopicMessages = producedMessages.filter((m) => m.topic === 'datastore_events_json_test')
 
             expect(eventsTopicMessages).toHaveLength(2)
 
@@ -840,7 +840,7 @@ describe('IngestionConsumer', () => {
             await ingester.handleKafkaBatch(messages)
 
             const producedMessages = mockProducerObserver.getProducedKafkaMessages()
-            const eventsTopicMessages = producedMessages.filter((m) => m.topic === 'clickhouse_events_json_test')
+            const eventsTopicMessages = producedMessages.filter((m) => m.topic === 'datastore_events_json_test')
 
             // Valid AI event should be processed
             const validAiEvent = eventsTopicMessages.find((m) => m.value.event === '$ai_generation')
@@ -923,7 +923,7 @@ describe('IngestionConsumer', () => {
             await ingester.handleKafkaBatch(messages)
 
             // Should not produce to clickhouse
-            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_events_json_test')).toHaveLength(0)
+            expect(mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_events_json_test')).toHaveLength(0)
 
             // Should produce to DLQ
             const dlqMessages = mockProducerObserver.getProducedKafkaMessagesForTopic(
@@ -1273,11 +1273,11 @@ describe('IngestionConsumer', () => {
 
                 // Verify metrics were published
                 const metricsMessages =
-                    mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                    mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 expect(metricsMessages).toEqual([
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: transformationFunction.id,
@@ -1338,11 +1338,11 @@ describe('IngestionConsumer', () => {
 
                 // Verify metrics were published
                 const metricsMessages =
-                    mockProducerObserver.getProducedKafkaMessagesForTopic('clickhouse_app_metrics2_test')
+                    mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
                 expect(metricsMessages).toEqual([
                     {
                         key: expect.any(String),
-                        topic: 'clickhouse_app_metrics2_test',
+                        topic: 'datastore_app_metrics2_test',
                         value: {
                             app_source: 'hog_function',
                             app_source_id: transformationFunction.id,

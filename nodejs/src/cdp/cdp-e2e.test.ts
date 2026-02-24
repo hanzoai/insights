@@ -210,7 +210,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
 
             expect(metricsMessages).toMatchObject([
                 {
-                    topic: 'clickhouse_app_metrics2_test',
+                    topic: 'datastore_app_metrics2_test',
                     value: {
                         app_source: 'hog_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
@@ -221,7 +221,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     },
                 },
                 {
-                    topic: 'clickhouse_app_metrics2_test',
+                    topic: 'datastore_app_metrics2_test',
                     value: {
                         app_source: 'hog_function',
                         app_source_id: '_event_trigger',
@@ -232,7 +232,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     },
                 },
                 {
-                    topic: 'clickhouse_app_metrics2_test',
+                    topic: 'datastore_app_metrics2_test',
                     value: {
                         app_source: 'hog_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
@@ -243,7 +243,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     },
                 },
                 {
-                    topic: 'clickhouse_app_metrics2_test',
+                    topic: 'datastore_app_metrics2_test',
                     value: {
                         app_source: 'hog_function',
                         app_source_id: fnFetchNoFilters.id.toString(),

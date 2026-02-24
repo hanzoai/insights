@@ -52,7 +52,7 @@ describe('createExtractHeatmapDataStep', () => {
 
         step = createExtractHeatmapDataStep({
             kafkaProducer: mockProducer,
-            CLICKHOUSE_HEATMAPS_KAFKA_TOPIC: 'clickhouse_heatmaps_test',
+            DATASTORE_HEATMAPS_KAFKA_TOPIC: 'datastore_heatmaps_test',
         })
     })
 
@@ -117,7 +117,7 @@ describe('createExtractHeatmapDataStep', () => {
 
             expect(mockProducer.queueMessages).toHaveBeenCalledTimes(1)
             expect(mockProducer.queueMessages).toHaveBeenCalledWith({
-                topic: 'clickhouse_heatmaps_test',
+                topic: 'datastore_heatmaps_test',
                 messages: expect.arrayContaining([
                     expect.objectContaining({
                         key: '018eebf3-cb48-750b-bfad-36409ea6f2b2',
