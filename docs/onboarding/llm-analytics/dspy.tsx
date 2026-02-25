@@ -15,7 +15,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                 <>
                     <Markdown>
                         Setting up analytics starts with installing the PostHog SDK. The DSPy integration uses PostHog's
-                        LiteLLM callback.
+                        LLM callback.
                     </Markdown>
 
                     <CodeBlock
@@ -28,31 +28,31 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             ),
         },
         {
-            title: 'Install DSPy and LiteLLM',
+            title: 'Install DSPy and LLM',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Install DSPy and LiteLLM. DSPy uses LiteLLM natively for provider access, and PostHog integrates
-                        with LiteLLM's callback system.
+                        Install DSPy and LLM. DSPy uses LLM natively for provider access, and PostHog integrates
+                        with LLM's callback system.
                     </Markdown>
 
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install dspy litellm
+                            pip install dspy llm
                         `}
                     />
                 </>
             ),
         },
         {
-            title: 'Configure PostHog with LiteLLM',
+            title: 'Configure PostHog with LLM',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Set your PostHog project API key and host as environment variables, then configure LiteLLM to
+                        Set your PostHog project API key and host as environment variables, then configure LLM to
                         use PostHog as a callback handler. You can find your API key in [your project
                         settings](https://app.posthog.com/settings/project).
                     </Markdown>
@@ -62,15 +62,15 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                         code={dedent`
                             import os
                             import dspy
-                            import litellm
+                            import llm
 
                             # Set PostHog environment variables
                             os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
                             os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"
 
-                            # Enable PostHog callbacks in LiteLLM
-                            litellm.success_callback = ["posthog"]
-                            litellm.failure_callback = ["posthog"]
+                            # Enable PostHog callbacks in LLM
+                            llm.success_callback = ["posthog"]
+                            llm.failure_callback = ["posthog"]
 
                             # Configure DSPy to use an LLM
                             lm = dspy.LM("openai/gpt-4o-mini", api_key="your_openai_api_key")
@@ -80,8 +80,8 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            DSPy uses LiteLLM under the hood for LLM provider access. By configuring PostHog as a
-                            LiteLLM callback, all LLM calls made through DSPy are automatically captured as
+                            DSPy uses LLM under the hood for LLM provider access. By configuring PostHog as a
+                            LLM callback, all LLM calls made through DSPy are automatically captured as
                             `$ai_generation` events.
                         </Markdown>
                     </CalloutBox>
@@ -95,7 +95,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                 <>
                     <Markdown>
                         Use DSPy as normal. PostHog automatically captures an `$ai_generation` event for each LLM call
-                        made through LiteLLM.
+                        made through LLM.
                     </Markdown>
 
                     <CodeBlock

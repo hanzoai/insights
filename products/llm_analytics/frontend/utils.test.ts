@@ -507,21 +507,21 @@ describe('LLM Analytics utils', () => {
             expect(result[0].content).toEqual([{ type: 'text', text: 'Custom response' }])
         })
 
-        it('handles LiteLLM choice wrapper and preserves nested role', () => {
-            const liteLLMChoice = {
+        it('handles LLM choice wrapper and preserves nested role', () => {
+            const llmChoice = {
                 finish_reason: 'stop',
                 index: 0,
                 message: {
                     role: 'assistant',
-                    content: [{ type: 'text', text: 'Response from LiteLLM' }],
+                    content: [{ type: 'text', text: 'Response from LLM' }],
                 },
             }
 
-            const result = normalizeMessage(liteLLMChoice, 'user')
+            const result = normalizeMessage(llmChoice, 'user')
 
             expect(result).toHaveLength(1)
             expect(result[0].role).toBe('assistant')
-            expect(result[0].content).toEqual([{ type: 'text', text: 'Response from LiteLLM' }])
+            expect(result[0].content).toEqual([{ type: 'text', text: 'Response from LLM' }])
         })
     })
 
@@ -759,8 +759,8 @@ describe('LLM Analytics utils', () => {
         })
     })
 
-    describe('LiteLLM support', () => {
-        const litellmChoice = {
+    describe('LLM support', () => {
+        const llmChoice = {
             finish_reason: 'stop',
             index: 0,
             message: {
@@ -774,15 +774,15 @@ describe('LLM Analytics utils', () => {
             provider_specific_fields: {},
         }
 
-        const litellmResponse = {
-            choices: [litellmChoice],
+        const llmResponse = {
+            choices: [llmChoice],
             model: 'gpt-3.5-turbo',
             usage: { prompt_tokens: 10, completion_tokens: 25, total_tokens: 35 },
         }
 
         describe('normalizeMessage', () => {
-            it('should handle LiteLLM choice format', () => {
-                const result = normalizeMessage(litellmChoice, 'user')
+            it('should handle LLM choice format', () => {
+                const result = normalizeMessage(llmChoice, 'user')
 
                 expect(result).toHaveLength(1)
                 expect(result[0]).toMatchObject({
@@ -794,11 +794,11 @@ describe('LLM Analytics utils', () => {
                 expect(result[0].tool_calls).toBeUndefined()
             })
 
-            it('should handle LiteLLM choice with tool calls', () => {
+            it('should handle LLM choice with tool calls', () => {
                 const choiceWithTools = {
-                    ...litellmChoice,
+                    ...llmChoice,
                     message: {
-                        ...litellmChoice.message,
+                        ...llmChoice.message,
                         content: null,
                         tool_calls: [
                             {
@@ -823,8 +823,8 @@ describe('LLM Analytics utils', () => {
         })
 
         describe('normalizeMessages', () => {
-            it('should handle LiteLLM response format', () => {
-                const result = normalizeMessages(litellmResponse, 'assistant')
+            it('should handle LLM response format', () => {
+                const result = normalizeMessages(llmResponse, 'assistant')
 
                 expect(result).toHaveLength(1)
                 expect(result[0]).toMatchObject({
@@ -836,15 +836,15 @@ describe('LLM Analytics utils', () => {
                 expect(result[0].tool_calls).toBeUndefined()
             })
 
-            it('should handle LiteLLM response with multiple choices', () => {
+            it('should handle LLM response with multiple choices', () => {
                 const multiChoiceResponse = {
                     choices: [
-                        litellmChoice,
+                        llmChoice,
                         {
-                            ...litellmChoice,
+                            ...llmChoice,
                             index: 1,
                             message: {
-                                ...litellmChoice.message,
+                                ...llmChoice.message,
                                 content: 'Alternative response',
                             },
                         },
@@ -860,7 +860,7 @@ describe('LLM Analytics utils', () => {
                 expect(result[1].content).toBe('Alternative response')
             })
 
-            it('should handle empty LiteLLM response gracefully', () => {
+            it('should handle empty LLM response gracefully', () => {
                 const emptyResponse = { choices: [] }
                 const result = normalizeMessages(emptyResponse, 'assistant')
 

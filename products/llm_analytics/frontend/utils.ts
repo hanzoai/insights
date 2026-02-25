@@ -22,8 +22,8 @@ import {
     GeminiAudioMessage,
     GeminiDocumentMessage,
     GeminiImageMessage,
-    LiteLLMChoice,
-    LiteLLMResponse,
+    LLMChoice,
+    LLMResponse,
     OpenAIAudioMessage,
     OpenAICompletionMessage,
     OpenAIFileMessage,
@@ -503,7 +503,7 @@ export function isGeminiAudioMessage(input: unknown): input is GeminiAudioMessag
     )
 }
 
-export function isLiteLLMChoice(input: unknown): input is LiteLLMChoice {
+export function isLLMChoice(input: unknown): input is LLMChoice {
     return (
         !!input &&
         typeof input === 'object' &&
@@ -515,13 +515,13 @@ export function isLiteLLMChoice(input: unknown): input is LiteLLMChoice {
     )
 }
 
-export function isLiteLLMResponse(input: unknown): input is LiteLLMResponse {
+export function isLLMResponse(input: unknown): input is LLMResponse {
     return (
         !!input &&
         typeof input === 'object' &&
         'choices' in input &&
         Array.isArray(input.choices) &&
-        input.choices.every(isLiteLLMChoice)
+        input.choices.every(isLLMChoice)
     )
 }
 
@@ -597,7 +597,7 @@ export function normalizeMessage(rawMessage: unknown, defaultRole: string): Comp
         ]
     }
 
-    if (isLiteLLMChoice(rawMessage)) {
+    if (isLLMChoice(rawMessage)) {
         return normalizeMessage(rawMessage.message, roleToUse)
     }
 
@@ -775,7 +775,7 @@ export function normalizeMessages(messages: unknown, defaultRole: string, tools?
 
     if (Array.isArray(messages)) {
         normalizedMessages.push(...messages.map((message) => normalizeMessage(message, defaultRole)).flat())
-    } else if (isLiteLLMResponse(messages)) {
+    } else if (isLLMResponse(messages)) {
         normalizedMessages.push(
             ...(messages.choices || []).map((choice) => normalizeMessage(choice, defaultRole)).flat()
         )

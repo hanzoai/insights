@@ -40,7 +40,7 @@ class TestPostHogCallback:
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (
@@ -72,7 +72,7 @@ class TestPostHogCallback:
     async def test_on_success_uses_uuid_when_no_auth_user(
         self, callback: PostHogCallback, standard_logging_object: dict
     ) -> None:
-        kwargs = {"standard_logging_object": standard_logging_object, "litellm_params": {}}
+        kwargs = {"standard_logging_object": standard_logging_object, "llm_params": {}}
 
         with (
             patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=None),
@@ -92,7 +92,7 @@ class TestPostHogCallback:
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
-            "litellm_params": {"metadata": {"user_id": "trace-id-123"}},
+            "llm_params": {"metadata": {"user_id": "trace-id-123"}},
         }
 
         with (
@@ -130,7 +130,7 @@ class TestPostHogCallback:
                 "response_cost": 0.05,
                 "response": "Hi",
             },
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (
@@ -154,7 +154,7 @@ class TestPostHogCallback:
                 "custom_llm_provider": "anthropic",
                 "error_str": "Rate limit exceeded",
             },
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (
@@ -186,7 +186,7 @@ class TestPostHogCallback:
                 "model": "gpt-4",
                 "custom_llm_provider": "openai",
             },
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (
@@ -212,7 +212,7 @@ class TestPostHogCallback:
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (
@@ -236,7 +236,7 @@ class TestPostHogCallback:
                 "custom_llm_provider": "anthropic",
                 "error_str": "Error",
             },
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (
@@ -255,7 +255,7 @@ class TestPostHogCallback:
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
-            "litellm_params": {"metadata": {"user_id": "metadata-user-id"}},
+            "llm_params": {"metadata": {"user_id": "metadata-user-id"}},
         }
 
         with (
@@ -282,7 +282,7 @@ class TestPostHogCallback:
                 "custom_llm_provider": "openai",
                 "error_str": "Error",
             },
-            "litellm_params": {"metadata": {"user_id": "trace-id-from-metadata"}},
+            "llm_params": {"metadata": {"user_id": "trace-id-from-metadata"}},
         }
 
         with (
@@ -316,7 +316,7 @@ class TestReplaceBinaryContent:
                 ("recording.m4a", b"\x00\x00\x00\x00"),
                 ("recording.m4a", {"type": "binary", "size_bytes": 4}),
             ),
-            # Stringified file tuple - format LiteLLM sends for audio transcription
+            # Stringified file tuple - format LLM sends for audio transcription
             (
                 "('file.m4a', b'\\x00\\x01\\x02')",
                 ("file.m4a", {"type": "binary", "size_bytes": 3}),
@@ -456,7 +456,7 @@ class TestTruncateForCapture:
                 "response_cost": 1.23,
                 "response": large_response,
             },
-            "litellm_params": {},
+            "llm_params": {},
         }
 
         with (

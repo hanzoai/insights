@@ -20,7 +20,7 @@ TEST_POSTHOG_API_KEY = "phx_fake_personal_api_key"
 
 MOCK_MODEL_COSTS = {
     "gpt-4o": {
-        "litellm_provider": "openai",
+        "llm_provider": "openai",
         "max_input_tokens": 128000,
         "supports_vision": True,
         "mode": "chat",
@@ -28,7 +28,7 @@ MOCK_MODEL_COSTS = {
         "output_cost_per_token": 0.000015,
     },
     "gpt-4o-mini": {
-        "litellm_provider": "openai",
+        "llm_provider": "openai",
         "max_input_tokens": 128000,
         "supports_vision": True,
         "mode": "chat",
@@ -36,7 +36,7 @@ MOCK_MODEL_COSTS = {
         "output_cost_per_token": 0.0000006,
     },
     "claude-3-5-sonnet-20241022": {
-        "litellm_provider": "anthropic",
+        "llm_provider": "anthropic",
         "max_input_tokens": 200000,
         "supports_vision": True,
         "mode": "chat",
@@ -44,7 +44,7 @@ MOCK_MODEL_COSTS = {
         "output_cost_per_token": 0.000015,
     },
     "gemini-2.0-flash": {
-        "litellm_provider": "vertex_ai",
+        "llm_provider": "vertex_ai",
         "max_input_tokens": 1048576,
         "supports_vision": True,
         "mode": "chat",

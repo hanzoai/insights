@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import litellm
+import llm
 import structlog
 
 from llm_gateway.callbacks.base import InstrumentedCallback
@@ -18,11 +18,11 @@ def estimate_cost_from_tokens(
     input_tokens: int | None,
     output_tokens: int | None,
 ) -> float | None:
-    """Estimate cost from token counts using litellm's model cost data."""
+    """Estimate cost from token counts using llm's model cost data."""
     if not model or input_tokens is None or output_tokens is None:
         return None
 
-    model_info = litellm.model_cost.get(model)
+    model_info = llm.model_cost.get(model)
     if not model_info:
         return None
 

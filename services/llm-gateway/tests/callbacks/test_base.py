@@ -179,7 +179,7 @@ class TestExtractEndUserId:
     def test_api_key_falls_back_to_metadata_user_id(
         self, callback: InstrumentedCallback, api_key_user: AuthenticatedUser
     ) -> None:
-        kwargs = {"litellm_params": {"metadata": {"user_id": "anthropic-user"}}}
+        kwargs = {"llm_params": {"metadata": {"user_id": "anthropic-user"}}}
         with patch("llm_gateway.callbacks.base.get_auth_user", return_value=api_key_user):
             result = callback._extract_end_user_id(kwargs)
         assert result == "anthropic-user"
@@ -189,7 +189,7 @@ class TestExtractEndUserId:
     ) -> None:
         kwargs = {
             "standard_logging_object": {"end_user": "openai-user"},
-            "litellm_params": {"metadata": {"user_id": "anthropic-user"}},
+            "llm_params": {"metadata": {"user_id": "anthropic-user"}},
         }
         with patch("llm_gateway.callbacks.base.get_auth_user", return_value=api_key_user):
             result = callback._extract_end_user_id(kwargs)

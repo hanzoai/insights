@@ -27,8 +27,8 @@ class TestCostRefreshService:
         assert instance1 is not instance2
 
     @patch("llm_gateway.rate_limiting.cost_refresh.get_model_cost_map")
-    def test_refresh_updates_litellm_model_cost(self, mock_get_cost_map: MagicMock) -> None:
-        import litellm
+    def test_refresh_updates_llm_model_cost(self, mock_get_cost_map: MagicMock) -> None:
+        import llm
 
         mock_costs = {
             "gpt-4": {"input_cost_per_token": 0.00003, "output_cost_per_token": 0.00006},
@@ -39,7 +39,7 @@ class TestCostRefreshService:
         service = CostRefreshService.get_instance()
         service.refresh()
 
-        assert litellm.model_cost == mock_costs
+        assert llm.model_cost == mock_costs
         mock_get_cost_map.assert_called_once()
 
     @patch("llm_gateway.rate_limiting.cost_refresh.get_model_cost_map")
