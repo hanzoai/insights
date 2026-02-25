@@ -50,7 +50,7 @@ class TestAnthropicMessagesEndpoint:
         assert response.status_code == 422
         assert expected_field in str(response.json())
 
-    @patch("llm_gateway.api.anthropic.litellm.anthropic_messages")
+    @patch("llm_gateway.api.anthropic.llm.anthropic_messages")
     def test_successful_request(
         self,
         mock_anthropic: MagicMock,
@@ -82,7 +82,7 @@ class TestAnthropicMessagesEndpoint:
             pytest.param(500, "Internal error", "internal_error", id="server_error"),
         ],
     )
-    @patch("llm_gateway.api.anthropic.litellm.anthropic_messages")
+    @patch("llm_gateway.api.anthropic.llm.anthropic_messages")
     def test_provider_errors(
         self,
         mock_anthropic: MagicMock,
@@ -107,7 +107,7 @@ class TestAnthropicMessagesEndpoint:
         assert response.status_code == error_status
         assert "error" in response.json()["detail"]
 
-    @patch("llm_gateway.api.anthropic.litellm.anthropic_messages")
+    @patch("llm_gateway.api.anthropic.llm.anthropic_messages")
     def test_product_prefix_route(
         self,
         mock_anthropic: MagicMock,
@@ -136,7 +136,7 @@ class TestAnthropicMessagesEndpoint:
             pytest.param("wizard", id="wizard_product"),
         ],
     )
-    @patch("llm_gateway.api.anthropic.litellm.anthropic_messages")
+    @patch("llm_gateway.api.anthropic.llm.anthropic_messages")
     def test_allowed_product_prefixes(
         self,
         mock_anthropic: MagicMock,

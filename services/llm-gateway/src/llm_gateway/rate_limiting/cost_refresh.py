@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import time
 
-import litellm
+import llm
 import structlog
-from litellm import model_cost_map_url
-from litellm.litellm_core_utils.get_model_cost_map import get_model_cost_map
+from llm import model_cost_map_url
+from llm.llm_core_utils.get_model_cost_map import get_model_cost_map
 
 logger = structlog.get_logger(__name__)
 
@@ -13,7 +13,7 @@ CACHE_TTL_SECONDS = 300
 
 
 class CostRefreshService:
-    """Singleton service that periodically refreshes litellm.model_cost."""
+    """Singleton service that periodically refreshes llm.model_cost."""
 
     _instance: CostRefreshService | None = None
 
@@ -38,7 +38,7 @@ class CostRefreshService:
     def refresh(self) -> None:
         try:
             model_cost = get_model_cost_map(url=model_cost_map_url)
-            litellm.model_cost = model_cost
+            llm.model_cost = model_cost
             self._last_refresh = time.monotonic()
             logger.info("model_cost_refreshed", model_count=len(model_cost))
         except Exception:

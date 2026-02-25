@@ -233,11 +233,11 @@ export const ALL_SDKS: SDK[] = [
         docsLink: 'https://posthog.com/docs/llm-analytics/installation/langchain',
     },
     {
-        name: 'LiteLLM',
-        key: SDKKey.LITELLM,
+        name: 'LLM',
+        key: SDKKey.LLM,
         tags: [SDKTag.FRAMEWORK, SDKTag.GATEWAY],
-        image: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/litellmicon_a2805d75e5.png',
-        docsLink: 'https://posthog.com/docs/llm-analytics/installation/litellm',
+        image: 'https://res.cloudinary.com/dmukukwp6/image/upload/q_auto,f_auto/llmicon_a2805d75e5.png',
+        docsLink: 'https://posthog.com/docs/llm-analytics/installation/llm',
     },
     {
         name: 'OpenRouter',

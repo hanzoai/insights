@@ -18,8 +18,8 @@ class ModelInfo:
     supports_vision: bool = False
 
 
-# Map LiteLLM provider names to (settings_attr, env_var) tuples
-# Settings use LLM_GATEWAY_ prefix, but litellm also checks unprefixed env vars
+# Map LLM provider names to (settings_attr, env_var) tuples
+# Settings use LLM_GATEWAY_ prefix, but llm also checks unprefixed env vars
 _PROVIDER_TO_API_KEY: Final[dict[str, tuple[str, str]]] = {
     "openai": ("openai_api_key", "OPENAI_API_KEY"),
     "anthropic": ("anthropic_api_key", "ANTHROPIC_API_KEY"),
@@ -51,7 +51,7 @@ def _model_matches_allowlist(model_id: str, allowed_models: frozenset[str]) -> b
 
 
 class ModelRegistryService:
-    """Singleton service for model discovery using LiteLLM data."""
+    """Singleton service for model discovery using LLM data."""
 
     _instance: ClassVar[ModelRegistryService | None] = None
 
@@ -67,13 +67,13 @@ class ModelRegistryService:
         cls._instance = None
 
     def get_model(self, model_id: str) -> ModelInfo | None:
-        """Get model info from LiteLLM's cost data."""
+        """Get model info from LLM's cost data."""
         cost_data = ModelCostService.get_instance().get_costs(model_id)
         if cost_data is None:
             return None
         return ModelInfo(
             id=model_id,
-            provider=cost_data.get("litellm_provider", "unknown"),
+            provider=cost_data.get("llm_provider", "unknown"),
             context_window=cost_data.get("max_input_tokens") or 0,
             supports_vision=bool(cost_data.get("supports_vision", False)),
             supports_streaming=True,
@@ -85,11 +85,11 @@ class ModelRegistryService:
         configured_providers = _get_configured_providers()
         allowed_models = config.allowed_models if config else None
 
-        # Fetch all chat models from LiteLLM, filtered by configured providers
-        all_litellm_models = ModelCostService.get_instance().get_all_models()
+        # Fetch all chat models from LLM, filtered by configured providers
+        all_llm_models = ModelCostService.get_instance().get_all_models()
         models = []
-        for model_id, cost_data in all_litellm_models.items():
-            provider = cost_data.get("litellm_provider", "")
+        for model_id, cost_data in all_llm_models.items():
+            provider = cost_data.get("llm_provider", "")
             if provider not in configured_providers:
                 continue
             if not _is_chat_model(cost_data):

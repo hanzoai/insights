@@ -2,29 +2,29 @@ import { OnboardingComponentsContext, createInstallation } from 'scenes/onboardi
 
 import { StepDefinition } from '../steps'
 
-export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
+export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] => {
     const { CodeBlock, Markdown, Blockquote, dedent, snippets } = ctx
     const NotableGenerationProperties = snippets?.NotableGenerationProperties
 
     return [
         {
-            title: 'LiteLLM Requirements',
+            title: 'LLM Requirements',
             badge: 'required',
             content: (
                 <Blockquote>
                     <Markdown>
-                        **Note:** LiteLLM can be used as a Python SDK or as a proxy server. PostHog observability requires
-                        LiteLLM version 1.77.3 or higher.
+                        **Note:** LLM can be used as a Python SDK or as a proxy server. PostHog observability requires
+                        LLM version 1.77.3 or higher.
                     </Markdown>
                 </Blockquote>
             ),
         },
         {
-            title: 'Install LiteLLM',
+            title: 'Install LLM',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Choose your installation method based on how you want to use LiteLLM:</Markdown>
+                    <Markdown>Choose your installation method based on how you want to use LLM:</Markdown>
 
                     <CodeBlock
                         blocks={[
@@ -32,7 +32,7 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'bash',
                                 file: 'SDK',
                                 code: dedent`
-                                    pip install litellm
+                                    pip install llm
                                 `,
                             },
                             {
@@ -40,10 +40,10 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'Proxy',
                                 code: dedent`
                                     # Install via pip
-                                    pip install 'litellm[proxy]'
+                                    pip install 'llm[proxy]'
 
                                     # Or run via Docker
-                                    docker run --rm -p 4000:4000 ghcr.io/berriai/litellm:latest
+                                    docker run --rm -p 4000:4000 ghcr.io/hanzoai/llm:latest
                                 `,
                             },
                         ]}
@@ -58,7 +58,7 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 <>
                     <Markdown>
                         Configure PostHog by setting your project API key and host as well as adding `posthog` to your
-                        LiteLLM callback handlers. You can find your API key in [your project
+                        LLM callback handlers. You can find your API key in [your project
                         settings](https://app.posthog.com/settings/project).
                     </Markdown>
 
@@ -69,15 +69,15 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'SDK',
                                 code: dedent`
                                     import os
-                                    import litellm
+                                    import llm
 
                                     # Set environment variables
                                     os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
                                     os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"  # Optional, defaults to https://app.posthog.com
 
                                     # Enable PostHog callbacks
-                                    litellm.success_callback = ["posthog"]
-                                    litellm.failure_callback = ["posthog"]  # Optional: also log failures
+                                    llm.success_callback = ["posthog"]
+                                    llm.failure_callback = ["posthog"]  # Optional: also log failures
                                 `,
                             },
                             {
@@ -87,10 +87,10 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     # config.yaml
                                     model_list:
                                     - model_name: gpt-4o-mini
-                                      litellm_params:
+                                      llm_params:
                                         model: gpt-4o-mini
 
-                                    litellm_settings:
+                                    llm_settings:
                                       success_callback: ["posthog"]
                                       failure_callback: ["posthog"]  # Optional: also log failures
 
@@ -105,12 +105,12 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Call LLMs through LiteLLM',
+            title: 'Call LLMs through LLM',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Now, when you use LiteLLM to call various LLM providers, PostHog automatically captures an
+                        Now, when you use LLM to call various LLM providers, PostHog automatically captures an
                         `$ai_generation` event.
                     </Markdown>
 
@@ -120,7 +120,7 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'python',
                                 file: 'SDK',
                                 code: dedent`
-                                    response = litellm.completion(
+                                    response = llm.completion(
                                         model="gpt-4o-mini",
                                         messages=[
                                             {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
@@ -139,7 +139,7 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'Proxy',
                                 code: dedent`
                                     # Start the proxy (if not already running)
-                                    litellm --config config.yaml
+                                    llm --config config.yaml
 
                                     # Make a request to the proxy
                                     curl -X POST http://localhost:4000/chat/completions \
@@ -188,7 +188,7 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        PostHog can also capture embedding generations as `$ai_embedding` events through LiteLLM:
+                        PostHog can also capture embedding generations as `$ai_embedding` events through LLM:
                     </Markdown>
 
                     <CodeBlock
@@ -197,7 +197,7 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'python',
                                 file: 'SDK',
                                 code: dedent`
-                                    response = litellm.embedding(
+                                    response = llm.embedding(
                                         input="The quick brown fox",
                                         model="text-embedding-3-small",
                                         metadata={
@@ -232,4 +232,4 @@ export const getLiteLLMSteps = (ctx: OnboardingComponentsContext): StepDefinitio
     ]
 }
 
-export const LiteLLMInstallation = createInstallation(getLiteLLMSteps)
+export const LLMInstallation = createInstallation(getLLMSteps)

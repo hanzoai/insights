@@ -1,5 +1,5 @@
-import litellm
-from litellm.integrations.custom_logger import CustomLogger
+import llm
+from llm.integrations.custom_logger import CustomLogger
 
 from llm_gateway.callbacks.posthog import PostHogCallback
 from llm_gateway.callbacks.prometheus import PrometheusCallback
@@ -22,4 +22,4 @@ def init_callbacks() -> None:
     callbacks.append(RateLimitCallback())
     callbacks.append(PrometheusCallback())
 
-    litellm.callbacks = callbacks
+    llm.callbacks = callbacks

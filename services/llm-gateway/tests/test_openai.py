@@ -55,7 +55,7 @@ class TestChatCompletionsEndpoint:
         assert response.status_code == 422
         assert expected_field in str(response.json())
 
-    @patch("llm_gateway.api.openai.litellm.acompletion")
+    @patch("llm_gateway.api.openai.llm.acompletion")
     def test_successful_request(
         self,
         mock_completion: MagicMock,
@@ -88,7 +88,7 @@ class TestChatCompletionsEndpoint:
             pytest.param(503, "Service unavailable", "service_unavailable", id="service_unavailable"),
         ],
     )
-    @patch("llm_gateway.api.openai.litellm.acompletion")
+    @patch("llm_gateway.api.openai.llm.acompletion")
     def test_provider_errors(
         self,
         mock_completion: MagicMock,

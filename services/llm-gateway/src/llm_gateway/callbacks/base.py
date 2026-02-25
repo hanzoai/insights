@@ -1,7 +1,7 @@
 from typing import Any
 
 import structlog
-from litellm.integrations.custom_logger import CustomLogger
+from llm.integrations.custom_logger import CustomLogger
 
 from llm_gateway.metrics.prometheus import CALLBACK_ERRORS, CALLBACK_SUCCESS
 from llm_gateway.observability import capture_exception
@@ -33,7 +33,7 @@ class InstrumentedCallback(CustomLogger):
             )
             return str(auth_user.user_id)
 
-        # OpenAI 'user' param is stored directly in kwargs by litellm
+        # OpenAI 'user' param is stored directly in kwargs by llm
         if user := kwargs.get("user"):
             logger.debug(
                 "end_user_id_from_kwargs",
@@ -53,13 +53,13 @@ class InstrumentedCallback(CustomLogger):
             return end_user
 
         # Fallback: Anthropic stores user in metadata.user_id
-        litellm_params = kwargs.get("litellm_params") or {}
-        metadata = litellm_params.get("metadata") or {}
+        llm_params = kwargs.get("llm_params") or {}
+        metadata = llm_params.get("metadata") or {}
         if user_id := metadata.get("user_id"):
             logger.debug(
                 "end_user_id_from_metadata",
                 user_id=user_id,
-                source="litellm_params.metadata.user_id",
+                source="llm_params.metadata.user_id",
             )
             return user_id
 
