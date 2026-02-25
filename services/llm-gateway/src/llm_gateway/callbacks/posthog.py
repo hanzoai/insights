@@ -206,5 +206,5 @@ class PostHogCallback(InstrumentedCallback):
         posthoganalytics.capture(**capture_kwargs)
 
     def _extract_metadata(self, kwargs: dict[str, Any]) -> dict[str, Any]:
-        litellm_params = kwargs.get("litellm_params", {}) or {}
-        return litellm_params.get("metadata", {}) or {}
+        llm_params = kwargs.get("llm_params", {}) or {}
+        return llm_params.get("metadata", {}) or {}

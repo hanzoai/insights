@@ -1,5 +1,5 @@
 """
-Integration tests for LiteLLM callbacks.
+Integration tests for LLM callbacks.
 
 Verifies that callbacks are properly invoked during actual LLM requests.
 Skipped unless ANTHROPIC_API_KEY is set.

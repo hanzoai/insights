@@ -3,10 +3,10 @@ from __future__ import annotations
 import time
 from typing import Final, TypedDict, cast
 
-import litellm
+import llm
 import structlog
-from litellm import model_cost_map_url
-from litellm.litellm_core_utils.get_model_cost_map import get_model_cost_map
+from llm import model_cost_map_url
+from llm.llm_core_utils.get_model_cost_map import get_model_cost_map
 
 logger = structlog.get_logger(__name__)
 
@@ -27,7 +27,7 @@ DEFAULT_LIMITS: Final[ModelLimits] = {"input_tph": 2_000_000, "output_tph": 400_
 
 
 class ModelCost(TypedDict, total=False):
-    """Model cost and capability information from litellm."""
+    """Model cost and capability information from llm."""
 
     input_cost_per_token: float
     """Cost in USD per input token."""
@@ -39,7 +39,7 @@ class ModelCost(TypedDict, total=False):
     """Maximum output tokens the model can generate."""
     max_tokens: int
     """Legacy field: defaults to max_output_tokens if set, otherwise max_input_tokens."""
-    litellm_provider: str
+    llm_provider: str
     """Provider identifier (e.g., "anthropic", "openai", "vertex_ai")."""
     supports_vision: bool
     """Whether the model supports image/vision input."""
@@ -73,7 +73,7 @@ class ModelCostService:
     def _refresh_cache(self) -> None:
         try:
             model_cost = get_model_cost_map(url=model_cost_map_url)
-            litellm.model_cost = model_cost
+            llm.model_cost = model_cost
             self._costs = cast(dict[str, ModelCost], model_cost)
             new_limits: dict[str, ModelLimits] = {}
             for model, cost in self._costs.items():

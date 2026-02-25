@@ -161,7 +161,7 @@ export interface CompatMessage extends RoleBasedMessage {
     tool_call_id?: string
 }
 
-export interface LiteLLMChoice {
+export interface LLMChoice {
     finish_reason: string
     index: number
     message: {
@@ -174,8 +174,8 @@ export interface LiteLLMChoice {
     provider_specific_fields?: Record<string, any>
 }
 
-export interface LiteLLMResponse {
-    choices?: LiteLLMChoice[]
+export interface LLMResponse {
+    choices?: LLMChoice[]
     [additionalKey: string]: any
 }
 

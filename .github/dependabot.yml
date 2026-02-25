@@ -102,7 +102,7 @@ updates:
                   - 'langchain*'
                   - 'langgraph'
                   - 'elevenlabs'
-                  - 'litellm'
+                  - 'llm'
                   - 'azure-ai-*'
               update-types:
                   - 'minor'

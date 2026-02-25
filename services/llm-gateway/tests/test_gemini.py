@@ -34,7 +34,7 @@ class TestGeminiModels:
         response = client.post("/v1/chat/completions", json=valid_gemini_request)
         assert response.status_code == 401
 
-    @patch("llm_gateway.api.openai.litellm.acompletion")
+    @patch("llm_gateway.api.openai.llm.acompletion")
     def test_successful_gemini_request(
         self,
         mock_completion: MagicMock,
@@ -58,7 +58,7 @@ class TestGeminiModels:
         assert "choices" in data
         assert data["usage"]["total_tokens"] == 15
 
-    @patch("llm_gateway.api.openai.litellm.acompletion")
+    @patch("llm_gateway.api.openai.llm.acompletion")
     def test_gemini_vision_request(
         self,
         mock_completion: MagicMock,
@@ -89,7 +89,7 @@ class TestGeminiModels:
         )
         assert response.status_code == 200
 
-    @patch("llm_gateway.api.openai.litellm.acompletion")
+    @patch("llm_gateway.api.openai.llm.acompletion")
     def test_gemini_streaming_request(
         self,
         mock_completion: MagicMock,
