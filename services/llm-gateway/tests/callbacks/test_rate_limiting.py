@@ -289,11 +289,11 @@ class TestDefaultFallbackCost:
 
 class TestEstimateCostFromTokens:
     def test_estimates_cost_for_known_model(self) -> None:
-        import litellm
+        import llm
 
         from llm_gateway.callbacks.rate_limiting import estimate_cost_from_tokens
 
-        litellm.model_cost = {
+        llm.model_cost = {
             "gpt-4": {
                 "input_cost_per_token": 0.00003,
                 "output_cost_per_token": 0.00006,
@@ -305,33 +305,33 @@ class TestEstimateCostFromTokens:
         assert cost == pytest.approx(0.03 + 0.03)
 
     def test_returns_none_for_unknown_model(self) -> None:
-        import litellm
+        import llm
 
         from llm_gateway.callbacks.rate_limiting import estimate_cost_from_tokens
 
-        litellm.model_cost = {}
+        llm.model_cost = {}
 
         cost = estimate_cost_from_tokens("unknown-model", 1000, 500)
 
         assert cost is None
 
     def test_returns_none_when_missing_cost_per_token(self) -> None:
-        import litellm
+        import llm
 
         from llm_gateway.callbacks.rate_limiting import estimate_cost_from_tokens
 
-        litellm.model_cost = {"gpt-4": {}}
+        llm.model_cost = {"gpt-4": {}}
 
         cost = estimate_cost_from_tokens("gpt-4", 1000, 500)
 
         assert cost is None
 
     def test_handles_none_tokens(self) -> None:
-        import litellm
+        import llm
 
         from llm_gateway.callbacks.rate_limiting import estimate_cost_from_tokens
 
-        litellm.model_cost = {
+        llm.model_cost = {
             "gpt-4": {
                 "input_cost_per_token": 0.00003,
                 "output_cost_per_token": 0.00006,

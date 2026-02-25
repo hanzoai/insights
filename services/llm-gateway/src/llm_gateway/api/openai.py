@@ -1,6 +1,6 @@
 from typing import Annotated, Any
 
-import litellm
+import llm
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 
@@ -18,7 +18,7 @@ openai_router = APIRouter()
 
 
 def _normalize_model_name(model: str) -> str:
-    """Ensure model name has openai/ prefix for litellm routing."""
+    """Ensure model name has openai/ prefix for llm routing."""
     if model.startswith("openai/"):
         return model
     return f"openai/{model}"
@@ -37,7 +37,7 @@ async def _handle_chat_completions(
         model=body.model,
         is_streaming=body.stream or False,
         provider_config=OPENAI_CONFIG,
-        llm_call=litellm.acompletion,
+        llm_call=llm.acompletion,
         product=product,
     )
 
@@ -64,7 +64,7 @@ async def _handle_responses(
         model=normalized_model,
         is_streaming=body.stream or False,
         provider_config=OPENAI_RESPONSES_CONFIG,
-        llm_call=litellm.aresponses,
+        llm_call=llm.aresponses,
         product=product,
     )
 
@@ -160,7 +160,7 @@ async def _handle_transcription(
         model=normalized_model,
         is_streaming=False,
         provider_config=OPENAI_TRANSCRIPTION_CONFIG,
-        llm_call=litellm.atranscription,
+        llm_call=llm.atranscription,
         product=product,
     )
 
