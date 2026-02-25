@@ -19,7 +19,7 @@ import { HuggingFaceInstallation } from '@posthog/shared-onboarding/llm-analytic
 import { InstructorInstallation } from '@posthog/shared-onboarding/llm-analytics/instructor'
 import { LangChainInstallation } from '@posthog/shared-onboarding/llm-analytics/langchain'
 import { LangGraphInstallation } from '@posthog/shared-onboarding/llm-analytics/langgraph'
-import { LiteLLMInstallation } from '@posthog/shared-onboarding/llm-analytics/litellm'
+import { LLMInstallation } from '@posthog/shared-onboarding/llm-analytics/llm'
 import { LlamaIndexInstallation } from '@posthog/shared-onboarding/llm-analytics/llamaindex'
 import { ManualInstallation } from '@posthog/shared-onboarding/llm-analytics/manual'
 import { MastraInstallation } from '@posthog/shared-onboarding/llm-analytics/mastra'
@@ -82,8 +82,8 @@ const LLMLangChainInstructionsWrapper = withOnboardingDocsWrapper({
     Installation: LangChainInstallation,
     snippets: PROVIDER_SNIPPETS,
 })
-const LLMLiteLLMInstructionsWrapper = withOnboardingDocsWrapper({
-    Installation: LiteLLMInstallation,
+const LLMLLMInstructionsWrapper = withOnboardingDocsWrapper({
+    Installation: LLMInstallation,
     snippets: PROVIDER_SNIPPETS,
 })
 const LLMVercelAIInstructionsWrapper = withOnboardingDocsWrapper({
@@ -210,7 +210,7 @@ export const LLMAnalyticsSDKInstructions: SDKInstructionsMap = {
     [SDKKey.VERCEL_AI]: LLMVercelAIInstructionsWrapper,
     [SDKKey.VERCEL_AI_GATEWAY]: LLMVercelAIGatewayInstructionsWrapper,
     [SDKKey.LANGCHAIN]: LLMLangChainInstructionsWrapper,
-    [SDKKey.LITELLM]: LLMLiteLLMInstructionsWrapper,
+    [SDKKey.LLM]: LLMLLMInstructionsWrapper,
     [SDKKey.OPENROUTER]: LLMOpenRouterInstructionsWrapper,
     [SDKKey.INSTRUCTOR]: LLMInstructorInstructionsWrapper,
     [SDKKey.CREWAI]: LLMCrewAIInstructionsWrapper,

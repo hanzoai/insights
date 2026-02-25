@@ -5794,7 +5794,7 @@ export enum SDKKey {
     LANGCHAIN = 'langchain',
     LANGGRAPH = 'langgraph',
     LANGFUSE = 'langfuse',
-    LITELLM = 'litellm',
+    LLM = 'llm',
     LLAMAINDEX = 'llamaindex',
     MANUAL_CAPTURE = 'manual_capture',
     MASTRA = 'mastra',

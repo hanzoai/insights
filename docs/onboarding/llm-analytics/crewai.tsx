@@ -14,8 +14,8 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. CrewAI uses LiteLLM under the hood,
-                        and PostHog integrates with LiteLLM's callback system.
+                        Setting up analytics starts with installing the PostHog SDK. CrewAI uses LLM under the hood,
+                        and PostHog integrates with LLM's callback system.
                     </Markdown>
 
                     <CodeBlock
@@ -33,26 +33,26 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Install CrewAI. PostHog instruments your LLM calls through LiteLLM's callback system that CrewAI
+                        Install CrewAI. PostHog instruments your LLM calls through LLM's callback system that CrewAI
                         uses natively.
                     </Markdown>
 
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install crewai litellm
+                            pip install crewai llm
                         `}
                     />
                 </>
             ),
         },
         {
-            title: 'Configure PostHog with LiteLLM',
+            title: 'Configure PostHog with LLM',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Set your PostHog project API key and host as environment variables, then configure LiteLLM to
+                        Set your PostHog project API key and host as environment variables, then configure LLM to
                         use PostHog as a callback handler. You can find your API key in [your project
                         settings](https://app.posthog.com/settings/project).
                     </Markdown>
@@ -61,23 +61,23 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                         language="python"
                         code={dedent`
                             import os
-                            import litellm
+                            import llm
                             from crewai import Agent, Task, Crew
 
                             # Set PostHog environment variables
                             os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
                             os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"
 
-                            # Enable PostHog callbacks in LiteLLM
-                            litellm.success_callback = ["posthog"]
-                            litellm.failure_callback = ["posthog"]
+                            # Enable PostHog callbacks in LLM
+                            llm.success_callback = ["posthog"]
+                            llm.failure_callback = ["posthog"]
                         `}
                     />
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            CrewAI uses LiteLLM under the hood for LLM provider access. By configuring PostHog as a
-                            LiteLLM callback, all LLM calls made through CrewAI are automatically captured as
+                            CrewAI uses LLM under the hood for LLM provider access. By configuring PostHog as a
+                            LLM callback, all LLM calls made through CrewAI are automatically captured as
                             `$ai_generation` events without proxying your calls.
                         </Markdown>
                     </CalloutBox>

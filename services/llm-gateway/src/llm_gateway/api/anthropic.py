@@ -1,6 +1,6 @@
 from typing import Any
 
-import litellm
+import llm
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
@@ -25,7 +25,7 @@ async def _handle_anthropic_messages(
         model=body.model,
         is_streaming=body.stream or False,
         provider_config=ANTHROPIC_CONFIG,
-        llm_call=litellm.anthropic_messages,
+        llm_call=llm.anthropic_messages,
         product=product,
     )
 
