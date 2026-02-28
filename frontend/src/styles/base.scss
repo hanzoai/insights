@@ -296,18 +296,17 @@
     --color-posthog-3000-450: hsl(67deg 8% 60%);
     --color-posthog-3000-500: hsl(67deg 8% 55%);
 
-    // PostHog brand colors
-    // Split into hue, saturation, lightness to make it easier to change the brand colors
+    // Hanzo brand colors (monochrome)
     // //////////////////////////////////////////////////////////
-    --color-posthog-brand-orange-hue: 19;
-    --color-posthog-brand-orange-saturation: 100%;
-    --color-posthog-brand-orange-lightness: 48%;
+    --color-posthog-brand-orange-hue: 0;
+    --color-posthog-brand-orange-saturation: 0%;
+    --color-posthog-brand-orange-lightness: 20%;
     --color-posthog-brand-blue-hue: 228;
     --color-posthog-brand-blue-saturation: 100%;
     --color-posthog-brand-blue-lightness: 56%;
-    --color-posthog-brand-yellow-hue: 43;
-    --color-posthog-brand-yellow-saturation: 94%;
-    --color-posthog-brand-yellow-lightness: 57%;
+    --color-posthog-brand-yellow-hue: 0;
+    --color-posthog-brand-yellow-saturation: 0%;
+    --color-posthog-brand-yellow-lightness: 80%;
 
     // Product specific colors
     --color-product-data-pipeline-light: rgb(46 162 211);
@@ -560,11 +559,11 @@
     --breakpoint-xl: 1200px;
     --breakpoint-xxl: 1600px;
 
-    // Brand colors
+    // Brand colors (Hanzo monochrome)
     // //////////////////////////////////////////////////////////
     --brand-blue: #1d4aff;
-    --brand-red: #f54e00;
-    --brand-yellow: #f9bd2b;
+    --brand-red: #333333;
+    --brand-yellow: #888888;
     --brand-key: #000;
 
     // Shadows
@@ -792,7 +791,7 @@
     --border-bold-3000-light: #c1c2b9;
     --glass-bg-3000-light: #e4e5deb3;
     --glass-border-3000-light: #e4e5de;
-    --link-3000-light: #f54e00;
+    --link-3000-light: #333333;
     --primary-3000-frame-bg-light: #eb9d2a;
     --primary-3000-button-bg-light: #fff;
     --primary-3000-button-border-light: #b17816;
@@ -801,9 +800,9 @@
     --secondary-3000-button-bg-light: #f3f4ef;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
-    --danger-3000-frame-bg-light: #f54e0080;
+    --danger-3000-frame-bg-light: #33333380;
     --danger-3000-button-border-light: #e96b30;
-    --danger-3000-button-border-hover-light: #f54e00;
+    --danger-3000-button-border-hover-light: #333333;
     --shadow-elevation-3000-light: 0 3px 0 var(--border-3000-light);
     --shadow-elevation-3000-dark: 0 3px 0 var(--border-3000-dark);
     --text-3000-dark: #fff;
@@ -833,9 +832,9 @@
     --secondary-3000-button-bg-dark: #1d1f27;
     --secondary-3000-button-border-dark: #4a4c52;
     --secondary-3000-button-border-hover-dark: #5e6064;
-    --danger-3000-frame-bg-dark: #f54e0080;
+    --danger-3000-frame-bg-dark: #33333380;
     --danger-3000-button-border-dark: #c44003;
-    --danger-3000-button-border-hover-dark: #f54e00;
+    --danger-3000-button-border-hover-dark: #333333;
 
     // Light mode
     --text-3000: var(--text-3000-light);
