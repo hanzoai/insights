@@ -57,7 +57,7 @@ exclude = [
 ]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py314"
 line-length = 120
 indent-width = 4
 
@@ -89,7 +89,7 @@ pythonpath = ["src"]
 addopts = ["--junitxml=junit.xml", "--reruns=2", "--reruns-delay=5"]
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 strict = true
 warn_return_any = true
 warn_unused_ignores = true
