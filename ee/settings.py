@@ -15,6 +15,16 @@ AUTHENTICATION_BACKENDS = [
     "ee.api.authentication.CustomGoogleOAuth2",
 ]
 
+# Hanzo IAM OIDC SSO — enabled when SOCIAL_AUTH_OIDC_OIDC_ENDPOINT is set
+if os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT"):
+    AUTHENTICATION_BACKENDS = [
+        *AUTHENTICATION_BACKENDS,
+        "social_core.backends.open_id_connect.OpenIdConnectAuth",
+    ]
+SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
+SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
+SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
+
 # SAML base attributes
 SOCIAL_AUTH_SAML_SP_ENTITY_ID = SITE_URL
 SOCIAL_AUTH_SAML_SECURITY_CONFIG = {
