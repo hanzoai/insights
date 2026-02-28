@@ -87,9 +87,9 @@ export const themeLogic = kea<themeLogicType>([
                 if (theme) {
                     return !!theme?.dark
                 }
-                // NOTE: Unauthenticated users always get the light mode until we have full support for dark mode there
+                // Default to dark mode for unauthenticated users (Hanzo brand)
                 if (sceneConfig?.allowUnauthenticated || sceneConfig?.onlyUnauthenticated) {
-                    return false
+                    return true
                 }
 
                 return themeMode === 'system' ? darkModeSystemPreference : themeMode === 'dark'
