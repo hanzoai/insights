@@ -179,11 +179,11 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
             ? [
                   {
                       identifier: 'ai',
-                      label: 'PostHog AI',
+                      label: 'Hanzo AI',
                       icon: <IconSparkles className="text-ai group-hover/button-primitive:animate-hue-rotate" />,
                       to: urls.ai(),
                       onClick: () => handleStaticNavbarItemClick(urls.ai(), true),
-                      collapsedTooltip: 'PostHog AI',
+                      collapsedTooltip: 'Hanzo AI',
                   },
               ]
             : []),
