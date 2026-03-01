@@ -283,18 +283,18 @@
     --color-neutral-900: hsl(0deg 0% 10%);
     --color-neutral-950: hsl(0deg 0% 5%);
 
-    // Posthog 3000 (yellow-greys) colors
-    --color-posthog-3000-25: hsl(75deg 14% 96.5%);
-    --color-posthog-3000-50: hsl(75deg 14% 95%);
-    --color-posthog-3000-100: hsl(70deg 16% 93%);
-    --color-posthog-3000-150: hsl(77deg 13% 89%);
-    --color-posthog-3000-200: hsl(78deg 13% 85%);
-    --color-posthog-3000-250: hsl(67deg 8% 80%);
-    --color-posthog-3000-300: hsl(72deg 8% 76%);
-    --color-posthog-3000-350: hsl(70deg 8% 71%);
-    --color-posthog-3000-400: hsl(69deg 8% 65%);
-    --color-posthog-3000-450: hsl(67deg 8% 60%);
-    --color-posthog-3000-500: hsl(67deg 8% 55%);
+    // Hanzo 3000 (neutral greys) — replaced warm PostHog yellows with pure neutral scale
+    --color-posthog-3000-25: hsl(0deg 0% 96.5%);
+    --color-posthog-3000-50: hsl(0deg 0% 95%);
+    --color-posthog-3000-100: hsl(0deg 0% 93%);
+    --color-posthog-3000-150: hsl(0deg 0% 89%);
+    --color-posthog-3000-200: hsl(0deg 0% 85%);
+    --color-posthog-3000-250: hsl(0deg 0% 80%);
+    --color-posthog-3000-300: hsl(0deg 0% 76%);
+    --color-posthog-3000-350: hsl(0deg 0% 71%);
+    --color-posthog-3000-400: hsl(0deg 0% 65%);
+    --color-posthog-3000-450: hsl(0deg 0% 60%);
+    --color-posthog-3000-500: hsl(0deg 0% 55%);
 
     // Hanzo brand colors (monochrome)
     // //////////////////////////////////////////////////////////
@@ -581,16 +581,16 @@
     --font-medium: 500;
     --font-semibold: 600;
     --font-sans:
-        'Emoji Flags Polyfill', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
         helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-title:
-        'Emoji Flags Polyfill', 'MatterSQ', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
         'Helvetica Neue', helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-button:
-        'Emoji Flags Polyfill', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue',
+        'Emoji Flags Polyfill', 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue',
         helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
     --font-mono:
-        'Emoji Flags Polyfill', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
+        'Emoji Flags Polyfill', 'Geist Mono', ui-monospace, 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono',
         monospace;
 
     // Dashboard item colors
@@ -779,29 +779,29 @@
     --color-text-secondary-3000-light: rgb(17 17 17 / 70%);
     --muted-3000-light: rgb(17 17 17 / 60%);
     --trace-3000-light: rgb(17 17 17 / 25%);
-    --primary-3000-light: #f54e01;
-    --primary-highlight-light: rgb(245 78 1 / 10%);
-    --primary-3000-hover-light: #f54e01;
-    --primary-3000-active-light: #f54e01;
-    --secondary-3000-light: rgb(207 209 194 / 60%);
-    --secondary-3000-hover-light: #cfd1c2;
-    --color-accent-3000-light: #eeefe9;
-    --color-bg-3000-light: #f3f4ef;
-    --border-3000-light: #dadbd2;
-    --border-bold-3000-light: #c1c2b9;
-    --glass-bg-3000-light: #e4e5deb3;
-    --glass-border-3000-light: #e4e5de;
+    --primary-3000-light: #111111;
+    --primary-highlight-light: rgb(17 17 17 / 10%);
+    --primary-3000-hover-light: #333333;
+    --primary-3000-active-light: #000000;
+    --secondary-3000-light: rgb(200 200 200 / 60%);
+    --secondary-3000-hover-light: #cccccc;
+    --color-accent-3000-light: #ebebeb;
+    --color-bg-3000-light: #f5f5f5;
+    --border-3000-light: #e0e0e0;
+    --border-bold-3000-light: #c0c0c0;
+    --glass-bg-3000-light: #e5e5e5b3;
+    --glass-border-3000-light: #e5e5e5;
     --link-3000-light: #333333;
-    --primary-3000-frame-bg-light: #eb9d2a;
+    --primary-3000-frame-bg-light: #333333;
     --primary-3000-button-bg-light: #fff;
-    --primary-3000-button-border-light: #b17816;
-    --primary-3000-button-border-hover-light: #8e5b03;
-    --secondary-3000-frame-bg-light: #e1dddd;
-    --secondary-3000-button-bg-light: #f3f4ef;
+    --primary-3000-button-border-light: #888888;
+    --primary-3000-button-border-hover-light: #555555;
+    --secondary-3000-frame-bg-light: #e0e0e0;
+    --secondary-3000-button-bg-light: #f5f5f5;
     --secondary-3000-button-border-light: #ccc;
     --secondary-3000-button-border-hover-light: #aaa;
     --danger-3000-frame-bg-light: #33333380;
-    --danger-3000-button-border-light: #e96b30;
+    --danger-3000-button-border-light: #cc3333;
     --danger-3000-button-border-hover-light: #333333;
     --shadow-elevation-3000-light: 0 3px 0 var(--border-3000-light);
     --shadow-elevation-3000-dark: 0 3px 0 var(--border-3000-dark);
@@ -809,11 +809,11 @@
     --color-text-secondary-3000-dark: rgb(255 255 255 / 70%);
     --muted-3000-dark: rgb(255 255 255 / 50%);
     --trace-3000-dark: rgb(255 255 255 / 25%);
-    --primary-3000-dark: #f7a503;
-    --primary-highlight-dark: rgb(247 165 3 / 10%);
-    --primary-3000-hover-dark: #f7a503;
-    --primary-3000-active-dark: #f7a503;
-    --primary-alt-highlight-light: #e5e7e0;
+    --primary-3000-dark: #ffffff;
+    --primary-highlight-dark: rgb(255 255 255 / 10%);
+    --primary-3000-hover-dark: #e0e0e0;
+    --primary-3000-active-dark: #c0c0c0;
+    --primary-alt-highlight-light: #e5e5e5;
     --secondary-3000-dark: #1d1f27;
     --secondary-3000-hover-dark: #575d77;
     --color-accent-3000-dark: #21242b;
@@ -822,11 +822,11 @@
     --border-bold-3000-dark: #3f4046;
     --glass-bg-3000-dark: #24262a99;
     --glass-border-3000-dark: var(--border-3000-dark);
-    --link-3000-dark: #f1a82c;
-    --primary-3000-frame-bg-dark: #926826;
+    --link-3000-dark: #ffffff;
+    --primary-3000-frame-bg-dark: #555555;
     --primary-3000-button-bg-dark: var(--color-accent);
-    --primary-3000-button-border-dark: #b17816;
-    --primary-3000-button-border-hover-dark: #8e5b03;
+    --primary-3000-button-border-dark: #888888;
+    --primary-3000-button-border-hover-dark: #aaaaaa;
     --primary-alt-highlight-dark: #232429;
     --secondary-3000-frame-bg-dark: #323232;
     --secondary-3000-button-bg-dark: #1d1f27;

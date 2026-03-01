@@ -57,16 +57,11 @@ export function Login(): JSX.Element {
                 minHeight: '100vh',
                 alignItems: 'center',
                 justifyContent: 'center',
-                background: 'linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0d0d0d 100%)',
+                background: '#0a0a0a',
                 flexDirection: 'column',
                 gap: '24px',
             }}
         >
-            <img
-                src="https://cdn.hanzo.ai/img/logo-white.svg"
-                alt="Hanzo"
-                style={{ height: '48px', width: 'auto' }}
-            />
             <div
                 style={{
                     display: 'flex',
@@ -75,7 +70,7 @@ export function Login(): JSX.Element {
                     gap: '8px',
                 }}
             >
-                <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0, fontSize: '15px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0, fontSize: '15px', fontFamily: 'Geist, sans-serif' }}>
                     {oidcAvailable ? 'Redirecting to Hanzo ID\u2026' : 'Loading\u2026'}
                 </p>
                 <div
@@ -83,7 +78,7 @@ export function Login(): JSX.Element {
                         width: '24px',
                         height: '24px',
                         border: '2px solid rgba(255,255,255,0.15)',
-                        borderTopColor: '#fd4444',
+                        borderTopColor: '#fff',
                         borderRadius: '50%',
                         animation: 'spin 0.8s linear infinite',
                     }}
