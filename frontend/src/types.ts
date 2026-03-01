@@ -254,7 +254,7 @@ export enum Region {
     EU = 'EU',
 }
 
-export type SSOProvider = 'google-oauth2' | 'github' | 'gitlab' | 'saml'
+export type SSOProvider = 'google-oauth2' | 'github' | 'gitlab' | 'saml' | 'oidc'
 export type LoginMethod = SSOProvider | 'password' | 'passkey' | null
 
 export interface AuthBackends {

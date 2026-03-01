@@ -183,11 +183,18 @@ WSGI_APPLICATION = "posthog.wsgi.application"
 
 AUTHENTICATION_BACKENDS: list[str] = [
     "axes.backends.AxesBackend",
+    "social_core.backends.open_id_connect.OpenIdConnectAuth",  # Hanzo IAM SSO
     "social_core.backends.github.GithubOAuth2",
     "social_core.backends.gitlab.GitLabOAuth2",
     "django.contrib.auth.backends.ModelBackend",
     "posthog.auth.WebauthnBackend",
 ]
+
+# Hanzo IAM OIDC SSO (social-auth)
+SOCIAL_AUTH_OIDC_OIDC_ENDPOINT: str | None = os.getenv("SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
+SOCIAL_AUTH_OIDC_KEY: str | None = os.getenv("SOCIAL_AUTH_OIDC_KEY")
+SOCIAL_AUTH_OIDC_SECRET: str | None = os.getenv("SOCIAL_AUTH_OIDC_SECRET")
+SOCIAL_AUTH_OIDC_SCOPE: list[str] = ["openid", "email", "profile"]
 
 AUTH_USER_MODEL = "posthog.User"
 
