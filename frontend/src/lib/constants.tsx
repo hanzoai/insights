@@ -468,6 +468,7 @@ export const SSO_PROVIDER_NAMES: Record<SSOProvider, string> = {
     github: 'GitHub',
     gitlab: 'GitLab',
     saml: 'Single sign-on (SAML)',
+    oidc: 'Hanzo ID',
 }
 
 export const DOMAIN_REGEX = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/
