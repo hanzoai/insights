@@ -3,10 +3,36 @@ import './Login.scss'
 import { useValues } from 'kea'
 import { useEffect } from 'react'
 
+import { Link } from 'lib/lemon-ui/Link'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { loginLogic } from './loginLogic'
+
+// Re-exported for backwards compatibility (used by ExporterLogin)
+export const ERROR_MESSAGES: Record<string, string | JSX.Element> = {
+    no_new_organizations:
+        'Your email address is not associated with an account. Please ask your administrator for an invite.',
+    invalid_sso_provider: (
+        <>
+            The SSO provider you specified is invalid. Visit{' '}
+            <Link to="https://hanzo.ai/sso" target="_blank">
+                https://hanzo.ai/sso
+            </Link>{' '}
+            for details.
+        </>
+    ),
+    improperly_configured_sso: (
+        <>
+            Cannot login with SSO provider because the provider is not configured. Please contact{' '}
+            <Link to="mailto:support@hanzo.ai">support@hanzo.ai</Link> for details.
+        </>
+    ),
+    jit_not_enabled:
+        'We could not find an account with your email address. Please contact your administrator for an invite.',
+    sso_enforced: "Please log in with your organization's required SSO method.",
+    oauth_cancelled: "Sign in was cancelled. Please try again when you're ready.",
+}
 
 export const scene: SceneExport = {
     component: Login,
