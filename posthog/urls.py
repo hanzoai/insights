@@ -309,6 +309,14 @@ if settings.TEST:
         urlpatterns.append(path("decode", decode_payloads, name="temporal_decode"))
 
 
+# Redirect /login directly to OIDC SSO — bypasses React SPA (avoids blank page)
+def _login_oidc_redirect(request: HttpRequest) -> HttpResponseRedirect:
+    next_url = request.GET.get("next", "/")
+    return HttpResponseRedirect(f"/login/oidc/?next={next_url}")
+
+
+urlpatterns.append(path("login", _login_oidc_redirect))
+
 # Routes added individually to remove login requirement
 frontend_unauthenticated_routes = [
     "preflight",
@@ -317,7 +325,6 @@ frontend_unauthenticated_routes = [
     "reset",
     "organization/billing/subscribed",
     "organization/confirm-creation",
-    "login",
     "unsubscribe",
     "verify_email",
 ]
