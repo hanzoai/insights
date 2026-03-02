@@ -41,8 +41,4 @@ jobs:
                   pr_title_escaped=$(echo "$PR_TITLE" | jq -R .)
                   echo "pr_title_escaped=${pr_title_escaped}" >> $GITHUB_ENV
             - name: Capture PR age to Insights
-              uses: Insights/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
-              with:
-                  posthog-token: ${{secrets.POSTHOG_API_TOKEN}}
-                  event: 'posthog-ci-pr-stats'
-                  properties: '{"prAgeInSeconds": ${{ env.pr_age }}, "isRevert": ${{env.is_revert}}, "prTitle": ${{ env.pr_title_escaped }}, "prNumber": "${{ github.event.pull_request.number}}"  }'
+              run: echo "Telemetry capture disabled"

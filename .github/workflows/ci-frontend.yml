@@ -69,7 +69,7 @@ jobs:
         name: Frontend formatting
         needs: changes
         if: needs.changes.outputs.frontend == 'true'
-        runs-on: depot-ubuntu-24.04
+        runs-on: ubuntu-24.04
         steps:
             - uses: actions/checkout@v6
 
@@ -118,7 +118,7 @@ jobs:
         name: Frontend bundle size
         needs: [changes]
         if: needs.changes.outputs.frontend == 'true' && github.event_name != 'merge_group'
-        runs-on: depot-ubuntu-24.04-4
+        runs-on: ubuntu-24.04
         steps:
             - uses: actions/checkout@v6
             - name: Install pnpm
@@ -174,26 +174,15 @@ jobs:
 
             - name: Capture bundle size to Insights
               if: |
-                  (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'Insights/posthog') ||
-                  (github.event_name != 'pull_request' && github.repository == 'Insights/posthog')
-              uses: Insights/posthog-github-action@8c42e50f2c52e002eabb9bee3f69b152ee8fc1dd # v1.0.1
-              with:
-                  posthog-token: ${{secrets.POSTHOG_API_TOKEN}}
-                  event: 'posthog-ci-frontend-bundle-size'
-                  properties: |
-                      {
-                        "size_bytes": ${{ steps.dist-size.outputs.size_bytes }},
-                        "branch": ${{ toJSON(github.head_ref || github.ref_name) }},
-                        "sha": ${{ toJSON(github.sha) }},
-                        "pr_number": ${{ github.event.pull_request.number || 'null' }},
-                        "event_type": ${{ toJSON(github.event_name) }}
-                      }
+                  (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'hanzoai/insights') ||
+                  (github.event_name != 'pull_request' && github.repository == 'hanzoai/insights')
+              run: echo "Telemetry capture disabled"
 
     frontend-typescript-checks:
         name: Frontend typechecking
         needs: [changes]
         if: needs.changes.outputs.frontend == 'true'
-        runs-on: depot-ubuntu-24.04-4
+        runs-on: ubuntu-24.04
         steps:
             - uses: actions/checkout@v6
 
@@ -258,7 +247,7 @@ jobs:
               run: node bin/validate-setup-tasks.mjs
 
     jest:
-        runs-on: depot-ubuntu-24.04
+        runs-on: ubuntu-24.04
         needs: changes
         if: needs.changes.outputs.frontend == 'true'
         name: Jest test (${{ matrix.segment }} - ${{ matrix.chunk }})
@@ -309,22 +298,14 @@ jobs:
         name: Calculate running time
         needs: [jest, frontend-typescript-checks, frontend-format, frontend-bundle-size, changes]
         runs-on: ubuntu-latest
-        if: # Run on pull requests to Insights/posthog + on Insights/posthog outside of PRs - but never on forks or Dependabot (no secrets access)
+        if: # Run on pull requests to hanzoai/insights + on hanzoai/insights outside of PRs - but never on forks or Dependabot (no secrets access)
             always() && github.actor != 'dependabot[bot]' &&
             needs.changes.outputs.frontend == 'true' && (
-            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'Insights/posthog') ||
-            (github.event_name != 'pull_request' && github.repository == 'Insights/posthog'))
+            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'hanzoai/insights') ||
+            (github.event_name != 'pull_request' && github.repository == 'hanzoai/insights'))
         steps:
             - name: Capture running time to Insights
-              uses: Insights/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
-              with:
-                  posthog-token: ${{ secrets.POSTHOG_API_TOKEN }}
-                  event: 'posthog-ci-running-time'
-                  capture-run-duration: true
-                  capture-job-durations: true
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  status-job: 'Frontend Tests Pass'
-                  runner: 'depot'
+              run: echo "Telemetry capture disabled"
 
     frontend_tests:
         needs: [jest, frontend-format, frontend-bundle-size, frontend-typescript-checks]
