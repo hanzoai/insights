@@ -11,7 +11,7 @@ from temporalio.common import RetryPolicy
 
 from posthog.batch_exports.service import AzureBlobBatchExportInputs, BatchExportInsertInputs, BatchExportModel
 from posthog.models.integration import AzureBlobIntegration, Integration
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_write_only_logger
 
@@ -314,7 +314,7 @@ async def insert_into_azure_blob_activity_from_stage(inputs: AzureBlobInsertInpu
 
 
 @workflow.defn(name="azure-blob-export", failure_exception_types=[workflow.NondeterminismError])
-class AzureBlobBatchExportWorkflow(PostHogWorkflow):
+class AzureBlobBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data into Azure Blob Storage."""
 
     @staticmethod

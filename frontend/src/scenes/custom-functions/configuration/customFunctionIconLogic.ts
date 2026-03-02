@@ -16,7 +16,7 @@ export interface CustomFunctionIconLogicProps {
 export const customFunctionIconLogic = kea<customFunctionIconLogicType>([
     props({} as CustomFunctionIconLogicProps),
     key((props) => props.logicKey ?? 'default'),
-    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'customFunctionIconLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'customfunctions', 'customFunctionIconLogic', key]),
 
     actions({
         loadPossibleIcons: true,

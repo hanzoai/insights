@@ -297,7 +297,7 @@ class TestRemoteConfigSurveys(_RemoteConfigBase):
             linked_flag=linked_flag,
             targeting_flag=targeting_flag,
             internal_targeting_flag=internal_targeting_flag,
-            questions=[{"type": "open", "question": "What's a hedgehog?"}],
+            questions=[{"type": "open", "question": "What's a mascot?"}],
             start_date=timezone.now(),
         )
 
@@ -312,7 +312,7 @@ class TestRemoteConfigSurveys(_RemoteConfigBase):
             created_by=self.user,
             name="survey with actions",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
             start_date=timezone.now(),
         )
         survey_with_actions.actions.set(Action.objects.filter(name="user subscribed"))
@@ -351,7 +351,7 @@ class TestRemoteConfigSurveys(_RemoteConfigBase):
                         {
                             "id": str(survey_with_flags.questions[0]["id"]),
                             "type": "open",
-                            "question": "What's a hedgehog?",
+                            "question": "What's a mascot?",
                         }
                     ],
                     "appearance": None,
@@ -378,7 +378,7 @@ class TestRemoteConfigSurveys(_RemoteConfigBase):
                         {
                             "id": str(survey_with_actions.questions[0]["id"]),
                             "type": "open",
-                            "question": "Why's a hedgehog?",
+                            "question": "Why's a mascot?",
                         }
                     ],
                     "appearance": None,

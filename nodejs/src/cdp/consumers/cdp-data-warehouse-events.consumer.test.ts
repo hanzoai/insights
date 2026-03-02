@@ -3,12 +3,12 @@ import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
-import { insertHogFunction as _insertHogFunction, createKafkaMessage } from '../_tests/fixtures'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { insertCustomFunction as _insertCustomFunction, createKafkaMessage } from '../_tests/fixtures'
 import { CdpDataWarehouseEvent } from '../schema'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { HogWatcherState } from '../services/monitoring/hog-watcher.service'
-import { HogFunctionInvocationGlobals, HogFunctionType } from '../types'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
+import { CustomFunctionInvocationGlobals, CustomFunctionType } from '../types'
 import { CdpDatawarehouseEventsConsumer } from './cdp-data-warehouse-events.consumer'
 
 jest.setTimeout(1000)
@@ -31,14 +31,14 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         }
     }
 
-    const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-        const teamId = hogFunction.team_id ?? team.id
-        const item = await _insertHogFunction(hub.postgres, teamId, {
-            ...hogFunction,
+    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+        const teamId = customFunction.team_id ?? team.id
+        const item = await _insertCustomFunction(hub.postgres, teamId, {
+            ...customFunction,
             type: 'destination',
         })
         // Trigger the reload that django would do
-        processor['hogFunctionManager']['onHogFunctionsReloaded'](teamId, [item.id])
+        processor['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [item.id])
         return item
     }
 
@@ -87,11 +87,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
     describe('_parseKafkaBatch', () => {
         it('should parse valid data warehouse events', async () => {
-            await insertHogFunction({
+            await insertCustomFunction({
                 team_id: team.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' })
@@ -110,7 +110,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(invocations[0].event.event).toBe('data-warehouse-table-event-do-not-use')
         })
 
-        it('should not parse events for teams without hog functions or flows', async () => {
+        it('should not parse events for teams without custom functions or flows', async () => {
             const event = createDataWarehouseEvent(team.id)
             const messages = [createKafkaMessage(event)]
 
@@ -120,11 +120,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
 
         it('should not parse events for teams that do not exist', async () => {
-            await insertHogFunction({
+            await insertCustomFunction({
                 team_id: team.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(99999)
@@ -145,11 +145,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
 
         it('should filter by team correctly', async () => {
-            await insertHogFunction({
+            await insertCustomFunction({
                 team_id: team.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const events = [
@@ -162,11 +162,11 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(invocations).toHaveLength(1)
             expect(invocations[0].project.id).toBe(team.id)
 
-            await insertHogFunction({
+            await insertCustomFunction({
                 team_id: team2.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const invocations2 = await processor._parseKafkaBatch(events)
@@ -174,25 +174,25 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
     })
 
-    describe('filterHogFunction', () => {
+    describe('filterCustomFunction', () => {
         it('should filter for data-warehouse-table source', async () => {
-            const fnWithDataWarehouseFilter = await insertHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+            const fnWithDataWarehouseFilter = await insertCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
-            await insertHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters,
-                filters: { ...HOG_FILTERS_EXAMPLES.no_filters.filters, source: 'events' },
+            await insertCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                filters: { ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters, source: 'events' },
             })
 
-            await insertHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters,
+            await insertCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
             })
 
             const event = createDataWarehouseEvent(team.id)
@@ -208,14 +208,14 @@ describe('CdpDatawarehouseEventsConsumer', () => {
     })
 
     describe('processBatch', () => {
-        let fnFetchNoFilters: HogFunctionType
-        let globals: HogFunctionInvocationGlobals
+        let fnFetchNoFilters: CustomFunctionType
+        let globals: CustomFunctionInvocationGlobals
 
         beforeEach(async () => {
-            fnFetchNoFilters = await insertHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+            fnFetchNoFilters = await insertCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const event = createDataWarehouseEvent(team.id, { test_prop: 'test_value' })
@@ -244,8 +244,8 @@ describe('CdpDatawarehouseEventsConsumer', () => {
             expect(mockQueueInvocations).not.toHaveBeenCalled()
         })
 
-        it('should filter out disabled hog functions', async () => {
-            await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.disabled)
+        it('should filter out disabled custom functions', async () => {
+            await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.disabled)
 
             const { invocations } = await processor.processBatch([globals])
 
@@ -256,7 +256,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'hog_function',
+                        app_source: 'custom_function',
                         app_source_id: fnFetchNoFilters.id,
                         count: 1,
                         metric_kind: 'failure',
@@ -268,7 +268,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
         })
 
         it('should handle degraded state by setting queue priority', async () => {
-            await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.degraded)
+            await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.degraded)
 
             const { invocations } = await processor.processBatch([globals])
 
@@ -287,7 +287,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'other',
@@ -301,7 +301,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: '_event_trigger',
                             instance_id: globals.event.uuid,
                             count: 1,
@@ -317,10 +317,10 @@ describe('CdpDatawarehouseEventsConsumer', () => {
 
         it('should bill once per event when multiple destinations match', async () => {
             // Add a second function that also matches
-            const fnSecondDestination = await insertHogFunction({
-                ...HOG_EXAMPLES.input_printer,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+            const fnSecondDestination = await insertCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             const { invocations } = await processor.processBatch([globals])
@@ -346,24 +346,24 @@ describe('CdpDatawarehouseEventsConsumer', () => {
     })
 
     describe('quota limiting', () => {
-        let fnFetchNoFilters: HogFunctionType
-        let fnDataWarehouseFunction: HogFunctionType
-        let globals: HogFunctionInvocationGlobals
+        let fnFetchNoFilters: CustomFunctionType
+        let fnDataWarehouseFunction: CustomFunctionType
+        let globals: CustomFunctionInvocationGlobals
 
         beforeEach(async () => {
             // Create functions for team2 (no data_pipelines feature)
-            fnFetchNoFilters = await insertHogFunction({
+            fnFetchNoFilters = await insertCustomFunction({
                 team_id: team2.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
-            fnDataWarehouseFunction = await insertHogFunction({
+            fnDataWarehouseFunction = await insertCustomFunction({
                 team_id: team2.id,
-                ...HOG_EXAMPLES.input_printer,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
-                ...HOG_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
+                ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch_data_warehouse_table,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters_data_warehouse_table,
             })
 
             // Globals for team2 (without data_pipelines)
@@ -391,7 +391,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                     expect.objectContaining({
                         topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'failure',
@@ -402,7 +402,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                     expect.objectContaining({
                         topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnDataWarehouseFunction.id,
                             count: 1,
                             metric_kind: 'failure',
@@ -431,7 +431,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                     expect.objectContaining({
                         topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'other',
@@ -442,7 +442,7 @@ describe('CdpDatawarehouseEventsConsumer', () => {
                     expect.objectContaining({
                         topic: 'datastore_app_metrics2_test',
                         value: expect.objectContaining({
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnDataWarehouseFunction.id,
                             count: 1,
                             metric_kind: 'other',

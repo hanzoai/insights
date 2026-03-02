@@ -63,7 +63,7 @@ class TestEmail(BaseTest):
                     to=[
                         {
                             "raw_email": "test0@posthog.com",
-                            "recipient": "Test PostHog <test0@posthog.com>",
+                            "recipient": "Test Insights <test0@posthog.com>",
                         }
                     ],
                     subject="Test email",

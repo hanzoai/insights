@@ -1258,7 +1258,7 @@ class SessionRecordingViewSet(
         environment_is_allowed = settings.DEBUG or is_cloud()
         has_openai_api_key = bool(os.environ.get("OPENAI_API_KEY"))
         if not environment_is_allowed or not has_openai_api_key:
-            raise exceptions.ValidationError("session summary is only supported in PostHog Cloud")
+            raise exceptions.ValidationError("session summary is only supported in Insights Cloud")
         if not posthoganalytics.feature_enabled(
             "ai-session-summary", str(user.distinct_id)
         ) and not posthoganalytics.feature_enabled(

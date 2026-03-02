@@ -148,7 +148,7 @@ class UserSerializer(serializers.ModelSerializer):
             "has_seen_product_intro_for",
             "scene_personalisation",
             "theme_mode",
-            "hedgehog_config",
+            "mascot_config",
             "allow_sidebar_suggestions",
             "shortcut_position",
             "role_at_organization",
@@ -489,10 +489,10 @@ class UserViewSet(
         "role_at_organization",
     ]
     time_sensitive_exclude_actions = [
-        "hedgehog_config",
+        "mascot_config",
         "scene_personalisation",
     ]
-    time_sensitive_allow_actions = ["hedgehog_config"]
+    time_sensitive_allow_actions = ["mascot_config"]
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["is_staff", "email"]
     queryset = User.objects.filter(is_active=True)
@@ -634,14 +634,14 @@ class UserViewSet(
             OAuthAccessTokenAuthentication,
         ],
     )
-    def hedgehog_config(self, request, **kwargs):
+    def mascot_config(self, request, **kwargs):
         instance = self.get_object()
         if request.method == "GET":
-            return Response(instance.hedgehog_config or {})
+            return Response(instance.mascot_config or {})
         else:
-            instance.hedgehog_config = request.data
+            instance.mascot_config = request.data
             instance.save()
-            return Response(instance.hedgehog_config)
+            return Response(instance.mascot_config)
 
     # Deprecated - use two_factor_start_setup instead
     @action(methods=["GET"], detail=True)
@@ -902,7 +902,7 @@ def redirect_to_site(request):
         params["distinctId"] = request.user.distinct_id
 
     # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/PostHog/posthog/issues/9671
+    # see https://github.com/Insights/posthog/issues/9671
     state = urllib.parse.quote(json.dumps(params), safe="")
 
     if str(request.GET.get("generateOnly")) in ["1", "yes", "true"]:
@@ -967,7 +967,7 @@ def redirect_to_website(request):
         )
 
     # pass the empty string as the safe param so that `//` is encoded correctly.
-    # see https://github.com/PostHog/posthog/issues/9671
+    # see https://github.com/Insights/posthog/issues/9671
     userData = urllib.parse.quote(json.dumps({"jwt": token}), safe="")
 
     return redirect("{}?userData={}&redirect={}".format("https://posthog.com/auth", userData, app_url))
@@ -986,7 +986,7 @@ def test_slack_webhook(request):
 
     if not webhook:
         return JsonResponse({"error": "no webhook URL"})
-    message = {"text": "_Greetings_ from PostHog!"}
+    message = {"text": "_Greetings_ from Insights!"}
     try:
         session = requests.Session()
 

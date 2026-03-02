@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Capture an event via a Stripe webhook',
     icon_url: '/static/services/stripe.png',
     category: ['Revenue', 'Payment'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 if(request.method != 'POST') {
   return {
@@ -114,7 +114,7 @@ for (let key, value in inputs.properties) {
     properties[key] := value
 }
 
-postHogCapture({
+insightsCapture({
   'event': inputs.event,
   'distinct_id': distinctId,
   'properties': properties

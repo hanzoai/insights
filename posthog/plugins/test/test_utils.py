@@ -26,31 +26,31 @@ from .plugin_archives import (
 @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
 class TestPluginsUtils(BaseTest):
     def test_parse_github_urls(self, mock_get):
-        parsed_url = parse_url("https://github.com/PostHog/posthog")
+        parsed_url = parse_url("https://github.com/Insights/posthog")
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url.get("tag", None), None)
         self.assertEqual(parsed_url.get("path", None), None)
         self.assertEqual(mock_get.call_count, 0)
         mock_get.reset_mock()
 
-        parsed_url = parse_url("https://github.com/PostHog/posthog", get_latest_if_none=True)
+        parsed_url = parse_url("https://github.com/Insights/posthog", get_latest_if_none=True)
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "MOCKLATESTCOMMIT")
         self.assertEqual(parsed_url.get("path", None), None)
         self.assertEqual(mock_get.call_count, 1)
         mock_get.assert_called_with(
-            "https://api.github.com/repos/PostHog/posthog/commits?sha=&path=",
+            "https://api.github.com/repos/Insights/posthog/commits?sha=&path=",
             headers={},
         )
         mock_get.reset_mock()
 
-        parsed_url = parse_url("https://github.com/PostHog/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
+        parsed_url = parse_url("https://github.com/Insights/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -58,11 +58,11 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e",
+            "https://github.com/Insights/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e",
             get_latest_if_none=True,
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -70,49 +70,49 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e/test/path/in/repo",
+            "https://github.com/Insights/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e/test/path/in/repo",
             get_latest_if_none=True,
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url["path"], "test/path/in/repo")
         self.assertEqual(mock_get.call_count, 0)
         mock_get.reset_mock()
 
-        parsed_url = parse_url("https://github.com/PostHog/posthog/tree/main", get_latest_if_none=True)
+        parsed_url = parse_url("https://github.com/Insights/posthog/tree/main", get_latest_if_none=True)
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "MOCKLATESTCOMMIT")
         self.assertEqual(parsed_url.get("path", None), None)
         self.assertEqual(mock_get.call_count, 1)
         mock_get.assert_called_with(
-            "https://api.github.com/repos/PostHog/posthog/commits?sha=main&path=",
+            "https://api.github.com/repos/Insights/posthog/commits?sha=main&path=",
             headers={},
         )
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog/tree/main/test/path/in/repo",
+            "https://github.com/Insights/posthog/tree/main/test/path/in/repo",
             get_latest_if_none=True,
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "MOCKLATESTCOMMIT")
         self.assertEqual(parsed_url["path"], "test/path/in/repo")
         self.assertEqual(mock_get.call_count, 1)
         mock_get.assert_called_with(
-            "https://api.github.com/repos/PostHog/posthog/commits?sha=main&path=test/path/in/repo",
+            "https://api.github.com/repos/Insights/posthog/commits?sha=main&path=test/path/in/repo",
             headers={},
         )
         mock_get.reset_mock()
 
-        parsed_url = parse_url("https://www.github.com/PostHog/posthog/commit/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
+        parsed_url = parse_url("https://www.github.com/Insights/posthog/commit/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -120,11 +120,11 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://www.github.com/PostHog/posthog/commit/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e",
+            "https://www.github.com/Insights/posthog/commit/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e",
             get_latest_if_none=True,
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -132,10 +132,10 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog/releases/tag/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e"
+            "https://github.com/Insights/posthog/releases/tag/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e"
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -143,10 +143,10 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://www.github.com/PostHog/posthog/archive/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e.zip"
+            "https://www.github.com/Insights/posthog/archive/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e.zip"
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -154,10 +154,10 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog/archive/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e.tar.gz"
+            "https://github.com/Insights/posthog/archive/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e.tar.gz"
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -165,9 +165,9 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         # private tokens
-        parsed_url = parse_url("https://github.com/PostHog/posthog?private_token=TOKEN")
+        parsed_url = parse_url("https://github.com/Insights/posthog?private_token=TOKEN")
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url.get("tag", None), None)
         self.assertEqual(parsed_url.get("path", None), None)
@@ -176,26 +176,26 @@ class TestPluginsUtils(BaseTest):
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog?private_token=TOKEN",
+            "https://github.com/Insights/posthog?private_token=TOKEN",
             get_latest_if_none=True,
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "MOCKLATESTCOMMIT")
         self.assertEqual(parsed_url.get("path", None), None)
         mock_get.assert_called_with(
-            "https://api.github.com/repos/PostHog/posthog/commits?sha=&path=",
+            "https://api.github.com/repos/Insights/posthog/commits?sha=&path=",
             headers={"Authorization": "Bearer TOKEN"},
         )
         self.assertEqual(mock_get.call_count, 1)
         mock_get.reset_mock()
 
         parsed_url = parse_url(
-            "https://github.com/PostHog/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e?private_token=TOKEN"
+            "https://github.com/Insights/posthog/tree/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e?private_token=TOKEN"
         )
         self.assertEqual(parsed_url["type"], "github")
-        self.assertEqual(parsed_url["user"], "PostHog")
+        self.assertEqual(parsed_url["user"], "Insights")
         self.assertEqual(parsed_url["repo"], "posthog")
         self.assertEqual(parsed_url["tag"], "82c9218ee40f561b7f37a22d6b6a0ca82887ee3e")
         self.assertEqual(parsed_url.get("path", None), None)
@@ -205,32 +205,32 @@ class TestPluginsUtils(BaseTest):
 
         # default global token
         with self.settings(GITHUB_TOKEN="MY_GITHUB_TOKEN"):
-            parsed_url = parse_url("https://github.com/PostHog/posthog", get_latest_if_none=True)
+            parsed_url = parse_url("https://github.com/Insights/posthog", get_latest_if_none=True)
             self.assertEqual(parsed_url["type"], "github")
-            self.assertEqual(parsed_url["user"], "PostHog")
+            self.assertEqual(parsed_url["user"], "Insights")
             self.assertEqual(parsed_url["repo"], "posthog")
             self.assertEqual(parsed_url["tag"], "MOCKLATESTCOMMIT")
             self.assertEqual(parsed_url.get("path", None), None)
             self.assertEqual(parsed_url.get("private_token", None), None)
             mock_get.assert_called_with(
-                "https://api.github.com/repos/PostHog/posthog/commits?sha=&path=",
+                "https://api.github.com/repos/Insights/posthog/commits?sha=&path=",
                 headers={"Authorization": "Bearer MY_GITHUB_TOKEN"},
             )
             self.assertEqual(mock_get.call_count, 1)
             mock_get.reset_mock()
 
             parsed_url = parse_url(
-                "https://github.com/PostHog/posthog?private_token=TOKEN",
+                "https://github.com/Insights/posthog?private_token=TOKEN",
                 get_latest_if_none=True,
             )
             self.assertEqual(parsed_url["type"], "github")
-            self.assertEqual(parsed_url["user"], "PostHog")
+            self.assertEqual(parsed_url["user"], "Insights")
             self.assertEqual(parsed_url["repo"], "posthog")
             self.assertEqual(parsed_url["tag"], "MOCKLATESTCOMMIT")
             self.assertEqual(parsed_url.get("path", None), None)
             self.assertEqual(parsed_url["private_token"], "TOKEN")
             mock_get.assert_called_with(
-                "https://api.github.com/repos/PostHog/posthog/commits?sha=&path=",
+                "https://api.github.com/repos/Insights/posthog/commits?sha=&path=",
                 headers={"Authorization": "Bearer TOKEN"},
             )
             self.assertEqual(mock_get.call_count, 1)
@@ -472,64 +472,64 @@ class TestPluginsUtils(BaseTest):
 
     def test_download_plugin_archive_github(self, mock_get):
         plugin_github_zip_1 = download_plugin_archive(
-            "https://www.github.com/PostHog/helloworldplugin/commit/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e",
+            "https://www.github.com/Insights/helloworldplugin/commit/82c9218ee40f561b7f37a22d6b6a0ca82887ee3e",
             HELLO_WORLD_PLUGIN_GITHUB_ZIP[0],
         )
         self.assertEqual(plugin_github_zip_1, base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1]))
         self.assertEqual(mock_get.call_count, 1)
         mock_get.assert_called_with(
-            "https://github.com/PostHog/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
+            "https://github.com/Insights/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
             headers={},
         )
 
         plugin_github_zip_2 = download_plugin_archive(
-            "https://www.github.com/PostHog/helloworldplugin/commit/{}".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0])
+            "https://www.github.com/Insights/helloworldplugin/commit/{}".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0])
         )
         self.assertEqual(plugin_github_zip_2, base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1]))
         self.assertEqual(mock_get.call_count, 2)
         mock_get.assert_called_with(
-            "https://github.com/PostHog/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
+            "https://github.com/Insights/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
             headers={},
         )
 
         plugin_github_zip_3 = download_plugin_archive(
-            "https://www.github.com/PostHog/helloworldplugin/commit/{}?private_token=TOKEN".format(
+            "https://www.github.com/Insights/helloworldplugin/commit/{}?private_token=TOKEN".format(
                 HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]
             )
         )
         self.assertEqual(plugin_github_zip_3, base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1]))
         self.assertEqual(mock_get.call_count, 3)
         mock_get.assert_called_with(
-            "https://github.com/PostHog/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
+            "https://github.com/Insights/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
             headers={"Authorization": "token TOKEN"},
         )
 
         with self.settings(GITHUB_TOKEN="MY_GITHUB_TOKEN"):
             plugin_github_zip_4 = download_plugin_archive(
-                "https://www.github.com/PostHog/helloworldplugin/commit/{}?private_token=TOKEN".format(
+                "https://www.github.com/Insights/helloworldplugin/commit/{}?private_token=TOKEN".format(
                     HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]
                 )
             )
             self.assertEqual(plugin_github_zip_4, base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1]))
             self.assertEqual(mock_get.call_count, 4)
             mock_get.assert_called_with(
-                "https://github.com/PostHog/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
+                "https://github.com/Insights/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
                 headers={"Authorization": "token TOKEN"},
             )
 
             plugin_github_zip_5 = download_plugin_archive(
-                "https://www.github.com/PostHog/helloworldplugin/commit/{}".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0])
+                "https://www.github.com/Insights/helloworldplugin/commit/{}".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0])
             )
             self.assertEqual(plugin_github_zip_5, base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1]))
             self.assertEqual(mock_get.call_count, 5)
             mock_get.assert_called_with(
-                "https://github.com/PostHog/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
+                "https://github.com/Insights/helloworldplugin/archive/d5aa1d2b8a534f37cd93be48b214f490ef9ee904.zip",
                 headers={"Authorization": "token MY_GITHUB_TOKEN"},
             )
 
         # test that subdirectory is properly extracted into its own archive
         plugin_github_zip_6 = download_plugin_archive(
-            "https://www.github.com/PostHog/helloworldplugin/tree/main/app",
+            "https://www.github.com/Insights/helloworldplugin/tree/main/app",
             HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[0],
         )
 
@@ -537,7 +537,7 @@ class TestPluginsUtils(BaseTest):
 
         self.assertEqual(mock_get.call_count, 6)
         mock_get.assert_called_with(
-            "https://github.com/PostHog/helloworldplugin/archive/f5a9ea85adaafe7c99014b7e8e0982c447631d54.zip",
+            "https://github.com/Insights/helloworldplugin/archive/f5a9ea85adaafe7c99014b7e8e0982c447631d54.zip",
             headers={},
         )
         self.assertEqual(
@@ -639,7 +639,7 @@ class TestPluginsUtils(BaseTest):
             get_file_from_archive(base64.b64decode(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1]), "plugin.json"),
         )
         self.assertEqual(plugin_json_zip["name"], "helloworldplugin")
-        self.assertEqual(plugin_json_zip["url"], "https://github.com/PostHog/helloworldplugin")
+        self.assertEqual(plugin_json_zip["url"], "https://github.com/Insights/helloworldplugin")
         self.assertEqual(plugin_json_zip["description"], "Greet the World and Foo a Bar, JS edition!")
 
         plugin_json_zip = cast(
@@ -655,7 +655,7 @@ class TestPluginsUtils(BaseTest):
             get_file_from_archive(base64.b64decode(HELLO_WORLD_PLUGIN_NPM_TGZ[1]), "plugin.json"),
         )
         self.assertEqual(plugin_json_tgz["name"], "helloworldplugin")
-        self.assertEqual(plugin_json_tgz["url"], "https://github.com/PostHog/helloworldplugin")
+        self.assertEqual(plugin_json_tgz["url"], "https://github.com/Insights/helloworldplugin")
         self.assertEqual(plugin_json_tgz["description"], "Greet the World and Foo a Bar, JS edition!")
 
     def test_put_json_into_zip_archive(self, mock_get):

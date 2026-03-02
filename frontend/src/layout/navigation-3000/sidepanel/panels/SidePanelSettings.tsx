@@ -70,7 +70,7 @@ export const SidePanelSettings = (): JSX.Element => {
                                     setPreviousTab(null)
                                     openAi()
                                 }}
-                                tooltip="Back to PostHog AI"
+                                tooltip="Back to Insights AI"
                                 tooltipPlacement="bottom-end"
                             />
                         )}

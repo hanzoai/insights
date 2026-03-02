@@ -10,7 +10,7 @@ import temporalio.common
 import temporalio.activity
 import temporalio.workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.logger import get_logger
 from posthog.temporal.messaging.backfill_precalculated_person_properties_workflow import (
@@ -100,7 +100,7 @@ async def get_person_count_activity(
 
 
 @temporalio.workflow.defn(name="backfill-precalculated-person-properties-coordinator")
-class BackfillPrecalculatedPersonPropertiesCoordinatorWorkflow(PostHogWorkflow):
+class BackfillPrecalculatedPersonPropertiesCoordinatorWorkflow(InsightsWorkflow):
     """Coordinator workflow that spawns multiple child workflows for parallel person processing."""
 
     @staticmethod

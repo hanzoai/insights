@@ -9,7 +9,7 @@ import * as crypto from 'crypto'
 import { Message } from 'node-rdkafka'
 import { Counter } from 'prom-client'
 
-import { execHog } from '../cdp/utils/hog-exec'
+import { execScript } from '../cdp/utils/script-exec'
 import { KAFKA_EVENTS_JSON, prefix as KAFKA_PREFIX } from '../config/kafka-topics'
 import { KafkaConsumer } from '../kafka/consumer'
 import { EvaluationManagerService } from '../llm-analytics/services/evaluation-manager.service'
@@ -109,7 +109,7 @@ export async function checkConditionMatch(event: RawKafkaEvent, condition: Evalu
         return false
     }
 
-    // Build globals for HogVM execution
+    // Build globals for ScriptVM execution
     let personProperties = {}
     let eventProperties = {}
 
@@ -144,7 +144,7 @@ export async function checkConditionMatch(event: RawKafkaEvent, condition: Evalu
     }
 
     try {
-        const execResult = await execHog(condition.bytecode, { globals: filterGlobals })
+        const execResult = await execScript(condition.bytecode, { globals: filterGlobals })
 
         if (execResult.error || execResult.execResult?.error) {
             logger.error('Error executing bytecode', {

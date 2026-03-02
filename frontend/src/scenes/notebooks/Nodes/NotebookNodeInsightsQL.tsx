@@ -6,7 +6,7 @@ import { useDebouncedCallback } from 'use-debounce'
 import { IconCornerDownRight } from '@posthog/icons'
 
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
 import { NotebookDataframeTable } from './components/NotebookDataframeTable'
@@ -301,7 +301,7 @@ const Settings = ({
     )
 }
 
-export const NotebookNodeInsightsQL = createPostHogWidgetNode<NotebookNodeInsightsQLAttributes>({
+export const NotebookNodeInsightsQL = createInsightsWidgetNode<NotebookNodeInsightsQLAttributes>({
     nodeType: NotebookNodeType.InsightsQLSQL,
     titlePlaceholder: 'SQL (InsightsQL)',
     Component,

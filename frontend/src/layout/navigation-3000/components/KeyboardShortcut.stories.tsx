@@ -6,7 +6,7 @@ import { Tooltip } from '@posthog/lemon-ui'
 import { KeyboardShortcut } from './KeyboardShortcut'
 
 const meta: Meta<typeof KeyboardShortcut> = {
-    title: 'PostHog 3000/Keyboard Shortcut',
+    title: 'Insights 3000/Keyboard Shortcut',
     component: KeyboardShortcut,
     tags: ['autodocs'],
 }

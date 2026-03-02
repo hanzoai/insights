@@ -8,7 +8,7 @@ To generate source code you need to install locally the `antlr` binary. Run this
 brew install antlr
 ```
 
-In case this installs a newer version than 4.13.2, update [ci-custom-script.yml](https://github.com/PostHog/posthog/blob/master/.github/workflows/ci-custom-script.yml) to reflect the changes.
+In case this installs a newer version than 4.13.2, update [ci-custom-script.yml](https://github.com/Insights/posthog/blob/master/.github/workflows/ci-custom-script.yml) to reflect the changes.
 
 Run this if you're using bash on ubuntu:
 

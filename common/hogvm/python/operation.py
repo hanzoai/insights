@@ -1,13 +1,13 @@
 from enum import Enum
 
-HOGQL_BYTECODE_IDENTIFIER_V0 = "_h"
-HOGQL_BYTECODE_IDENTIFIER = "_H"
-HOGQL_BYTECODE_FUNCTION = "_f"
+INSIGHTSQL_BYTECODE_IDENTIFIER_V0 = "_h"
+INSIGHTSQL_BYTECODE_IDENTIFIER = "_H"
+INSIGHTSQL_BYTECODE_FUNCTION = "_f"
 
 # Version history:
 #  0 - initial version
 #  1 - added version numbers; reversed order of function args in stack
-HOGQL_BYTECODE_VERSION = 1
+INSIGHTSQL_BYTECODE_VERSION = 1
 
 
 class Operation(int, Enum):

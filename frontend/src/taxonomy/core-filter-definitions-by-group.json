@@ -159,7 +159,7 @@
             "label": "AI Evaluation Key ID (LLM)"
         },
         "$ai_evaluation_key_type": {
-            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = PostHog default).",
+            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = Insights default).",
             "examples": [
                 "byok",
                 "posthog"
@@ -571,7 +571,7 @@
             "label": "Initial UTM term"
         },
         "$config_defaults": {
-            "description": "The version of the PostHog config defaults that were used when capturing the event.",
+            "description": "The version of the Insights config defaults that were used when capturing the event.",
             "label": "Config defaults",
             "type": "String",
             "used_for_debug": true
@@ -924,7 +924,7 @@
             "label": "Exception message"
         },
         "$exception_personURL": {
-            "description": "The PostHog person that experienced the exception.",
+            "description": "The Insights person that experienced the exception.",
             "label": "Exception person URL"
         },
         "$exception_proposed_fingerprint": {
@@ -994,7 +994,7 @@
             "label": "Feature flag evaluation reason"
         },
         "$feature_flag_request_id": {
-            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by PostHog support for debugging issues with feature flags.",
+            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by Insights support for debugging issues with feature flags.",
             "examples": [
                 "01234567-89ab-cdef-0123-456789abcdef"
             ],
@@ -1421,7 +1421,7 @@
             "label": "OS version"
         },
         "$pageview_id": {
-            "description": "PostHog's internal ID for matching events to a pageview.",
+            "description": "Insights's internal ID for matching events to a pageview.",
             "ignored_in_assistant": true,
             "label": "Pageview ID",
             "system": true
@@ -1564,7 +1564,7 @@
             "system": true
         },
         "$raw_user_agent": {
-            "description": "PostHog process information like browser, OS, and device type from the user agent string. This is the raw user agent string.",
+            "description": "Insights process information like browser, OS, and device type from the user agent string. This is the raw user agent string.",
             "examples": [
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"
             ],
@@ -1652,21 +1652,21 @@
             "used_for_debug": true
         },
         "$sdk_debug_extensions_init_method": {
-            "description": "The method used to initialize PostHog.js extensions.",
+            "description": "The method used to initialize Insights.js extensions.",
             "examples": [
                 "deferred",
                 "synchronous"
             ],
-            "label": "PostHog.js extensions init method",
+            "label": "Insights.js extensions init method",
             "type": "String",
             "used_for_debug": true
         },
         "$sdk_debug_extensions_init_time_ms": {
-            "description": "The time taken to initialize PostHog.js extensions in milliseconds.",
+            "description": "The time taken to initialize Insights.js extensions in milliseconds.",
             "examples": [
                 "150"
             ],
-            "label": "PostHog.js extensions init time (ms)",
+            "label": "Insights.js extensions init time (ms)",
             "type": "Numeric",
             "used_for_debug": true
         },
@@ -1774,7 +1774,7 @@
             "label": "Copied content"
         },
         "$sent_at": {
-            "description": "Time the event was sent to PostHog. Used for correcting the event timestamp when the device clock is off.",
+            "description": "Time the event was sent to Insights. Used for correcting the event timestamp when the device clock is off.",
             "examples": [
                 "2023-05-20T15:31:00Z"
             ],
@@ -2520,7 +2520,7 @@
         },
         "$feature_enrollment_update": {
             "description": "When a user enrolls with a feature.",
-            "description_llm": "When a user opts in or out of a beta feature. This event is specific to the PostHog Early Access Features product, and is only relevant if the project is using this product.",
+            "description_llm": "When a user opts in or out of a beta feature. This event is specific to the Insights Early Access Features product, and is only relevant if the project is using this product.",
             "label": "Feature enrollment"
         },
         "$feature_flag_called": {
@@ -2759,7 +2759,7 @@
             "label": "AI Evaluation Key ID (LLM)"
         },
         "$ai_evaluation_key_type": {
-            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = PostHog default).",
+            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = Insights default).",
             "examples": [
                 "byok",
                 "posthog"
@@ -3171,7 +3171,7 @@
             "label": "Initial UTM term"
         },
         "$config_defaults": {
-            "description": "The version of the PostHog config defaults that were used when capturing the event.",
+            "description": "The version of the Insights config defaults that were used when capturing the event.",
             "label": "Config defaults",
             "type": "String",
             "used_for_debug": true
@@ -3524,7 +3524,7 @@
             "label": "Exception message"
         },
         "$exception_personURL": {
-            "description": "The PostHog person that experienced the exception.",
+            "description": "The Insights person that experienced the exception.",
             "label": "Exception person URL"
         },
         "$exception_proposed_fingerprint": {
@@ -3594,7 +3594,7 @@
             "label": "Feature flag evaluation reason"
         },
         "$feature_flag_request_id": {
-            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by PostHog support for debugging issues with feature flags.",
+            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by Insights support for debugging issues with feature flags.",
             "examples": [
                 "01234567-89ab-cdef-0123-456789abcdef"
             ],
@@ -4140,7 +4140,7 @@
             "label": "Initial qclid"
         },
         "$initial_raw_user_agent": {
-            "description": "PostHog process information like browser, OS, and device type from the user agent string. This is the raw user agent string. Data from the first time this user was seen.",
+            "description": "Insights process information like browser, OS, and device type from the user agent string. This is the raw user agent string. Data from the first time this user was seen.",
             "examples": [
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"
             ],
@@ -4425,7 +4425,7 @@
             "label": "Latest OS version"
         },
         "$pageview_id": {
-            "description": "PostHog's internal ID for matching events to a pageview.",
+            "description": "Insights's internal ID for matching events to a pageview.",
             "ignored_in_assistant": true,
             "label": "Pageview ID",
             "system": true
@@ -4568,7 +4568,7 @@
             "system": true
         },
         "$raw_user_agent": {
-            "description": "PostHog process information like browser, OS, and device type from the user agent string. This is the raw user agent string. Data from the last time this user was seen.",
+            "description": "Insights process information like browser, OS, and device type from the user agent string. This is the raw user agent string. Data from the last time this user was seen.",
             "examples": [
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"
             ],
@@ -4656,21 +4656,21 @@
             "used_for_debug": true
         },
         "$sdk_debug_extensions_init_method": {
-            "description": "The method used to initialize PostHog.js extensions.",
+            "description": "The method used to initialize Insights.js extensions.",
             "examples": [
                 "deferred",
                 "synchronous"
             ],
-            "label": "PostHog.js extensions init method",
+            "label": "Insights.js extensions init method",
             "type": "String",
             "used_for_debug": true
         },
         "$sdk_debug_extensions_init_time_ms": {
-            "description": "The time taken to initialize PostHog.js extensions in milliseconds.",
+            "description": "The time taken to initialize Insights.js extensions in milliseconds.",
             "examples": [
                 "150"
             ],
-            "label": "PostHog.js extensions init time (ms)",
+            "label": "Insights.js extensions init time (ms)",
             "type": "Numeric",
             "used_for_debug": true
         },
@@ -4778,7 +4778,7 @@
             "label": "Copied content"
         },
         "$sent_at": {
-            "description": "Time the event was sent to PostHog. Used for correcting the event timestamp when the device clock is off.",
+            "description": "Time the event was sent to Insights. Used for correcting the event timestamp when the device clock is off.",
             "examples": [
                 "2023-05-20T15:31:00Z"
             ],
@@ -5881,7 +5881,7 @@
             "type": "Numeric"
         },
         "$session_duration": {
-            "description": "The duration of the session being tracked. Learn more about how PostHog tracks sessions in [our documentation](https://posthog.com/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
+            "description": "The duration of the session being tracked. Learn more about how Insights tracks sessions in [our documentation](https://posthog.com/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
             "examples": [
                 "30",
                 "146",

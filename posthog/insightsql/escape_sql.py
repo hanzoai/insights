@@ -46,7 +46,7 @@ def escape_insightsql_identifier(identifier: str | int) -> str:
     # InsightsQL allows dollars in the identifier.
     if re.match(
         r"^[A-Za-z_$][A-Za-z0-9_$]*$", identifier
-    ):  # Same regex as the frontend escapePropertyAsHogQlIdentifier
+    ):  # Same regex as the frontend escapePropertyAsInsightsQLIdentifier
         return identifier
     return "`{}`".format("".join(backquote_escape_chars_map.get(c, c) for c in identifier))
 

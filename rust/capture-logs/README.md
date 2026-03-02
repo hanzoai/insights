@@ -1,4 +1,4 @@
-# PostHog Log Capture Service
+# Insights Log Capture Service
 
 A service that receives OpenTelemetry Protocol (OTLP) logs via HTTP and processes them based on team authentication.
 
@@ -38,7 +38,7 @@ Authorization: Bearer your-project-api-key
 POST /v1/logs?token=your-project-api-key
 ```
 
-The token is your PostHog project API key.
+The token is your Insights project API key.
 
 ## Running the Service
 
@@ -88,7 +88,7 @@ Standard OTLP protobuf encoding is also supported.
 Requirements:
 
 1. Set the HTTP endpoint to `http://your-service-host:8000/v1/logs`
-2. Include your PostHog project API key in the Authorization header or as a query parameter
+2. Include your Insights project API key in the Authorization header or as a query parameter
 3. Use standard OTLP log format (JSON, JSONL, or Protobuf)
 
 ## Endpoints

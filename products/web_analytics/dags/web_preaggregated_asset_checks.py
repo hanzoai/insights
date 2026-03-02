@@ -6,21 +6,21 @@ import chdb
 import structlog
 from dagster import AssetCheckExecutionContext, AssetCheckResult, AssetCheckSeverity, Field, MetadataValue, asset_check
 
-from posthog.schema import DateRange, HogQLQueryModifiers, WebOverviewItem, WebOverviewQuery
+from posthog.schema import DateRange, InsightsQLQueryModifiers, WebOverviewItem, WebOverviewQuery
 
-from posthog.hogql.database.schema.web_analytics_s3 import (
+from posthog.insightsql.database.schema.web_analytics_s3 import (
     get_s3_function_args,
     get_s3_url,
     get_s3_web_bounces_structure,
     get_s3_web_stats_structure,
 )
-from posthog.hogql.query import HogQLQueryExecutor
+from posthog.insightsql.query import InsightsQLQueryExecutor
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.client.escape import substitute_params
 from posthog.clickhouse.query_tagging import DagsterTags, get_query_tags, tags_context
 from posthog.dags.common import dagster_tags
-from posthog.hogql_queries.web_analytics.web_overview import WebOverviewQueryRunner
+from posthog.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 from posthog.models import Team
 from posthog.settings.base_variables import DEBUG
 
@@ -218,7 +218,7 @@ def log_query_sql(
         else:
             query_ast = runner.to_query()
 
-        executor = HogQLQueryExecutor(query=query_ast, team=team, modifiers=runner.modifiers)
+        executor = InsightsQLQueryExecutor(query=query_ast, team=team, modifiers=runner.modifiers)
         sql_with_placeholders, sql_context = executor.generate_clickhouse_sql()
         raw_sql = substitute_params(sql_with_placeholders, sql_context.values)
         context.log.info(f"{query_name}:\n {raw_sql}")
@@ -254,12 +254,12 @@ def create_runners_for_accuracy_check(
         query=query_fn(),
         team=team,
         use_v2_tables=use_v2_tables,
-        modifiers=HogQLQueryModifiers(useWebAnalyticsPreAggregatedTables=True, convertToProjectTimezone=False),
+        modifiers=InsightsQLQueryModifiers(useWebAnalyticsPreAggregatedTables=True, convertToProjectTimezone=False),
     )
     runner_regular = WebOverviewQueryRunner(
         query=query_fn(),
         team=team,
-        modifiers=HogQLQueryModifiers(useWebAnalyticsPreAggregatedTables=False, convertToProjectTimezone=False),
+        modifiers=InsightsQLQueryModifiers(useWebAnalyticsPreAggregatedTables=False, convertToProjectTimezone=False),
     )
 
     return runner_pre_agg, runner_regular

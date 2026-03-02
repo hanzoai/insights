@@ -5,7 +5,7 @@ These endpoints are public (authenticated via public token) and used by the post
 
 Security model:
 - `widget_session_id`: Random UUID generated client-side, stored in localStorage. Used for ACCESS CONTROL.
-- `distinct_id`: PostHog's user identifier. Used for PERSON LINKING only, not access control.
+- `distinct_id`: Insights's user identifier. Used for PERSON LINKING only, not access control.
 
 This prevents users from accessing others' chats by knowing their email.
 """
@@ -282,7 +282,7 @@ class WidgetMessagesView(APIView):
             elif author_type == "customer":
                 author_name = ticket.anonymous_traits.get("name") or ticket.anonymous_traits.get("email") or "You"
             elif author_type == "AI":
-                author_name = "PostHog Assistant"
+                author_name = "Insights Assistant"
             else:
                 author_name = "Support"
 

@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
-                "db_table": "hogflow_templates",
+                "db_table": "customflow_templates",
                 "indexes": [models.Index(fields=["team"], name="hogflow_tem_team_id_cb8b2b_idx")],
             },
         ),

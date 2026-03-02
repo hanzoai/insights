@@ -17,7 +17,7 @@ export type CyclotronJobTemplateOptionCategory = {
 }
 
 export type CyclotronJobTemplateSuggestionsLogicProps = {
-    templating: 'hog' | 'liquid'
+    templating: 'custom_script' | 'liquid'
 }
 
 // Helping kea-typegen navigate the exported default class for Fuse
@@ -91,7 +91,7 @@ export const cyclotronJobTemplateSuggestionsLogic = kea<cyclotronJobTemplateSugg
         allOptions: [
             (_, p) => [p.templating],
             (templating): CyclotronJobTemplateOption[] => {
-                return templating === 'hog' ? [...HOG_USAGE_EXAMPLES, ...HOG_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
+                return templating === 'custom_script' ? [...HOG_USAGE_EXAMPLES, ...HOG_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
             },
         ],
 

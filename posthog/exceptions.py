@@ -35,9 +35,9 @@ class EnterpriseFeatureException(APIException):
     def __init__(self, feature: Optional[str] = None) -> None:
         super().__init__(
             detail=(
-                f"{feature.capitalize().replace('_', ' ') if feature else 'This feature'} is part of the premium PostHog offering. "
+                f"{feature.capitalize().replace('_', ' ') if feature else 'This feature'} is part of the premium Insights offering. "
                 + (
-                    "To use it, subscribe to PostHog Cloud with a generous free tier."
+                    "To use it, subscribe to Insights Cloud with a generous free tier."
                     if is_cloud()
                     else "Self-hosted licenses are no longer available for purchase. Please contact sales@posthog.com to discuss options."
                 )
@@ -51,7 +51,7 @@ class PaidFeatureException(APIException):
 
     def __init__(self, feature: Optional[str] = None) -> None:
         feature_name = feature.capitalize().replace("_", " ") if feature else "This feature"
-        super().__init__(detail=f"{feature_name} requires a paid PostHog plan. Please upgrade to access this feature.")
+        super().__init__(detail=f"{feature_name} requires a paid Insights plan. Please upgrade to access this feature.")
 
 
 class Conflict(APIException):

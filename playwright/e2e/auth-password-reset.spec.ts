@@ -1,7 +1,7 @@
 import { LoginPage } from '../page-models/loginPage'
 import { expect, test } from '../utils/playwright-test-base'
 
-const VALID_PASSWORD = 'hedgE-hog-123%'
+const VALID_PASSWORD = 'Str0ng-Pass-123%'
 
 test.describe('Password Reset', () => {
     let loginPage: LoginPage

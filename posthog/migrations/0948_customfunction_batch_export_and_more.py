@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name="hogfunction",
+                    model_name="customfunction",
                     name="batch_export",
                     field=models.ForeignKey(
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.batchexport"
@@ -42,11 +42,11 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                        ALTER TABLE "posthog_hogfunction" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "posthog_hogfunction_batch_export_id_d64c3403_fk_posthog_b" REFERENCES "posthog_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                        SET CONSTRAINTS "posthog_hogfunction_batch_export_id_d64c3403_fk_posthog_b" IMMEDIATE; -- existing-table-constraint-ignore
+                        ALTER TABLE "posthog_customfunction" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "posthog_customfunction_batch_export_id_d64c3403_fk_posthog_b" REFERENCES "posthog_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                        SET CONSTRAINTS "posthog_customfunction_batch_export_id_d64c3403_fk_posthog_b" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_hogfunction" DROP COLUMN IF EXISTS "batch_export_id";
+                        ALTER TABLE "posthog_customfunction" DROP COLUMN IF EXISTS "batch_export_id";
                     """,
                 ),
             ],

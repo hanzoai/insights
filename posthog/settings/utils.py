@@ -23,7 +23,7 @@ def get_from_env(
         if default is not None:
             return default
         else:
-            raise ImproperlyConfigured(f'The environment variable "{key}" is required to run PostHog!')
+            raise ImproperlyConfigured(f'The environment variable "{key}" is required to run Insights!')
     if type_cast is not None:
         return type_cast(value)
     return value

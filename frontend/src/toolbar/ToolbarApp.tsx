@@ -36,7 +36,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
                   const styleLink = document.createElement('link')
                   styleLink.rel = 'stylesheet'
                   styleLink.type = 'text/css'
-                  // toolbar.js is served from the PostHog CDN, this has a TTL of 24 hours.
+                  // toolbar.js is served from the Insights CDN, this has a TTL of 24 hours.
                   // the toolbar asset includes a rotating "token" that is valid for 5 minutes.
                   const fiveMinutesInMillis = 5 * 60 * 1000
                   // this ensures that we bust the cache periodically
@@ -56,7 +56,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
     // which conflicts with our toolbar's internal mouse down listeners
     //
     // To workaround that we simply prevent the event from bubbling further than the toolbar
-    // See https://github.com/PostHog/posthog-js/issues/1425
+    // See https://github.com/Insights/posthog-js/issues/1425
     const onMouseDown = ({ nativeEvent: event }: React.MouseEvent<HTMLDivElement>): void => {
         event.stopImmediatePropagation()
     }

@@ -1,4 +1,4 @@
-import { HogFunctionInvocationGlobals } from '../../../types'
+import { CustomFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './pii-hashing.template'
 
@@ -11,7 +11,7 @@ interface EventResult {
 
 describe('pii-hashing.template', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: HogFunctionInvocationGlobals
+    let mockGlobals: CustomFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()

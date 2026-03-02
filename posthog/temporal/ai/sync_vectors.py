@@ -20,7 +20,7 @@ from posthog.clickhouse.query_tagging import Product, tag_queries
 from posthog.exceptions_capture import capture_exception
 from posthog.models import Action
 from posthog.models.ai.pg_embeddings import INSERT_BULK_PG_EMBEDDINGS_SQL
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import ClickHouseClient, get_client
 from posthog.temporal.common.utils import get_scheduled_start_time
 
@@ -357,7 +357,7 @@ class SyncVectorsInputs:
 
 
 @temporalio.workflow.defn(name="ai-sync-vectors")
-class SyncVectorsWorkflow(PostHogWorkflow):
+class SyncVectorsWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> SyncVectorsInputs:
         """Parse inputs from the management command CLI."""

@@ -229,7 +229,7 @@ def get_insight_analysis(
         messages = [
             {
                 "role": "system",
-                "content": "You are a helpful data analyst that provides concise, actionable insights about PostHog analytics data.",
+                "content": "You are a helpful data analyst that provides concise, actionable insights about Insights analytics data.",
             },
             {"role": "user", "content": prompt},
         ]
@@ -255,7 +255,7 @@ def get_ai_suggestions(
             context_section = f"\n\nPrevious Analysis Context:\n{context}\n\nUse this context to generate more relevant and targeted suggestions.\n"
 
         prompt = (
-            "You are an expert data analyst using PostHog. "
+            "You are an expert data analyst using Insights. "
             "Given the following analysis configuration and its results, suggest 3 relevant follow-up insights to explore deeper. "
             "The suggestions should help the user understand *why* the results are the way they are, or explore related metrics.\n\n"
             "Important Rules:\n"
@@ -269,7 +269,7 @@ def get_ai_suggestions(
             "Provide the response as a JSON array of objects with the following keys:\n"
             "- title: A short, descriptive title for the suggestion.\n"
             "- description: A brief explanation of why this is interesting.\n"
-            "- query_json: A valid PostHog InsightVizNode JSON object that represents the suggested query.\n\n"
+            "- query_json: A valid Insights InsightVizNode JSON object that represents the suggested query.\n\n"
             f"Current Query: {query.model_dump_json(exclude_none=True)}\n\n"
             f"Results Summary: {json.dumps(summarize_insight_result(insight_result), default=str)}..."
             f"{context_section}"
@@ -278,7 +278,7 @@ def get_ai_suggestions(
         messages = [
             {
                 "role": "system",
-                "content": "You are a helpful assistant that generates PostHog insights in JSON format. You only return valid JSON arrays.",
+                "content": "You are a helpful assistant that generates Insights insights in JSON format. You only return valid JSON arrays.",
             },
             {"role": "user", "content": prompt},
         ]
@@ -327,7 +327,7 @@ def generate_insight_name(query: InsightVizNode, team: Team) -> str:
         query_kind = query.source.kind if query.source else "Unknown"
 
         prompt = (
-            "Generate a short, descriptive name for this PostHog insight based on its query configuration. "
+            "Generate a short, descriptive name for this Insights insight based on its query configuration. "
             "The name should be concise (2-6 words), descriptive, and follow these patterns:\n\n"
             "Examples:\n"
             "- 'Weekly active users' (for a trends query counting unique users by week)\n"

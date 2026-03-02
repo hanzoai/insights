@@ -5,13 +5,13 @@ import redis as redis_lib
 
 from posthog import redis
 from posthog.clickhouse.client.execute_async import QueryStatusManager
-from posthog.settings import HOGQL_INCREASED_MAX_EXECUTION_TIME
+from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
 logger = logging.getLogger(__name__)
 
 PREAGG_JOB_CHANNEL_PREFIX = "preagg:job:"
 PREAGG_CH_STARTED_PREFIX = "preagg:ch_started:"
-CH_STARTED_TTL_SECONDS = HOGQL_INCREASED_MAX_EXECUTION_TIME
+CH_STARTED_TTL_SECONDS = INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
 
 def job_channel(job_id: uuid.UUID) -> str:

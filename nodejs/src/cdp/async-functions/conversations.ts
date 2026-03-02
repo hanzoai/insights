@@ -4,13 +4,13 @@ import { CyclotronInvocationQueueParametersFetchSchema } from '~/schema/cyclotro
 
 import { registerAsyncFunction } from '../async-function-registry'
 
-registerAsyncFunction('postHogGetTicket', {
+registerAsyncFunction('insightsGetTicket', {
     execute: async (args, context, result) => {
         const [opts] = args as [Record<string, any> | undefined]
         const ticketId = opts?.ticket_id
 
         if (!ticketId || typeof ticketId !== 'string') {
-            throw new Error("[HogFunction] - postHogGetTicket call missing 'ticket_id' property")
+            throw new Error("[CustomFunction] - insightsGetTicket call missing 'ticket_id' property")
         }
 
         const team = await context.hub.teamManager.getTeam(context.invocation.teamId)
@@ -30,12 +30,12 @@ registerAsyncFunction('postHogGetTicket', {
         logs.push({
             level: 'info',
             timestamp: DateTime.now(),
-            message: `Async function 'postHogGetTicket' was mocked with arguments:`,
+            message: `Async function 'insightsGetTicket' was mocked with arguments:`,
         })
         logs.push({
             level: 'info',
             timestamp: DateTime.now(),
-            message: `postHogGetTicket(${JSON.stringify(args[0], null, 2)})`,
+            message: `insightsGetTicket(${JSON.stringify(args[0], null, 2)})`,
         })
 
         return {
@@ -56,14 +56,14 @@ registerAsyncFunction('postHogGetTicket', {
     },
 })
 
-registerAsyncFunction('postHogUpdateTicket', {
+registerAsyncFunction('insightsUpdateTicket', {
     execute: async (args, context, result) => {
         const [opts] = args as [Record<string, any> | undefined]
         const ticketId = opts?.ticket_id
         const updates = opts?.updates || {}
 
         if (!ticketId || typeof ticketId !== 'string') {
-            throw new Error("[HogFunction] - postHogUpdateTicket call missing 'ticket_id' property")
+            throw new Error("[CustomFunction] - insightsUpdateTicket call missing 'ticket_id' property")
         }
 
         const updateTeam = await context.hub.teamManager.getTeam(context.invocation.teamId)
@@ -87,12 +87,12 @@ registerAsyncFunction('postHogUpdateTicket', {
         logs.push({
             level: 'info',
             timestamp: DateTime.now(),
-            message: `Async function 'postHogUpdateTicket' was mocked with arguments:`,
+            message: `Async function 'insightsUpdateTicket' was mocked with arguments:`,
         })
         logs.push({
             level: 'info',
             timestamp: DateTime.now(),
-            message: `postHogUpdateTicket(${JSON.stringify(args[0], null, 2)})`,
+            message: `insightsUpdateTicket(${JSON.stringify(args[0], null, 2)})`,
         })
 
         return {

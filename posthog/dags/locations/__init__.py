@@ -10,7 +10,7 @@ from posthog.dags.common.resources import (
     ClickhouseClusterResource,
     PostgresResource,
     PostgresURLResource,
-    PostHogAnalyticsResource,
+    InsightsAnalyticsResource,
     RedisResource,
     kafka_producer_resource,
 )
@@ -35,7 +35,7 @@ resources_by_env = {
             password=dagster.EnvVar("POSTGRES_PASSWORD"),
         ),
         "posthoganalytics": dagster.ResourceDefinition.none_resource(
-            description="Dummy PostHogAnalytics resource since posthoganalytics is configured properly in production."
+            description="Dummy InsightsAnalytics resource since posthoganalytics is configured properly in production."
         ),
         # Persons DB resource (parses connection URL)
         "persons_database": PostgresURLResource(
@@ -72,7 +72,7 @@ resources_by_env = {
             user=dagster.EnvVar("POSTGRES_USER"),
             password=dagster.EnvVar("POSTGRES_PASSWORD"),
         ),
-        "posthoganalytics": PostHogAnalyticsResource(personal_api_key=dagster.EnvVar("PERSONAL_API_KEY")),
+        "posthoganalytics": InsightsAnalyticsResource(personal_api_key=dagster.EnvVar("PERSONAL_API_KEY")),
         # Persons DB resource (parses connection URL)
         "persons_database": PostgresURLResource(
             connection_url=dagster.EnvVar("PERSONS_DB_WRITER_URL"),

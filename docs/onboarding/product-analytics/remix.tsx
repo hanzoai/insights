@@ -19,7 +19,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                             docs](https://posthog.com/docs/libraries/react-router).
                         </Markdown>
                     </CalloutBox>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -95,7 +95,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Create a `provider.tsx` file in the app folder. Set up the PostHog provider to initialize after
+                        Create a `provider.tsx` file in the app folder. Set up the Insights provider to initialize after
                         hydration:
                     </Markdown>
                     <CodeBlock
@@ -106,7 +106,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     import { useEffect, useState } from "react";
                                     import posthog from "posthog-js";
-                                    import { PostHogProvider } from "posthog-js/react";
+                                    import { InsightsProvider } from "posthog-js/react";
 
                                     export function PHProvider({ children }: { children: React.ReactNode }) {
                                       const [hydrated, setHydrated] = useState(false);
@@ -121,7 +121,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                       }, []);
 
                                       if (!hydrated) return <>{children}</>;
-                                      return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+                                      return <InsightsProvider client={posthog}>{children}</InsightsProvider>;
                                     }
                                 `,
                             },

@@ -16,10 +16,10 @@ import { KafkaConsumer } from '../../kafka/consumer'
 import { HealthCheckResult, RawClickHouseEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
-import { HogFunctionFilterGlobals } from '../types'
+import { CustomFunctionFilterGlobals } from '../types'
 import { ProducedPersonPropertiesEvent } from '../types-person-properties'
-import { execHog } from '../utils/hog-exec'
-import { convertClickhouseRawEventToFilterGlobals } from '../utils/hog-function-filtering'
+import { execScript } from '../utils/script-exec'
+import { convertClickhouseRawEventToFilterGlobals } from '../utils/custom-function-filtering'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
 
 export type PersonPropertyFilterGlobals = {
@@ -121,7 +121,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
 
     // Evaluate if event matches behavioral filter using bytecode execution
     private async evaluateEventAgainstRealtimeSupportedFilter(
-        filterGlobals: HogFunctionFilterGlobals,
+        filterGlobals: CustomFunctionFilterGlobals,
         filter: RealtimeSupportedFilter
     ): Promise<boolean> {
         if (!filter.bytecode) {
@@ -133,7 +133,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
         }
 
         try {
-            const { execResult } = await execHog(filter.bytecode, {
+            const { execResult } = await execScript(filter.bytecode, {
                 globals: filterGlobals,
             })
 
@@ -163,7 +163,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
         }
 
         try {
-            const { execResult } = await execHog(filter.bytecode, {
+            const { execResult } = await execScript(filter.bytecode, {
                 globals: personGlobals,
             })
 

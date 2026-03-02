@@ -232,7 +232,7 @@ const FeatureFlagInsightsToggle = ({
             title={
                 <div>
                     <p>
-                        PostHog automatically creates insights by default for feature flags to help you understand their
+                        Insights automatically creates insights by default for feature flags to help you understand their
                         performance.
                     </p>
                     <p className="mb-0">

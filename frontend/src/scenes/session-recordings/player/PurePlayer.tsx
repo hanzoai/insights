@@ -7,7 +7,7 @@ import { useEffect, useMemo, useRef } from 'react'
 
 import { LemonButton } from '@posthog/lemon-ui'
 
-import { BuilderHog2 } from 'lib/components/hedgehogs'
+import { BuilderHog2 } from 'lib/components/mascots'
 import { FloatingContainerContext } from 'lib/hooks/useFloatingContainerContext'
 import useIsHovering from 'lib/hooks/useIsHovering'
 import { HotkeysInterface, useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'

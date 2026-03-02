@@ -57,7 +57,7 @@ export function generateHCL<T, O extends HclExportOptions = HclExportOptions>(
     const lines: string[] = []
 
     // Header comment with metadata
-    lines.push(`# Terraform configuration for PostHog ${exporter.resourceLabel}`)
+    lines.push(`# Terraform configuration for Insights ${exporter.resourceLabel}`)
     lines.push(`# Compatible with posthog provider v${POSTHOG_PROVIDER_VERSION}`)
     if (resourceId !== undefined) {
         lines.push(`# Source ${exporter.resourceLabel} ID: ${resourceId}`)
@@ -71,7 +71,7 @@ export function generateHCL<T, O extends HclExportOptions = HclExportOptions>(
 
     // Import block for existing resources only
     if (includeImport && resourceId !== undefined) {
-        // Since v1.0.2 of the TF provider (https://github.com/PostHog/terraform-provider-posthog/pull/24/)
+        // Since v1.0.2 of the TF provider (https://github.com/Insights/terraform-provider-posthog/pull/24/)
         // we can specify the project to which a resource belongs when importing it.
         const importId = options.projectId ? `${options.projectId}/${resourceId}` : String(resourceId)
         lines.push(`import {`)

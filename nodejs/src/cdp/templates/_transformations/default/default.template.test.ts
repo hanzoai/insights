@@ -1,11 +1,11 @@
-import { HogFunctionInvocationGlobals } from '~/cdp/types'
+import { CustomFunctionInvocationGlobals } from '~/cdp/types'
 
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './default.template'
 
 describe('default.template.ts', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: HogFunctionInvocationGlobals
+    let mockGlobals: CustomFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()
@@ -39,7 +39,7 @@ describe('default.template.ts', () => {
                     test_property: 'test_value',
                 },
                 timestamp: '2024-01-01T00:00:00Z',
-                url: 'https://us.posthog.com/projects/1/events/1234',
+                url: 'https://us.hanzo.ai/projects/1/events/1234',
                 uuid: 'event-id',
             })
         })

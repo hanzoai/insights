@@ -9,8 +9,8 @@ from rest_framework import filters, parsers, request, response, serializers, sta
 
 from posthog.schema import DatabaseSerializedFieldType
 
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database, SerializedField, serialize_fields
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database, SerializedField, serialize_fields
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.shared import UserBasicSerializer
@@ -22,7 +22,7 @@ from posthog.tasks.warehouse import validate_data_warehouse_table_columns
 from products.data_warehouse.backend.api.external_data_source import SimpleExternalDataSourceSerializers
 from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
 from products.data_warehouse.backend.models.table import (
-    CLICKHOUSE_HOGQL_MAPPING,
+    CLICKHOUSE_INSIGHTSQL_MAPPING,
     SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING,
 )
 from products.data_warehouse.backend.models.util import validate_warehouse_table_url_pattern
@@ -74,11 +74,11 @@ class TableSerializer(serializers.ModelSerializer):
         if database.has_table(table.name):
             fields = database.get_table(table.name).fields
         else:
-            fields = table.hogql_definition().fields
+            fields = table.insightsql_definition().fields
 
         serializes_fields = serialize_fields(
             fields,
-            HogQLContext(database=database, team_id=self.context["team_id"]),
+            InsightsQLContext(database=database, team_id=self.context["team_id"]),
             table.name_chain,
             table.columns,
             table_type="external",
@@ -150,8 +150,8 @@ class TableSerializer(serializers.ModelSerializer):
 
     def validate_name(self, name):
         if not self.instance or self.instance.name != name:
-            name_exists_in_hogql_database = self.context["database"].has_table(name)
-            if name_exists_in_hogql_database:
+            name_exists_in_insightsql_database = self.context["database"].has_table(name)
+            if name_exists_in_insightsql_database:
                 raise serializers.ValidationError("A table with this name already exists.")
 
         return name
@@ -173,8 +173,8 @@ class SimpleTableSerializer(serializers.ModelSerializer):
             database = Database.create_for(team_id=self.context["team_id"])
 
         fields = serialize_fields(
-            table.hogql_definition().fields,
-            HogQLContext(database=database, team_id=team_id),
+            table.insightsql_definition().fields,
+            InsightsQLContext(database=database, team_id=team_id),
             table.name_chain,
             table_type="external",
         )
@@ -290,7 +290,7 @@ class TableViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 columns[key] = {}
 
             columns[key]["clickhouse"] = f"Nullable({SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]})"
-            columns[key]["hogql"] = CLICKHOUSE_HOGQL_MAPPING[SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]].__name__
+            columns[key]["insightsql"] = CLICKHOUSE_INSIGHTSQL_MAPPING[SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING[value]].__name__
 
         table.columns = columns
         table.save()

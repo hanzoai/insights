@@ -1,4 +1,4 @@
-import { SurprisedHog } from 'lib/components/hedgehogs'
+import { SurprisedHog } from 'lib/components/mascots'
 
 interface Props {
     type: 'question' | 'survey'

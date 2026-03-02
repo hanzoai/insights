@@ -45,12 +45,12 @@ import 'package:posthog_flutter/posthog_flutter.dart';
 Future<void> main() async {
   // init WidgetsFlutterBinding if not yet
   WidgetsFlutterBinding.ensureInitialized();
-  final config = PostHogConfig('${props.apiToken}');
+  final config = InsightsConfig('${props.apiToken}');
   config.host = '${apiHostOrigin()}';
   config.debug = true;
   config.captureApplicationLifecycleEvents = true;
   ${configOptions}
-  // Setup PostHog with the given Context and Config
+  // Setup Insights with the given Context and Config
   await Posthog().setup(config);
   runApp(MyApp());
 }`}
@@ -80,8 +80,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    // Wrap your App with PostHogWidget
-    return PostHogWidget(
+    // Wrap your App with InsightsWidget
+    return InsightsWidget(
       child: MaterialApp(
         // Add PosthogObserver to your navigatorObservers
         navigatorObservers: [PosthogObserver()],
@@ -266,7 +266,7 @@ export function SDKInstallFlutterInstructions(props: FlutterSetupProps): JSX.Ele
                     {props.includeReplay && (
                         <>
                             <p className="prompt-text">
-                                Wrap your app with the <strong>PostHogWidget</strong> and install the{' '}
+                                Wrap your app with the <strong>InsightsWidget</strong> and install the{' '}
                                 <strong>PosthogObserver</strong>
                             </p>
                             <InstallFlutterWidgetsAndObsserver />
@@ -286,7 +286,7 @@ export function SDKInstallFlutterTrackScreenInstructions(): JSX.Element {
         <>
             <p>
                 With the <Link to="https://posthog.com/docs/libraries/flutter#example">PosthogObserver</Link> Observer,
-                PostHog will try to record all screen changes automatically.
+                Insights will try to record all screen changes automatically.
             </p>
             <p>
                 If you want to manually send a new screen capture event, use the <code>screen</code> function.

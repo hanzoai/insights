@@ -19,8 +19,8 @@ export const MiniFilters: SharedListMiniFilter[] = [
     {
         type: 'events',
         key: 'events-posthog',
-        name: 'PostHog',
-        tooltip: 'Standard PostHog events except Pageviews, Autocapture, and Exceptions.',
+        name: 'Insights',
+        tooltip: 'Standard Insights events except Pageviews, Autocapture, and Exceptions.',
     },
     {
         type: 'events',
@@ -44,7 +44,7 @@ export const MiniFilters: SharedListMiniFilter[] = [
         type: 'events',
         key: 'events-exceptions',
         name: 'Exceptions',
-        tooltip: 'Exception events from PostHog or its Sentry integration',
+        tooltip: 'Exception events from Insights or its Sentry integration',
     },
     {
         type: 'console',
@@ -107,7 +107,7 @@ export const MiniFilters: SharedListMiniFilter[] = [
         key: 'doctor',
         name: 'Doctor',
         tooltip:
-            'Doctor events are special events that are automatically detected by PostHog to help diagnose issues in replay.',
+            'Doctor events are special events that are automatically detected by Insights to help diagnose issues in replay.',
     },
     {
         type: 'comment',

@@ -19,7 +19,7 @@ const config: StorybookConfig = {
     staticDirs: [
         'public',
         { from: '../../../frontend/public', to: '/static' },
-        { from: '../../../frontend/node_modules/@posthog/hedgehog-mode/assets', to: '/static/hedgehog-mode' },
+        { from: '../../../frontend/node_modules/@posthog/mascot-mode/assets', to: '/static/mascot-mode' },
     ],
 
     webpackFinal: (config) => {

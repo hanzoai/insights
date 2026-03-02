@@ -148,7 +148,7 @@ export function ManagedMigration(): JSX.Element {
                                 value={managedMigration.content_type}
                                 onChange={(value) => setManagedMigrationValue('content_type', value)}
                                 options={[
-                                    { value: 'captured', label: 'PostHog Events' },
+                                    { value: 'captured', label: 'Insights Events' },
                                     { value: 'mixpanel', label: 'Mixpanel Events' },
                                     { value: 'amplitude', label: 'Amplitude Events' },
                                 ]}
@@ -346,7 +346,7 @@ export function ManagedMigrations(): JSX.Element {
                                     const contentTypeConfig = {
                                         captured: {
                                             icon: '/static/icons/favicon.ico?v=2023-07-07',
-                                            alt: 'PostHog',
+                                            alt: 'Insights',
                                         },
                                         mixpanel: {
                                             icon: 'https://mixpanel.com/favicon.ico',

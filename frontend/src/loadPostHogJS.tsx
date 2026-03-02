@@ -1,4 +1,4 @@
-import posthog, { PostHogInterface } from 'posthog-js'
+import posthog, { InsightsInterface } from 'posthog-js'
 import { sampleOnProperty } from 'posthog-js/lib/src/extensions/sampling'
 
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -13,7 +13,7 @@ const shouldDefer = (): boolean => {
     return sampleOnProperty(sessionId, 0.5)
 }
 
-const shouldTrackFramerate = (loadedInstance: PostHogInterface): boolean => {
+const shouldTrackFramerate = (loadedInstance: InsightsInterface): boolean => {
     return (
         !!window.POSTHOG_APP_CONTEXT?.preflight?.is_debug ||
         (!!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_REACT_FRAMERATE) &&
@@ -21,7 +21,7 @@ const shouldTrackFramerate = (loadedInstance: PostHogInterface): boolean => {
     )
 }
 
-export function loadPostHogJS(): void {
+export function loadInsightsJS(): void {
     if (window.JS_POSTHOG_API_KEY) {
         posthog.init(window.JS_POSTHOG_API_KEY, {
             opt_out_useragent_filter: window.location.hostname === 'localhost', // we ARE a bot when running in localhost, so we need to enable this opt-out
@@ -38,7 +38,7 @@ export function loadPostHogJS(): void {
             disable_product_tours: window.IMPERSONATED_SESSION,
             __preview_deferred_init_extensions: shouldDefer(),
             error_tracking: {
-                __capturePostHogExceptions: true,
+                __captureInsightsExceptions: true,
             },
             loaded: (loadedInstance) => {
                 if (loadedInstance.sessionRecording) {

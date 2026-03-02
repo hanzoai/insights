@@ -17,7 +17,7 @@ export function PosthogStatusShownOnlyIfNotOperational({
         return null
     }
 
-    const tooltipText = postHogStatusTooltip ?? 'PostHog status'
+    const tooltipText = postHogStatusTooltip ?? 'Insights status'
     const color = postHogStatusBadgeStatus === 'danger' ? 'var(--danger)' : 'var(--warning)'
 
     return (

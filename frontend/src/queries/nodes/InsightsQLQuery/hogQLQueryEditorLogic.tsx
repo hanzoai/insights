@@ -111,7 +111,7 @@ export const insightsQLQueryEditorLogic = kea<insightsQLQueryEditorLogicType>([
         draftFromPrompt: async () => {
             if (!values.aiAvailable) {
                 throw new Error(
-                    'To use AI features, configure environment variable OPENAI_API_KEY for this instance of PostHog'
+                    'To use AI features, configure environment variable OPENAI_API_KEY for this instance of Insights'
                 )
             }
             try {

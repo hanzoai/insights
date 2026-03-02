@@ -8,7 +8,7 @@ import { RawClickHouseEvent, Team, TimestampFormat } from '../types'
 import { parseJSON } from '../utils/json-parse'
 import { UUIDT, castTimestampOrNow, clickHouseTimestampToISO } from '../utils/utils'
 import { CdpDataWarehouseEvent, CdpInternalEvent } from './schema'
-import { HogFunctionInvocationGlobals, HogFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
+import { CustomFunctionInvocationGlobals, CustomFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
 
 // ID of functions that are hidden from normal users and used by us for special testing
 // For example, transformations use this to only run if in comparison mode
@@ -31,15 +31,15 @@ export const getPersonDisplayName = (team: Team, distinctId: string, properties:
 }
 
 // that we can keep to as a contract
-export function convertToHogFunctionInvocationGlobals(
+export function convertToCustomFunctionInvocationGlobals(
     event: RawClickHouseEvent,
     team: Team,
     siteUrl: string
-): HogFunctionInvocationGlobals {
+): CustomFunctionInvocationGlobals {
     const properties = event.properties ? parseJSON(event.properties) : {}
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    let person: HogFunctionInvocationGlobals['person']
+    let person: CustomFunctionInvocationGlobals['person']
 
     if (event.person_id) {
         const personProperties = event.person_properties ? parseJSON(event.person_properties) : {}
@@ -65,7 +65,7 @@ export function convertToHogFunctionInvocationGlobals(
             : clickHouseTimestampToISO(event.captured_at)
         : null
 
-    const context: HogFunctionInvocationGlobals = {
+    const context: CustomFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
@@ -87,7 +87,7 @@ export function convertToHogFunctionInvocationGlobals(
     return context
 }
 
-export function convertBatchHogFlowRequestToHogFunctionInvocationGlobals({
+export function convertBatchCustomFlowRequestToCustomFunctionInvocationGlobals({
     team,
     personId,
     distinctId,
@@ -97,24 +97,24 @@ export function convertBatchHogFlowRequestToHogFunctionInvocationGlobals({
     personId: string
     distinctId: string
     siteUrl: string
-}): HogFunctionInvocationGlobals {
+}): CustomFunctionInvocationGlobals {
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    const person: HogFunctionInvocationGlobals['person'] = {
+    const person: CustomFunctionInvocationGlobals['person'] = {
         id: personId,
         properties: {},
         name: '',
         url: `${projectUrl}/person/${encodeURIComponent(distinctId)}`,
     }
 
-    const context: HogFunctionInvocationGlobals = {
+    const context: CustomFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
             url: projectUrl,
         },
         event: {
-            event: '$batch_hog_flow_invocation',
+            event: '$batch_custom_flow_invocation',
             properties: {},
             uuid: new UUIDT().toString(),
             distinct_id: distinctId,
@@ -128,15 +128,15 @@ export function convertBatchHogFlowRequestToHogFunctionInvocationGlobals({
     return context
 }
 
-export function convertDataWarehouseEventToHogFunctionInvocationGlobals(
+export function convertDataWarehouseEventToCustomFunctionInvocationGlobals(
     event: CdpDataWarehouseEvent,
     team: Team,
     siteUrl: string
-): HogFunctionInvocationGlobals {
+): CustomFunctionInvocationGlobals {
     const data = event.properties
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    const context: HogFunctionInvocationGlobals = {
+    const context: CustomFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
@@ -156,14 +156,14 @@ export function convertDataWarehouseEventToHogFunctionInvocationGlobals(
     return context
 }
 
-export function convertInternalEventToHogFunctionInvocationGlobals(
+export function convertInternalEventToCustomFunctionInvocationGlobals(
     data: CdpInternalEvent,
     team: Team,
     siteUrl: string
-): HogFunctionInvocationGlobals {
+): CustomFunctionInvocationGlobals {
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    let person: HogFunctionInvocationGlobals['person']
+    let person: CustomFunctionInvocationGlobals['person']
 
     if (data.person) {
         const personDisplayName = getPersonDisplayName(team, data.event.distinct_id, data.person.properties)
@@ -189,7 +189,7 @@ export function convertInternalEventToHogFunctionInvocationGlobals(
         delete properties.exception_props
     }
 
-    const context: HogFunctionInvocationGlobals = {
+    const context: CustomFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
@@ -262,16 +262,16 @@ export const fixLogDeduplication = (logs: LogEntry[]): LogEntrySerialized[] => {
     return preparedLogs
 }
 
-export function isLegacyPluginHogFunction(hogFunction: Pick<HogFunctionType, 'template_id'>): boolean {
-    return hogFunction.template_id?.startsWith('plugin-') ?? false
+export function isLegacyPluginCustomFunction(customFunction: Pick<CustomFunctionType, 'template_id'>): boolean {
+    return customFunction.template_id?.startsWith('plugin-') ?? false
 }
 
-export function isSegmentPluginHogFunction(hogFunction: Pick<HogFunctionType, 'template_id'>): boolean {
-    return hogFunction.template_id?.startsWith('segment-') ?? false
+export function isSegmentPluginCustomFunction(customFunction: Pick<CustomFunctionType, 'template_id'>): boolean {
+    return customFunction.template_id?.startsWith('segment-') ?? false
 }
 
-export function isNativeHogFunction(hogFunction: Pick<HogFunctionType, 'template_id'>): boolean {
-    return hogFunction.template_id?.startsWith('native-') ?? false
+export function isNativeCustomFunction(customFunction: Pick<CustomFunctionType, 'template_id'>): boolean {
+    return customFunction.template_id?.startsWith('native-') ?? false
 }
 
 export function isInternalErrorTrackingEvent(event: CdpInternalEvent['event']): boolean {

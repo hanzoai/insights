@@ -147,7 +147,7 @@ function EmptyInbox(): JSX.Element {
             <IconExpand className="size-12 text-tertiary mb-4" />
             <h3 className="text-lg font-semibold mb-1">Your inbox is empty</h3>
             <p className="text-sm text-secondary max-w-md">
-                PostHog automatically analyzes user sessions and surfaces actionable reports here. Reports will appear
+                Insights automatically analyzes user sessions and surfaces actionable reports here. Reports will appear
                 as patterns are detected.
             </p>
         </div>

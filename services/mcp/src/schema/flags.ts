@@ -1,13 +1,13 @@
 import { z } from 'zod'
 
-export interface PostHogFeatureFlag {
+export interface InsightsFeatureFlag {
     id: number
     key: string
     name: string
 }
 
-export interface PostHogFlagsResponse {
-    results?: PostHogFeatureFlag[]
+export interface InsightsFlagsResponse {
+    results?: InsightsFeatureFlag[]
 }
 const base = ['exact', 'is_not', 'is_set', 'is_not_set'] as const
 const stringOpsForSchema = ['icontains', 'not_icontains', 'regex', 'not_regex', 'is_cleaned_path_exact']

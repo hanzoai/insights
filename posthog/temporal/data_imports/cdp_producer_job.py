@@ -5,7 +5,7 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.logger import get_logger
 from posthog.temporal.data_imports.pipelines.pipeline.cdp_producer import CDPProducer
 from posthog.temporal.utils import CDPProducerWorkflowInputs
@@ -24,7 +24,7 @@ async def produce_to_cdp_kafka_activity(inputs: CDPProducerWorkflowInputs) -> No
 
 
 @workflow.defn(name="dwh-cdp-producer-job")
-class CDPProducerJobWorkflow(PostHogWorkflow):
+class CDPProducerJobWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> CDPProducerWorkflowInputs:
         loaded = json.loads(inputs[0])

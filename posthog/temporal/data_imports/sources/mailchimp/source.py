@@ -33,7 +33,7 @@ class MailchimpSource(SimpleSource[MailchimpSourceConfig]):
             name=SchemaExternalDataSourceType.MAILCHIMP,
             label="Mailchimp",
             betaSource=True,
-            caption="""Enter your Mailchimp API key to automatically pull your Mailchimp data into the PostHog Data warehouse.
+            caption="""Enter your Mailchimp API key to automatically pull your Mailchimp data into the Insights Data warehouse.
 
 You can create an API key in your [Mailchimp account settings](https://us1.admin.mailchimp.com/account/api/).
 

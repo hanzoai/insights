@@ -154,7 +154,7 @@ export const initialEventToPersonProperties = new Set(
  *
  * Note: Properties NOT in this list will trigger updates by default.
  *
- * GeoIP properties source: posthog/geoip.py and posthog/taxonomy/taxonomy.py
+ * GeoIP properties source: insights/geoip.py and insights/taxonomy/taxonomy.py
  * GeoIP properties that DO trigger updates (not listed here): $geoip_country_name, $geoip_city_name
  */
 export const FILTERED_PERSON_UPDATE_PROPERTIES = new Set([

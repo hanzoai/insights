@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("endpoints", "0007_fix_hogql_variable_keys"),
+        ("endpoints", "0007_fix_insightsql_variable_keys"),
     ]
 
     operations = [

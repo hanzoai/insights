@@ -1,6 +1,6 @@
 import { P, match } from 'ts-pattern'
 
-import { isPostHogProperty } from '~/taxonomy/taxonomy'
+import { isInsightsProperty } from '~/taxonomy/taxonomy'
 
 import {
     ErrorEventProperties,
@@ -185,7 +185,7 @@ export function getAdditionalProperties(
 ): Record<string, unknown> {
     return Object.fromEntries(
         Object.entries(properties).filter(([key]) => {
-            return key === 'version' || !isPostHogProperty(key, isCloudOrDev)
+            return key === 'version' || !isInsightsProperty(key, isCloudOrDev)
         })
     )
 }

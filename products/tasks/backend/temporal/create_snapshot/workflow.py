@@ -6,7 +6,7 @@ from typing import Optional
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 from .activities import (
     CleanupSandboxInput,
@@ -41,7 +41,7 @@ class CreateSnapshotForRepositoryOutput:
 
 
 @workflow.defn(name="create-snapshot-for-repository")
-class CreateSnapshotForRepositoryWorkflow(PostHogWorkflow):
+class CreateSnapshotForRepositoryWorkflow(InsightsWorkflow):
     def __init__(self) -> None:
         self._context: Optional[SnapshotContext] = None
 

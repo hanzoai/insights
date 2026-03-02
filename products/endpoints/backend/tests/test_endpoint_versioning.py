@@ -14,7 +14,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
     def setUp(self):
         super().setUp()
         self.sample_query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count(1) FROM query_log",
         }
 
@@ -41,7 +41,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         assert version is not None
         self.assertEqual(1, version.version)
         # Check key fields (Pydantic expands with defaults)
-        self.assertEqual("HogQLQuery", version.query["kind"])
+        self.assertEqual("InsightsQLQuery", version.query["kind"])
         self.assertEqual(self.sample_query["query"], version.query["query"])
         self.assertEqual(self.user, version.created_by)
 
@@ -50,12 +50,12 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="version_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
         )
 
         # Update query
-        new_query = {"kind": "HogQLQuery", "query": "SELECT 2"}
+        new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2"}
         response = self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
@@ -108,7 +108,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
     def test_update_identical_query_does_not_create_version(self):
         """Submitting same query shouldn't create duplicate version."""
         # Create endpoint via API to ensure query goes through Pydantic expansion
-        query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         response = self.client.post(
             f"/api/environments/{self.team.id}/endpoints/",
             {"name": "duplicate_test", "query": query},
@@ -135,13 +135,13 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="run_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1 as v1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1 as v1"},
             created_by=self.user,
             is_active=True,
         )
 
         # Create version 2
-        new_query = {"kind": "HogQLQuery", "query": "SELECT 2 as v2"}
+        new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2 as v2"}
         self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
@@ -161,13 +161,13 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="run_v1_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1 as v1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1 as v1"},
             created_by=self.user,
             is_active=True,
         )
 
         # Create version 2
-        new_query = {"kind": "HogQLQuery", "query": "SELECT 2 as v2"}
+        new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2 as v2"}
         self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
@@ -218,7 +218,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="list_versions_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
         )
 
@@ -226,7 +226,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         for i in range(2, 4):
             self.client.put(
                 f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-                {"query": {"kind": "HogQLQuery", "query": f"SELECT {i}"}},
+                {"query": {"kind": "InsightsQLQuery", "query": f"SELECT {i}"}},
                 format="json",
             )
 
@@ -244,7 +244,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="version_detail_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
         )
 
@@ -270,7 +270,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         for i in range(2, 5):
             self.client.put(
                 f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-                {"query": {"kind": "HogQLQuery", "query": f"SELECT {i}"}},
+                {"query": {"kind": "InsightsQLQuery", "query": f"SELECT {i}"}},
                 format="json",
             )
 
@@ -289,7 +289,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="immutable_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
         )
 
@@ -300,7 +300,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         # Update endpoint to create v2
         self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-            {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+            {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
 
@@ -313,14 +313,14 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="activity_test",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
         )
 
         # Update to create v2
         self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-            {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+            {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
 
@@ -340,7 +340,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
 
         from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT * FROM events LIMIT 10"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT * FROM events LIMIT 10"}
 
         # Create endpoint with a query that references a table
         endpoint = Endpoint.objects.create(
@@ -381,7 +381,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
             patch("products.data_warehouse.backend.data_load.saved_query_service.delete_saved_query_schedule"),
         ):
             # Update query (which should create new version with its own materialization)
-            new_query = {"kind": "HogQLQuery", "query": "SELECT * FROM events WHERE timestamp > now() - INTERVAL 1 DAY"}
+            new_query = {"kind": "InsightsQLQuery", "query": "SELECT * FROM events WHERE timestamp > now() - INTERVAL 1 DAY"}
             response = self.client.put(
                 f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
                 {"query": new_query},
@@ -422,7 +422,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
     def test_no_materialization_transfer_for_non_materialized_endpoint(self):
         """Non-materialized endpoints should not trigger materialization transfer."""
         # Create non-materialized endpoint using helper
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="non_materialized_test",
             team=self.team,
@@ -435,7 +435,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         self.assertIsNone(version.saved_query)
 
         # Update query
-        new_query = {"kind": "HogQLQuery", "query": "SELECT 2"}
+        new_query = {"kind": "InsightsQLQuery", "query": "SELECT 2"}
         response = self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
             {"query": new_query},
@@ -584,7 +584,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
 
         from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="versioned_mat",
             team=self.team,
@@ -611,7 +611,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         with patch("products.data_warehouse.backend.data_load.saved_query_service.sync_saved_query_workflow"):
             response = self.client.put(
                 f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-                {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+                {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
                 format="json",
             )
             self.assertEqual(status.HTTP_200_OK, response.status_code, response.json())
@@ -633,7 +633,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         from unittest.mock import patch
 
         # Create endpoint with v1
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="target_version_mat",
             team=self.team,
@@ -644,7 +644,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         # Create v2 by changing query
         response = self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-            {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+            {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -688,7 +688,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 
         # Create endpoint with v1
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="disable_v1_mat",
             team=self.team,
@@ -714,7 +714,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         # Create v2 by changing query
         response = self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-            {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+            {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -744,7 +744,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
     def test_update_with_version_param_updates_description_on_specific_version(self):
         """Update with ?version=N should update description on that specific version."""
         # Create endpoint with v1
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="desc_v1_update",
             team=self.team,
@@ -755,7 +755,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
         # Create v2 by changing query
         response = self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/",
-            {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+            {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
         self.assertEqual(status.HTTP_200_OK, response.status_code)
@@ -780,7 +780,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
 
     def test_update_with_invalid_version_param_returns_error(self):
         """Update with ?version=N where N doesn't exist should return error."""
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="invalid_version_update",
             team=self.team,
@@ -800,7 +800,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
 
     def test_update_rejects_query_change_with_version_param(self):
         """Cannot change query when targeting a specific version."""
-        initial_query = {"kind": "HogQLQuery", "query": "SELECT 1"}
+        initial_query = {"kind": "InsightsQLQuery", "query": "SELECT 1"}
         endpoint = create_endpoint_with_version(
             name="query_change_rejection",
             team=self.team,
@@ -810,7 +810,7 @@ class TestEndpointVersioning(ClickhouseTestMixin, APIBaseTest):
 
         response = self.client.put(
             f"/api/environments/{self.team.id}/endpoints/{endpoint.name}/?version=1",
-            {"query": {"kind": "HogQLQuery", "query": "SELECT 2"}},
+            {"query": {"kind": "InsightsQLQuery", "query": "SELECT 2"}},
             format="json",
         )
 

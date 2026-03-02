@@ -19,7 +19,7 @@ import { CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS } from 'products/customer_analyti
 import { customerProfileLogic } from 'products/customer_analytics/frontend/customerProfileLogic'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
-import { createPostHogWidgetNode } from './NodeWrapper'
+import { createInsightsWidgetNode } from './NodeWrapper'
 import { notebookNodeLogic } from './notebookNodeLogic'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeUsageMetricsAttributes>): JSX.Element | null => {
@@ -159,7 +159,7 @@ type NotebookNodeUsageMetricsAttributes = {
     tabId: string
 }
 
-export const NotebookNodeUsageMetrics = createPostHogWidgetNode<NotebookNodeUsageMetricsAttributes>({
+export const NotebookNodeUsageMetrics = createInsightsWidgetNode<NotebookNodeUsageMetricsAttributes>({
     nodeType: NotebookNodeType.UsageMetrics,
     titlePlaceholder: 'Usage',
     Component,

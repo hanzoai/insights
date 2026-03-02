@@ -575,7 +575,7 @@ class SetupWizardQueryRateThrottle(SimpleRateThrottle):
 
     # Throttle per wizard hash
     def get_cache_key(self, request, view):
-        hash = request.headers.get("X-PostHog-Wizard-Hash")
+        hash = request.headers.get("X-Insights-Wizard-Hash")
 
         authorization_header = request.headers.get("Authorization")
 

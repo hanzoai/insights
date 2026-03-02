@@ -97,7 +97,7 @@ const shouldForcePageLoad = (input: any): boolean => {
     return !!matches && matches[1] !== `${getCurrentTeamId()}`
 }
 
-const isPostHogDomain = (url: string): boolean => {
+const isInsightsDomain = (url: string): boolean => {
     return /^https:\/\/((www|app|eu)\.)?posthog\.com/.test(url)
 }
 
@@ -105,11 +105,11 @@ const isDirectLink = (url: string): boolean => {
     return /^(mailto:|https?:\/\/|:\/\/)/.test(url)
 }
 
-const isPostHogComDocs = (url: string): url is PostHogComDocsURL => {
+const isInsightsComDocs = (url: string): url is InsightsComDocsURL => {
     return /^https:\/\/(www\.)?posthog\.com\/docs/.test(url)
 }
 
-export type PostHogComDocsURL = `https://${'www.' | ''}posthog.com/docs/${string}`
+export type InsightsComDocsURL = `https://${'www.' | ''}posthog.com/docs/${string}`
 
 /**
  * Link
@@ -152,7 +152,7 @@ export const Link: React.FC<LinkProps & React.RefAttributes<HTMLElement>> = Reac
             href: typeof to === 'string' ? to : undefined,
         })
 
-        const shouldOpenInDocsPanel = !disableDocsPanel && typeof to === 'string' && isPostHogComDocs(to)
+        const shouldOpenInDocsPanel = !disableDocsPanel && typeof to === 'string' && isInsightsComDocs(to)
 
         const onClick = (event: React.MouseEvent<HTMLElement>): void => {
             if (event.metaKey || event.ctrlKey) {
@@ -205,14 +205,14 @@ export const Link: React.FC<LinkProps & React.RefAttributes<HTMLElement>> = Reac
                     }
                 }
             } else if (target === '_blank' && !externalLink && to && typeof to === 'string') {
-                // For internal links, open in new PostHog tab
+                // For internal links, open in new Insights tab
                 event.preventDefault()
                 event.stopPropagation()
                 newInternalTab(to)
             }
         }
 
-        const rel = typeof to === 'string' && isPostHogDomain(to) ? 'noopener' : 'noopener noreferrer'
+        const rel = typeof to === 'string' && isInsightsDomain(to) ? 'noopener' : 'noopener noreferrer'
         const href = to
             ? typeof to === 'string'
                 ? isDirectLink(to) || disableClientSideRouting

@@ -15,7 +15,7 @@ from .utils import generate_random_token
 ModeType = Literal["sha256", "pbkdf2"]
 PERSONAL_API_KEY_MODES_TO_TRY: tuple[tuple[ModeType, Optional[int]], ...] = (
     ("sha256", None),  # Moved to simple hashing in 2024-02
-    ("pbkdf2", 260000),  # This is the iteration count used by PostHog since the beginning of time.
+    ("pbkdf2", 260000),  # This is the iteration count used by Insights since the beginning of time.
     ("pbkdf2", 390000),  # This is the iteration count used briefly on some API keys.
 )
 

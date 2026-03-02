@@ -15,7 +15,7 @@ declare module '@storybook/types' {
  *   title: 'My story',
  *   component: MyComponent,
  *   parameters: {
- *     featureFlags: [FEATURE_FLAGS.HOGQL], // add flags here
+ *     featureFlags: [FEATURE_FLAGS.INSIGHTSQL], // add flags here
  *   },
  * } as ComponentMeta<typeof MyComponent>
  * ```

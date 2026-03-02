@@ -8,12 +8,12 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK.
+                        Setting up analytics starts with installing the Insights SDK.
                     </Markdown>
 
                     <CodeBlock
@@ -31,8 +31,8 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
             content: (
                 <>
                     <Markdown>
-                        Install the Vercel AI SDK. The PostHog SDK instruments your LLM calls by wrapping the Vercel AI client.
-                        The PostHog SDK **does not** proxy your calls.
+                        Install the Vercel AI SDK. The Insights SDK instruments your LLM calls by wrapping the Vercel AI client.
+                        The Insights SDK **does not** proxy your calls.
                     </Markdown>
 
                     <CodeBlock
@@ -44,7 +44,7 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the background to send the data.
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the background to send the data.
 
                             You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
@@ -53,23 +53,23 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
             ),
         },
         {
-            title: 'Initialize PostHog and Vercel AI',
+            title: 'Initialize Insights and Vercel AI',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then pass the Vercel AI OpenAI client and the PostHog client to the `withTracing` wrapper.
+                        Initialize Insights with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then pass the Vercel AI OpenAI client and the Insights client to the `withTracing` wrapper.
                     </Markdown>
 
                     <CodeBlock
                         language="typescript"
                         code={dedent`
-                            import { PostHog } from "posthog-node";
+                            import { Insights } from "posthog-node";
                             import { withTracing } from "@posthog/ai"
                             import { generateText } from "ai"
                             import { createOpenAI } from "@ai-sdk/openai"
 
-                            const phClient = new PostHog(
+                            const phClient = new Insights(
                               '<ph_project_api_key>',
                               { host: '<ph_client_api_host>' }
                             );
@@ -103,7 +103,7 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
             content: (
                 <>
                     <Markdown>
-                        Now, when you use the Vercel AI SDK to call LLMs, PostHog automatically captures an `$ai_generation` event.
+                        Now, when you use the Vercel AI SDK to call LLMs, Insights automatically captures an `$ai_generation` event.
 
                         This works for both `text` and `image` message types.
                     </Markdown>

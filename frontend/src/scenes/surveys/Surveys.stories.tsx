@@ -350,7 +350,7 @@ export const NewSurveyWithHTMLQuestionDescription: StoryFn = () => {
                 200,
                 {
                     email: 'test@posthog.com',
-                    first_name: 'Test Hedgehog',
+                    first_name: 'Test Mascot',
                     organization: {
                         ...organizationCurrent,
                         available_product_features: [

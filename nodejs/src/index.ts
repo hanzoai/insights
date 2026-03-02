@@ -1,7 +1,7 @@
 // NOTE: Keep these as ~ imports as we can validate the build output this way
 import { initTracing } from '~/common/tracing/otel'
 import { PluginServer } from '~/server'
-import { initSuperProperties } from '~/utils/posthog'
+import { initSuperProperties } from '~/utils/insights'
 
 initSuperProperties()
 initTracing()

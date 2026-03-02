@@ -341,7 +341,7 @@ describe('PersonState.processEvent()', () => {
             expect(personPrimaryTeam.uuid).not.toEqual(personOtherTeam.uuid)
         })
 
-        it('overrides are created only when distinct_id is in posthog_personlessdistinctid', async () => {
+        it('overrides are created only when distinct_id is in insights_personlessdistinctid', async () => {
             // oldUserDistinctId exists, and 'old2' will merge into it, but not create an override
             await createPerson(hub, timestamp, {}, {}, {}, teamId, null, false, oldUserUuid, {
                 distinctId: oldUserDistinctId,
@@ -389,7 +389,7 @@ describe('PersonState.processEvent()', () => {
             await kafkaAcks
             await kafkaAcks2
 
-            // new2 has an override, because it was in posthog_personlessdistinctid
+            // new2 has an override, because it was in insights_personlessdistinctid
             await clickhouse.delayUntilEventIngested(() => fetchOverridesForDistinctId('new2'))
             const chOverrides = await fetchOverridesForDistinctId('new2')
             expect(chOverrides.length).toEqual(1)
@@ -403,7 +403,7 @@ describe('PersonState.processEvent()', () => {
                 ])
             )
 
-            // old2 has no override, because it wasn't in posthog_personlessdistinctid
+            // old2 has no override, because it wasn't in insights_personlessdistinctid
             const chOverridesOld = await fetchOverridesForDistinctId('old2')
             expect(chOverridesOld.length).toEqual(0)
         })
@@ -2445,13 +2445,13 @@ describe('PersonState.processEvent()', () => {
             )
 
             // existing overrides
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: anonPerson.id,
                 feature_flag_key: 'beta-feature',
                 hash_key: 'example_id',
             })
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: identifiedPerson.id,
                 feature_flag_key: 'multivariate-flag',
@@ -2484,7 +2484,7 @@ describe('PersonState.processEvent()', () => {
 
             const result = await hub.postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT "feature_flag_key", "person_id", "hash_key" FROM "posthog_featureflaghashkeyoverride" WHERE "team_id" = $1`,
+                `SELECT "feature_flag_key", "person_id", "hash_key" FROM "insights_featureflaghashkeyoverride" WHERE "team_id" = $1`,
                 [teamId],
                 'testQueryHashKeyOverride'
             )
@@ -2533,19 +2533,19 @@ describe('PersonState.processEvent()', () => {
 
             // existing overrides for both anonPerson and identifiedPerson
             // which implies a clash when they are merged
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: anonPerson.id,
                 feature_flag_key: 'beta-feature',
                 hash_key: 'anon_id',
             })
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: identifiedPerson.id,
                 feature_flag_key: 'beta-feature',
                 hash_key: 'identified_id',
             })
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: anonPerson.id,
                 feature_flag_key: 'multivariate-flag',
@@ -2579,7 +2579,7 @@ describe('PersonState.processEvent()', () => {
 
             const result = await hub.postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT "feature_flag_key", "person_id", "hash_key" FROM "posthog_featureflaghashkeyoverride" WHERE "team_id" = $1`,
+                `SELECT "feature_flag_key", "person_id", "hash_key" FROM "insights_featureflaghashkeyoverride" WHERE "team_id" = $1`,
                 [teamId],
                 'testQueryHashKeyOverride'
             )
@@ -2625,13 +2625,13 @@ describe('PersonState.processEvent()', () => {
                 uuidFromDistinctId(teamId, 'new_distinct_id'),
                 { distinctId: 'new_distinct_id' }
             )
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: identifiedPerson.id,
                 feature_flag_key: 'beta-feature',
                 hash_key: 'example_id',
             })
-            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
                 team_id: teamId,
                 person_id: identifiedPerson.id,
                 feature_flag_key: 'multivariate-flag',
@@ -2661,7 +2661,7 @@ describe('PersonState.processEvent()', () => {
 
             const result = await hub.postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT "feature_flag_key", "person_id", "hash_key" FROM "posthog_featureflaghashkeyoverride" WHERE "team_id" = $1`,
+                `SELECT "feature_flag_key", "person_id", "hash_key" FROM "insights_featureflaghashkeyoverride" WHERE "team_id" = $1`,
                 [teamId],
                 'testQueryHashKeyOverride'
             )

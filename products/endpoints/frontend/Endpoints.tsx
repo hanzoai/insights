@@ -16,7 +16,7 @@ import { OutputTab } from 'scenes/data-warehouse/editor/outputPaneLogic'
 import { urls } from 'scenes/urls'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
-import { isHogQLQuery } from '~/queries/utils'
+import { isInsightsQLQuery } from '~/queries/utils'
 import { EndpointType } from '~/types'
 
 import { EndpointFromInsightModal } from './EndpointFromInsightModal'
@@ -77,7 +77,7 @@ export const EndpointsTable = ({ tabId }: EndpointsTableProps): JSX.Element => {
     }
 
     const handleDuplicate = (endpoint: EndpointType): void => {
-        if (isHogQLQuery(endpoint.query)) {
+        if (isInsightsQLQuery(endpoint.query)) {
             router.actions.push(urls.sqlEditor({ query: endpoint.query.query, outputTab: OutputTab.Endpoint }))
         } else {
             setDuplicateEndpoint(endpoint)

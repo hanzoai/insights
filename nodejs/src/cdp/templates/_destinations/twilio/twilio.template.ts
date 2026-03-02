@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'hidden',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Send SMS messages using Twilio',
     icon_url: '/static/services/twilio.png',
     category: ['Communication'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 let toNumber := inputs.to_number
 let message := inputs.message
@@ -94,7 +94,7 @@ if (inputs.debug) {
             secret: false,
             required: true,
             description: 'SMS message content (max 1600 characters).',
-            default: 'PostHog event {{ event.event }} was triggered',
+            default: 'Insights event {{ event.event }} was triggered',
             templating: 'liquid',
         },
         {

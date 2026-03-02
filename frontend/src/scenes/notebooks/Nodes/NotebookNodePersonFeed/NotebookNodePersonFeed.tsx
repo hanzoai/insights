@@ -13,7 +13,7 @@ import { PersonType } from '~/types'
 
 import { customerProfileLogic } from 'products/customer_analytics/frontend/customerProfileLogic'
 
-import { createPostHogWidgetNode } from '../NodeWrapper'
+import { createInsightsWidgetNode } from '../NodeWrapper'
 import { notebookNodeLogic } from '../notebookNodeLogic'
 import { AISessionSummary } from './AISessionSummary/AISessionSummary'
 import { Session } from './Session'
@@ -90,7 +90,7 @@ type NotebookNodePersonFeedAttributes = {
     distinctId: string
 }
 
-export const NotebookNodePersonFeed = createPostHogWidgetNode<NotebookNodePersonFeedAttributes>({
+export const NotebookNodePersonFeed = createInsightsWidgetNode<NotebookNodePersonFeedAttributes>({
     nodeType: NotebookNodeType.PersonFeed,
     titlePlaceholder: 'Feed',
     Component,

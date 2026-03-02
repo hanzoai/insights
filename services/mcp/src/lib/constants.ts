@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers'
 
 import type { CloudRegion } from '@/tools/types'
 
-// Region-specific PostHog API base URLs
+// Region-specific Insights API base URLs
 export const POSTHOG_US_BASE_URL = 'https://us.posthog.com'
 export const POSTHOG_EU_BASE_URL = 'https://eu.posthog.com'
 
@@ -15,17 +15,17 @@ export const toCloudRegion = (value: string | undefined | null): CloudRegion => 
     return 'us'
 }
 
-// Get the PostHog base URL for a region
+// Get the Insights base URL for a region
 export const getBaseUrlForRegion = (region: CloudRegion): string => {
     return region === 'eu' ? POSTHOG_EU_BASE_URL : POSTHOG_US_BASE_URL
 }
 
 /**
- * Custom API base URL for self-hosted PostHog instances.
+ * Custom API base URL for self-hosted Insights instances.
  *
- * WARNING: In PostHog Production, this should NOT be set.
+ * WARNING: In Insights Production, this should NOT be set.
  * The code automatically handles US/EU region routing via getAuthorizationServerUrl().
- * Only set this for self-hosted PostHog deployments.
+ * Only set this for self-hosted Insights deployments.
  */
 export const CUSTOM_API_BASE_URL = env.POSTHOG_API_BASE_URL
 

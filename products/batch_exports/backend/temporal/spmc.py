@@ -10,16 +10,16 @@ from django.conf import settings
 
 import pyarrow as pa
 
-from posthog.schema import EventPropertyFilter, HogQLPropertyFilter, HogQLQueryModifiers, MaterializationMode
+from posthog.schema import EventPropertyFilter, InsightsQLPropertyFilter, InsightsQLQueryModifiers, MaterializationMode
 
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database
-from posthog.hogql.errors import ExposedHogQLError, InternalHogQLError
-from posthog.hogql.hogql import ast
-from posthog.hogql.parser import parse_expr
-from posthog.hogql.printer import prepare_ast_for_printing, print_prepared_ast
-from posthog.hogql.property import property_to_expr
-from posthog.hogql.visitor import TraversingVisitor
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.errors import ExposedInsightsQLError, InternalInsightsQLError
+from posthog.insightsql.insightsql import ast
+from posthog.insightsql.parser import parse_expr
+from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from posthog.insightsql.property import property_to_expr
+from posthog.insightsql.visitor import TraversingVisitor
 
 from posthog.batch_exports.service import BackfillDetails
 from posthog.models import Team
@@ -640,8 +640,8 @@ class UpdatePropertiesToPersonProperties(TraversingVisitor):
 class InvalidFilterError(Exception):
     """Error raised when an invalid filter is used."""
 
-    def __init__(self, error: ExposedHogQLError | InternalHogQLError):
-        if isinstance(error, ExposedHogQLError):
+    def __init__(self, error: ExposedInsightsQLError | InternalInsightsQLError):
+        if isinstance(error, ExposedInsightsQLError):
             msg = f"One or more provided filters are invalid: {error}"
         else:
             # TODO: Figure out if we can include some debug information from internal
@@ -661,23 +661,23 @@ def compose_filters_clause(
     be collisions with the values returned by this function.
 
     Arguments:
-        filters: A list of serialized HogQL filters.
+        filters: A list of serialized InsightsQL filters.
         team_id: Team we are running for.
-        values: HogQL placeholder values already in use.
+        values: InsightsQL placeholder values already in use.
 
     Returns:
         A printed string with the ClickHouse SQL clause, and a dictionary
         of placeholder to values to be used as query parameters.
     """
     team = Team.objects.get(id=team_id)
-    context = HogQLContext(
+    context = InsightsQLContext(
         team=team,
         team_id=team.id,
         enable_select_queries=False,
         limit_top_select=False,
-        within_non_hogql_query=False,
+        within_non_insightsql_query=False,
         values=values or {},
-        modifiers=HogQLQueryModifiers(materializationMode=MaterializationMode.DISABLED),
+        modifiers=InsightsQLQueryModifiers(materializationMode=MaterializationMode.DISABLED),
     )
     context.database = Database.create_for(team=team, modifiers=context.modifiers)
     exprs = []
@@ -689,22 +689,22 @@ def compose_filters_clause(
                 # HACK: We are trying to apply the filter to 'events.person_properties' as that would
                 # mimic workflows behavior of applying it to the person in the event but:
                 # 1. PersonPropertyFilter expects a join with the person table, so we can't use it.
-                # 2. 'persons_properties' doesn't exist in the HogQL 'EventsTable', so we can't use it.
+                # 2. 'persons_properties' doesn't exist in the InsightsQL 'EventsTable', so we can't use it.
                 # So, we treat this filter like an events property filter (for 1) and manually update
                 # the chain to point to 'events.poe.properties' which does exist in 'EventsTable' (for 2).
                 # This will get resolved to 'events.person_properties' in ClickHouse dialect. This is done
                 # using a visitor, which makes it slightly less of a hack.
                 # I attempted to add a new property filter just for us to use here, but it was a mess
                 # requiring multiple unnecessary (for us) file changes, and consistently failed type checks
-                # everywhere in hogql modules.
+                # everywhere in insightsql modules.
                 expr = property_to_expr(EventPropertyFilter(**{**filter, **{"type": "event"}}), team=team)
                 UpdatePropertiesToPersonProperties().visit(expr)
                 exprs.append(expr)
 
-            case "hogql":
+            case "insightsql":
                 try:
-                    exprs.append(property_to_expr(HogQLPropertyFilter(**filter), team=team))
-                except (ExposedHogQLError, InternalHogQLError) as e:
+                    exprs.append(property_to_expr(InsightsQLPropertyFilter(**filter), team=team))
+                except (ExposedInsightsQLError, InternalInsightsQLError) as e:
                     raise InvalidFilterError(e) from e
 
             case s:
@@ -721,7 +721,7 @@ def compose_filters_clause(
         where=and_expr,
     )
     prepared_select_query: ast.SelectQuery = typing.cast(
-        ast.SelectQuery, prepare_ast_for_printing(select_query, context=context, dialect="hogql", stack=[select_query])
+        ast.SelectQuery, prepare_ast_for_printing(select_query, context=context, dialect="insightsql", stack=[select_query])
     )
     prepared_and_expr = prepare_ast_for_printing(
         and_expr, context=context, dialect="clickhouse", stack=[prepared_select_query]
@@ -734,7 +734,7 @@ def compose_filters_clause(
             dialect="clickhouse",
             stack=[prepared_select_query],
         )
-    except (ExposedHogQLError, InternalHogQLError) as e:
+    except (ExposedInsightsQLError, InternalInsightsQLError) as e:
         raise InvalidFilterError(e) from e
 
     return printed, context.values

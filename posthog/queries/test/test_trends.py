@@ -4621,7 +4621,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
     @snapshot_clickhouse_queries
     def test_trends_aggregate_by_distinct_id(self):
-        # Stopgap until https://github.com/PostHog/meta/pull/39 is implemented
+        # Stopgap until https://github.com/Insights/meta/pull/39 is implemented
 
         _create_person(
             team_id=self.team.pk,
@@ -5379,7 +5379,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["$host"], person_properties=["$some_prop"])
     def test_against_clashing_entity_and_property_filter_naming(self):
-        # Regression test for https://github.com/PostHog/posthog/issues/5814
+        # Regression test for https://github.com/Insights/posthog/issues/5814
         _create_person(
             team_id=self.team.pk,
             distinct_ids=["blabla", "anonymous_id"],

@@ -4,13 +4,13 @@ from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 EXAMPLE_RESPONSE = {
     "person": {
         "id": "1234",
-        "name": {"fullName": "Max the Hedgehog", "givenName": "Max", "familyName": "the Hedgehog"},
+        "name": {"fullName": "Max the Mascot", "givenName": "Max", "familyName": "the Mascot"},
         "email": "max@posthog.com",
     },
     "company": {
         "id": "1234",
-        "name": "PostHog",
-        "legalName": "PostHog Inc.",
+        "name": "Insights",
+        "legalName": "Insights Inc.",
         "domain": "posthog.com",
     },
 }
@@ -58,7 +58,7 @@ class TestTemplateClearbit(BaseCustomFunctionTemplateTest):
             {"method": "GET", "headers": {"Authorization": "Bearer API_KEY"}},
         )
 
-        assert self.get_mock_print_calls() == [("Clearbit data found - sending event to PostHog",)]
+        assert self.get_mock_print_calls() == [("Clearbit data found - sending event to Insights",)]
         assert self.get_mock_posthog_capture_calls() == [
             (
                 {
@@ -71,16 +71,16 @@ class TestTemplateClearbit(BaseCustomFunctionTemplateTest):
                             "person": {
                                 "id": "1234",
                                 "name": {
-                                    "fullName": "Max the Hedgehog",
+                                    "fullName": "Max the Mascot",
                                     "givenName": "Max",
-                                    "familyName": "the Hedgehog",
+                                    "familyName": "the Mascot",
                                 },
                                 "email": "max@posthog.com",
                             },
                             "company": {
                                 "id": "1234",
-                                "name": "PostHog",
-                                "legalName": "PostHog Inc.",
+                                "name": "Insights",
+                                "legalName": "Insights Inc.",
                                 "domain": "posthog.com",
                             },
                             "clearbit_enriched": True,

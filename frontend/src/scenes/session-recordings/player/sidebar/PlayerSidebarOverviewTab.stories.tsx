@@ -155,10 +155,10 @@ const meta: Meta = {
                                         'Desktop',
                                         'Max OS',
                                         '',
-                                        'hedgehog.io',
+                                        'mascot.io',
                                         'Spikeville',
                                         'Hogington',
-                                        'https://hedgehog.io/entry-page',
+                                        'https://mascot.io/entry-page',
                                     ],
                                 ],
                             })

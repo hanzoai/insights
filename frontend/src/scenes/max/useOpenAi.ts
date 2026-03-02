@@ -18,7 +18,7 @@ export interface UseOpenAiReturn {
 }
 
 /**
- * Hook that abstracts opening PostHog AI.
+ * Hook that abstracts opening Insights AI.
  * When UX_REMOVE_SIDEPANEL flag is enabled, opens AI in a new tab.
  * Otherwise, opens the Max side panel.
  */

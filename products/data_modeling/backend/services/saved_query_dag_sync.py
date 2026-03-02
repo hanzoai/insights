@@ -5,10 +5,10 @@ from django.utils import timezone
 
 import structlog
 
-from posthog.hogql.database.database import Database
-from posthog.hogql.database.models import SavedQuery as HogQLSavedQuery
-from posthog.hogql.database.s3_table import DataWarehouseTable as HogQLDataWarehouseTable
-from posthog.hogql.errors import QueryError
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.database.models import SavedQuery as InsightsQLSavedQuery
+from posthog.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+from posthog.insightsql.errors import QueryError
 
 from posthog.exceptions_capture import capture_exception
 
@@ -42,13 +42,13 @@ def resolve_dependency_to_node(
     database: Database,
 ) -> Node:
     """
-    Resolve a dependency name to a Node following HogQL's resolution priority.
+    Resolve a dependency name to a Node following InsightsQL's resolution priority.
 
-    Creates TABLE nodes as needed for warehouse and PostHog system tables.
+    Creates TABLE nodes as needed for warehouse and Insights system tables.
     For SavedQuery views and matviews, we only find existing nodes or error.
 
     Resolution order:
-    1. PostHog system table (events, persons, etc.)
+    1. Insights system table (events, persons, etc.)
     2. SavedQuery view or matview
     3. DataWarehouse table (postgres, stripe, etc.)
 
@@ -56,18 +56,18 @@ def resolve_dependency_to_node(
     """
     from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 
-    # get hogql's understanding of this table
+    # get insightsql's understanding of this table
     try:
         table = database.get_table(dependency_name)
     except QueryError:
         raise UnknownParentError(dependency_name, "")
     # ephemeral view
-    if isinstance(table, HogQLSavedQuery):
+    if isinstance(table, InsightsQLSavedQuery):
         saved_query = DataWarehouseSavedQuery.objects.get(team=team, name=dependency_name, deleted=False)
         return Node.objects.get(team=team, dag_id_text=dag_id, saved_query=saved_query, name=dependency_name)
 
     # table in s3
-    if isinstance(table, HogQLDataWarehouseTable):
+    if isinstance(table, InsightsQLDataWarehouseTable):
         if table.table_id:
             matview_saved_query = (
                 DataWarehouseSavedQuery.objects.filter(team=team, table_id=table.table_id).exclude(deleted=True).first()

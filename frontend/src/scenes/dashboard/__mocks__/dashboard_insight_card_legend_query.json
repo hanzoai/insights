@@ -12,7 +12,7 @@
         "last_name": "",
         "email": "test@posthog.com",
         "is_email_verified": null,
-        "hedgehog_config": null
+        "mascot_config": null
     },
     "is_shared": false,
     "deleted": false,
@@ -272,7 +272,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T18:50:25.744742Z",
@@ -287,7 +287,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
                 "timezone": "America/Aruba",
@@ -556,7 +556,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T18:50:19.792306Z",
@@ -571,7 +571,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
                 "timezone": "America/Aruba",
@@ -840,7 +840,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T18:50:14.717170Z",
@@ -855,7 +855,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
                 "timezone": "America/Aruba",
@@ -1124,7 +1124,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T18:50:08.838479Z",
@@ -1139,7 +1139,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
                 "timezone": "America/Aruba",
@@ -1354,7 +1354,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T18:50:00.486559Z",
@@ -1369,7 +1369,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
                 "timezone": "America/Aruba",
@@ -1473,7 +1473,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "description": "",
                 "updated_at": "2024-07-18T18:49:21.665443Z",
@@ -1488,7 +1488,7 @@
                     "last_name": "",
                     "email": "test@posthog.com",
                     "is_email_verified": null,
-                    "hedgehog_config": null
+                    "mascot_config": null
                 },
                 "is_sample": false,
                 "timezone": "America/Aruba",

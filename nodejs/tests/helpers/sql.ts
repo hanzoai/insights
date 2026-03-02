@@ -25,14 +25,14 @@ DECLARE
     r RECORD;
 BEGIN
     -- First handle tables with foreign key dependencies
-    DELETE FROM posthog_cohort CASCADE;
-    DELETE FROM posthog_featureflag CASCADE;
-    DELETE FROM posthog_organizationmembership CASCADE;
-    DELETE FROM posthog_project CASCADE;
-    DELETE FROM posthog_organization CASCADE;
-    DELETE FROM posthog_action CASCADE;
-    DELETE FROM posthog_user CASCADE;
-    DELETE FROM posthog_team CASCADE;
+    DELETE FROM insights_cohort CASCADE;
+    DELETE FROM insights_featureflag CASCADE;
+    DELETE FROM insights_organizationmembership CASCADE;
+    DELETE FROM insights_project CASCADE;
+    DELETE FROM insights_organization CASCADE;
+    DELETE FROM insights_action CASCADE;
+    DELETE FROM insights_user CASCADE;
+    DELETE FROM insights_team CASCADE;
 
     -- Then handle remaining tables
     FOR r IN (
@@ -40,26 +40,26 @@ BEGIN
         FROM pg_tables
         WHERE schemaname = current_schema()
         AND tablename NOT IN (
-            'posthog_cohort',
-            'posthog_featureflag',
-            'posthog_organizationmembership',
-            'posthog_project',
-            'posthog_organization',
-            'posthog_action',
-            'posthog_user',
-            'posthog_team',
+            'insights_cohort',
+            'insights_featureflag',
+            'insights_organizationmembership',
+            'insights_project',
+            'insights_organization',
+            'insights_action',
+            'insights_user',
+            'insights_team',
             -- Exclude persons-related tables as they're in a different database
-            'posthog_featureflaghashkeyoverride',
-            'posthog_cohortpeople',
-            'posthog_persondistinctid',
-            'posthog_personlessdistinctid',
-            'posthog_person',
-            'posthog_personoverridemapping',
-            'posthog_personoverride',
-            'posthog_pendingpersonoverride',
-            'posthog_flatpersonoverride',
-            'posthog_group',
-            'posthog_grouptypemapping'
+            'insights_featureflaghashkeyoverride',
+            'insights_cohortpeople',
+            'insights_persondistinctid',
+            'insights_personlessdistinctid',
+            'insights_person',
+            'insights_personoverridemapping',
+            'insights_personoverride',
+            'insights_pendingpersonoverride',
+            'insights_flatpersonoverride',
+            'insights_group',
+            'insights_grouptypemapping'
         )
     ) LOOP
         EXECUTE 'DELETE FROM ' || quote_ident(r.tablename) || ' CASCADE';
@@ -73,17 +73,17 @@ DECLARE
     r RECORD;
 BEGIN
     -- Delete persons-related tables with proper ordering for foreign keys
-    DELETE FROM posthog_grouptypemapping CASCADE;
-    DELETE FROM posthog_group CASCADE;
-    DELETE FROM posthog_featureflaghashkeyoverride CASCADE;
-    DELETE FROM posthog_cohortpeople CASCADE;
-    DELETE FROM posthog_flatpersonoverride CASCADE;
-    DELETE FROM posthog_pendingpersonoverride CASCADE;
-    DELETE FROM posthog_personoverride CASCADE;
-    DELETE FROM posthog_personoverridemapping CASCADE;
-    DELETE FROM posthog_persondistinctid CASCADE;
-    DELETE FROM posthog_personlessdistinctid CASCADE;
-    DELETE FROM posthog_person CASCADE;
+    DELETE FROM insights_grouptypemapping CASCADE;
+    DELETE FROM insights_group CASCADE;
+    DELETE FROM insights_featureflaghashkeyoverride CASCADE;
+    DELETE FROM insights_cohortpeople CASCADE;
+    DELETE FROM insights_flatpersonoverride CASCADE;
+    DELETE FROM insights_pendingpersonoverride CASCADE;
+    DELETE FROM insights_personoverride CASCADE;
+    DELETE FROM insights_personoverridemapping CASCADE;
+    DELETE FROM insights_persondistinctid CASCADE;
+    DELETE FROM insights_personlessdistinctid CASCADE;
+    DELETE FROM insights_person CASCADE;
 
     -- Handle any other tables that might exist in the persons database
     FOR r IN (
@@ -91,17 +91,17 @@ BEGIN
         FROM pg_tables
         WHERE schemaname = current_schema()
         AND tablename NOT IN (
-            'posthog_grouptypemapping',
-            'posthog_group',
-            'posthog_featureflaghashkeyoverride',
-            'posthog_cohortpeople',
-            'posthog_flatpersonoverride',
-            'posthog_pendingpersonoverride',
-            'posthog_personoverride',
-            'posthog_personoverridemapping',
-            'posthog_persondistinctid',
-            'posthog_personlessdistinctid',
-            'posthog_person'
+            'insights_grouptypemapping',
+            'insights_group',
+            'insights_featureflaghashkeyoverride',
+            'insights_cohortpeople',
+            'insights_flatpersonoverride',
+            'insights_pendingpersonoverride',
+            'insights_personoverride',
+            'insights_personoverridemapping',
+            'insights_persondistinctid',
+            'insights_personlessdistinctid',
+            'insights_person'
         )
     ) LOOP
         EXECUTE 'DELETE FROM ' || quote_ident(r.tablename) || ' CASCADE';
@@ -161,7 +161,7 @@ function getPostgresUseForTable(table: string): PostgresUse {
 
     // Persons-related tables
     const personsTablesRegex =
-        /^posthog_(person|persondistinctid|personlessdistinctid|personoverridemapping|personoverride|pendingpersonoverride|flatpersonoverride|featureflaghashkeyoverride|cohortpeople|group|grouptypemapping)$/
+        /^insights_(person|persondistinctid|personlessdistinctid|personoverridemapping|personoverride|pendingpersonoverride|flatpersonoverride|featureflaghashkeyoverride|cohortpeople|group|grouptypemapping)$/
     if (personsTablesRegex.test(table)) {
         return PostgresUse.PERSONS_WRITE
     }
@@ -219,20 +219,20 @@ export async function createUserTeamAndOrganization(
     organizationMembershipId: string = commonOrganizationMembershipId,
     teamOverrides: Record<string, any> = {}
 ): Promise<void> {
-    await insertRow(db, 'posthog_user', {
+    await insertRow(db, 'insights_user', {
         id: userId,
         uuid: userUuid,
         password: 'gibberish',
         first_name: 'PluginTest',
         last_name: 'User',
-        email: `test${userId}@posthog.com`,
+        email: `test${userId}@hanzo.ai`,
         distinct_id: `plugin_test_user_distinct_id_${userId}`,
         is_staff: false,
         is_active: false,
         date_joined: new Date().toISOString(),
         events_column_config: { active: 'DEFAULT' },
     })
-    await insertRow(db, 'posthog_organization', {
+    await insertRow(db, 'insights_organization', {
         id: organizationId,
         name: 'TEST ORG',
         plugins_access_level: 9,
@@ -250,7 +250,7 @@ export async function createUserTeamAndOrganization(
         default_anonymize_ips: false,
     } as RawOrganization)
     await updateOrganizationAvailableFeatures(db, organizationId, [{ key: 'data_pipelines', name: 'Data Pipelines' }])
-    await insertRow(db, 'posthog_organizationmembership', {
+    await insertRow(db, 'insights_organizationmembership', {
         id: organizationMembershipId,
         organization_id: organizationId,
         user_id: userId,
@@ -258,7 +258,7 @@ export async function createUserTeamAndOrganization(
         joined_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
     })
-    await insertRow(db, 'posthog_project', {
+    await insertRow(db, 'insights_project', {
         id: teamId,
         organization_id: organizationId,
         name: 'TEST PROJECT',
@@ -305,13 +305,13 @@ export async function createUserTeamAndOrganization(
         teamData.drop_events_older_than = `${drop_events_older_than_seconds} seconds`
     }
 
-    await insertRow(db, 'posthog_team', teamData)
+    await insertRow(db, 'insights_team', teamData)
 }
 
 export async function getTeams(hub: Hub): Promise<Team[]> {
     const selectResult = await hub.postgres.query<Team>(
         PostgresUse.COMMON_READ,
-        'SELECT * FROM posthog_team ORDER BY id',
+        'SELECT * FROM insights_team ORDER BY id',
         undefined,
         'fetchAllTeams'
     )
@@ -332,7 +332,7 @@ export async function getFirstTeam(hub: Hub): Promise<Team> {
 
 export const createOrganization = async (pg: PostgresRouter) => {
     const organizationId = new UUIDT().toString()
-    await insertRow(pg, 'posthog_organization', {
+    await insertRow(pg, 'insights_organization', {
         id: organizationId,
         name: 'TEST ORG',
         plugins_access_level: 9,
@@ -359,7 +359,7 @@ export const updateOrganizationAvailableFeatures = async (
 ) => {
     await pg.query(
         PostgresUse.COMMON_WRITE,
-        `UPDATE posthog_organization SET available_product_features = $1 WHERE id = $2`,
+        `UPDATE insights_organization SET available_product_features = $1 WHERE id = $2`,
         [features, organizationId],
         'change-team-available-features'
     )
@@ -381,7 +381,7 @@ export const createTeam = async (
         organizationId = await pg
             .query<PartialProject>(
                 PostgresUse.COMMON_READ,
-                'SELECT organization_id FROM posthog_project WHERE id = $1',
+                'SELECT organization_id FROM insights_project WHERE id = $1',
                 [projectId],
                 'fetchOrganizationId'
             )
@@ -389,7 +389,7 @@ export const createTeam = async (
     } else {
         projectId = id as ProjectId
         organizationId = projectOrOrganizationId
-        await insertRow(pg, 'posthog_project', {
+        await insertRow(pg, 'insights_project', {
             // Every team (aka environment) must be a child of a project
             id,
             organization_id: organizationId,
@@ -397,7 +397,7 @@ export const createTeam = async (
             created_at: new Date().toISOString(),
         })
     }
-    await insertRow(pg, 'posthog_team', {
+    await insertRow(pg, 'insights_team', {
         id,
         organization_id: organizationId,
         project_id: projectId,
@@ -440,7 +440,7 @@ export const createAction = async (
 ): Promise<number> => {
     // KLUDGE: auto increment IDs can be racy in tests so we ensure IDs don't clash
     const id = Math.round(Math.random() * 1000000000)
-    await insertRow(pg, 'posthog_action', {
+    await insertRow(pg, 'insights_action', {
         id,
         name,
         description: `Test action: ${name}`,
@@ -462,12 +462,12 @@ export const createAction = async (
 
 export const createUser = async (pg: PostgresRouter, distinctId: string) => {
     const uuid = new UUIDT().toString()
-    const user = await insertRow(pg, 'posthog_user', {
+    const user = await insertRow(pg, 'insights_user', {
         uuid: uuid,
         password: 'gibberish',
         first_name: 'PluginTest',
         last_name: 'User',
-        email: `test${uuid}@posthog.com`,
+        email: `test${uuid}@hanzo.ai`,
         distinct_id: distinctId,
         is_staff: false,
         is_active: false,
@@ -479,7 +479,7 @@ export const createUser = async (pg: PostgresRouter, distinctId: string) => {
 
 export const createOrganizationMembership = async (pg: PostgresRouter, organizationId: string, userId: number) => {
     const membershipId = new UUIDT().toString()
-    const membership = await insertRow(pg, 'posthog_organizationmembership', {
+    const membership = await insertRow(pg, 'insights_organizationmembership', {
         id: membershipId,
         organization_id: organizationId,
         user_id: userId,
@@ -491,7 +491,7 @@ export const createOrganizationMembership = async (pg: PostgresRouter, organizat
 }
 
 export async function fetchPostgresPersons(postgres: PostgresRouter, teamId: number) {
-    const query = `SELECT * FROM posthog_person WHERE team_id = ${teamId} ORDER BY id`
+    const query = `SELECT * FROM insights_person WHERE team_id = ${teamId} ORDER BY id`
     return (await postgres.query(PostgresUse.PERSONS_READ, query, undefined, 'persons')).rows.map(
         // NOTE: we map to update some values here to maintain
         // compatibility with `hub.fetchPersons`.
@@ -507,7 +507,7 @@ export async function fetchPostgresPersons(postgres: PostgresRouter, teamId: num
 }
 
 export async function fetchPostgresDistinctIdsForPerson(postgres: PostgresRouter, personId: string): Promise<string[]> {
-    const query = `SELECT distinct_id FROM posthog_persondistinctid WHERE person_id = ${personId} ORDER BY id`
+    const query = `SELECT distinct_id FROM insights_persondistinctid WHERE person_id = ${personId} ORDER BY id`
     return (await postgres.query(PostgresUse.PERSONS_READ, query, undefined, 'distinctIds')).rows.map(
         (row: { distinct_id: string }) => row.distinct_id
     )
@@ -531,7 +531,7 @@ export const createCohort = async (
 ): Promise<number> => {
     // KLUDGE: auto increment IDs can be racy in tests so we ensure IDs don't clash
     const id = Math.round(Math.random() * 1000000000)
-    await insertRow(pg, 'posthog_cohort', {
+    await insertRow(pg, 'insights_cohort', {
         id,
         name,
         description: `Test cohort: ${name}`,

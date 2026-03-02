@@ -626,7 +626,7 @@ class TestGitHubIntegrationModel(BaseTest):
                     mock_response.json.return_value = {}
             else:
                 mock_response.status_code = 200
-                mock_response.json.return_value = {"account": {"type": "Organization", "login": "PostHog"}}
+                mock_response.json.return_value = {"account": {"type": "Organization", "login": "Insights"}}
             return mock_response
 
         return _client_request
@@ -653,7 +653,7 @@ class TestGitHubIntegrationModel(BaseTest):
         assert integration.config == {
             "installation_id": "INSTALLATION_ID",
             "account": {
-                "name": "PostHog",
+                "name": "Insights",
                 "type": "Organization",
             },
             "repository_selection": "all",

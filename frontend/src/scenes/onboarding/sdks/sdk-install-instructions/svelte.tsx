@@ -8,7 +8,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from '~/loadPostHogJS'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
 import SetupWizardBanner from './components/SetupWizardBanner'
 import { JSInstallSnippet } from './js-web'
@@ -62,7 +62,7 @@ export function SDKInstallSvelteJSInstructions({ hideWizard }: { hideWizard?: bo
                     layout
                 </Link>{' '}
                 already, create a new file called <code>+layout.js</code> in your <code>src/routes</code> folder. In
-                this file, check the environment is the browser, and initialize PostHog if so:
+                this file, check the environment is the browser, and initialize Insights if so:
             </p>
             <SvelteAppClientCodeSnippet />
         </>

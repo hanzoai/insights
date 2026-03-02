@@ -460,7 +460,7 @@
         "$screen_height": 923,
         "$device_model": "sdk_gphone16k_arm64",
         "$geoip_city_name": "Vienna",
-        "$app_name": "PostHog Android Sample",
+        "$app_name": "Insights Android Sample",
         "$app_namespace": "com.posthog.android.sample",
         "$network_wifi": true,
         "$screen_width": 411,
@@ -479,7 +479,7 @@
                     "git": {
                         "branch": "chore/progaurd-support",
                         "commit_id": "bd1373f1b02ffb849572aa5d953b223c142b0e0f",
-                        "remote_url": "git@github.com:PostHog/posthog-android.git",
+                        "remote_url": "git@github.com:Insights/posthog-android.git",
                         "repo_name": "posthog-android"
                     }
                 }

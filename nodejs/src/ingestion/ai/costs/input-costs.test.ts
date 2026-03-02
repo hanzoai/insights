@@ -284,7 +284,7 @@ describe('calculateInputCost()', () => {
 
         it('falls back to exclusive accounting when Vercel gateway tokens are provably not inclusive', () => {
             // When inputTokens < cacheReadTokens + cacheWriteTokens, the tokens can't be inclusive.
-            // This happens when SDKs (e.g., posthog-ai) report Anthropic-style exclusive counts
+            // This happens when SDKs (e.g., insights-ai) report Anthropic-style exclusive counts
             // through the Vercel gateway. Without this guard, uncachedTokens goes negative.
             const event = createTestEvent({
                 properties: {

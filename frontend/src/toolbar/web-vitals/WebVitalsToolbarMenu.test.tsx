@@ -19,7 +19,7 @@ describe('WebVitalsToolbarMenu', () => {
             .mount()
     })
 
-    it('uses the PostHog ui host for the settings link', () => {
+    it('uses the Insights ui host for the settings link', () => {
         render(<WebVitalsToolbarMenu />)
 
         const settingsLink = screen.getByRole('link', { name: 'settings page' })

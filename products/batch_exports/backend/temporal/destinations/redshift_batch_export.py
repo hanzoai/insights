@@ -28,7 +28,7 @@ from posthog.batch_exports.service import (
     IAMRole,
     RedshiftBatchExportInputs,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -1354,7 +1354,7 @@ async def copy_into_redshift_activity_from_stage(inputs: RedshiftCopyActivityInp
 
 
 @workflow.defn(name="redshift-export", failure_exception_types=[workflow.NondeterminismError])
-class RedshiftBatchExportWorkflow(PostHogWorkflow):
+class RedshiftBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data into Postgres.
 
     This Workflow is intended to be executed both manually and by a Temporal

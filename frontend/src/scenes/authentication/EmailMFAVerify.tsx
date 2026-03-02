@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { LemonButton } from '@posthog/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
-import { HeartHog, SurprisedHog } from 'lib/components/hedgehogs'
+import { HeartHog, SurprisedHog } from 'lib/components/mascots'
 
 import { emailMFAVerifyLogic } from './emailMFAVerifyLogic'
 

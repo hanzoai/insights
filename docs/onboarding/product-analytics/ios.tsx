@@ -11,14 +11,14 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add PostHog to your Podfile:</Markdown>
+                    <Markdown>Add Insights to your Podfile:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'ruby',
                                 file: 'Podfile',
                                 code: dedent`
-                                    pod "PostHog", "~> 3.0"
+                                    pod "Insights", "~> 3.0"
                                 `,
                             },
                         ]}
@@ -31,7 +31,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'Package.swift',
                                 code: dedent`
                                     dependencies: [
-                                      .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
+                                      .package(url: "https://github.com/Insights/posthog-ios.git", from: "3.0.0")
                                     ]
                                 `,
                             },
@@ -41,11 +41,11 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize PostHog in your AppDelegate:</Markdown>
+                    <Markdown>Initialize Insights in your AppDelegate:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -53,7 +53,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'AppDelegate.swift',
                                 code: dedent`
                                     import Foundation
-                                    import PostHog
+                                    import Insights
                                     import UIKit
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
@@ -61,8 +61,8 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                             let POSTHOG_API_KEY = "<ph_project_api_key>"
                                             let POSTHOG_HOST = "<ph_client_api_host>"
 
-                                            let config = PostHogConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
-                                            PostHogSDK.shared.setup(config)
+                                            let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+                                            InsightsSDK.shared.setup(config)
 
                                             return true
                                         }
@@ -80,7 +80,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        Once installed, PostHog will automatically start capturing events. You can also manually send
+                        Once installed, Insights will automatically start capturing events. You can also manually send
                         events to test your integration:
                     </Markdown>
                     <CodeBlock
@@ -89,7 +89,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'swift',
                                 file: 'Swift',
                                 code: dedent`
-                                    PostHogSDK.shared.capture("button_clicked", properties: ["button_name": "signup"])
+                                    InsightsSDK.shared.capture("button_clicked", properties: ["button_name": "signup"])
                                 `,
                             },
                         ]}

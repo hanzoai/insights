@@ -1,4 +1,4 @@
-# PostHog MCP
+# Insights MCP
 
 Documentation: https://posthog.com/docs/model-context-protocol
 
@@ -42,7 +42,7 @@ npx @posthog/wizard@latest mcp add
 
 If you want to call MCP from Node (outside an IDE), use the Model Context Protocol SDK’s **Streamable HTTP** transport.
 
-- **Auth:** Use a **personal** PostHog API key and pass it as a Bearer token in `Authorization`.
+- **Auth:** Use a **personal** Insights API key and pass it as a Bearer token in `Authorization`.
 - **Accept header:** Clients **must** include `Accept: application/json, text/event-stream`.
 - **Lifecycle:** MCP requires `initialize` then a client `notifications/initialized`; the SDK performs this during `connect()`.
 
@@ -97,7 +97,7 @@ await client.close()
 - Streamable HTTP requires the `Accept` header to include **both** JSON and SSE.
 - After `initialize`, the client must send `notifications/initialized`; the SDK does this for you in `connect()`.
 
-See also the main PostHog MCP docs for available tools and setup flows: [https://posthog.com/docs/model-context-protocol](https://posthog.com/docs/model-context-protocol)
+See also the main Insights MCP docs for available tools and setup flows: [https://posthog.com/docs/model-context-protocol](https://posthog.com/docs/model-context-protocol)
 
 ### Docker install
 
@@ -148,10 +148,10 @@ npx @modelcontextprotocol/inspector docker run -i --rm --env POSTHOG_AUTH_HEADER
 
 **Environment Variables:**
 
-- `POSTHOG_AUTH_HEADER`: Your PostHog API token (required)
+- `POSTHOG_AUTH_HEADER`: Your Insights API token (required)
 - `POSTHOG_REMOTE_MCP_URL`: The MCP server URL (optional, defaults to `https://mcp.posthog.com/mcp`)
 
-This approach allows you to use the PostHog MCP server without needing Node.js or npm installed locally.
+This approach allows you to use the Insights MCP server without needing Node.js or npm installed locally.
 
 ### Example Prompts
 
@@ -273,7 +273,7 @@ Available features:
 - `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
 - `flags` - [Feature flag management](https://posthog.com/docs/feature-flags)
 - `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
-- `docs` - PostHog documentation search
+- `docs` - Insights documentation search
 
 To view which tools are available per feature, see our [documentation](https://posthog.com/docs/model-context-protocol) or alternatively check out `schema/tool-definitions.json`,
 
@@ -283,7 +283,7 @@ The MCP server is hosted on a Cloudflare worker which can be located outside of 
 
 ### Using self-hosted instances
 
-If you're using a self-hosted instance of PostHog, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://posthog.example.com`
+If you're using a self-hosted instance of Insights, you can specify a custom base URL by adding the `POSTHOG_BASE_URL` [environment variable](https://developers.cloudflare.com/workers/configuration/environment-variables) when running the MCP server locally or on your own infrastructure, e.g. `POSTHOG_BASE_URL=https://posthog.example.com`
 
 # Development
 
@@ -299,7 +299,7 @@ And replace `https://mcp.posthog.com/mcp` with `http://localhost:8787/mcp` in th
 
 To develop with warm loading for MCP resources (workflows, prompts, examples):
 
-1. Start the [context-mill](https://github.com/PostHog/context-mill) dev server: `cd ../context-mill && npm run dev`
+1. Start the [context-mill](https://github.com/Insights/context-mill) dev server: `cd ../context-mill && npm run dev`
 2. Start the MCP server with local resources: `pnpm run dev:local-resources`
 
 Changes in the examples repo will be reflected on the next request.
@@ -361,10 +361,10 @@ npx
 - **Privacy Policy:** https://posthog.com/privacy
 - **Terms of Service:** https://posthog.com/terms
 - **Support:** https://posthog.com/questions or email support@posthog.com
-- **GitHub Issues:** https://github.com/PostHog/posthog/issues
+- **GitHub Issues:** https://github.com/Insights/posthog/issues
 
 ### Data handling
 
-The MCP server acts as a proxy to your PostHog instance. It does not store your analytics data - all queries are executed against your PostHog project and results are returned directly to your AI client. Session state (active project/organization) is cached temporarily using Cloudflare Durable Objects tied to your API key hash.
+The MCP server acts as a proxy to your Insights instance. It does not store your analytics data - all queries are executed against your Insights project and results are returned directly to your AI client. Session state (active project/organization) is cached temporarily using Cloudflare Durable Objects tied to your API key hash.
 
-For EU users, use the `mcp-eu.posthog.com` endpoint to ensure OAuth flows route to the EU PostHog instance.
+For EU users, use the `mcp-eu.posthog.com` endpoint to ensure OAuth flows route to the EU Insights instance.

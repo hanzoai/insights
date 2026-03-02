@@ -308,7 +308,7 @@
     ],
     "compounds": [
         {
-            "name": "PostHog",
+            "name": "Insights",
             "configurations": [
                 "Backend",
                 "Celery Threaded Pool",
@@ -323,7 +323,7 @@
             }
         },
         {
-            "name": "PostHog (no typegen)",
+            "name": "Insights (no typegen)",
             "configurations": [
                 "Backend",
                 "Celery Threaded Pool",
@@ -338,7 +338,7 @@
             }
         },
         {
-            "name": "PostHog (https)",
+            "name": "Insights (https)",
             "configurations": [
                 "Backend",
                 "Celery Threaded Pool",
@@ -353,7 +353,7 @@
             }
         },
         {
-            "name": "PostHog (local billing)",
+            "name": "Insights (local billing)",
             "configurations": [
                 "Backend (with local billing)",
                 "Celery Threaded Pool",

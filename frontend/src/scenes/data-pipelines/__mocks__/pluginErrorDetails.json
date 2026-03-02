@@ -57,7 +57,7 @@
                         "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                         "$session_id": "018c2035-4b74-7cad-893a-4dbbfeca42f6",
                         "$window_id": "018c1be8-e593-7bf2-89b1-359fc9e5968a",
-                        "title": "App name • Pipeline • PostHog",
+                        "title": "App name • Pipeline • Insights",
                         "$ip": "127.0.0.1",
                         "$set": {
                             "$os": "Mac OS X",
@@ -311,7 +311,7 @@
                         "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                         "$session_id": "018c2035-4b74-7cad-893a-4dbbfeca42f6",
                         "$window_id": "018c2035-4b74-7cad-893a-4dbc6a16e1fd",
-                        "title": "testing erroring app • Data pipeline • PostHog",
+                        "title": "testing erroring app • Data pipeline • Insights",
                         "$ip": "127.0.0.1",
                         "$set": {
                             "$os": "Mac OS X",

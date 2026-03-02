@@ -174,7 +174,7 @@ async def test_run_dag_activity_activity_skips_if_ancestor_failed_mocked(
         team=ateam,
     )
     run_dag_activity_inputs = RunDagActivityInputs(team_id=ateam.pk, dag=dag, job_id=job.id)
-    assert all(model not in posthog_table_names for model in make_fail), "PostHog tables cannot fail"
+    assert all(model not in posthog_table_names for model in make_fail), "Insights tables cannot fail"
 
     def raise_if_should_make_fail(model_label, *args, **kwargs):
         if model_label in make_fail:

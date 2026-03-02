@@ -12,7 +12,7 @@ from posthog.temporal.common.client import sync_connect
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-EXPORT_NAME = "PostHog HTTP Migration"
+EXPORT_NAME = "Insights HTTP Migration"
 VALID_INTERVALS = {i[0] for i in BATCH_EXPORT_INTERVALS}
 REGION_URLS = {
     "us": "https://app.posthog.com/batch",
@@ -21,7 +21,7 @@ REGION_URLS = {
 
 
 class Command(BaseCommand):
-    help = "Creates an HTTP batch export for a team to migrate data to another PostHog instance, \
+    help = "Creates an HTTP batch export for a team to migrate data to another Insights instance, \
             or another team within the same instance."
 
     def add_arguments(self, parser):

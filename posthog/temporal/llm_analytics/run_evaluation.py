@@ -16,7 +16,7 @@ from temporalio.exceptions import ApplicationError
 from posthog.models.event.util import create_event
 from posthog.models.team import Team
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.llm_analytics.message_utils import extract_text_from_messages
 from posthog.temporal.llm_analytics.metrics import (
     increment_errors,
@@ -125,7 +125,7 @@ class RunEvaluationInputs:
 
     @property
     def properties_to_log(self) -> dict[str, Any]:
-        """Properties for PostHogClientInterceptor error capture."""
+        """Properties for InsightsClientInterceptor error capture."""
         return {
             "evaluation_id": self.evaluation_id,
             "team_id": self.event_data.get("team_id"),
@@ -188,7 +188,7 @@ async def update_key_state_activity(key_id: str, state: str, error_message: str 
 
 @temporalio.activity.defn
 async def increment_trial_eval_count_activity(team_id: int) -> None:
-    """Increment trial eval counter after successful execution with PostHog key"""
+    """Increment trial eval counter after successful execution with Insights key"""
     from django.db.models import F
 
     def _increment():
@@ -266,7 +266,7 @@ async def execute_llm_judge_activity(evaluation: dict[str, Any], event_data: dic
                 non_retryable=True,
             )
 
-        # Trial mode - no provider key, use PostHog defaults
+        # Trial mode - no provider key, use Insights defaults
         return None
 
     def _get_provider_key_by_id(key_id: str) -> LLMProviderKey:
@@ -290,7 +290,7 @@ async def execute_llm_judge_activity(evaluation: dict[str, Any], event_data: dic
             )
 
     def _check_trial_quota() -> None:
-        """Check if trial quota is available for PostHog key usage."""
+        """Check if trial quota is available for Insights key usage."""
         config, _ = EvaluationConfig.objects.get_or_create(team_id=team_id)
         if config.trial_evals_used >= config.trial_eval_limit:
             raise ApplicationError(
@@ -308,7 +308,7 @@ async def execute_llm_judge_activity(evaluation: dict[str, Any], event_data: dic
         if provider_key_id:
             provider_key = await database_sync_to_async(_get_provider_key_by_id)(provider_key_id)
         else:
-            # Using PostHog key - check trial quota
+            # Using Insights key - check trial quota
             await database_sync_to_async(_check_trial_quota)()
             provider_key = None
     else:
@@ -354,7 +354,7 @@ async def execute_llm_judge_activity(evaluation: dict[str, Any], event_data: dic
 
 Output: {output_data}"""
 
-    # Get eval-specific config when using PostHog defaults (no provider_key)
+    # Get eval-specific config when using Insights defaults (no provider_key)
     config = get_eval_config(provider) if provider_key is None else None
 
     # Create unified Client with analytics disabled to prevent eval loops
@@ -548,7 +548,7 @@ async def emit_internal_telemetry_activity(
     team_id: int,
     result: dict[str, Any],
 ) -> None:
-    """Emit telemetry event to PostHog org for internal tracking"""
+    """Emit telemetry event to Insights org for internal tracking"""
     from posthog.tasks.usage_report import get_ph_client
 
     def _emit_telemetry():
@@ -577,7 +577,7 @@ async def emit_internal_telemetry_activity(
 
 
 @temporalio.workflow.defn(name="run-evaluation")
-class RunEvaluationWorkflow(PostHogWorkflow):
+class RunEvaluationWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> RunEvaluationInputs:
         return RunEvaluationInputs(
@@ -639,7 +639,7 @@ class RunEvaluationWorkflow(PostHogWorkflow):
                     )
             raise
 
-        # Activity 3: Increment trial eval counter if using PostHog key
+        # Activity 3: Increment trial eval counter if using Insights key
         if not result.get("is_byok"):
             await temporalio.workflow.execute_activity(
                 increment_trial_eval_count_activity,

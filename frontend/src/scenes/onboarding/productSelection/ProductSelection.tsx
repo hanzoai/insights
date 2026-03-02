@@ -67,7 +67,7 @@ function ChoosePathStep(): JSX.Element {
             <div className="flex justify-center mb-4">
                 <Logomark />
             </div>
-            <h1 className="text-4xl font-bold text-center mb-2">What do you want to do with PostHog?</h1>
+            <h1 className="text-4xl font-bold text-center mb-2">What do you want to do with Insights?</h1>
             <p className="text-center text-muted mb-8">
                 {aiRecommendationsEnabled
                     ? "Describe your goals and we'll recommend the right products for you"

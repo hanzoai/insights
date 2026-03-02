@@ -88,7 +88,7 @@ class VercelProxyViewSet(viewsets.ViewSet):
     Proxy endpoint for the billing service to call Vercel APIs.
 
     The billing service sends requests here with the Vercel API path and body.
-    PostHog validates the JWT, looks up the Vercel token from OrganizationIntegration,
+    Insights validates the JWT, looks up the Vercel token from OrganizationIntegration,
     and forwards the request to Vercel.
 
     """

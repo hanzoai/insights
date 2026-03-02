@@ -31,7 +31,7 @@ from posthog.batch_exports.service import (
 )
 from posthog.models.integration import Integration
 from posthog.models.team import Team
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.logger import BATCH_EXPORT_WORKFLOW_TYPES as LOGGER_BATCH_EXPORT_WORKFLOW_TYPES
 from posthog.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
 
@@ -69,7 +69,7 @@ class BaseDestinationTest(ABC):
 
     @property
     @abstractmethod
-    def workflow_class(self) -> type[PostHogWorkflow]:
+    def workflow_class(self) -> type[InsightsWorkflow]:
         """Return the workflow class for this destination."""
         pass
 
@@ -379,11 +379,11 @@ class CommonWorkflowTests:
                 "fields": [
                     {"expression": "uuid", "alias": "uuid"},
                     {"expression": "event", "alias": "my_event_name"},
-                    {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_0)s), '')", "alias": "browser"},
-                    {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_1)s), '')", "alias": "os"},
+                    {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_0)s), '')", "alias": "browser"},
+                    {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_1)s), '')", "alias": "os"},
                     {"expression": "nullIf(properties, '')", "alias": "all_properties"},
                 ],
-                "values": {"hogql_val_0": "$browser", "hogql_val_1": "$os"},
+                "values": {"insightsql_val_0": "$browser", "insightsql_val_1": "$os"},
             },
         ),
         BatchExportModel(name="events", schema=None),
@@ -401,11 +401,11 @@ class CommonWorkflowTests:
             "fields": [
                 {"expression": "uuid", "alias": "uuid"},
                 {"expression": "event", "alias": "my_event_name"},
-                {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_0)s), '')", "alias": "browser"},
-                {"expression": "nullIf(JSONExtractString(properties, %(hogql_val_1)s), '')", "alias": "os"},
+                {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_0)s), '')", "alias": "browser"},
+                {"expression": "nullIf(JSONExtractString(properties, %(insightsql_val_1)s), '')", "alias": "os"},
                 {"expression": "nullIf(properties, '')", "alias": "all_properties"},
             ],
-            "values": {"hogql_val_0": "$browser", "hogql_val_1": "$os"},
+            "values": {"insightsql_val_0": "$browser", "insightsql_val_1": "$os"},
         },
         None,
     ]

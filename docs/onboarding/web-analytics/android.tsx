@@ -20,7 +20,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     <>
                         {MobileFinalSteps && <MobileFinalSteps />}
                         <Markdown>
-                            To automatically track screen views, configure PostHog to capture screen views:
+                            To automatically track screen views, configure Insights to capture screen views:
                         </Markdown>
                         <CodeBlock
                             blocks={[
@@ -28,13 +28,13 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     language: 'kotlin',
                                     file: 'SampleApp.kt',
                                     code: dedent`
-                                        val config = PostHogAndroidConfig(
+                                        val config = InsightsAndroidConfig(
                                             apiKey = POSTHOG_API_KEY,
                                             host = POSTHOG_HOST
                                         ).apply {
                                             captureScreenViews = true
                                         }
-                                        PostHogAndroid.setup(this, config)
+                                        InsightsAndroid.setup(this, config)
                                     `,
                                 },
                             ]}

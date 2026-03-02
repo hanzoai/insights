@@ -2,20 +2,20 @@
 
 ## Overview
 
-Python-based acceptance tests for the LLM Analytics capture pipeline, testing against an existing PostHog instance.
+Python-based acceptance tests for the LLM Analytics capture pipeline, testing against an existing Insights instance.
 
 ## Test Execution
 
 ### Local Development
 
-- User starts PostHog stack manually (using docker-compose or other method)
-- Set POSTHOG_TEST_BASE_URL environment variable to PostHog instance URL
+- User starts Insights stack manually (using docker-compose or other method)
+- Set POSTHOG_TEST_BASE_URL environment variable to Insights instance URL
 - Run acceptance tests: `python run_tests.py`
 
 ### GitHub Actions
 
 - Triggered on PRs affecting rust/capture/ or nodejs/
-- Sets up PostHog stack in CI
+- Sets up Insights stack in CI
 - Runs acceptance tests against the stack
 - Collects logs on failure
 
@@ -28,19 +28,19 @@ Python-based acceptance tests for the LLM Analytics capture pipeline, testing ag
 3. Add requirements.txt with test dependencies
 4. Add run_tests.py test runner script
 
-### Commit 2: PostHog API client for test setup
+### Commit 2: Insights API client for test setup
 
-1. Add api_client.py with PostHogTestClient class
+1. Add api_client.py with InsightsTestClient class
 2. Implement organization creation via API
 3. Implement project creation with API key retrieval
 4. Add project deletion for cleanup
-5. Add event querying through PostHog Query API
+5. Add event querying through Insights Query API
 6. Implement polling mechanism for event arrival
 
 ### Commit 3: Basic event capture test
 
 1. Add test_basic_capture.py
-2. Test sending a regular PostHog event to /capture
+2. Test sending a regular Insights event to /capture
 3. Poll Query API until event appears
 4. Verify event properties match what was sent
 5. Confirm end-to-end pipeline works
@@ -56,7 +56,7 @@ Python-based acceptance tests for the LLM Analytics capture pipeline, testing ag
 
 1. Add .github/workflows/llma-acceptance-tests.yml
 2. Configure triggers for relevant paths
-3. Add PostHog stack startup steps
+3. Add Insights stack startup steps
 4. Add test execution with pytest
 5. Implement log collection on failure
 6. Add cleanup steps
@@ -73,7 +73,7 @@ Python-based acceptance tests for the LLM Analytics capture pipeline, testing ag
 ## Usage
 
 ```bash
-# Start PostHog manually (e.g., with docker-compose)
+# Start Insights manually (e.g., with docker-compose)
 docker-compose -f docker-compose.dev-full.yml up -d
 
 # Set environment variable

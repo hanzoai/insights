@@ -13,7 +13,7 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -53,16 +53,16 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Create a new file `src/composables/usePostHog.js`:</Markdown>
+                    <Markdown>Create a new file `src/composables/useInsights.js`:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'javascript',
-                                file: 'src/composables/usePostHog.js',
+                                file: 'src/composables/useInsights.js',
                                 code: dedent`
                                     import posthog from 'posthog-js'
 
-                                    export function usePostHog() {
+                                    export function useInsights() {
                                       posthog.init('<ph_project_api_key>', {
                                         api_host: '<ph_client_api_host>',
                                         defaults: '2026-01-30'
@@ -82,7 +82,7 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             badge: 'required',
             content: (
                 <>
-                    <Markdown>In `router/index.js`, import the `usePostHog` composable and call it:</Markdown>
+                    <Markdown>In `router/index.js`, import the `useInsights` composable and call it:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -91,7 +91,7 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 code: dedent`
                                     import { createRouter, createWebHistory } from 'vue-router'
                                     import HomeView from '../views/HomeView.vue'
-                                    import { usePostHog } from '@/composables/usePostHog'
+                                    import { useInsights } from '@/composables/useInsights'
 
                                     const router = createRouter({
                                       history: createWebHistory(import.meta.env.BASE_URL),
@@ -109,7 +109,7 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                       ],
                                     })
 
-                                    const { posthog } = usePostHog()
+                                    const { posthog } = useInsights()
 
                                     export default router
                                 `,

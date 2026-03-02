@@ -1,10 +1,10 @@
 # MCP Server Scripts
 
-Scripts for connecting AI assistants (Claude Code, Cursor, etc.) to PostHog's internal Grafana instances via the [Grafana MCP server](https://github.com/grafana/mcp-grafana).
+Scripts for connecting AI assistants (Claude Code, Cursor, etc.) to Insights's internal Grafana instances via the [Grafana MCP server](https://github.com/grafana/mcp-grafana).
 
 ## Why these scripts exist
 
-PostHog's Grafana instances are protected by Cognito OAuth at the AWS ALB level. This authentication method doesn't support Bearer token authentication, which the Grafana MCP server requires. These scripts work around this by:
+Insights's Grafana instances are protected by Cognito OAuth at the AWS ALB level. This authentication method doesn't support Bearer token authentication, which the Grafana MCP server requires. These scripts work around this by:
 
 1. Creating a kubectl port-forward to access Grafana directly within the K8s cluster
 2. Using a Grafana service account token for authentication
@@ -12,7 +12,7 @@ PostHog's Grafana instances are protected by Cognito OAuth at the AWS ALB level.
 
 ## Prerequisites
 
-- **kubectl** configured with access to PostHog K8s clusters
+- **kubectl** configured with access to Insights K8s clusters
 - **AWS SSO** session active (`aws sso login`)
 - **mcp-grafana** binary installed
 - **macOS** (for Keychain-based token storage) or Linux with environment variables
@@ -41,11 +41,11 @@ For each region you need access to, create a service account token in Grafana:
 Add the following to your shell config file (`~/.zshrc`, `~/.bashrc`, or equivalent):
 
 ```bash
-# PostHog infra scripts (grafana-region, grafana-token, etc.)
+# Insights infra scripts (grafana-region, grafana-token, etc.)
 export PATH="$HOME/dev/posthog/posthog/infra-scripts/mcp:$PATH"
 ```
 
-Adjust the path if your PostHog repo is in a different location. Then reload your shell:
+Adjust the path if your Insights repo is in a different location. Then reload your shell:
 
 ```bash
 source ~/.zshrc  # or ~/.bashrc
@@ -95,7 +95,7 @@ Add to your MCP settings:
 
 ### Switching regions
 
-Use the `grafana-region` command to switch between PostHog environments:
+Use the `grafana-region` command to switch between Insights environments:
 
 ```bash
 grafana-region          # Show current region

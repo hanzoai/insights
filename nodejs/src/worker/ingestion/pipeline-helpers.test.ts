@@ -4,7 +4,7 @@ import { KafkaProducerWrapper, TopicMessage } from '../../kafka/producer'
 import { PipelineEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { PromiseScheduler } from '../../utils/promise-scheduler'
 import {
     logDroppedMessage,
@@ -17,7 +17,7 @@ import { captureIngestionWarning } from './utils'
 
 // Mock all dependencies
 jest.mock('../../utils/logger')
-jest.mock('../../utils/posthog')
+jest.mock('../../utils/insights')
 
 // Mock only specific functions from utils, not the whole module
 jest.mock('./utils', () => {

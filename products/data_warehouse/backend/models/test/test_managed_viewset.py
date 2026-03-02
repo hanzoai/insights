@@ -57,7 +57,7 @@ class TestDataWarehouseManagedViewSetModel(BaseTest):
             self.assertIsNotNone(view.query)
             self.assertIsNotNone(view.columns)
             self.assertIsNotNone(view.external_tables)
-            self.assertIn("HogQLQuery", view.query.get("kind", ""))  # type: ignore
+            self.assertIn("InsightsQLQuery", view.query.get("kind", ""))  # type: ignore
 
         expected_view_names = sorted(
             [
@@ -87,8 +87,8 @@ class TestDataWarehouseManagedViewSetModel(BaseTest):
         )
 
         # Create a view with old query/columns
-        old_query = {"kind": "HogQLQuery", "query": "SELECT 1 as old_column"}
-        old_columns = {"old_column": {"hogql": "String", "clickhouse": "String", "valid": True}}
+        old_query = {"kind": "InsightsQLQuery", "query": "SELECT 1 as old_column"}
+        old_columns = {"old_column": {"insightsql": "String", "clickhouse": "String", "valid": True}}
 
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
@@ -107,7 +107,7 @@ class TestDataWarehouseManagedViewSetModel(BaseTest):
         self.assertNotEqual(saved_query.query, old_query)
         self.assertNotEqual(saved_query.columns, old_columns)
         self.assertIsNotNone(saved_query.external_tables)  # Was unset, guarantee we've set it
-        self.assertIn("HogQLQuery", saved_query.query.get("kind", ""))  # type: ignore
+        self.assertIn("InsightsQLQuery", saved_query.query.get("kind", ""))  # type: ignore
 
     def test_delete_with_views(self):
         """Test that delete_with_views properly deletes the managed viewset and marks views as deleted"""
@@ -120,14 +120,14 @@ class TestDataWarehouseManagedViewSetModel(BaseTest):
         view1 = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="test_view_1",
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
         view2 = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="test_view_2",
-            query={"kind": "HogQLQuery", "query": "SELECT 2"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 2"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )

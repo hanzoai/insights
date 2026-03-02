@@ -3,9 +3,9 @@ import '../../../tests/helpers/mocks/producer.mock'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
-import { insertHogFunction as _insertHogFunction, createInternalEvent, createKafkaMessage } from '../_tests/fixtures'
-import { HogFunctionType } from '../types'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { insertCustomFunction as _insertCustomFunction, createInternalEvent, createKafkaMessage } from '../_tests/fixtures'
+import { CustomFunctionType } from '../types'
 import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
 describe('CDP Internal Events Consumer', () => {
@@ -13,10 +13,10 @@ describe('CDP Internal Events Consumer', () => {
     let hub: Hub
     let team: Team
 
-    const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-        const item = await _insertHogFunction(hub.postgres, team.id, hogFunction)
+    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+        const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
         // Trigger the reload that django would do
-        processor['hogFunctionManager']['onHogFunctionsReloaded'](team.id, [item.id])
+        processor['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -51,12 +51,12 @@ describe('CDP Internal Events Consumer', () => {
             expect(events).toHaveLength(0)
         })
 
-        describe('with an existing team and hog function', () => {
+        describe('with an existing team and custom function', () => {
             beforeEach(async () => {
-                await insertHogFunction({
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.no_filters,
+                await insertCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
                     type: 'internal_destination',
                 })
             })
@@ -72,7 +72,7 @@ describe('CDP Internal Events Consumer', () => {
                 expect(events).toHaveLength(0)
             })
 
-            it('should parse a valid message with an existing team and hog function ', async () => {
+            it('should parse a valid message with an existing team and custom function ', async () => {
                 const event = createInternalEvent(team.id, {})
                 event.event.timestamp = '2024-12-18T15:06:23.545Z'
                 event.event.uuid = 'b6da2f33-ba54-4550-9773-50d3278ad61f'

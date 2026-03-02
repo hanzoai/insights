@@ -270,7 +270,7 @@ class Matrix(ABC):
         FeatureFlag.objects.create(
             team=team,
             key="custom",
-            name="Breaking the fourth wall: PostHog's Custom flag.",
+            name="Breaking the fourth wall: Custom flag.",
             filters={"groups": [{"variant": None, "properties": [], "rollout_percentage": 100}]},
             created_by=user,
             created_at=dt.datetime.fromtimestamp(0),  # Epoch

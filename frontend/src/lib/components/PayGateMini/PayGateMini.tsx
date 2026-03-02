@@ -277,7 +277,7 @@ const renderGateVariantMessage = (
     isAddonProduct?: boolean
 ): JSX.Element => {
     if (gateVariant === 'move-to-cloud') {
-        return <>This feature is only available on PostHog Cloud.</>
+        return <>This feature is only available on Insights Cloud.</>
     } else if (isAddonProduct) {
         return (
             <>
@@ -305,7 +305,7 @@ const DocsLink = ({ url }: { url: string }): JSX.Element => {
     return (
         <div className="mb-4">
             <Link to={url} target="_blank">
-                Learn more in PostHog Docs.
+                Learn more in Insights Docs.
             </Link>
         </div>
     )

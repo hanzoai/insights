@@ -6,7 +6,7 @@ import { IconCornerDownRight } from '@posthog/icons'
 
 import { Popover } from 'lib/lemon-ui/Popover/Popover'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
 import { NotebookDataframeTable } from './components/NotebookDataframeTable'
@@ -351,7 +351,7 @@ const Settings = ({
     )
 }
 
-export const NotebookNodePython = createPostHogWidgetNode<NotebookNodePythonAttributes>({
+export const NotebookNodePython = createInsightsWidgetNode<NotebookNodePythonAttributes>({
     nodeType: NotebookNodeType.Python,
     titlePlaceholder: 'Python',
     Component,

@@ -498,13 +498,13 @@ def compute_repository_readiness(
         static_cv_ok = scan_evidence.found_posthog_init
         if not static_cv_ok:
             computer_vision = _capability_state(
-                "No frontend PostHog initialization found for computer vision support.",
+                "No frontend Insights initialization found for computer vision support.",
                 "needs_setup",
                 evidence={"replayTaskCount": replay_task_count},
             )
         elif not team.session_recording_opt_in:
             computer_vision = _capability_state(
-                "PostHog SDK detected. Enable session replay for this project.",
+                "Insights SDK detected. Enable session replay for this project.",
                 "detected",
                 evidence={"replayTaskCount": replay_task_count},
             )

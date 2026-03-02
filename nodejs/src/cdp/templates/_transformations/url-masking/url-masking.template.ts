@@ -1,15 +1,15 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
     id: 'template-url-masking',
     name: 'URL Parameter Masking',
     description: 'Masks sensitive information in URL parameters (query strings) of specified properties',
-    icon_url: '/static/hedgehog/builder-hog-01.png',
+    icon_url: '/static/mascot/builder-mascot-01.png',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 // Function to check if parameter matches any mask pattern
 fun isParameterInList(paramName, paramsString) {

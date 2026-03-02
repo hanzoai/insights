@@ -6,7 +6,7 @@ import { IconGear } from '@posthog/icons'
 import { LemonButton, Link, Spinner } from '@posthog/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { ListHog } from 'lib/components/hedgehogs'
+import { ListHog } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { useInterval } from 'lib/hooks/useInterval'
 import goImage from 'scenes/onboarding/sdks/logos/go.svg'
@@ -92,7 +92,7 @@ const NoLogsPrompt = ({ className }: { className?: string }): JSX.Element | null
             productName="Logs"
             thingName="log"
             titleOverride="You haven't sent any logs yet"
-            description="PostHog logs works with any OpenTelemetry-compatible client. You don't need any PostHog-specific packages – just use standard OpenTelemetry libraries to send logs via OTLP."
+            description="Insights logs works with any OpenTelemetry-compatible client. You don't need any Insights-specific packages – just use standard OpenTelemetry libraries to send logs via OTLP."
             isEmpty={true}
             productKey={ProductKey.LOGS}
             className={className}

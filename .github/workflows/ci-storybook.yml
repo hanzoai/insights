@@ -507,14 +507,14 @@ jobs:
         name: Calculate running time
         needs: [visual-regression, changes]
         runs-on: ubuntu-latest
-        if: # Run on pull requests to PostHog/posthog + on PostHog/posthog outside of PRs - but never on forks or Dependabot (no secrets access)
+        if: # Run on pull requests to Insights/posthog + on Insights/posthog outside of PRs - but never on forks or Dependabot (no secrets access)
             always() && github.actor != 'dependabot[bot]' &&
             needs.changes.outputs.frontend == 'true' && (
-            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog') ||
-            (github.event_name != 'pull_request' && github.repository == 'PostHog/posthog'))
+            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'Insights/posthog') ||
+            (github.event_name != 'pull_request' && github.repository == 'Insights/posthog'))
         steps:
-            - name: Capture running time to PostHog
-              uses: PostHog/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
+            - name: Capture running time to Insights
+              uses: Insights/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
               with:
                   posthog-token: ${{ secrets.POSTHOG_API_TOKEN }}
                   event: 'posthog-ci-running-time'

@@ -35,7 +35,7 @@ const meta: Meta<typeof LemonDialog> = {
         docs: {
             description: {
                 component: `
-[Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/PostHog-Design-System-One?node-id=3139%3A1388)
+[Related Figma area](https://www.figma.com/file/Y9G24U4r04nEjIDGIEGuKI/Insights-Design-System-One?node-id=3139%3A1388)
                 
 Dialogs are blocking prompts that force a user decision or action. 
 When a dialog presents a desctructive choice, the actions should align with that destructive / warning color palette options.

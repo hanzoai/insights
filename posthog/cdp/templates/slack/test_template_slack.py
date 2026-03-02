@@ -14,8 +14,8 @@ class TestTemplateSlack(BaseCustomFunctionTemplateTest):
             "slack_workspace": {
                 "access_token": "xoxb-1234",
             },
-            "icon_emoji": ":hedgehog:",
-            "username": "PostHog",
+            "icon_emoji": ":mascot:",
+            "username": "Insights",
             "channel": "channel",
             "blocks": [],
         }
@@ -33,8 +33,8 @@ class TestTemplateSlack(BaseCustomFunctionTemplateTest):
             {
                 "body": {
                     "channel": "channel",
-                    "icon_emoji": ":hedgehog:",
-                    "username": "PostHog",
+                    "icon_emoji": ":mascot:",
+                    "username": "Insights",
                     "blocks": [],
                     "text": None,
                 },

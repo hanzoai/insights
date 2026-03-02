@@ -16,7 +16,7 @@ import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUr
 import { AuthorizedUrlListType, appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
-import { DetectiveHog } from 'lib/components/hedgehogs'
+import { DetectiveHog } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { useResizeObserver } from 'lib/hooks/useResizeObserver'
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
@@ -259,7 +259,7 @@ function HeatmapsBrowserIntro(): JSX.Element {
                         </p>
                         <p>
                             You can also view heatmaps for any page on your website by entering the URL above. As long
-                            as the page has the PostHog Toolbar installed, and can be loaded in an iframe, you can view
+                            as the page has the Insights Toolbar installed, and can be loaded in an iframe, you can view
                             heatmaps for it.
                         </p>
                     </div>

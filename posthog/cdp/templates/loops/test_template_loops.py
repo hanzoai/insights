@@ -24,7 +24,7 @@ class TestTemplateLoops(BaseCustomFunctionTemplateTest):
             globals={
                 "person": {
                     "id": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
-                    "properties": {"name": "Max", "company": "PostHog"},
+                    "properties": {"name": "Max", "company": "Insights"},
                 },
             },
         )
@@ -52,7 +52,7 @@ class TestTemplateLoops(BaseCustomFunctionTemplateTest):
             globals={
                 "person": {
                     "id": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
-                    "properties": {"company": "PostHog"},
+                    "properties": {"company": "Insights"},
                 },
             },
         )
@@ -68,7 +68,7 @@ class TestTemplateLoops(BaseCustomFunctionTemplateTest):
                 "body": {
                     "email": "max@posthog.com",
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
-                    "company": "PostHog",
+                    "company": "Insights",
                     "firstName": "Max",
                     "lastName": "AI",
                 },
@@ -92,7 +92,7 @@ class TestTemplateLoopsEvent(BaseCustomFunctionTemplateTest):
             "apiKey": "1cac089e00a708680bdb1ed9f082d5bf",
             "email": "max@posthog.com",
             "include_all_properties": False,
-            "properties": {"product": "PostHog"},
+            "properties": {"product": "Insights"},
         }
         inputs.update(kwargs)
         return inputs
@@ -103,7 +103,7 @@ class TestTemplateLoopsEvent(BaseCustomFunctionTemplateTest):
             globals={
                 "person": {
                     "id": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
-                    "properties": {"name": "Max", "company": "PostHog"},
+                    "properties": {"name": "Max", "company": "Insights"},
                 },
                 "event": {
                     "event": "pageview",
@@ -125,7 +125,7 @@ class TestTemplateLoopsEvent(BaseCustomFunctionTemplateTest):
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
                     "eventName": "pageview",
                     "eventProperties": {
-                        "product": "PostHog",
+                        "product": "Insights",
                     },
                 },
             },
@@ -137,7 +137,7 @@ class TestTemplateLoopsEvent(BaseCustomFunctionTemplateTest):
             globals={
                 "person": {
                     "id": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
-                    "properties": {"company": "PostHog"},
+                    "properties": {"company": "Insights"},
                 },
                 "event": {
                     "event": "pageview",
@@ -159,7 +159,7 @@ class TestTemplateLoopsEvent(BaseCustomFunctionTemplateTest):
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
                     "eventName": "pageview",
                     "eventProperties": {
-                        "product": "PostHog",
+                        "product": "Insights",
                         "pathname": "/pricing",
                     },
                 },

@@ -14,7 +14,7 @@ from structlog import get_logger
 
 from posthog.clickhouse.query_tagging import tag_queries
 from posthog.models.person import Person
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 
 LOGGER = get_logger(__name__)
@@ -206,8 +206,8 @@ class DeletePersonsWorkflowInputs:
 
 
 @temporalio.workflow.defn(name="delete-persons")
-class DeletePersonsWorkflow(PostHogWorkflow):
-    """Workflow to delete persons and associated entities from the PostHog database."""
+class DeletePersonsWorkflow(InsightsWorkflow):
+    """Workflow to delete persons and associated entities from the Insights database."""
 
     def __init__(self) -> None:
         self.lock = asyncio.Lock()

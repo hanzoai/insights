@@ -6,7 +6,7 @@ import { LemonCollapse, LemonDivider, LemonInput, LemonSelect, LemonTag, Link, T
 import { AppMetricsSparkline } from 'lib/components/AppMetrics/AppMetricsSparkline'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { MailHog } from 'lib/components/hedgehogs'
+import { MailHog } from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { More } from 'lib/lemon-ui/LemonButton/More'
@@ -19,13 +19,13 @@ import { urls } from 'scenes/urls'
 
 import { WorkflowsSceneProps } from '../WorkflowsScene'
 import { NewWorkflowModal } from './NewWorkflowModal'
-import { getHogFlowStep } from './hogflows/steps/HogFlowSteps'
-import { HogFlow } from './hogflows/types'
+import { getCustomFlowStep } from './customflows/steps/CustomFlowSteps'
+import { CustomFlow } from './customflows/types'
 import { newWorkflowLogic } from './newWorkflowLogic'
 import { workflowLogic } from './workflowLogic'
 import { workflowsLogic } from './workflowsLogic'
 
-function WorkflowTypeTag({ workflow }: { workflow: HogFlow }): JSX.Element {
+function WorkflowTypeTag({ workflow }: { workflow: CustomFlow }): JSX.Element {
     const hasMessagingAction = useMemo(() => {
         return workflow.actions.some((action) => {
             return ['function_email', 'function_sms', 'function_slack'].includes(action.type)
@@ -38,11 +38,11 @@ function WorkflowTypeTag({ workflow }: { workflow: HogFlow }): JSX.Element {
     return <LemonTag type="default">Automation</LemonTag>
 }
 
-function WorkflowActionsSummary({ workflow }: { workflow: HogFlow }): JSX.Element {
+function WorkflowActionsSummary({ workflow }: { workflow: CustomFlow }): JSX.Element {
     const actionsByType = useMemo(() => {
         return workflow.actions.reduce(
             (acc, action) => {
-                const step = getHogFlowStep(action, {})
+                const step = getCustomFlowStep(action, {})
                 if (!step || !step.type.startsWith('function')) {
                     return acc
                 }
@@ -112,7 +112,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         loadWorkflows()
     })
 
-    const columns: LemonTableColumns<HogFlow> = [
+    const columns: LemonTableColumns<CustomFlow> = [
         {
             title: 'Name',
             key: 'name',
@@ -174,7 +174,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
             },
         },
         {
-            ...(updatedAtColumn() as LemonTableColumn<HogFlow, any>),
+            ...(updatedAtColumn() as LemonTableColumn<CustomFlow, any>),
             width: 0,
         },
         {
@@ -186,7 +186,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                         <AppMetricsSparkline
                             logicKey={id}
                             forceParams={{
-                                appSource: 'hog_flow',
+                                appSource: 'custom_flow',
                                 appSourceId: id,
                                 metricKind: ['success', 'failure'],
                                 breakdownBy: 'metric_kind',
@@ -214,7 +214,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         },
         {
             width: 0,
-            render: function Render(_, workflow: HogFlow) {
+            render: function Render(_, workflow: CustomFlow) {
                 return (
                     <More
                         overlay={

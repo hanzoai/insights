@@ -6,7 +6,7 @@ import dataclasses
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 with workflow.unsafe.imports_passed_through():
     from posthog.temporal.dlq_replay.activities import (
@@ -52,7 +52,7 @@ class DLQReplayWorkflowResult:
 
 
 @workflow.defn(name="dlq-replay")
-class DLQReplayWorkflow(PostHogWorkflow):
+class DLQReplayWorkflow(InsightsWorkflow):
     """Workflow to replay messages from a Kafka DLQ topic to a target topic.
 
     This workflow:

@@ -13,17 +13,17 @@ import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { ElapsedTime } from '~/queries/nodes/DataNode/ElapsedTime'
 import { Reload } from '~/queries/nodes/DataNode/Reload'
 import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { InsightsQLQueryModifiers, HogQuery, HogQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers, ScriptQuery, ScriptQueryResponse } from '~/queries/schema/schema-general'
 
-export interface HogQueryEditorProps {
-    query: HogQuery
-    setQuery?: (query: HogQuery) => void
+export interface ScriptQueryEditorProps {
+    query: ScriptQuery
+    setQuery?: (query: ScriptQuery) => void
     queryKey?: string
 }
 
 let uniqueNode = 0
 
-export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
+export function ScriptQueryEditor(props: ScriptQueryEditorProps): JSX.Element {
     // Using useRef, not useState, as we don't want to reload the component when this changes.
     const monacoDisposables = useRef([] as IDisposable[])
     useOnMountEffect(() => {
@@ -56,14 +56,14 @@ export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
                         <CodeEditor
                             queryKey={props.queryKey ?? `new/${realKey}`}
                             className="border rounded overflow-hidden h-full"
-                            language="hog"
+                            language="custom_script"
                             value={queryInput}
                             onChange={(v) => setQueryInput(v ?? '')}
                             height="100%"
                             onMount={(editor, monaco) => {
                                 monacoDisposables.current.push(
                                     editor.addAction({
-                                        id: 'saveAndRunPostHog',
+                                        id: 'saveAndRunInsights',
                                         label: 'Save and run query',
                                         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
                                         run: () => saveQuery(),
@@ -107,8 +107,8 @@ export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
 
 interface HogDebugProps {
     queryKey: string
-    query: HogQuery
-    setQuery: (query: HogQuery) => void
+    query: ScriptQuery
+    setQuery: (query: ScriptQuery) => void
     debug?: boolean
     modifiers?: InsightsQLQueryModifiers
     attachTo?: LogicWrapper | BuiltLogic
@@ -123,7 +123,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
     }
     const { dataLoading, response: _response } = useValues(dataNodeLogic(dataNodeLogicProps))
     useAttachedLogic(dataNodeLogic(dataNodeLogicProps), attachTo)
-    const response = _response as HogQueryResponse | null
+    const response = _response as ScriptQueryResponse | null
     const [tab, setTab] = useState('results' as 'results' | 'bytecode' | 'coloredBytecode' | 'stdout')
 
     return (
@@ -131,7 +131,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
             <div className="deprecated-space-y-2">
                 {setQuery ? (
                     <>
-                        <HogQueryEditor query={query} setQuery={setQuery} queryKey={queryKey} />
+                        <ScriptQueryEditor query={query} setQuery={setQuery} queryKey={queryKey} />
                         <LemonDivider className="my-4" />
                         <div className="flex gap-2">
                             <Reload />
@@ -170,7 +170,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
                                         : 'No bytecode returned with response'
                                 }
                                 height={500}
-                                path={`debug/${queryKey}/hog-bytecode.json`}
+                                path={`debug/${queryKey}/script-bytecode.json`}
                                 options={{ wordWrap: 'on' }}
                             />
                         ) : tab === 'coloredBytecode' && debug ? (
@@ -185,7 +185,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
                                         : 'No bytecode returned with response'
                                 }
                                 height={500}
-                                path={`debug/${queryKey}/hog-bytecode.json`}
+                                path={`debug/${queryKey}/script-bytecode.json`}
                                 options={{ wordWrap: 'on', lineNumbers: (nr) => String(nr - 1) }}
                             />
                         ) : tab === 'stdout' ? (
@@ -194,7 +194,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
                                 language="text"
                                 value={String(response?.stdout ?? 'No bytecode returned with response')}
                                 height={500}
-                                path={`debug/${queryKey}/hog-stdout.txt`}
+                                path={`debug/${queryKey}/script-stdout.txt`}
                                 options={{ wordWrap: 'on' }}
                             />
                         ) : (
@@ -207,7 +207,7 @@ export function HogDebug({ query, setQuery, queryKey, debug, modifiers, attachTo
                                         : String(response?.results ?? '')
                                 }
                                 height={500}
-                                path={`debug/${queryKey}/hog-result.json`}
+                                path={`debug/${queryKey}/script-result.json`}
                                 options={{ wordWrap: 'on' }}
                             />
                         )}

@@ -4,9 +4,9 @@
 
 The integration tests require MinIO to be running locally on port 19000.
 
-### Option 1: Using PostHog Docker Compose (Recommended)
+### Option 1: Using Insights Docker Compose (Recommended)
 
-From the PostHog root directory:
+From the Insights root directory:
 
 ```bash
 # Start just the MinIO service
@@ -23,7 +23,7 @@ docker-compose -f docker-compose.dev-full.yml down objectstorage
 ### Option 2: Using Docker directly
 
 ```bash
-# Start MinIO with PostHog's credentials
+# Start MinIO with Insights's credentials
 docker run -p 19000:19000 -p 19001:19001 \
   -e MINIO_ROOT_USER=object_storage_root_user \
   -e MINIO_ROOT_PASSWORD=object_storage_root_password \

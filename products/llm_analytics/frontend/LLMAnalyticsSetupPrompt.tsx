@@ -38,7 +38,7 @@ function IngestionStatusCheck({ className, thing }: { className?: string; thing:
             productName="LLM analytics"
             thingName={`LLM ${thing}`}
             titleOverride={`No LLM ${thing} events have been detected!`}
-            description="To use the LLM Analytics product, please instrument your LLM calls with the PostHog SDK."
+            description="To use the LLM Analytics product, please instrument your LLM calls with the Insights SDK."
             isEmpty={true}
             productKey={ProductKey.LLM_ANALYTICS}
             className={className}

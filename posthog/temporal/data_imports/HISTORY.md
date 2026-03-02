@@ -28,8 +28,8 @@ Makes building new sources a breeze, we now have other teams building sources (s
 
 **Further reading**:
 
-- Limited internal workings of the pipeline and handling OOMs: https://github.com/PostHog/posthog/blob/master/posthog/temporal/data_imports/README.md
-- How to build a new source: https://github.com/PostHog/posthog/blob/master/posthog/temporal/data_imports/sources/README.md
+- Limited internal workings of the pipeline and handling OOMs: https://github.com/Insights/posthog/blob/master/posthog/temporal/data_imports/README.md
+- How to build a new source: https://github.com/Insights/posthog/blob/master/posthog/temporal/data_imports/sources/README.md
 
 ### Problems
 
@@ -82,8 +82,8 @@ We want lots of sources, of well running sources - that is, sources that run eff
 
 We've got a decent prompt to one-shot source creation via Claude, examples:
 
-- https://github.com/PostHog/posthog/compare/master...claude/add-klaviyo-warehouse-source-0168rKr1z9DsehvfpUi56vXt
-- https://github.com/PostHog/posthog/compare/master...claude/mailgun-data-warehouse-source-01WUz5GQwBaUarJnrqU2hSeV
+- https://github.com/Insights/posthog/compare/master...claude/add-klaviyo-warehouse-source-0168rKr1z9DsehvfpUi56vXt
+- https://github.com/Insights/posthog/compare/master...claude/mailgun-data-warehouse-source-01WUz5GQwBaUarJnrqU2hSeV
 
 The next step is to automate the above process for when a user requests a new source, and then add self-healing sources.
 

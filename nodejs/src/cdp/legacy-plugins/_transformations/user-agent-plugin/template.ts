@@ -12,7 +12,7 @@ export const userAgentPlugin: LegacyTransformationPlugin = {
         id: 'plugin-user-agent-plugin',
         name: 'User Agent Populator',
         description:
-            "Enhances events with user agent details. User Agent plugin allows you to populate events with the $browser, $browser_version for PostHog Clients that don't  typically populate these properties",
+            "Enhances events with user agent details. User Agent plugin allows you to populate events with the $browser, $browser_version for Insights Clients that don't  typically populate these properties",
         icon_url: '/static/transformations/user-agent.png',
         category: ['Transformation'],
         code_language: 'javascript',
@@ -34,7 +34,7 @@ export const userAgentPlugin: LegacyTransformationPlugin = {
                 label: 'Automatically read segment_userAgent property, automatically sent by Segment via analytics.js?',
                 type: 'choice',
                 description:
-                    "Segment's analytics.js library automatically sends a useragent property that Posthog sees as segment_userAgent. Enabling this causes this plugin to parse that property",
+                    "Segment's analytics.js library automatically sends a useragent property that Insights sees as segment_userAgent. Enabling this causes this plugin to parse that property",
                 choices: [
                     { value: 'false', label: 'false' },
                     { value: 'true', label: 'true' },

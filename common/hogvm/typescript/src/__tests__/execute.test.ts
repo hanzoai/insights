@@ -109,8 +109,8 @@ describe('hogvm execute', () => {
     test('error handling', async () => {
         const globals = { properties: { foo: 'bar' } }
         const options = { globals }
-        expect(() => execSync([], options)).toThrow("Invalid HogQL bytecode, must start with '_H'")
-        await expect(execAsync([], options)).rejects.toThrow("Invalid HogQL bytecode, must start with '_H'")
+        expect(() => execSync([], options)).toThrow("Invalid InsightsQL bytecode, must start with '_H'")
+        await expect(execAsync([], options)).rejects.toThrow("Invalid InsightsQL bytecode, must start with '_H'")
 
         expect(() => execSync(['_h', op.INTEGER, 2, op.INTEGER, 1, 'InvalidOp'], options)).toThrow(
             'Unexpected node while running bytecode in chunk "root": InvalidOp'
@@ -137,7 +137,7 @@ describe('hogvm execute', () => {
         // This test documents the current typescript hogvm behavior where null is coerced to 0 in ordering comparisons.
         // HogVM in python/rust does not share this behavior.
         // It is preserved for backward compatibility - users depend on it.
-        // See: https://github.com/PostHog/posthog/pull/45328
+        // See: https://github.com/Insights/posthog/pull/45328
         const options = {}
 
         // null is coerced to 0 in JavaScript comparisons
@@ -1034,7 +1034,7 @@ describe('hogvm execute', () => {
 
         // return [1, 2, 3][0]
         expect(() => execSync(['_h', 33, 1, 33, 2, 33, 3, 43, 3, 33, 0, 45, 38])).toThrow(
-            'Hog arrays start from index 1'
+            'Script arrays start from index 1'
         )
     })
 

@@ -20,7 +20,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         def run_optimized_celery():
-            # Optimize file watching - only watch core PostHog directories instead of all 66k+ files
+            # Optimize file watching - only watch core Insights directories instead of all 66k+ files
             # This must be called inside the reloader process
             self._setup_limited_file_watching()
             self.run_celery_worker(options["type"])
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         autoreload.run_with_reloader(run_optimized_celery)
 
     def _setup_limited_file_watching(self):
-        """Limit file watching to core PostHog directories instead of all 66k+ files"""
+        """Limit file watching to core Insights directories instead of all 66k+ files"""
         # Get the project root directory
         project_root = Path(__file__).parent.parent.parent.parent
 

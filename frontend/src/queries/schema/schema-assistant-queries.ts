@@ -608,6 +608,6 @@ export interface AssistantRetentionQuery extends AssistantInsightsQueryBase {
 
 export interface AssistantInsightsQLQuery {
     kind: NodeKind.InsightsQLQuery
-    /** SQL SELECT statement to execute. Mostly standard ClickHouse SQL with PostHog-specific additions. */
+    /** SQL SELECT statement to execute. Mostly standard ClickHouse SQL with Insights-specific additions. */
     query: string
 }

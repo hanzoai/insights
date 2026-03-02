@@ -20,8 +20,8 @@ from temporalio.workflow import ParentClosePolicy
 
 from posthog.schema import EmbeddingModelName
 
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.embedding_worker import emit_embedding_request, generate_embedding
 from posthog.models import Team
@@ -129,7 +129,7 @@ async def fetch_signal_type_examples_activity(input: FetchSignalTypeExamplesInpu
             GROUP BY source_product, source_type
         """
 
-        result = await sync_to_async(execute_hogql_query, thread_sensitive=False)(
+        result = await sync_to_async(execute_insightsql_query, thread_sensitive=False)(
             query_type="SignalsFetchTypeExamples",
             query=query,
             team=team,
@@ -322,7 +322,7 @@ async def run_signal_semantic_search_activity(input: RunSignalSemanticSearchInpu
             LIMIT {limit}
         """
 
-        result = await sync_to_async(execute_hogql_query, thread_sensitive=False)(
+        result = await sync_to_async(execute_insightsql_query, thread_sensitive=False)(
             query_type="SignalsRunEmbeddingQuery",
             query=query,
             team=team,

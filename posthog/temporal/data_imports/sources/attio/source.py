@@ -37,7 +37,7 @@ class AttioSource(SimpleSource[AttioSourceConfig]):
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
             name=SchemaExternalDataSourceType.ATTIO,
-            caption="""Enter your Attio API key to automatically pull your Attio data into the PostHog Data warehouse.
+            caption="""Enter your Attio API key to automatically pull your Attio data into the Insights Data warehouse.
 
 You can generate an API key in your Attio workspace settings. Check out [this guide](https://attio.com/help/apps/other-apps/generating-an-api-key) for more details.
 

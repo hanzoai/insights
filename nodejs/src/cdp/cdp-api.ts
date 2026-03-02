@@ -5,7 +5,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 
 import { ModifiedRequest } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
-import { KAFKA_CDP_BATCH_HOGFLOW_REQUESTS, KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
+import { KAFKA_CDP_BATCH_CUSTOMFLOW_REQUESTS, KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
 import { KafkaProducerWrapper } from '~/kafka/producer'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, Hub, PluginServerService } from '../types'
@@ -16,35 +16,35 @@ import './async-functions'
 import {
     CdpSourceWebhooksConsumer,
     CdpSourceWebhooksConsumerHub,
-    HogFunctionWebhookResult,
+    CustomFunctionWebhookResult,
     SourceWebhookError,
 } from './consumers/cdp-source-webhooks.consumer'
-import { HogTransformerHub, HogTransformerService } from './hog-transformations/hog-transformer.service'
-import { HogExecutorExecuteAsyncOptions, HogExecutorService, MAX_ASYNC_STEPS } from './services/hog-executor.service'
-import { HogFlowExecutorService, createHogFlowInvocation } from './services/hogflows/hogflow-executor.service'
-import { HogFlowFunctionsService } from './services/hogflows/hogflow-functions.service'
-import { HogFlowManagerService } from './services/hogflows/hogflow-manager.service'
-import { HogFunctionManagerService } from './services/managers/hog-function-manager.service'
-import { HogFunctionTemplateManagerService } from './services/managers/hog-function-template-manager.service'
+import { ScriptTransformerHub, ScriptTransformerService } from './script-transformations/script-transformer.service'
+import { ScriptExecutorExecuteAsyncOptions, ScriptExecutorService, MAX_ASYNC_STEPS } from './services/script-executor.service'
+import { CustomFlowExecutorService, createCustomFlowInvocation } from './services/customflows/customflow-executor.service'
+import { CustomFlowFunctionsService } from './services/customflows/customflow-functions.service'
+import { CustomFlowManagerService } from './services/customflows/customflow-manager.service'
+import { CustomFunctionManagerService } from './services/managers/custom-function-manager.service'
+import { CustomFunctionTemplateManagerService } from './services/managers/custom-function-template-manager.service'
 import { RecipientsManagerService } from './services/managers/recipients-manager.service'
 import { EmailTrackingService } from './services/messaging/email-tracking.service'
 import { RecipientPreferencesService } from './services/messaging/recipient-preferences.service'
 import { RecipientTokensService } from './services/messaging/recipient-tokens.service'
-import { HogFunctionMonitoringService } from './services/monitoring/hog-function-monitoring.service'
-import { HogWatcherService, HogWatcherState } from './services/monitoring/hog-watcher.service'
+import { CustomFunctionMonitoringService } from './services/monitoring/custom-function-monitoring.service'
+import { ScriptWatcherService, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
-import { HOG_FUNCTION_TEMPLATES } from './templates'
-import { HogFunctionInvocationGlobals, HogFunctionType, MinimalLogEntry } from './types'
-import { convertToHogFunctionInvocationGlobals, isNativeHogFunction, isSegmentPluginHogFunction } from './utils'
-import { convertToHogFunctionFilterGlobal } from './utils/hog-function-filtering'
+import { CUSTOM_FUNCTION_TEMPLATES } from './templates'
+import { CustomFunctionInvocationGlobals, CustomFunctionType, MinimalLogEntry } from './types'
+import { convertToCustomFunctionInvocationGlobals, isNativeCustomFunction, isSegmentPluginCustomFunction } from './utils'
+import { convertToCustomFunctionFilterGlobal } from './utils/custom-function-filtering'
 
 /**
  * Hub type for CdpApi.
  * Combines all hub types needed by CdpApi and its dependencies.
  */
 export type CdpApiHub = CdpSourceWebhooksConsumerHub &
-    HogTransformerHub &
+    ScriptTransformerHub &
     Pick<
         Hub,
         | 'teamManager'
@@ -58,20 +58,20 @@ export type CdpApiHub = CdpSourceWebhooksConsumerHub &
     >
 
 export class CdpApi {
-    private hogExecutor: HogExecutorService
+    private scriptExecutor: ScriptExecutorService
     private nativeDestinationExecutorService: NativeDestinationExecutorService
     private segmentDestinationExecutorService: SegmentDestinationExecutorService
 
-    private hogFunctionManager: HogFunctionManagerService
-    private hogFunctionTemplateManager: HogFunctionTemplateManagerService
-    private hogFlowManager: HogFlowManagerService
+    private customFunctionManager: CustomFunctionManagerService
+    private customFunctionTemplateManager: CustomFunctionTemplateManagerService
+    private customFlowManager: CustomFlowManagerService
     private recipientsManager: RecipientsManagerService
 
-    private hogFlowExecutor: HogFlowExecutorService
-    private hogFlowFunctionsService: HogFlowFunctionsService
-    private hogWatcher: HogWatcherService
-    private hogTransformer: HogTransformerService
-    private hogFunctionMonitoringService: HogFunctionMonitoringService
+    private customFlowExecutor: CustomFlowExecutorService
+    private customFlowFunctionsService: CustomFlowFunctionsService
+    private scriptWatcher: ScriptWatcherService
+    private scriptTransformer: ScriptTransformerService
+    private customFunctionMonitoringService: CustomFunctionMonitoringService
     private cdpSourceWebhooksConsumer: CdpSourceWebhooksConsumer
     private emailTrackingService: EmailTrackingService
     private recipientPreferencesService: RecipientPreferencesService
@@ -79,26 +79,26 @@ export class CdpApi {
     private cdpWarehouseKafkaProducer?: KafkaProducerWrapper
 
     constructor(private hub: CdpApiHub) {
-        this.hogFunctionManager = new HogFunctionManagerService(hub)
-        this.hogFunctionTemplateManager = new HogFunctionTemplateManagerService(hub.postgres)
-        this.hogFlowManager = new HogFlowManagerService(hub.postgres, hub.pubSub)
+        this.customFunctionManager = new CustomFunctionManagerService(hub)
+        this.customFunctionTemplateManager = new CustomFunctionTemplateManagerService(hub.postgres)
+        this.customFlowManager = new CustomFlowManagerService(hub.postgres, hub.pubSub)
         this.recipientsManager = new RecipientsManagerService(hub.postgres)
-        this.hogExecutor = new HogExecutorService(hub)
-        this.hogFlowFunctionsService = new HogFlowFunctionsService(
+        this.scriptExecutor = new ScriptExecutorService(hub)
+        this.customFlowFunctionsService = new CustomFlowFunctionsService(
             hub.SITE_URL,
-            this.hogFunctionTemplateManager,
-            this.hogExecutor
+            this.customFunctionTemplateManager,
+            this.scriptExecutor
         )
         this.recipientPreferencesService = new RecipientPreferencesService(this.recipientsManager)
         this.recipientTokensService = new RecipientTokensService(hub)
-        this.hogFlowExecutor = new HogFlowExecutorService(
-            this.hogFlowFunctionsService,
+        this.customFlowExecutor = new CustomFlowExecutorService(
+            this.customFlowFunctionsService,
             this.recipientPreferencesService
         )
         this.nativeDestinationExecutorService = new NativeDestinationExecutorService(hub)
         this.segmentDestinationExecutorService = new SegmentDestinationExecutorService(hub)
         // CDP uses its own Redis instance with fallback to default
-        this.hogWatcher = new HogWatcherService(
+        this.scriptWatcher = new ScriptWatcherService(
             hub,
             createRedisV2PoolFromConfig({
                 connection: hub.CDP_REDIS_HOST
@@ -112,13 +112,13 @@ export class CdpApi {
                 poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
             })
         )
-        this.hogTransformer = new HogTransformerService(hub)
-        this.hogFunctionMonitoringService = new HogFunctionMonitoringService(hub)
+        this.scriptTransformer = new ScriptTransformerService(hub)
+        this.customFunctionMonitoringService = new CustomFunctionMonitoringService(hub)
         this.cdpSourceWebhooksConsumer = new CdpSourceWebhooksConsumer(hub)
         this.emailTrackingService = new EmailTrackingService(
-            this.hogFunctionManager,
-            this.hogFlowManager,
-            this.hogFunctionMonitoringService
+            this.customFunctionManager,
+            this.customFlowManager,
+            this.customFunctionMonitoringService
         )
     }
 
@@ -156,16 +156,16 @@ export class CdpApi {
                 fn(req, res).catch(next)
 
         // API routes (authentication handled globally by middleware)
-        router.post('/api/projects/:team_id/hog_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
-        router.post('/api/projects/:team_id/hog_flows/:id/invocations', asyncHandler(this.postHogflowInvocation))
+        router.post('/api/projects/:team_id/custom_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
+        router.post('/api/projects/:team_id/custom_flows/:id/invocations', asyncHandler(this.postCustomflowInvocation))
         router.post(
-            '/api/projects/:team_id/hog_flows/:id/batch_invocations/:parent_run_id',
-            asyncHandler(this.postHogFlowBatchInvocation)
+            '/api/projects/:team_id/custom_flows/:id/batch_invocations/:parent_run_id',
+            asyncHandler(this.postCustomFlowBatchInvocation)
         )
-        router.get('/api/projects/:team_id/hog_functions/:id/status', asyncHandler(this.getFunctionStatus()))
-        router.patch('/api/projects/:team_id/hog_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
-        router.get('/api/hog_functions/states', asyncHandler(this.getFunctionStates()))
-        router.get('/api/hog_function_templates', this.getHogFunctionTemplates)
+        router.get('/api/projects/:team_id/custom_functions/:id/status', asyncHandler(this.getFunctionStatus()))
+        router.patch('/api/projects/:team_id/custom_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
+        router.get('/api/custom_functions/states', asyncHandler(this.getFunctionStates()))
+        router.get('/api/custom_function_templates', this.getCustomFunctionTemplates)
         router.post('/api/messaging/generate_preferences_token', asyncHandler(this.generatePreferencesToken()))
         router.get('/api/messaging/validate_preferences_token/:token', asyncHandler(this.validatePreferencesToken()))
 
@@ -192,15 +192,15 @@ export class CdpApi {
         return router
     }
 
-    private getHogFunctionTemplates = (req: ModifiedRequest, res: express.Response): void => {
-        res.json(HOG_FUNCTION_TEMPLATES)
+    private getCustomFunctionTemplates = (req: ModifiedRequest, res: express.Response): void => {
+        res.json(CUSTOM_FUNCTION_TEMPLATES)
     }
 
     private getFunctionStatus =
         () =>
         async (req: ModifiedRequest, res: express.Response): Promise<void> => {
             const { id } = req.params
-            const summary = await this.hogWatcher.getPersistedState(id)
+            const summary = await this.scriptWatcher.getPersistedState(id)
 
             res.json(summary)
         }
@@ -212,57 +212,57 @@ export class CdpApi {
             const { state } = req.body
 
             // Check that state is valid
-            if (!Object.values(HogWatcherState).includes(state)) {
+            if (!Object.values(ScriptWatcherState).includes(state)) {
                 res.status(400).json({ error: 'Invalid state' })
                 return
             }
 
-            const summary = await this.hogWatcher.getPersistedState(id)
-            const hogFunction = await this.hogFunctionManager.fetchHogFunction(id)
+            const summary = await this.scriptWatcher.getPersistedState(id)
+            const customFunction = await this.customFunctionManager.fetchCustomFunction(id)
 
-            if (!hogFunction) {
-                res.status(404).json({ error: 'Hog function not found' })
+            if (!customFunction) {
+                res.status(404).json({ error: 'Custom function not found' })
                 return
             }
 
             // Only allow patching the status if it is different from the current status
 
             if (summary.state !== state) {
-                await this.hogWatcher.forceStateChange(hogFunction, state)
+                await this.scriptWatcher.forceStateChange(customFunction, state)
             }
 
             // Hacky - wait for a little to give a chance for the state to change
             await delay(100)
 
-            res.json(await this.hogWatcher.getPersistedState(id))
+            res.json(await this.scriptWatcher.getPersistedState(id))
         }
 
     private getFunctionStates =
         () =>
         async (req: ModifiedRequest, res: express.Response): Promise<void> => {
             try {
-                const allStates = await this.hogWatcher.getAllFunctionStates()
+                const allStates = await this.scriptWatcher.getAllFunctionStates()
 
                 // Transform the data for better consumption by Grafana and sort by tokens ascending
                 const statesArray = Object.entries(allStates)
                     .map(([functionId, state]) => ({
                         function_id: functionId,
-                        state: HogWatcherState[state.state], // Convert numeric state to readable string
+                        state: ScriptWatcherState[state.state], // Convert numeric state to readable string
                         tokens: state.tokens,
                         state_numeric: state.state,
                     }))
                     .sort((a, b) => b.state_numeric - a.state_numeric)
 
-                const hogFunctions = await this.hogFunctionManager.getHogFunctions(
+                const customFunctions = await this.customFunctionManager.getCustomFunctions(
                     statesArray.map((x) => x.function_id)
                 )
 
                 const results = statesArray.map((x) => ({
                     ...x,
-                    function_name: hogFunctions[x.function_id]?.name,
-                    function_team_id: hogFunctions[x.function_id]?.team_id,
-                    function_type: hogFunctions[x.function_id]?.type,
-                    function_enabled: hogFunctions[x.function_id]?.enabled && !hogFunctions[x.function_id]?.deleted,
+                    function_name: customFunctions[x.function_id]?.name,
+                    function_team_id: customFunctions[x.function_id]?.team_id,
+                    function_type: customFunctions[x.function_id]?.type,
+                    function_enabled: customFunctions[x.function_id]?.enabled && !customFunctions[x.function_id]?.deleted,
                 }))
 
                 res.json({
@@ -293,9 +293,9 @@ export class CdpApi {
 
             const isNewFunction = req.params.id === 'new'
 
-            const hogFunction = isNewFunction
+            const customFunction = isNewFunction
                 ? null
-                : await this.hogFunctionManager.fetchHogFunction(req.params.id).catch(() => null)
+                : await this.customFunctionManager.fetchCustomFunction(req.params.id).catch(() => null)
             const team = await this.hub.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
             if (!team) {
@@ -303,7 +303,7 @@ export class CdpApi {
             }
 
             globals = clickhouse_event
-                ? convertToHogFunctionInvocationGlobals(clickhouse_event, team, this.hub.SITE_URL)
+                ? convertToCustomFunctionInvocationGlobals(clickhouse_event, team, this.hub.SITE_URL)
                 : globals
 
             if (!globals || !globals.event) {
@@ -311,15 +311,15 @@ export class CdpApi {
                 return
             }
 
-            // NOTE: We allow the hog function to be null if it is a "new" hog function
+            // NOTE: We allow the custom function to be null if it is a "new" custom function
             // The real security happens at the django layer so this is more of a sanity check
-            if (!isNewFunction && (!hogFunction || hogFunction.team_id !== team.id)) {
-                return res.status(404).json({ error: 'Hog function not found' })
+            if (!isNewFunction && (!customFunction || customFunction.team_id !== team.id)) {
+                return res.status(404).json({ error: 'Custom function not found' })
             }
 
             // We use the provided config if given, otherwise the function's config
-            const compoundConfiguration: HogFunctionType = {
-                ...hogFunction,
+            const compoundConfiguration: CustomFunctionType = {
+                ...customFunction,
                 ...configuration,
                 team_id: team.id,
             }
@@ -328,7 +328,7 @@ export class CdpApi {
             let result: any = null
             const errors: any[] = []
 
-            const triggerGlobals: HogFunctionInvocationGlobals = {
+            const triggerGlobals: CustomFunctionInvocationGlobals = {
                 ...globals,
                 project: {
                     id: team.id,
@@ -343,7 +343,7 @@ export class CdpApi {
                     invocations,
                     logs: filterLogs,
                     metrics: filterMetrics,
-                } = await this.hogExecutor.buildHogFunctionInvocations([compoundConfiguration], triggerGlobals)
+                } = await this.scriptExecutor.buildCustomFunctionInvocations([compoundConfiguration], triggerGlobals)
 
                 // Add metrics to the logs
                 filterMetrics.forEach((metric) => {
@@ -363,18 +363,18 @@ export class CdpApi {
                 for (const invocation of invocations) {
                     invocation.id = invocationID
 
-                    const options: HogExecutorExecuteAsyncOptions = buildHogExecutorAsyncOptions(
+                    const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(
                         mock_async_functions,
                         logs
                     )
 
                     let response: any = null
-                    if (isNativeHogFunction(compoundConfiguration)) {
+                    if (isNativeCustomFunction(compoundConfiguration)) {
                         response = await this.nativeDestinationExecutorService.execute(invocation)
-                    } else if (isSegmentPluginHogFunction(compoundConfiguration)) {
+                    } else if (isSegmentPluginCustomFunction(compoundConfiguration)) {
                         response = await this.segmentDestinationExecutorService.execute(invocation)
                     } else {
-                        response = await this.hogExecutor.executeWithAsyncFunctions(invocation, options)
+                        response = await this.scriptExecutor.executeWithAsyncFunctions(invocation, options)
                     }
 
                     logs = logs.concat(response.logs)
@@ -405,7 +405,7 @@ export class CdpApi {
                     team_id: triggerGlobals.project.id,
                     now: '',
                 }
-                const response = await this.hogTransformer.transformEvent(pluginEvent, [compoundConfiguration])
+                const response = await this.scriptTransformer.transformEvent(pluginEvent, [compoundConfiguration])
 
                 result = response.event
 
@@ -433,16 +433,16 @@ export class CdpApi {
             console.error(e)
             res.status(500).json({ errors: [e.message] })
         } finally {
-            await this.hogFunctionMonitoringService.flush()
+            await this.customFunctionMonitoringService.flush()
         }
     }
 
-    private postHogflowInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
+    private postCustomflowInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
         try {
             const { id, team_id } = req.params
             const { clickhouse_event, configuration, invocation_id, current_action_id, mock_async_functions } = req.body
 
-            logger.info('⚡️', 'Received hogflow invocation', { id, team_id, body: req.body })
+            logger.info('⚡️', 'Received customflow invocation', { id, team_id, body: req.body })
 
             const invocationID = invocation_id ?? new UUIDT().toString()
 
@@ -452,8 +452,8 @@ export class CdpApi {
                 return
             }
 
-            const isNewHogFlow = req.params.id === 'new'
-            const hogFlow = isNewHogFlow ? null : await this.hogFlowManager.getHogFlow(req.params.id)
+            const isNewCustomFlow = req.params.id === 'new'
+            const customFlow = isNewCustomFlow ? null : await this.customFlowManager.getCustomFlow(req.params.id)
 
             const team = await this.hub.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
@@ -461,14 +461,14 @@ export class CdpApi {
                 return res.status(404).json({ error: 'Team not found' })
             }
 
-            // NOTE: We allow the hog flow to be null if it is a "new" hog flow
+            // NOTE: We allow the custom flow to be null if it is a "new" custom flow
             // The real security happens at the django layer so this is more of a sanity check
-            if (!isNewHogFlow && (!hogFlow || hogFlow.team_id !== team.id)) {
-                return res.status(404).json({ error: 'Hog flow not found' })
+            if (!isNewCustomFlow && (!customFlow || customFlow.team_id !== team.id)) {
+                return res.status(404).json({ error: 'Custom flow not found' })
             }
 
-            const globals: HogFunctionInvocationGlobals | null = clickhouse_event
-                ? convertToHogFunctionInvocationGlobals(
+            const globals: CustomFunctionInvocationGlobals | null = clickhouse_event
+                ? convertToCustomFunctionInvocationGlobals(
                       clickhouse_event,
                       team,
                       this.hub.SITE_URL ?? 'http://localhost:8000'
@@ -481,12 +481,12 @@ export class CdpApi {
 
             // We use the provided config if given, otherwise the flow's config
             const compoundConfiguration = {
-                ...hogFlow,
+                ...customFlow,
                 ...configuration,
                 team_id: team.id,
             }
 
-            const triggerGlobals: HogFunctionInvocationGlobals = {
+            const triggerGlobals: CustomFunctionInvocationGlobals = {
                 ...globals,
                 project: {
                     id: team.id,
@@ -495,14 +495,14 @@ export class CdpApi {
                 },
             }
 
-            const filterGlobals = convertToHogFunctionFilterGlobal({
+            const filterGlobals = convertToCustomFunctionFilterGlobal({
                 event: globals.event,
                 person: globals.person,
                 groups: globals.groups,
                 variables: globals.variables || {},
             })
 
-            const invocation = createHogFlowInvocation(triggerGlobals, compoundConfiguration, filterGlobals)
+            const invocation = createCustomFlowInvocation(triggerGlobals, compoundConfiguration, filterGlobals)
 
             invocation.state.currentAction = current_action_id
                 ? {
@@ -512,8 +512,8 @@ export class CdpApi {
                 : undefined
 
             const logs: MinimalLogEntry[] = []
-            const options: HogExecutorExecuteAsyncOptions = buildHogExecutorAsyncOptions(mock_async_functions, logs)
-            const result = await this.hogFlowExecutor.executeCurrentAction(invocation, { hogExecutorOptions: options })
+            const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(mock_async_functions, logs)
+            const result = await this.customFlowExecutor.executeCurrentAction(invocation, { scriptExecutorOptions: options })
 
             res.json({
                 nextActionId: result.invocation.state.currentAction?.id,
@@ -529,11 +529,11 @@ export class CdpApi {
         }
     }
 
-    private postHogFlowBatchInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
+    private postCustomFlowBatchInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
         try {
             const { id, team_id, parent_run_id } = req.params
 
-            logger.info('⚡️', 'Received hogflow batch invocation', { id, team_id, parent_run_id })
+            logger.info('⚡️', 'Received customflow batch invocation', { id, team_id, parent_run_id })
 
             const team = await this.hub.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
@@ -541,9 +541,9 @@ export class CdpApi {
                 return res.status(404).json({ error: 'Team not found' })
             }
 
-            const hogFlow = await this.hogFlowManager.getHogFlow(id)
+            const customFlow = await this.customFlowManager.getCustomFlow(id)
 
-            if (!hogFlow || hogFlow.team_id !== team.id) {
+            if (!customFlow || customFlow.team_id !== team.id) {
                 return res.status(404).json({ error: 'Workflow not found' })
             }
 
@@ -553,29 +553,29 @@ export class CdpApi {
                 return res.status(500).json({ error: 'Kafka producer not available' })
             }
 
-            if (hogFlow.trigger.type !== 'batch') {
+            if (customFlow.trigger.type !== 'batch') {
                 return res.status(400).json({ error: 'Only batch Workflows are supported for batch jobs' })
             }
 
-            const batchHogFlowRequest = {
+            const batchCustomFlowRequest = {
                 teamId: team.id,
-                hogFlowId: hogFlow.id,
+                customFlowId: customFlow.id,
                 parentRunId: parent_run_id,
                 filters: {
-                    properties: hogFlow.trigger.filters.properties || [],
+                    properties: customFlow.trigger.filters.properties || [],
                     filter_test_accounts: req.body.filters?.filter_test_accounts || false,
                 },
             }
 
             await kafkaProducer.produce({
-                topic: KAFKA_CDP_BATCH_HOGFLOW_REQUESTS,
-                value: Buffer.from(JSON.stringify(batchHogFlowRequest)),
-                key: `${team.id}_${hogFlow.id}`,
+                topic: KAFKA_CDP_BATCH_CUSTOMFLOW_REQUESTS,
+                value: Buffer.from(JSON.stringify(batchCustomFlowRequest)),
+                key: `${team.id}_${customFlow.id}`,
             })
 
             res.json({ status: 'queued' })
         } catch (e) {
-            logger.error('Error handling hogflow batch invocation', { error: e })
+            logger.error('Error handling customflow batch invocation', { error: e })
             res.status(500).json({ error: [e.message] })
         }
     }
@@ -592,7 +592,7 @@ export class CdpApi {
             const result = await this.cdpSourceWebhooksConsumer.processWebhook(webhookId, req)
 
             if (typeof result.execResult === 'object' && result.execResult && 'httpResponse' in result.execResult) {
-                const httpResponse = result.execResult.httpResponse as HogFunctionWebhookResult
+                const httpResponse = result.execResult.httpResponse as CustomFunctionWebhookResult
                 if (typeof httpResponse.body === 'string') {
                     return res
                         .status(httpResponse.status)
@@ -641,10 +641,10 @@ export class CdpApi {
                     return res.status(500).json({ error: 'Template did not return a payload' })
                 }
 
-                const hogFunction = result.invocation.hogFunction
-                const schemaId = hogFunction.inputs?.schema_id?.value
+                const customFunction = result.invocation.customFunction
+                const schemaId = customFunction.inputs?.schema_id?.value
                 if (!schemaId) {
-                    return res.status(500).json({ error: 'Missing schema_id on hog function' })
+                    return res.status(500).json({ error: 'Missing schema_id on custom function' })
                 }
 
                 const kafkaProducer = this.cdpWarehouseKafkaProducer
@@ -654,7 +654,7 @@ export class CdpApi {
 
                 await kafkaProducer.produce({
                     topic: KAFKA_WAREHOUSE_SOURCE_WEBHOOKS,
-                    key: `${hogFunction.team_id}:${schemaId}`,
+                    key: `${customFunction.team_id}:${schemaId}`,
                     value: Buffer.from(JSON.stringify(result.execResult)),
                 })
 
@@ -729,10 +729,10 @@ export class CdpApi {
         }
 }
 
-const buildHogExecutorAsyncOptions = (
+const buildScriptExecutorAsyncOptions = (
     mockAsyncFunctions: boolean,
     logs: MinimalLogEntry[]
-): HogExecutorExecuteAsyncOptions => {
+): ScriptExecutorExecuteAsyncOptions => {
     let mockFunctions: Record<string, (...args: any[]) => any> | undefined
 
     if (mockAsyncFunctions) {

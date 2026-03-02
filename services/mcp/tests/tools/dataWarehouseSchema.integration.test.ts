@@ -36,11 +36,11 @@ describe('read-data-warehouse-schema', { concurrent: false }, () => {
 
     const tool = readDataWarehouseSchemaTool()
 
-    it('should return core PostHog table schemas', async () => {
+    it('should return core Insights table schemas', async () => {
         const result = await tool.handler(context, {})
 
         expect(typeof result).toBe('string')
-        expect(result).toContain('# Core PostHog tables')
+        expect(result).toContain('# Core Insights tables')
         expect(result).toContain('## Table `events`')
         expect(result).toContain('## Table `persons`')
     })

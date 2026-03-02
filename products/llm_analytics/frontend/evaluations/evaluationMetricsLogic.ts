@@ -4,8 +4,8 @@ import { loaders } from 'kea-loaders'
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
 
-import { HogQLQuery, NodeKind, TrendsQuery } from '~/queries/schema/schema-general'
-import { ChartDisplayType, HogQLMathType } from '~/types'
+import { InsightsQLQuery, NodeKind, TrendsQuery } from '~/queries/schema/schema-general'
+import { ChartDisplayType, InsightsQLMathType } from '~/types'
 
 import { PASS_RATE_SUCCESS_THRESHOLD } from './components/EvaluationMetrics'
 import type { evaluationMetricsLogicType } from './evaluationMetricsLogicType'
@@ -82,8 +82,8 @@ export const evaluationMetricsLogic = kea<evaluationMetricsLogicType>([
                     const dateFrom = values.dateFilter.dateFrom || '-1d'
                     const dateTo = values.dateFilter.dateTo || null
 
-                    const query: HogQLQuery = {
-                        kind: NodeKind.HogQLQuery,
+                    const query: InsightsQLQuery = {
+                        kind: NodeKind.InsightsQLQuery,
                         query: `
                             SELECT
                                 properties.$ai_evaluation_id as evaluation_id,
@@ -194,9 +194,9 @@ export const evaluationMetricsLogic = kea<evaluationMetricsLogicType>([
                         kind: NodeKind.EventsNode,
                         event: '$ai_evaluation',
                         custom_name: evaluation.name,
-                        math: HogQLMathType.HogQL,
+                        math: InsightsQLMathType.InsightsQL,
                         // Pass rate excludes N/A results, returns 0 if all results are N/A
-                        math_hogql: `if(countIf(properties.$ai_evaluation_id = '${evaluation.id}' AND properties.$ai_evaluation_result IS NOT NULL) > 0, countIf(properties.$ai_evaluation_id = '${evaluation.id}' AND properties.$ai_evaluation_result = 1) / countIf(properties.$ai_evaluation_id = '${evaluation.id}' AND properties.$ai_evaluation_result IS NOT NULL) * 100, 0)`,
+                        math_insightsql: `if(countIf(properties.$ai_evaluation_id = '${evaluation.id}' AND properties.$ai_evaluation_result IS NOT NULL) > 0, countIf(properties.$ai_evaluation_id = '${evaluation.id}' AND properties.$ai_evaluation_result = 1) / countIf(properties.$ai_evaluation_id = '${evaluation.id}' AND properties.$ai_evaluation_result IS NOT NULL) * 100, 0)`,
                     })),
                     trendsFilter: {
                         display: ChartDisplayType.ActionsLineGraph,

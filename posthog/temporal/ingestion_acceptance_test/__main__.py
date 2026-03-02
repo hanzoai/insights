@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import posthoganalytics
 
-from posthog.temporal.ingestion_acceptance_test.client import PostHogClient
+from posthog.temporal.ingestion_acceptance_test.client import InsightsClient
 from posthog.temporal.ingestion_acceptance_test.config import Config
 from posthog.temporal.ingestion_acceptance_test.runner import run_tests
 from posthog.temporal.ingestion_acceptance_test.terminal_report import format_terminal_report
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     )
 
     tests = discover_tests()
-    client = PostHogClient(config, posthog_sdk)
+    client = InsightsClient(config, posthog_sdk)
     with ThreadPoolExecutor() as executor:
         result = run_tests(config, tests, client, executor)
     logger.info(format_terminal_report(result))

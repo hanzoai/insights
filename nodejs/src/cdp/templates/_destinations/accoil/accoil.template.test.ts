@@ -238,7 +238,7 @@ describe('accoil template', () => {
     })
 
     describe('mapping behavior', () => {
-        // Note: HogQL filters are tested in production but not in the test environment
+        // Note: InsightsQL filters are tested in production but not in the test environment
         // due to test helper limitations that bypass the filtering logic
 
         it('should allow custom events in Track Calls mapping when explicitly enabled', async () => {
@@ -268,7 +268,7 @@ describe('accoil template', () => {
     })
 
     describe('system event filtering', () => {
-        it('should skip internal PostHog events not in whitelist', async () => {
+        it('should skip internal Insights events not in whitelist', async () => {
             const response = await tester.invokeMapping(
                 'Track Calls',
                 baseInputs,

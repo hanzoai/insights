@@ -24,7 +24,7 @@ from posthog.batch_exports.service import (
 )
 from posthog.models.integration import Integration
 from posthog.models.team import Team
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 from products.batch_exports.backend.temporal.destinations.databricks_batch_export import (
     DatabricksBatchExportWorkflow,
@@ -69,7 +69,7 @@ class DatabricksDestinationTest(BaseDestinationTest):
         return "Databricks"
 
     @property
-    def workflow_class(self) -> type[PostHogWorkflow]:
+    def workflow_class(self) -> type[InsightsWorkflow]:
         return DatabricksBatchExportWorkflow
 
     @property
@@ -408,7 +408,7 @@ class TestDatabricksBatchExportWorkflow(CommonWorkflowTests):
             `is_deleted` BOOLEAN
         )
         USING DELTA
-        COMMENT 'PostHog generated table'
+        COMMENT 'Insights generated table'
         """
         with destination_test.cursor(ateam.pk, integration) as cursor:
             cursor.execute(query)

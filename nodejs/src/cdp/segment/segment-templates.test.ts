@@ -30,7 +30,7 @@ describe('segment templates', () => {
 
         const iconUrl = template.icon_url
 
-        if (!iconUrl || iconUrl === '/static/posthog-icon.svg') {
+        if (!iconUrl || iconUrl === '/static/insights-icon.svg') {
             return
         }
 

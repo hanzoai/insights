@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LemonButton, LemonInput, SpinnerOverlay } from '@posthog/lemon-ui'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
 import { notebookNodeLogic } from './notebookNodeLogic'
@@ -126,7 +126,7 @@ const Settings = ({
     )
 }
 
-export const NotebookNodeEmbed = createPostHogWidgetNode<NotebookNodeEmbedAttributes>({
+export const NotebookNodeEmbed = createInsightsWidgetNode<NotebookNodeEmbedAttributes>({
     nodeType: NotebookNodeType.Embed,
     titlePlaceholder: 'Embed',
     Component,

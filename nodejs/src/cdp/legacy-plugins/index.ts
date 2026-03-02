@@ -1,16 +1,16 @@
 import { customerioPlugin } from './_destinations/customerio/template'
 import { hubspotPlugin } from './_destinations/hubspot/template'
 import { intercomPlugin } from './_destinations/intercom/template'
-import { pacePlugin } from './_destinations/pace-posthog-integration/template'
-import { avoPlugin } from './_destinations/posthog-avo/template'
-import { brazePlugin } from './_destinations/posthog-braze-app/template'
-import { engagePlugin } from './_destinations/posthog-engage-so/template'
-import { gcsPlugin } from './_destinations/posthog-gcs/template'
-import { laudspeakerPlugin } from './_destinations/posthog-laudspeaker-app/template'
-import { patternsPlugin } from './_destinations/posthog-patterns-app/template'
-import { replicatorPlugin } from './_destinations/posthog-plugin-replicator/template'
+import { pacePlugin } from './_destinations/pace-insights-integration/template'
+import { avoPlugin } from './_destinations/insights-avo/template'
+import { brazePlugin } from './_destinations/insights-braze-app/template'
+import { engagePlugin } from './_destinations/insights-engage-so/template'
+import { gcsPlugin } from './_destinations/insights-gcs/template'
+import { laudspeakerPlugin } from './_destinations/insights-laudspeaker-app/template'
+import { patternsPlugin } from './_destinations/insights-patterns-app/template'
+import { replicatorPlugin } from './_destinations/insights-plugin-replicator/template'
 import { pubsubPlugin } from './_destinations/pubsub/template'
-import { rudderstackPlugin } from './_destinations/rudderstack-posthog/template'
+import { rudderstackPlugin } from './_destinations/rudderstack-insights/template'
 import { salesforcePlugin } from './_destinations/salesforce/template'
 import { sendgridPlugin } from './_destinations/sendgrid/template'
 import { pluginStonlyCleanCampaignName } from './_transformations/Plugin-Stonly-Clean-Campaign-Name/template'
@@ -24,14 +24,14 @@ import { phShotgunProcessEventApp } from './_transformations/ph-shotgun-processe
 import { pluginAdvancedGeoip } from './_transformations/plugin-advanced-geoip/template'
 import { pluginNetdataEventProcessing } from './_transformations/plugin-netdata-event-processing/template'
 import { pluginStonlyUtmExtractor } from './_transformations/plugin-stonly-UTM-Extractor/template'
-import { posthogAnonymization } from './_transformations/posthog-anonymization/template'
-import { posthogAppUnduplicator } from './_transformations/posthog-app-unduplicator/template'
-import { posthogAppUrlParametersToEventProperties } from './_transformations/posthog-app-url-parameters-to-event-properties/template'
-import { posthogFilterOutPlugin } from './_transformations/posthog-filter-out-plugin/template'
-import { posthogPluginGeoip } from './_transformations/posthog-plugin-geoip/template'
-import { posthogPluginSnowplowRefererParser } from './_transformations/posthog-plugin-snowplow-referer-parser/template'
-import { posthogRouteCensorPlugin } from './_transformations/posthog-route-censor-plugin/template'
-import { posthogUrlNormalizerPlugin } from './_transformations/posthog-url-normalizer-plugin/template'
+import { insightsAnonymization } from './_transformations/insights-anonymization/template'
+import { insightsAppUnduplicator } from './_transformations/insights-app-unduplicator/template'
+import { insightsAppUrlParametersToEventProperties } from './_transformations/insights-app-url-parameters-to-event-properties/template'
+import { insightsFilterOutPlugin } from './_transformations/insights-filter-out-plugin/template'
+import { insightsPluginGeoip } from './_transformations/insights-plugin-geoip/template'
+import { insightsPluginSnowplowRefererParser } from './_transformations/insights-plugin-snowplow-referer-parser/template'
+import { insightsRouteCensorPlugin } from './_transformations/insights-route-censor-plugin/template'
+import { insightsUrlNormalizerPlugin } from './_transformations/insights-url-normalizer-plugin/template'
 import { propertyFilterPlugin } from './_transformations/property-filter-plugin/template'
 import { semverFlattenerPlugin } from './_transformations/semver-flattener-plugin/template'
 import { taxonomyPlugin } from './_transformations/taxonomy-plugin/template'
@@ -70,14 +70,14 @@ export const TRANSFORMATION_PLUGINS: LegacyTransformationPlugin[] = [
     pluginNetdataEventProcessing,
     pluginStonlyCleanCampaignName,
     pluginStonlyUtmExtractor,
-    posthogAnonymization,
-    posthogAppUnduplicator,
-    posthogAppUrlParametersToEventProperties,
-    posthogFilterOutPlugin,
-    posthogPluginGeoip,
-    posthogPluginSnowplowRefererParser,
-    posthogRouteCensorPlugin,
-    posthogUrlNormalizerPlugin,
+    insightsAnonymization,
+    insightsAppUnduplicator,
+    insightsAppUrlParametersToEventProperties,
+    insightsFilterOutPlugin,
+    insightsPluginGeoip,
+    insightsPluginSnowplowRefererParser,
+    insightsRouteCensorPlugin,
+    insightsUrlNormalizerPlugin,
     propertyFilterPlugin,
     semverFlattenerPlugin,
     taxonomyPlugin,

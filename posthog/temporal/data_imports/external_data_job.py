@@ -15,7 +15,7 @@ from temporalio.workflow import ParentClosePolicy, start_child_workflow
 # TODO: remove dependency
 from posthog.exceptions_capture import capture_exception
 from posthog.sync import database_sync_to_async_pool
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.client import sync_connect
 from posthog.temporal.common.logger import get_logger
 from posthog.temporal.common.schedule import trigger_schedule_buffer_one
@@ -210,7 +210,7 @@ def trigger_schedule_buffer_one_activity(schedule_id: str) -> None:
 
 # TODO: update retry policies
 @workflow.defn(name="external-data-job")
-class ExternalDataJobWorkflow(PostHogWorkflow):
+class ExternalDataJobWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> ExternalDataWorkflowInputs:
         loaded = json.loads(inputs[0])

@@ -243,7 +243,7 @@ export function ProductSetupPopover({
                                     <>
                                         {setupTasks.length > 0 && (
                                             <TaskSection
-                                                title="PostHog setup"
+                                                title="Insights setup"
                                                 tasks={setupTasks}
                                                 onTaskClick={handleTaskClick}
                                                 onSkip={handleSkip}

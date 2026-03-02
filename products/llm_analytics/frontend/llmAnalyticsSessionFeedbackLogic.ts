@@ -2,7 +2,7 @@ import { actions, afterMount, kea, key, listeners, path, props, reducers } from 
 
 import api from 'lib/api'
 
-import { HogQLQuery, NodeKind } from '~/queries/schema/schema-general'
+import { InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
 
 import type { llmAnalyticsSessionFeedbackLogicType } from './llmAnalyticsSessionFeedbackLogicType'
 
@@ -78,8 +78,8 @@ export const llmAnalyticsSessionFeedbackLogic = kea<llmAnalyticsSessionFeedbackL
                 return
             }
 
-            const feedbackQuery: HogQLQuery = {
-                kind: NodeKind.HogQLQuery,
+            const feedbackQuery: InsightsQLQuery = {
+                kind: NodeKind.InsightsQLQuery,
                 query: `
                     SELECT
                         properties.$ai_metric_value as rating,
@@ -117,8 +117,8 @@ export const llmAnalyticsSessionFeedbackLogic = kea<llmAnalyticsSessionFeedbackL
                 return
             }
 
-            const ticketsQuery: HogQLQuery = {
-                kind: NodeKind.HogQLQuery,
+            const ticketsQuery: InsightsQLQuery = {
+                kind: NodeKind.InsightsQLQuery,
                 query: `
                     SELECT
                         properties.$ai_support_ticket_id as ticket_id,

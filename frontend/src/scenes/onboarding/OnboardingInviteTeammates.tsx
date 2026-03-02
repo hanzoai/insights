@@ -33,7 +33,7 @@ export const OnboardingInviteTeammates: OnboardingStepComponentType = () => {
             case ProductKey.ERROR_TRACKING:
                 return 'Tracking errors is'
             default:
-                return 'PostHog is'
+                return 'Insights is'
         }
     }
 
