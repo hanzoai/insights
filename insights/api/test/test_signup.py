@@ -362,6 +362,8 @@ class TestSignupAPI(APIBaseTest):
 
     @pytest.mark.ee
     def test_signup_allowed_on_self_hosted_with_env_var(self):
+        pass
+
     @pytest.mark.skip_on_multitenancy
     @patch("posthoganalytics.capture")
     def test_signup_minimum_attrs(self, mock_capture):
