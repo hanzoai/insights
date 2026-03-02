@@ -5,6 +5,8 @@ import temporalio
 
 from insights.models import Team
 
+from insights.temporal.ai.session_summary.ee_stubs import capture_session_summary_timing
+
 
 
 @dataclass
