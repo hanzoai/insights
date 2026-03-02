@@ -1,0 +1,76 @@
+name: Build insightsql-parser
+
+on:
+    pull_request:
+        paths:
+            - common/insightsql_parser/**
+            - .github/workflows/build-insightsql-parser.yml
+
+permissions:
+    contents: read
+    pull-requests: write
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+jobs:
+    build-wheels:
+        name: Build wheels on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        timeout-minutes: 30
+        if: github.event.pull_request.head.repo.full_name == 'hanzoai/insights'
+        strategy:
+            matrix:
+                os: [ubuntu-22.04, buildjet-2vcpu-ubuntu-2204-arm, macos-14, macos-15-intel]
+                include:
+                    - os: macos-14
+                      cibw_archs_macos: arm64
+                      MACOSX_DEPLOYMENT_TARGET: 14
+                    - os: macos-15-intel
+                      cibw_archs_macos: x86_64
+                      MACOSX_DEPLOYMENT_TARGET: 15
+                    - os: ubuntu-22.04
+                      cibw_archs_linux: x86_64
+                      MACOSX_DEPLOYMENT_TARGET: ''
+                    - os: buildjet-2vcpu-ubuntu-2204-arm
+                      cibw_archs_linux: aarch64
+                      MACOSX_DEPLOYMENT_TARGET: ''
+
+        steps:
+            - uses: actions/checkout@v6
+
+            - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+              with:
+                  python-version: '3.12.10'
+
+            - name: Build sdist
+              if: matrix.os == 'ubuntu-22.04'
+              run: |
+                  pip install setuptools==80.9.0
+                  cd common/insightsql_parser && python setup.py sdist
+
+            - name: Install cibuildwheel
+              run: pip install cibuildwheel==2.23.*
+
+            - name: Build wheels
+              run: cd common/insightsql_parser && python -m cibuildwheel --output-dir dist
+              env:
+                  CIBW_ARCHS_MACOS: ${{ matrix.cibw_archs_macos }}
+                  CIBW_ARCHS_LINUX: ${{ matrix.cibw_archs_linux }}
+                  MACOSX_DEPLOYMENT_TARGET: ${{ matrix.MACOSX_DEPLOYMENT_TARGET }}
+
+            - name: Upload wheels artifact
+              uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+              with:
+                  name: wheels-${{ matrix.os }}
+                  path: |
+                      common/insightsql_parser/dist/*.whl
+                      common/insightsql_parser/dist/*.tar.gz
+                  if-no-files-found: error
+
+            - name: Verify wheel installs and imports
+              if: matrix.os == 'ubuntu-22.04'
+              run: |
+                  pip install common/insightsql_parser/dist/insightsql_parser-*.whl
+                  python -c "import insightsql_parser; print('insightsql_parser imported successfully')"
