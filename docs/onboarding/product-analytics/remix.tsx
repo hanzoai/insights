@@ -106,7 +106,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     import { useEffect, useState } from "react";
                                     import posthog from "posthog-js";
-                                    import { InsightsProvider } from "posthog-js/react";
+                                    import { PostHogProvider } from "posthog-js/react";
 
                                     export function PHProvider({ children }: { children: React.ReactNode }) {
                                       const [hydrated, setHydrated] = useState(false);
@@ -121,7 +121,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                       }, []);
 
                                       if (!hydrated) return <>{children}</>;
-                                      return <InsightsProvider client={posthog}>{children}</InsightsProvider>;
+                                      return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
                                     }
                                 `,
                             },

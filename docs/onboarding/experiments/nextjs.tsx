@@ -38,7 +38,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             <Tab.Panel>
                                 <Markdown>
                                     {dedent`
-                                        For client-side experiments in React components, you can use the \`useFeatureFlagVariantKey\` hook or the \`InsightsFeature\` component:
+                                        For client-side experiments in React components, you can use the \`useFeatureFlagVariantKey\` hook or the \`PostHogFeature\` component:
                                     `}
                                 </Markdown>
                                 {ExperimentImplementation && <ExperimentImplementation language="react" />}

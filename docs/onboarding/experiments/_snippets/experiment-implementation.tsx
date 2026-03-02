@@ -31,15 +31,15 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
 
             // Method two: using the feature flags component
-            import { InsightsFeature } from 'posthog-js/react'
+            import { PostHogFeature } from 'posthog-js/react'
 
             function App() {
                 return (
-                    <InsightsFeature flag='your-experiment-feature-flag' match='test'>
+                    <PostHogFeature flag='your-experiment-feature-flag' match='test'>
                         <div>
                             {/* the component to show */}
                         </div>
-                    </InsightsFeature>
+                    </PostHogFeature>
                 )
             }
 
