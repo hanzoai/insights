@@ -3,9 +3,9 @@
 # This workflow builds the hobby installer binaries and publishes them as GitHub releases.
 #
 # Download the latest version:
-#   curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer && chmod +x hobby-installer
+#   curl -L https://github.com/hanzoai/insights/releases/download/hobby-latest/hobby-installer -o hobby-installer && chmod +x hobby-installer
 #
-# Or browse all versions at: https://github.com/PostHog/posthog/releases?q=hobby-&expanded=true
+# Or browse all versions at: https://github.com/hanzoai/insights/releases?q=hobby-&expanded=true
 
 name: Build Hobby Installer
 
@@ -66,5 +66,5 @@ jobs:
                   This is currently experimental and may not work as expected. We believe it to be working correctly, but please make sure you backup your data before using it.
 
 
-                  Download: \`curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer && chmod +x hobby-installer\`" \
+                  Download: \`curl -L https://github.com/hanzoai/insights/releases/download/hobby-latest/hobby-installer -o hobby-installer && chmod +x hobby-installer\`" \
                       --latest=false

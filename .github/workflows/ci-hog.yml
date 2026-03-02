@@ -100,7 +100,7 @@ jobs:
             - name: Check if ANTLR definitions are up to date
               run: |
                   cd ..
-                  sudo apt-get update && sudo apt-get install default-jre
+                  sudo apt-get update && sudo apt-get install -y default-jre cmake build-essential g++
                   mkdir antlr
                   cd antlr
                   curl -o antlr.jar https://www.antlr.org/download/antlr-$ANTLR_VERSION-complete.jar
@@ -111,7 +111,7 @@ jobs:
                   export CLASSPATH=".:$PWD/antlr.jar:$CLASSPATH"
                   export PATH="$PWD:$PATH"
 
-                  cd ../posthog
+                  cd ../insights
                   antlr | grep "Version"
                   npm run grammar:build && git diff --exit-code
               env:

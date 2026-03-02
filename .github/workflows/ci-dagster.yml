@@ -97,7 +97,7 @@ jobs:
             matrix:
                 clickhouse-server-image: ${{ fromJson(needs.get_clickhouse_versions.outputs.oldest_supported) }}
         if: needs.changes.outputs.dagster == 'true'
-        runs-on: depot-ubuntu-latest
+        runs-on: ubuntu-latest
         steps:
             - name: 'Checkout repo'
               uses: actions/checkout@v6

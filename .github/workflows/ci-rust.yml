@@ -16,7 +16,7 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        if: github.repository == 'Insights/posthog'
+        if: github.repository == 'hanzoai/insights'
         name: Determine need to run Rust checks
         permissions:
             contents: read
@@ -123,7 +123,7 @@ jobs:
         name: Build Rust services
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: depot-ubuntu-22.04-4
+        runs-on: ubuntu-22.04
 
         defaults:
             run:
@@ -177,7 +177,7 @@ jobs:
             matrix: ${{ fromJSON(needs.changes.outputs.matrix) }}
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: depot-ubuntu-24.04-4
+        runs-on: ubuntu-24.04
         timeout-minutes: 20
 
         defaults:
@@ -308,7 +308,7 @@ jobs:
         name: Lint Rust services
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: depot-ubuntu-22.04-4
+        runs-on: ubuntu-22.04
 
         defaults:
             run:
@@ -370,7 +370,7 @@ jobs:
         name: Shear Rust services
         needs: changes
         if: needs.changes.outputs.rust == 'true'
-        runs-on: depot-ubuntu-22.04-4
+        runs-on: ubuntu-22.04
 
         defaults:
             run:
