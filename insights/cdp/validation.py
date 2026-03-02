@@ -287,7 +287,7 @@ class InputsSerializer(serializers.DictField):
                 templating_val = schema["templating"]
                 if isinstance(templating_val, bool):
                     if templating_val:
-                        value["templating = "fn"
+                        value["templating"] = "fn"
                     # If False, do not set templating field
                 else:
                     value["templating"] = templating_val
