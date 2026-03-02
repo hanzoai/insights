@@ -5,14 +5,13 @@ from typing import Any
 from pydantic import BaseModel, Field
 from rest_framework.exceptions import ValidationError
 
-from posthog.schema import FeatureFlagGroupType
+from insights.schema import FeatureFlagGroupType
 
-from posthog.api.feature_flag import FeatureFlagSerializer
-from posthog.exceptions_capture import capture_exception
-from posthog.models import FeatureFlag, GroupTypeMapping
-from posthog.sync import database_sync_to_async
+from insights.api.feature_flag import FeatureFlagSerializer
+from insights.exceptions_capture import capture_exception
+from insights.models import FeatureFlag, GroupTypeMapping
+from insights.sync import database_sync_to_async
 
-from ee.hogai.tool import MaxTool
 
 
 class MultivariateVariant(BaseModel):

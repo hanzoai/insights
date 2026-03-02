@@ -26,10 +26,10 @@ class TestFindPythonDependencies(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("simple_module", "posthog.utils", "posthog/utils.py"),
-            ("package_module", "posthog.temporal.subscriptions", "posthog/temporal/subscriptions/__init__.py"),
-            ("nested_module", "posthog.insightsql_queries.query_runner", "posthog/insightsql_queries/query_runner.py"),
-            ("nonexistent_module", "posthog.nonexistent.module", None),
+            ("simple_module", "insights.utils", "insights/utils.py"),
+            ("package_module", "insights.temporal.subscriptions", "insights/temporal/subscriptions/__init__.py"),
+            ("nested_module", "insights.insightsql_queries.query_runner", "insights/insightsql_queries/query_runner.py"),
+            ("nonexistent_module", "insights.nonexistent.module", None),
             ("ee_module", "ee.tasks.subscriptions.subscription_utils", "ee/tasks/subscriptions/subscription_utils.py"),
         ]
     )
@@ -37,7 +37,7 @@ class TestFindPythonDependencies(unittest.TestCase):
         self.assertEqual(module_to_file(module), expected_file)
 
     def test_returns_only_python_file_paths(self):
-        files = find_all_dependency_files(self.graph, "posthog.temporal.subscriptions")
+        files = find_all_dependency_files(self.graph, "insights.temporal.subscriptions")
         self.assertIsInstance(files, set)
         for f in files:
             self.assertTrue(f.endswith(".py"), f"Expected .py file, got {f}")
@@ -45,16 +45,16 @@ class TestFindPythonDependencies(unittest.TestCase):
     @parameterized.expand(
         [
             # Dependencies - should be included
-            ("The utils file (e.g. caching key)", "posthog/utils.py", True),
-            ("The underlying query runner", "posthog/insightsql_queries/query_runner.py", True),
+            ("The utils file (e.g. caching key)", "insights/utils.py", True),
+            ("The underlying query runner", "insights/insightsql_queries/query_runner.py", True),
             # Non-dependencies - should NOT be included
             ("API endpoint that calls the worker", "ee/api/subscription.py", False),
-            ("Schedule config that starts workflows", "posthog/temporal/schedule.py", False),
-            ("Unrelated admin module", "posthog/admin/__init__.py", False),
+            ("Schedule config that starts workflows", "insights/temporal/schedule.py", False),
+            ("Unrelated admin module", "insights/admin/__init__.py", False),
         ]
     )
     def test_file_inclusion(self, _name, file_path, should_be_included):
-        files = find_all_dependency_files(self.graph, "posthog.temporal.subscriptions")
+        files = find_all_dependency_files(self.graph, "insights.temporal.subscriptions")
         if should_be_included:
             self.assertIn(file_path, files)
         else:
@@ -63,18 +63,18 @@ class TestFindPythonDependencies(unittest.TestCase):
     @parameterized.expand(
         [
             # Direct dependencies - should trigger rebuild
-            ("entrypoint_init", "posthog/temporal/subscriptions/__init__.py", True),
-            ("entrypoint_workflow", "posthog/temporal/subscriptions/subscription_scheduling_workflow.py", True),
+            ("entrypoint_init", "insights/temporal/subscriptions/__init__.py", True),
+            ("entrypoint_workflow", "insights/temporal/subscriptions/subscription_scheduling_workflow.py", True),
             # Transitive dependencies (the bug that caused issue https://github.com/PostHog/posthog/pull/42307) - should trigger rebuild
-            ("transitive_utils", "posthog/utils.py", True),
-            ("transitive_query_runner", "posthog/insightsql_queries/query_runner.py", True),
+            ("transitive_utils", "insights/utils.py", True),
+            ("transitive_query_runner", "insights/insightsql_queries/query_runner.py", True),
             # Export-related files - should trigger rebuild
-            ("exporter", "posthog/tasks/exporter.py", True),
-            ("image_exporter", "posthog/tasks/exports/image_exporter.py", True),
+            ("exporter", "insights/tasks/exporter.py", True),
+            ("image_exporter", "insights/tasks/exports/image_exporter.py", True),
             ("subscription_utils", "ee/tasks/subscriptions/subscription_utils.py", True),
             # Files that should NOT affect the worker
             ("api_endpoint", "ee/api/subscription.py", False),
-            ("schedule_config", "posthog/temporal/schedule.py", False),
+            ("schedule_config", "insights/temporal/schedule.py", False),
             ("frontend_code", "frontend/src/test.tsx", False),
             ("rust_code", "rust/some_file.rs", False),
             ("non_python", "pyproject.toml", False),
@@ -83,7 +83,7 @@ class TestFindPythonDependencies(unittest.TestCase):
     def test_change_detection(self, _name, changed_file, should_be_affected):
         affected, _matching = check_if_changes_affect_entrypoint(
             self.graph,
-            "posthog.temporal.subscriptions",
+            "insights.temporal.subscriptions",
             [changed_file],
         )
         self.assertEqual(
@@ -96,16 +96,16 @@ class TestFindPythonDependencies(unittest.TestCase):
     def test_multiple_changes_one_affects(self):
         affected, matching = check_if_changes_affect_entrypoint(
             self.graph,
-            "posthog.temporal.subscriptions",
-            ["frontend/test.tsx", "posthog/utils.py", "README.md"],
+            "insights.temporal.subscriptions",
+            ["frontend/test.tsx", "insights/utils.py", "README.md"],
         )
         self.assertTrue(affected)
-        self.assertEqual(matching, ["posthog/utils.py"])
+        self.assertEqual(matching, ["insights/utils.py"])
 
     def test_multiple_changes_none_affect(self):
         affected, matching = check_if_changes_affect_entrypoint(
             self.graph,
-            "posthog.temporal.subscriptions",
+            "insights.temporal.subscriptions",
             ["frontend/test.tsx", "README.md", "rust/main.rs"],
         )
         self.assertFalse(affected)
@@ -114,8 +114,8 @@ class TestFindPythonDependencies(unittest.TestCase):
     def test_returns_sorted_matching_files(self):
         _affected, matching = check_if_changes_affect_entrypoint(
             self.graph,
-            "posthog.temporal.subscriptions",
-            ["posthog/utils.py", "posthog/insightsql_queries/query_runner.py", "ee/models/license.py"],
+            "insights.temporal.subscriptions",
+            ["insights/utils.py", "insights/insightsql_queries/query_runner.py", "ee/models/license.py"],
         )
         self.assertGreater(len(matching), 1, "Need multiple matches to verify sorting")
         self.assertEqual(matching, sorted(matching))
@@ -123,33 +123,33 @@ class TestFindPythonDependencies(unittest.TestCase):
     @parameterized.expand(
         [
             # Entrypoint - should trigger rebuild
-            ("entrypoint_init", "posthog/temporal/subscriptions/__init__.py", True),
-            ("entrypoint_workflow", "posthog/temporal/subscriptions/subscription_scheduling_workflow.py", True),
+            ("entrypoint_init", "insights/temporal/subscriptions/__init__.py", True),
+            ("entrypoint_workflow", "insights/temporal/subscriptions/subscription_scheduling_workflow.py", True),
             # posthog/temporal/common - should trigger rebuild
-            ("temporal_common_base", "posthog/temporal/common/base.py", True),
-            ("temporal_common_client", "posthog/temporal/common/client.py", True),
+            ("temporal_common_base", "insights/temporal/common/base.py", True),
+            ("temporal_common_client", "insights/temporal/common/client.py", True),
             # posthog/tasks/exporter.py - should trigger rebuild
-            ("exporter", "posthog/tasks/exporter.py", True),
+            ("exporter", "insights/tasks/exporter.py", True),
             # posthog/tasks/exports/ - should trigger rebuild
-            ("image_exporter", "posthog/tasks/exports/image_exporter.py", True),
-            ("csv_exporter", "posthog/tasks/exports/csv_exporter.py", True),
+            ("image_exporter", "insights/tasks/exports/image_exporter.py", True),
+            ("csv_exporter", "insights/tasks/exports/csv_exporter.py", True),
             # ee/tasks/subscriptions/ - should trigger rebuild
             ("subscription_utils", "ee/tasks/subscriptions/subscription_utils.py", True),
             ("email_subscriptions", "ee/tasks/subscriptions/email_subscriptions.py", True),
             # Transitive dependencies - should trigger rebuild
-            ("utils", "posthog/utils.py", True),
-            ("query_runner", "posthog/insightsql_queries/query_runner.py", True),
+            ("utils", "insights/utils.py", True),
+            ("query_runner", "insights/insightsql_queries/query_runner.py", True),
             # Non-dependencies - should NOT trigger rebuild
             ("api_endpoint", "ee/api/subscription.py", False),
-            ("schedule_config", "posthog/temporal/schedule.py", False),
-            ("admin", "posthog/admin/admins/batch_imports.py", False),
-            ("tests", "posthog/test/test_utils.py", False),
+            ("schedule_config", "insights/temporal/schedule.py", False),
+            ("admin", "insights/admin/admins/batch_imports.py", False),
+            ("tests", "insights/test/test_utils.py", False),
         ]
     )
     def test_analytics_platform_worker_file_triggers_rebuild(self, _name, changed_file, should_trigger):
         affected, _ = check_if_changes_affect_entrypoint(
             self.graph,
-            "posthog.temporal.subscriptions",
+            "insights.temporal.subscriptions",
             [changed_file],
         )
         if should_trigger:

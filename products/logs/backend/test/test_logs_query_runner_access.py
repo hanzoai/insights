@@ -1,11 +1,11 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
 from rest_framework import status
 
-from posthog.schema import DateRange, FilterLogicalOperator, LogsQuery, PropertyGroupFilter
+from insights.schema import DateRange, FilterLogicalOperator, LogsQuery, PropertyGroupFilter
 
-from posthog.rbac.user_access_control import UserAccessControlError
+from insights.rbac.user_access_control import UserAccessControlError
 
 from products.logs.backend.logs_query_runner import LogsQueryRunner
 
@@ -44,7 +44,7 @@ class TestLogsQueryRunnerAccess(APIBaseTest):
         runner = _build_runner(self.team)
 
         with patch.object(runner, "_calculate") as mock_calculate:
-            from posthog.schema import LogsQueryResponse
+            from insights.schema import LogsQueryResponse
 
             mock_calculate.return_value = LogsQueryResponse(results=[], hasMore=False)
             response = runner.run()

@@ -16,15 +16,15 @@ from databricks import sql
 from databricks.sdk.core import Config, oauth_service_principal
 from databricks.sql.exc import ServerOperationError
 
-from posthog.batch_exports.service import (
+from insights.batch_exports.service import (
     BaseBatchExportInputs,
     BatchExportField,
     BatchExportModel,
     DatabricksBatchExportInputs,
 )
-from posthog.models.integration import Integration
-from posthog.models.team import Team
-from posthog.temporal.common.base import InsightsWorkflow
+from insights.models.integration import Integration
+from insights.models.team import Team
+from insights.temporal.common.base import InsightsWorkflow
 
 from products.batch_exports.backend.temporal.destinations.databricks_batch_export import (
     DatabricksBatchExportWorkflow,

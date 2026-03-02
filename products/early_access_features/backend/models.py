@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING
 from django.db import models
 from django.db.models import QuerySet
 
-from posthog.models.file_system.file_system_mixin import FileSystemSyncMixin
-from posthog.models.file_system.file_system_representation import FileSystemRepresentation
-from posthog.models.utils import RootTeamMixin, UUIDTModel, sane_repr
+from insights.models.file_system.file_system_mixin import FileSystemSyncMixin
+from insights.models.file_system.file_system_representation import FileSystemRepresentation
+from insights.models.utils import RootTeamMixin, UUIDTModel, sane_repr
 
 if TYPE_CHECKING:
-    from posthog.models.team import Team
+    from insights.models.team import Team
 
 
 class EarlyAccessFeature(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
@@ -27,13 +27,13 @@ class EarlyAccessFeature(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     ReleaseStage = [Stage.CONCEPT, Stage.ALPHA, Stage.BETA, Stage.GENERAL_AVAILABILITY]
 
     team = models.ForeignKey(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         related_name="features",
         related_query_name="feature",
     )
     feature_flag = models.ForeignKey(
-        "posthog.FeatureFlag",
+        "insights.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.PROTECT,

@@ -5,11 +5,8 @@ from typing import Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from posthog.schema import ErrorTrackingIssueFilteringToolOutput
+from insights.schema import ErrorTrackingIssueFilteringToolOutput
 
-from ee.hogai.chat_agent.schema_generator.parsers import PydanticOutputParserException
-from ee.hogai.llm import MaxChatOpenAI
-from ee.hogai.tool import MaxTool
 
 from .prompts import (
     ERROR_TRACKING_FILTER_INITIAL_PROMPT,

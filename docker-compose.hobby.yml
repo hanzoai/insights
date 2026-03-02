@@ -36,13 +36,13 @@ services:
         depends_on:
             - kafka
         volumes:
-            - ./posthog/posthog/idl:/idl
+            - ./posthog/insights/idl:/idl
             - ./posthog/docker/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
             - ./posthog/docker/clickhouse/config.xml:/etc/clickhouse-server/config.xml
             - ./posthog/docker/clickhouse/config.d/default.xml:/etc/clickhouse-server/config.d/default.xml
             - ./posthog/docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml
             - ./posthog/docker/clickhouse/user_defined_function.xml:/etc/clickhouse-server/user_defined_function.xml
-            - ./posthog/posthog/user_scripts:/var/lib/clickhouse/user_scripts
+            - ./posthog/insights/user_scripts:/var/lib/clickhouse/user_scripts
             - clickhouse-data:/var/lib/clickhouse
 
     kafka:
@@ -375,7 +375,7 @@ services:
                 condition: service_healthy
 
     cymbal:
-        image: ghcr.io/posthog/posthog/cymbal:master
+        image: ghcr.i./posthog/insights/cymbal:master
         build:
             context: ./posthog/rust
             args:

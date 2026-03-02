@@ -1,6 +1,6 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
-from posthog.test.db_context_capturing import capture_db_queries
+from insights.test.db_context_capturing import capture_db_queries
 
 from products.data_warehouse.backend.api.lineage import topological_sort
 from products.data_warehouse.backend.models import DataWarehouseSavedQuery, DataWarehouseTable

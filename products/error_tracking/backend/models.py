@@ -10,11 +10,11 @@ import structlog
 from django_deprecate_fields import deprecate_field
 from rest_framework.exceptions import ValidationError
 
-from posthog.kafka_client.client import ClickhouseProducer
-from posthog.kafka_client.topics import KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT
-from posthog.models.integration import Integration
-from posthog.models.utils import UUIDTModel
-from posthog.storage import object_storage
+from insights.kafka_client.client import ClickhouseProducer
+from insights.kafka_client.topics import KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT
+from insights.models.integration import Integration
+from insights.models.utils import UUIDTModel
+from insights.storage import object_storage
 
 from products.error_tracking.backend.sql import INSERT_ERROR_TRACKING_ISSUE_FINGERPRINT_OVERRIDES
 
@@ -34,7 +34,7 @@ class ErrorTrackingIssue(UUIDTModel):
         PENDING_RELEASE = "pending_release", "Pending release"
         SUPPRESSED = "suppressed", "Suppressed"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     status = models.TextField(choices=Status.choices, default=Status.ACTIVE, null=False)
     name = models.TextField(null=True, blank=True)
@@ -100,7 +100,7 @@ class ErrorTrackingIssueCohort(UUIDTModel):
         related_name="cohorts",
     )
     cohort = models.ForeignKey(
-        "posthog.Cohort",
+        "insights.Cohort",
         on_delete=models.CASCADE,
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -113,10 +113,10 @@ class ErrorTrackingIssueCohort(UUIDTModel):
 
 class ErrorTrackingIssueAssignment(UUIDTModel):
     issue = models.OneToOneField(ErrorTrackingIssue, on_delete=models.CASCADE, related_name="assignment")
-    user = models.ForeignKey("posthog.User", null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
     # DEPRECATED: issues can only be assigned to users or roles
-    user_group = deprecate_field(models.ForeignKey("posthog.UserGroup", null=True, on_delete=models.CASCADE))
-    role = models.ForeignKey("ee.Role", null=True, on_delete=models.CASCADE)
+    user_group = deprecate_field(models.ForeignKey("insights.UserGroup", null=True, on_delete=models.CASCADE))
+    role_id_legacy = models.IntegerField(null=True, db_column="role_id")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -124,7 +124,7 @@ class ErrorTrackingIssueAssignment(UUIDTModel):
 
 
 class ErrorTrackingIssueFingerprintV2(UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     issue = models.ForeignKey(ErrorTrackingIssue, on_delete=models.CASCADE, related_name="fingerprints")
     fingerprint = models.TextField(null=False, blank=False)
     # current version of the id, used to sync with ClickHouse and collapse rows correctly for overrides ClickHouse table
@@ -138,7 +138,7 @@ class ErrorTrackingIssueFingerprintV2(UUIDTModel):
 
 
 class ErrorTrackingRelease(UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     # On upload, users can provide a hash of some key identifiers, e.g. "git repo, commit, branch"
     # or similar, which we guarantee to be unique. If a user doesn't provide a hash_id, we use the
     # id of the model - TODO - should this instead by a hash of the project and version?
@@ -171,7 +171,7 @@ class ErrorTrackingRelease(UUIDTModel):
 class ErrorTrackingSymbolSet(UUIDTModel):
     # Derived from the symbol set reference
     ref = models.TextField(null=False, blank=False)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     # How we stored this symbol set, and where to look for it
     # These are null if we failed to find a symbol set for a given reference. We store a
@@ -217,11 +217,11 @@ class ErrorTrackingSymbolSet(UUIDTModel):
 
 
 class ErrorTrackingAssignmentRule(UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    user = models.ForeignKey("posthog.User", null=True, on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
     # DEPRECATED: issues can only be assigned to users or roles
-    user_group = deprecate_field(models.ForeignKey("posthog.UserGroup", null=True, on_delete=models.CASCADE))
-    role = models.ForeignKey("ee.Role", null=True, on_delete=models.CASCADE)
+    user_group = deprecate_field(models.ForeignKey("insights.UserGroup", null=True, on_delete=models.CASCADE))
+    role_id_legacy = models.IntegerField(null=True, db_column="role_id")
     order_key = models.IntegerField(null=False, blank=False)
     bytecode = models.JSONField(null=False, blank=False)  # The bytecode of the rule
     filters = models.JSONField(null=False, blank=False)  # The json object describing the filter rule
@@ -252,7 +252,7 @@ class ErrorTrackingAssignmentRule(UUIDTModel):
 # This means "custom issues" can still be merged and otherwise handled as you'd expect, just that
 # the set of events that end up in them will be different from the default grouping rules.
 class ErrorTrackingGroupingRule(UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     bytecode = models.JSONField(null=False, blank=False)  # The bytecode of the rule
     filters = models.JSONField(null=False, blank=False)  # The json object describing the filter rule
     created_at = models.DateTimeField(auto_now_add=True)
@@ -266,10 +266,10 @@ class ErrorTrackingGroupingRule(UUIDTModel):
     # We allow grouping rules to also auto-assign, and if they do, assignment rules are ignored
     # in favour of the assignment of the grouping rule. Notably this differs from assignment rules
     # in so far as we permit all of these to be null
-    user = models.ForeignKey("posthog.User", null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey("insights.User", null=True, on_delete=models.CASCADE)
     # DEPRECATED: issues can only be assigned to users or roles
-    user_group = deprecate_field(models.ForeignKey("posthog.UserGroup", null=True, on_delete=models.CASCADE))
-    role = models.ForeignKey("ee.Role", null=True, on_delete=models.CASCADE)
+    user_group = deprecate_field(models.ForeignKey("insights.UserGroup", null=True, on_delete=models.CASCADE))
+    role_id_legacy = models.IntegerField(null=True, db_column="role_id")
 
     # Users will probably find it convenient to be able to add a short description to grouping rules
     description = models.TextField(null=True)
@@ -287,7 +287,7 @@ class ErrorTrackingGroupingRule(UUIDTModel):
 
 
 class ErrorTrackingSuppressionRule(UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     filters = models.JSONField(null=False, blank=False)  # The json object describing the filter rule
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -320,7 +320,7 @@ class ErrorTrackingAutoCaptureControls(UUIDTModel):
     class Library(models.TextChoices):
         WEB = "web"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     library = models.CharField(max_length=24, choices=Library.choices, null=False, blank=False, default=Library.WEB)
 
     match_type = models.CharField(
@@ -382,7 +382,7 @@ class ErrorTrackingStackFrame(UUIDTModel):
     raw_id = models.TextField(null=False, blank=False)
     # Raw frames could be resolved into multiple frames after demangling because of compilation process
     part = models.IntegerField(null=False, default=0)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     symbol_set = models.ForeignKey("ErrorTrackingSymbolSet", on_delete=models.SET_NULL, null=True)
     contents = models.JSONField(null=False, blank=False)
@@ -408,7 +408,7 @@ class ErrorTrackingGroup(UUIDTModel):
         RESOLVED = "resolved", "Resolved"
         PENDING_RELEASE = "pending_release", "Pending release"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
     fingerprint: ArrayField = ArrayField(models.TextField(null=False, blank=False), null=False, blank=False)
     merged_fingerprints: ArrayField = ArrayField(
@@ -419,7 +419,7 @@ class ErrorTrackingGroup(UUIDTModel):
     )
     status = models.CharField(max_length=40, choices=Status.choices, default=Status.ACTIVE, null=False)
     assignee = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -431,7 +431,7 @@ class ErrorTrackingGroup(UUIDTModel):
 
 # DEPRECATED: Use ErrorTrackingIssueFingerprintV2 instead
 class ErrorTrackingIssueFingerprint(models.Model):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE, db_index=False)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE, db_index=False)
     issue = models.ForeignKey(ErrorTrackingGroup, on_delete=models.CASCADE)
     fingerprint = models.TextField(null=False, blank=False)
     # current version of the id, used to sync with ClickHouse and collapse rows correctly for overrides ClickHouse table
@@ -511,7 +511,7 @@ def delete_symbol_set_contents(upload_path: str) -> None:
 
 class ErrorTrackingSpikeDetectionConfig(models.Model):
     team = models.OneToOneField(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         primary_key=True,
         related_name="error_tracking_spike_detection_config",

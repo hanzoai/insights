@@ -6,9 +6,9 @@ from django.core.management.base import BaseCommand, CommandError
 import yaml
 import numpy as np
 
-from posthog.kafka_client.client import KafkaProducer
-from posthog.kafka_client.topics import KAFKA_DOCUMENT_EMBEDDINGS_TOPIC
-from posthog.models import Team
+from insights.kafka_client.client import KafkaProducer
+from insights.kafka_client.topics import KAFKA_DOCUMENT_EMBEDDINGS_TOPIC
+from insights.models import Team
 
 
 class Command(BaseCommand):

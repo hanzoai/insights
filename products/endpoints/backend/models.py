@@ -7,14 +7,14 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.visitor import CloningVisitor
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.visitor import CloningVisitor
 
-from posthog.exceptions_capture import capture_exception
-from posthog.models.team import Team
-from posthog.models.user import User
-from posthog.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
+from insights.exceptions_capture import capture_exception
+from insights.models.team import Team
+from insights.models.user import User
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
 
 logger = logging.getLogger(__name__)
 
@@ -216,9 +216,9 @@ class EndpointVersion(models.Model):
         if not insightsql_string:
             return []
         try:
-            from posthog.insightsql.query import InsightsQLQueryExecutor
+            from insights.insightsql.query import InsightsQLQueryExecutor
 
-            from posthog.clickhouse.client import sync_execute
+            from insights.clickhouse.client import sync_execute
 
             parsed = parse_select(insightsql_string)
             cleaned = _PLACEHOLDER_REPLACER.visit(parsed)

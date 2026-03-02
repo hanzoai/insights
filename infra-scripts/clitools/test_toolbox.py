@@ -120,8 +120,8 @@ class TestToolbox(unittest.TestCase):
                             "labels": {
                                 "app.kubernetes.io/name": "posthog-toolbox-django",
                                 "pod-template-hash": "749c5d8db",
-                                "posthog.com/image": "posthog",
-                                "posthog.com/team": "infra",
+                                "insights.com/image": "posthog",
+                                "insights.com/team": "infra",
                                 "role": "toolbox",
                             },
                             "deletionTimestamp": None,

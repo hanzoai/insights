@@ -1,8 +1,8 @@
 import datetime as dt
 import posixpath
 
-from posthog.batch_exports.service import BatchExportModel
-from posthog.temporal.common.logger import get_logger
+from insights.batch_exports.service import BatchExportModel
+from insights.temporal.common.logger import get_logger
 
 EXTERNAL_LOGGER = get_logger("EXTERNAL")
 

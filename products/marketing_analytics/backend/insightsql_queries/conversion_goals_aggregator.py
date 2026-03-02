@@ -1,8 +1,8 @@
-from posthog.schema import MarketingAnalyticsBaseColumns
+from insights.schema import MarketingAnalyticsBaseColumns
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 
 from products.marketing_analytics.backend.insightsql_queries.constants import UNIFIED_CONVERSION_GOALS_CTE_ALIAS
 

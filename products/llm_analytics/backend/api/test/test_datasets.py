@@ -1,10 +1,10 @@
 from uuid import uuid4
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
-from posthog.models import Organization, Project, Team, User
+from insights.models import Organization, Project, Team, User
 
 from products.llm_analytics.backend.models.datasets import Dataset, DatasetItem
 

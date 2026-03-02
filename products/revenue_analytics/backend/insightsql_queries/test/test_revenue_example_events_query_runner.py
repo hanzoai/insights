@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     APIBaseTest,
     ClickhouseTestMixin,
     _create_event,
@@ -10,7 +10,7 @@ from posthog.test.base import (
 )
 from unittest.mock import patch
 
-from posthog.schema import (
+from insights.schema import (
     CurrencyCode,
     RevenueAnalyticsEventItem,
     RevenueCurrencyPropertyConfig,
@@ -18,7 +18,7 @@ from posthog.schema import (
     RevenueExampleEventsQueryResponse,
 )
 
-from posthog.models.utils import uuid7
+from insights.models.utils import uuid7
 
 from products.data_warehouse.backend.models import DataWarehouseManagedViewSet
 from products.data_warehouse.backend.types import DataWarehouseManagedViewSetKind

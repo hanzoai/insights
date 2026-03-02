@@ -1,11 +1,11 @@
 import os
 import json
 
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 
 from rest_framework import status
 
-from posthog.clickhouse.client import sync_execute
+from insights.clickhouse.client import sync_execute
 
 
 class TestLogValuesAttributesTimezones(ClickhouseTestMixin, APIBaseTest):

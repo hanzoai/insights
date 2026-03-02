@@ -5,7 +5,7 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="notebooks.notebook"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
                     models.ForeignKey(

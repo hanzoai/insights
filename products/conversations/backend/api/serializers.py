@@ -2,8 +2,8 @@
 
 from rest_framework import serializers
 
-from posthog.api.utils import on_permitted_recording_domain
-from posthog.models import Team
+from insights.api.utils import on_permitted_recording_domain
+from insights.models import Team
 
 from products.conversations.backend.models import TicketAssignment
 from products.conversations.backend.models.constants import Status

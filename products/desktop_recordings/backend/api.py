@@ -7,9 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.auth import PersonalAPIKeyAuthentication
-from posthog.permissions import APIScopePermission
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.auth import PersonalAPIKeyAuthentication
+from insights.permissions import APIScopePermission
 
 from .models import DesktopRecording
 from .serializers import (
@@ -72,7 +72,7 @@ class DesktopRecordingViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         Create a new recording with Recall.ai upload token.
         Auto-creates empty transcript record.
         """
-        from posthog.settings.integrations import RECALL_AI_API_KEY, RECALL_AI_API_URL
+        from insights.settings.integrations import RECALL_AI_API_KEY, RECALL_AI_API_URL
 
         if not RECALL_AI_API_KEY:
             return Response({"detail": "Recall.ai API key not configured"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)

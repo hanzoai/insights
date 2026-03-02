@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
@@ -700,7 +700,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_active_breakpoints_cross_org_isolation(self):
         """SECURITY: Complete isolation between different organizations"""
         # Create a completely different organization
-        from posthog.models import Organization
+        from insights.models import Organization
 
         other_org = Organization.objects.create(name="Other Organization")
         other_team = other_org.teams.create(name="Other Org Team")
@@ -729,7 +729,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_cannot_access_different_org_via_url_path(self):
         """SECURITY: Cannot access a different organization's data by changing URL path"""
         # Create a different organization
-        from posthog.models import Organization
+        from insights.models import Organization
 
         other_org = Organization.objects.create(name="Other Organization")
         other_team = other_org.teams.create(name="Other Org Team")
@@ -750,7 +750,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_cannot_list_different_org_breakpoints_via_url_path(self):
         """SECURITY: Cannot list a different organization's breakpoints by changing URL path"""
         # Create a different organization
-        from posthog.models import Organization
+        from insights.models import Organization
 
         other_org = Organization.objects.create(name="Other Organization")
         other_team = other_org.teams.create(name="Other Org Team")
@@ -771,7 +771,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_cannot_access_different_org_active_breakpoints_via_url_path(self):
         """SECURITY: Cannot access a different organization's active breakpoints by changing URL path"""
         # Create a different organization
-        from posthog.models import Organization
+        from insights.models import Organization
 
         other_org = Organization.objects.create(name="Other Organization")
         other_team = other_org.teams.create(name="Other Org Team")
@@ -812,10 +812,9 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
     def test_cannot_access_private_team_without_explicit_access(self):
         """With advanced permissions, users cannot access private teams without explicit access"""
-        from posthog.constants import AvailableFeature
-        from posthog.models import OrganizationMembership
+        from insights.constants import AvailableFeature
+        from insights.models import OrganizationMembership
 
-        from ee.models.rbac.access_control import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ADVANCED_PERMISSIONS, "name": AvailableFeature.ADVANCED_PERMISSIONS}
@@ -856,10 +855,9 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
     def test_can_access_private_team_with_explicit_access(self):
         """With advanced permissions, users can access private teams when granted explicit access"""
-        from posthog.constants import AvailableFeature
-        from posthog.models import OrganizationMembership
+        from insights.constants import AvailableFeature
+        from insights.models import OrganizationMembership
 
-        from ee.models.rbac.access_control import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ADVANCED_PERMISSIONS, "name": AvailableFeature.ADVANCED_PERMISSIONS}
@@ -906,10 +904,9 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
     def test_org_admin_can_access_private_team(self):
         """Org admins can access private teams even without explicit access"""
-        from posthog.constants import AvailableFeature
-        from posthog.models import OrganizationMembership
+        from insights.constants import AvailableFeature
+        from insights.models import OrganizationMembership
 
-        from ee.models.rbac.access_control import AccessControl
 
         self.organization.available_product_features = [
             {"key": AvailableFeature.ADVANCED_PERMISSIONS, "name": AvailableFeature.ADVANCED_PERMISSIONS}

@@ -22,17 +22,17 @@ from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.clickhouse.query_tagging import Product, tags_context
-from posthog.event_usage import report_user_action
-from posthog.models import Team, User
-from posthog.permissions import AccessControlPermission
-from posthog.rate_limit import (
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.clickhouse.query_tagging import Product, tags_context
+from insights.event_usage import report_user_action
+from insights.models import Team, User
+from insights.permissions import AccessControlPermission
+from insights.rate_limit import (
     LLMAnalyticsSummarizationBurstThrottle,
     LLMAnalyticsSummarizationDailyThrottle,
     LLMAnalyticsSummarizationSustainedThrottle,

@@ -4,7 +4,7 @@ from django.db import models
 
 import tiktoken
 
-from posthog.models.utils import UUIDModel
+from insights.models.utils import UUIDModel
 
 if TYPE_CHECKING:
     from kafka.producer.kafka import FutureRecordMetadata
@@ -14,12 +14,12 @@ EMBEDDING_MODEL_TOKEN_LIMIT = 8192
 
 class AgentMemory(UUIDModel):
     team = models.ForeignKey(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         related_name="agent_memories",
     )
     user = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -43,7 +43,7 @@ class AgentMemory(UUIDModel):
                 f"Memory content exceeds {EMBEDDING_MODEL_TOKEN_LIMIT} token limit for embedding model (got {token_count} tokens)"
             )
 
-        from posthog.api.embedding_worker import emit_embedding_request
+        from insights.api.embedding_worker import emit_embedding_request
 
         embedding_metadata = {**self.metadata}
         if self.user_id is not None:

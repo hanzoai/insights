@@ -2,7 +2,7 @@ from typing import Optional
 
 from django.conf import settings
 
-from posthog.models.integration import GitHubIntegration, Integration
+from insights.models.integration import GitHubIntegration, Integration
 
 
 def get_sandbox_api_url() -> str:

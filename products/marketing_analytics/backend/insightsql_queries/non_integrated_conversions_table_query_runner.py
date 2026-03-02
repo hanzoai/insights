@@ -3,7 +3,7 @@ from typing import Literal, Optional, cast
 
 import structlog
 
-from posthog.schema import (
+from insights.schema import (
     CachedNonIntegratedConversionsTableQueryResponse,
     DateRange,
     MarketingAnalyticsItem,
@@ -12,10 +12,10 @@ from posthog.schema import (
     NonIntegratedConversionsTableQueryResponse,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 
 from products.marketing_analytics.backend.insightsql_queries.marketing_analytics_config import MarketingAnalyticsConfig
 

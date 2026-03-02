@@ -10,13 +10,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.event_usage import report_user_action
-from posthog.models import User
-from posthog.permissions import AccessControlPermission
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.event_usage import report_user_action
+from insights.models import User
+from insights.permissions import AccessControlPermission
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 
 from ..llm.client import Client
 from ..models.evaluation_config import EvaluationConfig

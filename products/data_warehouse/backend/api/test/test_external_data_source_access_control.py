@@ -1,23 +1,16 @@
 import uuid
 
 import pytest
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
-from posthog.constants import AvailableFeature
-from posthog.models.organization import OrganizationMembership
-from posthog.models.user import User
-from posthog.rbac.user_access_control import UserAccessControl
+from insights.constants import AvailableFeature
+from insights.models.organization import OrganizationMembership
+from insights.models.user import User
+from insights.rbac.user_access_control import UserAccessControl
 
 from products.data_warehouse.backend.models import ExternalDataSchema, ExternalDataSource
-
-try:
-    from ee.models.rbac.access_control import AccessControl
-    from ee.models.rbac.role import Role, RoleMembership
-except ImportError:
-    pass
-
 
 @pytest.mark.ee
 class TestExternalDataSourceAccessControl(APIBaseTest):

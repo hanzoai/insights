@@ -1,6 +1,6 @@
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.insightsql.database.models import StringDatabaseField
+from insights.insightsql.database.models import StringDatabaseField
 
 from ._definitions import FieldsDict, Schema
 

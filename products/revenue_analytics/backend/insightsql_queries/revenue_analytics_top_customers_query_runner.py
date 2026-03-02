@@ -1,4 +1,4 @@
-from posthog.schema import (
+from insights.schema import (
     CachedRevenueAnalyticsTopCustomersQueryResponse,
     DatabaseSchemaManagedViewTableKind,
     ResolvedDateRangeResponse,
@@ -6,9 +6,9 @@ from posthog.schema import (
     RevenueAnalyticsTopCustomersQueryResponse,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.models import UnknownDatabaseField
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.database.models import UnknownDatabaseField
+from insights.insightsql.query import execute_insightsql_query
 
 from products.revenue_analytics.backend.views import (
     RevenueAnalyticsBaseView,

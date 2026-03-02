@@ -1,9 +1,9 @@
 from datetime import datetime
 
 import pytest
-from posthog.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, ClickhouseTestMixin
 
-from posthog.schema import (
+from insights.schema import (
     BaseMathType,
     ConversionGoalFilter1,
     ConversionGoalFilter2,
@@ -12,12 +12,12 @@ from posthog.schema import (
     NodeKind,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
-from posthog.insightsql.test.utils import pretty_print_in_tests
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
+from insights.insightsql.test.utils import pretty_print_in_tests
 
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.models import Action
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models import Action
 
 from .conversion_goal_processor import ConversionGoalProcessor
 from .conversion_goals_aggregator import ConversionGoalsAggregator

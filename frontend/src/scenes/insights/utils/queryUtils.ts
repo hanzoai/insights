@@ -164,7 +164,7 @@ export const cleanInsightQuery = (query: InsightQueryNode, opts?: CompareQueryOp
     }
 
     if (opts?.ignoreVisualizationOnlyChanges && !isWebAnalyticsInsightQuery(cleanedQuery)) {
-        // Keep this in sync with posthog/schema_helpers.py `serialize_query` method
+        // Keep this in sync with insights/schema_helpers.py `serialize_query` method
         const insightFilter = filterForQuery(cleanedQuery)
         const insightFilterKey = filterKeyForQuery(cleanedQuery)
         cleanedQuery[insightFilterKey] = {

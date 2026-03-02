@@ -1,13 +1,13 @@
 from io import StringIO
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
-from posthog.models import MessageCategory, MessageRecipientPreference
-from posthog.models.message_category import MessageCategoryType
-from posthog.models.message_preferences import PreferenceStatus
+from insights.models import MessageCategory, MessageRecipientPreference
+from insights.models.message_category import MessageCategoryType
+from insights.models.message_preferences import PreferenceStatus
 
 from .customerio_import_service import CustomerIOImportService
 

@@ -5,14 +5,14 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from posthog.schema import PropertyGroupFilterValue
+from insights.schema import PropertyGroupFilterValue
 
-from posthog.insightsql import ast
-from posthog.insightsql.compiler.bytecode import create_bytecode
-from posthog.insightsql.property import property_to_expr
+from insights.insightsql import ast
+from insights.insightsql.compiler.bytecode import create_bytecode
+from insights.insightsql.property import property_to_expr
 
-from posthog.api.utils import action
-from posthog.models.team.team import Team
+from insights.api.utils import action
+from insights.models.team.team import Team
 
 from products.error_tracking.backend.hogvm_stl import RUST_HOGVM_STL
 from products.error_tracking.backend.models import ErrorTrackingIssueAssignment

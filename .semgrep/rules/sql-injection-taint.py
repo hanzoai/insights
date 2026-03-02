@@ -1,5 +1,5 @@
 from psycopg2 import sql
-from posthog.insightsql.escape_sql import escape_clickhouse_identifier
+from insights.insightsql.escape_sql import escape_clickhouse_identifier
 
 # === sql-injection-user-input: SHOULD BE CAUGHT (ruleid) ===
 

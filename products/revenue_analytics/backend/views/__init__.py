@@ -1,9 +1,9 @@
 from abc import ABC
 from typing import ClassVar, Optional
 
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.insightsql.database.models import SavedQuery
+from insights.insightsql.database.models import SavedQuery
 
 
 class RevenueAnalyticsBaseView(SavedQuery, ABC):

@@ -7,7 +7,7 @@ import django.db.models.deletion
 import django.contrib.postgres.fields
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                         size=None,
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingautocapturecontrols",

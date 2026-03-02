@@ -17,9 +17,9 @@ import temporalio.testing
 import temporalio.exceptions
 from asgiref.sync import sync_to_async
 
-from posthog.temporal.tests.utils.datetimes import date_range
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
-from posthog.temporal.tests.utils.models import (
+from insights.temporal.tests.utils.datetimes import date_range
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.models import (
     acreate_batch_export,
     adelete_batch_export,
     afetch_batch_export,

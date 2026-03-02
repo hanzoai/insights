@@ -54,10 +54,9 @@ jobs:
               with:
                   filters: |
                       dagster:
-                        - 'posthog/dags/**'
+                        - 'insights/dags/**'
                         # Dagster depends on Python, so ensure we run on any possible changes to it
-                        - 'posthog/**/*'
-                        - 'ee/**/*'
+                        - 'insights/**/*'
                         - 'products/**/*'
                         # Make sure we run if someone is explicitly change the workflow
                         - .github/workflows/ci-dagster.yml
@@ -180,7 +179,7 @@ jobs:
 
             - name: Run Dagster tests
               run: |
-                  pytest posthog/dags --junitxml=junit-dagster.xml
+                  pytest insights/dags --junitxml=junit-dagster.xml
 
             - name: Run products Dagster tests
               run: |

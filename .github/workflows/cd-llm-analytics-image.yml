@@ -11,10 +11,10 @@ on:
         branches:
             - master
         paths:
-            - 'posthog/temporal/llm_analytics/**'
+            - 'insights/temporal/llm_analytics/**'
             - 'products/llm_analytics/**'
-            - 'posthog/temporal/common/**'
-            - 'posthog/management/commands/start_temporal_worker.py'
+            - 'insights/temporal/common/**'
+            - 'insights/management/commands/start_temporal_worker.py'
             - 'Dockerfile.llm-analytics'
             - '.github/workflows/cd-llm-analytics-image.yml'
             - 'pyproject.toml'

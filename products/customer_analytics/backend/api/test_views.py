@@ -1,11 +1,11 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from parameterized import parameterized
 from rest_framework import status
 
-from posthog.models import Insight
-from posthog.models.activity_logging.activity_log import ActivityLog
-from posthog.models.team import Team
+from insights.models import Insight
+from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.team import Team
 
 from products.customer_analytics.backend.models import CustomerJourney, CustomerProfileConfig
 

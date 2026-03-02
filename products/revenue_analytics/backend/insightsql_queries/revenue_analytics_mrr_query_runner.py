@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 
-from posthog.schema import (
+from insights.schema import (
     CachedRevenueAnalyticsMRRQueryResponse,
     DatabaseSchemaManagedViewTableKind,
     InsightsQLQueryResponse,
@@ -12,13 +12,13 @@ from posthog.schema import (
     RevenueAnalyticsMRRQueryResultItem,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.models import UnknownDatabaseField
-from posthog.insightsql.database.schema.exchange_rate import EXCHANGE_RATE_DECIMAL_PRECISION
-from posthog.insightsql.parser import parse_expr
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.database.models import UnknownDatabaseField
+from insights.insightsql.database.schema.exchange_rate import EXCHANGE_RATE_DECIMAL_PRECISION
+from insights.insightsql.parser import parse_expr
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.insightsql_queries.utils.timestamp_utils import format_label_date
+from insights.insightsql_queries.utils.timestamp_utils import format_label_date
 
 from products.revenue_analytics.backend.views import RevenueAnalyticsBaseView, RevenueAnalyticsRevenueItemView
 from products.revenue_analytics.backend.views.schemas import SCHEMAS as VIEW_SCHEMAS

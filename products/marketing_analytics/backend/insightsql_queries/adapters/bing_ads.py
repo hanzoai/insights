@@ -1,8 +1,8 @@
 # Bing Ads Marketing Source Adapter
 
-from posthog.schema import NativeMarketingSource
+from insights.schema import NativeMarketingSource
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
 from products.marketing_analytics.backend.insightsql_queries.constants import (
     INTEGRATION_DEFAULT_SOURCES,

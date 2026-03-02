@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 
 from rest_framework import status
 
@@ -53,7 +53,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response_schema["properties"]["results"]["type"], "array")
 
     def test_openapi_spec_with_variables(self):
-        from posthog.models.insight_variable import InsightVariable
+        from insights.models.insight_variable import InsightVariable
 
         variable = InsightVariable.objects.create(
             team=self.team,
@@ -92,7 +92,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(variables_schema["properties"]["country"]["type"], "string")
 
     def test_openapi_spec_variable_types(self):
-        from posthog.models.insight_variable import InsightVariable
+        from insights.models.insight_variable import InsightVariable
 
         test_cases = [
             (InsightVariable.Type.NUMBER, "number", None),
@@ -243,7 +243,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
 
     def test_openapi_spec_insight_endpoint_with_date_variables(self):
         """Test that non-materialized insight endpoints include date variables in spec."""
-        from posthog.schema import EventsNode, TrendsQuery
+        from insights.schema import EventsNode, TrendsQuery
 
         create_endpoint_with_version(
             name="trends-endpoint",
@@ -271,7 +271,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
 
     def test_openapi_spec_insight_endpoint_with_breakdown(self):
         """Test that insight endpoints with breakdown include breakdown property in spec."""
-        from posthog.schema import Breakdown, BreakdownFilter, BreakdownType, EventsNode, TrendsQuery
+        from insights.schema import Breakdown, BreakdownFilter, BreakdownType, EventsNode, TrendsQuery
 
         create_endpoint_with_version(
             name="trends-breakdown",

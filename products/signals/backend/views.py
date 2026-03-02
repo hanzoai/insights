@@ -15,9 +15,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
-from posthog.permissions import APIScopePermission
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
+from insights.permissions import APIScopePermission
 
 from products.signals.backend.api import emit_signal
 from products.signals.backend.models import SignalReport, SignalReportArtefact

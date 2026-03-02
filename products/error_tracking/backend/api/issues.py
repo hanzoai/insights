@@ -9,17 +9,17 @@ from rest_framework import request, serializers, status, viewsets
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.documentation import extend_schema
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.models.activity_logging.activity_log import Change, Detail, load_activity, log_activity
-from posthog.models.activity_logging.activity_page import activity_page_response
-from posthog.models.cohort.cohort import Cohort
-from posthog.models.organization import OrganizationMembership
-from posthog.tasks.email import send_error_tracking_issue_assigned
+from insights.api.documentation import extend_schema
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.models.activity_logging.activity_log import Change, Detail, load_activity, log_activity
+from insights.models.activity_logging.activity_page import activity_page_response
+from insights.models.cohort.cohort import Cohort
+from insights.models.organization import OrganizationMembership
+from insights.tasks.email import send_error_tracking_issue_assigned
 
 from products.error_tracking.backend.models import (
     ErrorTrackingIssue,
@@ -293,7 +293,6 @@ def assign_issue(issue: ErrorTrackingIssue, assignee, organization, user, team_i
             if not OrganizationMembership.objects.filter(user_id=assignee["id"], organization=organization).exists():
                 raise ValidationError("Assignee user does not belong to this organization.")
         elif assignee["type"] == "role":
-            from ee.models.rbac.role import Role
 
             if not Role.objects.filter(id=assignee["id"], organization=organization).exists():
                 raise ValidationError("Assignee role does not belong to this organization.")

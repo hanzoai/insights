@@ -1,4 +1,4 @@
-from posthog.models.dashboard_templates import DashboardTemplate
+from insights.models.dashboard_templates import DashboardTemplate
 
 
 def get_llm_analytics_default_template() -> DashboardTemplate:

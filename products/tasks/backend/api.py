@@ -17,12 +17,12 @@ from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from posthog.api.mixins import validated_request
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import ServerTimingsGathered
-from posthog.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
-from posthog.permissions import APIScopePermission, InsightsFeatureFlagPermission
-from posthog.storage import object_storage
+from insights.api.mixins import validated_request
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import ServerTimingsGathered
+from insights.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
+from insights.permissions import APIScopePermission, InsightsFeatureFlagPermission
+from insights.storage import object_storage
 
 from .models import Task, TaskRun
 from .repository_readiness import compute_repository_readiness
@@ -308,7 +308,7 @@ class TaskRunViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
     def _signal_workflow_completion(self, task_run: TaskRun, status: str, error_message: str | None) -> None:
         """Send completion signal to Temporal workflow."""
-        from posthog.temporal.common.client import sync_connect
+        from insights.temporal.common.client import sync_connect
 
         from products.tasks.backend.temporal.process_task.workflow import ProcessTaskWorkflow
 

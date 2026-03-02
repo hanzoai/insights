@@ -15,12 +15,12 @@ import temporalio.workflow
 import temporalio.exceptions
 from asgiref.sync import sync_to_async
 
-from posthog.batch_exports.models import BatchExport, BatchExportBackfill
-from posthog.batch_exports.service import BackfillBatchExportInputs, BackfillDetails, unpause_batch_export
-from posthog.temporal.common.base import InsightsWorkflow
-from posthog.temporal.common.client import connect
-from posthog.temporal.common.heartbeat import Heartbeater
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.batch_exports.models import BatchExport, BatchExportBackfill
+from insights.batch_exports.service import BackfillBatchExportInputs, BackfillDetails, unpause_batch_export
+from insights.temporal.common.base import InsightsWorkflow
+from insights.temporal.common.client import connect
+from insights.temporal.common.heartbeat import Heartbeater
+from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.batch_exports import (
     CreateBatchExportBackfillInputs,

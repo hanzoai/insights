@@ -1,4 +1,4 @@
-// sync with ee/hogai/tools/read_billing_tool/tool.py
+// Usage types for billing display
 export const USAGE_TYPES = [
     { label: 'Events', value: 'event_count_in_period' },
     { label: 'Identified Events', value: 'enhanced_persons_event_count_in_period' },

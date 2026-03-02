@@ -10,10 +10,10 @@ from parameterized import parameterized
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from posthog.models import Organization, OrganizationMembership, PersonalAPIKey, Team, User
-from posthog.models.personal_api_key import hash_key_value
-from posthog.models.utils import generate_random_token_personal
-from posthog.storage import object_storage
+from insights.models import Organization, OrganizationMembership, PersonalAPIKey, Team, User
+from insights.models.personal_api_key import hash_key_value
+from insights.models.utils import generate_random_token_personal
+from insights.storage import object_storage
 
 from products.tasks.backend.models import Task, TaskRun
 from products.tasks.backend.services.connection_token import get_sandbox_jwt_public_key
@@ -613,8 +613,8 @@ class TestTaskRunAPI(BaseTaskAPITest):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch("posthog.storage.object_storage.write")
-    @patch("posthog.storage.object_storage.tag")
+    @patch("insights.storage.object_storage.write")
+    @patch("insights.storage.object_storage.tag")
     def test_upload_artifacts(self, mock_tag, mock_write):
         task = self.create_task()
         run = TaskRun.objects.create(task=task, team=self.team, status=TaskRun.Status.IN_PROGRESS)
@@ -659,7 +659,7 @@ class TestTaskRunAPI(BaseTaskAPITest):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @patch("posthog.storage.object_storage.get_presigned_url")
+    @patch("insights.storage.object_storage.get_presigned_url")
     def test_presign_artifact_url(self, mock_presign):
         mock_presign.return_value = "https://example.com/artifact?sig=123"
         task = self.create_task()

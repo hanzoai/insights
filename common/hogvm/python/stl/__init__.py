@@ -29,7 +29,7 @@ from .ip import isIPAddressInRange
 from .print import print_hog_string_output
 
 if TYPE_CHECKING:
-    from posthog.models import Team
+    from insights.models import Team
 
 
 @dataclasses.dataclass
@@ -123,7 +123,7 @@ def print(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], 
 def run(args: list[Any], team: Optional["Team"], stdout: Optional[list[str]], timeout: float) -> list[Any]:
     if team is None:
         return []
-    from posthog.insightsql.query import execute_insightsql_query
+    from insights.insightsql.query import execute_insightsql_query
 
     response = execute_insightsql_query(query=args[0], team=team)
     return response.results

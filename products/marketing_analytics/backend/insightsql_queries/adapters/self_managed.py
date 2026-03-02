@@ -1,6 +1,6 @@
 # Self-Managed Marketing Source Adapters
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
 from products.marketing_analytics.backend.insightsql_queries.constants import (
     MARKETING_ANALYTICS_SCHEMA,

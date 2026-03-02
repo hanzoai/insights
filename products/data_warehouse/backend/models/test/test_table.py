@@ -1,7 +1,7 @@
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
-from posthog.insightsql.database.models import DateTimeDatabaseField, IntegerDatabaseField, StringDatabaseField
+from insights.insightsql.database.models import DateTimeDatabaseField, IntegerDatabaseField, StringDatabaseField
 
 from products.data_warehouse.backend.models import DataWarehouseCredential, DataWarehouseTable
 from products.data_warehouse.backend.models.table import SERIALIZED_FIELD_TO_CLICKHOUSE_MAPPING

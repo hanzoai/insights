@@ -3,11 +3,11 @@
 from datetime import datetime
 from typing import cast
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
 
-from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
-from posthog.models import Team
+from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from insights.models import Team
 
 
 def fetch_responses(

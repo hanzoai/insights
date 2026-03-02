@@ -13,21 +13,20 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.batch_exports.models import BatchExportRun
-from posthog.cloud_utils import get_cached_instance_license
-from posthog.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionState, InsightsFunctionType
-from posthog.utils import convert_property_value, flatten
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.batch_exports.models import BatchExportRun
+from insights.cloud_utils import get_cached_instance_license
+from insights.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionState, InsightsFunctionType
+from insights.utils import convert_property_value, flatten
 
 from products.data_warehouse.backend.models import ExternalDataJob, ExternalDataSchema, ExternalDataSource
 from products.data_warehouse.backend.models.data_modeling_job import DataModelingJob
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 from products.data_warehouse.backend.models.util import get_view_or_table_by_name
 
-from ee.billing.billing_manager import BillingManager
 
 logger = structlog.get_logger(__name__)
 
@@ -118,60 +117,7 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         breakdown_of_rows_by_source = {}
         sources = ExternalDataSource.objects.filter(team_id=self.team_id, deleted=False)
 
-        try:
-            billing_manager = BillingManager(get_cached_instance_license())
-            org_billing = billing_manager.get_billing(organization=self.team.organization)
-
-            if org_billing and org_billing.get("billing_period"):
-                billing_period = org_billing["billing_period"]
-                billing_period_start = parser.parse(billing_period["current_period_start"])
-                billing_period_end = parser.parse(billing_period["current_period_end"])
-                billing_interval = billing_period.get("interval", "month")
-
-                usage_summary = org_billing.get("usage_summary", {})
-                billing_tracked_rows = usage_summary.get("rows_synced", {}).get("usage", 0)
-                billing_available = True
-
-                all_external_jobs = ExternalDataJob.objects.filter(
-                    team_id=self.team_id,
-                    created_at__gte=billing_period_start,
-                    created_at__lt=billing_period_end,
-                    billable=True,
-                )
-                total_db_rows = all_external_jobs.aggregate(total=Sum("rows_synced"))["total"] or 0
-
-                pending_billing_rows = max(0, total_db_rows - billing_tracked_rows)
-
-                rows_synced = billing_tracked_rows + pending_billing_rows
-
-                data_modeling_jobs = DataModelingJob.objects.filter(
-                    team_id=self.team_id,
-                    created_at__gte=billing_period_start,
-                    created_at__lt=billing_period_end,
-                )
-                materialized_rows = data_modeling_jobs.aggregate(total=Sum("rows_materialized"))["total"] or 0
-
-                for source in sources:
-                    total_rows = (
-                        ExternalDataJob.objects.filter(
-                            pipeline=source,
-                            created_at__gte=billing_period_start,
-                            created_at__lt=billing_period_end,
-                        ).aggregate(total=Sum("rows_synced"))["total"]
-                        or 0
-                    )
-
-                    breakdown_of_rows_by_source[str(source.id)] = total_rows
-
-            else:
-                logger.info("No billing period information available, using defaults")
-
-        except Exception as e:
-            logger.exception("There was an error retrieving billing information", exc_info=e)
-            return Response(
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                data={"error": "An error occurred retrieving billing information"},
-            )
+        # Billing integration removed
 
         return Response(
             status=status.HTTP_200_OK,

@@ -6,8 +6,8 @@ from typing import Any
 
 from temporalio import activity, workflow
 
-from posthog.batch_exports.service import BackfillDetails, NoOpInputs
-from posthog.temporal.common.base import InsightsWorkflow
+from insights.batch_exports.service import BackfillDetails, NoOpInputs
+from insights.temporal.common.base import InsightsWorkflow
 
 
 @dataclass

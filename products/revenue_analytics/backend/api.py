@@ -7,14 +7,14 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.database.database import Database
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.models.team.team import Team
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.models.team.team import Team
 
 from products.revenue_analytics.backend.views import RevenueAnalyticsBaseView
 from products.revenue_analytics.backend.views.schemas import SCHEMAS as VIEW_SCHEMAS

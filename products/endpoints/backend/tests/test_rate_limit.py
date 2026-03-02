@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import MagicMock, patch
 
 from django.core.cache import cache

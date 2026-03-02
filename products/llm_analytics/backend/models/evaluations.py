@@ -5,7 +5,7 @@ from django.dispatch import receiver
 
 import structlog
 
-from posthog.models.utils import UUIDTModel
+from insights.models.utils import UUIDTModel
 
 from .evaluation_configs import EvaluationType, OutputType, validate_evaluation_configs
 
@@ -22,7 +22,7 @@ class Evaluation(UUIDTModel):
         ]
 
     # Core fields
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     name = models.CharField(max_length=400)
     description = models.TextField(blank=True, default="")
     enabled = models.BooleanField(default=False)
@@ -47,14 +47,14 @@ class Evaluation(UUIDTModel):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
     deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        from posthog.cdp.filters import compile_filters_bytecode
+        from insights.cdp.filters import compile_filters_bytecode
 
         # Validate evaluation and output configs
         if self.evaluation_config or self.output_config:
@@ -81,6 +81,6 @@ class Evaluation(UUIDTModel):
 
 @receiver(post_save, sender=Evaluation)
 def evaluation_saved(sender, instance, created, **kwargs):
-    from posthog.plugins.plugin_server_api import reload_evaluations_on_workers
+    from insights.plugins.plugin_server_api import reload_evaluations_on_workers
 
     reload_evaluations_on_workers(team_id=instance.team_id, evaluation_ids=[str(instance.id)])

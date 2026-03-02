@@ -4,20 +4,20 @@ from pathlib import Path
 from typing import Union
 
 import pytest
-from posthog.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, ClickhouseTestMixin
 from unittest.mock import Mock, patch
 
 import structlog
 from parameterized import parameterized
 
-from posthog.schema import DateRange, SourceMap
+from insights.schema import DateRange, SourceMap
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
-from posthog.insightsql.test.utils import pretty_print_in_tests
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
+from insights.insightsql.test.utils import pretty_print_in_tests
 
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.models.team.team import DEFAULT_CURRENCY
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models.team.team import DEFAULT_CURRENCY
 
 from products.data_warehouse.backend.models import DataWarehouseTable, ExternalDataSource
 from products.data_warehouse.backend.models.credential import DataWarehouseCredential

@@ -1,4 +1,4 @@
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
 from products.revenue_analytics.backend.views.core import Builder
 

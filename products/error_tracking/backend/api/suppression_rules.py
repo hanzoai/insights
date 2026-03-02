@@ -5,9 +5,9 @@ import posthoganalytics
 from rest_framework import serializers, status, viewsets
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.event_usage import groups
-from posthog.models.team.team import Team
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.event_usage import groups
+from insights.models.team.team import Team
 
 from products.error_tracking.backend.models import ErrorTrackingSuppressionRule
 

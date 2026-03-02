@@ -5,8 +5,8 @@ from typing import Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from posthog.insightsql import errors as insightsql_errors
-from posthog.insightsql.ai import (
+from insights.insightsql import errors as insightsql_errors
+from insights.insightsql.ai import (
     DESTINATION_LIMITATIONS_MESSAGE,
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
@@ -20,9 +20,9 @@ from posthog.insightsql.ai import (
     PERSON_TAXONOMY_MESSAGE,
     TRANSFORMATION_LIMITATIONS_MESSAGE,
 )
-from posthog.insightsql.parser import parse_program
+from insights.insightsql.parser import parse_program
 
-from posthog.cdp.validation import compile_hog
+from insights.cdp.validation import compile_hog
 
 from products.cdp.backend.prompts import (
     INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
@@ -30,9 +30,6 @@ from products.cdp.backend.prompts import (
     HOG_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
 )
 
-from ee.hogai.chat_agent.schema_generator.parsers import PydanticOutputParserException
-from ee.hogai.llm import MaxChatOpenAI
-from ee.hogai.tool import MaxTool
 
 
 class CreateHogTransformationFunctionArgs(BaseModel):

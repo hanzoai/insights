@@ -15,14 +15,14 @@ from infi.clickhouse_orm import Database
 from psycopg import sql
 from temporalio.testing import ActivityEnvironment
 
-from posthog.conftest import create_clickhouse_tables
-from posthog.models import Organization, Team
-from posthog.models.team.util import delete_batch_exports
-from posthog.models.utils import uuid7
-from posthog.temporal.common.clickhouse import ClickHouseClient
-from posthog.temporal.common.client import connect
-from posthog.temporal.common.logger import configure_logger
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.conftest import create_clickhouse_tables
+from insights.models import Organization, Team
+from insights.models.team.util import delete_batch_exports
+from insights.models.utils import uuid7
+from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.common.client import connect
+from insights.temporal.common.logger import configure_logger
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
 
 from products.batch_exports.backend.temporal import ACTIVITIES, WORKFLOWS
 from products.batch_exports.backend.temporal.metrics import BatchExportsMetricsInterceptor
@@ -336,7 +336,7 @@ def test_properties(request, session_id):
         "$os": "Mac OS X",
         "prop": "value",
         "$session_id": session_id,
-        "$current_url": "posthog.com",
+        "$current_url": "insights.com",
     }
 
 

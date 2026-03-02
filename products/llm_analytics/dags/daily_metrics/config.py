@@ -7,7 +7,7 @@ Modify this file to add new metrics or change aggregation behavior.
 
 from dataclasses import dataclass, field
 
-from posthog.schema import AIEventType
+from insights.schema import AIEventType
 
 
 @dataclass

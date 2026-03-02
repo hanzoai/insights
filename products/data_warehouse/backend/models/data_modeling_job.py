@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from posthog.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDTModel
 
 
 class DataModelingJob(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
@@ -11,7 +11,7 @@ class DataModelingJob(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
         FAILED = "Failed", "Failed"
         CANCELLED = "Cancelled", "Cancelled"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.SET_NULL, null=True)
+    team = models.ForeignKey("insights.Team", on_delete=models.SET_NULL, null=True)
     saved_query = models.ForeignKey("data_warehouse.DataWarehouseSavedQuery", on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=400, choices=Status.choices, default=Status.RUNNING)
     rows_materialized = models.IntegerField(default=0)

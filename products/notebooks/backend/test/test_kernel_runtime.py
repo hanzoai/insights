@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import Any
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from django.test import override_settings

@@ -3,17 +3,17 @@ import uuid
 import typing
 import datetime as dt
 
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.insightsql import ast
-from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
-from posthog.insightsql.visitor import clone_expr
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database
+from insights.insightsql.insightsql import ast
+from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from insights.insightsql.visitor import clone_expr
 
-from posthog.batch_exports.service import BatchExportModel, BatchExportSchema
-from posthog.clickhouse import query_tagging
-from posthog.clickhouse.query_tagging import Product
-from posthog.models import Team
-from posthog.sync import database_sync_to_async
+from insights.batch_exports.service import BatchExportModel, BatchExportSchema
+from insights.clickhouse import query_tagging
+from insights.clickhouse.query_tagging import Product
+from insights.models import Team
+from insights.sync import database_sync_to_async
 
 from products.batch_exports.backend.temporal import sql
 

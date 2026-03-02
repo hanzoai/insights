@@ -5,16 +5,14 @@ from typing import Any, Literal
 from posthoganalytics import capture_exception
 from pydantic import BaseModel, Field
 
-from posthog.schema import MaxExperimentMetricResult
+from insights.schema import MaxExperimentMetricResult
 
-from posthog.insightsql_queries.experiments.utils import get_experiment_stats_method
-from posthog.models import Experiment, FeatureFlag
-from posthog.session_recordings.session_recording_api import list_recordings_from_query
-from posthog.session_recordings.utils import filter_from_params_to_query
-from posthog.sync import database_sync_to_async
+from insights.insightsql_queries.experiments.utils import get_experiment_stats_method
+from insights.models import Experiment, FeatureFlag
+from insights.session_recordings.session_recording_api import list_recordings_from_query
+from insights.session_recordings.utils import filter_from_params_to_query
+from insights.sync import database_sync_to_async
 
-from ee.hogai.context.experiment.context import ExperimentContext
-from ee.hogai.tool import MaxTool
 
 CREATE_EXPERIMENT_TOOL_DESCRIPTION = dedent("""
     Use this tool to create A/B test experiments that measure the impact of changes.

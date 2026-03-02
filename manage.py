@@ -12,7 +12,7 @@ if _common_path not in sys.path:
 
 
 def main():
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "posthog.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "insights.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

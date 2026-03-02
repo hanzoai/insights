@@ -6,10 +6,10 @@ import dagster
 import requests
 from clickhouse_driver import Client
 
-from posthog.clickhouse.cluster import ClickhouseCluster
-from posthog.dags.common import JobOwners, settings_with_log_comment
-from posthog.models.exchange_rate.currencies import SUPPORTED_CURRENCY_CODES
-from posthog.models.exchange_rate.sql import EXCHANGE_RATE_DATA_BACKFILL_SQL, EXCHANGE_RATE_DICTIONARY_NAME
+from insights.clickhouse.cluster import ClickhouseCluster
+from insights.dags.common import JobOwners, settings_with_log_comment
+from insights.models.exchange_rate.currencies import SUPPORTED_CURRENCY_CODES
+from insights.models.exchange_rate.sql import EXCHANGE_RATE_DATA_BACKFILL_SQL, EXCHANGE_RATE_DICTIONARY_NAME
 
 OPEN_EXCHANGE_RATES_API_BASE_URL = "https://openexchangerates.org/api"
 

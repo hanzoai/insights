@@ -2,17 +2,17 @@ from decimal import Decimal
 from pathlib import Path
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, snapshot_clickhouse_queries
 from unittest.mock import patch
 
-from posthog.schema import (
+from insights.schema import (
     CurrencyCode,
     InsightsQLQueryModifiers,
     RevenueExampleDataWarehouseTablesQuery,
     RevenueExampleDataWarehouseTablesQueryResponse,
 )
 
-from posthog.temporal.data_imports.sources.stripe.constants import INVOICE_RESOURCE_NAME as STRIPE_INVOICE_RESOURCE_NAME
+from insights.temporal.data_imports.sources.stripe.constants import INVOICE_RESOURCE_NAME as STRIPE_INVOICE_RESOURCE_NAME
 
 from products.data_warehouse.backend.models import ExternalDataSchema
 from products.data_warehouse.backend.models.datawarehouse_managed_viewset import DataWarehouseManagedViewSet

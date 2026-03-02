@@ -260,12 +260,12 @@ describe('calculations', () => {
             }
 
             // Test baseline value calculation
-            // Backend reference: posthog/products/experiments/stats/shared/statistics.py:119-124
+            // Backend reference: insights/products/experiments/stats/shared/statistics.py:119-124
             const baselineValue = calculateBaselineValue(baseline, metric)
             expect(baselineValue).toBeCloseTo(10, 4) // $10 per order
 
             // Test variance calculation using delta method
-            // Backend reference: posthog/products/experiments/stats/shared/statistics.py:135-145
+            // Backend reference: insights/products/experiments/stats/shared/statistics.py:135-145
             const variance = calculateVarianceFromResults(baselineValue!, metric, baseline)
             expect(variance).not.toBeNull()
             expect(variance).toBeCloseTo(32, 1) // Variance = 32

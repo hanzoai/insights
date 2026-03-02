@@ -5,8 +5,8 @@ import pytest
 
 from temporalio.testing import ActivityEnvironment
 
-from posthog.models import Integration, OAuthApplication, Organization, OrganizationMembership, Team, User
-from posthog.temporal.common.logger import configure_logger
+from insights.models import Integration, OAuthApplication, Organization, OrganizationMembership, Team, User
+from insights.temporal.common.logger import configure_logger
 
 from products.tasks.backend.models import SandboxSnapshot, Task, TaskRun
 from products.tasks.backend.services.sandbox import Sandbox, SandboxConfig, SandboxTemplate

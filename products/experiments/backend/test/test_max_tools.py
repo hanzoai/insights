@@ -1,17 +1,16 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from posthog.schema import (
+from insights.schema import (
     MaxExperimentMetricResult,
     MaxExperimentVariantResultBayesian,
     MaxExperimentVariantResultFrequentist,
 )
 
-from posthog.models import Experiment, FeatureFlag
+from insights.models import Experiment, FeatureFlag
 
 from products.experiments.backend.max_tools import CreateExperimentTool, ExperimentSummaryTool
 
-from ee.hogai.utils.types import AssistantState
 
 
 class TestCreateExperimentTool(APIBaseTest):

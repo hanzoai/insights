@@ -21,13 +21,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.monitoring import monitor
-from posthog.auth import SessionAuthentication
-from posthog.event_usage import groups, report_user_action
-from posthog.models import User
-from posthog.rate_limit import LLMProxyBurstRateThrottle, LLMProxyDailyRateThrottle, LLMProxySustainedRateThrottle
-from posthog.renderers import SafeJSONRenderer, ServerSentEventRenderer
-from posthog.settings import SERVER_GATEWAY_INTERFACE
+from insights.api.monitoring import monitor
+from insights.auth import SessionAuthentication
+from insights.event_usage import groups, report_user_action
+from insights.models import User
+from insights.rate_limit import LLMProxyBurstRateThrottle, LLMProxyDailyRateThrottle, LLMProxySustainedRateThrottle
+from insights.renderers import SafeJSONRenderer, ServerSentEventRenderer
+from insights.settings import SERVER_GATEWAY_INTERFACE
 
 from products.llm_analytics.backend.api.metrics import llma_track_latency
 from products.llm_analytics.backend.llm import (
@@ -39,7 +39,6 @@ from products.llm_analytics.backend.llm import (
 from products.llm_analytics.backend.llm.errors import UnsupportedProviderError
 from products.llm_analytics.backend.models.provider_keys import LLMProviderKey
 
-from ee.hogai.utils.asgi import SyncIterableToAsync
 
 logger = logging.getLogger(__name__)
 

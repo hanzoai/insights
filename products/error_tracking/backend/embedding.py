@@ -1,13 +1,13 @@
 from django.conf import settings
 
-from posthog.clickhouse.indexes import index_by_kafka_timestamp
-from posthog.clickhouse.kafka_engine import (
+from insights.clickhouse.indexes import index_by_kafka_timestamp
+from insights.clickhouse.kafka_engine import (
     CONSUMER_GROUP_DOCUMENT_EMBEDDINGS,
     KAFKA_COLUMNS_WITH_PARTITION,
     kafka_engine,
 )
-from posthog.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
-from posthog.kafka_client.topics import KAFKA_DOCUMENT_EMBEDDINGS_TOPIC
+from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.kafka_client.topics import KAFKA_DOCUMENT_EMBEDDINGS_TOPIC
 
 DOCUMENT_EMBEDDINGS = "posthog_document_embeddings"
 SHARDED_DOCUMENT_EMBEDDINGS = f"sharded_{DOCUMENT_EMBEDDINGS}"

@@ -1,21 +1,15 @@
 from datetime import datetime, timedelta
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
-from posthog.schema import IntervalType, RevenueAnalyticsGrossRevenueQuery
+from insights.schema import IntervalType, RevenueAnalyticsGrossRevenueQuery
 
-from posthog.constants import AvailableFeature
-from posthog.rbac.user_access_control import UserAccessControlError
+from insights.constants import AvailableFeature
+from insights.rbac.user_access_control import UserAccessControlError
 
 from products.data_warehouse.backend.models import ExternalDataSchema, ExternalDataSource
 from products.data_warehouse.backend.types import ExternalDataSourceType
 from products.revenue_analytics.backend.insightsql_queries.revenue_analytics_query_runner import RevenueAnalyticsQueryRunner
-
-try:
-    from ee.models.rbac.access_control import AccessControl
-except ImportError:
-    pass
-
 
 # This is required because we can't instantiate the base class directly
 # since it doesn't implement two abstract methods

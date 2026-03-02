@@ -7,13 +7,13 @@ from typing import Any, Generic, Optional, TypeVar
 
 import structlog
 
-from posthog.schema import MarketingAnalyticsColumnsSchemaNames, MarketingAnalyticsConstants, SourceMap
+from insights.schema import MarketingAnalyticsColumnsSchemaNames, MarketingAnalyticsConstants, SourceMap
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_expr
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_expr
 
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.models.team.team import DEFAULT_CURRENCY, Team
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models.team.team import DEFAULT_CURRENCY, Team
 
 from products.data_warehouse.backend.models import DataWarehouseTable
 from products.marketing_analytics.backend.insightsql_queries.constants import MATCH_KEY_FIELD

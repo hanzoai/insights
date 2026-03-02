@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from google.genai.types import Blob, Content, Part
 from rest_framework import exceptions
 
-from posthog.models.uploaded_media import UploadedMedia
-from posthog.storage import object_storage
+from insights.models.uploaded_media import UploadedMedia
+from insights.storage import object_storage
 
 from ..llm import generate_structured_output
 from ..prompts import TOUR_GENERATION_SYSTEM_PROMPT, TOUR_GENERATION_USER_PROMPT

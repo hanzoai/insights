@@ -10,22 +10,22 @@ from django.conf import settings
 
 import pyarrow as pa
 
-from posthog.schema import EventPropertyFilter, InsightsQLPropertyFilter, InsightsQLQueryModifiers, MaterializationMode
+from insights.schema import EventPropertyFilter, InsightsQLPropertyFilter, InsightsQLQueryModifiers, MaterializationMode
 
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.errors import ExposedInsightsQLError, InternalInsightsQLError
-from posthog.insightsql.insightsql import ast
-from posthog.insightsql.parser import parse_expr
-from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
-from posthog.insightsql.property import property_to_expr
-from posthog.insightsql.visitor import TraversingVisitor
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database
+from insights.insightsql.errors import ExposedInsightsQLError, InternalInsightsQLError
+from insights.insightsql.insightsql import ast
+from insights.insightsql.parser import parse_expr
+from insights.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from insights.insightsql.property import property_to_expr
+from insights.insightsql.visitor import TraversingVisitor
 
-from posthog.batch_exports.service import BackfillDetails
-from posthog.models import Team
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.clickhouse import get_client
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.batch_exports.service import BackfillDetails
+from insights.models import Team
+from insights.sync import database_sync_to_async
+from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.logger import get_write_only_logger
 
 from products.batch_exports.backend.temporal.record_batch_model import RecordBatchModel
 from products.batch_exports.backend.temporal.sql import (
