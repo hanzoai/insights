@@ -43,7 +43,7 @@ jobs:
                         - 'frontend/**'
                         - 'ee/frontend/**'
                         - 'common/esbuilder/**'
-                        - 'common/hogql_parser/**'
+                        - 'common/insightsql_parser/**'
                         - 'products/**/*.ts'
                         - 'products/**/*.tsx'
                         - 'playwright/**'
