@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name="pipelines",
             field=ArrayField(
                 base_field=models.CharField(max_length=50),
-                default=posthog.models.event_ingestion_restriction_config.default_pipelines,
+                default=insights.models.event_ingestion_restriction_config.default_pipelines,
                 blank=True,
                 help_text="List of ingestion pipelines this restriction applies to (e.g., 'analytics', 'session_recordings')",
                 size=None,

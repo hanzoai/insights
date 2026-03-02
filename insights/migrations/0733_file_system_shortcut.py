@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="FileSystemShortcut",
             fields=[
-                ("id", models.UUIDField(default=posthog.models.utils.uuid7, primary_key=True, serialize=False)),
+                ("id", models.UUIDField(default=insights.models.utils.uuid7, primary_key=True, serialize=False)),
                 ("path", models.TextField()),
                 ("type", models.CharField(blank=True, max_length=100)),
                 ("ref", models.CharField(blank=True, max_length=100, null=True)),
