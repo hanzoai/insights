@@ -20,7 +20,7 @@
 
 ### JS SDK Changes
 
-Most survey logic lives in the [Insights JS SDK](https://github.com/Insights/posthog-js/). To test changes:
+Most survey logic lives in the [Insights JS SDK](https://github.com/PostHog/posthog-js/). To test changes:
 
 First, build the package with hot-reload:
 
@@ -213,7 +213,7 @@ One caveat: **reserved ngrok domains are only available for paid ngrok users.**
 
 ### Testing survey usage_report
 
-The function [get_teams_with_survey_responses_count_in_period](https://github.com/Insights/posthog/blob/master/posthog/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
+The function [get_teams_with_survey_responses_count_in_period](https://github.com/PostHog/posthog/blob/master/posthog/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
 
 Here's how to run it in the Django shell:
 
@@ -235,7 +235,7 @@ print(results)
 
 ### posthog-js logs
 
-We [added some logging on the JS SDK](https://github.com/Insights/posthog-js/pull/1663) to help debug issues with surveys.
+We [added some logging on the JS SDK](https://github.com/PostHog/posthog-js/pull/1663) to help debug issues with surveys.
 
 However, those logs are only enabled when posthog-js (v1.117.0 and higher) is set with debug=true.
 

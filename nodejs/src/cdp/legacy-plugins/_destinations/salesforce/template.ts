@@ -13,7 +13,7 @@ export const salesforcePlugin: LegacyDestinationPlugin = {
         id: 'plugin-salesforce-plugin',
         name: 'Salesforce Export Plugin',
         description: 'Relay Insights events to Salesforce',
-        icon_url: 'https://raw.githubusercontent.com/Insights/salesforce-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/PostHog/salesforce-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',
@@ -104,7 +104,7 @@ export const salesforcePlugin: LegacyDestinationPlugin = {
                 label: 'Event endpoint mapping',
                 type: 'json',
                 description:
-                    '⚠️ For advanced uses only ⚠️ Allows you to map events to different SalesForce endpoints. See https://github.com/Insights/salesforce-plugin/blob/main/README.md for an example.',
+                    '⚠️ For advanced uses only ⚠️ Allows you to map events to different SalesForce endpoints. See https://github.com/PostHog/salesforce-plugin/blob/main/README.md for an example.',
                 default: '',
                 required: false,
                 secret: false,
@@ -115,7 +115,7 @@ export const salesforcePlugin: LegacyDestinationPlugin = {
                 label: 'Event to salesforce field mapping',
                 type: 'json',
                 description:
-                    "SalesForce can be strict about field names, if your insights event property names don't match then you can map them using this. See https://github.com/Insights/salesforce-plugin/blob/main/README.md for an example.",
+                    "SalesForce can be strict about field names, if your insights event property names don't match then you can map them using this. See https://github.com/PostHog/salesforce-plugin/blob/main/README.md for an example.",
                 default: '',
                 required: false,
                 secret: false,

@@ -17,7 +17,7 @@ import { appendToCorrelationConfig } from './funnelUtils'
 
 // List of events that should be excluded, if we don't have an explicit list of
 // excluded properties. Copied from
-// https://github.com/Insights/posthog/issues/6474#issuecomment-952044722
+// https://github.com/PostHog/posthog/issues/6474#issuecomment-952044722
 export const DEFAULT_EXCLUDED_PERSON_PROPERTIES = [
     '$initial_geoip_postal_code',
     '$initial_geoip_latitude',

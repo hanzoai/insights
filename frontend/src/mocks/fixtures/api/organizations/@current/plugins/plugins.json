@@ -8,7 +8,7 @@
             "plugin_type": "custom",
             "name": "Replicator",
             "description": "Replicate Insights event stream in another Insights instance",
-            "url": "https://github.com/Insights/posthog-plugin-replicator",
+            "url": "https://github.com/PostHog/posthog-plugin-replicator",
             "icon": null,
             "config_schema": [
                 {
@@ -65,7 +65,7 @@
             "plugin_type": "custom",
             "name": "GeoIP",
             "description": "Enrich Insights events and persons with IP location data",
-            "url": "https://github.com/Insights/posthog-plugin-geoip",
+            "url": "https://github.com/PostHog/posthog-plugin-geoip",
             "icon": null,
             "config_schema": [],
             "tag": "2dd67e1dec9c8b5febd7a6d9235c51072950cd37",
@@ -82,7 +82,7 @@
             "plugin_type": "custom",
             "name": "Customer.io",
             "description": "Send event data and emails into Customer.io.",
-            "url": "https://github.com/Insights/customerio-plugin",
+            "url": "https://github.com/PostHog/customerio-plugin",
             "icon": null,
             "config_schema": [
                 {
@@ -152,7 +152,7 @@
             "plugin_type": "custom",
             "name": "BigQuery Export",
             "description": "Sends events to a BigQuery database on ingestion.",
-            "url": "https://github.com/Insights/bigquery-plugin",
+            "url": "https://github.com/PostHog/bigquery-plugin",
             "icon": null,
             "config_schema": [
                 {

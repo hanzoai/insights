@@ -67,7 +67,7 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Check for breaking changes
-              run: buf breaking proto/ --against 'https://github.com/Insights/posthog.git#branch=master,subdir=proto'
+              run: buf breaking proto/ --against 'https://github.com/PostHog/posthog.git#branch=master,subdir=proto'
 
     proto_checks:
         needs: [changes, lint, breaking]

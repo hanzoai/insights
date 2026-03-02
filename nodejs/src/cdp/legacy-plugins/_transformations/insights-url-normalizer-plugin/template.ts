@@ -12,7 +12,7 @@ export const insightsUrlNormalizerPlugin: LegacyTransformationPlugin = {
         name: 'URL Normalizer',
         description:
             'Normalize the format of urls in your application allowing you to more easily compare them in insights.',
-        icon_url: 'https://raw.githubusercontent.com/Insights/insights-url-normalizer-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/PostHog/insights-url-normalizer-plugin/main/logo.png',
         category: ['Transformation'],
         code_language: 'javascript',
         code: `return event`,

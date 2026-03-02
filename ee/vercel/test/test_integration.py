@@ -862,7 +862,7 @@ class TestVercelInstallationRegressions(TestCase):
     @patch("ee.vercel.integration.report_user_signed_up")
     def test_regression_existing_user_without_vercel_mapping_added_to_org(self, mock_report):
         """
-        Regression test for: https://github.com/Insights/posthog/pull/46107
+        Regression test for: https://github.com/PostHog/posthog/pull/46107
 
         Bug: When an existing Insights user (without any prior Vercel mappings) installed
         the Vercel integration, they were NOT added to the newly created organization.
