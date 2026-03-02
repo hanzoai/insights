@@ -2,7 +2,7 @@ import pytest_asyncio
 from asgiref.sync import sync_to_async
 
 # Import temporal test fixtures directly
-from posthog.temporal.tests.conftest import aorganization, ateam, auser, temporal_client  # noqa: F401
+from insights.temporal.tests.conftest import aorganization, ateam, auser, temporal_client  # noqa: F401
 
 from products.endpoints.backend.models import Endpoint, EndpointVersion
 

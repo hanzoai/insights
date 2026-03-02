@@ -1,8 +1,8 @@
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 
-from posthog.models.team.team import Team
-from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDModel
+from insights.models.team.team import Team
+from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDModel
 
 
 class Dataset(UUIDModel, CreatedMetaFields, UpdatedMetaFields, DeletedMetaFields):

@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils import timezone
 
-from posthog.models.team.team import Team
-from posthog.models.user import User
-from posthog.models.utils import UUIDModel
+from insights.models.team.team import Team
+from insights.models.user import User
+from insights.models.utils import UUIDModel
 
 
 class DesktopRecording(UUIDModel):

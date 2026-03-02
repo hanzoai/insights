@@ -6,8 +6,8 @@ import random
 import typing
 import datetime as dt
 
-from posthog.temporal.common.clickhouse import ClickHouseClient
-from posthog.temporal.tests.utils.datetimes import date_range
+from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.tests.utils.datetimes import date_range
 
 from products.batch_exports.backend.tests.temporal.utils.clickhouse import execute_query
 

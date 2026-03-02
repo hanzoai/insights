@@ -1,8 +1,8 @@
 # Google Ads Marketing Source Adapter
 
-from posthog.schema import NativeMarketingSource
+from insights.schema import NativeMarketingSource
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
 from ..constants import INTEGRATION_DEFAULT_SOURCES, INTEGRATION_FIELD_NAMES, INTEGRATION_PRIMARY_SOURCE
 from .base import GoogleAdsConfig, MarketingSourceAdapter, ValidationResult

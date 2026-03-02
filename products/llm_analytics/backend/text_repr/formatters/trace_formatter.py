@@ -10,7 +10,7 @@ import json
 import base64
 from typing import Any
 
-from posthog.schema import LLMTrace
+from insights.schema import LLMTrace
 
 from .constants import DEFAULT_MAX_LENGTH, MAX_TREE_DEPTH, SEPARATOR
 from .event_formatter import format_event_text_repr

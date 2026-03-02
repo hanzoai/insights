@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
 from unittest import mock
 
 from django.utils import timezone
@@ -6,9 +6,9 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
 
-from posthog.schema import DataWarehouseSyncInterval, EventsNode, TrendsQuery
+from insights.schema import DataWarehouseSyncInterval, EventsNode, TrendsQuery
 
-from posthog.models.insight_variable import InsightVariable
+from insights.models.insight_variable import InsightVariable
 
 from products.data_warehouse.backend.models import DataWarehouseTable
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
@@ -1071,7 +1071,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
     # =========================================================================
 
     def test_non_materialized_insight_endpoint_accepts_breakdown_variable(self):
-        from posthog.schema import Breakdown, BreakdownFilter, BreakdownType
+        from insights.schema import Breakdown, BreakdownFilter, BreakdownType
 
         endpoint = create_endpoint_with_version(
             name="trends_breakdown_filter",
@@ -1105,7 +1105,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_non_materialized_insight_endpoint_accepts_breakdown_and_date_variables(self):
-        from posthog.schema import Breakdown, BreakdownFilter, BreakdownType
+        from insights.schema import Breakdown, BreakdownFilter, BreakdownType
 
         endpoint = create_endpoint_with_version(
             name="trends_breakdown_dates",

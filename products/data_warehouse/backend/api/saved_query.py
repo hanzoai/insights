@@ -18,20 +18,20 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from temporalio.client import ScheduleActionExecutionStartWorkflow
 
-from posthog.schema import DataWarehouseManagedViewsetKind, ProductKey
+from insights.schema import DataWarehouseManagedViewsetKind, ProductKey
 
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database, SerializedField, serialize_fields
-from posthog.insightsql.errors import ExposedInsightsQLError
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.placeholders import FindPlaceholders
-from posthog.insightsql.printer import prepare_and_print_ast
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database, SerializedField, serialize_fields
+from insights.insightsql.errors import ExposedInsightsQLError
+from insights.insightsql.parser import parse_select
+from insights.insightsql.placeholders import FindPlaceholders
+from insights.insightsql.printer import prepare_and_print_ast
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.exceptions_capture import capture_exception
-from posthog.models import Team
-from posthog.models.activity_logging.activity_log import (
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.exceptions_capture import capture_exception
+from insights.models import Team
+from insights.models.activity_logging.activity_log import (
     ActivityLog,
     Change,
     Detail,
@@ -39,8 +39,8 @@ from posthog.models.activity_logging.activity_log import (
     load_activity,
     log_activity,
 )
-from posthog.models.activity_logging.activity_page import activity_page_response
-from posthog.temporal.common.client import sync_connect
+from insights.models.activity_logging.activity_page import activity_page_response
+from insights.temporal.common.client import sync_connect
 
 from products.data_warehouse.backend.data_load.saved_query_service import (
     pause_saved_query_schedule,

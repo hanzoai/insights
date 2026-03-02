@@ -13,10 +13,10 @@
 # to manage the risk you're thinking about, do not add an entry.
 
 # ClickHouse team owns Clickhouse migrations
-posthog/clickhouse/migrations/** @PostHog/clickhouse
+insights/clickhouse/migrations/** @PostHog/clickhouse
 
 # HogQL team owns HogQL changes
-posthog/hogql/** @PostHog/hogql
+insights/hogql/** @PostHog/hogql
 
 # Being open source brings us unwanted problems because Github Actions are untrusted and inherently unsafe
 # so we have to be extra careful with changes here. Let's have the security team own these checks.
@@ -33,6 +33,5 @@ posthog/hogql/** @PostHog/hogql
 CODEOWNERS @PostHog/team-security
 
 # Critical authentication logic
-posthog/api/authentication.py @PostHog/team-security
-posthog/auth.py @PostHog/team-security
-ee/api/scim/auth.py @PostHog/team-security
+insights/api/authentication.py @PostHog/team-security
+insights/auth.py @PostHog/team-security

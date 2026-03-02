@@ -31,7 +31,7 @@ from common.hogvm.python.utils import (
 )
 
 if TYPE_CHECKING:
-    from posthog.models import Team
+    from insights.models import Team
 
 MAX_MEMORY = 64 * 1024 * 1024  # 64 MB
 MAX_FUNCTION_ARGS_LENGTH = 300

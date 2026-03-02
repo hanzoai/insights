@@ -18,22 +18,22 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.api.utils import action
-from posthog.exceptions import Conflict
-from posthog.models import User
-from posthog.models.activity_logging.activity_log import Change, Detail, changes_between, load_activity, log_activity
-from posthog.models.activity_logging.activity_page import activity_page_response
-from posthog.models.utils import UUIDT
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
-from posthog.rbac.user_access_control import UserAccessControlSerializerMixin
-from posthog.renderers import SafeJSONRenderer, ServerSentEventRenderer
-from posthog.settings import SERVER_GATEWAY_INTERFACE
-from posthog.utils import relative_date_parse
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.api.utils import action
+from insights.exceptions import Conflict
+from insights.models import User
+from insights.models.activity_logging.activity_log import Change, Detail, changes_between, load_activity, log_activity
+from insights.models.activity_logging.activity_page import activity_page_response
+from insights.models.utils import UUIDT
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.rbac.user_access_control import UserAccessControlSerializerMixin
+from insights.renderers import SafeJSONRenderer, ServerSentEventRenderer
+from insights.settings import SERVER_GATEWAY_INTERFACE
+from insights.utils import relative_date_parse
 
 from products.notebooks.backend.kernel_runtime import build_notebook_sandbox_config, get_kernel_runtime
 from products.notebooks.backend.models import KernelRuntime, Notebook
@@ -41,7 +41,6 @@ from products.notebooks.backend.python_analysis import analyze_python_globals, a
 from products.tasks.backend.services.sandbox import SandboxStatus
 from products.tasks.backend.temporal.exceptions import SandboxProvisionError
 
-from ee.hogai.utils.asgi import SyncIterableToAsync
 
 logger = structlog.get_logger(__name__)
 

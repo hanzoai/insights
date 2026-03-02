@@ -1,6 +1,6 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
-from posthog.models import Team
+from insights.models import Team
 
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 from products.data_warehouse.backend.models.datawarehouse_saved_query_draft import DataWarehouseSavedQueryDraft

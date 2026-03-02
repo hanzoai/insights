@@ -2,9 +2,9 @@ from datetime import timedelta
 
 from django.conf import settings
 
-from posthog.models import Team
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.client import async_connect
+from insights.models import Team
+from insights.sync import database_sync_to_async
+from insights.temporal.common.client import async_connect
 
 from products.signals.backend.temporal.grouping import TeamSignalGroupingWorkflow
 from products.signals.backend.temporal.types import EmitSignalInputs, TeamSignalGroupingInput

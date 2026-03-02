@@ -7,13 +7,13 @@ from structlog.contextvars import bind_contextvars
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.batch_exports.models import BatchExport, BatchExportRun
-from posthog.batch_exports.service import afetch_batch_export_runs_in_range, aupdate_records_total_count
-from posthog.batch_exports.sql import EVENT_COUNT_BY_INTERVAL
-from posthog.temporal.common.base import InsightsWorkflow
-from posthog.temporal.common.clickhouse import get_client
-from posthog.temporal.common.heartbeat import Heartbeater
-from posthog.temporal.common.logger import get_logger
+from insights.batch_exports.models import BatchExport, BatchExportRun
+from insights.batch_exports.service import afetch_batch_export_runs_in_range, aupdate_records_total_count
+from insights.batch_exports.sql import EVENT_COUNT_BY_INTERVAL
+from insights.temporal.common.base import InsightsWorkflow
+from insights.temporal.common.clickhouse import get_client
+from insights.temporal.common.heartbeat import Heartbeater
+from insights.temporal.common.logger import get_logger
 
 LOGGER = get_logger(__name__)
 

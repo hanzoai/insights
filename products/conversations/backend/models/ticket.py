@@ -2,12 +2,12 @@ from typing import TYPE_CHECKING
 
 from django.db import models, transaction
 
-from posthog.models.utils import UUIDTModel
+from insights.models.utils import UUIDTModel
 
 from .constants import Channel, Priority, Status
 
 if TYPE_CHECKING:
-    from posthog.models import Person
+    from insights.models import Person
 
 
 class TicketManager(models.Manager):
@@ -16,7 +16,7 @@ class TicketManager(models.Manager):
         Create a ticket with an auto-incrementing ticket_number.
         Uses SELECT FOR UPDATE on Team row to serialize ticket creation per team.
         """
-        from posthog.models import Team
+        from insights.models import Team
 
         team = kwargs.get("team")
         if not team:
@@ -37,7 +37,7 @@ class Ticket(UUIDTModel):
     # Dynamic attribute set by TicketViewSet._attach_persons_to_tickets for serialization
     person: "Person | None"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     ticket_number = models.PositiveIntegerField()
     channel_source = models.CharField(max_length=20, choices=Channel.choices, default=Channel.WIDGET)
     widget_session_id = models.CharField(max_length=64, db_index=True)  # Random UUID for access control

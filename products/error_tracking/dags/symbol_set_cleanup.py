@@ -5,7 +5,7 @@ from django.utils import timezone
 
 import dagster
 
-from posthog.dags.common import JobOwners
+from insights.dags.common import JobOwners
 
 from products.error_tracking.backend.models import ErrorTrackingSymbolSet
 

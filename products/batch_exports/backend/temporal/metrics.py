@@ -15,7 +15,7 @@ from temporalio.worker import (
     WorkflowInterceptorClassInput,
 )
 
-from posthog.temporal.common.logger import get_write_only_logger
+from insights.temporal.common.logger import get_write_only_logger
 
 LOGGER = get_write_only_logger(__name__)
 

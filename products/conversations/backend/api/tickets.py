@@ -11,14 +11,14 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from posthog.api.person import get_person_name
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.exceptions_capture import capture_exception
-from posthog.models import OrganizationMembership
-from posthog.models.activity_logging.activity_log import Change, Detail, log_activity
-from posthog.models.person.person import READ_DB_FOR_PERSONS, Person, PersonDistinctId
-from posthog.permissions import APIScopePermission
-from posthog.utils import relative_date_parse
+from insights.api.person import get_person_name
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.exceptions_capture import capture_exception
+from insights.models import OrganizationMembership
+from insights.models.activity_logging.activity_log import Change, Detail, log_activity
+from insights.models.person.person import READ_DB_FOR_PERSONS, Person, PersonDistinctId
+from insights.permissions import APIScopePermission
+from insights.utils import relative_date_parse
 
 from products.conversations.backend.api.serializers import TicketAssignmentSerializer
 from products.conversations.backend.cache import (
@@ -34,7 +34,6 @@ from products.conversations.backend.events import (
 from products.conversations.backend.models import Ticket, TicketAssignment
 from products.conversations.backend.models.constants import Channel, Priority, Status
 
-from ee.models.rbac.role import Role
 
 logger = structlog.get_logger(__name__)
 

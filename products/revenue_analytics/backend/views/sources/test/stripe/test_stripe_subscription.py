@@ -1,4 +1,4 @@
-from posthog.temporal.data_imports.sources.stripe.constants import SUBSCRIPTION_RESOURCE_NAME
+from insights.temporal.data_imports.sources.stripe.constants import SUBSCRIPTION_RESOURCE_NAME
 
 from products.revenue_analytics.backend.views.schemas.subscription import SCHEMA as SUBSCRIPTION_SCHEMA
 from products.revenue_analytics.backend.views.sources.stripe.subscription import build

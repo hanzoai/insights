@@ -5,7 +5,7 @@ import django.contrib.postgres.fields
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
@@ -13,8 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("posthog", "0879_migrate_error_tracking_models"),
-        ("ee", "0028_alter_conversation_type"),
+        ("insights", "0879_migrate_error_tracking_models"),
     ]
 
     database_operations = [
@@ -60,7 +59,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackinggroup",
@@ -91,7 +90,7 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.TextField(blank=True, null=True)),
                 ("description", models.TextField(blank=True, null=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingissue",
@@ -111,7 +110,7 @@ class Migration(migrations.Migration):
                 ("version", models.TextField()),
                 ("project", models.TextField()),
                 ("metadata", models.JSONField(null=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingrelease",
@@ -138,7 +137,7 @@ class Migration(migrations.Migration):
                         null=True, on_delete=django.db.models.deletion.CASCADE, to="error_tracking.errortrackingrelease"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingsymbolset",
@@ -157,7 +156,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("order_key", models.IntegerField()),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingsuppressionrule",
@@ -185,7 +184,7 @@ class Migration(migrations.Migration):
                         to="error_tracking.errortrackingsymbolset",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingstackframe",
@@ -212,7 +211,7 @@ class Migration(migrations.Migration):
                         to="error_tracking.errortrackingissue",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingissuefingerprintv2",
@@ -232,7 +231,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={
@@ -257,7 +256,7 @@ class Migration(migrations.Migration):
                         to="error_tracking.errortrackingissue",
                     ),
                 ),
-                ("role", models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="ee.role")),
+                ("role_id_legacy", models.IntegerField(null=True, db_column="role_id")),
                 (
                     "user",
                     models.ForeignKey(
@@ -266,7 +265,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "user_group",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
+                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
                 ),
             ],
             options={
@@ -289,8 +288,8 @@ class Migration(migrations.Migration):
                 ("disabled_data", models.JSONField(blank=True, null=True)),
                 ("order_key", models.IntegerField()),
                 ("description", models.TextField(null=True)),
-                ("role", models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="ee.role")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("role_id_legacy", models.IntegerField(null=True, db_column="role_id")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
                     models.ForeignKey(
@@ -299,7 +298,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "user_group",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
+                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
                 ),
             ],
             options={
@@ -321,7 +320,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "integration",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.integration"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.integration"),
                 ),
                 (
                     "issue",
@@ -352,8 +351,8 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("disabled_data", models.JSONField(blank=True, null=True)),
-                ("role", models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="ee.role")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("role_id_legacy", models.IntegerField(null=True, db_column="role_id")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
                     models.ForeignKey(
@@ -362,7 +361,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "user_group",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
+                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
                 ),
             ],
             options={

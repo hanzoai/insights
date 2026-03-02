@@ -13,18 +13,17 @@ import requests
 import structlog
 from temporalio.common import WorkflowIDConflictPolicy, WorkflowIDReusePolicy
 
-from posthog.models.integration import Integration, SlackIntegration, SlackIntegrationError
-from posthog.models.organization import OrganizationMembership
-from posthog.temporal.ai.slack_conversation import (
+from insights.models.integration import Integration, SlackIntegration, SlackIntegrationError
+from insights.models.organization import OrganizationMembership
+from insights.temporal.ai.slack_conversation import (
     THINKING_MESSAGES,
     SlackConversationRunnerWorkflow,
     SlackConversationRunnerWorkflowInputs,
 )
-from posthog.temporal.common.client import sync_connect
-from posthog.user_permissions import UserPermissions
-from posthog.utils import get_instance_region
+from insights.temporal.common.client import sync_connect
+from insights.user_permissions import UserPermissions
+from insights.utils import get_instance_region
 
-from ee.models.assistant import Conversation
 
 logger = structlog.get_logger(__name__)
 

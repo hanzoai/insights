@@ -3,9 +3,9 @@ from rest_framework.decorators import action
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.models import MessageCategory
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.models import MessageCategory
 
 from products.workflows.backend.services.customerio_import_service import CustomerIOImportService
 

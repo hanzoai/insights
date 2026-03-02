@@ -14,7 +14,7 @@ import type { asyncMigrationsLogicType } from './asyncMigrationsLogicType'
 
 export type TabName = 'overview' | 'internal_metrics'
 
-// keep in sync with MigrationStatus in posthog/models/async_migration.py
+// keep in sync with MigrationStatus in insights/models/async_migration.py
 export enum AsyncMigrationStatus {
     NotStarted = 0,
     Running = 1,

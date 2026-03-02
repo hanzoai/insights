@@ -6,7 +6,7 @@ from django.conf import settings
 
 import pytest_asyncio
 
-from posthog.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export
+from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export
 
 from products.batch_exports.backend.tests.temporal.utils.s3 import create_test_client, delete_all_from_s3
 

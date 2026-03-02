@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import pytest
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
 from unittest import mock
 
 from django.utils import timezone
@@ -11,11 +11,11 @@ from asgiref.sync import sync_to_async
 from rest_framework import status
 from rest_framework.response import Response
 
-from posthog.schema import DataWarehouseSyncInterval, PathsFilter, PathsQuery, PathType, RetentionQuery
+from insights.schema import DataWarehouseSyncInterval, PathsFilter, PathsQuery, PathType, RetentionQuery
 
-from posthog.constants import RETENTION_FIRST_EVER_OCCURRENCE, TREND_FILTER_TYPE_EVENTS
-from posthog.settings.temporal import DATA_MODELING_TASK_QUEUE
-from posthog.sync import database_sync_to_async
+from insights.constants import RETENTION_FIRST_EVER_OCCURRENCE, TREND_FILTER_TYPE_EVENTS
+from insights.settings.temporal import DATA_MODELING_TASK_QUEUE
+from insights.sync import database_sync_to_async
 
 from products.data_warehouse.backend.data_load.saved_query_service import get_saved_query_schedule
 from products.data_warehouse.backend.models import DataWarehouseModelPath, DataWarehouseTable

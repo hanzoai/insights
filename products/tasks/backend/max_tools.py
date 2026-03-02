@@ -3,9 +3,8 @@ from typing import Any
 from asgiref.sync import sync_to_async
 from pydantic import BaseModel, Field
 
-from posthog.storage import object_storage
+from insights.storage import object_storage
 
-from ee.hogai.tool import MaxTool
 
 from .models import Task, TaskRun
 from .temporal.client import execute_task_processing_workflow_async
@@ -65,7 +64,7 @@ By default, the task will be created and immediately executed. Set run=false to 
     async def _arun_impl(
         self, title: str, description: str, repository: str, run: bool = True
     ) -> tuple[str, dict[str, Any]]:
-        from posthog.models.integration import Integration
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_task_and_maybe_run():
@@ -488,7 +487,7 @@ Use this tool when the user wants to:
     args_schema: type[BaseModel] = ListRepositoriesArgs
 
     async def _arun_impl(self, search: str | None = None) -> tuple[str, dict[str, Any]]:
-        from posthog.models.integration import GitHubIntegration, Integration
+        from insights.models.integration import GitHubIntegration, Integration
 
         @sync_to_async
         def get_repositories():

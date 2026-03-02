@@ -1,14 +1,14 @@
 import re
 from textwrap import dedent
 
-from posthog.test.base import APIBaseTest, FuzzyInt
+from insights.test.base import APIBaseTest, FuzzyInt
 from unittest.mock import patch
 
 from rest_framework import status
 
-from posthog.schema import InsightsQLQueryResponse
+from insights.schema import InsightsQLQueryResponse
 
-from posthog.insightsql.query import InsightsQLQueryExecutor
+from insights.insightsql.query import InsightsQLQueryExecutor
 
 from products.data_warehouse.backend.models import DataWarehouseJoin, DataWarehouseTable
 from products.data_warehouse.backend.models.credential import DataWarehouseCredential

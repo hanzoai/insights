@@ -1,9 +1,9 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
-from posthog.schema import FeatureFlagGroupType, GroupPropertyFilter, PersonPropertyFilter, PropertyOperator
+from insights.schema import FeatureFlagGroupType, GroupPropertyFilter, PersonPropertyFilter, PropertyOperator
 
-from posthog.models import FeatureFlag
-from posthog.models.group_type_mapping import GroupTypeMapping
+from insights.models import FeatureFlag
+from insights.models.group_type_mapping import GroupTypeMapping
 
 from products.feature_flags.backend.max_tools import (
     CreateFeatureFlagTool,
@@ -11,7 +11,6 @@ from products.feature_flags.backend.max_tools import (
     MultivariateVariant,
 )
 
-from ee.hogai.utils.types import AssistantState
 
 ALL_USERS_GROUP = FeatureFlagGroupType(properties=[], rollout_percentage=None)
 
@@ -429,8 +428,8 @@ class TestCreateFeatureFlagTool(APIBaseTest):
 
     @staticmethod
     async def _get_tag_names(flag: FeatureFlag) -> list[str]:
-        from posthog.models import TaggedItem
-        from posthog.sync import database_sync_to_async
+        from insights.models import TaggedItem
+        from insights.sync import database_sync_to_async
 
         @database_sync_to_async
         def get_tags():

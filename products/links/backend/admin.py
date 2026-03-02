@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from posthog.models.link import Link
+from insights.models.link import Link
 
 
 class LinkAdmin(admin.ModelAdmin):

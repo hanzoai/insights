@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from asgiref.sync import sync_to_async
@@ -233,7 +233,7 @@ class TestRunTaskTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_run_task_other_team(self, mock_execute_workflow):
-        from posthog.models import Organization, Team, User
+        from insights.models import Organization, Team, User
 
         @sync_to_async
         def create_other_team_task():
@@ -602,7 +602,7 @@ class TestListTasksTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_tasks_team_isolation(self):
-        from posthog.models import Organization, Team, User
+        from insights.models import Organization, Team, User
 
         @sync_to_async
         def create_other_team_task():
@@ -811,11 +811,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         assert artifact["repositories"] == []
         assert artifact["settings_url"] == "/settings/project-integrations"
 
-    @patch("posthog.models.integration.GitHubIntegration")
+    @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_repositories_success(self, mock_github_class):
-        from posthog.models.integration import Integration
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_integration():
@@ -842,11 +842,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         assert artifact["repositories"][0]["organization"] == "posthog"
         assert artifact["repositories"][0]["name"] == "posthog-js"
 
-    @patch("posthog.models.integration.GitHubIntegration")
+    @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_repositories_with_search(self, mock_github_class):
-        from posthog.models.integration import Integration
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_integration():
@@ -871,11 +871,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         assert len(artifact["repositories"]) == 1
         assert artifact["repositories"][0]["repository"] == "posthog/posthog-python"
 
-    @patch("posthog.models.integration.GitHubIntegration")
+    @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_repositories_search_case_insensitive(self, mock_github_class):
-        from posthog.models.integration import Integration
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_integration():
@@ -898,11 +898,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         assert len(artifact["repositories"]) == 1
 
-    @patch("posthog.models.integration.GitHubIntegration")
+    @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_repositories_search_no_match(self, mock_github_class):
-        from posthog.models.integration import Integration
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_integration():
@@ -926,11 +926,11 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         assert "No repositories found matching 'nonexistent'" in content
         assert artifact["repositories"] == []
 
-    @patch("posthog.models.integration.GitHubIntegration")
+    @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_repositories_handles_integration_error(self, mock_github_class):
-        from posthog.models.integration import Integration
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_integration():
@@ -954,12 +954,12 @@ class TestListRepositoriesTool(BaseTaskToolTest):
         assert artifact["repositories"] == []
         assert artifact["settings_url"] == "/settings/project-integrations"
 
-    @patch("posthog.models.integration.GitHubIntegration")
+    @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_repositories_team_isolation(self, mock_github_class):
-        from posthog.models import Organization, Team
-        from posthog.models.integration import Integration
+        from insights.models import Organization, Team
+        from insights.models.integration import Integration
 
         @sync_to_async
         def create_other_team_integration():

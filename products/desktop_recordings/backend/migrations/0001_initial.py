@@ -5,14 +5,14 @@ import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0892_alter_integration_kind"),
+        ("insights", "0892_alter_integration_kind"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="desktop_recordings",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],

@@ -11,16 +11,16 @@ from django.db import models, transaction
 import structlog
 from dlt.common.normalizers.naming.snake_case import NamingConvention
 
-from posthog.schema import DataWarehouseSavedQueryOrigin, InsightsQLQueryModifiers
+from insights.schema import DataWarehouseSavedQueryOrigin, InsightsQLQueryModifiers
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.database.models import FieldOrTable, SavedQuery
-from posthog.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+from insights.insightsql import ast
+from insights.insightsql.database.database import Database
+from insights.insightsql.database.models import FieldOrTable, SavedQuery
+from insights.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
 
-from posthog.exceptions_capture import capture_exception
-from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTModel
-from posthog.sync import database_sync_to_async
+from insights.exceptions_capture import capture_exception
+from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTModel
+from insights.sync import database_sync_to_async
 
 from products.data_warehouse.backend.models.util import (
     CLICKHOUSE_INSIGHTSQL_MAPPING,
@@ -69,7 +69,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         MANAGED_VIEWSET = DataWarehouseSavedQueryOrigin.MANAGED_VIEWSET
 
     name = models.CharField(max_length=128, validators=[validate_saved_query_name])
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     latest_error = models.TextField(default=None, null=True, blank=True)
     columns = models.JSONField(
         default=dict,
@@ -195,8 +195,8 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         self.save()
 
     def get_columns(self) -> dict[str, dict[str, Any]]:
-        from posthog.api.services.query import process_query_dict
-        from posthog.insightsql_queries.query_runner import ExecutionMode
+        from insights.api.services.query import process_query_dict
+        from insights.insightsql_queries.query_runner import ExecutionMode
 
         response = process_query_dict(self.team, self.query, execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
         result = getattr(response, "types", [])
@@ -228,13 +228,13 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
     @property
     def s3_tables(self):
-        from posthog.insightsql.context import InsightsQLContext
-        from posthog.insightsql.database.database import Database
-        from posthog.insightsql.parser import parse_select
-        from posthog.insightsql.query import create_default_modifiers_for_team
-        from posthog.insightsql.resolver import resolve_types
+        from insights.insightsql.context import InsightsQLContext
+        from insights.insightsql.database.database import Database
+        from insights.insightsql.parser import parse_select
+        from insights.insightsql.query import create_default_modifiers_for_team
+        from insights.insightsql.resolver import resolve_types
 
-        from posthog.models.property.util import S3TableVisitor
+        from insights.models.property.util import S3TableVisitor
 
         context = InsightsQLContext(
             team_id=self.team.pk,

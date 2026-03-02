@@ -1,4 +1,4 @@
-from posthog.schema import DatabaseSchemaManagedViewTableKind
+from insights.schema import DatabaseSchemaManagedViewTableKind
 
 from ._definitions import Schema
 from .charge import SCHEMA as CHARGE
