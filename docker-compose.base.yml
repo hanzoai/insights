@@ -254,7 +254,7 @@ services:
         restart: on-failure
 
     capture:
-        image: ghcr.io/posthog/posthog/capture:master
+        image: ghcr.io/hanzoai/insights-capture:latest
         build:
             context: rust/
             args:
@@ -269,7 +269,7 @@ services:
             RUST_LOG: 'info,rdkafka=warn'
 
     replay-capture:
-        image: ghcr.io/posthog/posthog/capture:master
+        image: ghcr.io/hanzoai/insights-capture:latest
         build:
             context: rust/
             args:
@@ -283,7 +283,7 @@ services:
             CAPTURE_MODE: recordings
 
     capture-ai:
-        image: ghcr.io/posthog/posthog/capture:master
+        image: ghcr.io/hanzoai/insights-capture:latest
         build:
             context: rust/
             args:
@@ -305,7 +305,7 @@ services:
             AI_S3_SECRET_ACCESS_KEY: object_storage_root_password
 
     capture-logs:
-        image: ghcr.io/posthog/posthog/capture-logs:master
+        image: ghcr.io/hanzoai/insights-capture-logs:latest
         build:
             context: rust/
             args:
@@ -324,7 +324,7 @@ services:
             - default
 
     property-defs-rs:
-        image: ghcr.io/posthog/posthog/property-defs-rs:master
+        image: ghcr.io/hanzoai/insights-property-defs:latest
         build:
             context: rust/
             args:
@@ -338,7 +338,7 @@ services:
             FILTER_MODE: 'opt-out'
 
     feature-flags:
-        image: ghcr.io/posthog/posthog/feature-flags:master
+        image: ghcr.io/hanzoai/insights-feature-flags:latest
         build:
             context: rust/
             args:
@@ -393,7 +393,7 @@ services:
             SESSION_RECORDING_API_REDIS_PORT: 6379
 
     livestream:
-        image: 'ghcr.io/posthog/posthog/livestream:master'
+        image: 'ghcr.io/hanzoai/insights-livestream:latest'
         restart: on-failure
         depends_on:
             kafka:
@@ -491,7 +491,7 @@ services:
             TEMPORAL_HOST: temporal
 
     cyclotron-janitor:
-        image: ghcr.io/posthog/posthog/cyclotron-janitor:master
+        image: ghcr.io/hanzoai/insights-cyclotron-janitor:latest
         build:
             context: rust/
             args:
