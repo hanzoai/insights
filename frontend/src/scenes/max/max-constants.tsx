@@ -517,7 +517,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Analyzing user interviews...'
         },
     },
-    create_hog_function_filters: {
+    create_custom_function_filters: {
         name: 'Set up function filters',
         description: 'Set up function filters for quick pipeline configuration',
         product: Scene.Transformations,
@@ -530,20 +530,20 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
         },
     },
     create_hog_transformation_function: {
-        name: 'Write and tweak Hog code',
-        description: 'Write and tweak Hog code of transformations',
+        name: 'Write and tweak Custom code',
+        description: 'Write and tweak Custom code of transformations',
         product: Scene.Transformations,
         icon: iconForType('data_warehouse'),
         displayFormatter: (toolCall) => {
             if (toolCall.status === 'completed') {
-                return 'Edited Hog code'
+                return 'Edited Custom code'
             }
-            return 'Writing and tweaking Hog code...'
+            return 'Writing and tweaking Custom code...'
         },
     },
-    create_hog_function_inputs: {
+    create_custom_function_inputs: {
         name: 'Manage function variables',
-        description: 'Manage function variables in Hog functions',
+        description: 'Manage function variables in Custom functions',
         product: Scene.Transformations,
         icon: iconForType('data_warehouse'),
         displayFormatter: (toolCall) => {
@@ -669,7 +669,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Creating email templates...'
         },
     },
-    fix_hogql_query: {
+    fix_insightsql_query: {
         name: 'Fix SQL',
         icon: iconForType('data_warehouse'),
         displayFormatter: (toolCall) => {

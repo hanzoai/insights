@@ -4,14 +4,14 @@
             "path": "Site Apps",
             "category": "Tools",
             "iconType": "data_pipeline",
-            "type": "hog_function",
+            "type": "custom_function",
             "intents": ["site_apps"]
         },
         {
             "path": "Data pipelines",
             "category": "Tools",
             "iconType": "data_pipeline",
-            "type": "hog_function",
+            "type": "custom_function",
             "intents": ["pipeline_batch_exports", "pipeline_destinations", "pipeline_transformations", "site_apps"]
         },
         {
@@ -205,14 +205,14 @@
             "path": "Transformations",
             "category": "Pipeline",
             "iconType": "data_pipeline_metadata",
-            "type": "hog_function/transformation",
+            "type": "custom_function/transformation",
             "intents": []
         },
         {
             "path": "Destinations",
             "category": "Pipeline",
             "iconType": "data_pipeline_metadata",
-            "type": "hog_function/destination",
+            "type": "custom_function/destination",
             "intents": []
         },
         {
@@ -228,7 +228,7 @@
             "path": "Sources",
             "category": "Pipeline",
             "iconType": "data_pipeline_metadata",
-            "type": "hog_function/source",
+            "type": "custom_function/source",
             "intents": []
         },
         { "path": "Models", "category": "Tools", "iconType": "sql_editor", "type": "sql", "intents": [] },

@@ -21,7 +21,7 @@ import {
     IconFunnels,
     IconGear,
     IconGraph,
-    IconHogQL,
+    IconInsightsQL,
     IconHome,
     IconLifecycle,
     IconLive,
@@ -253,7 +253,7 @@ const iconTypes: Record<FileSystemIconType, { icon: JSX.Element; iconColor?: Fil
         iconColor: ['var(--color-insight-stickiness-light)'],
     },
     'insight/hog': {
-        icon: <IconHogQL />,
+        icon: <IconInsightsQL />,
         iconColor: ['var(--color-insight-sql-light)'],
     },
     team_activity: {
@@ -390,8 +390,8 @@ export function iconForType(type?: FileSystemIconType, colorOverride?: FileSyste
         )
     }
 
-    // Handle hog_function types
-    if (type.startsWith('hog_function/')) {
+    // Handle custom_function types
+    if (type.startsWith('custom_function/')) {
         return (
             <ProductIconWrapper type="plug" colorOverride={colorOverride}>
                 <IconPlug />

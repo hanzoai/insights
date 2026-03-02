@@ -1,10 +1,10 @@
 import pytest
 
 from posthog.cdp.templates.discord.template_discord import template as template_discord
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 
 
-class TestTemplateDiscord(BaseHogFunctionTemplateTest):
+class TestTemplateDiscord(BaseCustomFunctionTemplateTest):
     template = template_discord
 
     def _inputs(self, **kwargs):

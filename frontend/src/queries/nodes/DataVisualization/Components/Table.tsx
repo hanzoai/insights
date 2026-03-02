@@ -12,7 +12,7 @@ import { lightenDarkenColor } from 'lib/utils'
 import { InsightEmptyState, InsightErrorState } from 'scenes/insights/EmptyStates'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
-import { DataVisualizationNode, HogQLQueryResponse, NodeKind } from '~/queries/schema/schema-general'
+import { DataVisualizationNode, InsightsQLQueryResponse, NodeKind } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 
 import { LoadNext } from '../../DataNode/LoadNext'
@@ -24,7 +24,7 @@ interface TableProps {
     query: DataVisualizationNode
     uniqueKey: string | number | undefined
     context: QueryContext<DataVisualizationNode> | undefined
-    cachedResults: HogQLQueryResponse | undefined
+    cachedResults: InsightsQLQueryResponse | undefined
     embedded?: boolean
 }
 

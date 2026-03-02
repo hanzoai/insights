@@ -16,7 +16,7 @@ from posthog.tasks.alerts.checks import (
     checks_cleanup_task,
     reset_stuck_alerts_task,
 )
-from posthog.tasks.email import send_error_tracking_weekly_digest, send_hog_functions_daily_digest
+from posthog.tasks.email import send_error_tracking_weekly_digest, send_custom_functions_daily_digest
 from posthog.tasks.feature_flags import (
     cleanup_stale_flags_expiry_tracking_task,
     compute_feature_flag_metrics,
@@ -264,11 +264,11 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="send llm analytics usage reports",
     )
 
-    # Send HogFunctions daily digest at 9:30 AM UTC (good for US and EU)
+    # Send CustomFunctions daily digest at 9:30 AM UTC (good for US and EU)
     sender.add_periodic_task(
         crontab(hour="9", minute="30"),
-        send_hog_functions_daily_digest.s(),
-        name="send HogFunctions daily digest",
+        send_custom_functions_daily_digest.s(),
+        name="send CustomFunctions daily digest",
     )
 
     sender.add_periodic_task(

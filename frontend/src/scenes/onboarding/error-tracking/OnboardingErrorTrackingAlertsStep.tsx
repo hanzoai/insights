@@ -6,7 +6,7 @@ import { LemonButton, LemonButtonProps, LemonInput, LemonSelect, LemonTable, Lin
 import api from 'lib/api'
 import { SlackChannelPicker } from 'lib/integrations/SlackIntegrationHelpers'
 import { LemonField } from 'lib/lemon-ui/LemonField'
-import { HogFunctionIcon } from 'scenes/hog-functions/configuration/HogFunctionIcon'
+import { CustomFunctionIcon } from 'scenes/custom-functions/configuration/CustomFunctionIcon'
 
 import { IntegrationType, OnboardingStepKey } from '~/types'
 
@@ -76,7 +76,7 @@ export const OnboardingErrorTrackingAlertsStep: OnboardingStepComponentType = ()
                             render: (_, record) => {
                                 return (
                                     <div className="flex gap-2 font-bold items-center">
-                                        <HogFunctionIcon size="small" src={record.icon} />
+                                        <CustomFunctionIcon size="small" src={record.icon} />
                                         {record.name}
                                     </div>
                                 )

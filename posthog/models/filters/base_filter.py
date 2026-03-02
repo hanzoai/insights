@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from rest_framework import request
 from rest_framework.exceptions import ValidationError
 
-from posthog.hogql.context import HogQLContext
+from posthog.insightsql.context import InsightsQLContext
 
 from posthog.constants import PROPERTIES
 from posthog.models.utils import sane_repr
@@ -21,7 +21,7 @@ class BaseFilter(BaseParamMixin):
     _data: dict
     team: Optional["Team"]
     kwargs: dict
-    hogql_context: HogQLContext
+    insightsql_context: InsightsQLContext
 
     def __init__(
         self,
@@ -54,17 +54,17 @@ class BaseFilter(BaseParamMixin):
         self.kwargs = kwargs
         self.team = team
 
-        # Set the HogQL context for the request
-        self.hogql_context = self.kwargs.get(
-            "hogql_context",
-            HogQLContext(
-                within_non_hogql_query=True,
+        # Set the InsightsQL context for the request
+        self.insightsql_context = self.kwargs.get(
+            "insightsql_context",
+            InsightsQLContext(
+                within_non_insightsql_query=True,
                 team_id=self.team.pk if self.team else None,
                 team=self.team if self.team else None,
             ),
         )
         if self.team:
-            self.hogql_context.modifiers.personsOnEventsMode = self.team.person_on_events_mode
+            self.insightsql_context.modifiers.personsOnEventsMode = self.team.person_on_events_mode
 
         if self.team and hasattr(self, "simplify") and not getattr(self, "is_simplified", False):
             simplified_filter = self.simplify(self.team)
@@ -86,10 +86,10 @@ class BaseFilter(BaseParamMixin):
         return json.dumps(self.to_dict(), default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def shallow_clone(self, overrides: dict[str, Any]):
-        "Clone the filter's data while sharing the HogQL context"
+        "Clone the filter's data while sharing the InsightsQL context"
         return type(self)(
             data={**self._data, **overrides},
-            **{**self.kwargs, "team": self.team, "hogql_context": self.hogql_context},
+            **{**self.kwargs, "team": self.team, "insightsql_context": self.insightsql_context},
         )
 
     def query_tags(self) -> dict[str, Any]:

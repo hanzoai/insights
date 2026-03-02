@@ -10,16 +10,16 @@ import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { InsightErrorState, StatelessInsightLoadingState } from 'scenes/insights/EmptyStates'
 import { insightDataLogic } from 'scenes/insights/insightDataLogic'
-import { HogQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
+import { InsightsQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
 import { urls } from 'scenes/urls'
 
 import { insightVizDataCollectionId, insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
 import {
     AnyResponseType,
     DataVisualizationNode,
-    HogQLQuery,
-    HogQLQueryResponse,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
     NodeKind,
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
@@ -55,7 +55,7 @@ export interface DataTableVisualizationProps {
     readOnly?: boolean
     exportContext?: ExportContext
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     /** Attach ourselves to another logic, such as the scene logic */
     attachTo?: BuiltLogic | LogicWrapper
 }
@@ -182,7 +182,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
     const { queryId, pollResponse } = useValues(dataNodeLogic)
 
     const setQuerySource = useCallback(
-        (source: HogQLQuery) => props.setQuery?.({ ...props.query, source }),
+        (source: InsightsQLQuery) => props.setQuery?.({ ...props.query, source }),
         [props.setQuery, props.query] // oxlint-disable-line react-hooks/exhaustive-deps
     )
 
@@ -217,7 +217,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
                 uniqueKey={props.uniqueKey}
                 query={query}
                 context={props.context}
-                cachedResults={props.cachedResults as HogQLQueryResponse | undefined}
+                cachedResults={props.cachedResults as InsightsQLQueryResponse | undefined}
             />
         )
     } else if (
@@ -243,7 +243,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
     } else if (visualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
         component = <TwoDimensionalHeatmap />
     } else if (visualizationType === ChartDisplayType.BoldNumber) {
-        component = <HogQLBoldNumber />
+        component = <InsightsQLBoldNumber />
     }
 
     return (
@@ -271,7 +271,7 @@ function InternalDataTableVisualization(props: DataTableVisualizationProps): JSX
                                                 key="date-range"
                                                 query={query.source}
                                                 setQuery={(query) => {
-                                                    if (query.kind === NodeKind.HogQLQuery) {
+                                                    if (query.kind === NodeKind.InsightsQLQuery) {
                                                         setQuerySource(query)
                                                     }
                                                 }}

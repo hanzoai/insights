@@ -21,7 +21,7 @@ def register_all_admin():
         ExternalDataSchemaAdmin,
         FeatureFlagAdmin,
         GroupTypeMappingAdmin,
-        HogFunctionAdmin,
+        CustomFunctionAdmin,
         InsightAdmin,
         InstanceSettingAdmin,
         IntegrationAdmin,
@@ -59,7 +59,7 @@ def register_all_admin():
         ExportedAsset,
         FeatureFlag,
         GroupTypeMapping,
-        HogFunction,
+        CustomFunction,
         Insight,
         InstanceSetting,
         Integration,
@@ -127,7 +127,7 @@ def register_all_admin():
     admin.site.register(ExternalDataSchema, ExternalDataSchemaAdmin)
     admin.site.register(DataWarehouseTable, DataWarehouseTableAdmin)
     admin.site.register(DuckLakeCatalog, DuckLakeCatalogAdmin)
-    admin.site.register(HogFunction, HogFunctionAdmin)
+    admin.site.register(CustomFunction, CustomFunctionAdmin)
     admin.site.register(EventIngestionRestrictionConfig, EventIngestionRestrictionConfigAdmin)
     admin.site.register(Link, LinkAdmin)
     admin.site.register(BatchImport, BatchImportAdmin)

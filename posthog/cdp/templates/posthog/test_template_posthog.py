@@ -1,6 +1,6 @@
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.posthog.template_posthog import (
     TemplatePostHogMigrator,
     template as template_posthog,
@@ -8,7 +8,7 @@ from posthog.cdp.templates.posthog.template_posthog import (
 from posthog.models import PluginConfig
 
 
-class TestTemplatePosthog(BaseHogFunctionTemplateTest):
+class TestTemplatePosthog(BaseCustomFunctionTemplateTest):
     template = template_posthog
 
     def test_function_works(self):
@@ -103,7 +103,7 @@ class TestTemplateMigration(BaseTest):
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"type": "hogql", "key": "event not in ('event1', 'event2', '\\'smore')"}],
+                    "properties": [{"type": "insightsql", "key": "event not in ('event1', 'event2', '\\'smore')"}],
                 }
             ]
         }

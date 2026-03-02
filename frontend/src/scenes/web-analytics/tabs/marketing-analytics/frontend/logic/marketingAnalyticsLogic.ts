@@ -424,7 +424,7 @@ export const marketingAnalyticsLogic = kea<marketingAnalyticsLogicType>([
                             source_map_id: table.schema?.id || table.source?.id || table.id,
                             source_prefix: table.source?.prefix || '',
                             columns: Object.keys(table.fields).map((field) => ({
-                                name: table.fields[field].hogql_value,
+                                name: table.fields[field].insightsql_value,
                                 type: table.fields[field].type,
                             })),
                             sourceUrl: urls.dataWarehouseSource(

@@ -38,7 +38,7 @@ APIScopeObject = Literal[
     "file_system_shortcut",
     "group",
     "health_issue",
-    "hog_function",
+    "custom_function",
     "insight",
     "insight_variable",
     "integration",

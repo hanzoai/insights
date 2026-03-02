@@ -75,9 +75,9 @@ def make_base_schema() -> dict:
 
 
 class TestPloBaseTargets:
-    @patch("ee.billing.dags.productled_outbound_targets.execute_hogql_query")
+    @patch("ee.billing.dags.productled_outbound_targets.execute_insightsql_query")
     @patch("ee.billing.dags.productled_outbound_targets.Team")
-    def test_returns_dataframe_with_results(self, mock_team, mock_hogql):
+    def test_returns_dataframe_with_results(self, mock_team, mock_insightsql):
         mock_team.objects.get.return_value = MagicMock()
         mock_response = MagicMock()
         # Return a row with all BASE_COLUMNS in order
@@ -102,7 +102,7 @@ class TestPloBaseTargets:
                 "owner@acme.com",  # vitally_owner
             ),
         ]
-        mock_hogql.return_value = mock_response
+        mock_insightsql.return_value = mock_response
 
         context = dagster.build_asset_context()
         df = plo_base_targets(context)
@@ -113,13 +113,13 @@ class TestPloBaseTargets:
         assert df["organization_id"][0] == "org-1"
         mock_team.objects.get.assert_called_once()
 
-    @patch("ee.billing.dags.productled_outbound_targets.execute_hogql_query")
+    @patch("ee.billing.dags.productled_outbound_targets.execute_insightsql_query")
     @patch("ee.billing.dags.productled_outbound_targets.Team")
-    def test_returns_empty_dataframe_when_no_results(self, mock_team, mock_hogql):
+    def test_returns_empty_dataframe_when_no_results(self, mock_team, mock_insightsql):
         mock_team.objects.get.return_value = MagicMock()
         mock_response = MagicMock()
         mock_response.results = []
-        mock_hogql.return_value = mock_response
+        mock_insightsql.return_value = mock_response
 
         context = dagster.build_asset_context()
         df = plo_base_targets(context)
@@ -480,7 +480,7 @@ class TestDataframeToPloClayPayload:
             }
         )
         df = pl.DataFrame([row])
-        # Simulate HogQL returning datetime objects by casting columns to Datetime
+        # Simulate InsightsQL returning datetime objects by casting columns to Datetime
         df = df.with_columns(
             pl.col("organization_created_at").str.to_datetime().alias("organization_created_at"),
             pl.col("vitally_churned_at").str.to_datetime().alias("vitally_churned_at"),

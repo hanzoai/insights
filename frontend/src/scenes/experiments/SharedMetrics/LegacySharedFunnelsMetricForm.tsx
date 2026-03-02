@@ -7,7 +7,7 @@ import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch
 import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
-import { getHogQLValue } from 'scenes/insights/filters/AggregationSelect'
+import { getInsightsQLValue } from 'scenes/insights/filters/AggregationSelect'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { Query } from '~/queries/Query/Query'
@@ -78,9 +78,9 @@ export function LegacySharedFunnelsMetricForm(): JSX.Element {
             />
             <div className="mt-4 deprecated-space-y-4">
                 <FunnelAggregationSelect
-                    value={getHogQLValue(
+                    value={getInsightsQLValue(
                         sharedMetricQuery.funnels_query.aggregation_group_type_index ?? undefined,
-                        sharedMetricQuery.funnels_query.funnelsFilter?.funnelAggregateByHogQL ?? undefined
+                        sharedMetricQuery.funnels_query.funnelsFilter?.funnelAggregateByInsightsQL ?? undefined
                     )}
                     onChange={(value) => {
                         setSharedMetric({
@@ -90,7 +90,7 @@ export function LegacySharedFunnelsMetricForm(): JSX.Element {
                                     ...sharedMetricQuery.funnels_query,
                                     funnelsFilter: {
                                         ...sharedMetricQuery.funnels_query.funnelsFilter,
-                                        funnelAggregateByHogQL: value,
+                                        funnelAggregateByInsightsQL: value,
                                     },
                                 },
                             },

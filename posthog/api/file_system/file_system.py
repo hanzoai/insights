@@ -13,7 +13,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from posthog.api.file_system.deletion import (
-    HOG_FUNCTION_TYPES,
+    CUSTOM_FUNCTION_TYPES,
     delete_file_system_object,
     is_file_system_type_registered,
     undo_delete as undo_delete_object,
@@ -243,8 +243,8 @@ class FileSystemViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 elif field == "type":
                     if value.endswith("/"):
                         q = Q(type__startswith=value)
-                    elif value in HOG_FUNCTION_TYPES:
-                        q = Q(type="hog_function/" + value)
+                    elif value in CUSTOM_FUNCTION_TYPES:
+                        q = Q(type="custom_function/" + value)
                     else:
                         q = Q(type=value)
                 elif field == "ref":
@@ -286,11 +286,11 @@ class FileSystemViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
     def _scope_by_project_and_environment(self, queryset: QuerySet) -> QuerySet:
         """
-        Show all objects belonging to the project, except for hog functions, which are scoped by team.
+        Show all objects belonging to the project, except for custom functions, which are scoped by team.
         """
         queryset = self._scope_by_project(queryset)
-        # type !~ 'hog_function/.*' or team = $current
-        queryset = queryset.filter(Q(**self.parent_query_kwargs) | ~Q(type__startswith="hog_function/"))
+        # type !~ 'custom_function/.*' or team = $current
+        queryset = queryset.filter(Q(**self.parent_query_kwargs) | ~Q(type__startswith="custom_function/"))
         return queryset
 
     def _filter_queryset_by_parents_lookups(self, queryset):
@@ -613,7 +613,7 @@ class FileSystemViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             instance.depth = len(split_path(instance.path))
             instance.save()
 
-        # Repair folder tree for items we *didn't* move (hog functions in other teams under the moved folder)
+        # Repair folder tree for items we *didn't* move (custom functions in other teams under the moved folder)
         leftovers = self._scope_by_project(FileSystem.objects.filter(path__startswith=f"{old_path}/"))
         first_leftover = leftovers.first()
         if first_leftover:

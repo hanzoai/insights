@@ -22,7 +22,7 @@ from posthog.event_usage import groups
 from posthog.models import Insight, User
 from posthog.models.activity_logging.activity_log import Change, Detail, log_activity
 from posthog.models.exported_asset import ExportedAsset, get_content_response
-from posthog.settings import HOGQL_INCREASED_MAX_EXECUTION_TIME
+from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from posthog.settings.temporal import TEMPORAL_WORKFLOW_MAX_ATTEMPTS
 from posthog.tasks import exporter
 from posthog.temporal.common.client import async_connect
@@ -59,9 +59,9 @@ class ExportedAssetSerializer(serializers.ModelSerializer):
         """Override to show stuck exports as having an exception."""
         data = super().to_representation(instance)
 
-        # Check if this export is stuck (created over HOGQL_INCREASED_MAX_EXECUTION_TIME seconds ago,
+        # Check if this export is stuck (created over INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME seconds ago,
         # has no content, and has no recorded exception)
-        timeout_threshold = now() - timedelta(seconds=HOGQL_INCREASED_MAX_EXECUTION_TIME + 30)
+        timeout_threshold = now() - timedelta(seconds=INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME + 30)
         if (
             timeout_threshold
             and instance.created_at < timeout_threshold

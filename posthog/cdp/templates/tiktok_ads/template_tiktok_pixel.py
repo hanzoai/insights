@@ -1,4 +1,4 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionMappingTemplate, HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionMappingTemplate, CustomFunctionTemplateDC
 
 
 def build_inputs(multiProductEvent=False):
@@ -51,7 +51,7 @@ def build_inputs(multiProductEvent=False):
     ]
 
 
-template_tiktok_pixel: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_tiktok_pixel: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="alpha",
     free=False,
     type="site_destination",
@@ -139,7 +139,7 @@ export function onEvent({ inputs }) {
         },
     ],
     mapping_templates=[
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Page Viewed",
             include_by_default=True,
             filters={"events": [{"id": "$pageview", "name": "Pageview", "type": "events"}]},
@@ -155,7 +155,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=False),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Order Completed",
             include_by_default=True,
             filters={"events": [{"id": "Order Completed", "type": "events"}]},
@@ -171,7 +171,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=True),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Product Viewed",
             include_by_default=True,
             filters={"events": [{"id": "Product Viewed", "type": "events"}]},
@@ -187,7 +187,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=False),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Product Clicked",
             include_by_default=True,
             filters={"events": [{"id": "Product Clicked", "type": "events"}]},
@@ -203,7 +203,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=False),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Products Searched",
             include_by_default=True,
             filters={"events": [{"id": "Products Searched", "type": "events"}]},
@@ -219,7 +219,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=False),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Add to Wishlist",
             include_by_default=True,
             filters={"events": [{"id": "Add to Wishlist", "type": "events"}]},
@@ -235,7 +235,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=False),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Product Added",
             include_by_default=True,
             filters={"events": [{"id": "Product Added", "type": "events"}]},
@@ -251,7 +251,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=False),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Checkout Started",
             include_by_default=True,
             filters={"events": [{"id": "Checkout Started", "type": "events"}]},
@@ -267,7 +267,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=True),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Add Payment Info",
             include_by_default=True,
             filters={"events": [{"id": "Add Payment Info", "type": "events"}]},
@@ -283,7 +283,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=True),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Order Placed",
             include_by_default=True,
             filters={"events": [{"id": "Order Placed", "type": "events"}]},
@@ -299,7 +299,7 @@ export function onEvent({ inputs }) {
                 *build_inputs(multiProductEvent=True),
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Signed Up",
             include_by_default=True,
             filters={"events": [{"id": "Signed Up", "type": "events"}]},

@@ -29,9 +29,9 @@ import {
     isEventsQuery,
     isGroupsQuery,
     isSessionsQuery,
-    taxonomicEventFilterToHogQL,
-    taxonomicGroupFilterToHogQL,
-    taxonomicPersonFilterToHogQL,
+    taxonomicEventFilterToInsightsQL,
+    taxonomicGroupFilterToInsightsQL,
+    taxonomicPersonFilterToInsightsQL,
     trimQuotes,
 } from '~/queries/utils'
 import { GroupTypeIndex, PropertyFilterType } from '~/types'
@@ -133,19 +133,19 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
     if (isGroupsQuery(query.source)) {
         taxonomicGroupTypes = [
             `${TaxonomicFilterGroupType.GroupsPrefix}_${query.source.group_type_index}` as TaxonomicFilterGroupType,
-            TaxonomicFilterGroupType.HogQLExpression,
+            TaxonomicFilterGroupType.InsightsQLExpression,
         ]
     } else if (isActorsQuery(query.source)) {
-        taxonomicGroupTypes = [TaxonomicFilterGroupType.PersonProperties, TaxonomicFilterGroupType.HogQLExpression]
+        taxonomicGroupTypes = [TaxonomicFilterGroupType.PersonProperties, TaxonomicFilterGroupType.InsightsQLExpression]
     } else if (isSessionsQuery(query.source)) {
-        taxonomicGroupTypes = [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.HogQLExpression]
+        taxonomicGroupTypes = [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.InsightsQLExpression]
     } else {
         taxonomicGroupTypes = [
             TaxonomicFilterGroupType.EventProperties,
             TaxonomicFilterGroupType.EventFeatureFlags,
             TaxonomicFilterGroupType.PersonProperties,
             ...(isEventsQuery(query.source)
-                ? [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.HogQLExpression]
+                ? [TaxonomicFilterGroupType.SessionProperties, TaxonomicFilterGroupType.InsightsQLExpression]
                 : []),
         ]
     }
@@ -226,10 +226,10 @@ function ColumnConfiguratorModal({ query }: ColumnConfiguratorProps): JSX.Elemen
                                             value={undefined}
                                             onChange={(group, value) => {
                                                 const column = isGroupsQuery(query.source)
-                                                    ? taxonomicGroupFilterToHogQL(group.type, value)
+                                                    ? taxonomicGroupFilterToInsightsQL(group.type, value)
                                                     : isActorsQuery(query.source)
-                                                      ? taxonomicPersonFilterToHogQL(group.type, value)
-                                                      : taxonomicEventFilterToHogQL(group.type, value)
+                                                      ? taxonomicPersonFilterToInsightsQL(group.type, value)
+                                                      : taxonomicEventFilterToInsightsQL(group.type, value)
                                                 if (column !== null) {
                                                     selectColumn(column)
                                                 }

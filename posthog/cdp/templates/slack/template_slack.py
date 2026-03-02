@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=True,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Sends a message to a Slack channel",
     icon_url="/static/services/slack.png",
     category=["Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let res := fetch('https://slack.com/api/chat.postMessage', {
   'body': {

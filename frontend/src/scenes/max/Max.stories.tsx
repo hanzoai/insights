@@ -1163,7 +1163,7 @@ export const MultiVisualizationInThread: StoryFn = () => {
                     results: [[100, 120, 130, 140, 150]],
                     columns: ['count'],
                     types: ['integer'],
-                    hogql: 'SELECT count() FROM events',
+                    insightsql: 'SELECT count() FROM events',
                 },
             ],
             '/api/environments/:team_id/conversations/': (_, res, ctx) => {

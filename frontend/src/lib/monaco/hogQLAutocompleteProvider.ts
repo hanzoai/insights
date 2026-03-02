@@ -7,7 +7,7 @@ import { performQuery } from '~/queries/query'
 import {
     AutocompleteCompletionItemKind,
     HogLanguage,
-    HogQLAutocomplete,
+    InsightsQLAutocomplete,
     NodeKind,
 } from '~/queries/schema/schema-general'
 import { setLatestVersionsOnQuery } from '~/queries/utils'
@@ -85,7 +85,7 @@ const kindToSortText = (kind: AutocompleteCompletionItemKind, label: string): st
     return `3-${label}`
 }
 
-export const hogQLAutocompleteProvider = (type: HogLanguage): languages.CompletionItemProvider => ({
+export const insightsQLAutocompleteProvider = (type: HogLanguage): languages.CompletionItemProvider => ({
     triggerCharacters: [' ', ',', '.', '{'],
     provideCompletionItems: async (model, position) => {
         const logic: BuiltLogic<codeEditorLogicType> | undefined = (model as any).codeEditorLogic
@@ -104,9 +104,9 @@ export const hogQLAutocompleteProvider = (type: HogLanguage): languages.Completi
             lineNumber: position.lineNumber,
             column: word.endColumn,
         })
-        const query: HogQLAutocomplete = setLatestVersionsOnQuery(
+        const query: InsightsQLAutocomplete = setLatestVersionsOnQuery(
             {
-                kind: NodeKind.HogQLAutocomplete,
+                kind: NodeKind.InsightsQLAutocomplete,
                 language: type,
                 // Use the text from the model instead of logic due to a race condition on the logic values updating quick enough
                 query: model.getValue(),
@@ -118,7 +118,7 @@ export const hogQLAutocompleteProvider = (type: HogLanguage): languages.Completi
             },
             { recursion: false }
         )
-        const response = await performQuery<HogQLAutocomplete>(query)
+        const response = await performQuery<InsightsQLAutocomplete>(query)
         const completionItems = response.suggestions
         const suggestions = completionItems.map<languages.CompletionItem>((item) => {
             const kind = convertCompletionItemKind(item.kind)

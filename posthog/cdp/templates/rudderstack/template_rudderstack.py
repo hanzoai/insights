@@ -1,9 +1,9 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send data to RudderStack",
     icon_url="/static/services/rudderstack.png",
     category=["Custom"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 fun getPayload() {
     let rudderPayload := {
@@ -132,7 +132,7 @@ if (res.status != 200 or res.body.ok == false) {
 )
 
 
-class TemplateRudderstackMigrator(HogFunctionTemplateMigrator):
+class TemplateRudderstackMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/rudderstack-posthog-plugin"
 
     @classmethod

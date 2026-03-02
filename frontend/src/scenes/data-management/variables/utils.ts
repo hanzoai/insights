@@ -1,4 +1,4 @@
-import { DataVisualizationNode, HogQLVariable } from '~/queries/schema/schema-general'
+import { DataVisualizationNode, InsightsQLVariable } from '~/queries/schema/schema-general'
 import { QueryBasedInsightModel } from '~/types'
 
 /**
@@ -21,5 +21,5 @@ export function insightUsesVariable(insight: QueryBasedInsightModel, variableId:
         return false
     }
 
-    return Object.values(variables).some((v: HogQLVariable) => v.variableId === variableId)
+    return Object.values(variables).some((v: InsightsQLVariable) => v.variableId === variableId)
 }

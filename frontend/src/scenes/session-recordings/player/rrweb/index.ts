@@ -223,7 +223,7 @@ export const makeLogger = (onIncrement: (count: number) => void): BuiltLogging =
                     }
 
                     console.warn(
-                        `[PostHog Replayer] ${counters[type]} ${type}s (window.__posthog_player_${type}s to safely log them)`
+                        `[PostScript REPLayer] ${counters[type]} ${type}s (window.__posthog_player_${type}s to safely log them)`
                     )
                     counters[type] = 0
                 }, 5000)

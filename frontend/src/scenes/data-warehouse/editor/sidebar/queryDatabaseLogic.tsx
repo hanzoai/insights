@@ -206,7 +206,7 @@ const createVirtualTableField = (
 
     return {
         name: fieldName,
-        hogql_value: fieldName,
+        insightsql_value: fieldName,
         type: 'unknown',
         schema_valid: true,
     }
@@ -342,7 +342,7 @@ const createLazyTableChildren = (
                     tableName,
                     {
                         name: childFieldName,
-                        hogql_value: childFieldName,
+                        insightsql_value: childFieldName,
                         type: 'unknown',
                         schema_valid: true,
                     },
@@ -362,7 +362,7 @@ const createLazyTableChildren = (
                     referencedTable.fields[childFieldName] ??
                     ({
                         name: childFieldName,
-                        hogql_value: childFieldName,
+                        insightsql_value: childFieldName,
                         type: 'unknown',
                         schema_valid: true,
                     } as DatabaseSchemaField)
@@ -415,7 +415,7 @@ const createViewTableChildren = (
                     tableName,
                     {
                         name: childFieldName,
-                        hogql_value: childFieldName,
+                        insightsql_value: childFieldName,
                         type: 'unknown',
                         schema_valid: true,
                     },
@@ -435,7 +435,7 @@ const createViewTableChildren = (
                     referencedTable.fields[childFieldName] ??
                     ({
                         name: childFieldName,
-                        hogql_value: childFieldName,
+                        insightsql_value: childFieldName,
                         type: 'unknown',
                         schema_valid: true,
                     } as DatabaseSchemaField)

@@ -623,7 +623,7 @@ function QueryContext({ item }: { item: Query }): JSX.Element | null {
                         fullWidth
                         center
                     >
-                        {showModifiers ? 'Hide HogQLQueryModifiers' : 'Show HogQLQueryModifiers'}
+                        {showModifiers ? 'Hide InsightsQLQueryModifiers' : 'Show InsightsQLQueryModifiers'}
                     </LemonButton>
                 )
             ) : null}

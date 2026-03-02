@@ -13,7 +13,7 @@ import {
     AnyResponseType,
     DataTableNode,
     EventsQuery,
-    HogQLExpression,
+    InsightsQLExpression,
     NodeKind,
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
@@ -54,7 +54,7 @@ export const dataTableLogic = kea<dataTableLogicType>([
         return props.vizKey
     }),
     path(['queries', 'nodes', 'DataTable', 'dataTableLogic']),
-    actions({ setColumnsInQuery: (columns: HogQLExpression[]) => ({ columns }) }),
+    actions({ setColumnsInQuery: (columns: InsightsQLExpression[]) => ({ columns }) }),
     reducers(({ props }) => ({
         columnsInQuery: [getColumnsForQuery(props.query), { setColumnsInQuery: (_, { columns }) => columns }],
     })),
@@ -217,13 +217,13 @@ export const dataTableLogic = kea<dataTableLogicType>([
                         showElapsedTime:
                             (query.showTimings ?? flagQueryTimingsEnabled) ||
                             (query.showElapsedTime ??
-                                ((flagQueryRunningTimeEnabled || source.kind === NodeKind.HogQLQuery) && showIfFull)),
+                                ((flagQueryRunningTimeEnabled || source.kind === NodeKind.InsightsQLQuery) && showIfFull)),
                         showColumnConfigurator: query.showColumnConfigurator ?? showIfFull,
                         showPersistentColumnConfigurator: query.showPersistentColumnConfigurator ?? false,
                         showSavedQueries: query.showSavedQueries ?? false,
                         showSavedFilters: query.showSavedFilters ?? false,
                         showTableViews: query.showTableViews ?? false,
-                        showHogQLEditor: query.showHogQLEditor ?? showIfFull,
+                        showInsightsQLEditor: query.showInsightsQLEditor ?? showIfFull,
                         allowSorting: query.allowSorting ?? true,
                         showOpenEditorButton:
                             context?.showOpenEditorButton !== undefined

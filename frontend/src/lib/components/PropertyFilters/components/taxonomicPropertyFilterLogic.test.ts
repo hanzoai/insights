@@ -87,7 +87,7 @@ describe('taxonomicPropertyFilterLogic', () => {
                     TaxonomicFilterGroupType.EventProperties,
                     TaxonomicFilterGroupType.PersonProperties,
                     TaxonomicFilterGroupType.Cohorts,
-                    TaxonomicFilterGroupType.HogQLExpression,
+                    TaxonomicFilterGroupType.InsightsQLExpression,
                     TaxonomicFilterGroupType.FeatureFlags,
                     TaxonomicFilterGroupType.EventMetadata,
                 ],
@@ -134,12 +134,12 @@ describe('taxonomicPropertyFilterLogic', () => {
             )
         })
 
-        it('creates HogQL filter with null value', () => {
+        it('creates InsightsQL filter with null value', () => {
             selectAndExpect(
-                TaxonomicFilterGroupType.HogQLExpression,
+                TaxonomicFilterGroupType.InsightsQLExpression,
                 "properties.$browser = 'Chrome'",
-                PropertyFilterType.HogQL,
-                { type: PropertyFilterType.HogQL, key: "properties.$browser = 'Chrome'", value: null }
+                PropertyFilterType.InsightsQL,
+                { type: PropertyFilterType.InsightsQL, key: "properties.$browser = 'Chrome'", value: null }
             )
         })
 

@@ -202,8 +202,6 @@ function piiMaskingMenuItem(
 
 function MoreMenu(): JSX.Element {
     const {
-        hedgehogModeEnabled,
-        hedgehogModeAvailable,
         theme,
         posthog,
         piiMaskingEnabled,
@@ -211,12 +209,10 @@ function MoreMenu(): JSX.Element {
         piiWarning,
     } = useValues(toolbarLogic)
     const {
-        setHedgehogModeEnabled,
         toggleTheme,
         togglePiiMasking,
         setPiiMaskingColor,
         startGracefulExit,
-        openHedgehogOptions,
     } = useActions(toolbarLogic)
     const { isTakingScreenshot } = useValues(screenshotUploadLogic)
     const { takeScreenshot } = useActions(screenshotUploadLogic)
@@ -244,25 +240,6 @@ function MoreMenu(): JSX.Element {
                 fallbackPlacements={['bottom-end']}
                 items={
                     [
-                        {
-                            icon: <>🦔</>,
-                            label: hedgehogModeEnabled ? 'Disable hedgehog mode' : 'Hedgehog mode',
-                            disabledReason: !hedgehogModeAvailable
-                                ? "Hedgehog mode is disabled. Hedgehog mode uses `new Function` directives to render WebGL, and that requires 'unsafe-eval' in your Content Security Policy's script-src directive"
-                                : undefined,
-                            onClick: () => {
-                                setHedgehogModeEnabled(!hedgehogModeEnabled)
-                            },
-                        },
-                        hedgehogModeEnabled && hedgehogModeAvailable
-                            ? {
-                                  icon: <IconFlare />,
-                                  label: 'Hedgehog options',
-                                  onClick: () => {
-                                      openHedgehogOptions()
-                                  },
-                              }
-                            : undefined,
                         {
                             icon: currentlyLightMode ? <IconNight /> : <IconDay />,
                             label: `Switch to ${currentlyLightMode ? 'dark' : 'light'} mode`,
@@ -370,7 +347,7 @@ export function ToolbarInfoMenu(): JSX.Element | null {
 
 export function Toolbar(): JSX.Element | null {
     const ref = useRef<HTMLDivElement | null>(null)
-    const { minimized, position, isDragging, hedgehogMode, isEmbeddedInApp, isExiting, isLoading } =
+    const { minimized, position, isDragging, isEmbeddedInApp, isExiting, isLoading } =
         useValues(toolbarLogic)
     const { setVisibleMenu, toggleMinimized, onMouseOrTouchDown, setElement, setIsBlurred, completeGracefulExit } =
         useActions(toolbarLogic)
@@ -428,7 +405,6 @@ export function Toolbar(): JSX.Element | null {
                 ref={ref}
                 className={clsx('Toolbar', {
                     'Toolbar--minimized': minimized,
-                    'Toolbar--hedgehog-mode': hedgehogMode,
                     'Toolbar--dragging': isDragging,
                     'Toolbar--extra-buttons-1': (showExperiments ? 1 : 0) + (showProductTours ? 1 : 0) === 1,
                     'Toolbar--extra-buttons-2': (showExperiments ? 1 : 0) + (showProductTours ? 1 : 0) === 2,

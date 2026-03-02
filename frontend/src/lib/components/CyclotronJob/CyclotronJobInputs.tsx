@@ -29,7 +29,7 @@ import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { CyclotronJobInputSchemaType, CyclotronJobInputType, CyclotronJobInvocationGlobalsWithInputs } from '~/types'
 
-import { EmailTemplater } from '../../../scenes/hog-functions/email-templater/EmailTemplater'
+import { EmailTemplater } from '../../../scenes/custom-functions/email-templater/EmailTemplater'
 import { CyclotronJobTemplateSuggestionsButton } from './CyclotronJobTemplateSuggestions'
 import { cyclotronJobInputLogic, formatJsonValue } from './cyclotronJobInputLogic'
 import { CyclotronJobInputIntegration } from './integrations/CyclotronJobInputIntegration'

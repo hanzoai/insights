@@ -6,7 +6,7 @@ from asgiref.sync import async_to_sync
 from posthog.temporal.data_imports.pipelines.common.load import run_post_load_operations, supports_partial_data_loading
 from posthog.temporal.data_imports.pipelines.pipeline.consts import PARTITION_KEY
 from posthog.temporal.data_imports.pipelines.pipeline.delta_table_helper import DeltaTableHelper
-from posthog.temporal.data_imports.pipelines.pipeline.hogql_schema import HogQLSchema
+from posthog.temporal.data_imports.pipelines.pipeline.insightsql_schema import InsightsQLSchema
 from posthog.temporal.data_imports.pipelines.pipeline.utils import append_partition_key_to_table
 from posthog.temporal.data_imports.pipelines.pipeline_sync import validate_schema_and_update_table
 from posthog.temporal.data_imports.pipelines.pipeline_v3.kafka.common import ExportSignalMessage, SyncTypeLiteral
@@ -87,7 +87,7 @@ async def _handle_partial_data_loading(
     schema: Any,
     delta_table: Any,
     previous_file_uris: list[str],
-    internal_schema: HogQLSchema,
+    internal_schema: InsightsQLSchema,
 ) -> None:
     """Make data available for querying during first-ever sync for Stripe sources."""
     if not export_signal.is_first_ever_sync:
@@ -134,7 +134,7 @@ async def _handle_partial_data_loading(
         run_id=str(job.id),
         team_id=job.team_id,
         schema_id=schema.id,
-        table_schema_dict=internal_schema.to_hogql_types(),
+        table_schema_dict=internal_schema.to_insightsql_types(),
         row_count=export_signal.cumulative_row_count,
         queryable_folder=queryable_folder,
         table_format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
@@ -167,7 +167,7 @@ def _run_post_load_for_already_processed_batch(export_signal: ExportSignalMessag
 
     pa_table = _apply_partitioning(export_signal, pa_table, delta_table, schema)
 
-    internal_schema = HogQLSchema()
+    internal_schema = InsightsQLSchema()
     internal_schema.add_pyarrow_table(pa_table)
 
     async_to_sync(run_post_load_operations)(
@@ -177,7 +177,7 @@ def _run_post_load_for_already_processed_batch(export_signal: ExportSignalMessag
         delta_table_helper=delta_table_helper,
         row_count=export_signal.total_rows or 0,
         file_uris=delta_table.file_uris(),
-        table_schema_dict=internal_schema.to_hogql_types(),
+        table_schema_dict=internal_schema.to_insightsql_types(),
         resource_name=export_signal.resource_name,
         logger=logger,
     )
@@ -276,7 +276,7 @@ def process_message(message: Any) -> None:
         primary_keys=primary_keys,
     )
 
-    internal_schema = HogQLSchema()
+    internal_schema = InsightsQLSchema()
     internal_schema.add_pyarrow_table(pa_table)
 
     logger.debug(
@@ -309,7 +309,7 @@ def process_message(message: Any) -> None:
             delta_table_helper=delta_table_helper,
             row_count=export_signal.total_rows or 0,
             file_uris=delta_table.file_uris(),
-            table_schema_dict=internal_schema.to_hogql_types(),
+            table_schema_dict=internal_schema.to_insightsql_types(),
             resource_name=export_signal.resource_name,
             logger=logger,
         )

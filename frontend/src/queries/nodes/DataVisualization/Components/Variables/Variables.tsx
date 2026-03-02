@@ -131,7 +131,7 @@ export const VariableInput = ({
         inputRef.current?.focus()
     }, [inputRef.current])
 
-    const variableAsHogQL = `{variables.${variable.code_name}}`
+    const variableAsInsightsQL = `{variables.${variable.code_name}}`
 
     return (
         <div className="min-w-80">
@@ -234,7 +234,7 @@ export const VariableInput = ({
                             }}
                             className="text-xs flex flex-1 items-center mr-2"
                         >
-                            {variableAsHogQL}
+                            {variableAsInsightsQL}
                         </code>
                         <LemonSwitch
                             size="xsmall"
@@ -249,7 +249,7 @@ export const VariableInput = ({
                         <LemonButton
                             icon={<IconCopy />}
                             size="xsmall"
-                            onClick={() => void copyToClipboard(variableAsHogQL, 'variable SQL')}
+                            onClick={() => void copyToClipboard(variableAsInsightsQL, 'variable SQL')}
                             tooltip="Copy SQL"
                         />
                         {onInsertAtCursor && (
@@ -257,7 +257,7 @@ export const VariableInput = ({
                                 icon={<IconCodeInsert />}
                                 size="xsmall"
                                 onClick={() => {
-                                    onInsertAtCursor(variableAsHogQL)
+                                    onInsertAtCursor(variableAsInsightsQL)
                                     closePopover()
                                 }}
                                 tooltip="Insert into query"
@@ -329,7 +329,7 @@ export const VariableComponent = ({
 }: VariableComponentProps): JSX.Element => {
     const [isPopoverOpen, setPopoverOpen] = useState(false)
 
-    const variableAsHogQL = `{variables.${variable.code_name}}`
+    const variableAsInsightsQL = `{variables.${variable.code_name}}`
 
     const tooltip =
         insightsUsingVariable && insightsUsingVariable.length > 0 ? (
@@ -396,11 +396,11 @@ export const VariableComponent = ({
                             <LemonButton
                                 icon={<IconCopy />}
                                 onClick={() => {
-                                    navigator.clipboard.writeText(variableAsHogQL)
+                                    navigator.clipboard.writeText(variableAsInsightsQL)
                                     lemonToast.success(
                                         <span>
-                                            <code className="text-sm">{variableAsHogQL}</code> copied to clipboard. Use
-                                            it anywhere in HogQL.
+                                            <code className="text-sm">{variableAsInsightsQL}</code> copied to clipboard. Use
+                                            it anywhere in InsightsQL.
                                         </span>
                                     )
                                 }}
@@ -414,10 +414,10 @@ export const VariableComponent = ({
                             <LemonButton
                                 icon={<IconCodeInsert />}
                                 onClick={() => {
-                                    onInsertAtCursor(variableAsHogQL)
+                                    onInsertAtCursor(variableAsInsightsQL)
                                     lemonToast.success(
                                         <span>
-                                            <code className="text-sm">{variableAsHogQL}</code> inserted into query.
+                                            <code className="text-sm">{variableAsInsightsQL}</code> inserted into query.
                                         </span>
                                     )
                                 }}

@@ -181,7 +181,7 @@ class Insight(RootTeamMixin, FileSystemSyncMixin, models.Model):
 
     @cached_property
     def query_from_filters(self):
-        from posthog.hogql_queries.legacy_compatibility.filter_to_query import filter_to_query
+        from posthog.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
 
         try:
             return {
@@ -262,7 +262,7 @@ class Insight(RootTeamMixin, FileSystemSyncMixin, models.Model):
         dashboard_filters_override: Optional[dict] = None,
         dashboard_variables_override: Optional[dict[str, dict]] = None,
     ) -> Optional[dict]:
-        from posthog.hogql_queries.apply_dashboard_filters import (
+        from posthog.insightsql_queries.apply_dashboard_filters import (
             apply_dashboard_filters_to_dict,
             apply_dashboard_variables_to_dict,
         )
@@ -320,7 +320,7 @@ class Insight(RootTeamMixin, FileSystemSyncMixin, models.Model):
         return True
 
     def generate_query_metadata(self):
-        from posthog.hogql_queries.query_metadata import extract_query_metadata
+        from posthog.insightsql_queries.query_metadata import extract_query_metadata
 
         if self.query is None:
             return

@@ -67,7 +67,7 @@ export const UnsubscribeSurveyModal = ({
     }
 
     const handleUnsubscribe = (): void => {
-        if (surveyResponse['$survey_response_2'].includes('Not enough hedgehogs')) {
+        if (surveyResponse['$survey_response_2'].includes('Missing features')) {
             setUnsubscribeModalStep(2)
             triggerMoreHedgehogs()
         } else {
@@ -78,15 +78,15 @@ export const UnsubscribeSurveyModal = ({
     const renderHedgehogStep = (): JSX.Element => (
         <div className="flex flex-col gap-4">
             <div className="text-center">
-                <h3 className="text-lg mb-2">How about now? Was that enough hedgehogs?</h3>
-                <p className="text-secondary mb-4">Look at all these adorable hedgehogs dancing just for you! 🦔✨</p>
+                <h3 className="text-lg mb-2">Are you sure you want to leave?</h3>
+                <p className="text-secondary mb-4">We would love to keep you around!</p>
                 <div className="flex justify-center items-center">
                     <HeartHog width="100" height="100" />
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
                 <Link onClick={triggerMoreHedgehogs} disabled={billingLoading}>
-                    Still not enough! More hedgehogs! 🦔
+                    I still want to leave
                 </Link>
             </div>
             <LemonDivider />

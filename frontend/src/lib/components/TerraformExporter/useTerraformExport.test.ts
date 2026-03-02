@@ -24,7 +24,7 @@ describe('useTerraformExport', () => {
         mockedApi.alerts = {
             list: jest.fn().mockResolvedValue({ results: [] }),
         } as any
-        mockedApi.hogFunctions = {
+        mockedApi.customFunctions = {
             list: jest.fn().mockResolvedValue({ results: [] }),
         } as any
     })
@@ -153,7 +153,7 @@ describe('useTerraformExport', () => {
             const mockResult = {
                 hcl: 'resource "posthog_insight" "working_insight" {}',
                 warnings: [],
-                resourceCounts: { dashboards: 0, insights: 1, alerts: 0, hogFunctions: 0 },
+                resourceCounts: { dashboards: 0, insights: 1, alerts: 0, customFunctions: 0 },
             }
 
             jest.spyOn(insightHclExporter, 'generateInsightHCL').mockReturnValue(mockResult)

@@ -6,7 +6,7 @@ import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
 import {
     FunnelsQuery,
     GoalLine,
-    HogQLQueryModifiers,
+    InsightsQLQueryModifiers,
     RetentionQuery,
     TrendsQuery,
 } from '~/queries/schema/schema-general'
@@ -16,7 +16,7 @@ import { InsightLogicProps } from '~/types'
 import { insightVizDataLogic } from '../insightVizDataLogic'
 import type { goalLinesLogicType } from './goalLinesLogicType'
 
-export type PoeModeTypes = HogQLQueryModifiers['personsOnEventsMode'] | null
+export type PoeModeTypes = InsightsQLQueryModifiers['personsOnEventsMode'] | null
 
 export const goalLinesLogic = kea<goalLinesLogicType>([
     props({} as InsightLogicProps),

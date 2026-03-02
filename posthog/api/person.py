@@ -25,7 +25,7 @@ from statshog.defaults.django import statsd
 
 from posthog.schema import ProductKey
 
-from posthog.hogql.constants import CSV_EXPORT_LIMIT
+from posthog.insightsql.constants import CSV_EXPORT_LIMIT
 
 from posthog.api.capture import capture_internal
 from posthog.api.documentation import PersonPropertiesSerializer, extend_schema
@@ -321,7 +321,7 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
         raw_paginated_result = insight_sync_execute(
             paginated_query,
-            {**paginated_params, **filter.hogql_context.values},
+            {**paginated_params, **filter.insightsql_context.values},
             filter=filter,
             query_type="person_list",
             team_id=team.pk,
@@ -340,7 +340,7 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             total_query_aggregated = f"SELECT count() FROM ({total_query})"
             raw_paginated_result = insight_sync_execute(
                 total_query_aggregated,
-                {**total_params, **filter.hogql_context.values},
+                {**total_params, **filter.insightsql_context.values},
                 filter=filter,
                 query_type="person_list_total",
                 team_id=team.pk,

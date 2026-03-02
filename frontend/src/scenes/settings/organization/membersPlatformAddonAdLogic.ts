@@ -27,26 +27,26 @@ const platformAddonAdVariants: Record<
         title: 'Who keeps changing these f***ing settings?!?',
         description: 'Upgrade for advanced member permissions and audit logs of who did what and when.',
         cta: 'Upgrade now',
-        alt: 'Detective hedgehog inspecting...stuff',
+        alt: 'Detective inspecting',
     },
     'test-paper-trail': {
         title: "I'm so tired of granting people permissions to things. What about you?",
         description:
             'Give admins more control over member permissions and keep audit logs for every important action with a platform add-on.',
         cta: 'Upgrade for more control',
-        alt: 'Judge hedgehog holding a gavel',
+        alt: 'Judge holding a gavel',
     },
     'test-space-scale': {
-        title: 'What if Neil Hogstrong deleted the rover on the way to the moon?',
+        title: 'What if someone deleted the rover on the way to the moon?',
         description: 'With a platform add-on, get advanced member permissions plus audit logs for every action.',
         cta: 'Wow sounds really cool tell me more',
-        alt: 'Space hedgehog floating with a visor',
+        alt: 'Space explorer floating with a visor',
     },
     'test-big-village': {
         title: 'Village got too many villagers to look after?',
         description: 'Upgrade for more control over member permissions plus audit logs for every action.',
         cta: 'Upgrade now',
-        alt: 'Hedgehogs eating porridge',
+        alt: 'Characters eating porridge',
     },
 }
 

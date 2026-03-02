@@ -49,7 +49,7 @@ class InsightVariablesDataGenerator(DataGenerator):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_1}",
                     "variables": {
                         str(var1.id): {
@@ -68,7 +68,7 @@ class InsightVariablesDataGenerator(DataGenerator):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_2}",
                     "variables": {
                         str(var2.id): {
@@ -87,7 +87,7 @@ class InsightVariablesDataGenerator(DataGenerator):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_3}",
                     "variables": {
                         str(var3.id): {
@@ -107,7 +107,7 @@ class InsightVariablesDataGenerator(DataGenerator):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_4}",
                     "variables": {
                         str(var4.id): {
@@ -126,7 +126,7 @@ class InsightVariablesDataGenerator(DataGenerator):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.var_missing}",
                     "variables": {
                         "missing_variable_id": {

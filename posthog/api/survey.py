@@ -1470,10 +1470,10 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
     @action(methods=["GET"], detail=True, url_path="archived-response-uuids", required_scopes=["survey:read"])
     def archived_response_uuids(self, request: request.Request, **kwargs) -> Response:
         """
-        Get list of archived response UUIDs for HogQL filtering.
+        Get list of archived response UUIDs for InsightsQL filtering.
 
         Returns list of UUIDs that the frontend can use to filter out archived responses
-        in HogQL queries.
+        in InsightsQL queries.
         """
         survey = self.get_object()
         uuids = get_archived_response_uuids(str(survey.id), self.team_id)

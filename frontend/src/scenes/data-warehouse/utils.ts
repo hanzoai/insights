@@ -5,7 +5,7 @@ import {
     DataWarehouseSyncInterval,
     ExternalDataJobStatus,
     ExternalDataSourceSyncSchema,
-    HogFunctionTemplateType,
+    CustomFunctionTemplateType,
 } from '~/types'
 
 export const DATAWAREHOUSE_EDITOR_ITEM_ID = 'new-SQL'
@@ -14,8 +14,8 @@ export const defaultQuery = (table: string, columns: DatabaseSchemaField[]): Dat
     return {
         kind: NodeKind.DataVisualizationNode,
         source: {
-            kind: NodeKind.HogQLQuery,
-            // TODO: Use `hogql` tag?
+            kind: NodeKind.InsightsQLQuery,
+            // TODO: Use `insightsql` tag?
             query: `SELECT ${columns
                 .filter(({ table, fields, chain, schema_valid }) => !table && !fields && !chain && schema_valid)
                 .map(({ name }) => name)} FROM ${table === 'numbers' ? 'numbers(0, 10)' : table} LIMIT 100`,
@@ -136,5 +136,5 @@ export const cleanSourceId = (id: string): string => id.replace('self-managed-',
  * Managed sources (Stripe, Postgres, etc.) have access control.
  * Self-managed sources (S3, GCS, Azure, R2) do not have access control.
  */
-export const isManagedSourceTemplate = (template: HogFunctionTemplateType): boolean =>
+export const isManagedSourceTemplate = (template: CustomFunctionTemplateType): boolean =>
     template.type === 'source' && !isSelfManagedSourceId(template.id)

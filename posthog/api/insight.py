@@ -32,9 +32,9 @@ from rest_framework_csv import renderers as csvrenderers
 
 from posthog.schema import QueryStatus
 
-from posthog.hogql.constants import BREAKDOWN_VALUES_LIMIT
-from posthog.hogql.errors import ExposedHogQLError
-from posthog.hogql.timings import HogQLTimings
+from posthog.insightsql.constants import BREAKDOWN_VALUES_LIMIT
+from posthog.insightsql.errors import ExposedInsightsQLError
+from posthog.insightsql.timings import InsightsQLTimings
 
 from posthog import schema
 from posthog.api.documentation import extend_schema, extend_schema_field, extend_schema_serializer
@@ -56,14 +56,14 @@ from posthog.decorators import cached_by_filters
 from posthog.errors import ExposedCHQueryError
 from posthog.event_usage import groups
 from posthog.helpers.multi_property_breakdown import protect_old_clients_from_multi_property_default
-from posthog.hogql_queries.apply_dashboard_filters import (
+from posthog.insightsql_queries.apply_dashboard_filters import (
     WRAPPER_NODE_KINDS,
     apply_dashboard_filters_to_dict,
     apply_dashboard_variables_to_dict,
 )
-from posthog.hogql_queries.legacy_compatibility.feature_flag import get_query_method, hogql_insights_replace_filters
-from posthog.hogql_queries.legacy_compatibility.filter_to_query import filter_to_query
-from posthog.hogql_queries.query_runner import (
+from posthog.insightsql_queries.legacy_compatibility.feature_flag import get_query_method, insightsql_insights_replace_filters
+from posthog.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
+from posthog.insightsql_queries.query_runner import (
     ExecutionMode,
     execution_mode_from_refresh,
     get_query_runner,
@@ -294,7 +294,7 @@ class InsightBasicSerializer(
 
         representation["dashboards"] = [tile["dashboard_id"] for tile in representation["dashboard_tiles"]]
 
-        if hogql_insights_replace_filters(instance.team) and (
+        if insightsql_insights_replace_filters(instance.team) and (
             instance.query is not None or instance.query_from_filters is not None
         ):
             representation["filters"] = {}
@@ -316,7 +316,7 @@ class InsightBasicSerializer(
 class _InsightQuerySchema(RootModel):
     """The query definition for this insight. The `kind` field determines the query type:
     - `InsightVizNode` — product analytics (trends, funnels, retention, paths, stickiness, lifecycle)
-    - `DataVisualizationNode` — SQL insights using HogQL
+    - `DataVisualizationNode` — SQL insights using InsightsQL
     - `DataTableNode` — raw data tables
     - `HogQuery` — Hog language queries
     """
@@ -386,7 +386,7 @@ class InsightSerializer(InsightBasicSerializer):
     )
     query = QueryFieldSerializer(required=False, allow_null=True)
     query_status = serializers.SerializerMethodField()
-    hogql = serializers.SerializerMethodField()
+    insightsql = serializers.SerializerMethodField()
     types = serializers.SerializerMethodField()
     resolved_date_range = serializers.SerializerMethodField(read_only=True)
     _create_in_folder = serializers.CharField(required=False, allow_blank=True, write_only=True)
@@ -427,7 +427,7 @@ class InsightSerializer(InsightBasicSerializer):
             "timezone",
             "is_cached",
             "query_status",
-            "hogql",
+            "insightsql",
             "types",
             "resolved_date_range",
             "_create_in_folder",
@@ -697,8 +697,8 @@ class InsightSerializer(InsightBasicSerializer):
 
         return query
 
-    def get_hogql(self, insight: Insight):
-        return self.insight_result(insight).hogql
+    def get_insightsql(self, insight: Insight):
+        return self.insight_result(insight).insightsql
 
     def get_types(self, insight: Insight):
         return self.insight_result(insight).types
@@ -760,7 +760,7 @@ class InsightSerializer(InsightBasicSerializer):
             request, dashboard, list(self.context["insight_variables"])
         )
 
-        if hogql_insights_replace_filters(instance.team) and (
+        if insightsql_insights_replace_filters(instance.team) and (
             instance.query is not None or instance.query_from_filters is not None
         ):
             query = instance.query or instance.query_from_filters
@@ -836,7 +836,7 @@ class InsightSerializer(InsightBasicSerializer):
                     cache_target_age=cached_response.get("cache_target_age"),
                     timings=cached_response.get("timings"),
                     query_status=cached_response.get("query_status"),
-                    hogql=cached_response.get("hogql"),
+                    insightsql=cached_response.get("insightsql"),
                     types=cached_response.get("types"),
                 )
             else:
@@ -875,7 +875,7 @@ class InsightSerializer(InsightBasicSerializer):
                     variables_override=variables_override,
                     tile_filters_override=tile_filters_override,
                 )
-            except (ExposedHogQLError, ExposedCHQueryError, HogVMException) as e:
+            except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
                 raise ValidationError(str(e), getattr(e, "code_name", None))
             except ConcurrencyLimitExceeded as e:
                 logger.warn(
@@ -896,7 +896,7 @@ class InsightSerializer(InsightBasicSerializer):
                         )
                     ),
                     cache_key=None,
-                    hogql=None,
+                    insightsql=None,
                     columns=None,
                     has_more=None,
                     timezone=self.context["get_team"]().timezone,
@@ -919,7 +919,7 @@ class InsightSerializer(InsightBasicSerializer):
                         )
                     ),
                     cache_key=None,
-                    hogql=None,
+                    insightsql=None,
                     columns=None,
                     has_more=None,
                     timezone=self.context["get_team"]().timezone,
@@ -1154,7 +1154,7 @@ class InsightViewSet(
             elif key == INSIGHT:
                 insight = request.GET[INSIGHT]
                 legacy_filter = Q(query__isnull=True) & Q(filters__insight=insight)
-                legacy_to_hogql_mapping = {
+                legacy_to_insightsql_mapping = {
                     "TRENDS": schema.NodeKind.TRENDS_QUERY,
                     "FUNNELS": schema.NodeKind.FUNNELS_QUERY,
                     "RETENTION": schema.NodeKind.RETENTION_QUERY,
@@ -1164,19 +1164,19 @@ class InsightViewSet(
                 }
                 if insight == "JSON":
                     queryset = queryset.filter(query__isnull=False)
-                    queryset = queryset.exclude(query__kind__in=WRAPPER_NODE_KINDS, query__source__kind="HogQLQuery")
+                    queryset = queryset.exclude(query__kind__in=WRAPPER_NODE_KINDS, query__source__kind="InsightsQLQuery")
                     queryset = queryset.exclude(
-                        query__kind__in=WRAPPER_NODE_KINDS, query__source__kind__in=legacy_to_hogql_mapping.values()
+                        query__kind__in=WRAPPER_NODE_KINDS, query__source__kind__in=legacy_to_insightsql_mapping.values()
                     )
                 elif insight == "SQL":
                     queryset = queryset.filter(query__isnull=False)
-                    queryset = queryset.filter(query__kind__in=WRAPPER_NODE_KINDS, query__source__kind="HogQLQuery")
-                elif insight in legacy_to_hogql_mapping:
+                    queryset = queryset.filter(query__kind__in=WRAPPER_NODE_KINDS, query__source__kind="InsightsQLQuery")
+                elif insight in legacy_to_insightsql_mapping:
                     queryset = queryset.filter(
                         legacy_filter
                         | Q(query__isnull=False)
                         & Q(query__kind=schema.NodeKind.INSIGHT_VIZ_NODE)
-                        & Q(query__source__kind=legacy_to_hogql_mapping[insight])
+                        & Q(query__source__kind=legacy_to_insightsql_mapping[insight])
                     )
                 else:
                     queryset = queryset.filter(legacy_filter)
@@ -1277,7 +1277,7 @@ When set, the specified dashboard's filters and date range override will be appl
 
         try:
             serialized_data = self.get_serializer(instance, context=serializer_context).data
-        except (ExposedHogQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
 
         if dashboard_tile is not None:
@@ -1404,15 +1404,15 @@ When set, the specified dashboard's filters and date range override will be appl
     def trend(self, request: request.Request, *args: Any, **kwargs: Any):
         capture_legacy_api_call(request, self.team)
 
-        timings = HogQLTimings()
+        timings = InsightsQLTimings()
         try:
             with timings.measure("calculate"):
                 query_method = get_query_method(request=request, team=self.team)
-                if query_method == "hogql":
-                    result = self.calculate_trends_hogql(request)
+                if query_method == "insightsql":
+                    result = self.calculate_trends_insightsql(request)
                 else:
                     result = self.calculate_trends(request)
-        except (ExposedHogQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
         except UserAccessControlError as e:
             raise ValidationError(str(e))
@@ -1477,7 +1477,7 @@ When set, the specified dashboard's filters and date range override will be appl
         return {"result": result, "timezone": team.timezone}
 
     @cached_by_filters
-    def calculate_trends_hogql(self, request: request.Request) -> dict[str, Any]:
+    def calculate_trends_insightsql(self, request: request.Request) -> dict[str, Any]:
         team = self.team
         filter = Filter(request=request, team=team)
         query = filter_to_query(filter.to_dict()).model_dump()
@@ -1499,16 +1499,16 @@ When set, the specified dashboard's filters and date range override will be appl
     def funnel(self, request: request.Request, *args: Any, **kwargs: Any) -> Response:
         capture_legacy_api_call(request, self.team)
 
-        timings = HogQLTimings()
+        timings = InsightsQLTimings()
         try:
             with timings.measure("calculate"):
                 query_method = get_query_method(request=request, team=self.team)
-                if query_method == "hogql":
-                    funnel = self.calculate_funnel_hogql(request)
+                if query_method == "insightsql":
+                    funnel = self.calculate_funnel_insightsql(request)
                 else:
                     funnel = self.calculate_funnel(request)
 
-        except (ExposedHogQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
 
         if isinstance(funnel["result"], BaseModel):
@@ -1541,7 +1541,7 @@ When set, the specified dashboard's filters and date range override will be appl
             }
 
     @cached_by_filters
-    def calculate_funnel_hogql(self, request: request.Request) -> dict[str, Any]:
+    def calculate_funnel_insightsql(self, request: request.Request) -> dict[str, Any]:
         team = self.team
         filter = Filter(request=request, team=team)
         filter = filter.shallow_clone(overrides={"insight": "FUNNELS"})

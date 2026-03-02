@@ -35,7 +35,7 @@ PropertyType = Literal[
     "log_entry",
     "behavioral",
     "session",
-    "hogql",
+    "insightsql",
     "data_warehouse",
     "data_warehouse_person_property",
     "error_tracking_issue",
@@ -110,7 +110,7 @@ VALIDATE_PROP_TYPES = {
     "revenue_analytics": ["key", "value"],
     "behavioral": ["key", "value"],
     "session": ["key", "value"],
-    "hogql": ["key"],
+    "insightsql": ["key"],
     "workflow_variable": ["key", "value"],
 }
 
@@ -280,7 +280,7 @@ class Property:
 
         if value is None and self.operator in ["is_set", "is_not_set"]:
             self.value = self.operator
-        elif self.type == "hogql":
+        elif self.type == "insightsql":
             pass  # keep value as None
         elif value is None:
             raise ValueError(f"Value must be set for property type {self.type} & operator {self.operator}")

@@ -169,8 +169,8 @@ describe('clipboardUtils', () => {
             expect(result[1]).toContain('NYC')
         })
 
-        it('handles HogQLQuery source', () => {
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+        it('handles InsightsQLQuery source', () => {
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
             const columns = ['event', 'properties']
             const rows: DataTableRow[] = [{ result: ['click', { button_id: 'submit', metadata: { source: 'form' } }] }]
 
@@ -223,8 +223,8 @@ describe('clipboardUtils', () => {
             expect(result[0].created_at).toBe('2023-01-01')
         })
 
-        it('handles HogQLQuery source', () => {
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+        it('handles InsightsQLQuery source', () => {
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
             const columns = ['event', 'count']
             const rows: DataTableRow[] = [{ result: ['pageview', 42] }]
 
@@ -261,7 +261,7 @@ describe('clipboardUtils', () => {
 
     describe('copyTableToCsv', () => {
         it('copies CSV data to clipboard', () => {
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
             const columns = ['event']
             const rows: DataTableRow[] = [{ result: ['pageview'] }]
 
@@ -274,7 +274,7 @@ describe('clipboardUtils', () => {
             mockCopyToClipboard.mockImplementation(() => {
                 throw new Error('Copy failed')
             })
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
 
             copyTableToCsv([{ result: ['pageview'] }], ['event'], query)
 
@@ -284,7 +284,7 @@ describe('clipboardUtils', () => {
 
     describe('copyTableToJson', () => {
         it('copies JSON data to clipboard', () => {
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
             const columns = ['event']
             const rows: DataTableRow[] = [{ result: ['pageview'] }]
 
@@ -298,7 +298,7 @@ describe('clipboardUtils', () => {
             mockCopyToClipboard.mockImplementation(() => {
                 throw new Error('Copy failed')
             })
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
 
             copyTableToJson([{ result: ['pageview'] }], ['event'], query)
 
@@ -308,7 +308,7 @@ describe('clipboardUtils', () => {
 
     describe('copyTableToExcel', () => {
         it('copies TSV data with tab delimiter', () => {
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
             const columns = ['event', 'timestamp', 'user_id']
             const rows: DataTableRow[] = [
                 { result: ['pageview', '2023-01-01T00:00:00Z', 'user123'] },
@@ -333,7 +333,7 @@ describe('clipboardUtils', () => {
             mockCopyToClipboard.mockImplementation(() => {
                 throw new Error('Copy failed')
             })
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
 
             copyTableToExcel([{ result: ['pageview'] }], ['event'], query)
 
@@ -344,7 +344,7 @@ describe('clipboardUtils', () => {
             mockPapaUnparse.mockImplementation(() => {
                 throw new Error('Papa parse failed')
             })
-            const query = createMockQuery(NodeKind.HogQLQuery, { query: 'SELECT * FROM events' })
+            const query = createMockQuery(NodeKind.InsightsQLQuery, { query: 'SELECT * FROM events' })
 
             copyTableToExcel([{ result: ['pageview'] }], ['event'], query)
 

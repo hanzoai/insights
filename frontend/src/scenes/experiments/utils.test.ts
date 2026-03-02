@@ -846,7 +846,7 @@ describe('filterToMetricConfig', () => {
                 name: '$pageview',
                 math: 'total',
                 math_property: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: [
                     {
                         key: '$browser',
@@ -885,7 +885,7 @@ describe('filterToMetricConfig', () => {
                 name: 'jan-16-running payment action',
                 math: 'total',
                 math_property: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: [{ key: '$lib', type: 'event', value: ['python'], operator: 'exact' }],
             },
         })
@@ -912,7 +912,7 @@ describe('filterToMetricConfig', () => {
                 data_warehouse_join_key: 'customer.email',
                 math: ExperimentMetricMathType.TotalCount,
                 math_property: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: undefined,
             },
         })
@@ -953,7 +953,7 @@ describe('filterToMetricConfig', () => {
                 data_warehouse_join_key: 'customer.email',
                 math: ExperimentMetricMathType.TotalCount,
                 math_property: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: [
                     {
                         key: 'amount',

@@ -9,17 +9,17 @@ from posthog.schema import (
     DataWarehouseNode,
     EventPropertyFilter,
     EventsNode,
-    HogQLQueryModifiers,
+    InsightsQLQueryModifiers,
     PropertyOperator,
     RecordingsQuery,
 )
 
-from posthog.hogql import ast
-from posthog.hogql.property import property_to_expr
-from posthog.hogql.query import execute_hogql_query, tracer
+from posthog.insightsql import ast
+from posthog.insightsql.property import property_to_expr
+from posthog.insightsql.query import execute_insightsql_query, tracer
 
 from posthog.clickhouse.query_tagging import Product, tag_queries
-from posthog.hogql_queries.legacy_compatibility.filter_to_query import MathAvailability, legacy_entity_to_node
+from posthog.insightsql_queries.legacy_compatibility.filter_to_query import MathAvailability, legacy_entity_to_node
 from posthog.models import Entity, EventProperty, Team
 from posthog.session_recordings.queries.sub_queries.base_query import SessionRecordingsListingBaseQuery
 from posthog.session_recordings.queries.utils import (
@@ -68,10 +68,10 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
         team: Team,
         query: RecordingsQuery,
         allow_event_property_expansion: bool = False,
-        hogql_query_modifiers: Optional[HogQLQueryModifiers] = None,
+        insightsql_query_modifiers: Optional[InsightsQLQueryModifiers] = None,
     ):
         super().__init__(team, query)
-        self._hogql_query_modifiers = hogql_query_modifiers
+        self._insightsql_query_modifiers = insightsql_query_modifiers
         self._allow_event_property_expansion = allow_event_property_expansion
 
     @staticmethod
@@ -221,7 +221,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
         return ast.SelectQuery(
             select=[ast.Field(chain=["distinct_id"])],
             select_from=ast.JoinExpr(
-                table=ast.Field(chain=["person_distinct_ids"])  # HogQL virtual table
+                table=ast.Field(chain=["person_distinct_ids"])  # InsightsQL virtual table
             ),
             where=ast.CompareOperation(
                 op=ast.CompareOperationOp.In,
@@ -509,17 +509,17 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
         query = self.get_query_for_event_id_matching()
 
         tag_queries(product=Product.REPLAY, team_id=self._team.id)
-        hogql_query_response = execute_hogql_query(
+        insightsql_query_response = execute_insightsql_query(
             query=query,
             team=self._team,
             query_type="SessionRecordingMatchingEventsForSessionQuery",
-            modifiers=self._hogql_query_modifiers,
+            modifiers=self._insightsql_query_modifiers,
         )
 
         return SessionRecordingQueryResult(
-            results=hogql_query_response.results,
+            results=insightsql_query_response.results,
             has_more_recording=False,
-            timings=hogql_query_response.timings,
+            timings=insightsql_query_response.timings,
         )
 
     def _where_predicates(self, where_expr: ast.Expr | list[ast.Expr] | None) -> ast.Expr:

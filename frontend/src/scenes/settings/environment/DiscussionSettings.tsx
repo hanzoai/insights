@@ -1,7 +1,7 @@
 import { IconInfo } from '@posthog/icons'
 import { Tooltip } from '@posthog/lemon-ui'
 
-import { LinkedHogFunctions } from 'scenes/hog-functions/list/LinkedHogFunctions'
+import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
 import { urls } from 'scenes/urls'
 
 export function DiscussionMentionNotifications(): JSX.Element {
@@ -22,7 +22,7 @@ export function DiscussionMentionNotifications(): JSX.Element {
                 </Tooltip>
             </p>
 
-            <LinkedHogFunctions
+            <LinkedCustomFunctions
                 type="internal_destination"
                 subTemplateIds={['discussion-mention']}
                 emptyText="No notifications configured"

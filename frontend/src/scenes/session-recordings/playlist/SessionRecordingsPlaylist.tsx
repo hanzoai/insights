@@ -158,7 +158,7 @@ function PlayerWrapper({
         pinnedRecordings,
         matchingEventsMatchType,
         activeSessionRecording,
-        allowHogQLFilters,
+        allowInsightsQLFilters,
         totalFiltersCount,
         nextSessionRecording,
     } = useValues(sessionRecordingsPlaylistLogic)
@@ -186,7 +186,7 @@ function PlayerWrapper({
                         filters={filters}
                         setFilters={setFilters}
                         totalFiltersCount={totalFiltersCount}
-                        allowReplayHogQLFilters={allowHogQLFilters}
+                        allowReplayInsightsQLFilters={allowInsightsQLFilters}
                     />
                 </div>
             ) : showContent && activeSessionRecording ? (

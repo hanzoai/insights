@@ -36,7 +36,7 @@ export const API_SCOPES: APIScope[] = [
     { key: 'feature_flag', objectName: 'Feature flag', objectPlural: 'feature flags' },
     { key: 'group', objectName: 'Group', objectPlural: 'groups' },
     { key: 'health_issue', objectName: 'Health issue', objectPlural: 'health issues' },
-    { key: 'hog_function', objectName: 'Hog function', objectPlural: 'hog functions' },
+    { key: 'custom_function', objectName: 'Custom function', objectPlural: 'custom functions' },
     { key: 'insight', objectName: 'Insight', objectPlural: 'insights' },
     { key: 'insight_variable', objectName: 'Insight variable', objectPlural: 'insight variables' },
     { key: 'integration', objectName: 'Integration', objectPlural: 'integrations', disabledActions: ['write'] },

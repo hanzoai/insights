@@ -13,7 +13,7 @@ class AdvancedActivityLogFilterManager:
         queryset = self._apply_activity_filters(queryset, filters)
         queryset = self._apply_search_filters(queryset, filters)
         queryset = self._apply_detail_filters(queryset, filters.get("detail_filters", {}))
-        queryset = self._apply_hogql_filter(queryset, filters.get("hogql_filter"))
+        queryset = self._apply_insightsql_filter(queryset, filters.get("insightsql_filter"))
         queryset = self._apply_was_impersonated_filter(queryset, filters)
         queryset = self._apply_is_system_filter(queryset, filters)
         queryset = self._apply_item_ids_filter(queryset, filters)
@@ -149,8 +149,8 @@ class AdvancedActivityLogFilterManager:
             return field_path
         return field_path.replace(".", "__")
 
-    def _apply_hogql_filter(self, queryset: QuerySet[ActivityLog], hogql_filter: str | None) -> QuerySet[ActivityLog]:
-        # TODO: HogQL filtering to be implemented
+    def _apply_insightsql_filter(self, queryset: QuerySet[ActivityLog], insightsql_filter: str | None) -> QuerySet[ActivityLog]:
+        # TODO: InsightsQL filtering to be implemented
         return queryset
 
     def _apply_was_impersonated_filter(

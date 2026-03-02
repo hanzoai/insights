@@ -1,6 +1,6 @@
 from typing import Literal
 
-BreakdownType = Literal["event", "person", "cohort", "group", "session", "hogql"]
+BreakdownType = Literal["event", "person", "cohort", "group", "session", "insightsql"]
 IntervalType = Literal["hour", "day", "week", "month"]
 FunnelWindowIntervalType = Literal["second", "minute", "hour", "day", "week", "month"]
 

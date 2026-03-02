@@ -136,12 +136,12 @@ export const conversionGoalPopoverFields: DataWarehousePopoverField[] = [
     {
         key: 'timestamp_field',
         label: 'Timestamp Field',
-        allowHogQL: true,
+        allowInsightsQL: true,
     },
     {
         key: 'distinct_id_field',
         label: 'Distinct ID Field',
-        allowHogQL: true,
+        allowInsightsQL: true,
     },
     {
         key: UTM_CAMPAIGN_NAME_SCHEMA_FIELD,

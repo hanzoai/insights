@@ -21,7 +21,7 @@ import { DefinitionLogicProps, definitionLogic } from 'scenes/data-management/de
 import { EventDefinitionInsights } from 'scenes/data-management/events/EventDefinitionInsights'
 import { EventDefinitionProperties } from 'scenes/data-management/events/EventDefinitionProperties'
 import { EventDefinitionSchema } from 'scenes/data-management/events/EventDefinitionSchema'
-import { LinkedHogFunctions } from 'scenes/hog-functions/list/LinkedHogFunctions'
+import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -340,7 +340,7 @@ export function DefinitionView(props: DefinitionLogicProps): JSX.Element {
                         title="Connected destinations"
                         description="Get notified via Slack, webhooks or more whenever this event is captured."
                     >
-                        <LinkedHogFunctions
+                        <LinkedCustomFunctions
                             type="destination"
                             forceFilterGroups={[
                                 {

@@ -5,14 +5,14 @@ from typing import Any, Optional
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from posthog.hogql import ast
-from posthog.hogql.compiler.bytecode import create_bytecode
-from posthog.hogql.compiler.javascript import JavaScriptCompiler
-from posthog.hogql.parser import parse_program, parse_string_template
-from posthog.hogql.visitor import TraversingVisitor
+from posthog.insightsql import ast
+from posthog.insightsql.compiler.bytecode import create_bytecode
+from posthog.insightsql.compiler.javascript import JavaScriptCompiler
+from posthog.insightsql.parser import parse_program, parse_string_template
+from posthog.insightsql.visitor import TraversingVisitor
 
 from posthog.cdp.filters import compile_filters_bytecode, compile_filters_expr
-from posthog.models.hog_functions.hog_function import TYPES_WITH_JAVASCRIPT_SOURCE, TYPES_WITH_TRANSPILED_FILTERS
+from posthog.models.custom_functions.custom_function import TYPES_WITH_JAVASCRIPT_SOURCE, TYPES_WITH_TRANSPILED_FILTERS
 
 logger = logging.getLogger(__name__)
 
@@ -158,8 +158,8 @@ class InputsSchemaItemSerializer(serializers.Serializer):
     requires_field = serializers.CharField(required=False)
     integration_field = serializers.CharField(required=False)
     requiredScopes = serializers.CharField(required=False)
-    # Indicates if hog templating should be used for this input
-    templating = serializers.ChoiceField(choices=[True, False, "hog", "liquid"], required=False)
+    # Indicates if custom templating should be used for this input
+    templating = serializers.ChoiceField(choices=[True, False, "custom_script", "liquid"], required=False)
 
     # TODO Validate choices if type=choice
 
@@ -333,7 +333,7 @@ class InputsSerializer(serializers.DictField):
         # Unlike standard dict validation we are iterating the schema - not the inputs
 
 
-class HogFunctionFiltersSerializer(serializers.Serializer):
+class CustomFunctionFiltersSerializer(serializers.Serializer):
     source = serializers.ChoiceField(
         choices=["events", "person-updates", "data-warehouse-table"], required=False, default="events"
     )  # type: ignore
@@ -398,7 +398,7 @@ class MappingsSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     inputs_schema = serializers.ListField(child=InputsSchemaItemSerializer(), required=False)
     inputs = InputsSerializer(required=False)
-    filters = HogFunctionFiltersSerializer(required=False)
+    filters = CustomFunctionFiltersSerializer(required=False)
 
     def to_internal_value(self, data):
         # Weirdly nested serializers don't get this set...
@@ -449,7 +449,7 @@ def compile_hog(hog: str, hog_type: str, in_repl: Optional[bool] = False) -> lis
         detector = HyphenatedPropertyDetector()
         detector.visit(program)
         if detector.errors:
-            raise serializers.ValidationError({"hog": detector.errors[0]})
+            raise serializers.ValidationError({"custom_script": detector.errors[0]})
 
         supported_functions = set()
 
@@ -461,4 +461,4 @@ def compile_hog(hog: str, hog_type: str, in_repl: Optional[bool] = False) -> lis
         raise
     except Exception as e:
         logger.error(f"Failed to compile hog {e}", exc_info=True)
-        raise serializers.ValidationError({"hog": "Hog code has errors."})
+        raise serializers.ValidationError({"custom_script": "Custom code has errors."})

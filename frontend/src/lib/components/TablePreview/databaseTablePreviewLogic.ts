@@ -2,8 +2,8 @@ import { afterMount, kea, key, path, props, propsChanged } from 'kea'
 import { loaders } from 'kea-loaders'
 import posthog from 'posthog-js'
 
-import { hogqlQuery } from '~/queries/query'
-import { hogql } from '~/queries/utils'
+import { insightsqlQuery } from '~/queries/query'
+import { insightsql } from '~/queries/utils'
 
 import type { databaseTablePreviewLogicType } from './databaseTablePreviewLogicType'
 
@@ -33,10 +33,10 @@ export const databaseTablePreviewLogic = kea<databaseTablePreviewLogicType>([
                     const trimmedWhereClause = props.whereClause?.trim()
 
                     try {
-                        const response = await hogqlQuery(
+                        const response = await insightsqlQuery(
                             trimmedWhereClause
-                                ? hogql`SELECT * FROM ${hogql.identifier(props.tableName)} WHERE ${hogql.raw(trimmedWhereClause)} LIMIT ${previewLimit}`
-                                : hogql`SELECT * FROM ${hogql.identifier(props.tableName)} LIMIT ${previewLimit}`
+                                ? insightsql`SELECT * FROM ${insightsql.identifier(props.tableName)} WHERE ${insightsql.raw(trimmedWhereClause)} LIMIT ${previewLimit}`
+                                : insightsql`SELECT * FROM ${insightsql.identifier(props.tableName)} LIMIT ${previewLimit}`
                         )
                         return (response.results || []).map((row: any[]) =>
                             Object.fromEntries(

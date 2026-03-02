@@ -8,8 +8,8 @@ from django.db.models.query import Prefetch, QuerySet
 from posthog.schema import ActorsQuery
 
 from posthog.constants import INSIGHT_FUNNELS, INSIGHT_PATHS, INSIGHT_TRENDS
-from posthog.hogql_queries.actor_strategies import PersonStrategy
-from posthog.hogql_queries.insights.paginators import HogQLHasMorePaginator
+from posthog.insightsql_queries.actor_strategies import PersonStrategy
+from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from posthog.models import Entity, Filter, PersonDistinctId, SessionRecording, Team
 from posthog.models.filters.mixins.utils import cached_property
 from posthog.models.filters.retention_filter import RetentionFilter
@@ -100,7 +100,7 @@ class ActorBaseQuery:
         query, params = self.actor_query()
         raw_result = insight_sync_execute(
             query,
-            {**params, **self._filter.hogql_context.values},
+            {**params, **self._filter.insightsql_context.values},
             query_type=self.QUERY_TYPE,
             filter=self._filter,
             team_id=self._team.pk,
@@ -292,7 +292,7 @@ def get_people(
 def get_serialized_people(
     team: Team, people_ids: list[Any], value_per_actor_id: Optional[dict[str, float]] = None, distinct_id_limit=1000
 ) -> list[SerializedPerson]:
-    persons_dict = PersonStrategy(team, ActorsQuery(), HogQLHasMorePaginator()).get_actors(
+    persons_dict = PersonStrategy(team, ActorsQuery(), InsightsQLHasMorePaginator()).get_actors(
         people_ids, sort_by_created_at_descending=True
     )
     from posthog.api.person import get_person_name_helper
