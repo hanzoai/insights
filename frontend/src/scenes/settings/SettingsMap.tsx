@@ -156,7 +156,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'snippet',
                 title: 'SDK setup',
                 description:
-                    'Install Hanzo Insights in your app using one of our SDKs. Select your platform to see the setup instructions.',
+                    'Install Insights in your app using one of our SDKs. Select your platform to see the setup instructions.',
                 docsUrl: 'https://posthog.com/docs/getting-started/install',
                 component: <SDKSetupInstructions />,
                 keywords: [
@@ -212,7 +212,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                     </>
                 ),
                 description:
-                    'The V2 snippet includes your project config automatically along with the Hanzo Insights JS code, leading to faster load times and fewer calls needed before the SDK is fully functional.',
+                    'The V2 snippet includes your project config automatically along with the Insights JS code, leading to faster load times and fewer calls needed before the SDK is fully functional.',
                 flag: 'REMOTE_CONFIG',
                 component: <WebSnippetV2 />,
                 keywords: ['javascript', 'install', 'setup', 'v2', 'fast'],
@@ -243,7 +243,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'business-model',
                 title: 'Business model',
                 description:
-                    'Set whether this project serves B2B or B2C customers so Hanzo Insights can tailor the experience and recommendations.',
+                    'Set whether this project serves B2B or B2C customers so Insights can tailor the experience and recommendations.',
                 component: <TeamBusinessModel />,
                 keywords: ['b2b', 'b2c', 'saas', 'ecommerce'],
             },
@@ -336,7 +336,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'mcp-server-configure',
                 title: 'Model Context Protocol (MCP) server',
                 description:
-                    'Connect Hanzo Insights to AI tools like Claude, Cursor, and Copilot via the MCP protocol for data-driven AI assistance.',
+                    'Connect Insights to AI tools like Claude, Cursor, and Copilot via the MCP protocol for data-driven AI assistance.',
                 docsUrl: 'https://posthog.com/docs/model-context-protocol',
                 component: <MCPServerSettings />,
                 keywords: ['ai', 'llm', 'claude', 'cursor', 'copilot'],
@@ -1185,7 +1185,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'integration-github',
                 title: 'GitHub integration',
-                description: 'Connect GitHub to link issues and pull requests with Hanzo Insights.',
+                description: 'Connect GitHub to link issues and pull requests with Insights.',
                 docsUrl: 'https://posthog.com/docs/error-tracking/integrations',
                 component: <GithubIntegration />,
                 keywords: ['github', 'git', 'repository', 'issue', 'pr'],
@@ -1193,7 +1193,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'integration-linear',
                 title: 'Linear integration',
-                description: 'Connect Linear to create and link issues directly from Hanzo Insights.',
+                description: 'Connect Linear to create and link issues directly from Insights.',
                 docsUrl: 'https://posthog.com/docs/error-tracking/integrations',
                 component: <LinearIntegration />,
                 keywords: ['linear', 'issue', 'project management', 'task'],
@@ -1209,7 +1209,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'integration-ip-allowlist',
                 title: 'Static IP addresses',
                 description:
-                    'Hanzo Insights Cloud uses static IP addresses for outbound traffic. Add these to your firewall allowlist if needed.',
+                    'Insights Cloud uses static IP addresses for outbound traffic. Add these to your firewall allowlist if needed.',
                 component: <IPAllowListInfo />,
                 keywords: ['whitelist', 'firewall', 'allowlist', 'cidr', 'ip'],
             },
@@ -1284,7 +1284,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'organization-display-name',
                 title: 'Name & logo',
                 description:
-                    "Your organization's name and logo are shown across the Hanzo Insights interface. Click the avatar to upload a custom logo.",
+                    "Your organization's name and logo are shown across the Insights interface. Click the avatar to upload a custom logo.",
                 component: <OrganizationDisplayName />,
                 keywords: ['name', 'rename', 'label', 'organization', 'logo', 'image', 'brand', 'icon', 'avatar'],
             },
@@ -1436,7 +1436,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'email-members',
                 title: 'Notification preferences',
-                description: 'Configure which emails your organization members receive from Hanzo Insights.',
+                description: 'Configure which emails your organization members receive from Insights.',
                 component: <OrganizationEmailPreferences />,
                 keywords: ['email', 'notification', 'digest', 'unsubscribe'],
             },
@@ -1518,7 +1518,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'notifications',
                 title: 'Notifications',
-                description: 'Choose which email notifications you receive from Hanzo Insights.',
+                description: 'Choose which email notifications you receive from Insights.',
                 component: <UpdateEmailPreferences />,
                 keywords: ['email', 'notification', 'digest', 'unsubscribe'],
             },
@@ -1546,7 +1546,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'optout',
                 title: 'Anonymize data collection',
                 description:
-                    'Hanzo Insights uses Hanzo Insights to capture information about how people use the product. Anonymize your usage data if you prefer not to share it.',
+                    'Insights uses Insights to capture information about how people use the product. Anonymize your usage data if you prefer not to share it.',
                 component: <OptOutCapture />,
                 hideOn: [Realm.Cloud],
                 keywords: ['telemetry', 'opt out', 'privacy', 'tracking'],
@@ -1589,7 +1589,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'feature-previews',
                 title: 'Feature previews',
                 description:
-                    'Try out upcoming Hanzo Insights features before they are generally available. Toggling a preview enables it for your account only.',
+                    'Try out upcoming Insights features before they are generally available. Toggling a preview enables it for your account only.',
                 component: <FeaturePreviewsSettings />,
                 keywords: ['beta', 'early access', 'preview', 'opt-in'],
             },
@@ -1626,7 +1626,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'user-delete',
                 title: 'Delete account',
-                description: 'Permanently delete your Hanzo Insights account. This action cannot be undone.',
+                description: 'Permanently delete your Insights account. This action cannot be undone.',
                 component: <UserDangerZone />,
                 keywords: ['delete', 'remove', 'account'],
             },
