@@ -7,12 +7,12 @@ import { DateRange, FileSystemIconType, ProductKey } from '~/queries/schema/sche
 import { FileSystemIconColor, ProductManifest, UniversalFiltersGroup } from '../../frontend/src/types'
 
 export const manifest: ProductManifest = {
-    name: 'Error tracking',
+    name: 'Error Tracking',
     scenes: {
         ErrorTracking: {
             import: () => import('./frontend/scenes/ErrorTrackingScene/ErrorTrackingScene'),
             projectBased: true,
-            name: 'Error tracking',
+            name: 'Error Tracking',
             defaultDocsPath: '/docs/error-tracking',
             iconType: 'error_tracking',
             description: 'Track and analyze your error tracking data to understand and fix issues.',
@@ -20,19 +20,19 @@ export const manifest: ProductManifest = {
         ErrorTrackingIssue: {
             import: () => import('./frontend/scenes/ErrorTrackingIssueScene/ErrorTrackingIssueScene'),
             projectBased: true,
-            name: 'Error tracking issue',
+            name: 'Error Tracking issue',
             layout: 'app-raw',
         },
         ErrorTrackingIssueFingerprints: {
             import: () =>
                 import('./frontend/scenes/ErrorTrackingFingerprintsScene/ErrorTrackingIssueFingerprintsScene'),
             projectBased: true,
-            name: 'Error tracking issue fingerprints',
+            name: 'Error Tracking issue fingerprints',
         },
         ErrorTrackingConfiguration: {
             import: () => import('./frontend/scenes/ErrorTrackingConfigurationScene/ErrorTrackingConfigurationScene'),
             projectBased: true,
-            name: 'Error tracking configuration',
+            name: 'Error Tracking configuration',
         },
     },
     routes: {
@@ -65,7 +65,7 @@ export const manifest: ProductManifest = {
     treeItemsNew: [],
     treeItemsProducts: [
         {
-            path: 'Error tracking',
+            path: 'Error Tracking',
             intents: [ProductKey.ERROR_TRACKING],
             category: 'Behavior',
             type: 'error_tracking',

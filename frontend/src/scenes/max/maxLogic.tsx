@@ -30,7 +30,7 @@ import { MaxUIContext } from './maxTypes'
 /** Maximum age for restored prompts (5 minutes) */
 const PENDING_PROMPT_MAX_AGE_MS = 5 * 60 * 1000
 
-/** Key for storing pending Max context in sessionStorage */
+/** Key for storing pending AI assistant context in sessionStorage */
 export const PENDING_MAX_CONTEXT_KEY = 'posthog.pending_max_context'
 
 /** Maximum age for restored context (5 minutes) */
@@ -417,7 +417,7 @@ export const maxLogic = kea<maxLogicType>([
                 if (err.status === 404) {
                     // If conversation is not found, do nothing. In the normal case a NotFound will be shown.
                     // There's also a not-quite-normal case of a race condition: when loadConversationHistory succeeds WHILE
-                    // a message is being generated (e.g. because user messaged Max before initial load of conversations completed).
+                    // a message is being generated (e.g. because user messaged the AI before initial load of conversations completed).
                     // In this case, we especially want to do nothing, so that the normal course of generation isn't interrupted.
                     return
                 }
@@ -595,7 +595,7 @@ export function getScrollableContainer(element?: Element | null): HTMLElement | 
         if (current instanceof HTMLElement && current.dataset.attr === 'side-panel-content') {
             return current
         }
-        // Full screen Max with UX_REMOVE_SIDEPANEL flag (AiFirstMaxInstance)
+        // Full screen AI assistant with UX_REMOVE_SIDEPANEL flag (AiFirstMaxInstance)
         if (current instanceof HTMLElement && current.dataset.attr === 'max-scrollable') {
             return current
         }

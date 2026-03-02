@@ -21,8 +21,8 @@ export function EventsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
         <SceneContent>
             <ActivitySceneTabs activeKey={ActivityTab.ExploreEvents} />
             <SceneTitleSection
-                name={sceneConfigurations[Scene.Activity].name}
-                description={sceneConfigurations[Scene.Activity].description}
+                name={sceneConfigurations[Scene.EventExplorer].name}
+                description={sceneConfigurations[Scene.EventExplorer].description}
                 resourceType={{
                     type: sceneConfigurations[Scene.ExploreEvents].iconType || 'default_icon_type',
                 }}

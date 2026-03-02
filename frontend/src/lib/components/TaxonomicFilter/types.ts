@@ -213,7 +213,7 @@ export enum TaxonomicFilterGroupType {
     Resources = 'resources',
     ErrorTrackingProperties = 'error_tracking_properties',
     ActivityLogProperties = 'activity_log_properties',
-    // Max AI Context
+    // AI Assistant Context
     MaxAIContext = 'max_ai_context',
     // Workflows execution variables
     WorkflowVariables = 'workflow_variables',

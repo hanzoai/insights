@@ -56,7 +56,7 @@ export const releasesLogic = kea<releasesLogicType>([
             (): Breadcrumb[] => [
                 {
                     key: Scene.ErrorTracking,
-                    name: 'Error tracking',
+                    name: 'Error Tracking',
                     path: urls.errorTracking(),
                     iconType: 'error_tracking',
                 },

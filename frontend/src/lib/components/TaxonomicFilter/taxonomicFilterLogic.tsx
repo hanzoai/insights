@@ -413,8 +413,8 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                           ]
                         : []),
                     {
-                        name: 'Extended person properties',
-                        searchPlaceholder: 'extended person properties',
+                        name: 'Extended user properties',
+                        searchPlaceholder: 'extended user properties',
                         type: TaxonomicFilterGroupType.DataWarehousePersonProperties,
                         logic: dataWarehouseJoinsLogic,
                         value: 'columnsJoinedToPersons',
@@ -692,8 +692,8 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         ...propertyTaxonomicGroupProps(),
                     },
                     {
-                        name: 'Person properties',
-                        searchPlaceholder: 'person properties',
+                        name: 'User properties',
+                        searchPlaceholder: 'user properties',
                         type: TaxonomicFilterGroupType.PersonProperties,
                         endpoint: combineUrl(`api/projects/${projectId}/property_definitions`, {
                             type: 'person',
@@ -835,8 +835,8 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         getPopoverHeader: () => `Wildcard`,
                     },
                     {
-                        name: 'Persons',
-                        searchPlaceholder: 'persons',
+                        name: 'Users',
+                        searchPlaceholder: 'users',
                         type: TaxonomicFilterGroupType.Persons,
                         endpoint: `api/environments/${teamId}/persons/`,
                         getName: (person: PersonType) => person.name || 'Anon user?',
@@ -958,9 +958,9 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         componentProps: { metadataSource, globals: insightsQLGlobals },
                     },
                     {
-                        name: 'Replay',
-                        searchPlaceholder: 'Replay',
-                        categoryLabel: (count: number) => 'Replay' + (count > 0 ? `: ${count}` : ''),
+                        name: 'Session Replay',
+                        searchPlaceholder: 'Session Replay',
+                        categoryLabel: (count: number) => 'Session Replay' + (count > 0 ? `: ${count}` : ''),
                         type: TaxonomicFilterGroupType.Replay,
                         render: ReplayTaxonomicFilters,
                         localItemsSearch: (
@@ -987,7 +987,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                                 )
                             }
                         },
-                        getPopoverHeader: () => 'Replay',
+                        getPopoverHeader: () => 'Session Replay',
                     },
                     {
                         name: 'On this page',

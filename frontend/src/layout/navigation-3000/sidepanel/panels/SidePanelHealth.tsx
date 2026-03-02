@@ -35,7 +35,7 @@ export function SidePanelHealth(): JSX.Element {
 
     return (
         <div className="flex flex-col h-full">
-            <SidePanelPaneHeader title="Pipeline status">
+            <SidePanelPaneHeader title="Data Pipeline status">
                 <LemonButton
                     size="xsmall"
                     type="secondary"

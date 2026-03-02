@@ -174,7 +174,7 @@ export const EventPropertyTabs = ({
         Object.keys(setProperties).length > 0
             ? {
                   key: '$set_properties',
-                  label: 'Person properties',
+                  label: 'User properties',
                   content: tabContentComponentFn({
                       properties: setProperties,
                       event,
@@ -186,7 +186,7 @@ export const EventPropertyTabs = ({
         Object.keys(setOnceProperties).length > 0
             ? {
                   key: '$set_once_properties',
-                  label: 'Set once person properties',
+                  label: 'Set once user properties',
                   content: tabContentComponentFn({
                       properties: setOnceProperties,
                       event,

@@ -226,7 +226,7 @@ export const insightsFunctionSceneLogic = kea<insightsFunctionSceneLogicType>([
                         return [
                             {
                                 key: Scene.ErrorTracking,
-                                name: 'Error tracking',
+                                name: 'Error Tracking',
                                 path: urls.errorTracking(),
                             },
                             {

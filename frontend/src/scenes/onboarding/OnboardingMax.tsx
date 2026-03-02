@@ -86,12 +86,12 @@ const PRODUCT_INFO: Partial<Record<ProductKey, { name: string; description: stri
         icon: <IconMessage className="text-primary" />,
     },
     [ProductKey.ERROR_TRACKING]: {
-        name: 'Error tracking',
+        name: 'Error Tracking',
         description: 'Catch and debug exceptions automatically',
         icon: <IconWarning className="text-danger" />,
     },
     [ProductKey.WEB_ANALYTICS]: {
-        name: 'Web analytics',
+        name: 'Web Analytics',
         description: 'Privacy-friendly website traffic insights',
         icon: <IconGraph className="text-primary" />,
     },

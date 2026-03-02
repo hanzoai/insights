@@ -302,7 +302,7 @@ export const teamLogic = kea<teamLogicType>([
                         frequentMistakes.push({
                             key: 'email',
                             type: 'event',
-                            fix: 'it is more common to filter email by person properties, not event properties',
+                            fix: 'it is more common to filter email by user properties, not event properties',
                         })
                     }
                 }

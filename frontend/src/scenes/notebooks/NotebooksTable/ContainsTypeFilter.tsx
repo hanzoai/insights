@@ -22,7 +22,7 @@ export const fromNodeTypeToLabel: Omit<
     [NotebookNodeType.EarlyAccessFeature]: 'Early Access Features',
     [NotebookNodeType.Survey]: 'Surveys',
     [NotebookNodeType.Image]: 'Images',
-    [NotebookNodeType.Person]: 'Persons',
+    [NotebookNodeType.Person]: 'Users',
     [NotebookNodeType.Query]: 'Queries',
     [NotebookNodeType.Python]: 'Python',
     [NotebookNodeType.DuckSQL]: 'SQL (DuckDB)',

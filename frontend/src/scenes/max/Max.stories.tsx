@@ -2790,7 +2790,7 @@ NotebookArtifactWithLoadingAndErrors.parameters = {
 const SAMPLE_CHANGELOG_ENTRIES: ChangelogEntry[] = [
     {
         title: 'SQL generation',
-        description: 'Max can now write and run SQL queries for you',
+        description: 'AI can now write and run SQL queries for you',
         tag: 'new',
     },
     {

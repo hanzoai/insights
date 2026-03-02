@@ -864,11 +864,16 @@ export enum ExperimentsTabs {
     Settings = 'settings',
 }
 
-export enum ActivityTab {
+export enum EventExplorerTab {
     ExploreEvents = 'explore',
     ExploreSessions = 'sessions',
     LiveEvents = 'live',
 }
+
+/** @deprecated Use EventExplorerTab instead */
+export const ActivityTab = EventExplorerTab
+/** @deprecated Use EventExplorerTab instead */
+export type ActivityTab = EventExplorerTab
 
 export enum ProgressStatus {
     Draft = 'draft',

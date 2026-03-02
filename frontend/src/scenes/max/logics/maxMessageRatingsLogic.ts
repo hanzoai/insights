@@ -8,7 +8,7 @@ export type MaxMessageRatingOrNull = MaxMessageRating | null
 const MAX_STORED_RATINGS = 1000
 
 /**
- * Persists Max AI message ratings ("good"/"bad") keyed by trace ID.
+ * Persists AI assistant message ratings ("good"/"bad") keyed by trace ID.
  *
  * Uses Kea's localStorage plugin for automatic persistence.
  */
