@@ -3,9 +3,9 @@ import asyncio
 import aiohttp.client_exceptions
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_random_exponential
 
-from posthog.models.app_metrics2.sql import APP_METRICS2_DATA_TABLE_SQL, APP_METRICS2_MV_TABLE_SQL
-from posthog.temporal.common.asyncpa import InvalidMessageFormat
-from posthog.temporal.common.clickhouse import ClickHouseClient, ClickHouseError
+from insights.models.app_metrics2.sql import APP_METRICS2_DATA_TABLE_SQL, APP_METRICS2_MV_TABLE_SQL
+from insights.temporal.common.asyncpa import InvalidMessageFormat
+from insights.temporal.common.clickhouse import ClickHouseClient, ClickHouseError
 
 from products.batch_exports.backend.temporal.spmc import slice_record_batch
 
@@ -25,7 +25,7 @@ async def execute_query(clickhouse_client: ClickHouseClient, query: str, *data):
 
 
 async def create_clickhouse_tables_and_views(clickhouse_client):
-    from posthog.batch_exports.sql import (
+    from insights.batch_exports.sql import (
         CREATE_EVENTS_BATCH_EXPORT_VIEW,
         CREATE_EVENTS_BATCH_EXPORT_VIEW_BACKFILL,
         CREATE_EVENTS_BATCH_EXPORT_VIEW_RECENT,
@@ -33,7 +33,7 @@ async def create_clickhouse_tables_and_views(clickhouse_client):
         CREATE_PERSONS_BATCH_EXPORT_VIEW,
         CREATE_PERSONS_BATCH_EXPORT_VIEW_BACKFILL,
     )
-    from posthog.clickhouse.schema import CREATE_KAFKA_TABLE_QUERIES, build_query
+    from insights.clickhouse.schema import CREATE_KAFKA_TABLE_QUERIES, build_query
 
     create_view_queries = (
         CREATE_EVENTS_BATCH_EXPORT_VIEW,

@@ -1,8 +1,8 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
-from posthog.models import MessageTemplate, Organization, Team
+from insights.models import MessageTemplate, Organization, Team
 
 
 class TestMessageTemplatesAPI(APIBaseTest):

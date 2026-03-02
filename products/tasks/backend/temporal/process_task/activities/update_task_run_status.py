@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from temporalio import activity
 
-from posthog.temporal.common.utils import asyncify
+from insights.temporal.common.utils import asyncify
 
 from products.tasks.backend.models import TaskRun
 from products.tasks.backend.temporal.observability import log_with_activity_context

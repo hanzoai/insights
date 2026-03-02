@@ -6,11 +6,11 @@ from typing import Literal
 from django.db import transaction
 from django.utils import timezone
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.models import Team
+from insights.models import Team
 
 from products.conversations.backend.models import ConversationRestoreToken, Ticket
 from products.conversations.backend.models.restore_token import hash_token

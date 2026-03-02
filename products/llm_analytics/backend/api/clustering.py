@@ -14,12 +14,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.event_usage import report_user_action
-from posthog.models import User
-from posthog.temporal.common.client import sync_connect
-from posthog.temporal.llm_analytics.trace_clustering.constants import (
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.event_usage import report_user_action
+from insights.models import User
+from insights.temporal.common.client import sync_connect
+from insights.temporal.llm_analytics.trace_clustering.constants import (
     DEFAULT_HDBSCAN_MIN_SAMPLES,
     DEFAULT_LOOKBACK_DAYS,
     DEFAULT_MAX_SAMPLES,
@@ -29,7 +29,7 @@ from posthog.temporal.llm_analytics.trace_clustering.constants import (
     MIN_CLUSTER_SIZE_FRACTION_MIN,
     WORKFLOW_NAME,
 )
-from posthog.temporal.llm_analytics.trace_clustering.models import ClusteringWorkflowInputs
+from insights.temporal.llm_analytics.trace_clustering.models import ClusteringWorkflowInputs
 
 from products.llm_analytics.backend.api.metrics import llma_track_latency
 

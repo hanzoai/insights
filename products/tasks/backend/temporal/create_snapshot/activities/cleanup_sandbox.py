@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from temporalio import activity
 
-from posthog.temporal.common.utils import asyncify
+from insights.temporal.common.utils import asyncify
 
 from products.tasks.backend.services.sandbox import Sandbox
 from products.tasks.backend.temporal.observability import log_activity_execution

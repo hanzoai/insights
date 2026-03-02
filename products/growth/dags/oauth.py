@@ -7,8 +7,8 @@ from django.utils import timezone
 
 import dagster
 
-from posthog.dags.common import JobOwners
-from posthog.models.oauth import OAuthAccessToken, OAuthGrant, OAuthIDToken, OAuthRefreshToken
+from insights.dags.common import JobOwners
+from insights.models.oauth import OAuthAccessToken, OAuthGrant, OAuthIDToken, OAuthRefreshToken
 
 
 def batch_delete_model(queryset: QuerySet, query: Q, context: dagster.OpExecutionContext, token_type: str) -> int:

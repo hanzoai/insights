@@ -21,12 +21,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from posthog.auth import WidgetAuthentication
-from posthog.exceptions_capture import capture_exception
-from posthog.models import Team
-from posthog.models.comment import Comment
-from posthog.rate_limit import WidgetTeamThrottle, WidgetUserBurstThrottle
-from posthog.tasks.email import send_new_ticket_notification
+from insights.auth import WidgetAuthentication
+from insights.exceptions_capture import capture_exception
+from insights.models import Team
+from insights.models.comment import Comment
+from insights.rate_limit import WidgetTeamThrottle, WidgetUserBurstThrottle
+from insights.tasks.email import send_new_ticket_notification
 
 from products.conversations.backend.api.serializers import (
     WidgetMarkReadSerializer,

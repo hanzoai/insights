@@ -1,9 +1,9 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import pagination, serializers, viewsets
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
+from insights.api.routing import TeamAndOrgViewSetMixin
 
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 from products.data_warehouse.backend.models.datawarehouse_saved_query_draft import DataWarehouseSavedQueryDraft

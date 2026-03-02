@@ -1,11 +1,11 @@
 import pytest
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
 from parameterized import parameterized
 
-from posthog.insightsql.errors import QueryError
+from insights.insightsql.errors import QueryError
 
-from posthog.models import DataWarehouseTable
+from insights.models import DataWarehouseTable
 
 from products.data_warehouse.backend.models import ExternalDataSchema, ExternalDataSource, ExternalDataSourceType
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery

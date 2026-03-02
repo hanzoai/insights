@@ -3,7 +3,7 @@ from typing import Any
 from rest_framework import filters, serializers, viewsets
 from rest_framework.pagination import PageNumberPagination
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
+from insights.api.routing import TeamAndOrgViewSetMixin
 
 from products.data_modeling.backend.models import Edge
 

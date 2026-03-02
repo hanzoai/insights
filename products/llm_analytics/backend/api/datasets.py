@@ -10,17 +10,17 @@ from drf_spectacular.utils import OpenApiExample, OpenApiParameter
 from rest_framework import serializers
 from rest_framework.viewsets import ModelViewSet
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.documentation import extend_schema
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.event_usage import report_user_action
-from posthog.models import User
-from posthog.permissions import AccessControlPermission
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.api.documentation import extend_schema
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.event_usage import report_user_action
+from insights.models import User
+from insights.permissions import AccessControlPermission
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
 
 from products.llm_analytics.backend.api.metrics import llma_track_latency
 from products.llm_analytics.backend.models import Dataset

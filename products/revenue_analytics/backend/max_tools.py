@@ -5,22 +5,15 @@ from typing import Any
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-from posthog.schema import RevenueAnalyticsAssistantFilters
+from insights.schema import RevenueAnalyticsAssistantFilters
 
-from posthog.clickhouse.query_tagging import Product, tags_context
-from posthog.models import Team, User
-from posthog.sync import database_sync_to_async
-from posthog.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
+from insights.clickhouse.query_tagging import Product, tags_context
+from insights.models import Team, User
+from insights.sync import database_sync_to_async
+from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
 
 from products.revenue_analytics.backend.api import find_values_for_revenue_analytics_property
 
-from ee.hogai.chat_agent.taxonomy.agent import TaxonomyAgent
-from ee.hogai.chat_agent.taxonomy.format import enrich_props_with_descriptions, format_properties_xml
-from ee.hogai.chat_agent.taxonomy.nodes import TaxonomyAgentNode, TaxonomyAgentToolsNode
-from ee.hogai.chat_agent.taxonomy.toolkit import TaxonomyAgentToolkit, TaxonomyErrorMessages
-from ee.hogai.chat_agent.taxonomy.tools import TaxonomyTool, ask_user_for_help, base_final_answer
-from ee.hogai.chat_agent.taxonomy.types import TaxonomyAgentState
-from ee.hogai.tool import MaxTool
 
 from .prompts import (
     DATE_FIELDS_PROMPT,

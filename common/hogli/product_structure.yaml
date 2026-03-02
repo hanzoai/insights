@@ -107,7 +107,7 @@ backend_files:
             """Django models for {product}."""
             from django.db import models
 
-            from posthog.models.utils import UUIDModel
+            from insights.models.utils import UUIDModel
 
             # Define your models here
             # Important: 
@@ -254,7 +254,7 @@ backend_files:
                 """
                 from rest_framework import viewsets
 
-                from posthog.api.routing import TeamAndOrgViewSetMixin
+                from insights.api.routing import TeamAndOrgViewSetMixin
 
                 # from ..facade import api
 

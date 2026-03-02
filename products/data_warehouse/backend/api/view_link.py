@@ -3,21 +3,21 @@ from typing import Optional
 from clickhouse_driver.errors import ServerException
 from rest_framework import filters, response, serializers, status, viewsets
 
-from posthog.insightsql import ast
-from posthog.insightsql.ast import Call, Field
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.database.models import LazyJoin
-from posthog.insightsql.database.utils import get_join_field_chain
-from posthog.insightsql.errors import QueryError, SyntaxError
-from posthog.insightsql.parser import parse_expr, parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.ast import Call, Field
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database
+from insights.insightsql.database.models import LazyJoin
+from insights.insightsql.database.utils import get_join_field_chain
+from insights.insightsql.errors import QueryError, SyntaxError
+from insights.insightsql.parser import parse_expr, parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.api.utils import action
-from posthog.errors import look_up_clickhouse_error_code_meta
-from posthog.exceptions_capture import capture_exception
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.api.utils import action
+from insights.errors import look_up_clickhouse_error_code_meta
+from insights.exceptions_capture import capture_exception
 
 from products.data_warehouse.backend.models import DataWarehouseJoin
 

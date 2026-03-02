@@ -1,20 +1,20 @@
 import json
 from typing import Any, cast
 
-from posthog.schema import (
+from insights.schema import (
     CachedRevenueExampleEventsQueryResponse,
     DatabaseSchemaManagedViewTableKind,
     RevenueExampleEventsQuery,
     RevenueExampleEventsQueryResponse,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.ast import CompareOperationOp
-from posthog.insightsql.constants import LimitContext
-from posthog.insightsql.database.models import UnknownDatabaseField
+from insights.insightsql import ast
+from insights.insightsql.ast import CompareOperationOp
+from insights.insightsql.constants import LimitContext
+from insights.insightsql.database.models import UnknownDatabaseField
 
-from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
-from posthog.insightsql_queries.query_runner import QueryRunnerWithInsightsQLContext
+from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from insights.insightsql_queries.query_runner import QueryRunnerWithInsightsQLContext
 
 from products.revenue_analytics.backend.insightsql_queries.revenue_analytics_query_runner import RevenueAnalyticsQueryRunner
 from products.revenue_analytics.backend.views.schemas import SCHEMAS as VIEW_SCHEMAS

@@ -7,9 +7,9 @@ from typing import Optional
 import dagster
 from dagster import Array, Backoff, DagsterRunStatus, Field, Jitter, RetryPolicy, RunsFilter, SkipReason
 
-from posthog.clickhouse.client.connection import NodeRole
-from posthog.clickhouse.cluster import ClickhouseCluster
-from posthog.settings.base_variables import DEBUG
+from insights.clickhouse.client.connection import NodeRole
+from insights.clickhouse.cluster import ClickhouseCluster
+from insights.settings.base_variables import DEBUG
 
 TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS = os.getenv("TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS", 1 if DEBUG else 2)
 

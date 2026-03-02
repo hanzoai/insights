@@ -7,14 +7,14 @@ class NotebooksConfig(AppConfig):
     label = "notebooks"
 
     def ready(self) -> None:
-        from posthog.api.file_system.deletion import (
+        from insights.api.file_system.deletion import (
             register_file_system_type,
             register_post_delete_hook,
             register_post_restore_hook,
         )
-        from posthog.models.activity_logging.activity_log import Change
-        from posthog.models.activity_logging.model_activity import is_impersonated_session
-        from posthog.models.user import User
+        from insights.models.activity_logging.activity_log import Change
+        from insights.models.activity_logging.model_activity import is_impersonated_session
+        from insights.models.user import User
 
         from products.notebooks.backend.api.notebook import log_notebook_activity
 

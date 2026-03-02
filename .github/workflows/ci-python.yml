@@ -38,8 +38,7 @@ jobs:
                       python:
                         - 'pyproject.toml'
                         - 'uv.lock'
-                        - 'ee/**/*.py'
-                        - 'posthog/**/*'
+                        - 'insights/**/*'
                         - 'products/**/*.py'
                         # Make sure we run if someone is explicitly change the workflows
                         - .github/workflows/ci-python.yml

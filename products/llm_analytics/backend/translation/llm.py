@@ -2,7 +2,7 @@
 
 import structlog
 
-from posthog.llm.gateway_client import get_llm_client
+from insights.llm.gateway_client import get_llm_client
 
 from .constants import SUPPORTED_LANGUAGES, TRANSLATION_MODEL
 

@@ -9,9 +9,9 @@ import dagster
 import requests
 import structlog
 
-from posthog.dags.common import JobOwners
-from posthog.dags.common.resources import redis
-from posthog.exceptions_capture import capture_exception
+from insights.dags.common import JobOwners
+from insights.dags.common.resources import redis
+from insights.exceptions_capture import capture_exception
 
 logger = structlog.get_logger(__name__)
 

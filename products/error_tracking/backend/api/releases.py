@@ -6,11 +6,11 @@ from rest_framework import serializers, status, viewsets
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.models.utils import UUIDT
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.models.utils import UUIDT
 
 from products.error_tracking.backend.models import ErrorTrackingRelease
 

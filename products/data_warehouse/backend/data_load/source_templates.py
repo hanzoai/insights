@@ -1,6 +1,6 @@
 from django.db import close_old_connections
 
-from posthog.temporal.common.logger import get_logger
+from insights.temporal.common.logger import get_logger
 
 from products.data_warehouse.backend.models.external_data_job import ExternalDataJob
 from products.data_warehouse.backend.models.join import DataWarehouseJoin

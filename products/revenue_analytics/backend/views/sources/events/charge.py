@@ -1,5 +1,5 @@
-from posthog.insightsql import ast
-from posthog.insightsql.database.schema.exchange_rate import (
+from insights.insightsql import ast
+from insights.insightsql.database.schema.exchange_rate import (
     currency_expression_for_events,
     revenue_comparison_and_value_exprs_for_events,
 )

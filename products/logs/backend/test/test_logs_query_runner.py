@@ -2,11 +2,11 @@ import os
 import json
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 
 from rest_framework import status
 
-from posthog.schema import (
+from insights.schema import (
     DateRange,
     FilterLogicalOperator,
     InsightsQLFilters,
@@ -18,10 +18,10 @@ from posthog.schema import (
     PropertyOperator,
 )
 
-from posthog.insightsql.query import InsightsQLQueryExecutor
+from insights.insightsql.query import InsightsQLQueryExecutor
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.client.connection import Workload
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.client.connection import Workload
 
 from products.logs.backend.logs_query_runner import LogsQueryRunner
 

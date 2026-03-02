@@ -1,9 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from posthog.models.core_event import CoreEvent
-from posthog.models.team import Team
-from posthog.models.utils import UUIDModel
+from insights.models.core_event import CoreEvent
+from insights.models.team import Team
+from insights.models.utils import UUIDModel
 
 
 class MarketingAnalyticsGoalMapping(UUIDModel):

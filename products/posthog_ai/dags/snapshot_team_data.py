@@ -6,7 +6,7 @@ import dagster
 from dagster_aws.s3.resources import S3Resource
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from posthog.schema import (
+from insights.schema import (
     ActorsPropertyTaxonomyQuery,
     ActorsPropertyTaxonomyResponse,
     CachedActorsPropertyTaxonomyQueryResponse,
@@ -17,17 +17,17 @@ from posthog.schema import (
     TeamTaxonomyQuery,
 )
 
-from posthog.insightsql.constants import InsightsQLGlobalSettings
+from insights.insightsql.constants import InsightsQLGlobalSettings
 
-from posthog.clickhouse.client.connection import Workload
-from posthog.dags.common import JobOwners
-from posthog.errors import InternalCHQueryError
-from posthog.insightsql_queries.ai.actors_property_taxonomy_query_runner import ActorsPropertyTaxonomyQueryRunner
-from posthog.insightsql_queries.ai.event_taxonomy_query_runner import EventTaxonomyQueryRunner
-from posthog.insightsql_queries.ai.team_taxonomy_query_runner import TeamTaxonomyQueryRunner
-from posthog.insightsql_queries.query_runner import ExecutionMode
-from posthog.models import GroupTypeMapping, Team
-from posthog.models.property_definition import PropertyDefinition
+from insights.clickhouse.client.connection import Workload
+from insights.dags.common import JobOwners
+from insights.errors import InternalCHQueryError
+from insights.insightsql_queries.ai.actors_property_taxonomy_query_runner import ActorsPropertyTaxonomyQueryRunner
+from insights.insightsql_queries.ai.event_taxonomy_query_runner import EventTaxonomyQueryRunner
+from insights.insightsql_queries.ai.team_taxonomy_query_runner import TeamTaxonomyQueryRunner
+from insights.insightsql_queries.query_runner import ExecutionMode
+from insights.models import GroupTypeMapping, Team
+from insights.models.property_definition import PropertyDefinition
 
 from products.posthog_ai.dags.utils import (
     check_dump_exists,
@@ -36,18 +36,6 @@ from products.posthog_ai.dags.utils import (
     dump_model,
 )
 
-from ee.hogai.eval.schema import (
-    ActorsPropertyTaxonomySnapshot,
-    BaseSnapshot,
-    ClickhouseTeamDataSnapshot,
-    DataWarehouseTableSnapshot,
-    GroupTypeMappingSnapshot,
-    PostgresTeamDataSnapshot,
-    PropertyDefinitionSnapshot,
-    PropertyTaxonomySnapshot,
-    TeamSnapshot,
-    TeamTaxonomyItemSnapshot,
-)
 
 DEFAULT_RETRY_POLICY = dagster.RetryPolicy(
     max_retries=4,

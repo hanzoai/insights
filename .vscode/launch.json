@@ -53,7 +53,7 @@
             "django": true,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
@@ -80,7 +80,7 @@
             "django": true,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
@@ -103,7 +103,7 @@
             "justMyCode": true,
             "autoReload": {
                 "enable": true,
-                "include": ["posthog/**/*.py"]
+                "include": ["insights/**/*.py"]
             },
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -127,7 +127,7 @@
             "justMyCode": true,
             "autoReload": {
                 "enable": true,
-                "include": ["posthog/**/*.py"]
+                "include": ["insights/**/*.py"]
             },
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
@@ -173,7 +173,7 @@
             "justMyCode": false,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",
@@ -263,7 +263,7 @@
             "django": true,
             "env": {
                 "PYTHONUNBUFFERED": "1",
-                "DJANGO_SETTINGS_MODULE": "posthog.settings",
+                "DJANGO_SETTINGS_MODULE": "insights.settings",
                 "DEBUG": "1",
                 "CLICKHOUSE_SECURE": "False",
                 "KAFKA_HOSTS": "localhost",

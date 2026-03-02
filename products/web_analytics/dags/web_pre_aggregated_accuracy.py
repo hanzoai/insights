@@ -4,9 +4,9 @@ import dagster
 import pydantic
 from dagster import AssetExecutionContext, MetadataValue, WeeklyPartitionsDefinition, asset
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.query_tagging import tags_context
-from posthog.dags.common import JobOwners, dagster_tags
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.query_tagging import tags_context
+from insights.dags.common import JobOwners, dagster_tags
 
 from products.web_analytics.dags.web_preaggregated_utils import (
     TEAM_ID_FOR_WEB_ANALYTICS_ASSET_CHECKS,

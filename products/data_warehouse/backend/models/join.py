@@ -4,14 +4,14 @@ from warnings import warn
 
 from django.db import models
 
-from posthog.insightsql import ast
-from posthog.insightsql.ast import SelectQuery
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.models import LazyJoinToAdd
-from posthog.insightsql.errors import ResolutionError
-from posthog.insightsql.parser import parse_expr
+from insights.insightsql import ast
+from insights.insightsql.ast import SelectQuery
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.models import LazyJoinToAdd
+from insights.insightsql.errors import ResolutionError
+from insights.insightsql.parser import parse_expr
 
-from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTModel
+from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTModel
 
 from products.data_warehouse.backend.models.datawarehouse_saved_query import DataWarehouseSavedQuery
 
@@ -32,7 +32,7 @@ class DataWarehouseViewLink(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         warn("DataWarehouseViewLink is deprecated, use DataWarehouseJoin", DeprecationWarning, stacklevel=2)
         super().__init__(*args, **kwargs)
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     table = models.CharField(max_length=128)
     from_join_key = models.CharField(max_length=400)
     saved_query = models.ForeignKey(DataWarehouseSavedQuery, on_delete=models.CASCADE)
@@ -40,7 +40,7 @@ class DataWarehouseViewLink(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
 
 class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     source_table_name = models.CharField(max_length=400)
     source_table_key = models.CharField(max_length=400)
     joining_table_name = models.CharField(max_length=400)
@@ -74,7 +74,7 @@ class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
             _source_table_key = override_source_table_key or self.source_table_key
             _joining_table_key = override_joining_table_key or self.joining_table_key
 
-            from posthog.insightsql import ast
+            from insights.insightsql import ast
 
             if not join_to_add.fields_accessed:
                 raise ResolutionError(f"No fields requested from {join_to_add.to_table}")

@@ -20,7 +20,7 @@ import urllib3
 import requests
 import digitalocean  # type: ignore
 
-DOMAIN = os.getenv("HOBBY_DOMAIN", "posthog.cc")
+DOMAIN = os.getenv("HOBBY_DOMAIN", "insights.cc")
 
 
 class HobbyTester:

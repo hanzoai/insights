@@ -8,8 +8,8 @@ from rest_framework import status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.models.user import User
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.models.user import User
 
 
 class FixInsightsQLViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):

@@ -19,8 +19,8 @@ from temporalio.client import (
 )
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.client import async_connect, sync_connect
-from posthog.temporal.common.schedule import (
+from insights.temporal.common.client import async_connect, sync_connect
+from insights.temporal.common.schedule import (
     a_create_schedule,
     a_delete_schedule,
     a_schedule_exists,
@@ -34,7 +34,7 @@ from posthog.temporal.common.schedule import (
     unpause_schedule,
     update_schedule,
 )
-from posthog.temporal.utils import ExternalDataWorkflowInputs
+from insights.temporal.utils import ExternalDataWorkflowInputs
 
 if TYPE_CHECKING:
     from products.data_warehouse.backend.models import ExternalDataSource

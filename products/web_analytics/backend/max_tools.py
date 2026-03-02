@@ -5,23 +5,14 @@ from typing import Any, Literal
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-from posthog.schema import WebAnalyticsAssistantFilters
+from insights.schema import WebAnalyticsAssistantFilters
 
-from posthog.clickhouse.query_tagging import Product, tags_context
-from posthog.models import Team, User
-from posthog.queries.property_values import get_person_property_values_for_key, get_property_values_for_key
-from posthog.sync import database_sync_to_async
-from posthog.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
+from insights.clickhouse.query_tagging import Product, tags_context
+from insights.models import Team, User
+from insights.queries.property_values import get_person_property_values_for_key, get_property_values_for_key
+from insights.sync import database_sync_to_async
+from insights.taxonomy.taxonomy import CORE_FILTER_DEFINITIONS_BY_GROUP
 
-from ee.hogai.chat_agent.taxonomy.agent import TaxonomyAgent
-from ee.hogai.chat_agent.taxonomy.format import enrich_props_with_descriptions, format_properties_xml
-from ee.hogai.chat_agent.taxonomy.nodes import TaxonomyAgentNode, TaxonomyAgentToolsNode
-from ee.hogai.chat_agent.taxonomy.toolkit import TaxonomyAgentToolkit, TaxonomyErrorMessages
-from ee.hogai.chat_agent.taxonomy.tools import TaxonomyTool, ask_user_for_help, base_final_answer
-from ee.hogai.chat_agent.taxonomy.types import TaxonomyAgentState
-from ee.hogai.tool import MaxTool
-from ee.hogai.utils.types.base import AssistantNodeName
-from ee.hogai.utils.types.composed import MaxNodeName
 
 from .prompts import (
     COMPARE_FILTER_PROMPT,

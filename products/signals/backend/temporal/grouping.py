@@ -18,14 +18,14 @@ from temporalio import workflow
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 from temporalio.workflow import ParentClosePolicy
 
-from posthog.schema import EmbeddingModelName
+from insights.schema import EmbeddingModelName
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.embedding_worker import emit_embedding_request, generate_embedding
-from posthog.models import Team
-from posthog.sync import database_sync_to_async
+from insights.api.embedding_worker import emit_embedding_request, generate_embedding
+from insights.models import Team
+from insights.sync import database_sync_to_async
 
 from products.signals.backend.models import SignalReport
 from products.signals.backend.temporal.llm import MAX_QUERY_TOKENS, call_llm, truncate_query_to_token_limit

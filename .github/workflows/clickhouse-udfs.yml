@@ -5,7 +5,7 @@ on:
         branches:
             - master
         paths:
-            - 'posthog/user_scripts/**'
+            - 'insights/user_scripts/**'
 
 jobs:
     trigger_udfs_workflow:

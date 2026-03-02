@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 
 import structlog
 
-from posthog.schema import (
+from insights.schema import (
     CachedErrorTrackingQueryResponse,
     DateRange,
     ErrorTrackingQuery,
@@ -17,14 +17,14 @@ from posthog.schema import (
     RevenuePeriod,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import LimitContext
+from insights.insightsql import ast
+from insights.insightsql.constants import LimitContext
 
-from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
-from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner
-from posthog.models.filters.mixins.utils import cached_property
-from posthog.models.property.util import property_to_django_filter
-from posthog.utils import relative_date_parse
+from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
+from insights.models.filters.mixins.utils import cached_property
+from insights.models.property.util import property_to_django_filter
+from insights.utils import relative_date_parse
 
 from products.error_tracking.backend.api.issues import ErrorTrackingIssuePreviewSerializer
 from products.error_tracking.backend.models import ErrorTrackingIssue

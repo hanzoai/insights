@@ -5,7 +5,7 @@ from django.conf import settings
 
 from temporalio import activity
 
-from posthog.temporal.common.utils import asyncify
+from insights.temporal.common.utils import asyncify
 
 from products.tasks.backend.models import SandboxSnapshot, Task, TaskRun
 from products.tasks.backend.services.connection_token import get_sandbox_jwt_public_key

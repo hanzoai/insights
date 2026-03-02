@@ -1,7 +1,7 @@
-from posthog.test.base import BaseTest, ClickhouseTestMixin
+from insights.test.base import BaseTest, ClickhouseTestMixin
 from unittest.mock import Mock, patch
 
-from posthog.schema import (
+from insights.schema import (
     BaseMathType,
     ConversionGoalFilter1,
     DateRange,
@@ -10,9 +10,9 @@ from posthog.schema import (
     NodeKind,
 )
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 
 from products.marketing_analytics.backend.insightsql_queries.adapters.base import MarketingSourceAdapter
 from products.marketing_analytics.backend.insightsql_queries.constants import DEFAULT_LIMIT

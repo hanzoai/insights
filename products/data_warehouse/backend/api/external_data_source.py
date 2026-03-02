@@ -14,25 +14,25 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.schema import ProductKey, SourceFieldInputConfig, SourceFieldInputConfigType, SourceFieldSwitchGroupConfig
+from insights.schema import ProductKey, SourceFieldInputConfig, SourceFieldInputConfigType, SourceFieldSwitchGroupConfig
 
-from posthog.insightsql.database.database import Database
+from insights.insightsql.database.database import Database
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.exceptions_capture import capture_exception
-from posthog.models.activity_logging.activity_log import ActivityContextBase, Detail, changes_between, log_activity
-from posthog.models.activity_logging.external_data_utils import (
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.exceptions_capture import capture_exception
+from insights.models.activity_logging.activity_log import ActivityContextBase, Detail, changes_between, log_activity
+from insights.models.activity_logging.external_data_utils import (
     get_external_data_source_created_by_info,
     get_external_data_source_detail_name,
 )
-from posthog.models.signals import model_activity_signal, mutable_receiver
-from posthog.models.user import User
-from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
-from posthog.rbac.user_access_control import UserAccessControlSerializerMixin
-from posthog.temporal.data_imports.sources import SourceRegistry
-from posthog.temporal.data_imports.sources.common.base import FieldType
-from posthog.temporal.data_imports.sources.common.config import Config
+from insights.models.signals import model_activity_signal, mutable_receiver
+from insights.models.user import User
+from insights.rbac.access_control_api_mixin import AccessControlViewSetMixin
+from insights.rbac.user_access_control import UserAccessControlSerializerMixin
+from insights.temporal.data_imports.sources import SourceRegistry
+from insights.temporal.data_imports.sources.common.base import FieldType
+from insights.temporal.data_imports.sources.common.config import Config
 
 from products.data_warehouse.backend.api.external_data_schema import (
     ExternalDataSchemaSerializer,

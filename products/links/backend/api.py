@@ -9,12 +9,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.shared import UserBasicSerializer
-from posthog.models.link import Link
-from posthog.models.team.team import Team
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.shared import UserBasicSerializer
+from insights.models.link import Link
+from insights.models.team.team import Team
 
 logger = structlog.get_logger(__name__)
 

@@ -12,13 +12,13 @@ from asgiref.sync import sync_to_async
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from posthog.schema import EmbeddingModelName
+from insights.schema import EmbeddingModelName
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.models import Team
-from posthog.sync import database_sync_to_async
+from insights.models import Team
+from insights.sync import database_sync_to_async
 
 from products.signals.backend.models import SignalReport
 from products.signals.backend.temporal.actionability_judge import (

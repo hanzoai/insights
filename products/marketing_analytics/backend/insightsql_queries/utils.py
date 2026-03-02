@@ -2,7 +2,7 @@
 
 import structlog
 
-from posthog.schema import ConversionGoalFilter1, ConversionGoalFilter2, ConversionGoalFilter3, NodeKind
+from insights.schema import ConversionGoalFilter1, ConversionGoalFilter2, ConversionGoalFilter3, NodeKind
 
 logger = structlog.get_logger(__name__)
 

@@ -5,10 +5,10 @@ import posthoganalytics
 from rest_framework import serializers, viewsets
 from rest_framework.exceptions import ValidationError
 
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.event_usage import groups
-from posthog.models.integration import (
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.event_usage import groups
+from insights.models.integration import (
     GitHubIntegration,
     GitLabIntegration,
     Integration,

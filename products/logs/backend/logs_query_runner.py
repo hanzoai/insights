@@ -4,7 +4,7 @@ import datetime as dt
 from typing import TYPE_CHECKING, cast
 from zoneinfo import ZoneInfo
 
-from posthog.schema import (
+from insights.schema import (
     CachedLogsQueryResponse,
     InsightsQLFilters,
     IntervalType,
@@ -16,19 +16,19 @@ from posthog.schema import (
     PropertyOperator,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.constants import InsightsQLGlobalSettings, LimitContext
-from posthog.insightsql.parser import parse_expr, parse_order_expr, parse_select
-from posthog.insightsql.property import get_lowercase_index_hint, operator_is_negative, property_to_expr
+from insights.insightsql import ast
+from insights.insightsql.constants import InsightsQLGlobalSettings, LimitContext
+from insights.insightsql.parser import parse_expr, parse_order_expr, parse_select
+from insights.insightsql.property import get_lowercase_index_hint, operator_is_negative, property_to_expr
 
-from posthog.clickhouse.client.connection import Workload
-from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
-from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner, QueryRunner
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.models.filters.mixins.utils import cached_property
+from insights.clickhouse.client.connection import Workload
+from insights.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from insights.insightsql_queries.query_runner import AnalyticsQueryRunner, QueryRunner
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models.filters.mixins.utils import cached_property
 
 if TYPE_CHECKING:
-    from posthog.models import User
+    from insights.models import User
 
 
 def _generate_resource_attribute_filters(
@@ -398,7 +398,7 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
         # (via ExportedAsset + Celery, which runs without a user context and skips this check).
         # Block all user-initiated queries via the generic /api/projects/:id/query/ endpoint
         # until the LogsQuery schema is stable and ready to be a public API.
-        from posthog.rbac.user_access_control import UserAccessControlError
+        from insights.rbac.user_access_control import UserAccessControlError
 
         raise UserAccessControlError("logs", "viewer")
 

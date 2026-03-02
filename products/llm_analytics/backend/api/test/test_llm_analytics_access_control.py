@@ -1,22 +1,16 @@
 import pytest
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from parameterized import parameterized
 from rest_framework import status
 
-from posthog.constants import AvailableFeature
-from posthog.models.organization import OrganizationMembership
-from posthog.models.user import User
+from insights.constants import AvailableFeature
+from insights.models.organization import OrganizationMembership
+from insights.models.user import User
 
 from products.llm_analytics.backend.models.datasets import Dataset
 from products.llm_analytics.backend.models.evaluations import Evaluation
 from products.llm_analytics.backend.models.provider_keys import LLMProviderKey
-
-try:
-    from ee.models.rbac.access_control import AccessControl
-except ImportError:
-    pass
-
 
 @pytest.mark.ee
 class TestLLMAnalyticsAccessControl(APIBaseTest):

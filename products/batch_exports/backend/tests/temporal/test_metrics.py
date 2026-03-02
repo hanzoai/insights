@@ -13,8 +13,8 @@ import temporalio.client
 from structlog.testing import capture_logs
 from temporalio.common import RetryPolicy
 
-from posthog.batch_exports.service import BatchExportModel
-from posthog.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export
+from insights.batch_exports.service import BatchExportModel
+from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export
 
 from products.batch_exports.backend.temporal.destinations.postgres_batch_export import PostgresBatchExportInputs
 from products.batch_exports.backend.temporal.metrics import SLAWaiter

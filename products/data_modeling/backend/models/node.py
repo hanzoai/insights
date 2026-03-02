@@ -1,8 +1,8 @@
 from django.db import models
 from django.db.models import Q
 
-from posthog.models import Team
-from posthog.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDModel
+from insights.models import Team
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDModel
 
 from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 

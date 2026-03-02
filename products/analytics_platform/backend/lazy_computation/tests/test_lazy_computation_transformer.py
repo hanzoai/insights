@@ -1,19 +1,19 @@
 from datetime import datetime
 from uuid import uuid4
 
-from posthog.test.base import BaseTest, QueryMatchingTest, _create_event
+from insights.test.base import BaseTest, QueryMatchingTest, _create_event
 
 from parameterized import parameterized
 
-from posthog.schema import InsightsQLQueryModifiers
+from insights.schema import InsightsQLQueryModifiers
 
-from posthog.insightsql import ast
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.preaggregation.sql import SHARDED_PREAGGREGATION_RESULTS_TABLE
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.preaggregation.sql import SHARDED_PREAGGREGATION_RESULTS_TABLE
 
 from products.analytics_platform.backend.lazy_computation.lazy_computation_transformer import (
     PREAGGREGATED_DAILY_UNIQUE_PERSONS_PAGEVIEWS_TABLE_NAME,
@@ -33,7 +33,7 @@ class TestPatternDetection(BaseTest):
     """Tests for individual pattern detection functions."""
 
     def test_is_person_id_field(self):
-        from posthog.insightsql import ast
+        from insights.insightsql import ast
 
         # Positive cases
         assert _is_person_id_field(ast.Field(chain=["person_id"]))
@@ -49,7 +49,7 @@ class TestPatternDetection(BaseTest):
         assert not _is_person_id_field(ast.Field(chain=["event"]))
 
     def test_is_timestamp_field(self):
-        from posthog.insightsql import ast
+        from insights.insightsql import ast
 
         context = InsightsQLContext(team_id=self.team.pk, team=self.team)
 
@@ -64,8 +64,8 @@ class TestPatternDetection(BaseTest):
         assert not _is_timestamp_field(ast.Constant(value="timestamp"), context)
 
     def test_is_pageview_filter(self):
-        from posthog.insightsql import ast
-        from posthog.insightsql.ast import CompareOperationOp
+        from insights.insightsql import ast
+        from insights.insightsql.ast import CompareOperationOp
 
         # Positive cases: event = '$pageview'
         expr1 = ast.CompareOperation(
@@ -92,7 +92,7 @@ class TestPatternDetection(BaseTest):
         assert not _is_pageview_filter(expr4)
 
     def test_is_uniq_exact_persons_call(self):
-        from posthog.insightsql import ast
+        from insights.insightsql import ast
 
         # Positive cases: uniqExact(person_id)
         expr1 = ast.Call(name="uniqExact", args=[ast.Field(chain=["person_id"])])
@@ -123,7 +123,7 @@ class TestPatternDetection(BaseTest):
         assert not _is_uniq_exact_persons_call(expr7)
 
     def test_is_to_start_of_day_timestamp(self):
-        from posthog.insightsql import ast
+        from insights.insightsql import ast
 
         context = InsightsQLContext(team_id=self.team.pk, team=self.team)
 
@@ -151,8 +151,8 @@ class TestPatternDetection(BaseTest):
         assert not _is_to_start_of_day_timestamp(expr5, context)
 
     def test_extract_timestamp_range(self):
-        from posthog.insightsql import ast
-        from posthog.insightsql.ast import CompareOperationOp
+        from insights.insightsql import ast
+        from insights.insightsql.ast import CompareOperationOp
 
         context = InsightsQLContext(team_id=self.team.pk, team=self.team)
 
@@ -177,7 +177,7 @@ class TestPatternDetection(BaseTest):
         assert end_dt == datetime(2024, 2, 1, 0, 0, 0)
 
     def test_flatten_and(self):
-        from posthog.insightsql import ast
+        from insights.insightsql import ast
 
         # Simple case: already flat
         expr1 = ast.Constant(value=1)

@@ -1,11 +1,11 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import MagicMock, patch
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from rest_framework import status
 
-from posthog.models import MessageCategory, Team
+from insights.models import MessageCategory, Team
 
 
 class TestMessageCategoryAPI(APIBaseTest):

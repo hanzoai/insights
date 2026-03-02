@@ -6,10 +6,10 @@ from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_sche
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.auth import ProjectSecretAPIKeyAuthentication, SessionAuthentication
-from posthog.permissions import ProjectSecretAPITokenPermission
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.auth import ProjectSecretAPIKeyAuthentication, SessionAuthentication
+from insights.permissions import ProjectSecretAPITokenPermission
 
 from products.live_debugger.backend.models import LiveDebuggerBreakpoint
 

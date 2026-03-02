@@ -12,7 +12,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { deadLetterQueueLogic } from './deadLetterQueueLogic'
 
-// keep in sync with posthog/api/dead_letter_queue.py
+// keep in sync with insights/api/dead_letter_queue.py
 const ROWS_LIMIT = 10
 
 export function MetricsTab(): JSX.Element {

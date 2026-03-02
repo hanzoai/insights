@@ -6,7 +6,6 @@ on:
         branches:
             - master
         paths:
-            - 'ee/hogai/**'
             - '.github/workflows/ci-ai.yml'
 
 concurrency:
@@ -88,7 +87,7 @@ jobs:
               run: sudo echo "127.0.0.1 kafka clickhouse" | sudo tee -a /etc/hosts
 
             - name: Run LLM evals
-              run: pytest ee/hogai/eval/ci -vv --junitxml=junit.xml
+              run: echo "ee/hogai evals removed - skipping"
               env:
                   EVAL_MODE: ci
                   EXPORT_EVAL_RESULTS: true

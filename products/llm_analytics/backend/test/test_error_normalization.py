@@ -10,9 +10,9 @@ See nodejs/src/ingestion/ai/errors/normalize-error.test.ts
 import uuid
 from datetime import UTC, datetime
 
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
 
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql.query import execute_insightsql_query
 
 from products.llm_analytics.backend.queries import get_errors_query
 

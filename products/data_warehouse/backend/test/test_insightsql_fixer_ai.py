@@ -1,10 +1,10 @@
 import pytest
 
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.database import Database
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.database import Database
 
-from posthog.models.organization import Organization
-from posthog.models.team.team import Team
+from insights.models.organization import Organization
+from insights.models.team.team import Team
 
 from products.data_warehouse.backend.insightsql_fixer_ai import _get_schema_description, _get_system_prompt, _get_user_prompt
 

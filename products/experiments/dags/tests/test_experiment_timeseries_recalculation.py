@@ -3,16 +3,16 @@ from typing import cast
 from zoneinfo import ZoneInfo
 
 import pytest
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import MagicMock, patch
 
 import dagster
 
-from posthog.schema import ExperimentQueryResponse, ExperimentStatsBaseValidated, ExperimentVariantResultFrequentist
+from insights.schema import ExperimentQueryResponse, ExperimentStatsBaseValidated, ExperimentVariantResultFrequentist
 
-from posthog.models import Organization, Team, User
-from posthog.models.experiment import Experiment, ExperimentMetricResult, ExperimentTimeseriesRecalculation
-from posthog.models.feature_flag import FeatureFlag
+from insights.models import Organization, Team, User
+from insights.models.experiment import Experiment, ExperimentMetricResult, ExperimentTimeseriesRecalculation
+from insights.models.feature_flag import FeatureFlag
 
 from products.experiments.dags.experiment_timeseries_recalculation import experiment_timeseries_recalculation
 

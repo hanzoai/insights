@@ -7,9 +7,9 @@ from django.conf import settings
 import posthoganalytics
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 
-from posthog.models.team.team import Team
-from posthog.models.user import User
-from posthog.temporal.common.client import async_connect, sync_connect
+from insights.models.team.team import Team
+from insights.models.user import User
+from insights.temporal.common.client import async_connect, sync_connect
 
 from products.tasks.backend.temporal.process_task.workflow import ProcessTaskInput
 
@@ -203,8 +203,8 @@ def execute_video_segment_clustering_workflow(team_id: int, skip_priming: bool =
     """
     from datetime import datetime
 
-    from posthog.temporal.ai.video_segment_clustering import constants
-    from posthog.temporal.ai.video_segment_clustering.models import ClusteringWorkflowInputs
+    from insights.temporal.ai.video_segment_clustering import constants
+    from insights.temporal.ai.video_segment_clustering.models import ClusteringWorkflowInputs
 
     try:
         workflow_id = f"video-segment-clustering-team-{team_id}-manual-{datetime.now().isoformat()}"

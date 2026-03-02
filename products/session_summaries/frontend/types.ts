@@ -1,6 +1,6 @@
 import { UserBasicType } from '~/types'
 
-// Matches _SeverityLevel enum from ee/hogai/session_summaries/session_group/patterns.py
+// Severity levels for session summaries
 export type SeverityLevel = 'low' | 'medium' | 'high' | 'critical'
 
 // Matches EnrichedPatternAssignedEvent from patterns.py

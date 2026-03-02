@@ -1,11 +1,11 @@
 import uuid
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from django.db import transaction
 
-from posthog.models.comment import Comment
+from insights.models.comment import Comment
 
 from products.conversations.backend.models import Ticket
 

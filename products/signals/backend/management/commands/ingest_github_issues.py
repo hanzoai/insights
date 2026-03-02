@@ -5,7 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from posthog.models import Team
+from insights.models import Team
 
 from products.signals.backend.api import emit_signal
 

@@ -6,13 +6,13 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from posthog.schema import SourceMap
+from insights.schema import SourceMap
 
-from posthog.insightsql import ast
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.models.team.team import DEFAULT_CURRENCY
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.models.team.team import DEFAULT_CURRENCY
 
 from products.data_warehouse.backend.models import DataWarehouseTable
 from products.marketing_analytics.backend.insightsql_queries.adapters.base import ExternalConfig, QueryContext

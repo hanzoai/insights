@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 from django.apps import apps
 
-from posthog.models.integration import GitHubIntegration, Integration
+from insights.models.integration import GitHubIntegration, Integration
 
 
 class RepositoryContext:

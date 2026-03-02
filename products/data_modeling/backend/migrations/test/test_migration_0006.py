@@ -1,7 +1,7 @@
 from typing import Any
 
 import pytest
-from posthog.test.base import NonAtomicTestMigrations
+from insights.test.base import NonAtomicTestMigrations
 
 # skipped in prod because slow. passes locally. to run this test comment this out
 pytestmark = pytest.mark.skip("historical migration tests slow overall test run")
@@ -18,9 +18,9 @@ class BackfillNodesEdgesMigrationTest(NonAtomicTestMigrations):
         return "data_modeling"
 
     def setUpBeforeMigration(self, apps: Any) -> None:
-        Organization = apps.get_model("posthog", "Organization")
-        Project = apps.get_model("posthog", "Project")
-        Team = apps.get_model("posthog", "Team")
+        Organization = apps.get_model("insights", "Organization")
+        Project = apps.get_model("insights", "Project")
+        Team = apps.get_model("insights", "Team")
         DataWarehouseSavedQuery = apps.get_model("data_warehouse", "DataWarehouseSavedQuery")
         Node = apps.get_model("data_modeling", "Node")
 

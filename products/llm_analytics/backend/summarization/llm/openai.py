@@ -6,7 +6,7 @@ import structlog
 from openai.types.chat import ChatCompletionMessageParam
 from rest_framework import exceptions
 
-from posthog.llm.gateway_client import get_llm_client
+from insights.llm.gateway_client import get_llm_client
 
 from ..constants import SUMMARIZATION_TIMEOUT
 from ..models import OpenAIModel, SummarizationMode

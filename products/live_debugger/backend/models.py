@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from django.db import models
 
-from posthog.models.utils import UUIDModel
+from insights.models.utils import UUIDModel
 
 if TYPE_CHECKING:
-    from posthog.models import Team
+    from insights.models import Team
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class BreakpointHit:
 
 
 class LiveDebuggerBreakpoint(UUIDModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "PostHog/posthog")
     filename = models.TextField()
     line_number = models.PositiveIntegerField()
@@ -79,9 +79,9 @@ class LiveDebuggerBreakpoint(UUIDModel):
 
         Returns a list of BreakpointHit dataclass instances.
         """
-        from posthog.insightsql import ast
-        from posthog.insightsql.parser import parse_select
-        from posthog.insightsql.query import execute_insightsql_query
+        from insights.insightsql import ast
+        from insights.insightsql.parser import parse_select
+        from insights.insightsql.query import execute_insightsql_query
 
         # Build WHERE conditions (team_id filter is automatically added by execute_insightsql_query)
         where_conditions = [

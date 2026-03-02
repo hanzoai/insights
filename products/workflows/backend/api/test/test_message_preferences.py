@@ -1,6 +1,6 @@
 import json
 
-from posthog.test.base import APIBaseTest, BaseTest
+from insights.test.base import APIBaseTest, BaseTest
 from unittest.mock import patch
 
 from django.test import Client
@@ -9,9 +9,9 @@ from django.urls import reverse
 from parameterized import parameterized
 from requests import Response
 
-import posthog.plugins.plugin_server_api as plugin_server_api
-from posthog.models.message_category import MessageCategory
-from posthog.models.message_preferences import (
+import insights.plugins.plugin_server_api as plugin_server_api
+from insights.models.message_category import MessageCategory
+from insights.models.message_preferences import (
     ALL_MESSAGE_PREFERENCE_CATEGORY_ID,
     MessageRecipientPreference,
     PreferenceStatus,
@@ -52,7 +52,7 @@ class TestMessagePreferencesViews(BaseTest):
         self._token_patch.stop()
         super().tearDown()
 
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_preferences_page_valid_token(self, mock_validate_messaging_preferences_token):
         mock_validate_messaging_preferences_token.return_value = mock_response(
             200, {"valid": True, "team_id": self.team.id, "identifier": self.recipient.identifier}
@@ -74,7 +74,7 @@ class TestMessagePreferencesViews(BaseTest):
         self.assertEqual(categories[2]["name"], "All marketing communications")
         self.assertEqual(categories[2]["id"], ALL_MESSAGE_PREFERENCE_CATEGORY_ID)
 
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_preferences_page_one_click_unsubscribe_get(self, mock_validate_messaging_preferences_token):
         mock_validate_messaging_preferences_token.return_value = mock_response(
             200, {"valid": True, "team_id": self.team.id, "identifier": self.recipient.identifier}
@@ -94,7 +94,7 @@ class TestMessagePreferencesViews(BaseTest):
         self.assertEqual(prefs[str(self.category2.id)], PreferenceStatus.OPTED_OUT)
         self.assertEqual(prefs[ALL_MESSAGE_PREFERENCE_CATEGORY_ID], PreferenceStatus.OPTED_OUT)
 
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_preferences_page_one_click_unsubscribe_post(self, mock_validate_messaging_preferences_token):
         mock_validate_messaging_preferences_token.return_value = mock_response(
             200, {"valid": True, "team_id": self.team.id, "identifier": self.recipient.identifier}
@@ -113,14 +113,14 @@ class TestMessagePreferencesViews(BaseTest):
         self.assertEqual(prefs[str(self.category2.id)], PreferenceStatus.OPTED_OUT)
         self.assertEqual(prefs[ALL_MESSAGE_PREFERENCE_CATEGORY_ID], PreferenceStatus.OPTED_OUT)
 
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_preferences_page_invalid_token(self, mock_validate_messaging_preferences_token):
         mock_validate_messaging_preferences_token.return_value = mock_response(400, {"error": "Invalid token"})
         response = self.client.get(reverse("message_preferences", kwargs={"token": "invalid-token"}))
         self.assertEqual(response.status_code, 400)
         self.assertTemplateUsed(response, "message_preferences/error.html")
 
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_update_preferences_valid(self, mock_validate_messaging_preferences_token):
         data = {"token": self.token, "preferences[]": [f"{self.category.id}:true", f"{self.category2.id}:false"]}
         mock_validate_messaging_preferences_token.return_value = mock_response(
@@ -136,7 +136,7 @@ class TestMessagePreferencesViews(BaseTest):
         self.assertEqual(prefs[str(self.category.id)], PreferenceStatus.OPTED_IN)
         self.assertEqual(prefs[str(self.category2.id)], PreferenceStatus.OPTED_OUT)
 
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_update_preferences_all_opted_out_adds_all(self, mock_validate_messaging_preferences_token):
         data = {"token": self.token, "preferences[]": [f"{self.category.id}:false", f"{self.category2.id}:false"]}
         mock_validate_messaging_preferences_token.return_value = mock_response(
@@ -166,7 +166,7 @@ class TestMessagePreferencesViews(BaseTest):
             ("invalid-token", mock_response(200, {"valid": False})),
         ]
     )
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_update_preferences_invalid_token(
         self, token, mock_response_value, mock_validate_messaging_preferences_token
     ):
@@ -177,7 +177,7 @@ class TestMessagePreferencesViews(BaseTest):
         self.assertIn("error", json.loads(response.content))
 
     @parameterized.expand(["invalid", "TRUE", "", "1"])
-    @patch("posthog.views.validate_messaging_preferences_token")
+    @patch("insights.views.validate_messaging_preferences_token")
     def test_update_preferences_invalid_preference_format(
         self, invalid_value, mock_validate_messaging_preferences_token
     ):

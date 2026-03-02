@@ -11,25 +11,25 @@ from django.db.models import Q
 import chdb
 import structlog
 
-from posthog.schema import DatabaseSerializedFieldType, InsightsQLQueryModifiers
+from insights.schema import DatabaseSerializedFieldType, InsightsQLQueryModifiers
 
-from posthog.insightsql import ast
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.database.models import FieldOrTable
-from posthog.insightsql.database.s3_table import (
+from insights.insightsql import ast
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.database.models import FieldOrTable
+from insights.insightsql.database.s3_table import (
     DataWarehouseTable as InsightsQLDataWarehouseTable,
     build_function_call,
 )
-from posthog.insightsql.escape_sql import escape_clickhouse_identifier
+from insights.insightsql.escape_sql import escape_clickhouse_identifier
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.query_tagging import Product, tag_queries
-from posthog.errors import CHQueryErrorTooManySimultaneousQueries, wrap_clickhouse_query_error
-from posthog.exceptions_capture import capture_exception
-from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
-from posthog.settings import TEST
-from posthog.sync import database_sync_to_async
-from posthog.temporal.data_imports.pipelines.pipeline.consts import PARTITION_KEY
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.query_tagging import Product, tag_queries
+from insights.errors import CHQueryErrorTooManySimultaneousQueries, wrap_clickhouse_query_error
+from insights.exceptions_capture import capture_exception
+from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UpdatedMetaFields, UUIDTModel, sane_repr
+from insights.settings import TEST
+from insights.sync import database_sync_to_async
+from insights.temporal.data_imports.pipelines.pipeline.consts import PARTITION_KEY
 
 from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
 from products.data_warehouse.backend.models.util import (
@@ -104,7 +104,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
 
     name = models.CharField(max_length=128)
     format = models.CharField(max_length=128, choices=TableFormat.choices)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     url_pattern = models.CharField(max_length=500)
     queryable_folder = models.CharField(max_length=500, null=True, blank=True)
@@ -151,7 +151,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
         return self.name[len(prefix) :]
 
     def validate_column_type(self, column_key) -> bool:
-        from posthog.insightsql.query import execute_insightsql_query
+        from insights.insightsql.query import execute_insightsql_query
 
         if column_key not in self.columns.keys():
             raise Exception(f"Column {column_key} does not exist on table: {self.name}")

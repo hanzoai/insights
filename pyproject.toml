@@ -1,7 +1,7 @@
 
 
 [project]
-name = "posthog"
+name = "insights"
 version = "0.0.0"
 requires-python = "==3.12.12" # Pin full version to control Python upgrades explicitly
 # Prefer ~= (compat) over >= (floor). Only pin exact versions (==) when necessary.
@@ -293,7 +293,7 @@ exclude = [
     "./nodejs/node_modules/",
     "./plugins/node_modules/",
     "./env",
-    "./posthog/insightsql/grammar",
+    "./insights/insightsql/grammar",
 ]
 
 [tool.ruff.lint]
@@ -347,9 +347,9 @@ section-order = [
     "testing",
     "django",
     "third-party",
-    "posthog.schema",
-    "posthog.insightsql",
-    "posthog",
+    "insights.schema",
+    "insights.insightsql",
+    "insights",
     "products",
     "first-party",
     "local-folder",
@@ -361,12 +361,12 @@ section-order = [
     "freezegun",
     "pytest",
     "unittest",
-    "posthog.test.base",
+    "insights.test.base",
 ]
 # Separate groups for our own stuff
-"posthog.schema" = ["posthog.schema"]
-"posthog.insightsql" = ["posthog.insightsql"]
-"posthog" = ["posthog"]
+"insights.schema" = ["insights.schema"]
+"insights.insightsql" = ["insights.insightsql"]
+"insights" = ["insights"]
 "products" = ["products"]
 
 [tool.dagster]
@@ -394,16 +394,16 @@ module = "bin.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "posthog.insightsql.grammar.*"
+module = "insights.insightsql.grammar.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "posthog.tasks.*"
+module = "insights.tasks.*"
 disallow_untyped_defs = true
 check_untyped_defs = true
 
 [tool.django-stubs]
-django_settings_module = "posthog.settings"
+django_settings_module = "insights.settings"
 
 [tool.mypy-baseline]
 sort_baseline = true
@@ -421,7 +421,7 @@ python-version = "3.12"
 exclude = [
     "bin/**",
     "manage.py",
-    "posthog/insightsql/grammar/**",
+    "insights/insightsql/grammar/**",
 ]
 
 [tool.ty.rules]

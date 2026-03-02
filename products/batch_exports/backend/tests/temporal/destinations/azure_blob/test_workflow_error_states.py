@@ -13,7 +13,7 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from posthog.temporal.tests.utils.models import afetch_batch_export_runs
+from insights.temporal.tests.utils.models import afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import finish_batch_export_run
 from products.batch_exports.backend.temporal.destinations.azure_blob_batch_export import (

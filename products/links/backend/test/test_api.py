@@ -1,11 +1,11 @@
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
 
 import structlog
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from posthog.models.link import Link
-from posthog.models.team.team import Team
+from insights.models.link import Link
+from insights.models.team.team import Team
 
 logger = structlog.get_logger(__name__)
 
@@ -160,7 +160,7 @@ class TestLink(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         link_id = response.json()["id"]
         assert link_id is not None
 
-        from posthog.models.file_system.file_system import FileSystem
+        from insights.models.file_system.file_system import FileSystem
 
         fs_entry = FileSystem.objects.filter(team=self.team, ref=str(link_id), type="link").first()
         assert fs_entry is not None, "A FileSystem entry was not created for this Link."

@@ -5,17 +5,17 @@ from datetime import UTC, datetime, timedelta
 import dagster
 from dagster import BackfillPolicy, DailyPartitionsDefinition
 
-from posthog.clickhouse import query_tagging
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.cluster import ClickhouseCluster
-from posthog.dags.common import JobOwners, dagster_tags
-from posthog.models.web_preaggregated.sql import (
+from insights.clickhouse import query_tagging
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.cluster import ClickhouseCluster
+from insights.dags.common import JobOwners, dagster_tags
+from insights.models.web_preaggregated.sql import (
     REPLACE_WEB_BOUNCES_V2_STAGING_SQL,
     REPLACE_WEB_STATS_V2_STAGING_SQL,
     WEB_BOUNCES_INSERT_SQL,
     WEB_STATS_INSERT_SQL,
 )
-from posthog.settings import DEBUG, TEST
+from insights.settings import DEBUG, TEST
 
 from products.web_analytics.dags.web_preaggregated_utils import (
     DAGSTER_WEB_JOB_TIMEOUT,
