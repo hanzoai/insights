@@ -2,7 +2,7 @@ version: '3'
 
 services:
     kafka:
-        image: ghcr.io/hanzoai/kafka:latest
+        image: docker.redpanda.com/redpandadata/redpanda:latest
         restart: on-failure
         command:
             - redpanda
