@@ -122,7 +122,7 @@ ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_PROJECT_ENVIRONMENT=/python-runtime
 
-# Install build dependencies
+# Install build dependencies (includes cmake/curl/unzip for ANTLR4 C++ runtime needed by insightsql_parser)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     "build-essential" \
@@ -133,14 +133,31 @@ RUN apt-get update && \
     "libffi-dev" \
     "zlib1g-dev" \
     "pkg-config" \
+    "cmake" \
+    "curl" \
+    "unzip" \
+    "uuid-dev" \
     && \
     rm -rf /var/lib/apt/lists/*
 
+# Build and install ANTLR4 C++ runtime (required by insightsql_parser native extension)
+RUN curl -fsSL https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip -o /tmp/antlr4-source.zip && \
+    cd /tmp && unzip antlr4-source.zip -d antlr4-source && cd antlr4-source && \
+    cmake . -DBUILD_TESTING=OFF -DANTLR4_BUILD_TESTS=OFF && \
+    DESTDIR=out make -j$(nproc) install && \
+    cp -r out/usr/local/include/antlr4-runtime /usr/include/ && \
+    cp out/usr/local/lib/libantlr4-runtime.so* /usr/lib/ 2>/dev/null || \
+    cp out/usr/local/lib64/libantlr4-runtime.so* /usr/lib/ 2>/dev/null || true && \
+    ldconfig && \
+    rm -rf /tmp/antlr4-source /tmp/antlr4-source.zip
+
+# Copy insightsql_parser source (needed for local path dependency build)
+COPY common/insightsql_parser common/insightsql_parser/
+
 # Install Python dependencies using cache mount for faster rebuilds
 # Cache ID includes libxmlsec1 version to bust cache when system library changes
+COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,id=uv-libxmlsec1.2.37-2,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked --no-dev --no-install-project --no-binary-package lxml --no-binary-package xmlsec
 
 ENV PATH=/python-runtime/bin:$PATH \

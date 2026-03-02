@@ -1,4 +1,4 @@
-# Developing `hogql-parser`
+# Developing `insightsql-parser`
 
 ## Mandatory reading
 
@@ -52,32 +52,32 @@ Key takeaways:
    brew install antlr4-cpp-runtime
    ```
 
-2. Install `hogql_parser` by building from local sources:
+2. Install `insightsql_parser` by building from local sources:
 
    ```bash
-   pip install ./common/hogql_parser
+   pip install ./common/insightsql_parser
    ```
 
-   > If you're getting compilation errors like this on macOS Sonoma:  
-   > `/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/cstring:66:5: error: <cstring> tried including <string.h> but didn't find libc++'s <string.h> header.`  
-   > Then you may need to remove Xcode Command Line Tools:  
+   > If you're getting compilation errors like this on macOS Sonoma:
+   > `/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/cstring:66:5: error: <cstring> tried including <string.h> but didn't find libc++'s <string.h> header.`
+   > Then you may need to remove Xcode Command Line Tools:
    > `sudo rm -rf /Library/Developer/CommandLineTools`
 
-3. If you now run tests, the locally-built version of `hogql_parser` will be used:
+3. If you now run tests, the locally-built version of `insightsql_parser` will be used:
 
    ```bash
-   pytest posthog/hogql/
+   pytest posthog/insightsql/
    ```
 
 ## How to install dependencies on Ubuntu
 
 Antlr runtime provided in Ubuntu packages might be of an older version, which results in compilation errors.
 
-In that case run commands from [this step](https://github.com/PostHog/posthog/blob/4fba6a63e351131fdb27b85e7ba436446fdb3093/.github/actions/run-backend-tests/action.yml#L100).
+In that case run commands from [this step](https://github.com/hanzoai/insights/blob/master/.github/actions/run-backend-tests/action.yml#L100).
 
 ## WebAssembly (JavaScript/TypeScript) build
 
-The HogQL parser can also be compiled to WebAssembly for use in JavaScript/TypeScript environments via the `@posthog/hogql-parser` workspace package.
+The InsightsQL parser can also be compiled to WebAssembly for use in JavaScript/TypeScript environments via the `@hanzo/insightsql-parser` workspace package.
 
 ### Prerequisites
 
@@ -107,13 +107,13 @@ From the repository root:
 
 ```bash
 # Using Ninja (recommended, faster)
-pnpm --filter=@posthog/hogql-parser build
+pnpm --filter=@hanzo/insightsql-parser build
 
 # Or using Make
-pnpm --filter=@posthog/hogql-parser build:make
+pnpm --filter=@hanzo/insightsql-parser build:make
 ```
 
-This will generate the following files in `common/hogql_parser/dist/`:
+This will generate the following files in `common/insightsql_parser/dist/`:
 
 - `hogql_parser_wasm.js` - ES module with embedded WASM
 - `index.cjs` - CommonJS wrapper
@@ -124,7 +124,7 @@ This will generate the following files in `common/hogql_parser/dist/`:
 The frontend uses this as a workspace dependency. After building, the parser can be used:
 
 ```typescript
-import createHogQLParser from '@posthog/hogql-parser'
+import createHogQLParser from '@hanzo/insightsql-parser'
 
 createHogQLParser().then((parser) => {
   const ast = JSON.parse(parser.parseExpr('1 + 2'))

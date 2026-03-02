@@ -1040,12 +1040,12 @@ jobs:
               run: |
                   cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked
 
-            - name: Determine if hogql-parser has changed compared to master
+            - name: Determine if insightsql-parser has changed compared to master
               shell: bash
-              id: hogql-parser-diff
+              id: insightsql-parser-diff
               run: |
                   git fetch --no-tags --prune --depth=1 origin master
-                  changed=$(git diff --quiet HEAD origin/master -- common/hogql_parser/ && echo "false" || echo "true")
+                  changed=$(git diff --quiet HEAD origin/master -- common/insightsql_parser/ && echo "false" || echo "true")
                   echo "changed=$changed" >> $GITHUB_OUTPUT
 
             # tests would intermittently fail in GH actions
@@ -1066,11 +1066,11 @@ jobs:
               run: |
                   UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
 
-            - name: Install the working version of hogql-parser
-              if: ${{ needs.changes.outputs.backend == 'true' && steps.hogql-parser-diff.outputs.changed == 'true' }}
+            - name: Install the working version of insightsql-parser
+              if: ${{ needs.changes.outputs.backend == 'true' && steps.insightsql-parser-diff.outputs.changed == 'true' }}
               shell: bash
-              # This is not cached currently, as it's important to build the current HEAD version of hogql-parser if it has
-              # changed (requirements.txt has the already-published version)
+              # This is not cached currently, as it's important to build the current HEAD version of insightsql-parser if it has
+              # changed (pyproject.toml has the local path source)
               run: |
                   sudo apt-get install unzip cmake curl uuid pkg-config
                   curl https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip --output antlr4-source.zip
@@ -1090,7 +1090,7 @@ jobs:
                   sudo cp out/usr/local/lib/libantlr4-runtime.so* /usr/lib/
                   sudo ldconfig
                   cd ..
-                  pip install ./common/hogql_parser
+                  pip install ./common/insightsql_parser
 
             - name: Set up needed files
               shell: bash
