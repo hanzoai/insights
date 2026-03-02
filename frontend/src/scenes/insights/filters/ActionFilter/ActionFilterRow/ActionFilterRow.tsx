@@ -28,7 +28,7 @@ import {
 } from '@posthog/lemon-ui'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
-import { HogQLEditor } from 'lib/components/HogQLEditor/HogQLEditor'
+import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SeriesGlyph, SeriesLetter } from 'lib/components/SeriesGlyph'
@@ -86,7 +86,7 @@ import {
     EntityType,
     EntityTypes,
     FunnelExclusionLegacy,
-    HogQLMathType,
+    InsightsQLMathType,
     InsightShortId,
     InsightType,
     PropertyFilterType,
@@ -187,7 +187,7 @@ export interface ActionFilterRowProps {
     addFilterDocLink?: string
     /** Allow adding non-captured events */
     allowNonCapturedEvents?: boolean
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
 }
 
 export function ActionFilterRow({
@@ -225,7 +225,7 @@ export function ActionFilterRow({
     addFilterDocLink,
     excludedProperties,
     allowNonCapturedEvents,
-    hogQLGlobals,
+    insightsQLGlobals,
 }: ActionFilterRowProps & Pick<TaxonomicPopoverProps, 'excludedProperties' | 'allowNonCapturedEvents'>): JSX.Element {
     const showQuickFilters = useFeatureFlag('TAXONOMIC_QUICK_FILTERS', 'test')
     const effectiveActionsTaxonomicGroupTypes = showQuickFilters
@@ -269,7 +269,7 @@ export function ActionFilterRow({
     // DWH events are not supported in inline events yet
     const canCombine = showCombine && filter.type !== EntityTypes.DATA_WAREHOUSE
 
-    const [isHogQLDropdownVisible, setIsHogQLDropdownVisible] = useState(false)
+    const [isInsightsQLDropdownVisible, setIsInsightsQLDropdownVisible] = useState(false)
     const [isMenuVisible, setIsMenuVisible] = useState(false)
 
     const { setNodeRef, attributes, transform, transition, listeners, isDragging } = useSortable({ id: filter.uuid })
@@ -281,7 +281,7 @@ export function ActionFilterRow({
         math,
         math_property: mathProperty,
         math_property_type: mathPropertyType,
-        math_hogql: mathHogQL,
+        math_insightsql: mathInsightsQL,
         math_group_type_index: mathGroupTypeIndex,
     } = filter
 
@@ -301,21 +301,21 @@ export function ActionFilterRow({
                 mathDefinitions[selectedMath]?.category === MathCategory.PropertyValue
                     ? (mathProperty ?? '$time')
                     : undefined
-            const math_hogql =
-                mathDefinitions[selectedMath]?.category === MathCategory.HogQLExpression
-                    ? (mathHogQL ?? 'count()')
+            const math_insightsql =
+                mathDefinitions[selectedMath]?.category === MathCategory.InsightsQLExpression
+                    ? (mathInsightsQL ?? 'count()')
                     : undefined
             mathProperties = {
                 ...mathTypeToApiValues(selectedMath),
                 math_property,
-                math_hogql,
+                math_insightsql,
                 mathPropertyType,
             }
         } else {
             mathProperties = {
                 math_property: undefined,
                 mathPropertyType: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 math_group_type_index: undefined,
                 math: undefined,
             }
@@ -331,19 +331,19 @@ export function ActionFilterRow({
     const onMathPropertySelect = (_: unknown, property: string, groupType: TaxonomicFilterGroupType): void => {
         updateFilterMath({
             ...filter,
-            math_hogql: undefined,
+            math_insightsql: undefined,
             math_property: property,
             math_property_type: groupType,
             index,
         })
     }
 
-    const onMathHogQLSelect = (_: unknown, hogql: string): void => {
+    const onMathInsightsQLSelect = (_: unknown, insightsql: string): void => {
         updateFilterMath({
             ...filter,
             math_property: undefined,
             math_property_type: undefined,
-            math_hogql: hogql,
+            math_insightsql: insightsql,
             index,
         })
     }
@@ -740,20 +740,20 @@ export function ActionFilterRow({
                                             </div>
                                         )}
                                         {mathDefinitions[math || BaseMathType.TotalCount]?.category ===
-                                            MathCategory.HogQLExpression && (
+                                            MathCategory.InsightsQLExpression && (
                                             <div className="flex-auto overflow-hidden">
                                                 <LemonDropdown
-                                                    visible={isHogQLDropdownVisible}
+                                                    visible={isInsightsQLDropdownVisible}
                                                     closeOnClickInside={false}
-                                                    onClickOutside={() => setIsHogQLDropdownVisible(false)}
+                                                    onClickOutside={() => setIsInsightsQLDropdownVisible(false)}
                                                     overlay={
                                                         // eslint-disable-next-line react/forbid-dom-props
                                                         <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
-                                                            <HogQLEditor
-                                                                value={mathHogQL}
+                                                            <InsightsQLEditor
+                                                                value={mathInsightsQL}
                                                                 onChange={(currentValue) => {
-                                                                    onMathHogQLSelect(index, currentValue)
-                                                                    setIsHogQLDropdownVisible(false)
+                                                                    onMathInsightsQLSelect(index, currentValue)
+                                                                    setIsInsightsQLDropdownVisible(false)
                                                                 }}
                                                             />
                                                         </div>
@@ -762,12 +762,12 @@ export function ActionFilterRow({
                                                     <LemonButton
                                                         fullWidth
                                                         type="secondary"
-                                                        data-attr={`math-hogql-select-${index}`}
+                                                        data-attr={`math-insightsql-select-${index}`}
                                                         onClick={() =>
-                                                            setIsHogQLDropdownVisible(!isHogQLDropdownVisible)
+                                                            setIsInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)
                                                         }
                                                     >
-                                                        <code>{mathHogQL}</code>
+                                                        <code>{mathInsightsQL}</code>
                                                     </LemonButton>
                                                 </LemonDropdown>
                                             </div>
@@ -904,7 +904,7 @@ export function ActionFilterRow({
                         metadataSource={
                             filter.type == TaxonomicFilterGroupType.DataWarehouse
                                 ? {
-                                      kind: NodeKind.HogQLQuery,
+                                      kind: NodeKind.InsightsQLQuery,
                                       query: `select ${filter.distinct_id_field} from ${filter.table_name}`,
                                   }
                                 : undefined
@@ -913,7 +913,7 @@ export function ActionFilterRow({
                             filter.type == TaxonomicFilterGroupType.DataWarehouse
                                 ? [
                                       TaxonomicFilterGroupType.DataWarehouseProperties,
-                                      TaxonomicFilterGroupType.HogQLExpression,
+                                      TaxonomicFilterGroupType.InsightsQLExpression,
                                   ]
                                 : propertiesTaxonomicGroupTypes
                         }
@@ -936,7 +936,7 @@ export function ActionFilterRow({
                         }
                         addFilterDocLink={addFilterDocLink}
                         excludedProperties={excludedProperties}
-                        hogQLGlobals={hogQLGlobals}
+                        insightsQLGlobals={insightsQLGlobals}
                     />
                 </div>
             )}
@@ -1348,13 +1348,13 @@ function useMathSelectorOptions({
     if (
         mathAvailability !== MathAvailability.FunnelsOnly &&
         mathAvailability !== MathAvailability.CalendarHeatmapOnly &&
-        (!allowedMathTypes || allowedMathTypes.includes(HogQLMathType.HogQL))
+        (!allowedMathTypes || allowedMathTypes.includes(InsightsQLMathType.InsightsQL))
     ) {
         options.push({
-            value: HogQLMathType.HogQL,
+            value: InsightsQLMathType.InsightsQL,
             label: 'SQL expression',
             tooltip: 'Aggregate events by custom SQL expression.',
-            'data-attr': `math-node-hogql-expression-${index}`,
+            'data-attr': `math-node-insightsql-expression-${index}`,
         })
     }
 

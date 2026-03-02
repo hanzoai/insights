@@ -24,7 +24,7 @@ import {
     isActorsQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isMarketingAnalyticsTableQuery,
     isNonIntegratedConversionsTableQuery,
     isPersonsNode,
@@ -33,7 +33,7 @@ import { ExporterFormat } from '~/types'
 
 import { dataTableLogic } from './dataTableLogic'
 
-// Sync with posthog/hogql/constants.py
+// Sync with posthog/insightsql/constants.py
 export const MAX_SELECT_RETURNED_ROWS = 50000
 
 const columnDisallowList = ['person.$delete', '*']
@@ -117,7 +117,7 @@ export function DataTableExport({ query, fileNameForExport }: DataTableExportPro
     const showExportClipboardButtons =
         isPersonsNode(source) ||
         isEventsQuery(source) ||
-        isHogQLQuery(source) ||
+        isInsightsQLQuery(source) ||
         isMarketingAnalyticsTableQuery(source) ||
         isNonIntegratedConversionsTableQuery(source)
     const canSaveAsCohort = isActorsQuery(source)

@@ -8,8 +8,8 @@ import polars as pl
 import dagster
 from dagster import AssetKey, JsonMetadataValue, MetadataValue
 
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.client import sync_execute
 from posthog.dags.common import JobOwners
@@ -17,7 +17,7 @@ from posthog.dags.common.resources import ClayWebhookResource
 from posthog.models import Team
 from posthog.models.organization import OrganizationMembership
 
-# The PostHog internal team used for executing HogQL queries against the ProductLed_Outbound saved query.
+# The PostHog internal team used for executing InsightsQL queries against the ProductLed_Outbound saved query.
 PLO_TEAM_ID = 2
 
 # Array fields to progressively truncate when a record exceeds Clay's batch
@@ -336,8 +336,8 @@ def plo_base_targets(
     query = f"""
         SELECT {", ".join(BASE_COLUMNS)}
         FROM ProductLed_Outbound
-        """  # nosemgrep: hogql-fstring-audit -- BASE_COLUMNS are hardcoded constants, not user input
-    response = execute_hogql_query(
+        """  # nosemgrep: insightsql-fstring-audit -- BASE_COLUMNS are hardcoded constants, not user input
+    response = execute_insightsql_query(
         query=query,
         team=team,
         query_type="plo_base_targets",

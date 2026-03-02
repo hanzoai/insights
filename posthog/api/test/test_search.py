@@ -9,7 +9,7 @@ from posthog.api.search import ENTITY_MAP, class_queryset, search_entities
 from posthog.helpers.full_text_search import process_query
 from posthog.models import Dashboard, FeatureFlag, Insight, Team
 from posthog.models.event_definition import EventDefinition
-from posthog.models.hog_flow.hog_flow import HogFlow
+from posthog.models.custom_flow.custom_flow import CustomFlow
 
 from products.early_access_features.backend.models import EarlyAccessFeature
 from products.notebooks.backend.models import Notebook
@@ -171,19 +171,19 @@ class TestSearch(APIBaseTest):
         self.assertEqual(results[0]["type"], "early_access_feature")
         self.assertEqual(results[0]["extra_fields"]["name"], "second feature")
 
-    def test_hog_flows(self):
-        HogFlow.objects.create(name="first workflow", team=self.team)
-        HogFlow.objects.create(name="second workflow", team=self.team)
-        HogFlow.objects.create(name="third workflow", team=self.team)
+    def test_custom_flows(self):
+        CustomFlow.objects.create(name="first workflow", team=self.team)
+        CustomFlow.objects.create(name="second workflow", team=self.team)
+        CustomFlow.objects.create(name="third workflow", team=self.team)
 
-        response = self.client.get("/api/projects/@current/search?q=sec&entities=hog_flow")
+        response = self.client.get("/api/projects/@current/search?q=sec&entities=custom_flow")
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["counts"]["hog_flow"], 1)
+        self.assertEqual(response.json()["counts"]["custom_flow"], 1)
 
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["type"], "hog_flow")
+        self.assertEqual(results[0]["type"], "custom_flow")
         self.assertEqual(results[0]["extra_fields"]["name"], "second workflow")
 
     def test_filters(self):

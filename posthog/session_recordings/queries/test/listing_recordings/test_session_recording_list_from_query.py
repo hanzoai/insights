@@ -25,9 +25,9 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from posthog.schema import PersonsOnEventsMode, RecordingsQuery
 
-from posthog.hogql.ast import SelectQuery
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.printer import prepare_and_print_ast
+from posthog.insightsql.ast import SelectQuery
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.printer import prepare_and_print_ast
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.log_entries import TRUNCATE_LOG_ENTRIES_TABLE_SQL
@@ -2222,12 +2222,12 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["$current_url", "$browser"], person_properties=["email"])
     @snapshot_clickhouse_queries
-    def test_event_filter_with_hogql_properties(self):
-        user = "test_event_filter_with_hogql_properties-user"
+    def test_event_filter_with_insightsql_properties(self):
+        user = "test_event_filter_with_insightsql_properties-user"
 
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
 
-        session_id = f"test_event_filter_with_hogql_properties-1-{str(uuid4())}"
+        session_id = f"test_event_filter_with_insightsql_properties-1-{str(uuid4())}"
         create_event(
             team=self.team,
             distinct_id=user,
@@ -2261,7 +2261,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                         "order": 0,
                         "name": "$pageview",
                         "properties": [
-                            {"key": "properties.$browser == 'Chrome'", "type": "hogql"},
+                            {"key": "properties.$browser == 'Chrome'", "type": "insightsql"},
                         ],
                     }
                 ]
@@ -2277,7 +2277,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                         "type": "events",
                         "order": 0,
                         "name": "$pageview",
-                        "properties": [{"key": "properties.$browser == 'Firefox'", "type": "hogql"}],
+                        "properties": [{"key": "properties.$browser == 'Firefox'", "type": "insightsql"}],
                     }
                 ]
             },
@@ -2285,12 +2285,12 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
     @snapshot_clickhouse_queries
-    def test_event_filter_with_hogql_person_properties(self):
-        user = "test_event_filter_with_hogql_properties-user"
+    def test_event_filter_with_insightsql_person_properties(self):
+        user = "test_event_filter_with_insightsql_properties-user"
 
         Person.objects.create(team=self.team, distinct_ids=[user], properties={"email": "bla"})
 
-        session_id = f"test_event_filter_with_hogql_properties-1-{str(uuid4())}"
+        session_id = f"test_event_filter_with_insightsql_properties-1-{str(uuid4())}"
         create_event(
             team=self.team,
             distinct_id=user,
@@ -2326,7 +2326,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                         "properties": [
                             {
                                 "key": "person.properties.email == 'bla'",
-                                "type": "hogql",
+                                "type": "insightsql",
                             },
                         ],
                     }
@@ -2346,7 +2346,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                         "properties": [
                             {
                                 "key": "person.properties.email == 'something else'",
-                                "type": "hogql",
+                                "type": "insightsql",
                             },
                         ],
                     }
@@ -3064,7 +3064,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
                 # we default to event in that case
                 # "type": "event",
             },
-            {"key": "properties.$browser == 'Chrome'", "type": "hogql"},
+            {"key": "properties.$browser == 'Chrome'", "type": "insightsql"},
         ]
         self.team.save()
 
@@ -3130,9 +3130,9 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     )
     @freeze_time("2021-01-21T20:00:00.000Z")
     @snapshot_clickhouse_queries
-    def test_event_filter_with_hogql_event_properties_test_accounts_excluded(self):
+    def test_event_filter_with_insightsql_event_properties_test_accounts_excluded(self):
         self.team.test_account_filters = [
-            {"key": "properties.$browser == 'Chrome'", "type": "hogql"},
+            {"key": "properties.$browser == 'Chrome'", "type": "insightsql"},
         ]
         self.team.save()
 
@@ -3192,13 +3192,13 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         self.team.test_account_filters = [
-            {"key": "person.properties.email == 'bla'", "type": "hogql"},
+            {"key": "person.properties.email == 'bla'", "type": "insightsql"},
         ]
         self.team.save()
 
         self._assert_query_matches_session_ids(
             {
-                # only 1 pageview that matches the hogql test_accounts filter
+                # only 1 pageview that matches the insightsql test_accounts filter
                 "events": [
                     {
                         "id": "$pageview",
@@ -3213,8 +3213,8 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         )
 
         self.team.test_account_filters = [
-            {"key": "properties.$browser == 'Chrome'", "type": "hogql"},
-            {"key": "person.properties.email == 'bla'", "type": "hogql"},
+            {"key": "properties.$browser == 'Chrome'", "type": "insightsql"},
+            {"key": "person.properties.email == 'bla'", "type": "insightsql"},
         ]
         self.team.save()
 
@@ -3415,7 +3415,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     @also_test_with_materialized_columns(event_properties=["is_internal_user"])
     @freeze_time("2021-01-21T20:00:00.000Z")
     @snapshot_clickhouse_queries
-    def test_top_level_hogql_event_property_test_account_filter(self):
+    def test_top_level_insightsql_event_property_test_account_filter(self):
         """
         This is a regression test. A user with an $ip test account filter
         reported the filtering wasn't working.
@@ -3423,7 +3423,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         The filter wasn't triggering the "should join events" check, and so we didn't apply the filter at all
         """
         self.team.test_account_filters = [
-            {"key": "properties.is_internal_user == 'true'", "type": "hogql"},
+            {"key": "properties.is_internal_user == 'true'", "type": "insightsql"},
         ]
         self.team.save()
 
@@ -3501,7 +3501,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
     @also_test_with_materialized_columns(person_properties=["email"], verify_no_jsonextract=False)
     @freeze_time("2021-01-21T20:00:00.000Z")
     @snapshot_clickhouse_queries
-    def test_top_level_hogql_person_property_test_account_filter(self):
+    def test_top_level_insightsql_person_property_test_account_filter(self):
         """
         This is a regression test. A user with an $ip test account filter
         reported the filtering wasn't working.
@@ -3509,7 +3509,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         The filter wasn't triggering the "should join events" check, and so we didn't apply the filter at all
         """
         self.team.test_account_filters = [
-            {"key": "person.properties.email == 'bla'", "type": "hogql"},
+            {"key": "person.properties.email == 'bla'", "type": "insightsql"},
         ]
         self.team.save()
 
@@ -3659,7 +3659,7 @@ class TestSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseTest):
         # there are 2 pageviews
         self._assert_query_matches_session_ids(
             {
-                # pageview that matches the hogql test_accounts filter
+                # pageview that matches the insightsql test_accounts filter
                 "events": [
                     {
                         "id": "$pageview",
@@ -4204,7 +4204,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
     def _print_query(self, query: SelectQuery) -> str:
         return prepare_and_print_ast(
             query,
-            HogQLContext(team_id=self.team.pk, enable_select_queries=True),
+            InsightsQLContext(team_id=self.team.pk, enable_select_queries=True),
             "clickhouse",
             pretty=True,
         )[0]
@@ -4304,21 +4304,21 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
                 },
             )
             session_recording_list_instance = SessionRecordingListFromQuery(
-                query=query, team=self.team, hogql_query_modifiers=None
+                query=query, team=self.team, insightsql_query_modifiers=None
             )
 
-            hogql_parsed_select = session_recording_list_instance.get_query()
-            printed_query = self._print_query(hogql_parsed_select)
+            insightsql_parsed_select = session_recording_list_instance.get_query()
+            printed_query = self._print_query(insightsql_parsed_select)
 
             if poe_v1 or poe_v2:
-                assert re.search(r"equals\(events\.mat_pp_rgInternal, %\(hogql_val_\d+\)s\)", printed_query)
+                assert re.search(r"equals\(events\.mat_pp_rgInternal, %\(insightsql_val_\d+\)s\)", printed_query)
             else:
                 assert re.search(
-                    r"tupleElement\(argMax\(tuple\(replaceRegexpAll\(nullIf\(nullIf\(JSONExtractRaw\(person\.properties, %\(hogql_val_\d+\)s\), ''\), 'null'\), '^\"|\"\$', ''\)\), person\.version\), 1\) AS properties___rgInternal",
+                    r"tupleElement\(argMax\(tuple\(replaceRegexpAll\(nullIf\(nullIf\(JSONExtractRaw\(person\.properties, %\(insightsql_val_\d+\)s\), ''\), 'null'\), '^\"|\"\$', ''\)\), person\.version\), 1\) AS properties___rgInternal",
                     printed_query,
                 )
                 assert re.search(
-                    r"ifNull\(equals\(events__person\.properties___rgInternal, %\(hogql_val_\d+\)s\), 0\)",
+                    r"ifNull\(equals\(events__person\.properties___rgInternal, %\(insightsql_val_\d+\)s\), 0\)",
                     printed_query,
                 )
             self.assertQueryMatchesSnapshot(printed_query)
@@ -4401,7 +4401,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
             )
 
             session_recording_list_instance = SessionRecordingListFromQuery(
-                query=match_everyone_filter, team=self.team, hogql_query_modifiers=None
+                query=match_everyone_filter, team=self.team, insightsql_query_modifiers=None
             )
             (session_recordings, _, _, _) = session_recording_list_instance.run()
 
@@ -4421,7 +4421,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
             )
 
             session_recording_list_instance = SessionRecordingListFromQuery(
-                query=match_bla_filter, team=self.team, hogql_query_modifiers=None
+                query=match_bla_filter, team=self.team, insightsql_query_modifiers=None
             )
             (session_recordings, _, _, _) = session_recording_list_instance.run()
 
@@ -4482,7 +4482,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
 
             query = RecordingsQuery.model_validate({"person_uuid": str(p.uuid)})
             session_recording_list_instance = SessionRecordingListFromQuery(
-                query=query, team=self.team, hogql_query_modifiers=None
+                query=query, team=self.team, insightsql_query_modifiers=None
             )
             (session_recordings, _, _, _) = session_recording_list_instance.run()
             assert sorted([r["session_id"] for r in session_recordings]) == sorted([session_id_two, session_id_one])
@@ -4505,7 +4505,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
         )
 
         query = RecordingsQuery.model_validate({"limit": 10})
-        result = SessionRecordingListFromQuery(query=query, team=self.team, hogql_query_modifiers=None).run()
+        result = SessionRecordingListFromQuery(query=query, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result.results), 2)
         self.assertFalse(result.has_more_recording)
@@ -4522,7 +4522,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
             )
 
         query = RecordingsQuery.model_validate({"limit": 2, "order": "start_time", "order_direction": "DESC"})
-        result = SessionRecordingListFromQuery(query=query, team=self.team, hogql_query_modifiers=None).run()
+        result = SessionRecordingListFromQuery(query=query, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result.results), 2)
         self.assertTrue(result.has_more_recording)
@@ -4532,7 +4532,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
         query2 = RecordingsQuery.model_validate(
             {"limit": 2, "order": "start_time", "order_direction": "DESC", "after": result.next_cursor}
         )
-        result2 = SessionRecordingListFromQuery(query=query2, team=self.team, hogql_query_modifiers=None).run()
+        result2 = SessionRecordingListFromQuery(query=query2, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result2.results), 2)
         self.assertTrue(result2.has_more_recording)
@@ -4542,7 +4542,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
         query3 = RecordingsQuery.model_validate(
             {"limit": 2, "order": "start_time", "order_direction": "DESC", "after": result2.next_cursor}
         )
-        result3 = SessionRecordingListFromQuery(query=query3, team=self.team, hogql_query_modifiers=None).run()
+        result3 = SessionRecordingListFromQuery(query=query3, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result3.results), 1)
         self.assertFalse(result3.has_more_recording)
@@ -4579,7 +4579,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
         )
 
         query = RecordingsQuery.model_validate({"limit": 2, "order": "console_error_count", "order_direction": "DESC"})
-        result = SessionRecordingListFromQuery(query=query, team=self.team, hogql_query_modifiers=None).run()
+        result = SessionRecordingListFromQuery(query=query, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result.results), 2)
         self.assertTrue(result.has_more_recording)
@@ -4589,7 +4589,7 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
         query2 = RecordingsQuery.model_validate(
             {"limit": 2, "order": "console_error_count", "order_direction": "DESC", "after": result.next_cursor}
         )
-        result2 = SessionRecordingListFromQuery(query=query2, team=self.team, hogql_query_modifiers=None).run()
+        result2 = SessionRecordingListFromQuery(query=query2, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result2.results), 1)
         self.assertFalse(result2.has_more_recording)
@@ -4607,14 +4607,14 @@ class TestClickhouseSessionRecordingsListFromQuery(ClickhouseTestMixin, APIBaseT
             )
 
         query = RecordingsQuery.model_validate({"limit": 2, "offset": 0})
-        result = SessionRecordingListFromQuery(query=query, team=self.team, hogql_query_modifiers=None).run()
+        result = SessionRecordingListFromQuery(query=query, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result.results), 2)
         self.assertTrue(result.has_more_recording)
         self.assertIsNone(result.next_cursor)
 
         query2 = RecordingsQuery.model_validate({"limit": 2, "offset": 2})
-        result2 = SessionRecordingListFromQuery(query=query2, team=self.team, hogql_query_modifiers=None).run()
+        result2 = SessionRecordingListFromQuery(query=query2, team=self.team, insightsql_query_modifiers=None).run()
 
         self.assertEqual(len(result2.results), 2)
         self.assertTrue(result2.has_more_recording)

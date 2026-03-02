@@ -3,8 +3,8 @@ import { kea, path, props, selectors, useValues } from 'kea'
 import { NotFound } from 'lib/components/NotFound'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { availableSourcesDataLogic } from 'scenes/data-warehouse/new/availableSourcesDataLogic'
-import { humanizeHogFunctionType } from 'scenes/hog-functions/hog-function-utils'
-import { HogFunctionTemplateList } from 'scenes/hog-functions/list/HogFunctionTemplateList'
+import { humanizeCustomFunctionType } from 'scenes/custom-functions/custom-function-utils'
+import { CustomFunctionTemplateList } from 'scenes/custom-functions/list/CustomFunctionTemplateList'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -13,7 +13,7 @@ import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { Breadcrumb } from '~/types'
 
 import type { dataPipelinesNewSceneLogicType } from './DataPipelinesNewSceneType'
-import { nonHogFunctionTemplatesLogic } from './utils/nonHogFunctionTemplatesLogic'
+import { nonCustomFunctionTemplatesLogic } from './utils/nonCustomFunctionTemplatesLogic'
 
 export type DataPipelinesNewSceneKind = 'transformation' | 'destination' | 'source' | 'site_app'
 
@@ -41,13 +41,13 @@ export const dataPipelinesNewSceneLogic = kea<dataPipelinesNewSceneLogicType>([
                 return [
                     {
                         key: mapping.scene,
-                        name: capitalizeFirstLetter(humanizeHogFunctionType(kind, true)),
+                        name: capitalizeFirstLetter(humanizeCustomFunctionType(kind, true)),
                         path: mapping.url(),
                         iconType: 'data_pipeline',
                     },
                     {
                         key: Scene.DataPipelinesNew,
-                        name: 'New ' + humanizeHogFunctionType(kind),
+                        name: 'New ' + humanizeCustomFunctionType(kind),
                         iconType: 'data_pipeline',
                     },
                 ]
@@ -69,13 +69,13 @@ export function DataPipelinesNewScene(): JSX.Element {
     const { kind } = logicProps
 
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
-    const { hogFunctionTemplatesDataWarehouseSources, hogFunctionTemplatesBatchExports } = useValues(
-        nonHogFunctionTemplatesLogic({
+    const { customFunctionTemplatesDataWarehouseSources, customFunctionTemplatesBatchExports } = useValues(
+        nonCustomFunctionTemplatesLogic({
             availableSources: availableSources ?? {},
         })
     )
 
-    const humanizedKind = humanizeHogFunctionType(kind)
+    const humanizedKind = humanizeCustomFunctionType(kind)
 
     return (
         <SceneContent>
@@ -87,15 +87,15 @@ export function DataPipelinesNewScene(): JSX.Element {
             />
 
             {kind === 'transformation' ? (
-                <HogFunctionTemplateList type="transformation" />
+                <CustomFunctionTemplateList type="transformation" />
             ) : kind === 'destination' ? (
-                <HogFunctionTemplateList type="destination" manualTemplates={hogFunctionTemplatesBatchExports} />
+                <CustomFunctionTemplateList type="destination" manualTemplates={customFunctionTemplatesBatchExports} />
             ) : kind === 'site_app' ? (
-                <HogFunctionTemplateList type="site_app" />
+                <CustomFunctionTemplateList type="site_app" />
             ) : kind === 'source' ? (
-                <HogFunctionTemplateList
+                <CustomFunctionTemplateList
                     type="source_webhook"
-                    manualTemplates={hogFunctionTemplatesDataWarehouseSources}
+                    manualTemplates={customFunctionTemplatesDataWarehouseSources}
                     manualTemplatesLoading={availableSourcesLoading}
                 />
             ) : (

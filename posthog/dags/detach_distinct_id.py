@@ -3,7 +3,7 @@
 Three cleanup phases, all required:
   1. Postgres — delete posthog_persondistinctid row (stops future ingestion lookups).
   2. Kafka  — publish is_deleted to person_distinct_id2 (stops ClickHouse lookups).
-  3. Override — insert into person_distinct_id_overrides so the HogQL query layer
+  3. Override — insert into person_distinct_id_overrides so the InsightsQL query layer
      immediately re-attributes historical events whose person_id was baked in at
      ingestion time (Person-on-Events). squash_person_overrides later makes it
      permanent and removes the override row.

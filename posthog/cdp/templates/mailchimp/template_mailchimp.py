@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="deprecated",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Updates a contact in Mailchimp and subscribes new ones.",
     icon_url="/static/services/mailchimp.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')

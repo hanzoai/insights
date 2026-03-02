@@ -2,12 +2,12 @@ import json
 import dataclasses
 from copy import deepcopy
 
-from posthog.hogql.escape_sql import escape_hogql_string
+from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 from posthog.models.integration import GoogleCloudIntegration
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -16,7 +16,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send data to a Google Pub/Sub topic",
     icon_url="/static/services/google-cloud.png",
     category=["Custom"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let headers := () -> {
   'Authorization': f'Bearer {inputs.auth.access_token}',
@@ -75,7 +75,7 @@ if (res.status >= 200 and res.status < 300) {
 )
 
 
-class TemplateGooglePubSubMigrator(HogFunctionTemplateMigrator):
+class TemplateGooglePubSubMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/pubsub-plugin"
 
     @classmethod
@@ -100,7 +100,7 @@ class TemplateGooglePubSubMigrator(HogFunctionTemplateMigrator):
 
         hf["filters"] = {}
         if exportEventsToIgnore:
-            event_names = ", ".join([escape_hogql_string(event) for event in exportEventsToIgnore])
+            event_names = ", ".join([escape_insightsql_string(event) for event in exportEventsToIgnore])
             query = f"event not in ({event_names})"
             hf["filters"]["events"] = [
                 {
@@ -108,7 +108,7 @@ class TemplateGooglePubSubMigrator(HogFunctionTemplateMigrator):
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"key": query, "type": "hogql"}],
+                    "properties": [{"key": query, "type": "insightsql"}],
                 }
             ]
 

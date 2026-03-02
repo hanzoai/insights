@@ -25,7 +25,7 @@ import {
 } from '~/queries/schema/schema-assistant-messages'
 import { DataVisualizationNode, InsightVizNode } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
-import { isFunnelsQuery, isHogQLQuery, isInsightVizNode } from '~/queries/utils'
+import { isFunnelsQuery, isInsightsQLQuery, isInsightVizNode } from '~/queries/utils'
 import { InsightShortId } from '~/types'
 
 import { MessageStatus } from '../maxLogic'
@@ -171,7 +171,7 @@ export const VisualizationArtifactAnswer = React.memo(function VisualizationArti
             {isInsightVizNode(query) && isSummaryShown && (
                 <>
                     <SeriesSummary query={query.source} heading={null} />
-                    {!isHogQLQuery(query.source) && (
+                    {!isInsightsQLQuery(query.source) && (
                         <div className="flex flex-wrap gap-4 mt-1 *:grow">
                             <PropertiesSummary properties={query.source.properties} />
                             <InsightBreakdownSummary query={query.source} />

@@ -25,7 +25,7 @@ from posthog.schema import FunnelLayout, NodeKind
 from posthog.api.insight_variable import map_stale_to_latest
 from posthog.caching.calculate_results import calculate_for_query_based_insight
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.models import InsightVariable
 from posthog.models.dashboard_tile import DashboardTile
 from posthog.models.exported_asset import ExportedAsset, get_public_access_token, save_content

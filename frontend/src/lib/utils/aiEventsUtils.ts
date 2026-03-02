@@ -1,7 +1,7 @@
 import api from 'lib/api'
 
-import { hogqlQuery } from '~/queries/query'
-import { hogql } from '~/queries/utils'
+import { insightsqlQuery } from '~/queries/query'
+import { insightsql } from '~/queries/utils'
 import { EventDefinitionType } from '~/types'
 
 import { isDefinitionStale } from './definitions'
@@ -31,8 +31,8 @@ export async function hasRecentAIEvents(): Promise<boolean> {
     }
 
     // Fallback: query ClickHouse directly for recent events (new users)
-    const response = await hogqlQuery(
-        hogql`SELECT 1 FROM events WHERE event IN ${[...AI_EVENT_NAMES]} AND timestamp > now() - INTERVAL 3 HOUR LIMIT 1`,
+    const response = await insightsqlQuery(
+        insightsql`SELECT 1 FROM events WHERE event IN ${[...AI_EVENT_NAMES]} AND timestamp > now() - INTERVAL 3 HOUR LIMIT 1`,
         undefined,
         'force_blocking'
     )

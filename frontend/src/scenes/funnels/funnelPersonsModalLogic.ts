@@ -81,7 +81,7 @@ export const funnelPersonsModalLogic = kea<funnelPersonsModalLogicType>([
         canOpenPersonModal: [
             (s) => [s.funnelsFilter],
             (funnelsFilter): boolean => {
-                return !funnelsFilter?.funnelAggregateByHogQL
+                return !funnelsFilter?.funnelAggregateByInsightsQL
             },
         ],
     }),

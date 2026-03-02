@@ -32,8 +32,8 @@ import {
     DataVisualizationNode,
     DatabaseSchemaViewTable,
     FileSystemIconType,
-    HogQLMetadataResponse,
-    HogQLQuery,
+    InsightsQLMetadataResponse,
+    InsightsQLQuery,
     NodeKind,
 } from '~/queries/schema/schema-general'
 import {
@@ -86,7 +86,7 @@ export interface SuggestionPayload {
     acceptText?: string
     rejectText?: string
     diffShowRunButton?: boolean
-    source?: 'max_ai' | 'hogql_fixer'
+    source?: 'max_ai' | 'insightsql_fixer'
     onAccept: (
         shouldRunQuery: boolean,
         actions: sqlEditorLogicType['actions'],
@@ -199,7 +199,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
         setError: (error: string | null) => ({ error }),
         setDataError: (error: string | null) => ({ error }),
         setSourceQuery: (sourceQuery: DataVisualizationNode) => ({ sourceQuery }),
-        setMetadata: (metadata: HogQLMetadataResponse | null) => ({ metadata }),
+        setMetadata: (metadata: InsightsQLMetadataResponse | null) => ({ metadata }),
         setMetadataLoading: (loading: boolean) => ({ loading }),
         setInsightLoading: (loading: boolean) => ({ loading }),
         editView: (query: string, view: DataWarehouseSavedQuery) => ({ query, view }),
@@ -263,7 +263,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             {
                 kind: NodeKind.DataVisualizationNode,
                 source: {
-                    kind: NodeKind.HogQLQuery,
+                    kind: NodeKind.InsightsQLQuery,
                     query: '',
                 },
                 display: ChartDisplayType.ActionsLineGraph,
@@ -315,12 +315,12 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             },
         ],
         metadata: [
-            null as HogQLMetadataResponse | null,
+            null as InsightsQLMetadataResponse | null,
             {
                 setMetadata: (_, { metadata }) => metadata,
             },
         ],
-        editorKey: [`hogql-editor-${props.tabId}`, {}],
+        editorKey: [`insightsql-editor-${props.tabId}`, {}],
         suggestionPayload: [
             null as SuggestionPayload | null,
             {
@@ -387,7 +387,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
     })),
     listeners(({ values, props, actions, asyncActions, cache }) => ({
         fixErrorsSuccess: ({ response }) => {
-            actions.setSuggestedQueryInput(response.query, 'hogql_fixer')
+            actions.setSuggestedQueryInput(response.query, 'insightsql_fixer')
 
             posthog.capture('ai-error-fixer-success', { trace_id: response.trace_id })
         },
@@ -495,7 +495,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                 if (!existingModel) {
                     const newModel = props.monaco.editor.createModel(
                         values.suggestedQueryInput,
-                        'hogQL',
+                        'insightsQL',
                         values.activeTab.uri
                     )
                     cache.createdModels = cache.createdModels || []
@@ -504,9 +504,9 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     initModel(
                         newModel,
                         codeEditorLogic({
-                            key: `hogql-editor-${props.tabId}`,
+                            key: `insightsql-editor-${props.tabId}`,
                             query: values.suggestedQueryInput,
-                            language: 'hogQL',
+                            language: 'insightsQL',
                         })
                     )
 
@@ -543,7 +543,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                 if (!existingModel) {
                     const newModel = props.monaco.editor.createModel(
                         values.queryInput ?? '',
-                        'hogQL',
+                        'insightsQL',
                         values.activeTab.uri
                     )
                     cache.createdModels = cache.createdModels || []
@@ -551,9 +551,9 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                     initModel(
                         newModel,
                         codeEditorLogic({
-                            key: `hogql-editor-${props.tabId}`,
+                            key: `insightsql-editor-${props.tabId}`,
                             query: values.queryInput ?? '',
-                            language: 'hogQL',
+                            language: 'insightsQL',
                         })
                     )
 
@@ -595,16 +595,16 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
                 const uri = props.monaco.Uri.parse(`tab-${props.tabId}`)
                 let model = props.monaco.editor.getModel(uri)
                 if (!model) {
-                    model = props.monaco.editor.createModel(query, 'hogQL', uri)
+                    model = props.monaco.editor.createModel(query, 'insightsQL', uri)
                     cache.createdModels = cache.createdModels || []
                     cache.createdModels.push(model)
                     props.editor?.setModel(model)
                     initModel(
                         model,
                         codeEditorLogic({
-                            key: `hogql-editor-${props.tabId}`,
+                            key: `insightsql-editor-${props.tabId}`,
                             query: values.sourceQuery?.source.query ?? '',
-                            language: 'hogQL',
+                            language: 'insightsQL',
                         })
                     )
                 }
@@ -672,7 +672,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             if (values.activeTab) {
                 actions.saveAsDraft(
                     {
-                        kind: NodeKind.HogQLQuery,
+                        kind: NodeKind.InsightsQLQuery,
                         query: queryInput,
                     },
                     viewId,
@@ -749,7 +749,7 @@ export const sqlEditorLogic = kea<sqlEditorLogicType>([
             })
         },
         saveAsViewSubmit: async ({ name, materializeAfterSave = false, fromDraft }) => {
-            const query: HogQLQuery = values.sourceQuery.source
+            const query: InsightsQLQuery = values.sourceQuery.source
 
             const queryToSave = {
                 ...query,

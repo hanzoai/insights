@@ -1,9 +1,9 @@
 import { PERSON_DISPLAY_NAME_COLUMN_NAME } from 'lib/constants'
 
 import { QueryFeature, getQueryFeatures } from '~/queries/nodes/DataTable/queryFeatures'
-import { DataNode, DataTableNode, EventsQuery, HogQLExpression, NodeKind } from '~/queries/schema/schema-general'
+import { DataNode, DataTableNode, EventsQuery, InsightsQLExpression, NodeKind } from '~/queries/schema/schema-general'
 
-export const defaultDataTableEventColumns: HogQLExpression[] = [
+export const defaultDataTableEventColumns: InsightsQLExpression[] = [
     '*',
     'event',
     PERSON_DISPLAY_NAME_COLUMN_NAME,
@@ -12,11 +12,11 @@ export const defaultDataTableEventColumns: HogQLExpression[] = [
     'timestamp',
 ]
 
-export const defaultDataTablePersonColumns: HogQLExpression[] = [PERSON_DISPLAY_NAME_COLUMN_NAME, 'id', 'created_at']
+export const defaultDataTablePersonColumns: InsightsQLExpression[] = [PERSON_DISPLAY_NAME_COLUMN_NAME, 'id', 'created_at']
 
-export const defaultDataTableGroupColumns: HogQLExpression[] = ['group_name', 'key', 'created_at']
+export const defaultDataTableGroupColumns: InsightsQLExpression[] = ['group_name', 'key', 'created_at']
 
-export const defaultDataTableSessionColumns: HogQLExpression[] = [
+export const defaultDataTableSessionColumns: InsightsQLExpression[] = [
     'session_id',
     '$start_timestamp',
     '$end_timestamp',
@@ -26,7 +26,7 @@ export const defaultDataTableSessionColumns: HogQLExpression[] = [
     '$is_bounce',
 ]
 
-export function defaultDataTableColumns(kind: NodeKind): HogQLExpression[] {
+export function defaultDataTableColumns(kind: NodeKind): InsightsQLExpression[] {
     return kind === NodeKind.PersonsNode || kind === NodeKind.ActorsQuery
         ? defaultDataTablePersonColumns
         : kind === NodeKind.EventsQuery
@@ -40,7 +40,7 @@ export function defaultDataTableColumns(kind: NodeKind): HogQLExpression[] {
                 : []
 }
 
-export function getDataNodeDefaultColumns(source: DataNode): HogQLExpression[] {
+export function getDataNodeDefaultColumns(source: DataNode): InsightsQLExpression[] {
     if (
         getQueryFeatures(source).has(QueryFeature.selectAndOrderByColumns) &&
         Array.isArray((source as EventsQuery).select) &&
@@ -51,7 +51,7 @@ export function getDataNodeDefaultColumns(source: DataNode): HogQLExpression[] {
     return defaultDataTableColumns(source.kind)
 }
 
-export function getColumnsForQuery(query: DataTableNode): HogQLExpression[] {
+export function getColumnsForQuery(query: DataTableNode): InsightsQLExpression[] {
     return query.columns ?? getDataNodeDefaultColumns(query.source)
 }
 

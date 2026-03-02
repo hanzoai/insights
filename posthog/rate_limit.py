@@ -169,7 +169,7 @@ class PersonalApiKeyRateThrottle(SimpleRateThrottle):
 
         try:
             team_id = self.safely_get_team_id_from_view(view)
-            if team_id is not None and self.scope == HogQLQueryThrottle.scope:
+            if team_id is not None and self.scope == InsightsQLQueryThrottle.scope:
                 self.load_team_rate_limit(team_id)
 
             request_would_be_allowed = super().allow_request(request, view)
@@ -412,8 +412,8 @@ class LLMProxyDailyRateThrottle(UserRateThrottle):
     rate = "20/day"
 
 
-class HogQLQueryThrottle(PersonalApiKeyRateThrottle):
-    # Lower rate limit for HogQL queries
+class InsightsQLQueryThrottle(PersonalApiKeyRateThrottle):
+    # Lower rate limit for InsightsQL queries
     scope = "query"
     rate = "120/hour"
 

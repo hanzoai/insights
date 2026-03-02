@@ -15,14 +15,14 @@ import {
     DateRange,
     ExperimentMetric,
     FileSystemIconType,
-    HogQLFilters,
-    HogQLVariable,
+    InsightsQLFilters,
+    InsightsQLVariable,
     Node,
     NodeKind,
     ProductKey,
     TileFilters,
 } from '~/queries/schema/schema-general'
-import { isDataTableNode, isDataVisualizationNode, isHogQLQuery } from '~/queries/utils'
+import { isDataTableNode, isDataVisualizationNode, isInsightsQLQuery } from '~/queries/utils'
 
 import type { WorkflowsSceneTab } from '../../products/workflows/frontend/WorkflowsScene'
 import {
@@ -128,8 +128,8 @@ export const productRoutes: Record<string, [string, string]> = {
     '/error_tracking/configuration': ['ErrorTrackingConfiguration', 'errorTrackingConfiguration'],
     '/error_tracking/:id': ['ErrorTrackingIssue', 'errorTrackingIssue'],
     '/error_tracking/:id/fingerprints': ['ErrorTrackingIssueFingerprints', 'errorTrackingIssueFingerprints'],
-    '/error_tracking/alerts/:id': ['HogFunction', 'errorTrackingAlert'],
-    '/error_tracking/alerts/new/:templateId': ['HogFunction', 'errorTrackingAlertNew'],
+    '/error_tracking/alerts/:id': ['CustomFunction', 'errorTrackingAlert'],
+    '/error_tracking/alerts/new/:templateId': ['CustomFunction', 'errorTrackingAlertNew'],
     '/feature_flags/templates': ['FeatureFlagTemplates', 'featureFlagTemplates'],
     '/games/368hedgehogs': ['Game368Hedgehogs', 'game368Hedgehogs'],
     '/links': ['Links', 'links'],
@@ -233,7 +233,7 @@ export const productConfiguration: Record<string, any> = {
         name: 'Transformations',
         description:
             'Transformations let you modify, filter, and enrich event data to improve data quality, privacy, and consistency.',
-        activityScope: 'HogFunction',
+        activityScope: 'CustomFunction',
         defaultDocsPath: '/docs/cdp/transformations',
         iconType: 'data_pipeline',
     },
@@ -699,10 +699,10 @@ export const productUrls = {
         query?: Node
         sceneSource?: InsightSceneSource
     } = {}): string => {
-        if (isHogQLQuery(query)) {
+        if (isInsightsQLQuery(query)) {
             return urls.sqlEditor({ query: query.query })
         }
-        if ((isDataVisualizationNode(query) || isDataTableNode(query)) && isHogQLQuery(query.source)) {
+        if ((isDataVisualizationNode(query) || isDataTableNode(query)) && isInsightsQLQuery(query.source)) {
             return urls.sqlEditor({ query: query.source.query })
         }
         return combineUrl('/insights/new', dashboardId ? { dashboard: dashboardId } : {}, {
@@ -711,16 +711,16 @@ export const productUrls = {
             ...(sceneSource ? { sceneSource } : {}),
         }).url
     },
-    insightNewHogQL: ({ query, filters }: { query: string; filters?: HogQLFilters }): string =>
+    insightNewInsightsQL: ({ query, filters }: { query: string; filters?: InsightsQLFilters }): string =>
         urls.insightNew({
-            query: { kind: NodeKind.DataTableNode, source: { kind: 'HogQLQuery', query, filters } } as any,
+            query: { kind: NodeKind.DataTableNode, source: { kind: 'InsightsQLQuery', query, filters } } as any,
         }),
     insightEdit: (id: InsightShortId, dashboardId?: number): string =>
         `/insights/${id}/edit${dashboardId ? `?dashboard=${dashboardId}` : ''}`,
     insightView: (
         id: InsightShortId,
         dashboardId?: number,
-        variablesOverride?: Record<string, HogQLVariable>,
+        variablesOverride?: Record<string, InsightsQLVariable>,
         filtersOverride?: DashboardFilter,
         tileFiltersOverride?: TileFilters
     ): string => {
@@ -970,31 +970,31 @@ export const getTreeItemsNew = (): FileSystemImport[] => [
     },
     {
         path: `Data/Destination`,
-        type: 'hog_function/destination',
+        type: 'custom_function/destination',
         href: urls.dataPipelinesNew('destination'),
         iconColor: ['var(--color-product-data-pipeline-light)'],
-        sceneKeys: ['HogFunction'],
+        sceneKeys: ['CustomFunction'],
     },
     {
         path: `Data/Site app`,
-        type: 'hog_function/site_app',
+        type: 'custom_function/site_app',
         href: urls.appsNew(),
         iconColor: ['var(--color-product-data-pipeline-light)'],
-        sceneKeys: ['HogFunction'],
+        sceneKeys: ['CustomFunction'],
     },
     {
         path: `Data/Source`,
-        type: 'hog_function/source',
+        type: 'custom_function/source',
         href: urls.dataPipelinesNew('source'),
         iconColor: ['var(--color-product-data-pipeline-light)'],
-        sceneKeys: ['HogFunction'],
+        sceneKeys: ['CustomFunction'],
     },
     {
         path: `Data/Transformation`,
-        type: 'hog_function/transformation',
+        type: 'custom_function/transformation',
         href: urls.dataPipelinesNew('transformation'),
         iconColor: ['var(--color-product-data-pipeline-light)'],
-        sceneKeys: ['HogFunction'],
+        sceneKeys: ['CustomFunction'],
     },
     {
         path: `Early access feature`,
@@ -1161,7 +1161,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
             ProductKey.SITE_APPS,
         ],
         category: 'Tools',
-        type: 'hog_function',
+        type: 'custom_function',
         iconType: 'data_pipeline',
         iconColor: ['var(--color-product-data-pipeline-light)'],
         flag: FEATURE_FLAGS.SHOW_DATA_PIPELINES_NAV_ITEM,
@@ -1487,7 +1487,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         path: 'Site Apps',
         intents: [ProductKey.SITE_APPS],
         category: 'Tools',
-        type: 'hog_function',
+        type: 'custom_function',
         iconType: 'data_pipeline',
         iconColor: ['var(--color-product-data-pipeline-light)'],
         href: urls.apps(),
@@ -1619,7 +1619,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     {
         path: `Destinations`,
         category: 'Pipeline',
-        type: 'hog_function/destination',
+        type: 'custom_function/destination',
         iconType: 'data_pipeline_metadata',
         href: urls.destinations(),
         sceneKey: 'Destinations',
@@ -1707,7 +1707,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     {
         path: `Sources`,
         category: 'Pipeline',
-        type: 'hog_function/source',
+        type: 'custom_function/source',
         iconType: 'data_pipeline_metadata',
         href: urls.sources(),
         sceneKey: 'Sources',
@@ -1727,7 +1727,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     {
         path: `Transformations`,
         category: 'Pipeline',
-        type: 'hog_function/transformation',
+        type: 'custom_function/transformation',
         iconType: 'data_pipeline_metadata',
         href: urls.transformations(),
         sceneKey: 'Transformations',

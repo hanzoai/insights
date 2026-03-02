@@ -1,5 +1,5 @@
 from posthog.cdp.templates.activecampaign.template_activecampaign import template as template_activecampaign
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 
 
 def create_inputs(**kwargs):
@@ -15,7 +15,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateActiveCampaign(BaseHogFunctionTemplateTest):
+class TestTemplateActiveCampaign(BaseCustomFunctionTemplateTest):
     template = template_activecampaign
 
     def test_function_works(self):

@@ -1,15 +1,5 @@
-import { useValues } from 'kea'
-
-import { HedgehogMode } from 'lib/components/HedgehogMode/HedgehogMode'
-
-import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
+// Hedgehog mode removed — stub kept for import compatibility
 
 export function HedgehogButton(): JSX.Element | null {
-    const { hedgehogModeEnabled, hedgehogModeAvailable } = useValues(toolbarLogic)
-
-    if (!hedgehogModeAvailable) {
-        return null
-    }
-
-    return <HedgehogMode enabledOverride={hedgehogModeEnabled} />
+    return null
 }

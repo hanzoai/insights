@@ -54,7 +54,7 @@ def requires_flag_warning(filter: Filter, team: Team) -> bool:
             "limit": filter.limit or 20,
             **date_params,
             **entity_params,
-            **filter.hogql_context.values,
+            **filter.insightsql_context.values,
         },
     )
 

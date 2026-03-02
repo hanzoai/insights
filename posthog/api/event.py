@@ -22,10 +22,10 @@ from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.settings import api_settings
 from rest_framework_csv import renderers as csvrenderers
 
-from posthog.hogql import ast
-from posthog.hogql.constants import DEFAULT_RETURNED_ROWS, MAX_SELECT_RETURNED_ROWS
-from posthog.hogql.property_utils import create_property_conditions
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.constants import DEFAULT_RETURNED_ROWS, MAX_SELECT_RETURNED_ROWS
+from posthog.insightsql.property_utils import create_property_conditions
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.documentation import PropertiesSerializer, extend_schema
 from posthog.api.routing import TeamAndOrgViewSetMixin
@@ -194,13 +194,13 @@ class EventViewSet(
             OpenApiParameter(
                 "select",
                 OpenApiTypes.STR,
-                description="(Experimental) JSON-serialized array of HogQL expressions to return",
+                description="(Experimental) JSON-serialized array of InsightsQL expressions to return",
                 many=True,
             ),
             OpenApiParameter(
                 "where",
                 OpenApiTypes.STR,
-                description="(Experimental) JSON-serialized array of HogQL expressions that must pass",
+                description="(Experimental) JSON-serialized array of InsightsQL expressions that must pass",
                 many=True,
             ),
             OpenApiParameter("person_id", OpenApiTypes.INT, description="Filter list by person id."),
@@ -551,7 +551,7 @@ class EventViewSet(
                 limit=ast.Constant(value=10),
             )
 
-            result = execute_hogql_query(query, team=query_params.team)
+            result = execute_insightsql_query(query, team=query_params.team)
 
             values = []
             for value in result.results:
@@ -609,7 +609,7 @@ class EventViewSet(
             order_by=[ast.OrderExpr(expr=ast.Field(chain=["event"]), order="ASC")],
         )
 
-        result = execute_hogql_query(query, team=query_params.team)
+        result = execute_insightsql_query(query, team=query_params.team)
 
         return self._return_with_short_cache([{"name": event[0]} for event in result.results])
 

@@ -18,7 +18,7 @@ from temporalio.exceptions import ApplicationError
 
 from posthog.schema import CachedSessionBatchEventsQueryResponse
 
-from posthog.hogql_queries.ai.session_batch_events_query_runner import (
+from posthog.insightsql_queries.ai.session_batch_events_query_runner import (
     SessionBatchEventsQueryRunner,
     create_session_batch_events_query,
 )

@@ -29,7 +29,7 @@ MAX_RETRY_ATTEMPTS = 2  # retry policy for both workflow and activity
 CACHE_TTL = 60 * 60 * 24  # 24 hours — events are immutable once ingested
 BATCH_MAX_TRACE_IDS = 25
 
-# HogQL query template for fetching $ai_generation events
+# InsightsQL query template for fetching $ai_generation events
 GENERATIONS_QUERY = """
     SELECT uuid, properties, properties.$ai_trace_id AS trace_id
     FROM events

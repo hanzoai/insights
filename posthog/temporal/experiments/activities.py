@@ -11,9 +11,9 @@ import temporalio.activity
 from posthog.schema import ExperimentFunnelMetric, ExperimentMeanMetric, ExperimentQuery, ExperimentRatioMetric
 
 from posthog.clickhouse.client.connection import Workload
-from posthog.hogql_queries.experiments.experiment_metric_fingerprint import compute_metric_fingerprint
-from posthog.hogql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
-from posthog.hogql_queries.experiments.utils import get_experiment_stats_method
+from posthog.insightsql_queries.experiments.experiment_metric_fingerprint import compute_metric_fingerprint
+from posthog.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
+from posthog.insightsql_queries.experiments.utils import get_experiment_stats_method
 from posthog.models.experiment import (
     Experiment,
     ExperimentMetricResult as ExperimentMetricResultModel,

@@ -11,7 +11,7 @@ import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
 import { cn } from 'lib/utils/css-classes'
-import { LinkedHogFunctions } from 'scenes/hog-functions/list/LinkedHogFunctions'
+import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
 import MaxTool from 'scenes/max/MaxTool'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -198,7 +198,7 @@ function Surveys(): JSX.Element {
             {tab === SurveysTabs.Notifications && (
                 <>
                     <p>Get notified whenever a survey result is submitted</p>
-                    <LinkedHogFunctions type="destination" subTemplateIds={['survey-response']} />
+                    <LinkedCustomFunctions type="destination" subTemplateIds={['survey-response']} />
                 </>
             )}
 

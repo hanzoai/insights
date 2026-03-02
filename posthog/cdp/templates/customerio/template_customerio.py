@@ -1,11 +1,11 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
 # Based off of https://customer.io/docs/api/track/#operation/entity
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -14,7 +14,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Identify or track events against customers in Customer.io",
     icon_url="/static/services/customerio.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let action := inputs.action
 let name := event.event
@@ -220,7 +220,7 @@ if (res.status >= 400) {
 )
 
 
-class TemplateCustomerioMigrator(HogFunctionTemplateMigrator):
+class TemplateCustomerioMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/customerio-plugin"
 
     @classmethod

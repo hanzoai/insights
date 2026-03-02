@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from posthog.schema import QueryIndexUsage
 
-from posthog.hogql.context import HogQLContext
+from posthog.insightsql.context import InsightsQLContext
 
 from posthog.clickhouse.client import sync_execute
 
@@ -125,9 +125,9 @@ def extract_index_usage_from_plan(plan: str) -> QueryIndexUsage:
     return QueryIndexUsage.UNDECISIVE
 
 
-def execute_explain_get_index_use(clickhouse_sql: str, context: HogQLContext) -> QueryIndexUsage:
+def execute_explain_get_index_use(clickhouse_sql: str, context: InsightsQLContext) -> QueryIndexUsage:
     # try:
-    # nosemgrep: clickhouse-fstring-param-audit - clickhouse_sql is HogQL-compiled, not user input
+    # nosemgrep: clickhouse-fstring-param-audit - clickhouse_sql is InsightsQL-compiled, not user input
     explain_results = sync_execute(
         f"EXPLAIN PLAN indexes=1,json=1 {clickhouse_sql}",
         context.values,

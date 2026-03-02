@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from rest_framework import status
 
-# The remote config stuff plus plugin and hog function queries
+# The remote config stuff plus plugin and custom function queries
 CONFIG_REFRESH_QUERY_COUNT = 5
 
 

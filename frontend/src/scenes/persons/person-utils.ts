@@ -7,7 +7,7 @@ import { isUUIDLike, midEllipsis } from 'lib/utils'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
-import { HogQLQueryString, hogql } from '~/queries/utils'
+import { InsightsQLQueryString, insightsql } from '~/queries/utils'
 
 /**
  * Generates a stable color index from a string using djb2 hash.
@@ -116,8 +116,8 @@ export const asLink = (person?: PersonPropType | null): string | undefined =>
             ? urls.personByUUID(person.id)
             : undefined
 
-export const getHogqlQueryStringForPersonId = (): HogQLQueryString => {
-    return hogql`SELECT
+export const getInsightsqlQueryStringForPersonId = (): InsightsQLQueryString => {
+    return insightsql`SELECT
                     id,
                     groupArray(101)(pdi2.distinct_id) as distinct_ids,
                     properties,

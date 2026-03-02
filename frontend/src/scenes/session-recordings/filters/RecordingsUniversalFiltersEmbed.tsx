@@ -309,7 +309,7 @@ interface ReplayUniversalFiltersEmbedProps {
     resetFilters?: () => void
     totalFiltersCount?: number
     className?: string
-    allowReplayHogQLFilters?: boolean
+    allowReplayInsightsQLFilters?: boolean
 }
 
 export const RecordingsUniversalFiltersEmbed = ({ ...props }: ReplayUniversalFiltersEmbedProps): JSX.Element => {
@@ -497,7 +497,7 @@ const ReplayFiltersTab = ({
     resetFilters,
     className,
     totalFiltersCount,
-    allowReplayHogQLFilters = false,
+    allowReplayInsightsQLFilters = false,
 }: ReplayUniversalFiltersEmbedProps): JSX.Element => {
     const [isSaveFiltersModalOpen, setIsSaveFiltersModalOpen] = useState(false)
 
@@ -529,8 +529,8 @@ const ReplayFiltersTab = ({
         TaxonomicFilterGroupType.AutocaptureEvents,
     ]
 
-    if (allowReplayHogQLFilters) {
-        taxonomicGroupTypes.push(TaxonomicFilterGroupType.HogQLExpression)
+    if (allowReplayInsightsQLFilters) {
+        taxonomicGroupTypes.push(TaxonomicFilterGroupType.InsightsQLExpression)
     }
 
     if (showQuickFilters) {

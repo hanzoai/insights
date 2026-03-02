@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Knock",
     icon_url="/static/services/knock.png",
     category=["SMS & Push Notifications"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.userId)) {
     print('No User ID set. Skipping...')

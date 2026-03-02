@@ -53,7 +53,7 @@ function createNPSTrendSeries(
     kind: NodeKind.EventsNode
     custom_name: string
     properties: Array<{
-        type: PropertyFilterType.HogQL
+        type: PropertyFilterType.InsightsQL
         key: string
     }>
 } {
@@ -63,7 +63,7 @@ function createNPSTrendSeries(
         custom_name: label,
         properties: [
             {
-                type: PropertyFilterType.HogQL,
+                type: PropertyFilterType.InsightsQL,
                 key: `getSurveyResponse(${questionIndex}, ${questionId ? `'${questionId}'` : ''}) in (${values.join(
                     ','
                 )})`,
@@ -81,7 +81,7 @@ function createSingleRatingTrendSeries(
     kind: NodeKind.EventsNode
     custom_name: string
     properties: Array<{
-        type: PropertyFilterType.HogQL
+        type: PropertyFilterType.InsightsQL
         key: string
     }>
 } {
@@ -91,7 +91,7 @@ function createSingleRatingTrendSeries(
         custom_name: `Rating ${ratingValue}`,
         properties: [
             {
-                type: PropertyFilterType.HogQL,
+                type: PropertyFilterType.InsightsQL,
                 key: `getSurveyResponse(${questionIndex}, '${questionId}') = '${ratingValue}'`,
             },
         ],
@@ -339,7 +339,7 @@ function RatingScoreOverTime({
         kind: NodeKind.EventsNode
         custom_name: string
         properties: Array<{
-            type: PropertyFilterType.HogQL
+            type: PropertyFilterType.InsightsQL
             key: string
         }>
     }> = []

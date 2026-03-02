@@ -5,7 +5,7 @@ from django.db import migrations
 
 def migrate_action_webhooks_forward(apps, schema_editor):
     # Migration code removed as it has already been released and applied in production
-    # Original migration converted action webhooks to HogFunction destinations
+    # Original migration converted action webhooks to CustomFunction destinations
     pass
 
 

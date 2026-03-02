@@ -59,7 +59,7 @@ class InsightResult:
     timings: Optional[list[QueryTiming]] = None
     columns: Optional[list] = None
     query_status: Optional[Any] = None
-    hogql: Optional[str] = None
+    insightsql: Optional[str] = None
     types: Optional[list] = None
     resolved_date_range: Optional[ResolvedDateRangeResponse] = None
 

@@ -39,8 +39,8 @@ export interface RetentionTrendPayload {
 
 export interface RetentionTablePeoplePayload {
     next?: string // Legacy support
-    offset?: number // Offset for HogQL queries
-    result?: RetentionTableAppearanceType[] // TODO: Rename to plural responses to match HogQL responses
+    offset?: number // Offset for InsightsQL queries
+    result?: RetentionTableAppearanceType[] // TODO: Rename to plural responses to match InsightsQL responses
     missing_persons?: number
 }
 

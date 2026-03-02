@@ -5,7 +5,7 @@ from django.core.cache import cache
 
 import pytz
 
-from posthog.schema import HogQLQuery
+from posthog.schema import InsightsQLQuery
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.query_tagging import Product, tag_queries
@@ -160,10 +160,10 @@ class SessionReplayEvents:
         Returns a list of tuples of (session_id, min_timestamp, max_timestamp, expiry_time).
         Timestamps are per session, not for the entire list of sessions.
         """
-        from posthog.hogql_queries.hogql_query_runner import HogQLQueryRunner
+        from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
 
         now = datetime.now(pytz.timezone("UTC"))
-        query = HogQLQuery(
+        query = InsightsQLQuery(
             query="""
                 SELECT
                     session_id,
@@ -187,7 +187,7 @@ class SessionReplayEvents:
             },
         )
         tag_queries(product=Product.REPLAY, team_id=team.pk)
-        result = HogQLQueryRunner(team=team, query=query).calculate()
+        result = InsightsQLQueryRunner(team=team, query=query).calculate()
         if not result.results:
             return []
         sessions_found: list[tuple[str, datetime, datetime, datetime]] = [
@@ -203,9 +203,9 @@ class SessionReplayEvents:
         Check which session IDs have events in the events table within the given time range.
         Returns a set of session IDs that have at least one event.
         """
-        from posthog.hogql_queries.hogql_query_runner import HogQLQueryRunner
+        from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
 
-        query = HogQLQuery(
+        query = InsightsQLQuery(
             query="""
                 SELECT DISTINCT properties.$session_id AS session_id
                 FROM events
@@ -220,7 +220,7 @@ class SessionReplayEvents:
             },
         )
         tag_queries(product=Product.REPLAY, team_id=team.pk)
-        result = HogQLQueryRunner(team=team, query=query).calculate()
+        result = InsightsQLQueryRunner(team=team, query=query).calculate()
         if not result.results:
             return set()
         return {row[0] for row in result.results}
@@ -488,9 +488,9 @@ class SessionReplayEvents:
         extra_fields: list[str] | None = None,
         limit: int | None = None,
         page: int = 0,
-    ) -> HogQLQuery:
+    ) -> InsightsQLQuery:
         """
-        Helper function to build a HogQLQuery for session events, to be able to use
+        Helper function to build a InsightsQLQuery for session events, to be able to use
         both in production and locally (for example, when testing session summary)
         """
         fields = [*DEFAULT_EVENT_FIELDS]
@@ -509,10 +509,10 @@ class SessionReplayEvents:
         if limit is not None and limit > 0:
             q += " LIMIT {limit}"
             # Offset makes sense only if limit is defined,
-            # to avoid mixing default HogQL limit and the expected one
+            # to avoid mixing default InsightsQL limit and the expected one
             if page > 0:
                 q += " OFFSET {offset}"
-        hq = HogQLQuery(
+        hq = InsightsQLQuery(
             query=q,
             values={
                 # Add some wiggle room to the timings, to ensure we get all the events
@@ -538,13 +538,13 @@ class SessionReplayEvents:
         limit: int | None = None,
         page: int = 0,
     ) -> tuple[list | None, list | None]:
-        from posthog.schema import HogQLQueryResponse
+        from posthog.schema import InsightsQLQueryResponse
 
-        from posthog.hogql_queries.hogql_query_runner import HogQLQueryRunner
+        from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
 
         hq = self.get_events_query(session_id, metadata, events_to_ignore, extra_fields, limit, page)
         tag_queries(product=Product.REPLAY, team_id=team.pk)
-        result: HogQLQueryResponse = HogQLQueryRunner(
+        result: InsightsQLQueryResponse = InsightsQLQueryRunner(
             team=team,
             query=hq,
         ).calculate()
@@ -658,7 +658,7 @@ def get_person_emails_for_session_ids(
     """
     Get person emails for a list of session IDs.
     """
-    from posthog.hogql_queries.hogql_query_runner import HogQLQueryRunner
+    from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
 
     if not session_ids:
         return {}
@@ -669,7 +669,7 @@ def get_person_emails_for_session_ids(
             f"Date range cannot exceed 3 months (90 days), got {(max_timestamp - min_timestamp).days} days"
         )
     team = Team.objects.get(pk=team_id)
-    query = HogQLQuery(
+    query = InsightsQLQuery(
         query="""
             SELECT
                 properties.$session_id AS session_id,
@@ -687,7 +687,7 @@ def get_person_emails_for_session_ids(
         },
     )
     tag_queries(product=Product.REPLAY, team_id=team_id)
-    result = HogQLQueryRunner(team=team, query=query).calculate()
+    result = InsightsQLQueryRunner(team=team, query=query).calculate()
     email_mapping: dict[str, str | None] = dict.fromkeys(session_ids)
     if result.results:
         for row in result.results:

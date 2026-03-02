@@ -7,7 +7,7 @@ import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { groupsModel } from '~/models/groupsModel'
-import { HOGQL_COLUMNS_KEY } from '~/queries/nodes/DataTable/defaultEventsQuery'
+import { INSIGHTSQL_COLUMNS_KEY } from '~/queries/nodes/DataTable/defaultEventsQuery'
 import { GroupTypeIndex } from '~/types'
 
 import type { columnConfiguratorLogicType } from './columnConfiguratorLogicType'
@@ -175,7 +175,7 @@ export const columnConfiguratorLogic = kea<columnConfiguratorLogicType>([
                 }
             } else {
                 // Team-wide default columns
-                teamLogic.actions.updateCurrentTeam({ live_events_columns: [HOGQL_COLUMNS_KEY, ...values.columns] })
+                teamLogic.actions.updateCurrentTeam({ live_events_columns: [INSIGHTSQL_COLUMNS_KEY, ...values.columns] })
             }
 
             // Always update the columns in the query

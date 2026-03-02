@@ -6,11 +6,11 @@ from pydantic import BaseModel
 
 from posthog.schema import CacheMissResponse, DashboardFilter
 
-from posthog.hogql.constants import LimitContext
+from posthog.insightsql.constants import LimitContext
 
 from posthog.api.services.query import ExecutionMode, process_query_dict
 from posthog.clickhouse.query_tagging import tag_queries
-from posthog.hogql_queries.query_runner import get_query_runner_or_none
+from posthog.insightsql_queries.query_runner import get_query_runner_or_none
 from posthog.models import Dashboard, DashboardTile, Insight, Team, User
 from posthog.models.insight import generate_insight_filters_hash
 from posthog.schema_migrations.upgrade_manager import upgrade_query
@@ -101,7 +101,7 @@ def calculate_for_query_based_insight(
             team.id,
             cache_key,
             last_refresh,
-            result=None,  # Not caching the result here, since in HogQL this is the query runner's responsibility
+            result=None,  # Not caching the result here, since in InsightsQL this is the query runner's responsibility
         )
 
     return InsightResult(
@@ -118,7 +118,7 @@ def calculate_for_query_based_insight(
         cache_target_age=response.get("cache_target_age"),
         timings=response.get("timings"),
         query_status=response.get("query_status"),
-        hogql=response.get("hogql"),
+        insightsql=response.get("insightsql"),
         types=response.get("types"),
         resolved_date_range=response.get("resolved_date_range"),
     )

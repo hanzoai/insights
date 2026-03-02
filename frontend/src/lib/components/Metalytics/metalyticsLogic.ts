@@ -8,7 +8,7 @@ import { sceneLogic } from 'scenes/sceneLogic'
 
 import { sidePanelContextLogic } from '~/layout/navigation-3000/sidepanel/panels/sidePanelContextLogic'
 import { SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import type { metalyticsLogicType } from './metalyticsLogicType'
 
@@ -23,7 +23,7 @@ export const metalyticsLogic = kea<metalyticsLogicType>([
             null as { views: number; users: number } | null,
             {
                 loadViewCount: async () => {
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT SUM(count) AS count, COUNT(DISTINCT app_source_id) AS unique_users
                         FROM app_metrics
                         WHERE app_source = 'metalytics'
@@ -31,7 +31,7 @@ export const metalyticsLogic = kea<metalyticsLogicType>([
 
                     // NOTE: I think this gets cached heavily - how to correctly invalidate?
                     const currentScene = sceneLogic.findMounted()?.values.activeSceneId ?? 'Metalytics'
-                    const response = await api.queryHogQL(
+                    const response = await api.queryInsightsQL(
                         query,
                         { scene: currentScene, productKey: 'platform_and_support' },
                         { refresh: 'force_blocking' }
@@ -48,7 +48,7 @@ export const metalyticsLogic = kea<metalyticsLogicType>([
             [] as string[],
             {
                 loadUsersLast30days: async () => {
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT DISTINCT app_source_id
                         FROM app_metrics
                         WHERE app_source = 'metalytics'
@@ -57,7 +57,7 @@ export const metalyticsLogic = kea<metalyticsLogicType>([
                         ORDER BY timestamp DESC`
 
                     const currentScene = sceneLogic.findMounted()?.values.activeSceneId ?? 'Metalytics'
-                    const response = await api.queryHogQL(
+                    const response = await api.queryInsightsQL(
                         query,
                         { scene: currentScene, productKey: 'platform_and_support' },
                         { refresh: 'force_blocking' }

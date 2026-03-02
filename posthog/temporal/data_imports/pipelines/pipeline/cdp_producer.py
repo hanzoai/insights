@@ -10,12 +10,12 @@ import pyarrow.parquet as pq
 from pyarrow.parquet import write_table
 from structlog.types import FilteringBoundLogger
 
-from posthog.hogql.database.database import get_data_warehouse_table_name
+from posthog.insightsql.database.database import get_data_warehouse_table_name
 
 from posthog.exceptions_capture import capture_exception
 from posthog.kafka_client.client import _AsyncKafkaProducer, get_async_warpstream_kafka_producer
 from posthog.kafka_client.topics import KAFKA_DWH_CDP_RAW_TABLE
-from posthog.models.hog_functions import HogFunction
+from posthog.models.custom_functions import CustomFunction
 from posthog.sync import database_sync_to_async_pool
 from posthog.temporal.data_imports.pipelines.helpers import build_table_name
 
@@ -91,11 +91,11 @@ class CDPProducer:
             raw_table_name = build_table_name(schema.source, schema.name)
             dot_notated_table_name = get_data_warehouse_table_name(schema.source, raw_table_name)
 
-            self.logger.debug(f"Checking if table {dot_notated_table_name} is used in any HogQL functions")
+            self.logger.debug(f"Checking if table {dot_notated_table_name} is used in any InsightsQL functions")
             self.logger.debug(f"Using table_name = {dot_notated_table_name}, source = data-warehouse-table")
 
             return (
-                HogFunction.objects.filter(
+                CustomFunction.objects.filter(
                     team_id=self.team_id,
                     enabled=True,
                     filters__source="data-warehouse-table",

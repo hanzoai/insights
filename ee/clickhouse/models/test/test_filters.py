@@ -24,7 +24,7 @@ def _filter_events(filter: Filter, team: Team, order_by: Optional[str] = None):
     prop_filters, prop_filter_params = parse_prop_grouped_clauses(
         property_group=filter.property_groups,
         team_id=team.pk,
-        hogql_context=filter.hogql_context,
+        insightsql_context=filter.insightsql_context,
     )
     params = {"team_id": team.pk, **prop_filter_params}
 
@@ -44,12 +44,12 @@ def _filter_persons(filter: Filter, team: Team):
         property_group=filter.property_groups,
         team_id=team.pk,
         person_properties_mode=PersonPropertiesMode.USING_PERSON_PROPERTIES_COLUMN,
-        hogql_context=filter.hogql_context,
+        insightsql_context=filter.insightsql_context,
     )
     # Note this query does not handle person rows changing over time
     rows = sync_execute(
         f"SELECT id, properties AS person_props FROM person WHERE team_id = %(team_id)s {prop_filters}",
-        {"team_id": team.pk, **prop_filter_params, **filter.hogql_context.values},
+        {"team_id": team.pk, **prop_filter_params, **filter.insightsql_context.values},
     )
     return [str(uuid) for uuid, _ in rows]
 
@@ -425,7 +425,7 @@ class TestFilters(PGTestFilters):
                         "id": "$pageview",
                         "id_field": None,
                         "math": None,
-                        "math_hogql": None,
+                        "math_insightsql": None,
                         "math_property": None,
                         "math_property_revenue_currency": None,
                         "math_group_type_index": None,
@@ -473,7 +473,7 @@ class TestFilters(PGTestFilters):
                         "id": "$pageview",
                         "id_field": None,
                         "math": "unique_group",
-                        "math_hogql": None,
+                        "math_insightsql": None,
                         "math_property": None,
                         "math_property_revenue_currency": None,
                         "math_group_type_index": 2,
@@ -1266,7 +1266,7 @@ class TestFiltering(ClickhouseTestMixin, property_to_Q_test_factory(_filter_pers
             property_group=filter.property_groups,
             has_person_id_joined=False,
             team_id=self.team.pk,
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         query = """
         SELECT distinct_id FROM person_distinct_id2 WHERE team_id = %(team_id)s {prop_clause}
@@ -1277,7 +1277,7 @@ class TestFiltering(ClickhouseTestMixin, property_to_Q_test_factory(_filter_pers
             {
                 "team_id": self.team.pk,
                 **prop_clause_params,
-                **filter.hogql_context.values,
+                **filter.insightsql_context.values,
             },
         )[0][0]
         self.assertEqual(result, person1_distinct_id)
@@ -1291,7 +1291,7 @@ class TestFiltering(ClickhouseTestMixin, property_to_Q_test_factory(_filter_pers
             property_group=filter.property_groups,
             has_person_id_joined=False,
             team_id=self.team.pk,
-            hogql_context=filter.hogql_context,
+            insightsql_context=filter.insightsql_context,
         )
         query = """
         SELECT distinct_id FROM person_distinct_id2 WHERE team_id = %(team_id)s {prop_clause}
@@ -1302,7 +1302,7 @@ class TestFiltering(ClickhouseTestMixin, property_to_Q_test_factory(_filter_pers
             {
                 "team_id": self.team.pk,
                 **prop_clause_params,
-                **filter.hogql_context.values,
+                **filter.insightsql_context.values,
             },
         )[0][0]
 

@@ -36,9 +36,9 @@ export function PathsEventsTypes({ insightProps }: EditorFilterProps): JSX.Eleme
             selected: includeEventTypes?.includes(PathType.CustomEvent),
         },
         {
-            type: PathType.HogQL,
+            type: PathType.InsightsQL,
             label: 'SQL expression',
-            selected: includeEventTypes?.includes(PathType.HogQL),
+            selected: includeEventTypes?.includes(PathType.InsightsQL),
         },
     ]
 

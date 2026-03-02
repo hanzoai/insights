@@ -11,7 +11,7 @@ from typing import Optional
 import dagster
 import pydantic
 
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.client import sync_execute
 from posthog.dags.common import JobOwners
@@ -53,8 +53,8 @@ def get_mismatched_distinct_ids(
 
     Returns list of distinct_ids that need to be checked.
     """
-    from posthog.hogql import ast
-    from posthog.hogql.parser import parse_select
+    from posthog.insightsql import ast
+    from posthog.insightsql.parser import parse_select
 
     # Select distinct_id (not person_id) so we can look up the correct person_id from pdi2
     query = parse_select("SELECT DISTINCT distinct_id FROM events WHERE person_id != pdi.person_id")
@@ -85,7 +85,7 @@ def get_mismatched_distinct_ids(
     if date_conditions and query.where:
         query.where = ast.And(exprs=[query.where, *date_conditions])
 
-    result = execute_hogql_query(query, team=team)
+    result = execute_insightsql_query(query, team=team)
     return [str(row[0]) for row in result.results] if result.results else []
 
 
@@ -199,7 +199,7 @@ def fix_missing_person_overrides_op(
     """
     Automatically detect and fix missing person_id overrides.
 
-    1. Use HogQL to find distinct_ids where events.person_id != pdi.person_id
+    1. Use InsightsQL to find distinct_ids where events.person_id != pdi.person_id
     2. Look up those distinct_ids in pdi2 to get the correct person_id
     3. Filter out distinct_ids that already have overrides
     4. Batch insert all missing overrides
@@ -211,7 +211,7 @@ def fix_missing_person_overrides_op(
     if config.min_date or config.max_date:
         context.log.info(f"Date range: {config.min_date or 'start'} to {config.max_date or 'end'}")
 
-    # Step 1: Find distinct_ids with mismatches (1 HogQL query)
+    # Step 1: Find distinct_ids with mismatches (1 InsightsQL query)
     mismatched_distinct_ids = get_mismatched_distinct_ids(team, config.min_date, config.max_date)
     context.log.info(f"Found {len(mismatched_distinct_ids)} distinct_ids with mismatches")
 

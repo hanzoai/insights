@@ -28,9 +28,9 @@ import {
     GoalLine,
     GroupNode,
     GroupsQuery,
-    HogQLASTQuery,
-    HogQLMetadata,
-    HogQLQuery,
+    InsightsQLASTQuery,
+    InsightsQLMetadata,
+    InsightsQLQuery,
     HogQuery,
     InsightActorsQuery,
     InsightFilter,
@@ -85,9 +85,9 @@ export function isDataNode(node?: Record<string, any> | null): node is EventsQue
         isPersonsNode(node) ||
         isEventsQuery(node) ||
         isActorsQuery(node) ||
-        isHogQLQuery(node) ||
-        isHogQLASTQuery(node) ||
-        isHogQLMetadata(node)
+        isInsightsQLQuery(node) ||
+        isInsightsQLASTQuery(node) ||
+        isInsightsQLMetadata(node)
     )
 }
 
@@ -141,10 +141,10 @@ export function isDataTableNode(node?: Record<string, any> | null): node is Data
 }
 
 /** Previously SQL queries by default were `DataTableNode`s. However now new SQL queries are `DataVisualizationNode`s */
-export function isDataTableNodeWithHogQLQuery(node?: Record<string, any> | null): node is DataTableNode & {
-    source: HogQLQuery
+export function isDataTableNodeWithInsightsQLQuery(node?: Record<string, any> | null): node is DataTableNode & {
+    source: InsightsQLQuery
 } {
-    return isDataTableNode(node) && isHogQLQuery(node.source)
+    return isDataTableNode(node) && isInsightsQLQuery(node.source)
 }
 
 export function isDataVisualizationNode(node?: Record<string, any> | null): node is DataVisualizationNode {
@@ -163,16 +163,16 @@ export function isHogQuery(node?: Record<string, any> | null): node is HogQuery 
     return node?.kind === NodeKind.HogQuery
 }
 
-export function isHogQLQuery(node?: Record<string, any> | null): node is HogQLQuery {
-    return node?.kind === NodeKind.HogQLQuery
+export function isInsightsQLQuery(node?: Record<string, any> | null): node is InsightsQLQuery {
+    return node?.kind === NodeKind.InsightsQLQuery
 }
 
-export function isHogQLASTQuery(node?: Record<string, any> | null): node is HogQLASTQuery {
-    return node?.kind === NodeKind.HogQLASTQuery
+export function isInsightsQLASTQuery(node?: Record<string, any> | null): node is InsightsQLASTQuery {
+    return node?.kind === NodeKind.InsightsQLASTQuery
 }
 
-export function isHogQLMetadata(node?: Record<string, any> | null): node is HogQLMetadata {
-    return node?.kind === NodeKind.HogQLMetadata
+export function isInsightsQLMetadata(node?: Record<string, any> | null): node is InsightsQLMetadata {
+    return node?.kind === NodeKind.InsightsQLMetadata
 }
 
 export function isRevenueAnalyticsGrossRevenueQuery(
@@ -309,11 +309,11 @@ export function isErrorTrackingIssueCorrelationQuery(
     return node?.kind === NodeKind.ErrorTrackingIssueCorrelationQuery
 }
 
-export function containsHogQLQuery(node?: Record<string, any> | null): boolean {
+export function containsInsightsQLQuery(node?: Record<string, any> | null): boolean {
     if (!node) {
         return false
     }
-    return isHogQLQuery(node) || (isNodeWithSource(node) && isHogQLQuery(node.source))
+    return isInsightsQLQuery(node) || (isNodeWithSource(node) && isInsightsQLQuery(node.source))
 }
 
 /*
@@ -378,7 +378,7 @@ export function isAsyncResponse(response: NonNullable<QuerySchema['response']>):
 export function shouldQueryBeAsync(query: Node): boolean {
     return (
         isInsightQueryNode(query) ||
-        isHogQLQuery(query) ||
+        isInsightsQLQuery(query) ||
         (isDataTableNode(query) && isInsightQueryNode(query.source)) ||
         (isDataVisualizationNode(query) && isInsightQueryNode(query.source))
     )
@@ -630,9 +630,9 @@ export function trimQuotes(identifier: string): string {
 }
 
 /** Make sure the property key is wrapped in quotes if it contains any special characters. */
-export function escapePropertyAsHogQLIdentifier(identifier: string): string {
+export function escapePropertyAsInsightsQLIdentifier(identifier: string): string {
     if (identifier.match(/^[A-Za-z_$][A-Za-z0-9_$]*$/)) {
-        // Same regex as in the backend escape_hogql_identifier
+        // Same regex as in the backend escape_insightsql_identifier
         return identifier // This identifier is simple
     }
     if (isQuoted(identifier)) {
@@ -641,55 +641,55 @@ export function escapePropertyAsHogQLIdentifier(identifier: string): string {
     return !identifier.includes('"') ? `"${identifier}"` : `\`${identifier}\``
 }
 
-export function taxonomicEventFilterToHogQL(
+export function taxonomicEventFilterToInsightsQL(
     groupType: TaxonomicFilterGroupType,
     value: TaxonomicFilterValue
 ): string | null {
     if (groupType === TaxonomicFilterGroupType.EventProperties) {
-        return `properties.${escapePropertyAsHogQLIdentifier(String(value))}`
+        return `properties.${escapePropertyAsInsightsQLIdentifier(String(value))}`
     }
     if (groupType === TaxonomicFilterGroupType.PersonProperties) {
-        return `person.properties.${escapePropertyAsHogQLIdentifier(String(value))}`
+        return `person.properties.${escapePropertyAsInsightsQLIdentifier(String(value))}`
     }
     if (groupType === TaxonomicFilterGroupType.EventFeatureFlags) {
-        return `properties.${escapePropertyAsHogQLIdentifier(String(value))}`
+        return `properties.${escapePropertyAsInsightsQLIdentifier(String(value))}`
     }
     if (groupType === TaxonomicFilterGroupType.SessionProperties) {
-        return `session.${escapePropertyAsHogQLIdentifier(String(value))}`
+        return `session.${escapePropertyAsInsightsQLIdentifier(String(value))}`
     }
-    if (groupType === TaxonomicFilterGroupType.HogQLExpression && value) {
+    if (groupType === TaxonomicFilterGroupType.InsightsQLExpression && value) {
         return String(value)
     }
     return null
 }
 
-export function taxonomicPersonFilterToHogQL(
+export function taxonomicPersonFilterToInsightsQL(
     groupType: TaxonomicFilterGroupType,
     value: TaxonomicFilterValue
 ): string | null {
     if (groupType === TaxonomicFilterGroupType.PersonProperties) {
-        return `properties.${escapePropertyAsHogQLIdentifier(String(value))}`
+        return `properties.${escapePropertyAsInsightsQLIdentifier(String(value))}`
     }
-    if (groupType === TaxonomicFilterGroupType.HogQLExpression && value) {
+    if (groupType === TaxonomicFilterGroupType.InsightsQLExpression && value) {
         return String(value)
     }
     return null
 }
 
-export function taxonomicGroupFilterToHogQL(
+export function taxonomicGroupFilterToInsightsQL(
     groupType: TaxonomicFilterGroupType,
     value: TaxonomicFilterValue
 ): string | null {
     if (groupType.startsWith(TaxonomicFilterGroupType.GroupsPrefix)) {
-        return `properties.${escapePropertyAsHogQLIdentifier(String(value))}`
+        return `properties.${escapePropertyAsInsightsQLIdentifier(String(value))}`
     }
-    if (groupType === TaxonomicFilterGroupType.HogQLExpression && value) {
+    if (groupType === TaxonomicFilterGroupType.InsightsQLExpression && value) {
         return String(value)
     }
     return null
 }
 
-export function isHogQLAggregation(hogQl: string): boolean {
+export function isInsightsQLAggregation(hogQl: string): boolean {
     return (
         hogQl.includes('count(') ||
         hogQl.includes('any(') ||
@@ -700,39 +700,39 @@ export function isHogQLAggregation(hogQl: string): boolean {
     )
 }
 
-declare const __hogqlBrand: unique symbol
-export type HogQLQueryString = string & { readonly [__hogqlBrand]: void }
+declare const __insightsqlBrand: unique symbol
+export type InsightsQLQueryString = string & { readonly [__insightsqlBrand]: void }
 
-export interface HogQLIdentifier {
-    __hogql_identifier: true
+export interface InsightsQLIdentifier {
+    __insightsql_identifier: true
     identifier: string
 }
 
-function hogQLIdentifier(identifier: string): HogQLIdentifier {
+function insightsQLIdentifier(identifier: string): InsightsQLIdentifier {
     return {
-        __hogql_identifier: true,
+        __insightsql_identifier: true,
         identifier,
     }
 }
 
-function isHogQLIdentifier(value: any): value is HogQLIdentifier {
-    return !!value?.__hogql_identifier
+function isInsightsQLIdentifier(value: any): value is InsightsQLIdentifier {
+    return !!value?.__insightsql_identifier
 }
 
-export interface HogQLRaw {
-    __hogql_raw: true
+export interface InsightsQLRaw {
+    __insightsql_raw: true
     raw: string
 }
 
-function hogQLRaw(raw: string): HogQLRaw {
+function insightsQLRaw(raw: string): InsightsQLRaw {
     return {
-        __hogql_raw: true,
+        __insightsql_raw: true,
         raw,
     }
 }
 
-function isHogQLRaw(value: any): value is HogQLRaw {
-    return !!value?.__hogql_raw
+function isInsightsQLRaw(value: any): value is InsightsQLRaw {
+    return !!value?.__insightsql_raw
 }
 
 const ESCAPE_CHARS_MAP: Record<string, string> = {
@@ -748,7 +748,7 @@ const ESCAPE_CHARS_MAP: Record<string, string> = {
     "'": "\\'",
 }
 
-export function escapeHogQLString(value: string): string {
+export function escapeInsightsQLString(value: string): string {
     let escaped = ''
     for (const char of value) {
         escaped += ESCAPE_CHARS_MAP[char] ?? char
@@ -756,18 +756,18 @@ export function escapeHogQLString(value: string): string {
     return `'${escaped}'`
 }
 
-function formatHogQLValue(value: any): string {
+function formatInsightsQLValue(value: any): string {
     if (Array.isArray(value)) {
-        return `[${value.map(formatHogQLValue).join(', ')}]`
+        return `[${value.map(formatInsightsQLValue).join(', ')}]`
     } else if (dayjs.isDayjs(value)) {
         const timezone = getAppContext()?.current_team?.timezone || 'UTC'
         return value.tz(timezone).format("'YYYY-MM-DD HH:mm:ss'")
-    } else if (isHogQLIdentifier(value)) {
-        return escapePropertyAsHogQLIdentifier(value.identifier)
-    } else if (isHogQLRaw(value)) {
+    } else if (isInsightsQLIdentifier(value)) {
+        return escapePropertyAsInsightsQLIdentifier(value.identifier)
+    } else if (isInsightsQLRaw(value)) {
         return value.raw
     } else if (typeof value === 'string') {
-        return escapeHogQLString(value)
+        return escapeInsightsQLString(value)
     } else if (typeof value === 'number') {
         return String(value)
     } else if (value === null) {
@@ -780,17 +780,17 @@ function formatHogQLValue(value: any): string {
 }
 
 /**
- * Template tag for HogQL formatting. Handles formatting of values for you.
- * @example hogql`SELECT * FROM events WHERE properties.text = ${text} AND timestamp > ${dayjs()}`
+ * Template tag for InsightsQL formatting. Handles formatting of values for you.
+ * @example insightsql`SELECT * FROM events WHERE properties.text = ${text} AND timestamp > ${dayjs()}`
  */
-export function hogql(strings: TemplateStringsArray, ...values: any[]): HogQLQueryString {
+export function insightsql(strings: TemplateStringsArray, ...values: any[]): InsightsQLQueryString {
     return strings.reduce(
-        (acc, str, i) => acc + str + (i < strings.length - 1 ? formatHogQLValue(values[i]) : ''),
+        (acc, str, i) => acc + str + (i < strings.length - 1 ? formatInsightsQLValue(values[i]) : ''),
         ''
-    ) as unknown as HogQLQueryString
+    ) as unknown as InsightsQLQueryString
 }
-hogql.identifier = hogQLIdentifier
-hogql.raw = hogQLRaw
+insightsql.identifier = insightsQLIdentifier
+insightsql.raw = insightsQLRaw
 
 /**
  * Wether we have a valid `breakdownFilter` or not.

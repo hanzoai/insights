@@ -147,14 +147,14 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         """Get properties that PostHog has automatically materialized.
 
         These are managed by PostHog's automatic materialization system and cannot be modified here.
-        Uses the same cached function that HogQL uses for query rewriting.
+        Uses the same cached function that InsightsQL uses for query rewriting.
         """
         if not EE_AVAILABLE:
             return response.Response([])
 
         try:
             # Get all auto-materialized columns using the cached function
-            # This is the same cache that HogQL uses (15 minute TTL with background refresh)
+            # This is the same cache that InsightsQL uses (15 minute TTL with background refresh)
             materialized_columns = get_materialized_columns("events")
 
             # Only show properties column materialized columns (exclude person_properties)

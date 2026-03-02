@@ -36,7 +36,7 @@ async def asaved_query(ateam, auser):
     query = await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
         team=ateam,
         name="test_model",
-        query={"query": "SELECT 1", "kind": "HogQLQuery"},
+        query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         created_by=auser,
     )
     yield query
@@ -270,7 +270,7 @@ class TestMaterializeViewActivity:
     async def test_materializes_view_to_delta_table(
         self, activity_environment, ateam, anode, asaved_query, ajob, bucket_name
     ):
-        def mock_hogql_table(*args, **kwargs):
+        def mock_insightsql_table(*args, **kwargs):
             del args, kwargs
             data = cast(
                 Collection[pa.Array],
@@ -291,7 +291,7 @@ class TestMaterializeViewActivity:
                 DATAWAREHOUSE_LOCAL_BUCKET_REGION="us-east-1",
             ),
             unittest.mock.patch(
-                "posthog.temporal.data_modeling.activities.materialize_view.hogql_table", mock_hogql_table
+                "posthog.temporal.data_modeling.activities.materialize_view.insightsql_table", mock_insightsql_table
             ),
             unittest.mock.patch(
                 "posthog.temporal.data_modeling.activities.materialize_view.get_query_row_count",
@@ -315,7 +315,7 @@ class TestMaterializeViewActivity:
     async def test_updates_job_progress_during_materialization(
         self, activity_environment, ateam, anode, ajob, bucket_name
     ):
-        def mock_hogql_table(*args, **kwargs):
+        def mock_insightsql_table(*args, **kwargs):
             del args, kwargs  # unused
             batch1 = pa.RecordBatch.from_arrays([pa.array([1, 2], type=pa.int64())], names=["id"])
             batch2 = pa.RecordBatch.from_arrays([pa.array([3, 4, 5], type=pa.int64())], names=["id"])
@@ -334,7 +334,7 @@ class TestMaterializeViewActivity:
                 DATAWAREHOUSE_LOCAL_BUCKET_REGION="us-east-1",
             ),
             unittest.mock.patch(
-                "posthog.temporal.data_modeling.activities.materialize_view.hogql_table", mock_hogql_table
+                "posthog.temporal.data_modeling.activities.materialize_view.insightsql_table", mock_insightsql_table
             ),
             unittest.mock.patch(
                 "posthog.temporal.data_modeling.activities.materialize_view.get_query_row_count",

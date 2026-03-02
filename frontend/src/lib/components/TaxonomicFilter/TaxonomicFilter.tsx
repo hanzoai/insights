@@ -47,7 +47,7 @@ export function TaxonomicFilter({
     maxContextOptions,
     useVerticalLayout,
     allowNonCapturedEvents = false,
-    hogQLGlobals,
+    insightsQLGlobals,
 }: TaxonomicFilterProps): JSX.Element {
     // Generate a unique key for each unique TaxonomicFilter that's rendered
     const taxonomicFilterLogicKey = useMemo(
@@ -81,7 +81,7 @@ export function TaxonomicFilter({
         autoSelectItem: true,
         allowNonCapturedEvents,
         maxContextOptions,
-        hogQLGlobals,
+        insightsQLGlobals,
     }
 
     const logic = taxonomicFilterLogic(taxonomicFilterLogicProps)
@@ -89,7 +89,7 @@ export function TaxonomicFilter({
     const [refReady, setRefReady] = useState(false)
 
     useEffect(() => {
-        if (groupType !== TaxonomicFilterGroupType.HogQLExpression) {
+        if (groupType !== TaxonomicFilterGroupType.InsightsQLExpression) {
             window.setTimeout(() => focusInput(), 1)
         }
     }, [groupType])
@@ -119,7 +119,7 @@ export function TaxonomicFilter({
                 // eslint-disable-next-line react/forbid-dom-props
                 style={style}
             >
-                {activeTab !== TaxonomicFilterGroupType.HogQLExpression || taxonomicGroupTypes.length > 1 ? (
+                {activeTab !== TaxonomicFilterGroupType.InsightsQLExpression || taxonomicGroupTypes.length > 1 ? (
                     <div className="relative">
                         <TaxonomicFilterSearchInput searchInputRef={searchInputRef} onClose={onClose} />
                     </div>

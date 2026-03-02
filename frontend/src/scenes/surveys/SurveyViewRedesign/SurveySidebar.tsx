@@ -8,7 +8,7 @@ import { LemonButton, LemonMenu, LemonSelect, LemonSkeleton, LemonSwitch, Link }
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { TZLabel } from 'lib/components/TZLabel'
 import { pluralize } from 'lib/utils'
-import { HogFunctionIcon } from 'scenes/hog-functions/configuration/HogFunctionIcon'
+import { CustomFunctionIcon } from 'scenes/custom-functions/configuration/CustomFunctionIcon'
 import { CopySurveyLink } from 'scenes/surveys/CopySurveyLink'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'
 import { SurveyConditionsList } from 'scenes/surveys/components/SurveyConditions'
@@ -23,7 +23,7 @@ import { urls } from 'scenes/urls'
 
 import {
     ExporterFormat,
-    HogFunctionType,
+    CustomFunctionType,
     Survey,
     SurveyQuestionBranchingType,
     SurveySchedule as SurveyScheduleEnum,
@@ -192,7 +192,7 @@ export function SurveyDetailsPanel(): JSX.Element {
     )
 }
 
-function getNotificationDescription(fn: HogFunctionType): string | null {
+function getNotificationDescription(fn: CustomFunctionType): string | null {
     const inputs = fn.inputs
     if (!inputs) {
         return null
@@ -234,12 +234,12 @@ export function SurveyNotificationsPanel(): JSX.Element {
                         const description = getNotificationDescription(fn)
                         return (
                             <div key={fn.id} className="flex items-center gap-2 rounded border p-2">
-                                <HogFunctionIcon src={fn.icon_url} size="small" />
+                                <CustomFunctionIcon src={fn.icon_url} size="small" />
                                 <div className="flex-1 min-w-0">
                                     <LemonButton
                                         type="tertiary"
                                         size="xsmall"
-                                        to={urls.hogFunction(fn.id)}
+                                        to={urls.customFunction(fn.id)}
                                         className="font-medium p-0 h-auto min-h-0"
                                         noPadding
                                     >

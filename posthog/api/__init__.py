@@ -1,7 +1,7 @@
 from rest_framework import decorators, exceptions, viewsets
 from rest_framework_extensions.routers import NestedRegistryItem
 
-from posthog.api import data_color_theme, hog_flow, hog_flow_template, metalytics, my_notifications, project
+from posthog.api import data_color_theme, custom_flow, custom_flow_template, metalytics, my_notifications, project
 from posthog.api.batch_imports import BatchImportViewSet
 from posthog.api.csp_reporting import CSPReportingViewSet
 from posthog.api.onboarding import OnboardingViewSet
@@ -22,7 +22,7 @@ import products.revenue_analytics.backend.api as revenue_analytics
 import products.marketing_analytics.backend.api as marketing_analytics
 import products.early_access_features.backend.api as early_access_feature
 import products.customer_analytics.backend.api.views as customer_analytics
-import products.data_warehouse.backend.api.fix_hogql as fix_hogql
+import products.data_warehouse.backend.api.fix_insightsql as fix_insightsql
 from products.data_modeling.backend.api import EdgeViewSet, NodeViewSet
 from products.data_warehouse.backend.api import (
     data_modeling_job,
@@ -104,8 +104,8 @@ from . import (
     flag_value,
     health_issue,
     hog,
-    hog_function,
-    hog_function_template,
+    custom_function,
+    custom_function_template,
     ingestion_warnings,
     insight_variable,
     instance_settings,
@@ -523,9 +523,9 @@ register_grandfathered_environment_nested_viewset(
     ["team_id"],
 )
 environments_router.register(
-    r"fix_hogql",
-    fix_hogql.FixHogQLViewSet,
-    "project_fix_hogql",
+    r"fix_insightsql",
+    fix_insightsql.FixInsightsQLViewSet,
+    "project_fix_insightsql",
     ["team_id"],
 )
 environments_router.register(
@@ -962,23 +962,23 @@ projects_router.register(
 )
 
 register_grandfathered_environment_nested_viewset(
-    r"hog_functions",
-    hog_function.HogFunctionViewSet,
-    "environment_hog_functions",
+    r"custom_functions",
+    custom_function.CustomFunctionViewSet,
+    "environment_custom_functions",
     ["team_id"],
 )
 
 register_grandfathered_environment_nested_viewset(
-    r"hog_flows",
-    hog_flow.HogFlowViewSet,
-    "environment_hog_flows",
+    r"custom_flows",
+    custom_flow.CustomFlowViewSet,
+    "environment_custom_flows",
     ["team_id"],
 )
 
 register_grandfathered_environment_nested_viewset(
-    r"hog_flow_templates",
-    hog_flow_template.HogFlowTemplateViewSet,
-    "environment_hog_flow_templates",
+    r"custom_flow_templates",
+    custom_flow_template.CustomFlowTemplateViewSet,
+    "environment_custom_flow_templates",
     ["team_id"],
 )
 
@@ -992,9 +992,9 @@ projects_router.register(
 )
 
 projects_router.register(
-    r"hog_function_templates",
-    hog_function_template.PublicHogFunctionTemplateViewSet,
-    "project_hog_function_templates",
+    r"custom_function_templates",
+    custom_function_template.PublicCustomFunctionTemplateViewSet,
+    "project_custom_function_templates",
     ["project_id"],
 )
 

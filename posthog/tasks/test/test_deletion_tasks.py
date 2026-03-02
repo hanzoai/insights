@@ -101,7 +101,7 @@ class TestDeleteOrganizationDataAndNotifyTask(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=team,
             name="test_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
         )
 
         # Create a Node referencing the saved query (this has PROTECT on saved_query)

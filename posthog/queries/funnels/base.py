@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 
 from posthog.schema import PersonsOnEventsMode
 
-from posthog.hogql.database.database import Database
+from posthog.insightsql.database.database import Database
 
 from posthog.clickhouse.materialized_columns import ColumnName
 from posthog.constants import (
@@ -71,12 +71,12 @@ class ClickhouseFunnelBase(ABC):
         self._include_preceding_timestamp = include_preceding_timestamp
         self._include_properties = include_properties or []
 
-        # HACK: Because we're in a legacy query, we need to override hogql_context with the legacy-alised PoE mode
-        self._filter.hogql_context.modifiers.personsOnEventsMode = alias_poe_mode_for_legacy(team.person_on_events_mode)
+        # HACK: Because we're in a legacy query, we need to override insightsql_context with the legacy-alised PoE mode
+        self._filter.insightsql_context.modifiers.personsOnEventsMode = alias_poe_mode_for_legacy(team.person_on_events_mode)
 
         # Recreate the database with the legacy-alised PoE mode
-        self._filter.hogql_context.database = Database.create_for(
-            team=self._team, modifiers=self._filter.hogql_context.modifiers
+        self._filter.insightsql_context.database = Database.create_for(
+            team=self._team, modifiers=self._filter.insightsql_context.modifiers
         )
 
         # handle default if window isn't provided
@@ -164,7 +164,7 @@ class ClickhouseFunnelBase(ABC):
         if isinstance(self._filter.breakdowns, list) and self._filter.breakdown_type in [
             "person",
             "event",
-            "hogql",
+            "insightsql",
             None,
         ]:
             data.update({"breakdown": [b.get("property") for b in self._filter.breakdowns]})
@@ -172,7 +172,7 @@ class ClickhouseFunnelBase(ABC):
         if isinstance(self._filter.breakdown, str) and self._filter.breakdown_type in [
             "person",
             "event",
-            "hogql",
+            "insightsql",
             None,
         ]:
             boxed_breakdown: list[Union[str, int]] = box_value(self._filter.breakdown)
@@ -285,7 +285,7 @@ class ClickhouseFunnelBase(ABC):
         query = self.get_query()
         return insight_sync_execute(
             query,
-            {**self.params, **self._filter.hogql_context.values},
+            {**self.params, **self._filter.insightsql_context.values},
             query_type=self.QUERY_TYPE,
             filter=self._filter,
             team_id=self._team.pk,
@@ -569,7 +569,7 @@ class ClickhouseFunnelBase(ABC):
                 prepend=f"{entity_name}_{step_prefix}step_{index}",
                 person_properties_mode=get_person_properties_mode(self._team),
                 person_id_joined_alias="person_id",
-                hogql_context=self._filter.hogql_context,
+                insightsql_context=self._filter.insightsql_context,
             )
             if action_query == "":
                 return ""
@@ -595,7 +595,7 @@ class ClickhouseFunnelBase(ABC):
             prepend=f"_{entity_name}_{index}",
             person_properties_mode=get_person_properties_mode(self._team),
             person_id_joined_alias="person_id",
-            hogql_context=self._filter.hogql_context,
+            insightsql_context=self._filter.insightsql_context,
         )
         self.params.update(prop_filter_params)
         return prop_filters
@@ -787,15 +787,15 @@ class ClickhouseFunnelBase(ABC):
                 column=properties_field,
             )
             basic_prop_selector = f"{expression} AS prop_basic"
-        elif self._filter.breakdown_type == "hogql":
-            from posthog.hogql.hogql import translate_hogql
+        elif self._filter.breakdown_type == "insightsql":
+            from posthog.insightsql.insightsql import translate_insightsql
 
             breakdown = self._filter.breakdown
             if isinstance(breakdown, list):
-                expressions = [translate_hogql(exp, self._filter.hogql_context) for exp in breakdown]
+                expressions = [translate_insightsql(exp, self._filter.insightsql_context) for exp in breakdown]
                 expression = f"array({','.join(expressions)})"
             else:
-                expression = translate_hogql(cast(str, breakdown), self._filter.hogql_context)
+                expression = translate_insightsql(cast(str, breakdown), self._filter.insightsql_context)
             basic_prop_selector = f"{expression} AS prop_basic"
 
         # TODO: simplify once array and string breakdowns are sorted

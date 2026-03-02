@@ -16,7 +16,7 @@ import { GoalLines } from 'scenes/insights/EditorFilters/GoalLines'
 import { PathsAdvanced } from 'scenes/insights/EditorFilters/PathsAdvanced'
 import { PathsEventsTypes } from 'scenes/insights/EditorFilters/PathsEventTypes'
 import { PathsExclusions } from 'scenes/insights/EditorFilters/PathsExclusions'
-import { PathsHogQL } from 'scenes/insights/EditorFilters/PathsHogQL'
+import { PathsInsightsQL } from 'scenes/insights/EditorFilters/PathsInsightsQL'
 import { PathsTargetEnd, PathsTargetStart } from 'scenes/insights/EditorFilters/PathsTarget'
 import { PathsWildcardGroups } from 'scenes/insights/EditorFilters/PathsWildcardGroups'
 import { PoeFilter } from 'scenes/insights/EditorFilters/PoeFilter'
@@ -35,7 +35,7 @@ import { userLogic } from 'scenes/userLogic'
 import { StickinessCriteria } from '~/queries/nodes/InsightViz/StickinessCriteria'
 import {
     AssistantFunnelsQuery,
-    AssistantHogQLQuery,
+    AssistantInsightsQLQuery,
     AssistantRetentionQuery,
     AssistantTrendsQuery,
 } from '~/queries/schema/schema-assistant-queries'
@@ -48,7 +48,7 @@ import {
     WebOverviewQuery,
     WebStatsTableQuery,
 } from '~/queries/schema/schema-general'
-import { isHogQLQuery, isInsightQueryNode, isWebAnalyticsInsightQuery } from '~/queries/utils'
+import { isInsightsQLQuery, isInsightQueryNode, isWebAnalyticsInsightQuery } from '~/queries/utils'
 import {
     AvailableFeature,
     ChartDisplayType,
@@ -130,7 +130,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
         isRetention
     const hasPathsAdvanced = hasAvailableFeature(AvailableFeature.PATHS_ADVANCED)
     const hasAttribution = isStepsFunnel || isTrendsFunnel
-    const hasPathsHogQL = isPaths && pathsFilter?.includeEventTypes?.includes(PathType.HogQL)
+    const hasPathsInsightsQL = isPaths && pathsFilter?.includeEventTypes?.includes(PathType.InsightsQL)
     const displayGoalLines =
         (isTrends &&
             [ChartDisplayType.ActionsLineGraph, ChartDisplayType.ActionsLineGraphCumulative].includes(
@@ -173,10 +173,10 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                               label: 'Event Types',
                               component: PathsEventsTypes,
                           },
-                          hasPathsHogQL && {
-                              key: 'hogql',
+                          hasPathsInsightsQL && {
+                              key: 'insightsql',
                               label: 'SQL Expression',
-                              component: PathsHogQL,
+                              component: PathsInsightsQL,
                           },
                           hasPathsAdvanced && {
                               key: 'wildcard-groups',
@@ -449,7 +449,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                                 | AssistantTrendsQuery
                                 | AssistantFunnelsQuery
                                 | AssistantRetentionQuery
-                                | AssistantHogQLQuery
+                                | AssistantInsightsQLQuery
                         ) => {
                             const source = castAssistantQuery(toolOutput)
                             if (!source) {
@@ -457,7 +457,7 @@ export function EditorFilters({ query, showing, embedded }: EditorFiltersProps):
                             }
 
                             let node: QuerySchema
-                            if (isHogQLQuery(source)) {
+                            if (isInsightsQLQuery(source)) {
                                 node = {
                                     kind: NodeKind.DataVisualizationNode,
                                     source,

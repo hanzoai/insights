@@ -17,19 +17,19 @@ from rest_framework import status
 
 from posthog.schema import (
     CachedEventsQueryResponse,
-    CachedHogQLQueryResponse,
+    CachedInsightsQLQueryResponse,
     CachedRetentionQueryResponse,
     EventPropertyFilter,
     EventsQuery,
-    HogQLPropertyFilter,
-    HogQLQuery,
+    InsightsQLPropertyFilter,
+    InsightsQLQuery,
     MeanRetentionCalculation,
     PersonPropertyFilter,
     PropertyOperator,
     RetentionQuery,
 )
 
-from posthog.hogql.constants import LimitContext
+from posthog.insightsql.constants import LimitContext
 
 from posthog.api.services.query import process_query_dict
 from posthog.models.insight_variable import InsightVariable
@@ -41,7 +41,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     ENDPOINT = "query"
 
     @snapshot_clickhouse_queries
-    def test_select_hogql_expressions(self):
+    def test_select_insightsql_expressions(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
                 properties={"email": "tom@posthog.com"},
@@ -148,7 +148,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(["key"])
     @snapshot_clickhouse_queries
-    def test_hogql_property_filter(self):
+    def test_insightsql_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
                 properties={"email": "tom@posthog.com"},
@@ -199,15 +199,15 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
 
-            query.properties = [HogQLPropertyFilter(type="hogql", key="'a%sd' == 'foo'")]
+            query.properties = [InsightsQLPropertyFilter(type="insightsql", key="'a%sd' == 'foo'")]
             response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 0)
 
-            query.properties = [HogQLPropertyFilter(type="hogql", key="'a%sd' == 'a%sd'")]
+            query.properties = [InsightsQLPropertyFilter(type="insightsql", key="'a%sd' == 'a%sd'")]
             response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 4)
 
-            query.properties = [HogQLPropertyFilter(type="hogql", key="properties.key == 'test_val2'")]
+            query.properties = [InsightsQLPropertyFilter(type="insightsql", key="properties.key == 'test_val2'")]
             response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
             self.assertEqual(len(response["results"]), 2)
 
@@ -526,7 +526,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["key"])
     @snapshot_clickhouse_queries
-    def test_full_hogql_query(self):
+    def test_full_insightsql_query(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
                 properties={"email": "tom@posthog.com"},
@@ -564,9 +564,9 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         with freeze_time("2020-01-10 12:14:00"):
-            query = HogQLQuery(query="select event, distinct_id, properties.key from events order by timestamp")
+            query = InsightsQLQuery(query="select event, distinct_id, properties.key from events order by timestamp")
             api_response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()}).json()
-            response = CachedHogQLQueryResponse.model_validate(api_response)
+            response = CachedInsightsQLQueryResponse.model_validate(api_response)
 
             self.assertEqual(response.results and len(response.results), 4)
             self.assertEqual(
@@ -583,7 +583,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         query = {
             "kind": "DataTableNode",
             "source": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT event from events",
             },
         }
@@ -599,9 +599,9 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json()["detail"], "Unsupported query kind: SavedInsightNode", response.content)
 
-    @patch("posthog.hogql.constants.DEFAULT_RETURNED_ROWS", 10)
-    @patch("posthog.hogql.constants.MAX_SELECT_RETURNED_ROWS", 15)
-    def test_full_hogql_query_limit(self, MAX_SELECT_RETURNED_ROWS=15, DEFAULT_RETURNED_ROWS=10):
+    @patch("posthog.insightsql.constants.DEFAULT_RETURNED_ROWS", 10)
+    @patch("posthog.insightsql.constants.MAX_SELECT_RETURNED_ROWS", 15)
+    def test_full_insightsql_query_limit(self, MAX_SELECT_RETURNED_ROWS=15, DEFAULT_RETURNED_ROWS=10):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         with freeze_time("2020-01-10 12:00:00"):
             for _ in range(20):
@@ -617,16 +617,16 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = process_query_dict(
                 team=self.team,
                 query_json={
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event from events where distinct_id='{random_uuid}'",
                 },
             )
-        assert isinstance(response, CachedHogQLQueryResponse)
+        assert isinstance(response, CachedInsightsQLQueryResponse)
         self.assertEqual(len(response.results), 10)
 
-    @patch("posthog.hogql.constants.DEFAULT_RETURNED_ROWS", 10)
-    @patch("posthog.hogql.constants.CSV_EXPORT_LIMIT", 15)
-    def test_full_hogql_query_limit_exported(self, CSV_EXPORT_LIMIT=15, DEFAULT_RETURNED_ROWS=10):
+    @patch("posthog.insightsql.constants.DEFAULT_RETURNED_ROWS", 10)
+    @patch("posthog.insightsql.constants.CSV_EXPORT_LIMIT", 15)
+    def test_full_insightsql_query_limit_exported(self, CSV_EXPORT_LIMIT=15, DEFAULT_RETURNED_ROWS=10):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         with freeze_time("2020-01-10 12:00:00"):
             for _ in range(20):
@@ -642,12 +642,12 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = process_query_dict(
                 team=self.team,
                 query_json={
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event from events where distinct_id='{random_uuid}'",
                 },
                 limit_context=LimitContext.EXPORT,  # This is the only difference
             )
-        assert isinstance(response, CachedHogQLQueryResponse)
+        assert isinstance(response, CachedInsightsQLQueryResponse)
         self.assertEqual(len(response.results), 15)
 
     @patch("posthog.api.query.process_query_model")
@@ -656,7 +656,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {
-                "query": {"kind": "HogQLQuery", "query": "select 1"},
+                "query": {"kind": "InsightsQLQuery", "query": "select 1"},
                 "limit_context": "posthog_ai",
             },
         )
@@ -669,25 +669,25 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {
-                "query": {"kind": "HogQLQuery", "query": "select 1"},
+                "query": {"kind": "InsightsQLQuery", "query": "select 1"},
             },
         )
         mock_process_query_model.assert_called_once()
-        # HogQLQuery is an insight query, so it gets QUERY_ASYNC by default
+        # InsightsQLQuery is an insight query, so it gets QUERY_ASYNC by default
         self.assertEqual(mock_process_query_model.call_args[1]["limit_context"], LimitContext.QUERY_ASYNC)
 
     def test_query_limit_context_invalid_value(self):
         api_response = self.client.post(
             f"/api/environments/{self.team.id}/query/",
             {
-                "query": {"kind": "HogQLQuery", "query": "select 1"},
+                "query": {"kind": "InsightsQLQuery", "query": "select 1"},
                 "limit_context": "export",
             },
         )
         self.assertEqual(api_response.status_code, 400)
 
-    @patch("posthog.hogql.constants.DEFAULT_RETURNED_ROWS", 10)
-    @patch("posthog.hogql.constants.MAX_SELECT_RETURNED_ROWS", 15)
+    @patch("posthog.insightsql.constants.DEFAULT_RETURNED_ROWS", 10)
+    @patch("posthog.insightsql.constants.MAX_SELECT_RETURNED_ROWS", 15)
     def test_full_events_query_limit(self, MAX_SELECT_RETURNED_ROWS=15, DEFAULT_RETURNED_ROWS=10):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         with freeze_time("2020-01-10 12:00:00"):
@@ -713,8 +713,8 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         assert isinstance(response, CachedEventsQueryResponse)
         self.assertEqual(len(response.results), 10)
 
-    @patch("posthog.hogql.constants.DEFAULT_RETURNED_ROWS", 10)
-    @patch("posthog.hogql.constants.CSV_EXPORT_LIMIT", 15)
+    @patch("posthog.insightsql.constants.DEFAULT_RETURNED_ROWS", 10)
+    @patch("posthog.insightsql.constants.CSV_EXPORT_LIMIT", 15)
     def test_full_events_query_limit_exported(self, CSV_EXPORT_LIMIT=15, DEFAULT_RETURNED_ROWS=10):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         with freeze_time("2020-01-10 12:00:00"):
@@ -785,7 +785,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(api_response.status_code, 400)
 
     @snapshot_clickhouse_queries
-    def test_full_hogql_query_view(self):
+    def test_full_insightsql_query_view(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
                 properties={"email": "tom@posthog.com"},
@@ -828,14 +828,14 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 {
                     "name": "event_view",
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": f"select event AS event, distinct_id as distinct_id, properties.key as key from events order by timestamp",
                     },
                 },
             )
-            query = HogQLQuery(query="select event, distinct_id, key from event_view")
+            query = InsightsQLQuery(query="select event, distinct_id, key from event_view")
             api_response = self.client.post(f"/api/environments/{self.team.id}/query/", {"query": query.dict()})
-            response = CachedHogQLQueryResponse.model_validate(api_response.json())
+            response = CachedInsightsQLQueryResponse.model_validate(api_response.json())
 
             self.assertEqual(api_response.status_code, 200)
             self.assertEqual(len(response.results), 4)
@@ -850,7 +850,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             )
 
     @snapshot_clickhouse_queries
-    def test_full_hogql_query_async(self):
+    def test_full_insightsql_query_async(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
                 properties={"email": "tom@posthog.com"},
@@ -874,7 +874,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         with freeze_time("2020-01-10 12:14:00"):
-            query = HogQLQuery(query="select * from events")
+            query = InsightsQLQuery(query="select * from events")
             api_response = self.client.post(
                 f"/api/environments/{self.team.id}/query/", {"query": query.dict(), "refresh": "force_async"}
             )
@@ -904,7 +904,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 },
             )
 
-    def test_full_hogql_query_values(self):
+    def test_full_insightsql_query_values(self):
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         with freeze_time("2020-01-10 12:00:00"):
             for _ in range(20):
@@ -920,13 +920,13 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response = process_query_dict(
                 team=self.team,
                 query_json={
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select count() from events where distinct_id = {random_uuid}",
                     "values": {"random_uuid": random_uuid},
                 },
             )
 
-        assert isinstance(response, CachedHogQLQueryResponse)
+        assert isinstance(response, CachedInsightsQLQueryResponse)
         self.assertEqual(response.results[0][0], 20)
 
     def test_dashboard_filters_applied(self):
@@ -951,22 +951,22 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             response_without_dashboard_filters = process_query_dict(
                 team=self.team,
                 query_json={
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select count() from events where {filters}",
                 },
             )
             response_with_dashboard_filters = process_query_dict(
                 team=self.team,
                 query_json={
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select count() from events where {filters}",
                 },
                 dashboard_filters_json={"date_from": "2020-01-09", "date_to": "2020-01-11"},
             )
 
-        assert isinstance(response_without_dashboard_filters, CachedHogQLQueryResponse)
+        assert isinstance(response_without_dashboard_filters, CachedInsightsQLQueryResponse)
         self.assertEqual(response_without_dashboard_filters.results, [(2,)])
-        assert isinstance(response_with_dashboard_filters, CachedHogQLQueryResponse)
+        assert isinstance(response_with_dashboard_filters, CachedInsightsQLQueryResponse)
         self.assertEqual(response_with_dashboard_filters.results, [(1,)])
 
     def test_dashboard_filters_applied_with_source(self):
@@ -993,7 +993,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 query_json={
                     "kind": "DataVisualizationNode",
                     "source": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select count() from events where {filters}",
                     },
                 },
@@ -1003,16 +1003,16 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                 query_json={
                     "kind": "DataVisualizationNode",
                     "source": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select count() from events where {filters}",
                     },
                 },
                 dashboard_filters_json={"date_from": "2020-01-09", "date_to": "2020-01-11"},
             )
 
-        assert isinstance(response_without_dashboard_filters, CachedHogQLQueryResponse)
+        assert isinstance(response_without_dashboard_filters, CachedInsightsQLQueryResponse)
         self.assertEqual(response_without_dashboard_filters.results, [(2,)])
-        assert isinstance(response_with_dashboard_filters, CachedHogQLQueryResponse)
+        assert isinstance(response_with_dashboard_filters, CachedInsightsQLQueryResponse)
         self.assertEqual(response_with_dashboard_filters.results, [(1,)])
 
     def test_dashboard_variables_overrides(self):
@@ -1026,7 +1026,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             f"/api/environments/{self.team.id}/query/",
             {
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select {variables.test}",
                     "explain": True,
                     "filters": {"dateRange": {"date_from": "-7d"}},
@@ -1050,7 +1050,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             },
         ).json()
 
-        response = CachedHogQLQueryResponse.model_validate(api_response)
+        response = CachedInsightsQLQueryResponse.model_validate(api_response)
         assert response.results[0][0] == variable_override_value
 
     @patch("posthog.api.query.process_query_model")
@@ -1187,7 +1187,7 @@ class TestQueryRetrieve(APIBaseTest):
 
 
 class TestQueryDraftSql(APIBaseTest):
-    @patch("posthog.hogql.ai.hit_openai", return_value=("SELECT 1", 21, 37))
+    @patch("posthog.insightsql.ai.hit_openai", return_value=("SELECT 1", 21, 37))
     def test_draft_sql(self, hit_openai_mock):
         response = self.client.get(
             f"/api/environments/{self.team.id}/query/draft_sql/", {"prompt": "I need the number 1"}

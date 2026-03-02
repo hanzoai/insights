@@ -57,7 +57,7 @@ class Person:
 class PostHogClient:
     """Client for acceptance tests using the official PostHog SDK.
 
-    Uses the official SDK for event capture and custom code for HogQL queries
+    Uses the official SDK for event capture and custom code for InsightsQL queries
     (since the SDK doesn't support querying).
     """
 
@@ -247,15 +247,15 @@ class PostHogClient:
         logger.warning("Polling timed out", description=description, timeout_seconds=self.config.event_timeout_seconds)
         return None
 
-    def _execute_hogql_query(self, query: str, values: dict[str, Any]) -> dict[str, Any] | None:
-        """Execute a HogQL query and return the first row as a dict, or None if no results."""
-        rows = self._execute_hogql_query_all(query, values)
+    def _execute_insightsql_query(self, query: str, values: dict[str, Any]) -> dict[str, Any] | None:
+        """Execute a InsightsQL query and return the first row as a dict, or None if no results."""
+        rows = self._execute_insightsql_query_all(query, values)
         if not rows:
             return None
         return rows[0]
 
-    def _execute_hogql_query_all(self, query: str, values: dict[str, Any]) -> list[dict[str, Any]]:
-        """Execute a HogQL query and return all rows as a list of dicts.
+    def _execute_insightsql_query_all(self, query: str, values: dict[str, Any]) -> list[dict[str, Any]]:
+        """Execute a InsightsQL query and return all rows as a list of dicts.
 
         Uses a session with automatic retry on transient HTTP errors (5xx).
         """
@@ -265,7 +265,7 @@ class PostHogClient:
             url,
             json={
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": query,
                     "values": values,
                 },
@@ -299,7 +299,7 @@ class PostHogClient:
             LIMIT 1
         """
 
-        row = self._execute_hogql_query(
+        row = self._execute_insightsql_query(
             query,
             {
                 "event_uuid": event_uuid,
@@ -331,7 +331,7 @@ class PostHogClient:
             LIMIT 1
         """
 
-        row = self._execute_hogql_query(query, {"distinct_id": distinct_id})
+        row = self._execute_insightsql_query(query, {"distinct_id": distinct_id})
         if not row:
             return None
 
@@ -359,7 +359,7 @@ class PostHogClient:
             ORDER BY timestamp ASC
         """
 
-        rows = self._execute_hogql_query_all(
+        rows = self._execute_insightsql_query_all(
             query,
             {
                 "person_id": person_id,

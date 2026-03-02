@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Triggers a webhook based scenario",
     icon_url="/static/services/make.png",
     category=["Custom"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (not match(inputs.webhookUrl, '^https://hook.[^/]+.make.com/?.*')) {
     throw Error('Invalid URL. The URL should match the format: https://hook.<region>.make.com/<hookUrl>')

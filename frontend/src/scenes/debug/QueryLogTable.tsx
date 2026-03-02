@@ -78,11 +78,11 @@ export function QueryLogTable({ queryKey, onLoadQuery }: QueryLogTableProps): JS
                                     size="xsmall"
                                     icon={<IconArrowRight />}
                                     onClick={() => {
-                                        const hogqlQuery = {
-                                            kind: 'HogQLQuery',
+                                        const insightsqlQuery = {
+                                            kind: 'InsightsQLQuery',
                                             query: record.query,
                                         }
-                                        onLoadQuery(JSON.stringify(hogqlQuery, null, 2))
+                                        onLoadQuery(JSON.stringify(insightsqlQuery, null, 2))
                                     }}
                                 />
                             </Tooltip>

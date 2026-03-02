@@ -103,7 +103,7 @@ class StickinessEventsQuery(EventQuery):
                 action=self._entity.get_action(self._team_id),
                 person_properties_mode=get_person_properties_mode(self._team),
                 person_id_joined_alias=f"{self.aggregation_target()}",
-                hogql_context=self._filter.hogql_context,
+                insightsql_context=self._filter.insightsql_context,
             )
         elif self._entity.id is None:
             condition, params = None, {}

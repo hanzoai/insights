@@ -3,7 +3,7 @@ import {
     BaseMathType,
     ExperimentConclusion,
     GroupMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     PropertyMathType,
 } from '~/types'
 import type { Experiment } from '~/types'
@@ -25,7 +25,7 @@ export const LEGACY_EXPERIMENT_ALLOWED_MATH_TYPES = [
     BaseMathType.FirstTimeForUser,
     GroupMathType.UniqueGroup,
     PropertyMathType.Sum,
-    HogQLMathType.HogQL,
+    InsightsQLMathType.InsightsQL,
 ] as const
 
 export const EXPERIMENT_VARIANT_MULTIPLE = '$multiple'

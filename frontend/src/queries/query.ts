@@ -5,9 +5,9 @@ import { delay } from 'lib/utils'
 import {
     DashboardFilter,
     DataNode,
-    HogQLQuery,
-    HogQLQueryResponse,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
     NodeKind,
     PersonsNode,
     QueryStatus,
@@ -16,11 +16,11 @@ import {
 import { OnlineExportContext, QueryExportContext } from '~/types'
 
 import {
-    HogQLQueryString,
+    InsightsQLQueryString,
     isAsyncResponse,
     isDataTableNode,
     isDataVisualizationNode,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightQueryNode,
     isPersonsNode,
     shouldQueryBeAsync,
@@ -163,7 +163,7 @@ async function executeQuery<N extends DataNode>(
     queryId?: string,
     setPollResponse?: (response: QueryStatus) => void,
     filtersOverride?: DashboardFilter | null,
-    variablesOverride?: Record<string, HogQLVariable> | null,
+    variablesOverride?: Record<string, InsightsQLVariable> | null,
     /**
      * Whether to limit the function to just polling the provided query ID.
      * This is important in shared contexts, where we cannot create arbitrary queries via POST – we can only GET.
@@ -225,7 +225,7 @@ export async function performQuery<N extends DataNode>(
     queryId?: string,
     setPollResponse?: (status: QueryStatus) => void,
     filtersOverride?: DashboardFilter | null,
-    variablesOverride?: Record<string, HogQLVariable> | null,
+    variablesOverride?: Record<string, InsightsQLVariable> | null,
     pollOnly = false,
     limitContext?: 'posthog_ai'
 ): Promise<NonNullable<N['response']>> {
@@ -248,8 +248,8 @@ export async function performQuery<N extends DataNode>(
                 pollOnly,
                 limitContext
             )
-            if (isHogQLQuery(queryNode) && response && typeof response === 'object') {
-                logParams.clickhouse_sql = (response as HogQLQueryResponse)?.clickhouse
+            if (isInsightsQLQuery(queryNode) && response && typeof response === 'object') {
+                logParams.clickhouse_sql = (response as InsightsQLQueryResponse)?.clickhouse
             }
         }
         posthog.capture('query completed', {
@@ -285,14 +285,14 @@ export function getPersonsEndpoint(query: PersonsNode): string {
     return api.persons.determineListUrl(params)
 }
 
-export async function hogqlQuery(
-    queryString: HogQLQueryString,
+export async function insightsqlQuery(
+    queryString: InsightsQLQueryString,
     values?: Record<string, any>,
     refresh?: RefreshType
-): Promise<HogQLQueryResponse> {
-    return await performQuery<HogQLQuery>(
+): Promise<InsightsQLQueryResponse> {
+    return await performQuery<InsightsQLQuery>(
         {
-            kind: NodeKind.HogQLQuery,
+            kind: NodeKind.InsightsQLQuery,
             query: queryString,
             values,
         },

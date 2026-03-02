@@ -99,7 +99,7 @@ class TestTemplateMigration(BaseTest):
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"key": "event not in ('event1', 'event2')", "type": "hogql"}],
+                    "properties": [{"key": "event not in ('event1', 'event2')", "type": "insightsql"}],
                 }
             ]
         }

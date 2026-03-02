@@ -6,13 +6,13 @@ import type { Category, InsightShortId, NotebookInfo } from '~/types'
 import { DocumentBlock } from './schema-assistant-artifacts'
 import type {
     AssistantFunnelsQuery,
-    AssistantHogQLQuery,
+    AssistantInsightsQLQuery,
     AssistantRetentionQuery,
     AssistantTrendsQuery,
 } from './schema-assistant-queries'
 import type {
     FunnelsQuery,
-    HogQLQuery,
+    InsightsQLQuery,
     QuerySchema,
     RetentionQuery,
     RevenueAnalyticsGrossRevenueQuery,
@@ -198,7 +198,7 @@ export type AnyAssistantGeneratedQuery =
     | AssistantTrendsQuery
     | AssistantFunnelsQuery
     | AssistantRetentionQuery
-    | AssistantHogQLQuery
+    | AssistantInsightsQLQuery
 
 export interface VisualizationItem {
     /** @default '' */
@@ -209,7 +209,7 @@ export interface VisualizationItem {
         | TrendsQuery
         | FunnelsQuery
         | RetentionQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery
@@ -394,11 +394,11 @@ export type ApprovalCardUIStatus = ApprovalDecisionStatus | 'approving' | 'rejec
 
 export type AssistantTool =
     | 'search_session_recordings'
-    | 'fix_hogql_query'
+    | 'fix_insightsql_query'
     | 'analyze_user_interviews'
     | 'create_hog_transformation_function'
-    | 'create_hog_function_filters'
-    | 'create_hog_function_inputs'
+    | 'create_custom_function_filters'
+    | 'create_custom_function_inputs'
     | 'create_message_template'
     | 'filter_error_tracking_issues'
     | 'search_error_tracking_issues'

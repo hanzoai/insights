@@ -160,7 +160,7 @@ class AssistantEventMultipleBreakdownFilterType(StrEnum):
     EVENT = "event"
     EVENT_METADATA = "event_metadata"
     SESSION = "session"
-    HOGQL = "hogql"
+    INSIGHTSQL = "insightsql"
     REVENUE_ANALYTICS = "revenue_analytics"
 
 
@@ -198,7 +198,7 @@ class AssistantFunnelsBreakdownType(StrEnum):
     SESSION = "session"
 
 
-class FunnelAggregateByHogQL(Enum):
+class FunnelAggregateByInsightsQL(Enum):
     PROPERTIES__SESSION_ID = "properties.$session_id"
     NONE_TYPE_NONE = None
 
@@ -228,11 +228,11 @@ class AssistantGenericPropertyFilterType(StrEnum):
     FEATURE = "feature"
 
 
-class AssistantHogQLQuery(BaseModel):
+class AssistantInsightsQLQuery(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    kind: Literal["HogQLQuery"] = "HogQLQuery"
+    kind: Literal["InsightsQLQuery"] = "InsightsQLQuery"
     query: str = Field(
         ...,
         description=(
@@ -329,11 +329,11 @@ class AssistantStringOrBooleanValuePropertyFilterOperator(StrEnum):
 
 class AssistantTool(StrEnum):
     SEARCH_SESSION_RECORDINGS = "search_session_recordings"
-    FIX_HOGQL_QUERY = "fix_hogql_query"
+    FIX_INSIGHTSQL_QUERY = "fix_insightsql_query"
     ANALYZE_USER_INTERVIEWS = "analyze_user_interviews"
     CREATE_HOG_TRANSFORMATION_FUNCTION = "create_hog_transformation_function"
-    CREATE_HOG_FUNCTION_FILTERS = "create_hog_function_filters"
-    CREATE_HOG_FUNCTION_INPUTS = "create_hog_function_inputs"
+    CREATE_CUSTOM_FUNCTION_FILTERS = "create_custom_function_filters"
+    CREATE_CUSTOM_FUNCTION_INPUTS = "create_custom_function_inputs"
     CREATE_MESSAGE_TEMPLATE = "create_message_template"
     FILTER_ERROR_TRACKING_ISSUES = "filter_error_tracking_issues"
     SEARCH_ERROR_TRACKING_ISSUES = "search_error_tracking_issues"
@@ -626,7 +626,7 @@ class BreakdownType(StrEnum):
     EVENT_METADATA = "event_metadata"
     GROUP = "group"
     SESSION = "session"
-    HOGQL = "hogql"
+    INSIGHTSQL = "insightsql"
     DATA_WAREHOUSE = "data_warehouse"
     DATA_WAREHOUSE_PERSON_PROPERTY = "data_warehouse_person_property"
     REVENUE_ANALYTICS = "revenue_analytics"
@@ -1529,7 +1529,7 @@ class ExperimentMetricMathType(StrEnum):
     AVG = "avg"
     DAU = "dau"
     UNIQUE_GROUP = "unique_group"
-    HOGQL = "hogql"
+    INSIGHTSQL = "insightsql"
 
 
 class ExperimentMetricOutlierHandling(BaseModel):
@@ -2090,8 +2090,8 @@ class HogCompileResponse(BaseModel):
 class HogLanguage(StrEnum):
     HOG = "hog"
     HOG_JSON = "hogJson"
-    HOG_QL = "hogQL"
-    HOG_QL_EXPR = "hogQLExpr"
+    HOG_QL = "insightsQL"
+    HOG_QL_EXPR = "insightsQLExpr"
     HOG_TEMPLATE = "hogTemplate"
     LIQUID = "liquid"
 
@@ -2157,7 +2157,7 @@ class SessionsV2JoinMode(StrEnum):
     UUID = "uuid"
 
 
-class HogQLVariable(BaseModel):
+class InsightsQLVariable(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -2818,7 +2818,7 @@ class MultipleBreakdownType(StrEnum):
     EVENT_METADATA = "event_metadata"
     GROUP = "group"
     SESSION = "session"
-    HOGQL = "hogql"
+    INSIGHTSQL = "insightsql"
     REVENUE_ANALYTICS = "revenue_analytics"
 
 
@@ -2841,10 +2841,10 @@ class NodeKind(StrEnum):
     SESSIONS_QUERY = "SessionsQuery"
     PERSONS_NODE = "PersonsNode"
     HOG_QUERY = "HogQuery"
-    HOG_QL_QUERY = "HogQLQuery"
-    HOG_QLAST_QUERY = "HogQLASTQuery"
-    HOG_QL_METADATA = "HogQLMetadata"
-    HOG_QL_AUTOCOMPLETE = "HogQLAutocomplete"
+    HOG_QL_QUERY = "InsightsQLQuery"
+    HOG_QLAST_QUERY = "InsightsQLASTQuery"
+    HOG_QL_METADATA = "InsightsQLMetadata"
+    HOG_QL_AUTOCOMPLETE = "InsightsQLAutocomplete"
     ACTORS_QUERY = "ActorsQuery"
     GROUPS_QUERY = "GroupsQuery"
     FUNNELS_ACTORS_QUERY = "FunnelsActorsQuery"
@@ -2942,7 +2942,7 @@ class PathType(StrEnum):
     FIELD_PAGEVIEW = "$pageview"
     FIELD_SCREEN = "$screen"
     CUSTOM_EVENT = "custom_event"
-    HOGQL = "hogql"
+    INSIGHTSQL = "insightsql"
 
 
 class PathsFilterLegacy(BaseModel):
@@ -2961,7 +2961,7 @@ class PathsFilterLegacy(BaseModel):
     path_groupings: list[str] | None = None
     path_replacements: bool | None = None
     path_type: PathType | None = None
-    paths_hogql_expression: str | None = None
+    paths_insightsql_expression: str | None = None
     start_point: str | None = None
     step_limit: int | None = None
 
@@ -3181,7 +3181,7 @@ class PropertyFilterType(StrEnum):
     RECORDING = "recording"
     LOG_ENTRY = "log_entry"
     GROUP = "group"
-    HOGQL = "hogql"
+    INSIGHTSQL = "insightsql"
     DATA_WAREHOUSE = "data_warehouse"
     DATA_WAREHOUSE_PERSON_PROPERTY = "data_warehouse_person_property"
     ERROR_TRACKING_ISSUE = "error_tracking_issue"
@@ -3971,7 +3971,7 @@ class TaxonomicFilterGroupType(StrEnum):
     DASHBOARDS = "dashboards"
     NAME_GROUPS = "name_groups"
     SESSION_PROPERTIES = "session_properties"
-    HOGQL_EXPRESSION = "hogql_expression"
+    INSIGHTSQL_EXPRESSION = "insightsql_expression"
     NOTEBOOKS = "notebooks"
     LOG_ENTRIES = "log_entries"
     ERROR_TRACKING_ISSUES = "error_tracking_issues"
@@ -4457,7 +4457,7 @@ class AssistantFunnelsFilter(BaseModel):
             " to explicitly state this in the plan."
         ),
     )
-    funnelAggregateByHogQL: FunnelAggregateByHogQL | None = Field(
+    funnelAggregateByInsightsQL: FunnelAggregateByInsightsQL | None = Field(
         default=None,
         description=("Use this field only if the user explicitly asks to aggregate the funnel by unique sessions."),
     )
@@ -5031,7 +5031,7 @@ class DatabaseSchemaField(BaseModel):
     )
     chain: list[str | int] | None = None
     fields: list[str] | None = None
-    hogql_value: str
+    insightsql_value: str
     id: str | None = None
     name: str
     schema_valid: bool
@@ -5431,7 +5431,7 @@ class FunnelsFilterLegacy(BaseModel):
     breakdown_attribution_type: BreakdownAttributionType | None = None
     breakdown_attribution_value: float | None = None
     exclusions: list[FunnelExclusionLegacy] | None = None
-    funnel_aggregate_by_hogql: str | None = None
+    funnel_aggregate_by_insightsql: str | None = None
     funnel_from_step: float | None = None
     funnel_order_type: StepOrderValue | None = None
     funnel_step_reference: FunnelStepReference | None = None
@@ -5455,7 +5455,7 @@ class GroupPropertyFilter(BaseModel):
     value: list[str | float | bool] | str | float | bool | None = None
 
 
-class HogQLAutocompleteResponse(BaseModel):
+class InsightsQLAutocompleteResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -5467,7 +5467,7 @@ class HogQLAutocompleteResponse(BaseModel):
     )
 
 
-class HogQLNotice(BaseModel):
+class InsightsQLNotice(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -5477,17 +5477,17 @@ class HogQLNotice(BaseModel):
     start: int | None = None
 
 
-class HogQLPropertyFilter(BaseModel):
+class InsightsQLPropertyFilter(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     key: str
     label: str | None = None
-    type: Literal["hogql"] = "hogql"
+    type: Literal["insightsql"] = "insightsql"
     value: list[str | float | bool] | str | float | bool | None = None
 
 
-class HogQLQueryModifiers(BaseModel):
+class InsightsQLQueryModifiers(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -5519,7 +5519,7 @@ class HogQLQueryModifiers(BaseModel):
     usePreaggregatedIntermediateResults: bool | None = None
     usePreaggregatedTableTransforms: bool | None = Field(
         default=None,
-        description=("Try to automatically convert HogQL queries to use preaggregated tables at the AST level *"),
+        description=("Try to automatically convert InsightsQL queries to use preaggregated tables at the AST level *"),
     )
     useWebAnalyticsPreAggregatedTables: bool | None = None
 
@@ -5530,7 +5530,7 @@ class HogQuery(BaseModel):
     )
     code: str | None = None
     kind: Literal["HogQuery"] = "HogQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: HogQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -5800,7 +5800,7 @@ class PathsFilter(BaseModel):
     pathGroupings: list[str] | None = None
     pathReplacements: bool | None = None
     pathStartKey: str | None = Field(default=None, description="Relevant only within actors query")
-    pathsHogQLExpression: str | None = None
+    pathsInsightsQLExpression: str | None = None
     showFullUrls: bool | None = None
     startPoint: str | None = None
     stepLimit: int | None = 5
@@ -5850,13 +5850,13 @@ class QueryResponseAlternative9(BaseModel):
         extra="forbid",
     )
     ch_table_names: list[str] | None = None
-    errors: list[HogQLNotice]
+    errors: list[InsightsQLNotice]
     isUsingIndices: QueryIndexUsage | None = None
     isValid: bool | None = None
-    notices: list[HogQLNotice]
+    notices: list[InsightsQLNotice]
     query: str | None = None
     table_names: list[str] | None = None
-    warnings: list[HogQLNotice]
+    warnings: list[InsightsQLNotice]
 
 
 class QueryResponseAlternative10(BaseModel):
@@ -6056,8 +6056,8 @@ class RevenueAnalyticsGrossRevenueQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6083,8 +6083,8 @@ class RevenueAnalyticsMRRQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6110,8 +6110,8 @@ class RevenueAnalyticsMetricsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6144,8 +6144,8 @@ class RevenueAnalyticsOverviewQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6171,8 +6171,8 @@ class RevenueAnalyticsTopCustomersQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6199,9 +6199,9 @@ class RevenueExampleDataWarehouseTablesQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6230,9 +6230,9 @@ class RevenueExampleEventsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6303,7 +6303,7 @@ class SavedInsightNode(BaseModel):
     showExport: bool | None = Field(default=None, description="Show the export button")
     showFilters: bool | None = None
     showHeader: bool | None = None
-    showHogQLEditor: bool | None = Field(default=None, description="Include a HogQL query editor above HogQL tables")
+    showInsightsQLEditor: bool | None = Field(default=None, description="Include a InsightsQL query editor above InsightsQL tables")
     showLastComputation: bool | None = None
     showLastComputationRefresh: bool | None = None
     showOpenEditorButton: bool | None = Field(
@@ -6365,9 +6365,9 @@ class SessionAttributionExplorerQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6396,9 +6396,9 @@ class SessionBatchEventsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6485,9 +6485,9 @@ class SessionsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6515,8 +6515,8 @@ class SessionsTimelineQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6595,8 +6595,8 @@ class StickinessQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6616,7 +6616,7 @@ class SuggestedQuestionsQuery(BaseModel):
         extra="forbid",
     )
     kind: Literal["SuggestedQuestionsQuery"] = "SuggestedQuestionsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: SuggestedQuestionsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -6752,8 +6752,8 @@ class TestBasicQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6784,10 +6784,10 @@ class TestCachedBasicQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -6817,9 +6817,9 @@ class TraceQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6847,9 +6847,9 @@ class TracesQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -6932,8 +6932,8 @@ class TrendsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -6972,8 +6972,8 @@ class UsageMetricsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7046,9 +7046,9 @@ class WebExternalClicksTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7078,9 +7078,9 @@ class WebGoalsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7110,8 +7110,8 @@ class WebOverviewQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7139,9 +7139,9 @@ class WebPageURLSearchQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7168,9 +7168,9 @@ class WebStatsTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7216,8 +7216,8 @@ class ActorsPropertyTaxonomyQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7244,10 +7244,10 @@ class ActorsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -7274,8 +7274,8 @@ class AnalyticsQueryResponseBase(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -7609,7 +7609,7 @@ class AssistantTrendsActionsNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
@@ -7651,7 +7651,7 @@ class AssistantTrendsEventsNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
@@ -7774,10 +7774,10 @@ class CachedActorsPropertyTaxonomyQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -7813,12 +7813,12 @@ class CachedActorsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int
     missing_actors_count: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int
     query_metadata: dict[str, Any] | None = None
@@ -7855,10 +7855,10 @@ class CachedCalendarHeatmapQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -7893,11 +7893,11 @@ class CachedDocumentSimilarityQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -7932,10 +7932,10 @@ class CachedEndpointsUsageOverviewQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -7971,11 +7971,11 @@ class CachedEndpointsUsageTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8011,10 +8011,10 @@ class CachedEndpointsUsageTrendsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8048,10 +8048,10 @@ class CachedErrorTrackingBreakdownsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8086,11 +8086,11 @@ class CachedErrorTrackingSimilarIssuesQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8125,10 +8125,10 @@ class CachedEventTaxonomyQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8164,11 +8164,11 @@ class CachedEventsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8232,11 +8232,11 @@ class CachedFunnelCorrelationResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8272,10 +8272,10 @@ class CachedFunnelsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8311,12 +8311,12 @@ class CachedGroupsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     is_cached: bool
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     last_refresh: AwareDatetime
     limit: int
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int
     query_metadata: dict[str, Any] | None = None
@@ -8352,10 +8352,10 @@ class CachedLifecycleQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8391,11 +8391,11 @@ class CachedLogsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
@@ -8431,10 +8431,10 @@ class CachedMarketingAnalyticsAggregatedQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8471,11 +8471,11 @@ class CachedMarketingAnalyticsTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8514,11 +8514,11 @@ class CachedNonIntegratedConversionsTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8555,10 +8555,10 @@ class CachedPathsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8593,10 +8593,10 @@ class CachedRevenueAnalyticsGrossRevenueQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8631,10 +8631,10 @@ class CachedRevenueAnalyticsMRRQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8669,10 +8669,10 @@ class CachedRevenueAnalyticsMetricsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8706,10 +8706,10 @@ class CachedRevenueAnalyticsOverviewQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8744,10 +8744,10 @@ class CachedRevenueAnalyticsTopCustomersQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -8783,11 +8783,11 @@ class CachedRevenueExampleDataWarehouseTablesQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8825,11 +8825,11 @@ class CachedRevenueExampleEventsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8867,11 +8867,11 @@ class CachedSessionAttributionExplorerQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8909,11 +8909,11 @@ class CachedSessionBatchEventsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8958,11 +8958,11 @@ class CachedSessionsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -8999,10 +8999,10 @@ class CachedSessionsTimelineQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9036,10 +9036,10 @@ class CachedStickinessQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9095,10 +9095,10 @@ class CachedTeamTaxonomyQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9169,11 +9169,11 @@ class CachedTraceQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -9210,11 +9210,11 @@ class CachedTracesQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -9250,10 +9250,10 @@ class CachedTrendsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9287,10 +9287,10 @@ class CachedUsageMetricsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9324,10 +9324,10 @@ class CachedVectorSearchQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9363,11 +9363,11 @@ class CachedWebExternalClicksTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -9406,11 +9406,11 @@ class CachedWebGoalsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -9449,10 +9449,10 @@ class CachedWebOverviewQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9489,11 +9489,11 @@ class CachedWebPageURLSearchQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9529,11 +9529,11 @@ class CachedWebStatsTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -9571,10 +9571,10 @@ class CachedWebVitalsPathBreakdownQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -9603,8 +9603,8 @@ class CalendarHeatmapResponse(BaseModel):
         ),
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -9651,7 +9651,7 @@ class ConversionGoalFilter1(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9674,11 +9674,11 @@ class ConversionGoalFilter1(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -9699,7 +9699,7 @@ class ConversionGoalFilter1(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9734,7 +9734,7 @@ class ConversionGoalFilter2(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9757,11 +9757,11 @@ class ConversionGoalFilter2(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -9781,7 +9781,7 @@ class ConversionGoalFilter2(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9818,7 +9818,7 @@ class ConversionGoalFilter3(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9842,11 +9842,11 @@ class ConversionGoalFilter3(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -9866,7 +9866,7 @@ class ConversionGoalFilter3(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9904,7 +9904,7 @@ class DashboardFilter(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -9928,9 +9928,9 @@ class Response(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -9959,10 +9959,10 @@ class Response1(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -9991,10 +9991,10 @@ class Response2(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10023,8 +10023,8 @@ class Response4(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10053,9 +10053,9 @@ class Response5(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10086,9 +10086,9 @@ class Response6(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10116,8 +10116,8 @@ class Response8(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10144,9 +10144,9 @@ class Response9(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10175,9 +10175,9 @@ class Response10(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10205,8 +10205,8 @@ class Response11(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10232,8 +10232,8 @@ class Response12(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10259,8 +10259,8 @@ class Response13(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10285,8 +10285,8 @@ class Response14(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10312,8 +10312,8 @@ class Response15(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10340,9 +10340,9 @@ class Response16(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10371,9 +10371,9 @@ class Response18(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10401,8 +10401,8 @@ class Response19(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10430,9 +10430,9 @@ class Response20(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10462,9 +10462,9 @@ class Response25(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10492,9 +10492,9 @@ class Response26(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10531,7 +10531,7 @@ class DataWarehouseNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -10555,11 +10555,11 @@ class DataWarehouseNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -10579,7 +10579,7 @@ class DataWarehouseNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -10632,9 +10632,9 @@ class DocumentSimilarityQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10660,7 +10660,7 @@ class EndpointRunRequest(BaseModel):
     )
     debug: bool | None = Field(
         default=False,
-        description=("Whether to include debug information (such as the executed HogQL) in the response."),
+        description=("Whether to include debug information (such as the executed InsightsQL) in the response."),
     )
     filters_override: DashboardFilter | None = None
     limit: int | None = Field(
@@ -10672,7 +10672,7 @@ class EndpointRunRequest(BaseModel):
         default=None,
         description=(
             "Variables to parameterize the endpoint query. The key is the variable name"
-            " and the value is the variable value.\n\nFor HogQL endpoints:   Keys must"
+            " and the value is the variable value.\n\nFor InsightsQL endpoints:   Keys must"
             " match a variable `code_name` defined in the query (referenced as"
             ' `{variables.code_name}`).   Example: `{"event_name": "$pageview"}`\n\nFor'
             " non-materialized insight endpoints (e.g. TrendsQuery):   - `date_from`"
@@ -10700,8 +10700,8 @@ class EndpointsUsageOverviewQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10728,9 +10728,9 @@ class EndpointsUsageTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10757,8 +10757,8 @@ class EndpointsUsageTrendsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10791,7 +10791,7 @@ class EntityNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -10813,11 +10813,11 @@ class EntityNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -10837,7 +10837,7 @@ class EntityNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -10861,8 +10861,8 @@ class ErrorTrackingBreakdownsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -10927,7 +10927,7 @@ class ErrorTrackingIssueFilteringToolOutput(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -10956,9 +10956,9 @@ class ErrorTrackingQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -10999,9 +10999,9 @@ class ErrorTrackingSimilarIssuesQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -11027,8 +11027,8 @@ class EventTaxonomyQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11062,7 +11062,7 @@ class EventsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11085,11 +11085,11 @@ class EventsNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -11110,7 +11110,7 @@ class EventsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11136,9 +11136,9 @@ class EventsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -11197,7 +11197,7 @@ class ExperimentDataWarehouseNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11219,11 +11219,11 @@ class ExperimentDataWarehouseNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -11243,7 +11243,7 @@ class ExperimentDataWarehouseNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11277,7 +11277,7 @@ class ExperimentEventExposureConfig(BaseModel):
         | GroupPropertyFilter
         | FeaturePropertyFilter
         | FlagPropertyFilter
-        | HogQLPropertyFilter
+        | InsightsQLPropertyFilter
         | EmptyPropertyFilter
         | DataWarehousePropertyFilter
         | DataWarehousePersonPropertyFilter
@@ -11307,7 +11307,7 @@ class FeatureFlagGroupType(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11335,9 +11335,9 @@ class FunnelCorrelationResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -11372,7 +11372,7 @@ class FunnelExclusionActionsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11397,11 +11397,11 @@ class FunnelExclusionActionsNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -11421,7 +11421,7 @@ class FunnelExclusionActionsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11454,7 +11454,7 @@ class FunnelExclusionEventsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11479,11 +11479,11 @@ class FunnelExclusionEventsNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -11504,7 +11504,7 @@ class FunnelExclusionEventsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11528,8 +11528,8 @@ class FunnelsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11574,10 +11574,10 @@ class GroupsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -11598,7 +11598,7 @@ class HeatMapQuerySource(RootModel[EventsNode]):
     root: EventsNode
 
 
-class HogQLFilters(BaseModel):
+class InsightsQLFilters(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -11617,7 +11617,7 @@ class HogQLFilters(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -11629,21 +11629,21 @@ class HogQLFilters(BaseModel):
     ) = None
 
 
-class HogQLMetadataResponse(BaseModel):
+class InsightsQLMetadataResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     ch_table_names: list[str] | None = None
-    errors: list[HogQLNotice]
+    errors: list[InsightsQLNotice]
     isUsingIndices: QueryIndexUsage | None = None
     isValid: bool | None = None
-    notices: list[HogQLNotice]
+    notices: list[InsightsQLNotice]
     query: str | None = None
     table_names: list[str] | None = None
-    warnings: list[HogQLNotice]
+    warnings: list[InsightsQLNotice]
 
 
-class HogQLQueryResponse(BaseModel):
+class InsightsQLQueryResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -11657,10 +11657,10 @@ class HogQLQueryResponse(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -11684,7 +11684,7 @@ class InsightActorsQueryBase(BaseModel):
     )
     includeRecordings: bool | None = None
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ActorsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -11700,8 +11700,8 @@ class LifecycleQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11727,8 +11727,8 @@ class LogAttributesQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11753,8 +11753,8 @@ class LogValuesQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11781,9 +11781,9 @@ class LogsQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -11810,8 +11810,8 @@ class MarketingAnalyticsAggregatedQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11852,9 +11852,9 @@ class MarketingAnalyticsTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -11916,7 +11916,7 @@ class NewExperimentQueryResponse(BaseModel):
     baseline: ExperimentStatsBaseValidated
     breakdown_results: list[ExperimentBreakdownResult] | None = None
     clickhouse_sql: str | None = None
-    hogql: str | None = None
+    insightsql: str | None = None
     variant_results: list[ExperimentVariantResultFrequentist] | list[ExperimentVariantResultBayesian]
 
 
@@ -11932,9 +11932,9 @@ class NonIntegratedConversionsTableQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -11962,8 +11962,8 @@ class PathsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -11997,7 +11997,7 @@ class PersonsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -12012,7 +12012,7 @@ class PersonsNode(BaseModel):
     )
     kind: Literal["PersonsNode"] = "PersonsNode"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     properties: (
         list[
@@ -12027,7 +12027,7 @@ class PersonsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -12071,7 +12071,7 @@ class PropertyGroupFilterValue(BaseModel):
         | GroupPropertyFilter
         | FeaturePropertyFilter
         | FlagPropertyFilter
-        | HogQLPropertyFilter
+        | InsightsQLPropertyFilter
         | EmptyPropertyFilter
         | DataWarehousePropertyFilter
         | DataWarehousePersonPropertyFilter
@@ -12093,9 +12093,9 @@ class QueryResponseAlternative1(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12124,10 +12124,10 @@ class QueryResponseAlternative3(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12156,10 +12156,10 @@ class QueryResponseAlternative4(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12200,8 +12200,8 @@ class QueryResponseAlternative6(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12230,10 +12230,10 @@ class QueryResponseAlternative8(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -12263,9 +12263,9 @@ class QueryResponseAlternative11(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12294,9 +12294,9 @@ class QueryResponseAlternative14(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12323,9 +12323,9 @@ class QueryResponseAlternative15(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12351,8 +12351,8 @@ class QueryResponseAlternative16(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12378,9 +12378,9 @@ class QueryResponseAlternative22(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12408,8 +12408,8 @@ class QueryResponseAlternative23(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12438,9 +12438,9 @@ class QueryResponseAlternative24(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12471,9 +12471,9 @@ class QueryResponseAlternative25(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12501,8 +12501,8 @@ class QueryResponseAlternative27(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12528,9 +12528,9 @@ class QueryResponseAlternative28(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12556,8 +12556,8 @@ class QueryResponseAlternative30(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12583,8 +12583,8 @@ class QueryResponseAlternative31(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12610,8 +12610,8 @@ class QueryResponseAlternative32(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12636,8 +12636,8 @@ class QueryResponseAlternative33(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12663,8 +12663,8 @@ class QueryResponseAlternative34(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12691,9 +12691,9 @@ class QueryResponseAlternative35(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12721,8 +12721,8 @@ class QueryResponseAlternative36(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12750,9 +12750,9 @@ class QueryResponseAlternative37(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12782,9 +12782,9 @@ class QueryResponseAlternative38(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12813,10 +12813,10 @@ class QueryResponseAlternative39(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int
     missing_actors_count: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12845,10 +12845,10 @@ class QueryResponseAlternative40(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12879,10 +12879,10 @@ class QueryResponseAlternative41(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -12912,8 +12912,8 @@ class QueryResponseAlternative42(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -12942,9 +12942,9 @@ class QueryResponseAlternative43(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -12975,9 +12975,9 @@ class QueryResponseAlternative44(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13005,8 +13005,8 @@ class QueryResponseAlternative46(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13033,9 +13033,9 @@ class QueryResponseAlternative47(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13064,9 +13064,9 @@ class QueryResponseAlternative48(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str = Field(..., description="Generated HogQL query.")
+    insightsql: str = Field(..., description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13094,8 +13094,8 @@ class QueryResponseAlternative49(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13121,8 +13121,8 @@ class QueryResponseAlternative50(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13148,8 +13148,8 @@ class QueryResponseAlternative51(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13174,8 +13174,8 @@ class QueryResponseAlternative52(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13201,8 +13201,8 @@ class QueryResponseAlternative53(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13229,9 +13229,9 @@ class QueryResponseAlternative54(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13260,9 +13260,9 @@ class QueryResponseAlternative56(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13290,8 +13290,8 @@ class QueryResponseAlternative57(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13319,9 +13319,9 @@ class QueryResponseAlternative58(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13351,9 +13351,9 @@ class QueryResponseAlternative59(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13381,9 +13381,9 @@ class QueryResponseAlternative63(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13411,9 +13411,9 @@ class QueryResponseAlternative64(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13441,8 +13441,8 @@ class QueryResponseAlternative65(BaseModel):
         ),
     )
     hasMore: bool | None = Field(default=None, description="Wether more breakdown values are available.")
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13467,8 +13467,8 @@ class QueryResponseAlternative66(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13493,8 +13493,8 @@ class QueryResponseAlternative68(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13519,8 +13519,8 @@ class QueryResponseAlternative69(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13547,9 +13547,9 @@ class QueryResponseAlternative71(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13578,9 +13578,9 @@ class QueryResponseAlternative73(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     nextCursor: str | None = Field(default=None, description="Cursor for fetching the next page of results")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
@@ -13608,8 +13608,8 @@ class QueryResponseAlternative74(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13634,8 +13634,8 @@ class QueryResponseAlternative75(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13660,8 +13660,8 @@ class QueryResponseAlternative77(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13686,8 +13686,8 @@ class QueryResponseAlternative78(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13712,8 +13712,8 @@ class QueryResponseAlternative79(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13740,9 +13740,9 @@ class QueryResponseAlternative80(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13768,8 +13768,8 @@ class QueryResponseAlternative83(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13794,8 +13794,8 @@ class QueryResponseAlternative84(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13820,8 +13820,8 @@ class QueryResponseAlternative85(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13848,9 +13848,9 @@ class QueryResponseAlternative86(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -13877,8 +13877,8 @@ class QueryResponseAlternative87(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -13927,7 +13927,7 @@ class RetentionEntity(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14018,7 +14018,7 @@ class RevenueAnalyticsBaseQueryRevenueAnalyticsGrossRevenueQueryResponse(BaseMod
     )
     dateRange: DateRange | None = None
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsGrossRevenueQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14031,7 +14031,7 @@ class RevenueAnalyticsBaseQueryRevenueAnalyticsMRRQueryResponse(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsMRRQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14044,7 +14044,7 @@ class RevenueAnalyticsBaseQueryRevenueAnalyticsMetricsQueryResponse(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsMetricsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14057,7 +14057,7 @@ class RevenueAnalyticsBaseQueryRevenueAnalyticsOverviewQueryResponse(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsOverviewQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14070,7 +14070,7 @@ class RevenueAnalyticsBaseQueryRevenueAnalyticsTopCustomersQueryResponse(BaseMod
     )
     dateRange: DateRange | None = None
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsTopCustomersQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14094,7 +14094,7 @@ class RevenueAnalyticsGrossRevenueQuery(BaseModel):
     dateRange: DateRange | None = None
     interval: SimpleIntervalType
     kind: Literal["RevenueAnalyticsGrossRevenueQuery"] = "RevenueAnalyticsGrossRevenueQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsGrossRevenueQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14109,7 +14109,7 @@ class RevenueAnalyticsMRRQuery(BaseModel):
     dateRange: DateRange | None = None
     interval: SimpleIntervalType
     kind: Literal["RevenueAnalyticsMRRQuery"] = "RevenueAnalyticsMRRQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsMRRQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14124,7 +14124,7 @@ class RevenueAnalyticsMetricsQuery(BaseModel):
     dateRange: DateRange | None = None
     interval: SimpleIntervalType
     kind: Literal["RevenueAnalyticsMetricsQuery"] = "RevenueAnalyticsMetricsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsMetricsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14137,7 +14137,7 @@ class RevenueAnalyticsOverviewQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["RevenueAnalyticsOverviewQuery"] = "RevenueAnalyticsOverviewQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsOverviewQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14151,7 +14151,7 @@ class RevenueAnalyticsTopCustomersQuery(BaseModel):
     dateRange: DateRange | None = None
     groupBy: RevenueAnalyticsTopCustomersGroupBy
     kind: Literal["RevenueAnalyticsTopCustomersQuery"] = "RevenueAnalyticsTopCustomersQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[RevenueAnalyticsPropertyFilter]
     response: RevenueAnalyticsTopCustomersQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14164,7 +14164,7 @@ class RevenueExampleDataWarehouseTablesQuery(BaseModel):
     )
     kind: Literal["RevenueExampleDataWarehouseTablesQuery"] = "RevenueExampleDataWarehouseTablesQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     response: RevenueExampleDataWarehouseTablesQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14177,7 +14177,7 @@ class RevenueExampleEventsQuery(BaseModel):
     )
     kind: Literal["RevenueExampleEventsQuery"] = "RevenueExampleEventsQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     response: RevenueExampleEventsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14192,7 +14192,7 @@ class SessionAttributionExplorerQuery(BaseModel):
     groupBy: list[SessionAttributionGroupBy]
     kind: Literal["SessionAttributionExplorerQuery"] = "SessionAttributionExplorerQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     response: SessionAttributionExplorerQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14212,7 +14212,7 @@ class SessionsTimelineQuery(BaseModel):
         description=("Only fetch sessions that started before this timestamp (default: '+5s')"),
     )
     kind: Literal["SessionsTimelineQuery"] = "SessionsTimelineQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     personId: str | None = Field(default=None, description="Fetch sessions only for a given person")
     response: SessionsTimelineQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14251,8 +14251,8 @@ class TeamTaxonomyQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -14288,7 +14288,7 @@ class TileFilters(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14308,7 +14308,7 @@ class TraceNeighborsQuery(BaseModel):
     filterSupportTraces: bool | None = None
     filterTestAccounts: bool | None = None
     kind: Literal["TraceNeighborsQuery"] = "TraceNeighborsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -14322,7 +14322,7 @@ class TraceNeighborsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14345,7 +14345,7 @@ class TraceQuery(BaseModel):
     )
     dateRange: DateRange | None = None
     kind: Literal["TraceQuery"] = "TraceQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -14359,7 +14359,7 @@ class TraceQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14386,7 +14386,7 @@ class TracesQuery(BaseModel):
     groupTypeIndex: int | None = None
     kind: Literal["TracesQuery"] = "TracesQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     personId: str | None = Field(default=None, description="Person who performed the event")
     properties: (
@@ -14402,7 +14402,7 @@ class TracesQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14437,7 +14437,7 @@ class UsageMetricsQuery(BaseModel):
         description="Group type index. Required with group_key for group queries.",
     )
     kind: Literal["UsageMetricsQuery"] = "UsageMetricsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     person_id: str | None = Field(
         default=None,
         description=("Person ID to fetch metrics for. Mutually exclusive with group parameters."),
@@ -14457,8 +14457,8 @@ class VectorSearchQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -14521,7 +14521,7 @@ class WebExternalClicksTableQuery(BaseModel):
     )
     kind: Literal["WebExternalClicksTableQuery"] = "WebExternalClicksTableQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebExternalClicksTableQueryResponse | None = None
@@ -14559,7 +14559,7 @@ class WebGoalsQuery(BaseModel):
     )
     kind: Literal["WebGoalsQuery"] = "WebGoalsQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebGoalsQueryResponse | None = None
@@ -14595,7 +14595,7 @@ class WebOverviewQuery(BaseModel):
         description=("Interval for date range calculation (affects date_to rounding for hour vs day ranges)"),
     )
     kind: Literal["WebOverviewQuery"] = "WebOverviewQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebOverviewQueryResponse | None = None
@@ -14632,7 +14632,7 @@ class WebPageURLSearchQuery(BaseModel):
     )
     kind: Literal["WebPageURLSearchQuery"] = "WebPageURLSearchQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebPageURLSearchQueryResponse | None = None
@@ -14675,7 +14675,7 @@ class WebStatsTableQuery(BaseModel):
     )
     kind: Literal["WebStatsTableQuery"] = "WebStatsTableQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
@@ -14701,10 +14701,10 @@ class WebTrendsQueryResponse(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -14743,8 +14743,8 @@ class WebVitalsPathBreakdownQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -14769,8 +14769,8 @@ class WebVitalsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -14803,7 +14803,7 @@ class ActionsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14826,11 +14826,11 @@ class ActionsNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -14850,7 +14850,7 @@ class ActionsNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -14871,7 +14871,7 @@ class ActorsPropertyTaxonomyQuery(BaseModel):
     groupTypeIndex: int | None = None
     kind: Literal["ActorsPropertyTaxonomyQuery"] = "ActorsPropertyTaxonomyQuery"
     maxPropertyValues: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[str]
     response: ActorsPropertyTaxonomyQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -14882,9 +14882,9 @@ class AnyResponseType(
     RootModel[
         dict[str, Any]
         | HogQueryResponse
-        | HogQLQueryResponse
-        | HogQLMetadataResponse
-        | HogQLAutocompleteResponse
+        | InsightsQLQueryResponse
+        | InsightsQLMetadataResponse
+        | InsightsQLAutocompleteResponse
         | Any
         | EventsQueryResponse
         | SessionsQueryResponse
@@ -14897,9 +14897,9 @@ class AnyResponseType(
     root: (
         dict[str, Any]
         | HogQueryResponse
-        | HogQLQueryResponse
-        | HogQLMetadataResponse
-        | HogQLAutocompleteResponse
+        | InsightsQLQueryResponse
+        | InsightsQLMetadataResponse
+        | InsightsQLAutocompleteResponse
         | Any
         | EventsQueryResponse
         | SessionsQueryResponse
@@ -14946,11 +14946,11 @@ class CachedErrorTrackingQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -14969,7 +14969,7 @@ class CachedErrorTrackingQueryResponse(BaseModel):
     )
 
 
-class CachedHogQLQueryResponse(BaseModel):
+class CachedInsightsQLQueryResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -14989,12 +14989,12 @@ class CachedHogQLQueryResponse(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
@@ -15056,7 +15056,7 @@ class CachedNewExperimentQueryResponse(BaseModel):
         description=("What triggered the calculation of the query, leave empty if user/immediate"),
     )
     clickhouse_sql: str | None = None
-    hogql: str | None = None
+    insightsql: str | None = None
     is_cached: bool
     last_refresh: AwareDatetime
     next_allowed_client_refresh: AwareDatetime
@@ -15085,10 +15085,10 @@ class CachedRetentionQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -15126,12 +15126,12 @@ class CachedWebTrendsQueryResponse(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
@@ -15170,10 +15170,10 @@ class CachedWebVitalsQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     query_metadata: dict[str, Any] | None = None
     query_status: QueryStatus | None = Field(
@@ -15235,10 +15235,10 @@ class Response3(BaseModel):
     )
     explain: list[str] | None = Field(default=None, description="Query explanation output")
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    metadata: HogQLMetadataResponse | None = Field(default=None, description="Query metadata output")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    metadata: InsightsQLMetadataResponse | None = Field(default=None, description="Query metadata output")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query: str | None = Field(default=None, description="Input query string")
     query_status: QueryStatus | None = Field(
@@ -15268,9 +15268,9 @@ class Response21(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15296,7 +15296,7 @@ class DocumentSimilarityQuery(BaseModel):
     kind: Literal["DocumentSimilarityQuery"] = "DocumentSimilarityQuery"
     limit: int | None = None
     model: str
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     order_by: OrderBy
     order_direction: OrderDirection
@@ -15318,7 +15318,7 @@ class EndpointsUsageOverviewQuery(BaseModel):
     endpointNames: list[str] | None = Field(default=None, description="Filter to specific endpoints by name")
     kind: Literal["EndpointsUsageOverviewQuery"] = "EndpointsUsageOverviewQuery"
     materializationType: MaterializationType | None = Field(default=None, description="Filter by materialization type")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: EndpointsUsageOverviewQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -15334,7 +15334,7 @@ class EndpointsUsageTableQuery(BaseModel):
     kind: Literal["EndpointsUsageTableQuery"] = "EndpointsUsageTableQuery"
     limit: int | None = None
     materializationType: MaterializationType | None = Field(default=None, description="Filter by materialization type")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: list[EndpointsUsageOrderByField | EndpointsUsageOrderByDirection] | None = None
     response: EndpointsUsageTableQueryResponse | None = None
@@ -15356,7 +15356,7 @@ class EndpointsUsageTrendsQuery(BaseModel):
     kind: Literal["EndpointsUsageTrendsQuery"] = "EndpointsUsageTrendsQuery"
     materializationType: MaterializationType | None = Field(default=None, description="Filter by materialization type")
     metric: Metric = Field(..., description="Metric to trend")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: EndpointsUsageTrendsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -15372,7 +15372,7 @@ class ErrorTrackingBreakdownsQuery(BaseModel):
     issueId: str
     kind: Literal["ErrorTrackingBreakdownsQuery"] = "ErrorTrackingBreakdownsQuery"
     maxValuesPerProperty: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ErrorTrackingBreakdownsQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -15409,9 +15409,9 @@ class ErrorTrackingIssueCorrelationQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -15437,7 +15437,7 @@ class ErrorTrackingSimilarIssuesQuery(BaseModel):
     limit: int | None = None
     maxDistance: float | None = None
     modelName: EmbeddingModelName | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     rendering: str | None = None
     response: ErrorTrackingSimilarIssuesQueryResponse | None = None
@@ -15453,7 +15453,7 @@ class EventTaxonomyQuery(BaseModel):
     event: str | None = None
     kind: Literal["EventTaxonomyQuery"] = "EventTaxonomyQuery"
     maxPropertyValues: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[str] | None = None
     response: EventTaxonomyQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -15571,7 +15571,7 @@ class FunnelsFilter(BaseModel):
         description=("Breakdown table sorting. Format: 'column_key' or '-column_key' (descending)"),
     )
     exclusions: list[FunnelExclusionEventsNode | FunnelExclusionActionsNode] | None = []
-    funnelAggregateByHogQL: str | None = None
+    funnelAggregateByInsightsQL: str | None = None
     funnelFromStep: int | None = None
     funnelOrderType: StepOrderValue | None = StepOrderValue.ORDERED
     funnelStepReference: FunnelStepReference | None = FunnelStepReference.TOTAL
@@ -15615,7 +15615,7 @@ class GroupNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -15638,11 +15638,11 @@ class GroupNode(BaseModel):
         | ExperimentMetricMathType
         | CalendarHeatmapMathType
         | Literal["unique_group"]
-        | Literal["hogql"]
+        | Literal["insightsql"]
         | None
     ) = None
     math_group_type_index: MathGroupTypeIndex | None = None
-    math_hogql: str | None = None
+    math_insightsql: str | None = None
     math_multiplier: float | None = None
     math_property: str | None = None
     math_property_revenue_currency: RevenueCurrencyPropertyConfig | None = None
@@ -15667,7 +15667,7 @@ class GroupNode(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -15688,10 +15688,10 @@ class GroupsQuery(BaseModel):
     group_type_index: int
     kind: Literal["GroupsQuery"] = "GroupsQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: list[str] | None = None
-    properties: list[GroupPropertyFilter | HogQLPropertyFilter] | None = None
+    properties: list[GroupPropertyFilter | InsightsQLPropertyFilter] | None = None
     response: GroupsQueryResponse | None = None
     search: str | None = None
     select: list[str] | None = None
@@ -15699,45 +15699,45 @@ class GroupsQuery(BaseModel):
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
 
 
-class HogQLASTQuery(BaseModel):
+class InsightsQLASTQuery(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     explain: bool | None = None
-    filters: HogQLFilters | None = None
-    kind: Literal["HogQLASTQuery"] = "HogQLASTQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    filters: InsightsQLFilters | None = None
+    kind: Literal["InsightsQLASTQuery"] = "InsightsQLASTQuery"
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     name: str | None = Field(default=None, description="Client provided name of the query")
     query: dict[str, Any]
-    response: HogQLQueryResponse | None = None
+    response: InsightsQLQueryResponse | None = None
     tags: QueryLogTags | None = None
     values: dict[str, Any] | None = Field(
         default=None,
         description=("Constant values that can be referenced with the {placeholder} syntax in the query"),
     )
-    variables: dict[str, HogQLVariable] | None = Field(
+    variables: dict[str, InsightsQLVariable] | None = Field(
         default=None, description="Variables to be substituted into the query"
     )
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
 
 
-class HogQLQuery(BaseModel):
+class InsightsQLQuery(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     explain: bool | None = None
-    filters: HogQLFilters | None = None
-    kind: Literal["HogQLQuery"] = "HogQLQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    filters: InsightsQLFilters | None = None
+    kind: Literal["InsightsQLQuery"] = "InsightsQLQuery"
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     name: str | None = Field(default=None, description="Client provided name of the query")
     query: str
-    response: HogQLQueryResponse | None = None
+    response: InsightsQLQueryResponse | None = None
     tags: QueryLogTags | None = None
     values: dict[str, Any] | None = Field(
         default=None,
         description=("Constant values that can be referenced with the {placeholder} syntax in the query"),
     )
-    variables: dict[str, HogQLVariable] | None = Field(
+    variables: dict[str, InsightsQLVariable] | None = Field(
         default=None, description="Variables to be substituted into the query"
     )
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -15810,7 +15810,7 @@ class MarketingAnalyticsAggregatedQuery(BaseModel):
         description=("Interval for date range calculation (affects date_to rounding for hour vs day ranges)"),
     )
     kind: Literal["MarketingAnalyticsAggregatedQuery"] = "MarketingAnalyticsAggregatedQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: MarketingAnalyticsAggregatedQueryResponse | None = None
     sampling: WebAnalyticsSampling | None = None
@@ -15855,7 +15855,7 @@ class MarketingAnalyticsTableQuery(BaseModel):
     )
     kind: Literal["MarketingAnalyticsTableQuery"] = "MarketingAnalyticsTableQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[list[str | MarketingAnalyticsOrderByEnum]] | None = Field(
         default=None, description="Columns to order by - similar to EventsQuery format"
@@ -15966,7 +15966,7 @@ class NonIntegratedConversionsTableQuery(BaseModel):
     )
     kind: Literal["NonIntegratedConversionsTableQuery"] = "NonIntegratedConversionsTableQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[list[str | MarketingAnalyticsOrderByEnum]] | None = Field(
         default=None, description="Columns to order by"
@@ -16004,9 +16004,9 @@ class QueryResponseAlternative17(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -16032,8 +16032,8 @@ class QueryResponseAlternative67(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16080,7 +16080,7 @@ class RecordingsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16092,7 +16092,7 @@ class RecordingsQuery(BaseModel):
     ) = None
     kind: Literal["RecordingsQuery"] = "RecordingsQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     operand: FilterLogicalOperator | None = FilterLogicalOperator.AND_
     order: RecordingOrder | None = RecordingOrder.START_TIME
@@ -16121,7 +16121,7 @@ class RecordingsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16155,8 +16155,8 @@ class RetentionQueryResponse(BaseModel):
             "Query error. Returned only if 'explain' or `modifiers.debug` is true. Throws an error otherwise."
         ),
     )
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query_status: QueryStatus | None = Field(
         default=None,
         description=("Query status indicates whether next to the provided data, a query is still running."),
@@ -16191,7 +16191,7 @@ class StickinessQuery(BaseModel):
         description=("How many intervals comprise a period. Only used for cohorts, otherwise default 1."),
     )
     kind: Literal["StickinessQuery"] = "StickinessQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16205,7 +16205,7 @@ class StickinessQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16231,7 +16231,7 @@ class TeamTaxonomyQuery(BaseModel):
         extra="forbid",
     )
     kind: Literal["TeamTaxonomyQuery"] = "TeamTaxonomyQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: TeamTaxonomyQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -16259,7 +16259,7 @@ class TrendsQuery(BaseModel):
         description=("Granularity of the response. Can be one of `hour`, `day`, `week` or `month`"),
     )
     kind: Literal["TrendsQuery"] = "TrendsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16273,7 +16273,7 @@ class TrendsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16301,7 +16301,7 @@ class VectorSearchQuery(BaseModel):
     embedding: list[float]
     embeddingVersion: float | None = None
     kind: Literal["VectorSearchQuery"] = "VectorSearchQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: VectorSearchQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -16334,7 +16334,7 @@ class WebTrendsQuery(BaseModel):
     kind: Literal["WebTrendsQuery"] = "WebTrendsQuery"
     limit: int | None = None
     metrics: list[WebTrendsMetric]
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
@@ -16372,7 +16372,7 @@ class WebVitalsPathBreakdownQuery(BaseModel):
     )
     kind: Literal["WebVitalsPathBreakdownQuery"] = "WebVitalsPathBreakdownQuery"
     metric: WebVitalsMetric
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     percentile: WebVitalsPercentile
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
@@ -16403,11 +16403,11 @@ class CachedErrorTrackingIssueCorrelationQueryResponse(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     is_cached: bool
     last_refresh: AwareDatetime
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     next_allowed_client_refresh: AwareDatetime
     offset: int | None = None
     query_metadata: dict[str, Any] | None = None
@@ -16481,7 +16481,7 @@ class CalendarHeatmapQuery(BaseModel):
         description=("Granularity of the response. Can be one of `hour`, `day`, `week` or `month`"),
     )
     kind: Literal["CalendarHeatmapQuery"] = "CalendarHeatmapQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16495,7 +16495,7 @@ class CalendarHeatmapQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16525,9 +16525,9 @@ class Response22(BaseModel):
         ),
     )
     hasMore: bool | None = None
-    hogql: str | None = Field(default=None, description="Generated HogQL query.")
+    insightsql: str | None = Field(default=None, description="Generated InsightsQL query.")
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     query_status: QueryStatus | None = Field(
         default=None,
@@ -16567,7 +16567,7 @@ class DataVisualizationNode(BaseModel):
     chartSettings: ChartSettings | None = None
     display: ChartDisplayType | None = None
     kind: Literal["DataVisualizationNode"] = "DataVisualizationNode"
-    source: HogQLQuery
+    source: InsightsQLQuery
     tableSettings: TableSettings | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
 
@@ -16579,7 +16579,7 @@ class DatabaseSchemaEndpointTable(BaseModel):
     fields: dict[str, DatabaseSchemaField]
     id: str
     name: str
-    query: HogQLQuery
+    query: InsightsQLQuery
     row_count: float | None = None
     status: str | None = None
     type: Literal["endpoint"] = "endpoint"
@@ -16593,7 +16593,7 @@ class DatabaseSchemaManagedViewTable(BaseModel):
     id: str
     kind: DatabaseSchemaManagedViewTableKind
     name: str
-    query: HogQLQuery
+    query: InsightsQLQuery
     row_count: float | None = None
     source_id: str | None = None
     type: Literal["managed_view"] = "managed_view"
@@ -16607,7 +16607,7 @@ class DatabaseSchemaMaterializedViewTable(BaseModel):
     id: str
     last_run_at: str | None = None
     name: str
-    query: HogQLQuery
+    query: InsightsQLQuery
     row_count: float | None = None
     status: str | None = None
     type: Literal["materialized_view"] = "materialized_view"
@@ -16620,7 +16620,7 @@ class DatabaseSchemaViewTable(BaseModel):
     fields: dict[str, DatabaseSchemaField]
     id: str
     name: str
-    query: HogQLQuery
+    query: InsightsQLQuery
     row_count: float | None = None
     type: Literal["view"] = "view"
 
@@ -16631,7 +16631,7 @@ class ErrorTrackingIssueCorrelationQuery(BaseModel):
     )
     events: list[str]
     kind: Literal["ErrorTrackingIssueCorrelationQuery"] = "ErrorTrackingIssueCorrelationQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ErrorTrackingIssueCorrelationQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -16650,7 +16650,7 @@ class ErrorTrackingQuery(BaseModel):
     issueId: str | None = None
     kind: Literal["ErrorTrackingQuery"] = "ErrorTrackingQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: OrderBy1
     orderDirection: OrderDirection1 | None = None
@@ -16679,7 +16679,7 @@ class ExperimentExposureQuery(BaseModel):
     feature_flag: dict[str, Any]
     holdout: ExperimentHoldoutType | None = None
     kind: Literal["ExperimentExposureQuery"] = "ExperimentExposureQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ExperimentExposureQueryResponse | None = None
     start_date: str | None = None
     tags: QueryLogTags | None = None
@@ -16776,7 +16776,7 @@ class ExperimentQueryResponse(BaseModel):
     )
     clickhouse_sql: str | None = None
     credible_intervals: dict[str, list[float]] | None = None
-    hogql: str | None = None
+    insightsql: str | None = None
     insight: list[dict[str, Any]] | None = None
     kind: Literal["ExperimentQuery"] = "ExperimentQuery"
     metric: ExperimentMeanMetric | ExperimentFunnelMetric | ExperimentRatioMetric | ExperimentRetentionMetric | None = (
@@ -16826,7 +16826,7 @@ class FunnelsQuery(BaseModel):
         description=("Granularity of the response. Can be one of `hour`, `day`, `week` or `month`"),
     )
     kind: Literal["FunnelsQuery"] = "FunnelsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16840,7 +16840,7 @@ class FunnelsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16872,7 +16872,7 @@ class InsightsQueryBaseCalendarHeatmapResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16886,7 +16886,7 @@ class InsightsQueryBaseCalendarHeatmapResponse(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16915,7 +16915,7 @@ class InsightsQueryBaseFunnelsQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16929,7 +16929,7 @@ class InsightsQueryBaseFunnelsQueryResponse(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -16958,7 +16958,7 @@ class InsightsQueryBaseLifecycleQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -16972,7 +16972,7 @@ class InsightsQueryBaseLifecycleQueryResponse(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17001,7 +17001,7 @@ class InsightsQueryBasePathsQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -17015,7 +17015,7 @@ class InsightsQueryBasePathsQueryResponse(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17044,7 +17044,7 @@ class InsightsQueryBaseRetentionQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -17058,7 +17058,7 @@ class InsightsQueryBaseRetentionQueryResponse(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17087,7 +17087,7 @@ class InsightsQueryBaseTrendsQueryResponse(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: NodeKind
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -17101,7 +17101,7 @@ class InsightsQueryBaseTrendsQueryResponse(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17153,7 +17153,7 @@ class LifecycleQuery(BaseModel):
     lifecycleFilter: LifecycleFilter | None = Field(
         default=None, description="Properties specific to the lifecycle insight"
     )
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -17167,7 +17167,7 @@ class LifecycleQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17194,7 +17194,7 @@ class LogAttributesQuery(BaseModel):
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["LogAttributesQuery"] = "LogAttributesQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     response: LogAttributesQueryResponse | None = None
     search: str | None = None
@@ -17214,7 +17214,7 @@ class LogValuesQuery(BaseModel):
     filterGroup: PropertyGroupFilter | None = None
     kind: Literal["LogValuesQuery"] = "LogValuesQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     response: LogValuesQueryResponse | None = None
     search: str | None = None
@@ -17234,7 +17234,7 @@ class LogsQuery(BaseModel):
     kind: Literal["LogsQuery"] = "LogsQuery"
     limit: int | None = None
     liveLogsCheckpoint: str | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: OrderBy3 | None = None
     resourceFingerprint: str | None = None
@@ -17296,7 +17296,7 @@ class QueryResponseAlternative20(BaseModel):
     )
     clickhouse_sql: str | None = None
     credible_intervals: dict[str, list[float]] | None = None
-    hogql: str | None = None
+    insightsql: str | None = None
     insight: list[dict[str, Any]] | None = None
     kind: Literal["ExperimentQuery"] = "ExperimentQuery"
     metric: ExperimentMeanMetric | ExperimentFunnelMetric | ExperimentRatioMetric | ExperimentRetentionMetric | None = (
@@ -17357,7 +17357,7 @@ class RetentionQuery(BaseModel):
         description=("Exclude internal and test users by applying the respective filters"),
     )
     kind: Literal["RetentionQuery"] = "RetentionQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     properties: (
         list[
             EventPropertyFilter
@@ -17371,7 +17371,7 @@ class RetentionQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17422,7 +17422,7 @@ class SessionsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17451,7 +17451,7 @@ class SessionsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17466,7 +17466,7 @@ class SessionsQuery(BaseModel):
     )
     kind: Literal["SessionsQuery"] = "SessionsQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[str] | None = Field(default=None, description="Columns to order by")
     personId: str | None = Field(default=None, description="Show sessions for a given person")
@@ -17483,7 +17483,7 @@ class SessionsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -17497,7 +17497,7 @@ class SessionsQuery(BaseModel):
     select: list[str] = Field(..., description="Return a limited set of data. Required.")
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
-    where: list[str] | None = Field(default=None, description="HogQL filters to apply on returned data")
+    where: list[str] | None = Field(default=None, description="InsightsQL filters to apply on returned data")
 
 
 class StickinessActorsQuery(BaseModel):
@@ -17508,7 +17508,7 @@ class StickinessActorsQuery(BaseModel):
     day: str | int | None = None
     includeRecordings: bool | None = None
     kind: Literal["StickinessActorsQuery"] = "StickinessActorsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     operator: StickinessOperator | None = None
     response: ActorsQueryResponse | None = None
     series: int | None = None
@@ -17525,7 +17525,7 @@ class VisualizationBlock(BaseModel):
         TrendsQuery
         | FunnelsQuery
         | RetentionQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery
@@ -17533,7 +17533,7 @@ class VisualizationBlock(BaseModel):
         | AssistantTrendsQuery
         | AssistantFunnelsQuery
         | AssistantRetentionQuery
-        | AssistantHogQLQuery
+        | AssistantInsightsQLQuery
     ) = Field(
         ...,
         description="The query to render (same as VisualizationArtifactContent.query)",
@@ -17550,7 +17550,7 @@ class VisualizationItem(BaseModel):
         TrendsQuery
         | FunnelsQuery
         | RetentionQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery
@@ -17558,7 +17558,7 @@ class VisualizationItem(BaseModel):
         | AssistantTrendsQuery
         | AssistantFunnelsQuery
         | AssistantRetentionQuery
-        | AssistantHogQLQuery
+        | AssistantInsightsQLQuery
     )
     initiator: str | None = None
     plan: str | None = None
@@ -17573,7 +17573,7 @@ class VisualizationMessage(BaseModel):
         TrendsQuery
         | FunnelsQuery
         | RetentionQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery
@@ -17581,7 +17581,7 @@ class VisualizationMessage(BaseModel):
         | AssistantTrendsQuery
         | AssistantFunnelsQuery
         | AssistantRetentionQuery
-        | AssistantHogQLQuery
+        | AssistantInsightsQLQuery
     )
     id: str | None = None
     initiator: str | None = None
@@ -17665,7 +17665,7 @@ class CachedExperimentQueryResponse(BaseModel):
     )
     clickhouse_sql: str | None = None
     credible_intervals: dict[str, list[float]] | None = None
-    hogql: str | None = None
+    insightsql: str | None = None
     insight: list[dict[str, Any]] | None = None
     is_cached: bool
     kind: Literal["ExperimentQuery"] = "ExperimentQuery"
@@ -17775,7 +17775,7 @@ class ExperimentQuery(BaseModel):
     experiment_id: int | None = None
     kind: Literal["ExperimentQuery"] = "ExperimentQuery"
     metric: ExperimentMeanMetric | ExperimentFunnelMetric | ExperimentRatioMetric | ExperimentRetentionMetric
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     name: str | None = None
     response: ExperimentQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -17791,7 +17791,7 @@ class ExperimentTrendsQuery(BaseModel):
     exposure_query: TrendsQuery | None = None
     fingerprint: str | None = None
     kind: Literal["ExperimentTrendsQuery"] = "ExperimentTrendsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     name: str | None = None
     response: ExperimentTrendsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -17836,7 +17836,7 @@ class FunnelsActorsQuery(BaseModel):
     )
     includeRecordings: bool | None = None
     kind: Literal["FunnelsActorsQuery"] = "FunnelsActorsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ActorsQueryResponse | None = None
     source: FunnelsQuery
     tags: QueryLogTags | None = None
@@ -17881,7 +17881,7 @@ class PathsQuery(BaseModel):
         description="Used for displaying paths in relation to funnel steps.",
     )
     kind: Literal["PathsQuery"] = "PathsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     pathsFilter: PathsFilter = Field(..., description="Properties specific to the paths insight")
     properties: (
         list[
@@ -17896,7 +17896,7 @@ class PathsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -18138,7 +18138,7 @@ class ExperimentFunnelsQuery(BaseModel):
     fingerprint: str | None = None
     funnels_query: FunnelsQuery
     kind: Literal["ExperimentFunnelsQuery"] = "ExperimentFunnelsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     name: str | None = None
     response: ExperimentFunnelsQueryResponse | None = None
     tags: QueryLogTags | None = None
@@ -18221,7 +18221,7 @@ class WebVitalsQuery(BaseModel):
         description=("Interval for date range calculation (affects date_to rounding for hour vs day ranges)"),
     )
     kind: Literal["WebVitalsQuery"] = "WebVitalsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     orderBy: list[WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection] | None = None
     properties: list[EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter | CohortPropertyFilter]
     response: WebGoalsQueryResponse | None = None
@@ -18247,7 +18247,7 @@ class DatabaseSchemaQuery(BaseModel):
         extra="forbid",
     )
     kind: Literal["DatabaseSchemaQuery"] = "DatabaseSchemaQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: DatabaseSchemaQueryResponse | None = None
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -18267,7 +18267,7 @@ class EndpointRequest(BaseModel):
     )
     name: str | None = None
     query: (
-        HogQLQuery
+        InsightsQLQuery
         | TrendsQuery
         | FunnelsQuery
         | RetentionQuery
@@ -18307,7 +18307,7 @@ class FunnelCorrelationActorsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -18319,7 +18319,7 @@ class FunnelCorrelationActorsQuery(BaseModel):
     ) = None
     includeRecordings: bool | None = None
     kind: Literal["FunnelCorrelationActorsQuery"] = "FunnelCorrelationActorsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ActorsQueryResponse | None = None
     source: FunnelCorrelationQuery
     tags: QueryLogTags | None = None
@@ -18339,7 +18339,7 @@ class InsightActorsQuery(BaseModel):
         description="An interval selected out of available intervals in source query.",
     )
     kind: Literal["InsightActorsQuery"] = "InsightActorsQuery"
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     response: ActorsQueryResponse | None = None
     series: int | None = None
     source: (
@@ -18395,7 +18395,7 @@ class SessionBatchEventsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -18414,7 +18414,7 @@ class SessionBatchEventsQuery(BaseModel):
     )
     kind: Literal["SessionBatchEventsQuery"] = "SessionBatchEventsQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[str] | None = Field(default=None, description="Columns to order by")
     personId: str | None = Field(default=None, description="Show events for a given person")
@@ -18431,7 +18431,7 @@ class SessionBatchEventsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -18450,7 +18450,7 @@ class SessionBatchEventsQuery(BaseModel):
     source: InsightActorsQuery | None = Field(default=None, description="source for querying events for insights")
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
-    where: list[str] | None = Field(default=None, description="HogQL filters to apply on returned data")
+    where: list[str] | None = Field(default=None, description="InsightsQL filters to apply on returned data")
 
 
 class ActorsQuery(BaseModel):
@@ -18458,7 +18458,7 @@ class ActorsQuery(BaseModel):
         extra="forbid",
     )
     fixedProperties: (
-        list[PersonPropertyFilter | CohortPropertyFilter | HogQLPropertyFilter | EmptyPropertyFilter] | None
+        list[PersonPropertyFilter | CohortPropertyFilter | InsightsQLPropertyFilter | EmptyPropertyFilter] | None
     ) = Field(
         default=None,
         description=(
@@ -18468,11 +18468,11 @@ class ActorsQuery(BaseModel):
     )
     kind: Literal["ActorsQuery"] = "ActorsQuery"
     limit: int | None = None
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = None
     orderBy: list[str] | None = None
     properties: (
-        list[PersonPropertyFilter | CohortPropertyFilter | HogQLPropertyFilter | EmptyPropertyFilter]
+        list[PersonPropertyFilter | CohortPropertyFilter | InsightsQLPropertyFilter | EmptyPropertyFilter]
         | PropertyGroupFilterValue
         | None
     ) = Field(
@@ -18490,7 +18490,7 @@ class ActorsQuery(BaseModel):
         | FunnelsActorsQuery
         | FunnelCorrelationActorsQuery
         | StickinessActorsQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | None
     ) = None
     tags: QueryLogTags | None = None
@@ -18525,7 +18525,7 @@ class EventsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -18540,7 +18540,7 @@ class EventsQuery(BaseModel):
     )
     kind: Literal["EventsQuery"] = "EventsQuery"
     limit: int | None = Field(default=None, description="Number of rows to return")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     offset: int | None = Field(default=None, description="Number of rows to skip before returning rows")
     orderBy: list[str] | None = Field(default=None, description="Columns to order by")
     personId: str | None = Field(default=None, description="Show events for a given person")
@@ -18557,7 +18557,7 @@ class EventsQuery(BaseModel):
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -18572,7 +18572,7 @@ class EventsQuery(BaseModel):
     source: InsightActorsQuery | None = Field(default=None, description="source for querying events for insights")
     tags: QueryLogTags | None = None
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
-    where: list[str] | None = Field(default=None, description="HogQL filters to apply on returned data")
+    where: list[str] | None = Field(default=None, description="InsightsQL filters to apply on returned data")
 
 
 class HasPropertiesNode(RootModel[EventsNode | EventsQuery | PersonsNode]):
@@ -18667,7 +18667,7 @@ class DataTableNode(BaseModel):
         description=("Include an events filter above the table to filter by multiple events (EventsQuery only)"),
     )
     showExport: bool | None = Field(default=None, description="Show the export button")
-    showHogQLEditor: bool | None = Field(default=None, description="Include a HogQL query editor above HogQL tables")
+    showInsightsQLEditor: bool | None = Field(default=None, description="Include a InsightsQL query editor above InsightsQL tables")
     showOpenEditorButton: bool | None = Field(
         default=None,
         description=("Show a button to open the current query as a new insight. (default: true)"),
@@ -18706,7 +18706,7 @@ class DataTableNode(BaseModel):
         | PersonsNode
         | ActorsQuery
         | GroupsQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | WebOverviewQuery
         | WebStatsTableQuery
         | WebExternalClicksTableQuery
@@ -18752,18 +18752,18 @@ class ArtifactMessage(BaseModel):
     type: Literal["ai/artifact"] = "ai/artifact"
 
 
-class HogQLAutocomplete(BaseModel):
+class InsightsQLAutocomplete(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     endPosition: int = Field(..., description="End position of the editor word")
-    filters: HogQLFilters | None = Field(default=None, description="Table to validate the expression against")
+    filters: InsightsQLFilters | None = Field(default=None, description="Table to validate the expression against")
     globals: dict[str, Any] | None = Field(default=None, description="Global values in scope")
-    kind: Literal["HogQLAutocomplete"] = "HogQLAutocomplete"
+    kind: Literal["InsightsQLAutocomplete"] = "InsightsQLAutocomplete"
     language: HogLanguage = Field(..., description="Language to validate")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query: str = Field(..., description="Query to validate")
-    response: HogQLAutocompleteResponse | None = None
+    response: InsightsQLAutocompleteResponse | None = None
     sourceQuery: (
         EventsNode
         | ActionsNode
@@ -18776,9 +18776,9 @@ class HogQLAutocomplete(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery
@@ -18825,7 +18825,7 @@ class HogQLAutocomplete(BaseModel):
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
 
 
-class HogQLMetadata(BaseModel):
+class InsightsQLMetadata(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -18833,13 +18833,13 @@ class HogQLMetadata(BaseModel):
         default=None,
         description="Enable more verbose output, usually run from the /debug page",
     )
-    filters: HogQLFilters | None = Field(default=None, description="Extra filters applied to query via {filters}")
+    filters: InsightsQLFilters | None = Field(default=None, description="Extra filters applied to query via {filters}")
     globals: dict[str, Any] | None = Field(default=None, description="Extra globals for the query")
-    kind: Literal["HogQLMetadata"] = "HogQLMetadata"
+    kind: Literal["InsightsQLMetadata"] = "InsightsQLMetadata"
     language: HogLanguage = Field(..., description="Language to validate")
-    modifiers: HogQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
+    modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query: str = Field(..., description="Query to validate")
-    response: HogQLMetadataResponse | None = None
+    response: InsightsQLMetadataResponse | None = None
     sourceQuery: (
         EventsNode
         | ActionsNode
@@ -18852,9 +18852,9 @@ class HogQLMetadata(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery
@@ -18900,7 +18900,7 @@ class HogQLMetadata(BaseModel):
         description=('Query within which "expr" and "template" are validated. Defaults to "select * from events"'),
     )
     tags: QueryLogTags | None = None
-    variables: dict[str, HogQLVariable] | None = Field(
+    variables: dict[str, InsightsQLVariable] | None = Field(
         default=None, description="Variables to be subsituted into the query"
     )
     version: float | None = Field(default=None, description="version of the node, used for schema migrations")
@@ -18951,10 +18951,10 @@ class MaxInsightContext(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery
@@ -19012,7 +19012,7 @@ class MaxInsightContext(BaseModel):
         | EndpointsUsageTrendsQuery
     ) = Field(..., discriminator="kind")
     type: Literal["insight"] = "insight"
-    variablesOverride: dict[str, HogQLVariable] | None = None
+    variablesOverride: dict[str, InsightsQLVariable] | None = None
 
 
 class MaxUIContext(BaseModel):
@@ -19060,10 +19060,10 @@ class QueryRequest(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery
@@ -19123,10 +19123,10 @@ class QueryRequest(BaseModel):
         ...,
         description=(
             "Submit a JSON string representing a query for PostHog data analysis, for"
-            ' example a HogQL query.\n\nExample payload:\n\n```\n\n{"query": {"kind":'
-            ' "HogQLQuery", "query": "select * from events limit 100"}}\n\n```\n\nFor'
-            " more details on HogQL queries, see the [PostHog HogQL"
-            " documentation](/docs/hogql#api-access)."
+            ' example a InsightsQL query.\n\nExample payload:\n\n```\n\n{"query": {"kind":'
+            ' "InsightsQLQuery", "query": "select * from events limit 100"}}\n\n```\n\nFor'
+            " more details on InsightsQL queries, see the [PostHog InsightsQL"
+            " documentation](/docs/insightsql#api-access)."
         ),
         discriminator="kind",
     )
@@ -19164,10 +19164,10 @@ class QuerySchemaRoot(
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery
@@ -19238,10 +19238,10 @@ class QuerySchemaRoot(
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery
@@ -19317,10 +19317,10 @@ class QueryUpgradeRequest(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery
@@ -19396,10 +19396,10 @@ class QueryUpgradeResponse(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery
@@ -19588,7 +19588,7 @@ class VisualizationArtifactContent(BaseModel):
         AssistantTrendsQuery
         | AssistantFunnelsQuery
         | AssistantRetentionQuery
-        | AssistantHogQLQuery
+        | AssistantInsightsQLQuery
         | EventsNode
         | ActionsNode
         | PersonsNode
@@ -19601,10 +19601,10 @@ class VisualizationArtifactContent(BaseModel):
         | InsightActorsQueryOptions
         | SessionsTimelineQuery
         | HogQuery
-        | HogQLQuery
-        | HogQLMetadata
-        | HogQLAutocomplete
-        | HogQLASTQuery
+        | InsightsQLQuery
+        | InsightsQLMetadata
+        | InsightsQLAutocomplete
+        | InsightsQLASTQuery
         | SessionAttributionExplorerQuery
         | RevenueExampleEventsQuery
         | RevenueExampleDataWarehouseTablesQuery

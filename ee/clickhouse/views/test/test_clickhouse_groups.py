@@ -12,9 +12,9 @@ from django.db import IntegrityError
 from orjson import orjson
 from rest_framework import status
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.helpers.dashboard_templates import create_group_type_mapping_detail_dashboard
 from posthog.models import GroupTypeMapping, GroupUsageMetric, Person, PropertyDefinition
@@ -351,7 +351,7 @@ class GroupsViewSetTestCase(ClickhouseTestMixin, APIBaseTest):
                 "group_type_index": 0,
             },
         )
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             parse_select(
                 """
                 select properties
@@ -537,7 +537,7 @@ class GroupsViewSetTestCase(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             parse_select(
                 """
                 select properties
@@ -616,7 +616,7 @@ class GroupsViewSetTestCase(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             parse_select(
                 """
                 select properties
@@ -740,7 +740,7 @@ class GroupsViewSetTestCase(ClickhouseTestMixin, APIBaseTest):
             },
         )
 
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             parse_select(
                 """
                 select properties

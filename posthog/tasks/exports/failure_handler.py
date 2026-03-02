@@ -7,10 +7,10 @@ from clickhouse_driver.errors import SocketTimeoutError
 from selenium.common import TimeoutException
 from urllib3.exceptions import MaxRetryError, ProtocolError, ReadTimeoutError
 
-from posthog.hogql.errors import (
+from posthog.insightsql.errors import (
     QueryError,
     ResolutionError,
-    SyntaxError as HogQLSyntaxError,
+    SyntaxError as InsightsQLSyntaxError,
 )
 
 from posthog.clickhouse.client.limit import ConcurrencyLimitExceeded
@@ -87,7 +87,7 @@ EXCEPTIONS_TO_RETRY = (
 
 USER_QUERY_ERRORS = (
     QueryError,
-    HogQLSyntaxError,
+    InsightsQLSyntaxError,
     ClickHouseQueryMemoryLimitExceeded,  # Users should reduce the date range on their query (or materialise)
     ClickHouseQueryTimeOut,  # Users should switch to materialised queries if they run into this
     CHQueryErrorIllegalTypeOfArgument,

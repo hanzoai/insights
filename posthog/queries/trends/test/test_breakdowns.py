@@ -499,11 +499,11 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         )
 
     @snapshot_clickhouse_queries
-    def test_breakdown_numeric_hogql(self):
+    def test_breakdown_numeric_insightsql(self):
         response = self._run(
             {
                 "breakdown": "length(properties.$current_url)",
-                "breakdown_type": "hogql",
+                "breakdown_type": "insightsql",
                 "breakdown_limit": 2,
             },
         )
@@ -517,11 +517,11 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         )
 
     @snapshot_clickhouse_queries
-    def test_breakdown_numeric_hogql_hide_other(self):
+    def test_breakdown_numeric_insightsql_hide_other(self):
         response = self._run(
             {
                 "breakdown": "length(properties.$current_url)",
-                "breakdown_type": "hogql",
+                "breakdown_type": "insightsql",
                 "breakdown_hide_other_aggregation": True,
                 "breakdown_limit": 2,
             },
@@ -536,7 +536,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         response = self._run(
             {
                 "breakdown": "length(properties.$current_url)",
-                "breakdown_type": "hogql",
+                "breakdown_type": "insightsql",
                 "breakdown_hide_other_aggregation": True,
                 "breakdown_limit": 3,
             },
@@ -551,11 +551,11 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         )
 
     @snapshot_clickhouse_queries
-    def test_breakdown_string_hogql(self):
+    def test_breakdown_string_insightsql(self):
         response = self._run(
             {
                 "breakdown": "properties.$current_url",
-                "breakdown_type": "hogql",
+                "breakdown_type": "insightsql",
                 "breakdown_limit": 2,
             },
         )
@@ -569,11 +569,11 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         )
 
     @snapshot_clickhouse_queries
-    def test_breakdown_string_hogql_hide_other(self):
+    def test_breakdown_string_insightsql_hide_other(self):
         response = self._run(
             {
                 "breakdown": "properties.$current_url",
-                "breakdown_type": "hogql",
+                "breakdown_type": "insightsql",
                 "breakdown_hide_other_aggregation": True,
                 "breakdown_limit": 2,
             },
@@ -588,7 +588,7 @@ class TestBreakdowns(ClickhouseTestMixin, APIBaseTest):
         response = self._run(
             {
                 "breakdown": "properties.$current_url",
-                "breakdown_type": "hogql",
+                "breakdown_type": "insightsql",
                 "breakdown_hide_other_aggregation": True,
                 "breakdown_limit": 3,
             },

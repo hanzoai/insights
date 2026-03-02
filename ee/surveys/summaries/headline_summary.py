@@ -6,11 +6,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from posthog.schema import SurveyQuestionType
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
 
 from posthog.api.utils import ServerTimingsGathered
-from posthog.hogql_queries.insights.paginators import HogQLHasMorePaginator
+from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from posthog.models import Team, User
 from posthog.models.surveys.survey import Survey
 from posthog.models.surveys.util import get_archived_response_uuids, get_survey_response_clickhouse_query
@@ -143,8 +143,8 @@ def generate_survey_headline(
         if archived_uuids:
             placeholders["exclude_uuids"] = ast.Tuple(exprs=[ast.Constant(value=uuid) for uuid in archived_uuids])
 
-        paginator = HogQLHasMorePaginator(limit=RESPONSE_LIMIT, offset=0)
-        result = paginator.execute_hogql_query(
+        paginator = InsightsQLHasMorePaginator(limit=RESPONSE_LIMIT, offset=0)
+        result = paginator.execute_insightsql_query(
             team=team,
             query_type="survey_headline_responses",
             query=parse_select(query, placeholders=placeholders),

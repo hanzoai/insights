@@ -139,5 +139,5 @@ class PropertyMixin(BaseParamMixin):
         return {"filter_by_type": list(filter_by_type)}
 
     @cached_property
-    def has_hogql_property(self):
-        return any(prop.type == "hogql" for prop in self.property_groups.flat)
+    def has_insightsql_property(self):
+        return any(prop.type == "insightsql" for prop in self.property_groups.flat)

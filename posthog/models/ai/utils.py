@@ -4,7 +4,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from posthog.clickhouse.client.execute import sync_execute
-from posthog.hogql_queries.ai.vector_search_query_runner import LATEST_ACTIONS_EMBEDDING_VERSION
+from posthog.insightsql_queries.ai.vector_search_query_runner import LATEST_ACTIONS_EMBEDDING_VERSION
 from posthog.models.ai.pg_embeddings import INSERT_BULK_PG_EMBEDDINGS_SQL
 
 

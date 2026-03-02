@@ -655,7 +655,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_numeric_hogql
+# name: TestBreakdowns.test_breakdown_numeric_insightsql
   '''
   
   SELECT length(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', '')) AS value,
@@ -671,7 +671,7 @@
   OFFSET 0
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_numeric_hogql.1
+# name: TestBreakdowns.test_breakdown_numeric_insightsql.1
   '''
   
   SELECT groupArray(day_start) as date,
@@ -716,7 +716,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_numeric_hogql_hide_other
+# name: TestBreakdowns.test_breakdown_numeric_insightsql_hide_other
   '''
   
   SELECT length(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', '')) AS value,
@@ -732,7 +732,7 @@
   OFFSET 0
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_numeric_hogql_hide_other.1
+# name: TestBreakdowns.test_breakdown_numeric_insightsql_hide_other.1
   '''
   
   SELECT groupArray(day_start) as date,
@@ -778,7 +778,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_numeric_hogql_hide_other.2
+# name: TestBreakdowns.test_breakdown_numeric_insightsql_hide_other.2
   '''
   
   SELECT length(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', '')) AS value,
@@ -794,7 +794,7 @@
   OFFSET 0
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_numeric_hogql_hide_other.3
+# name: TestBreakdowns.test_breakdown_numeric_insightsql_hide_other.3
   '''
   
   SELECT groupArray(day_start) as date,
@@ -840,7 +840,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_string_hogql
+# name: TestBreakdowns.test_breakdown_string_insightsql
   '''
   
   SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', '') AS value,
@@ -856,7 +856,7 @@
   OFFSET 0
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_string_hogql.1
+# name: TestBreakdowns.test_breakdown_string_insightsql.1
   '''
   
   SELECT groupArray(day_start) as date,
@@ -901,7 +901,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_string_hogql_hide_other
+# name: TestBreakdowns.test_breakdown_string_insightsql_hide_other
   '''
   
   SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', '') AS value,
@@ -917,7 +917,7 @@
   OFFSET 0
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_string_hogql_hide_other.1
+# name: TestBreakdowns.test_breakdown_string_insightsql_hide_other.1
   '''
   
   SELECT groupArray(day_start) as date,
@@ -963,7 +963,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_string_hogql_hide_other.2
+# name: TestBreakdowns.test_breakdown_string_insightsql_hide_other.2
   '''
   
   SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', '') AS value,
@@ -979,7 +979,7 @@
   OFFSET 0
   '''
 # ---
-# name: TestBreakdowns.test_breakdown_string_hogql_hide_other.3
+# name: TestBreakdowns.test_breakdown_string_insightsql_hide_other.3
   '''
   
   SELECT groupArray(day_start) as date,

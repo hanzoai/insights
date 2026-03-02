@@ -331,7 +331,7 @@ export function BatchExportConfiguration(): JSX.Element {
                                                           TaxonomicFilterGroupType.EventProperties,
                                                           TaxonomicFilterGroupType.EventFeatureFlags,
                                                           TaxonomicFilterGroupType.PersonProperties,
-                                                          TaxonomicFilterGroupType.HogQLExpression,
+                                                          TaxonomicFilterGroupType.InsightsQLExpression,
                                                       ]
                                                     : []
                                             }

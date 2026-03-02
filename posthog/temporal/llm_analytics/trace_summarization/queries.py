@@ -11,10 +11,10 @@ import orjson
 
 from posthog.schema import LLMTrace, LLMTraceEvent, LLMTracePerson
 
-from posthog.hogql import ast
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models.team import Team
 from posthog.temporal.llm_analytics.trace_summarization.constants import AI_EVENT_TYPES, TRACE_CAPTURE_RANGE
@@ -41,7 +41,7 @@ def fetch_trace(team: Team, trace_id: str, window_start: str, window_end: str) -
     end_dt = datetime.fromisoformat(window_end).astimezone(UTC) + TRACE_CAPTURE_RANGE
 
     query = parse_select(_TRACE_EVENTS_QUERY)
-    result = execute_hogql_query(
+    result = execute_insightsql_query(
         query_type="SummarizationTraceFetch",
         query=query,
         placeholders={

@@ -228,12 +228,12 @@ function BoldNumberComparison({
     )
 }
 
-export function HogQLBoldNumber(): JSX.Element {
+export function InsightsQLBoldNumber(): JSX.Element {
     const { response, responseLoading, tabularData } = useValues(dataVisualizationLogic)
 
     if (!response || responseLoading) {
         return (
-            <div className="BoldNumber LemonTable HogQL">
+            <div className="BoldNumber LemonTable InsightsQL">
                 <div className="BoldNumber__value">
                     <Textfit min={32} max={120}>
                         Loading...
@@ -251,7 +251,7 @@ export function HogQLBoldNumber(): JSX.Element {
     // If any of the values is null, show empty state
     if (formattedValue === null || directValue === null || resultsValue === null || resultValue === null) {
         return (
-            <div className="LemonTable HogQL">
+            <div className="LemonTable InsightsQL">
                 <InsightEmptyState />
             </div>
         )
@@ -260,7 +260,7 @@ export function HogQLBoldNumber(): JSX.Element {
     const value = formattedValue ?? directValue ?? resultsValue ?? resultValue
 
     return (
-        <div className="BoldNumber LemonTable HogQL">
+        <div className="BoldNumber LemonTable InsightsQL">
             <div className="BoldNumber__value">
                 <Textfit min={32} max={120}>
                     {String(value ?? 'Error')}
