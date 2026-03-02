@@ -11,7 +11,7 @@ export const SDKSnippet = ({ sdk, sdkInstructions }: SDKSnippetProps): JSX.Eleme
     return (
         <div>
             <div className="mb-8">
-                <h3 className="text-xl font-bold mb-2">Integrate Hanzo Insights with {sdk.name}</h3>
+                <h3 className="text-xl font-bold mb-2">Integrate Insights with {sdk.name}</h3>
                 <Link className="" to={sdk.docsLink} target="_blank" targetBlankIcon disableDocsPanel>
                     Read the docs
                 </Link>
