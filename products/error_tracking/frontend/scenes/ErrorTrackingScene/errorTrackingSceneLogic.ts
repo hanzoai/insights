@@ -107,7 +107,7 @@ export const errorTrackingSceneLogic = kea<errorTrackingSceneLogicType>([
             (): Breadcrumb[] => [
                 {
                     key: 'error-tracking',
-                    name: 'Error tracking',
+                    name: 'Error Tracking',
                     iconType: 'error_tracking',
                 },
             ],

@@ -76,7 +76,7 @@ export function ConversationHistory({ sidePanel = false, compact = false }: Conv
                 <div className="flex items-center flex-1">
                     <ProductIntroduction
                         isEmpty
-                        productName="Max"
+                        productName="AI Assistant"
                         productKey={ProductKey.MAX}
                         thingName="chat"
                         titleOverride="Start getting things done with Insights AI"

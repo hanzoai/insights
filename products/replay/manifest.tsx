@@ -7,7 +7,7 @@ import { ProductKey } from '~/queries/schema/schema-general'
 import { ProductManifest, RecordingUniversalFilters, ReplayTabs } from '../../frontend/src/types'
 
 export const manifest: ProductManifest = {
-    name: 'Replay',
+    name: 'Session Replay',
     urls: {
         replay: (
             tab?: ReplayTabs,
@@ -39,7 +39,7 @@ export const manifest: ProductManifest = {
     },
     fileSystemTypes: {
         session_recording_playlist: {
-            name: 'Replay playlist',
+            name: 'Session Replay playlist',
             iconType: 'session_replay',
             href: (ref: string) => urls.replayPlaylist(ref),
             iconColor: ['var(--color-product-session-replay-light)', 'var(--color-product-session-replay-dark)'],
@@ -48,7 +48,7 @@ export const manifest: ProductManifest = {
     },
     treeItemsProducts: [
         {
-            path: 'Session replay',
+            path: 'Session Replay',
             intents: [ProductKey.SESSION_REPLAY, ProductKey.MOBILE_REPLAY],
             category: 'Behavior',
             href: urls.replay(ReplayTabs.Home),

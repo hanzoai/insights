@@ -70,8 +70,8 @@ export function PersonDeleteModal(): JSX.Element | null {
                 </div>
                 {deleteConfirmationText == DELETE_CONFIRMATION_TEXT && (
                     <LemonBanner type="warning">
-                        Do NOT delete this person if you want to re-use the distinct IDs. Instead use split ID. Re-using
-                        the distinct ID of a deleted person is not supported and will result in a bad application state.
+                        Do NOT delete this user if you want to re-use the distinct IDs. Instead use split ID. Re-using
+                        the distinct ID of a deleted user is not supported and will result in a bad application state.
                     </LemonBanner>
                 )}
             </div>
@@ -92,7 +92,7 @@ export function PersonDeleteModal(): JSX.Element | null {
                     }
                     data-attr="delete-person"
                 >
-                    Delete person
+                    Delete user
                 </LemonButton>
             </div>
         </LemonModal>

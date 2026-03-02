@@ -20,21 +20,21 @@ export function MergeSplitPerson({ person }: { person: PersonType }): JSX.Elemen
         <LemonModal
             isOpen
             width="40rem"
-            title="Split persons"
+            title="Split users"
             footer={
                 <div className="flex items-center gap-2">
                     <LemonButton onClick={cancel} disabledReason={executedLoading && 'Splitting the user'}>
                         Cancel
                     </LemonButton>
                     <LemonButton type="primary" onClick={execute} loading={executedLoading}>
-                        Split persons
+                        Split users
                     </LemonButton>
                 </div>
             }
             onClose={cancel}
         >
             {person.distinct_ids.length < 2 ? (
-                'Only persons with more than two distinct IDs can be split.'
+                'Only users with more than two distinct IDs can be split.'
             ) : (
                 <BindLogic logic={mergeSplitPersonLogic} props={logicProps}>
                     <SplitPerson />
@@ -59,7 +59,7 @@ function SplitPerson(): JSX.Element | null {
 
     return (
         <>
-            <p>This will split all Distinct IDs for this person into unique persons.</p>
+            <p>This will split all Distinct IDs for this user into unique users.</p>
             <p>
                 You can select a distinct ID for which all the current properties will be assigned (<i>optional</i>).
                 All other new users will start without any properties.
@@ -74,7 +74,7 @@ function SplitPerson(): JSX.Element | null {
             />
             <LemonBanner type="warning" className="mt-4">
                 This will create <strong>{person.distinct_ids.length - 1}</strong>{' '}
-                {pluralize(person.distinct_ids.length - 1, 'new person', undefined, false)}. This might change the
+                {pluralize(person.distinct_ids.length - 1, 'new user', undefined, false)}. This might change the
                 numbers in your charts, even historically. Please be certain.
             </LemonBanner>
         </>

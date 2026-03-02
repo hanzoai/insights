@@ -1582,7 +1582,7 @@ export class ApiRequest {
         return this.environmentsDetail(teamId).addPathComponent('managed_viewsets').addPathComponent(kind)
     }
 
-    // Conversations (Max AI)
+    // Conversations (AI Assistant)
     public conversations(teamId?: TeamType['id']): ApiRequest {
         return this.environmentsDetail(teamId).addPathComponent('conversations')
     }

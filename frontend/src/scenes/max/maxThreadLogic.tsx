@@ -107,7 +107,7 @@ export interface MaxThreadLogicProps {
 export const maxThreadLogic = kea<maxThreadLogicType>([
     key((props) => {
         if (!props.tabId) {
-            throw new Error('Max thread logic must have a tabId prop')
+            throw new Error('AI thread logic must have a tabId prop')
         }
         return `${props.conversationId}-${props.tabId}`
     }),
@@ -1422,7 +1422,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                     pendingApprovalProposalId !== null && !resolvedApprovalStatuses[pendingApprovalProposalId]?.status
 
                 // Input unavailable when:
-                // - Answer must be provided using a form returned by Max only
+                // - Answer must be provided using a form returned by the AI only
                 // - Answer must be provided using a multi-question form
                 // - We are awaiting user to approve or reject external AI processing data
                 // - Support agent is viewing an existing conversation without override

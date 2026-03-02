@@ -5,12 +5,12 @@ import { ProductKey } from '~/queries/schema/schema-general'
 import { ProductManifest } from '../../frontend/src/types'
 
 export const manifest: ProductManifest = {
-    name: 'Toolbar',
+    name: 'Site Inspector',
     scenes: {
         Toolbar: {
-            name: 'Toolbar',
+            name: 'Site Inspector',
             projectBased: true,
-            description: 'Insights toolbar launches Insights right in your app or website.',
+            description: 'Site Inspector launches Insights right in your app or website.',
             iconType: 'toolbar',
         },
     },
@@ -19,7 +19,7 @@ export const manifest: ProductManifest = {
     },
     treeItemsProducts: [
         {
-            path: 'Toolbar',
+            path: 'Site Inspector',
             intents: [ProductKey.TOOLBAR],
             href: urls.toolbarLaunch(),
             type: 'toolbar',

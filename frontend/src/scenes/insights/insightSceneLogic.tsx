@@ -268,14 +268,14 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
                               sceneSource === 'web-analytics'
                                   ? {
                                         key: Scene.WebAnalytics,
-                                        name: 'Web analytics',
+                                        name: 'Web Analytics',
                                         path: urls.webAnalytics(),
                                         iconType: 'web_analytics' as FileSystemIconType,
                                     }
                                   : sceneSource === 'llm-analytics'
                                     ? {
                                           key: 'LLMAnalytics',
-                                          name: 'LLM analytics',
+                                          name: 'LLM Analytics',
                                           path: urls.llmAnalyticsDashboard(),
                                           iconType: 'llm_analytics' as FileSystemIconType,
                                       }

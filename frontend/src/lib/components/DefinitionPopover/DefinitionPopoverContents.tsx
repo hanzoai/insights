@@ -300,7 +300,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 <>
                     {sharedComponents}
                     <DefinitionPopover.Grid cols={2}>
-                        <DefinitionPopover.Card title="Persons" value={_definition.count ?? 0} />
+                        <DefinitionPopover.Card title="Users" value={_definition.count ?? 0} />
                         <DefinitionPopover.Card
                             title="Last calculated"
                             value={_definition.last_calculation && <TZLabel time={_definition.last_calculation} />}
@@ -314,7 +314,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                 <>
                     {sharedComponents}
                     <DefinitionPopover.Grid cols={2}>
-                        <DefinitionPopover.Card title="Persons" value={_definition.count ?? 0} />
+                        <DefinitionPopover.Card title="Users" value={_definition.count ?? 0} />
                         <DefinitionPopover.Card
                             title="Last calculated"
                             value={_definition.last_calculation && <TZLabel time={_definition.last_calculation} />}
@@ -328,7 +328,7 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
             <>
                 {sharedComponents}
                 <DefinitionPopover.Grid cols={2}>
-                    <DefinitionPopover.Card title="Persons" value={_definition.count ?? 0} />
+                    <DefinitionPopover.Card title="Users" value={_definition.count ?? 0} />
                     <DefinitionPopover.Card
                         title="Last calculated"
                         value={_definition.last_calculation && <TZLabel time={_definition.last_calculation} />}

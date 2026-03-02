@@ -429,9 +429,9 @@ export const SETTINGS_MAP: SettingSection[] = [
             },
             {
                 id: 'persons-on-events',
-                title: 'Person properties mode',
+                title: 'User properties mode',
                 description:
-                    'Choose the behavior of person property filters. For best performance, use person properties from the time of the event.',
+                    'Choose the behavior of user property filters. For best performance, use user properties from the time of the event.',
                 component: <PersonsOnEvents />,
                 flag: '!SETTINGS_PERSONS_ON_EVENTS_HIDDEN', // Setting hidden for Cloud orgs created since June 2024
                 keywords: ['person', 'properties', 'join', 'query', 'performance'],
@@ -447,9 +447,9 @@ export const SETTINGS_MAP: SettingSection[] = [
             },
             {
                 id: 'person-display-name',
-                title: 'Person display name',
+                title: 'User display name',
                 description:
-                    'Choose which person properties are used to display names in the UI (e.g. email, name, username).',
+                    'Choose which user properties are used to display names in the UI (e.g. email, name, username).',
                 docsUrl: 'https://posthog.com/docs/data/persons',
                 component: <PersonDisplayNameProperties />,
                 keywords: ['name', 'email', 'identity', 'display'],

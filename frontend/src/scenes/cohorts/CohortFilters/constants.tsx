@@ -108,7 +108,7 @@ export const FIELD_VALUES: Record<FieldOptionsType, FieldValues> = {
         type: FieldOptionsType.Actors,
         values: {
             [ActorGroupType.Person]: {
-                label: 'Persons',
+                label: 'Users',
             },
         },
     },

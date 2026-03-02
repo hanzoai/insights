@@ -26,7 +26,7 @@ export const sessionRecordingsSettingsSceneLogic = kea<sessionRecordingsSettings
                 {
                     key: Scene.Replay,
                     path: urls.replay(),
-                    name: 'Replay',
+                    name: 'Session Replay',
                     iconType: 'session_replay',
                 },
                 {
