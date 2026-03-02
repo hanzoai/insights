@@ -222,6 +222,8 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
+    # Hanzo IAM: map OIDC org claim -> PostHog Organization + Team + Membership
+    "posthog.api.iam_org_pipeline.iam_org_assign",
     "posthog.api.authentication.social_login_notification",
 )
 
