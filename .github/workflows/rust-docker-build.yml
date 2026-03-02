@@ -58,7 +58,7 @@ jobs:
                     - image: personhog-router
                       dockerfile: ./rust/Dockerfile
                       project: wqvvpmzgbk
-        runs-on: depot-ubuntu-22.04
+        runs-on: ubuntu-22.04
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow reading the repo contents
@@ -122,7 +122,7 @@ jobs:
               id: meta
               uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               with:
-                  images: ghcr.io/posthog/posthog/${{ matrix.image }}
+                  images: ghcr.io/hanzoai/insights/${{ matrix.image }}
                   tags: |
                       type=ref,event=pr
                       type=ref,event=branch
@@ -162,11 +162,7 @@ jobs:
 
             - name: report failure
               if: failure()
-              uses: Insights/posthog-github-action@8c42e50f2c52e002eabb9bee3f69b152ee8fc1dd # v1.0.1
-              with:
-                  posthog-token: ${{secrets.POSTHOG_API_TOKEN}}
-                  event: 'posthog-rust-image-build'
-                  properties: '{"status": "failure", "commit_hash": "${{ github.sha }}", "image": "${{ matrix.image }}"}'
+              run: echo "Telemetry capture disabled"
 
             - name: Container image digest
               id: digest
