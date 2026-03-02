@@ -726,8 +726,8 @@ WHERE properties.interests IS NOT NULL
                 json_schema=SQL_SCHEMA,
                 evaluation_criteria="""
 Most importantly, evaluate the `query` field, containing the generated InsightsQL.
-InsightsQL is simply an SQL flavor derived from ClickHouse SQL, with some PostHog-specific syntax.
-The most important piece of PostHog-specific syntax is easy access to JSON properties, which is done using `.`, like so: `SELECT properties.$browser FROM events`.
+InsightsQL is simply an SQL flavor derived from ClickHouse SQL, with some Insights-specific syntax.
+The most important piece of Insights-specific syntax is easy access to JSON properties, which is done using `.`, like so: `SELECT properties.$browser FROM events`.
 It's also possible to access nested tables, such the `events` table has a `person` field that actually points to the related row in the `persons` table (the concrete field on `events` is `person_id`).
 This means the following syntax is valid and useful too: `SELECT person.properties.foo.bar FROM events`.
 The other standard table is `sessions`, which contains data of the session the event belongs to (though events can be outside of a session as well).

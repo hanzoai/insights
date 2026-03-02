@@ -1,11 +1,11 @@
-# Contributing to PostHog MCP Server
+# Contributing to Insights MCP Server
 
-This guide covers local development setup for the PostHog MCP server, including the ext-apps UI integration.
+This guide covers local development setup for the Insights MCP server, including the ext-apps UI integration.
 
 ## Prerequisites
 
 - Flox environment (see repo root for setup)
-- A PostHog account with a personal API key
+- A Insights account with a personal API key
 
 ## Project Structure
 
@@ -119,7 +119,7 @@ Ask Claude to run a query:
 - "Show me the signup funnel"
 - "Query the events table"
 
-The UI should render inline showing charts or tables with a "View in PostHog" link.
+The UI should render inline showing charts or tables with a "View in Insights" link.
 
 ## Development Workflow
 
@@ -207,7 +207,7 @@ The visualization system is designed to be extractable to a standalone `@posthog
 
 **Other**:
 
-- **PostHogLink** - "View in PostHog" button
+- **InsightsLink** - "View in Insights" button
 
 ### Theming
 
@@ -219,7 +219,7 @@ Components use CSS variables from the ext-apps SDK that the host provides:
 - `--font-sans`, `--font-mono`
 - `--border-radius-sm`, `--border-radius-md`, `--border-radius-lg`
 
-Chart colors are PostHog-specific (`--posthog-chart-1` through `--posthog-chart-5`) since the ext-apps SDK doesn't provide chart colors.
+Chart colors are Insights-specific (`--posthog-chart-1` through `--posthog-chart-5`) since the ext-apps SDK doesn't provide chart colors.
 
 Default values are provided for light/dark mode via `prefers-color-scheme`.
 

@@ -8,12 +8,12 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics works best with our Python and Node SDKs.
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics works best with our Python and Node SDKs.
                     </Markdown>
 
                     <CodeBlock
@@ -43,8 +43,8 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Install the Google Gen AI SDK. The PostHog SDK instruments your LLM calls by wrapping the Google Gen
-                        AI client. The PostHog SDK **does not** proxy your calls.
+                        Install the Google Gen AI SDK. The Insights SDK instruments your LLM calls by wrapping the Google Gen
+                        AI client. The Insights SDK **does not** proxy your calls.
                     </Markdown>
 
                     <CodeBlock
@@ -68,7 +68,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the background to send the data.
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the background to send the data.
 
                             You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
@@ -77,12 +77,12 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Initialize PostHog and Google Gen AI client',
+            title: 'Initialize Insights and Google Gen AI client',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then pass it to our Google Gen AI wrapper.
+                        Initialize Insights with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then pass it to our Google Gen AI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -110,9 +110,9 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'Node',
                                 code: dedent`
                                     import { GoogleGenAI } from '@posthog/ai'
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                         '<ph_project_api_key>',
                                         { host: '<ph_client_api_host>' }
                                     )
@@ -128,7 +128,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** This integration also works with Vertex AI via Google Cloud Platform. You can use the Google Gen AI SDK's Vertex AI client with PostHog analytics.
+                            **Note:** This integration also works with Vertex AI via Google Cloud Platform. You can use the Google Gen AI SDK's Vertex AI client with Insights analytics.
                         </Markdown>
                     </Blockquote>
 
@@ -145,7 +145,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     from posthog import Posthog
                                     from posthog.ai.gemini import Client
 
-                                    # Initialize PostHog
+                                    # Initialize Insights
                                     posthog = Posthog(
                                         project_api_key="<ph_project_api_key>",
                                         host="<ph_client_api_host>"
@@ -173,17 +173,17 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { PostHog } from 'posthog-node'
-                                    import { PostHogGoogleGenAI } from '@posthog/ai'
+                                    import { Insights } from 'posthog-node'
+                                    import { InsightsGoogleGenAI } from '@posthog/ai'
 
-                                    // Initialize PostHog
-                                    const posthog = new PostHog(
+                                    // Initialize Insights
+                                    const posthog = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     )
 
                                     // Initialize Gemini client with Vertex AI
-                                    const client = new PostHogGoogleGenAI({
+                                    const client = new InsightsGoogleGenAI({
                                       vertexai: true,
                                       project: 'your-gcp-project-id',
                                       location: 'us-central1',
@@ -211,7 +211,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Now, when you use the Google Gen AI SDK to call LLMs, PostHog automatically captures an `$ai_generation` event.
+                        Now, when you use the Google Gen AI SDK to call LLMs, Insights automatically captures an `$ai_generation` event.
 
                         You can enrich the event with additional data such as the trace ID, distinct ID, custom properties, groups, and privacy mode options.
                     </Markdown>
@@ -224,7 +224,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                     response = client.models.generate_content(
                                         model="gemini-2.5-flash",
-                                        contents=["Tell me a fun fact about hedgehogs"],
+                                        contents=["Tell me a fun fact about mascots"],
                                         posthog_distinct_id="user_123", # optional
                                         posthog_trace_id="trace_123", # optional
                                         posthog_properties={"conversation_id": "abc123", "paid": True}, # optional
@@ -241,7 +241,7 @@ export const getGoogleSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                     const response = await client.models.generateContent({
                                       model: "gemini-2.5-flash",
-                                      contents: ["Tell me a fun fact about hedgehogs"],
+                                      contents: ["Tell me a fun fact about mascots"],
                                       posthogDistinctId: "user_123", // optional
                                       posthogTraceId: "trace_123", // optional
                                       posthogProperties: { conversationId: "abc123", paid: true }, // optional

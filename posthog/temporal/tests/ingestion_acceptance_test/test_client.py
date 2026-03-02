@@ -8,7 +8,7 @@ from typing import Any
 import pytest
 from unittest.mock import MagicMock, patch
 
-from posthog.temporal.ingestion_acceptance_test.client import CapturedEvent, Person, PostHogClient
+from posthog.temporal.ingestion_acceptance_test.client import CapturedEvent, Person, InsightsClient
 from posthog.temporal.ingestion_acceptance_test.config import Config
 
 
@@ -30,14 +30,14 @@ def mock_posthog_sdk() -> MagicMock:
 
 
 @pytest.fixture
-def client(config: Config, mock_posthog_sdk: MagicMock) -> Generator[PostHogClient, None, None]:
-    client = PostHogClient(config, mock_posthog_sdk)
+def client(config: Config, mock_posthog_sdk: MagicMock) -> Generator[InsightsClient, None, None]:
+    client = InsightsClient(config, mock_posthog_sdk)
     yield client
     client.shutdown()
 
 
 class TestCaptureEvent:
-    def test_calls_sdk_with_correct_arguments(self, client: PostHogClient, mock_posthog_sdk: MagicMock) -> None:
+    def test_calls_sdk_with_correct_arguments(self, client: InsightsClient, mock_posthog_sdk: MagicMock) -> None:
         properties = {"key": "value", "$set": {"email": "test@example.com"}}
 
         event_uuid = client.capture_event(
@@ -53,7 +53,7 @@ class TestCaptureEvent:
             uuid=event_uuid,
         )
 
-    def test_uses_empty_dict_when_no_properties(self, client: PostHogClient, mock_posthog_sdk: MagicMock) -> None:
+    def test_uses_empty_dict_when_no_properties(self, client: InsightsClient, mock_posthog_sdk: MagicMock) -> None:
         client.capture_event(event_name="test_event", distinct_id="user_123")
 
         call_kwargs = mock_posthog_sdk.capture.call_args[1]
@@ -61,7 +61,7 @@ class TestCaptureEvent:
 
 
 class TestFetchEventByUuid:
-    def test_sends_correct_insightsql_query(self, client: PostHogClient) -> None:
+    def test_sends_correct_insightsql_query(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -72,7 +72,7 @@ class TestFetchEventByUuid:
             call_kwargs = mock_post.call_args[1]
 
             assert call_kwargs["headers"] == {"Authorization": "Bearer phx_personal_key"}
-            assert call_kwargs["timeout"] == PostHogClient.HTTP_TIMEOUT_SECONDS
+            assert call_kwargs["timeout"] == InsightsClient.HTTP_TIMEOUT_SECONDS
 
             request_body = call_kwargs["json"]
             assert request_body["query"]["kind"] == "InsightsQLQuery"
@@ -82,7 +82,7 @@ class TestFetchEventByUuid:
             assert "min_timestamp" in request_body["query"]["values"]
             assert request_body["refresh"] == "force_blocking"
 
-    def test_posts_to_correct_url(self, client: PostHogClient) -> None:
+    def test_posts_to_correct_url(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -92,7 +92,7 @@ class TestFetchEventByUuid:
             url = mock_post.call_args[0][0]
             assert url == "https://test.posthog.com/api/projects/12345/query/"
 
-    def test_returns_captured_event_when_found(self, client: PostHogClient) -> None:
+    def test_returns_captured_event_when_found(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {
@@ -110,7 +110,7 @@ class TestFetchEventByUuid:
             assert result.properties == {"key": "value"}
             assert result.timestamp == "2024-01-01T00:00:00Z"
 
-    def test_returns_none_when_not_found(self, client: PostHogClient) -> None:
+    def test_returns_none_when_not_found(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -121,7 +121,7 @@ class TestFetchEventByUuid:
 
 
 class TestFetchPersonByDistinctId:
-    def test_sends_correct_insightsql_query_with_join(self, client: PostHogClient) -> None:
+    def test_sends_correct_insightsql_query_with_join(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -139,7 +139,7 @@ class TestFetchPersonByDistinctId:
             assert "WHERE pdi.distinct_id = {distinct_id}" in query
             assert request_body["query"]["values"] == {"distinct_id": "user_123"}
 
-    def test_returns_person_when_found(self, client: PostHogClient) -> None:
+    def test_returns_person_when_found(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {
@@ -155,7 +155,7 @@ class TestFetchPersonByDistinctId:
             assert result.properties == {"email": "test@example.com", "name": "Test"}
             assert result.created_at == "2024-01-01T00:00:00Z"
 
-    def test_returns_none_when_not_found(self, client: PostHogClient) -> None:
+    def test_returns_none_when_not_found(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -232,7 +232,7 @@ class TestHttpRetryBehavior:
             {"json": {"results": [], "columns": []}, "status_code": 200},
         ]
 
-        client = PostHogClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_posthog_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
@@ -257,7 +257,7 @@ class TestHttpRetryBehavior:
             {"json": {"results": [], "columns": []}, "status_code": 200},
         ]
 
-        client = PostHogClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_posthog_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
@@ -277,7 +277,7 @@ class TestHttpRetryBehavior:
 
         MockHttpHandler.queued_responses = [{"status_code": 400, "json": {"error": "Bad request"}}]
 
-        client = PostHogClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_posthog_sdk)
         with pytest.raises(Exception):
             client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
@@ -297,7 +297,7 @@ class TestHttpRetryBehavior:
 
         MockHttpHandler.queued_responses = [{"status_code": 429, "json": {"error": "Rate limited"}}]
 
-        client = PostHogClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_posthog_sdk)
         with pytest.raises(Exception):
             client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
@@ -317,7 +317,7 @@ class TestHttpRetryBehavior:
 
         MockHttpHandler.queued_responses = [{"status_code": 404}]
 
-        client = PostHogClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_posthog_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
@@ -339,7 +339,7 @@ class TestHttpRetryBehavior:
 
         MockHttpHandler.queued_responses = [{"json": {"results": [["value"]], "columns": ["col"]}, "status_code": 200}]
 
-        client = PostHogClient(config, mock_posthog_sdk)
+        client = InsightsClient(config, mock_posthog_sdk)
         result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
@@ -348,13 +348,13 @@ class TestHttpRetryBehavior:
 
 
 class TestTimestampFiltering:
-    def test_client_stores_test_start_date(self, client: PostHogClient) -> None:
+    def test_client_stores_test_start_date(self, client: InsightsClient) -> None:
         today = datetime.now(UTC).date()
         yesterday = today - timedelta(days=1)
 
         assert client._test_start_date == yesterday
 
-    def test_fetch_events_by_person_id_includes_timestamp_filter(self, client: PostHogClient) -> None:
+    def test_fetch_events_by_person_id_includes_timestamp_filter(self, client: InsightsClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}

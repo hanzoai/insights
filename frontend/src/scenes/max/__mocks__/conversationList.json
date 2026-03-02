@@ -53,7 +53,7 @@
                     "type": "human"
                 },
                 {
-                    "content": "Sure, here's a little poem for you:\n\nIn the world of data, where numbers dance,  \nPostHog stands ready, to give insights a chance.  \nWith dashboards and charts, it paints the scene,  \nTurning raw data into a story unseen.  \n\nFrom trends to funnels, retention too,  \nIt helps you understand what your users do.  \nSo gather your data, let PostHog play,  \nAnd watch as insights light up your day!",
+                    "content": "Sure, here's a little poem for you:\n\nIn the world of data, where numbers dance,  \nInsights stands ready, to give insights a chance.  \nWith dashboards and charts, it paints the scene,  \nTurning raw data into a story unseen.  \n\nFrom trends to funnels, retention too,  \nIt helps you understand what your users do.  \nSo gather your data, let Insights play,  \nAnd watch as insights light up your day!",
                     "id": "ai-1",
                     "meta": null,
                     "tool_calls": [],
@@ -65,7 +65,7 @@
                     "type": "human"
                 },
                 {
-                    "content": "Of course, here's another one for you:\n\nIn the forest of files, where hedgehogs roam,  \nA platform was born, a digital home.  \nDropbox for hedgehogs, sharing with flair,  \nCollaborating with ease, no need to despair.  \n\nWith quills of data, we scurry and share,  \nBuilding connections, with nary a care.  \nSo join the adventure, in this digital bog,  \nWhere files find a home, with PostHog!",
+                    "content": "Of course, here's another one for you:\n\nIn the forest of files, where mascots roam,  \nA platform was born, a digital home.  \nDropbox for mascots, sharing with flair,  \nCollaborating with ease, no need to despair.  \n\nWith quills of data, we scurry and share,  \nBuilding connections, with nary a care.  \nSo join the adventure, in this digital bog,  \nWhere files find a home, with Insights!",
                     "id": "ai-2",
                     "meta": null,
                     "tool_calls": [],
@@ -77,7 +77,7 @@
                     "type": "human"
                 },
                 {
-                    "content": "Of course, here's another one for you:\n\nIn the forest of files, where hedgehogs roam,  \nA platform was born, a digital home.  \nDropbox for hedgehogs, sharing with flair,  \nCollaborating with ease, no need to despair.  \n\nWith quills of data, we scurry and share,  \nBuilding connections, with nary a care.  \nSo join the adventure, in this digital bog,  \nWhere files find a home, with PostHog!",
+                    "content": "Of course, here's another one for you:\n\nIn the forest of files, where mascots roam,  \nA platform was born, a digital home.  \nDropbox for mascots, sharing with flair,  \nCollaborating with ease, no need to despair.  \n\nWith quills of data, we scurry and share,  \nBuilding connections, with nary a care.  \nSo join the adventure, in this digital bog,  \nWhere files find a home, with Insights!",
                     "id": "ai-3",
                     "meta": null,
                     "tool_calls": [],

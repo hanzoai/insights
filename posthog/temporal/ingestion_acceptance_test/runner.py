@@ -6,7 +6,7 @@ from concurrent.futures import Executor, as_completed
 from dataclasses import dataclass
 from typing import Literal
 
-from .client import CapturedEvent, PostHogClient
+from .client import CapturedEvent, InsightsClient
 from .config import Config
 from .results import TestResult, TestSuiteResult
 from .test_cases_discovery import TestCase
@@ -16,14 +16,14 @@ from .test_cases_discovery import TestCase
 class TestContext:
     """Context provided to all acceptance tests."""
 
-    client: PostHogClient
+    client: InsightsClient
     config: Config
 
 
 class AcceptanceTest:
     """Base class for acceptance tests."""
 
-    client: PostHogClient
+    client: InsightsClient
     config: Config
 
     def setup(self, ctx: TestContext) -> None:
@@ -97,7 +97,7 @@ def _run_single_test(
 def run_tests(
     config: Config,
     tests: list[TestCase],
-    client: PostHogClient,
+    client: InsightsClient,
     executor: Executor,
 ) -> TestSuiteResult:
     """Run all acceptance tests and return structured results.
@@ -105,7 +105,7 @@ def run_tests(
     Args:
         config: Configuration for the test run.
         tests: List of test cases to run.
-        client: PostHog client for API interactions.
+        client: Insights client for API interactions.
         executor: Executor for running tests in parallel.
 
     Returns:

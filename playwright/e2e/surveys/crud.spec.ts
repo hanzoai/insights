@@ -54,7 +54,7 @@ test.describe('CRUD Survey', () => {
     // and this doesn't support the new layout yet.
     test.skip('creates, launches, edits and deletes new survey', async ({ page }) => {
         await expect(page.locator('h1')).toContainText('Surveys')
-        await expect(page).toHaveTitle('Surveys • PostHog')
+        await expect(page).toHaveTitle('Surveys • Insights')
 
         await page.locator('[data-attr="new-survey"]').click()
         await page.locator('[data-attr="new-blank-survey"]').click()

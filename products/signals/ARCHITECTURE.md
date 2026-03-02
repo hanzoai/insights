@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Signals** product is a signal clustering and summarization pipeline. Signals from various PostHog products (experiments, web analytics, error tracking, session replay) get grouped into **SignalReports** via embedding similarity + LLM matching. When a group accumulates enough weight, a summary workflow summarizes the group, runs safety and actionability judges, and either marks the report as ready for a coding agent, defers to a human, or rejects it.
+The **Signals** product is a signal clustering and summarization pipeline. Signals from various Insights products (experiments, web analytics, error tracking, session replay) get grouped into **SignalReports** via embedding similarity + LLM matching. When a group accumulates enough weight, a summary workflow summarizes the group, runs safety and actionability judges, and either marks the report as ready for a coding agent, defers to a human, or rejects it.
 
 ---
 
@@ -173,7 +173,7 @@ Activities query via `execute_hogql_query()` using the HogQL alias `document_emb
 
 ### Entry Point: `emit_signal()` (`backend/api.py`)
 
-The primary programmatic entry point. Called by other PostHog products to emit signals.
+The primary programmatic entry point. Called by other Insights products to emit signals.
 
 ```python
 await emit_signal(
@@ -223,7 +223,7 @@ Uses `IsAuthenticated` + `APIScopePermission` (scope: `task`).
 
 ## LLM Integration
 
-All LLM calls use **Claude Sonnet 4.5** (`claude-sonnet-4-5`) via the Anthropic SDK, wrapped with PostHog analytics tracking. Shared configuration and the generic `call_llm()` helper live in `backend/temporal/llm.py`.
+All LLM calls use **Claude Sonnet 4.5** (`claude-sonnet-4-5`) via the Anthropic SDK, wrapped with Insights analytics tracking. Shared configuration and the generic `call_llm()` helper live in `backend/temporal/llm.py`.
 
 ### `call_llm()` (`backend/temporal/llm.py`)
 
@@ -265,7 +265,7 @@ Returns `{"choice": bool, "explanation": "..."}`. Explanation required when `cho
 
 #### `judge_report_actionability()` (`backend/temporal/actionability_judge.py`)
 
-Assesses whether the report is actionable by a coding agent with MCP access to PostHog tools and code access to write PRs. Returns one of three outcomes via `ActionabilityChoice` enum:
+Assesses whether the report is actionable by a coding agent with MCP access to Insights tools and code access to write PRs. Returns one of three outcomes via `ActionabilityChoice` enum:
 
 - **`immediately_actionable`** — The coding agent can take concrete action now (bug fixes, experiment reactions, feature flag cleanup, perf improvements, UX fixes, config changes). Explanation optional.
 - **`requires_human_input`** — Potentially actionable but needs human judgment first (business context, trade-offs, multiple valid approaches, significant user-facing impact). Explanation required (3-6 sentences).

@@ -5,7 +5,7 @@ import { BATCH_EXPORT_SERVICE_NAMES, BatchExportService } from '~/types'
 export const humanizeBatchExportName = (service: BatchExportService['type']): string => {
     switch (service) {
         case 'HTTP':
-            return 'PostHog HTTP'
+            return 'Insights HTTP'
         case 'AzureBlob':
             return 'Azure Blob Storage'
         default:

@@ -9,7 +9,7 @@ from rest_framework import status
 from posthog.schema import (
     DateRange,
     FilterLogicalOperator,
-    HogQLFilters,
+    InsightsQLFilters,
     LogPropertyFilter,
     LogPropertyFilterType,
     LogsQuery,
@@ -18,7 +18,7 @@ from posthog.schema import (
     PropertyOperator,
 )
 
-from posthog.hogql.query import HogQLQueryExecutor
+from posthog.insightsql.query import InsightsQLQueryExecutor
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.client.connection import Workload
@@ -59,7 +59,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -67,12 +67,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         # Verify that log attribute filters are included in the query
         self.assertIn("service.name", query_str)
@@ -113,7 +113,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -121,12 +121,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         # Verify resource attribute filtering logic is applied
         self.assertIn("k8s.container.name", query_str)
@@ -160,7 +160,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -168,12 +168,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         # Verify negative filtering uses NOT IN subquery pattern
         self.assertIn("k8s.container.name", query_str)
@@ -221,7 +221,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -229,12 +229,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         # All filter types should be present
         self.assertIn("http.status_code__float", query_str)
@@ -278,7 +278,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -286,12 +286,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         # All filter types should be present
         self.assertIn("service.name", query_str)
@@ -319,7 +319,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -327,12 +327,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         # Verify resource_fingerprint equality filter is present
         self.assertIn("resource_fingerprint", query_str)
@@ -353,7 +353,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -361,12 +361,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         self.assertIn("body", query_str)
         self.assertIn("timeout error", query_str)
@@ -386,7 +386,7 @@ class TestAttributeFilters(APIBaseTest):
         )
 
         runner = LogsQueryRunner(query=query, team=self.team)
-        executor = HogQLQueryExecutor(
+        executor = InsightsQLQueryExecutor(
             query_type="LogsQuery",
             query=runner.to_query(),
             modifiers=runner.modifiers,
@@ -394,12 +394,12 @@ class TestAttributeFilters(APIBaseTest):
             workload=Workload.LOGS,
             timings=runner.timings,
             limit_context=runner.limit_context,
-            filters=HogQLFilters(dateRange=runner.query.dateRange),
+            filters=InsightsQLFilters(dateRange=runner.query.dateRange),
             settings=runner.settings,
         )
         executor.generate_clickhouse_sql()
         assert executor.clickhouse_prepared_ast is not None
-        query_str = executor.clickhouse_prepared_ast.to_hogql()
+        query_str = executor.clickhouse_prepared_ast.to_insightsql()
 
         self.assertNotIn("ilike(body", query_str.lower())
 

@@ -1,8 +1,8 @@
 from posthog.schema import LogsSparklineBreakdownBy
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.client.connection import Workload
 
@@ -19,7 +19,7 @@ DEFAULT_BREAKDOWN = LogsSparklineBreakdownBy.SEVERITY
 
 class SparklineQueryRunner(LogsQueryRunner):
     def _calculate(self) -> LogsQueryResponse:
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             query_type="LogsQuery",
             query=self.to_query(),
             modifiers=self.modifiers,

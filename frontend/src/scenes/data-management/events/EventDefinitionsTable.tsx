@@ -33,8 +33,8 @@ const eventTypeOptions: LemonSelectOptions<EventDefinitionType> = [
         'data-attr': 'event-type-option-event-custom',
     },
     {
-        value: EventDefinitionType.EventPostHog,
-        label: 'PostHog events',
+        value: EventDefinitionType.EventInsights,
+        label: 'Insights events',
         'data-attr': 'event-type-option-event-posthog',
     },
 ]
@@ -130,7 +130,7 @@ export function EventDefinitionsTable(): JSX.Element {
                 {filters.event_type === 'event_custom'
                     ? 'custom '
                     : filters.event_type === 'event_posthog'
-                      ? 'PostHog '
+                      ? 'Insights '
                       : ''}
                 event usage statistics?{' '}
                 <Link

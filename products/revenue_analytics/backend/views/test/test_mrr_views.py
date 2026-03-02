@@ -12,10 +12,10 @@ from posthog.test.base import (
 )
 from unittest.mock import ANY
 
-from posthog.schema import CurrencyCode, HogQLQueryModifiers, HogQLQueryResponse
+from posthog.schema import CurrencyCode, InsightsQLQueryModifiers, InsightsQLQueryResponse
 
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models.utils import uuid7
 from posthog.temporal.data_imports.sources.stripe.constants import (
@@ -26,7 +26,7 @@ from posthog.temporal.data_imports.sources.stripe.constants import (
 
 from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
-from products.revenue_analytics.backend.hogql_queries.test.data.structure import (
+from products.revenue_analytics.backend.insightsql_queries.test.data.structure import (
     REVENUE_ANALYTICS_CONFIG_SAMPLE_EVENT,
     STRIPE_CHARGE_COLUMNS,
     STRIPE_INVOICE_COLUMNS,
@@ -50,7 +50,7 @@ class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
         self._setup_stripe_data()
 
     def _setup_stripe_data(self):
-        data_dir = Path(__file__).parent.parent.parent / "hogql_queries" / "test" / "data"
+        data_dir = Path(__file__).parent.parent.parent / "insightsql_queries" / "test" / "data"
 
         self.invoices_table, self.source, self.credential, _, self.invoices_cleanup = (
             create_data_warehouse_table_from_csv(
@@ -149,12 +149,12 @@ class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
             person_result.append((person, event_ids))
         return person_result
 
-    def _execute_query(self, query: ast.SelectQuery) -> HogQLQueryResponse:
+    def _execute_query(self, query: ast.SelectQuery) -> InsightsQLQueryResponse:
         with freeze_time(self.QUERY_TIMESTAMP):
-            return execute_hogql_query(
+            return execute_insightsql_query(
                 query=query,
                 team=self.team,
-                modifiers=HogQLQueryModifiers(formatCsvAllowDoubleQuotes=True),
+                modifiers=InsightsQLQueryModifiers(formatCsvAllowDoubleQuotes=True),
             )
 
     def test_no_data_when_no_stripe_source_data_warehouse_tables(self):

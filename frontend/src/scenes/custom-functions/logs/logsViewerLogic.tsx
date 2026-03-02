@@ -32,7 +32,7 @@ export const LOG_VIEWER_LIMIT = 100
 
 export type LogsViewerLogicProps = {
     logicKey?: string
-    sourceType: 'custom_function' | 'hog_flow' | 'batch_exports' | 'external_data_jobs'
+    sourceType: 'custom_function' | 'custom_flow' | 'batch_exports' | 'external_data_jobs'
     sourceId: string
     groupByInstanceId?: boolean
     searchGroups?: string[]
@@ -62,7 +62,7 @@ export type GroupedLogEntry = {
 }
 
 export type LogEntryParams = {
-    sourceType: 'custom_function' | 'hog_flow'
+    sourceType: 'custom_function' | 'custom_flow'
     sourceId: string
     levels: LogEntryLevel[]
     searchGroups: string[]
@@ -79,7 +79,7 @@ const toKey = (log: LogEntry): string => {
 
 export const toAbsoluteClickhouseTimestamp = (timestamp: Dayjs): string => {
     // TRICKY: CH query is timezone aware so we dont send iso, and we need to convert to UTC
-    // See https://github.com/PostHog/posthog/pull/45651
+    // See https://github.com/Insights/posthog/pull/45651
     return timestamp.tz('UTC').format('YYYY-MM-DD HH:mm:ss.SSS')
 }
 
@@ -211,7 +211,7 @@ const groupLogs = (logs: LogEntry[]): GroupedLogEntry[] => {
 }
 
 export const logsViewerLogic = kea<logsViewerLogicType>([
-    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'logs', 'logsViewerLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'customfunctions', 'logs', 'logsViewerLogic', key]),
     props({} as LogsViewerLogicProps), // TODO: Remove `stage` from props, it isn't needed here for anything
     key(({ sourceType, sourceId, logicKey }) => logicKey || `${sourceType}:${sourceId}`),
     actions({

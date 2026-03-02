@@ -1,15 +1,15 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
     id: 'template-filter-properties',
     name: 'Filter Properties',
     description: 'Filter out specific properties from the event by setting them to null or removing them completely.',
-    icon_url: '/static/hedgehog/builder-hog-01.png',
+    icon_url: '/static/mascot/builder-mascot-01.png',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 // Check if the event has properties
 if (empty(event.properties)) {

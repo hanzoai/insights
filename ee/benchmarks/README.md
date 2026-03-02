@@ -1,12 +1,12 @@
 # Clickhouse query benchmarks
 
-This is the benchmark suite for PostHog clickhouse queries. It tracks performance improvements to clickhouse queries over time.
+This is the benchmark suite for Insights clickhouse queries. It tracks performance improvements to clickhouse queries over time.
 
 The benchmarks are run using [airspeed velocity](https://asv.readthedocs.io/).
 
 To get stable results over time, a stable clickhouse node which has been pre-filled with data is used to run against.
 
-Historical benchmark results can be found in https://github.com/PostHog/benchmark-results.
+Historical benchmark results can be found in https://github.com/Insights/benchmark-results.
 
 # FAQ
 
@@ -34,7 +34,7 @@ These benchmarks are mostly run in CI for:
 - master branch
 - PRs labeled with `performance`
 
-To run the all the benchmarks locally, [get access to the clickhouse node](https://github.com/PostHog/vpc/blob/main/client_values/benchmarking/values.yaml) and:
+To run the all the benchmarks locally, [get access to the clickhouse node](https://github.com/Insights/vpc/blob/main/client_values/benchmarking/values.yaml) and:
 
 ```bash
 # Set up machine
@@ -59,7 +59,7 @@ Edit the `benchmarks.py` file as needed. Use `@benchmark_clickhouse` decorator t
 
 ## Backfilling benchmarks
 
-- Clone `https://github.com/PostHog/benchmark-results` locally under ee/benchmarks/results
+- Clone `https://github.com/Insights/benchmark-results` locally under ee/benchmarks/results
 - Run something like `CLICKHOUSE_HOST=X CLICKHOUSE_USER=X CLICKHOUSE_PASSWORD=X CLICKHOUSE_DATABASE=posthog asv run --config ee/benchmarks/asv.conf.json --date-period 4d master~500..`
 - Run `asv publish` and commit the changes to benchmark-results repo
 

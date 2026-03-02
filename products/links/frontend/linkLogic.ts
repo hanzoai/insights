@@ -16,7 +16,7 @@ import { Breadcrumb, ProjectTreeRef } from '~/types'
 import type { linkLogicType } from './linkLogicType'
 import { linksLogic } from './linksLogic'
 
-export type AvailableDomain = 'phog.gg' | 'postho.gg' | 'hog.gg' | 'custom'
+export type AvailableDomain = 'go.hanzo.ai' | 'link.hanzo.ai' | 's.hanzo.ai' | 'custom'
 export type DomainDefinition = {
     label: string
     value: AvailableDomain
@@ -25,13 +25,13 @@ export type DomainDefinition = {
 }
 
 export const AVAILABLE_DOMAINS: DomainDefinition[] = [
-    { label: 'phog.gg', value: 'phog.gg' },
-    { label: 'postho.gg', value: 'postho.gg', soon: true },
-    { label: 'hog.gg', value: 'hog.gg', soon: true },
+    { label: 'go.hanzo.ai', value: 'go.hanzo.ai' },
+    { label: 'link.hanzo.ai', value: 'link.hanzo.ai', soon: true },
+    { label: 's.hanzo.ai', value: 's.hanzo.ai', soon: true },
     { label: 'Custom (BYOD)', value: 'custom', soon: true, paid: true },
 ]
 
-export const DEFAULT_SHORT_LINK_DOMAIN = 'phog.gg'
+export const DEFAULT_SHORT_LINK_DOMAIN = 'go.hanzo.ai'
 export const NEW_LINK: Partial<LinkType> = {
     id: 'new',
     short_link_domain: DEFAULT_SHORT_LINK_DOMAIN,

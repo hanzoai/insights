@@ -59,7 +59,7 @@ export const llmAnalyticsErrorsLogic = kea<llmAnalyticsErrorsLogicType>([
                 return {
                     kind: NodeKind.DataTableNode,
                     source: {
-                        kind: NodeKind.HogQLQuery,
+                        kind: NodeKind.InsightsQLQuery,
                         query,
                         filters: {
                             dateRange: {
@@ -90,7 +90,7 @@ export const llmAnalyticsErrorsLogic = kea<llmAnalyticsErrorsLogicType>([
                         TaxonomicFilterGroupType.PersonProperties,
                         ...groupsTaxonomicTypes,
                         TaxonomicFilterGroupType.Cohorts,
-                        TaxonomicFilterGroupType.HogQLExpression,
+                        TaxonomicFilterGroupType.InsightsQLExpression,
                     ],
                     showTestAccountFilters: true,
                     showExport: true,

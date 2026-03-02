@@ -8,18 +8,18 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <CalloutBox type="fyi" icon="IconInfo" title="Alternative: OpenRouter Broadcast">
                         <Markdown>
-                            OpenRouter also offers a native [Broadcast feature](https://openrouter.ai/docs/guides/features/broadcast/posthog) that can automatically send LLM analytics data to PostHog without requiring SDK instrumentation. This is a simpler option if you don't need the additional customization that our SDK provides.
+                            OpenRouter also offers a native [Broadcast feature](https://openrouter.ai/docs/guides/features/broadcast/posthog) that can automatically send LLM analytics data to Insights without requiring SDK instrumentation. This is a simpler option if you don't need the additional customization that our SDK provides.
                         </Markdown>
                     </CalloutBox>
 
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics works
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics works
                         best with our Python and Node SDKs.
                     </Markdown>
 
@@ -49,7 +49,7 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the OpenAI SDK. The PostHog SDK instruments your LLM calls by wrapping the OpenAI client. The PostHog SDK **does not** proxy your calls.</Markdown>
+                    <Markdown>Install the OpenAI SDK. The Insights SDK instruments your LLM calls by wrapping the OpenAI client. The Insights SDK **does not** proxy your calls.</Markdown>
 
                     <CodeBlock
                         blocks={[
@@ -73,15 +73,15 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
             ),
         },
         {
-            title: 'Initialize PostHog and OpenAI client',
+            title: 'Initialize Insights and OpenAI client',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        We call OpenRouter through the OpenAI client and generate a response. We'll use PostHog's OpenAI
-                        provider to capture all the details of the call. Initialize PostHog with your PostHog project API
+                        We call OpenRouter through the OpenAI client and generate a response. We'll use Insights's OpenAI
+                        provider to capture all the details of the call. Initialize Insights with your Insights project API
                         key and host from [your project settings](https://app.posthog.com/settings/project), then pass the
-                        PostHog client along with the OpenRouter config (the base URL and API key) to our OpenAI wrapper.
+                        Insights client along with the OpenRouter config (the base URL and API key) to our OpenAI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -110,9 +110,9 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 file: 'Node',
                                 code: dedent`
                                     import { OpenAI } from '@posthog/ai'
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -138,7 +138,7 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but you
                             will need to capture the data in the right format. See the schema in the [manual capture
                             section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
@@ -153,7 +153,7 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Now, when you call OpenRouter with the OpenAI SDK, PostHog automatically captures an
+                        Now, when you call OpenRouter with the OpenAI SDK, Insights automatically captures an
                         `$ai_generation` event. You can also capture or modify additional properties with the distinct ID,
                         trace ID, properties, groups, and privacy mode parameters.
                     </Markdown>
@@ -167,7 +167,7 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
                                     response = client.responses.create(
                                         model="gpt-5-mini",
                                         input=[
-                                            {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
+                                            {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
                                         posthog_distinct_id="user_123", # optional
                                         posthog_trace_id="trace_123", # optional
@@ -185,7 +185,7 @@ export const getOpenRouterSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 code: dedent`
                                     const completion = await openai.responses.create({
                                         model: "gpt-5-mini",
-                                        input: [{ role: "user", content: "Tell me a fun fact about hedgehogs" }],
+                                        input: [{ role: "user", content: "Tell me a fun fact about mascots" }],
                                         posthogDistinctId: "user_123", // optional
                                         posthogTraceId: "trace_123", // optional
                                         posthogProperties: { conversation_id: "abc123", paid: true }, // optional

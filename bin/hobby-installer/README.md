@@ -1,6 +1,6 @@
-# PostHog Hobby Installer
+# Insights Hobby Installer
 
-A TUI (Terminal User Interface) and CI-compatible installer for PostHog self-hosted hobby deployments. Built with Go using [Bubbletea](https://github.com/charmbracelet/bubbletea).
+A TUI (Terminal User Interface) and CI-compatible installer for Insights self-hosted hobby deployments. Built with Go using [Bubbletea](https://github.com/charmbracelet/bubbletea).
 
 ## Features
 
@@ -39,8 +39,8 @@ CI mode is automatically enabled when common CI environment variables are detect
 **Flags:**
 
 - `--ci` - Force non-interactive CI mode
-- `--domain` - Domain where PostHog will be accessible (required in CI mode unless already in `.env`)
-- `--version` - PostHog version to install (default: `latest`)
+- `--domain` - Domain where Insights will be accessible (required in CI mode unless already in `.env`)
+- `--version` - Insights version to install (default: `latest`)
 
 ## Building
 
@@ -127,7 +127,7 @@ Both `tui/` and `ci/` consume the same `core.GetChecks()` and `core.GetInstallSt
 ## Installation flow
 
 1. **Welcome** - Detect Install vs Upgrade mode
-2. **Version** - Select PostHog version (latest recommended)
+2. **Version** - Select Insights version (latest recommended)
 3. **Domain** - Enter domain for TLS certificate (skipped if already in `.env`)
 4. **Checks** - Verify system requirements
 5. **Install** - Clone repo, generate config, pull images, start Docker stack
@@ -139,7 +139,7 @@ On an Ubuntu server:
 
 ```bash
 # Download and run
-curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
+curl -L https://github.com/Insights/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
 chmod +x posthog-hobby
 ./posthog-hobby
 ```
@@ -147,7 +147,7 @@ chmod +x posthog-hobby
 For CI/automated deployments:
 
 ```bash
-curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
+curl -L https://github.com/Insights/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
 chmod +x posthog-hobby
 ./posthog-hobby --ci --domain your-domain.com
 ```
@@ -164,5 +164,5 @@ The GitHub workflow (`.github/workflows/build-hobby-installer.yml`) does the fol
 
 This means:
 
-- **Stable URL**: `https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby` always points to the latest build
-- **Version history**: All previous builds are available at `https://github.com/PostHog/posthog/releases?q=hobby-&expanded=true`
+- **Stable URL**: `https://github.com/Insights/posthog/releases/download/hobby-latest/posthog-hobby` always points to the latest build
+- **Version history**: All previous builds are available at `https://github.com/Insights/posthog/releases?q=hobby-&expanded=true`

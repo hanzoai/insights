@@ -9,14 +9,14 @@ import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'
 import { Link } from 'lib/lemon-ui/Link'
 import { urls } from 'scenes/urls'
 
-import { HogQLQuery, InsightQueryNode } from '~/queries/schema/schema-general'
+import { InsightsQLQuery, InsightQueryNode } from '~/queries/schema/schema-general'
 
 import { endpointLogic } from './endpointLogic'
 import { endpointsLogic } from './endpointsLogic'
 
 export interface EndpointFromInsightModalProps {
     tabId: string
-    insightQuery: HogQLQuery | InsightQueryNode
+    insightQuery: InsightsQLQuery | InsightQueryNode
     insightShortId?: string
 }
 

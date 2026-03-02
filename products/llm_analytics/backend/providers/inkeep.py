@@ -50,7 +50,7 @@ class InkeepProvider:
         """
 
         try:
-            # Manually track with PostHog since Inkeep doesn't have native support
+            # Manually track with Insights since Inkeep doesn't have native support
             posthoganalytics.capture(
                 distinct_id=distinct_id,
                 event="$ai_generation",

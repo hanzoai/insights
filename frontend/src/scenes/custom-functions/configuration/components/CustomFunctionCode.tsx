@@ -23,7 +23,7 @@ export function CustomFunctionCode(): JSX.Element {
         type,
         mightDropEvents,
         oldHogCode,
-        newHogCode,
+        newScriptCode,
     } = useValues(customFunctionConfigurationLogic)
 
     const {
@@ -102,27 +102,27 @@ export function CustomFunctionCode(): JSX.Element {
                             {type === 'source_webhook' && (
                                 <LemonBanner type="info" className="mt-2">
                                     <b>HTTP requests:</b> Webhook sources can call <code>postHogCapture</code> to ingest
-                                    events to PostHog. You can also do HTTP calls with <code>fetch</code>. In this case
+                                    events to Insights. You can also do HTTP calls with <code>fetch</code>. In this case
                                     however, the request will be queued to a background task, a <code>201 Created</code>{' '}
                                     response will be returned and the event will be ingested asynchronously.
                                 </LemonBanner>
                             )}
                             <CodeEditorResizeable
                                 language={type.startsWith('site_') ? 'typescript' : 'hog'}
-                                value={newHogCode ?? value ?? ''}
-                                originalValue={oldHogCode && newHogCode ? oldHogCode : undefined}
+                                value={newScriptCode ?? value ?? ''}
+                                originalValue={oldHogCode && newScriptCode ? oldHogCode : undefined}
                                 onChange={(v) => {
                                     // If user manually edits while diff is showing, clear the diff
-                                    if (oldHogCode && newHogCode) {
+                                    if (oldHogCode && newScriptCode) {
                                         clearHogCodeDiff()
                                     }
                                     onChange(v ?? '')
                                 }}
                                 globals={sampleGlobalsWithInputs}
-                                showDiffActions={!!(oldHogCode && newHogCode)}
+                                showDiffActions={!!(oldHogCode && newScriptCode)}
                                 onAcceptChanges={() => {
-                                    if (newHogCode) {
-                                        onChange(newHogCode)
+                                    if (newScriptCode) {
+                                        onChange(newScriptCode)
                                     }
                                     reportAICustomFunctionAccepted()
                                     clearHogCodeDiff()
@@ -146,7 +146,7 @@ export function CustomFunctionCode(): JSX.Element {
                                         showInlineDetails: true,
                                     },
                                     quickSuggestionsDelay: 300,
-                                    readOnly: !!(oldHogCode && newHogCode),
+                                    readOnly: !!(oldHogCode && newScriptCode),
                                 }}
                             />
                         </>
@@ -160,7 +160,7 @@ export function CustomFunctionCode(): JSX.Element {
         <MaxTool
             identifier="create_hog_transformation_function"
             context={{
-                current_hog_code: configuration.hog ?? '',
+                current_hog_code: configuration.custom_script ?? '',
             }}
             contextDescription={{
                 text: 'Current Custom code',
@@ -168,7 +168,7 @@ export function CustomFunctionCode(): JSX.Element {
             }}
             callback={(toolOutput: string) => {
                 // Store the old value before changing
-                setOldHogCode(configuration.hog ?? '')
+                setOldHogCode(configuration.custom_script ?? '')
                 // Store the new value from Max Tool
                 setNewHogCode(toolOutput)
                 // Report that AI was prompted

@@ -21,11 +21,11 @@ class TestSyncUserSettingsCommand(BaseTest):
         self.user.theme_mode = "light"
         self.user.toolbar_mode = "toolbar"
         self.user.anonymize_data = False
-        self.user.hedgehog_config = None
+        self.user.mascot_config = None
         self.user.save()
 
     def _mock_cloud_api_responses(self, mock_get):
-        """Configure mock responses for PostHog cloud API"""
+        """Configure mock responses for Insights cloud API"""
         # Mock user settings response
         user_response = MagicMock()
         user_response.status_code = 200
@@ -35,7 +35,7 @@ class TestSyncUserSettingsCommand(BaseTest):
             "theme_mode": "dark",
             "toolbar_mode": "disabled",
             "anonymize_data": True,
-            "hedgehog_config": {"mode": "festive"},
+            "mascot_config": {"mode": "festive"},
             "partial_notification_settings": {"plugin_disabled": False},
             "has_seen_product_intro_for": {"feature_flags": True},
         }
@@ -86,7 +86,7 @@ class TestSyncUserSettingsCommand(BaseTest):
         assert self.user.theme_mode == "dark"
         assert self.user.toolbar_mode == "disabled"
         assert self.user.anonymize_data is True
-        assert self.user.hedgehog_config == {"mode": "festive"}
+        assert self.user.mascot_config == {"mode": "festive"}
 
         # Verify home settings were synced
         home_settings = UserHomeSettings.objects.get(user=self.user, team=self.team)
@@ -243,7 +243,7 @@ class TestSyncUserSettingsCommand(BaseTest):
 
     @patch("posthog.management.commands.sync_user_settings.requests.get")
     def test_sync_with_custom_host(self, mock_get):
-        """Test syncing from a custom PostHog host"""
+        """Test syncing from a custom Insights host"""
         self._mock_cloud_api_responses(mock_get)
 
         call_command("sync_user_settings", api_key="test_key", host="https://eu.posthog.com")

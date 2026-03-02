@@ -12,7 +12,7 @@ export type FilterType = 'behavioral' | 'person_property'
 
 export interface RealtimeSupportedFilter {
     conditionHash: string // The 16-char SHA256 hash from the filter
-    bytecode: any // HogQL bytecode for execution
+    bytecode: any // InsightsQL bytecode for execution
     team_id: number
     cohort_id: number // For tracking which cohort this filter belongs to
     filter_type: FilterType // 'behavioral' for event filters, 'person_property' for person filters
@@ -80,7 +80,7 @@ export class RealtimeSupportedFilterManagerCDP {
                 id as cohort_id,
                 team_id,
                 filters
-            FROM posthog_cohort
+            FROM insights_cohort
             WHERE team_id = ANY($1)
               AND deleted = FALSE
               AND filters IS NOT NULL

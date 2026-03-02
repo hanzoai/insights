@@ -30,7 +30,7 @@ from posthog.ducklake.verification import (
 from posthog.exceptions_capture import capture_exception
 from posthog.models import Team
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat_sync import HeartbeaterSync
 from posthog.temporal.common.logger import get_logger
 from posthog.temporal.ducklake.metrics import (
@@ -660,7 +660,7 @@ def _quote_identifier(identifier: str) -> str:
 
 
 @workflow.defn(name="ducklake-copy.data-imports")
-class DuckLakeCopyDataImportsWorkflow(PostHogWorkflow):
+class DuckLakeCopyDataImportsWorkflow(InsightsWorkflow):
     """Temporal workflow that copies data imports into the DuckLake bucket."""
 
     @staticmethod

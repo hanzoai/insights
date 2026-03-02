@@ -13,9 +13,9 @@ import { TaskRunStatusBadge } from './TaskRunStatusBadge'
 import { ConsoleLogEntry } from './session/ConsoleLogEntry'
 import { ToolCallEntry } from './session/ToolCallEntry'
 
-const HEDGEHOG_STATUSES = [
+const MASCOT_STATUSES = [
     'Spiking...',
-    'Hedgehogging...',
+    'Mascotging...',
     'Snuffling...',
     'Curling up...',
     'Foraging...',
@@ -31,12 +31,12 @@ const HEDGEHOG_STATUSES = [
     'Uncurling...',
 ]
 
-function HedgehogStatus(): JSX.Element {
-    const [statusIndex, setStatusIndex] = useState(() => Math.floor(Math.random() * HEDGEHOG_STATUSES.length))
+function MascotStatus(): JSX.Element {
+    const [statusIndex, setStatusIndex] = useState(() => Math.floor(Math.random() * MASCOT_STATUSES.length))
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setStatusIndex((prev) => (prev + 1) % HEDGEHOG_STATUSES.length)
+            setStatusIndex((prev) => (prev + 1) % MASCOT_STATUSES.length)
         }, 2000)
         return () => clearInterval(interval)
     }, [])
@@ -45,7 +45,7 @@ function HedgehogStatus(): JSX.Element {
         <div className="flex items-center gap-2 py-2 text-muted">
             <Spinner className="text-xs" />
             <TextMorph as="span" className="text-xs">
-                {HEDGEHOG_STATUSES[statusIndex]}
+                {MASCOT_STATUSES[statusIndex]}
             </TextMorph>
         </div>
     )
@@ -156,7 +156,7 @@ export function TaskSessionView({ logs, isPolling, run }: TaskSessionViewProps):
                 {entries.map((entry) => (
                     <LogEntryRenderer key={entry.id} entry={entry} />
                 ))}
-                {isPolling && <HedgehogStatus />}
+                {isPolling && <MascotStatus />}
             </div>
         </div>
     )

@@ -56,7 +56,7 @@ def get_nested_value(obj, chain, nullish=False) -> Any:
             return None
         if isinstance(key, int):
             if key == 0:
-                raise HogVMException(f"Hog arrays start from index 1")
+                raise HogVMException(f"Script arrays start from index 1")
             elif key > 0:
                 if key > len(obj):
                     return None
@@ -85,7 +85,7 @@ def set_nested_value(obj, chain, value) -> Any:
         if not isinstance(chain[-1], int):
             raise HogVMException(f"Invalid index: {chain[-1]}")
         if chain[-1] <= 0:
-            raise HogVMException(f"Hog arrays start from index 1")
+            raise HogVMException(f"Script arrays start from index 1")
         obj[chain[-1] - 1] = value
     else:
         raise HogVMException(f'Can not set property "{chain[-1]}" on object of type "{type(obj).__name__}"')

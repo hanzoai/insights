@@ -12,11 +12,11 @@ import {
 } from '@posthog/icons'
 import { LemonButton, Link } from '@posthog/lemon-ui'
 
-import { ExperimentsHog } from 'lib/components/hedgehogs'
+import { ExperimentsHog } from 'lib/components/mascots'
 import { SceneExport } from 'scenes/sceneTypes'
 
 export const scene: SceneExport = {
-    component: MoveToPostHogCloud,
+    component: MoveToInsightsCloud,
 }
 
 type CloudFeature = {
@@ -47,18 +47,18 @@ const CLOUD_FEATURES: CloudFeature[] = [
     {
         name: 'Auto-scaling',
         description:
-            'As your product grows, so does your data. PostHog Cloud scales for you, so you never have to worry about spikes or downtime.',
+            'As your product grows, so does your data. Insights Cloud scales for you, so you never have to worry about spikes or downtime.',
         icon: <IconTrending />,
     },
     {
         name: 'Highly available',
-        description: 'PostHog Cloud is highly available, so you can rest easy knowing your data is always accessible.',
+        description: 'Insights Cloud is highly available, so you can rest easy knowing your data is always accessible.',
         icon: <IconBolt />,
     },
     {
         name: 'Automatic upgrades',
         description:
-            'PostHog Cloud is always up to date with the latest features and security updates - no upgrades required.',
+            'Insights Cloud is always up to date with the latest features and security updates - no upgrades required.',
         icon: <IconUpload />,
     },
     {
@@ -69,14 +69,14 @@ const CLOUD_FEATURES: CloudFeature[] = [
     {
         name: 'Access to all features',
         description:
-            'Group analytics, data pipelines, experiments, and other premium features are only available on PostHog Cloud.',
+            'Group analytics, data pipelines, experiments, and other premium features are only available on Insights Cloud.',
         icon: <IconFeatures />,
         link: 'https://posthog.com/pricing',
     },
     {
         name: 'World-class support',
         description:
-            'PostHog Cloud customers get access to our world-class support team, not just the community forum.',
+            'Insights Cloud customers get access to our world-class support team, not just the community forum.',
         icon: <IconSupport />,
         link: 'https://posthog.com/handbook/growth/customer-support',
     },
@@ -93,18 +93,18 @@ const CLOUD_FEATURES: CloudFeature[] = [
     },
 ]
 
-export function MoveToPostHogCloud(): JSX.Element {
+export function MoveToInsightsCloud(): JSX.Element {
     return (
         <div className="-m-4">
             <header className="bg-primary-alt-highlight border-b border-t border-primary flex justify-center p-8">
                 <div className="grid md:grid-cols-2 items-center gap-8 w-full max-w-screen-xl">
                     <div className="">
-                        <h2 className="text-2xl font-bold">PostHog Cloud</h2>
+                        <h2 className="text-2xl font-bold">Insights Cloud</h2>
                         <h3 className="text-4xl font-bold tracking-tight">
                             We handle the infra. You focus on your product.
                         </h3>
                         <p>
-                            Hosting PostHog is no easy feat. It takes a lot of domain knowledge to get it right -
+                            Hosting Insights is no easy feat. It takes a lot of domain knowledge to get it right -
                             especially at scale. Let us handle the hosting, so you can focus on building your product.
                         </p>
                         <div className="flex">
@@ -113,7 +113,7 @@ export function MoveToPostHogCloud(): JSX.Element {
                                 type="primary"
                                 status="alt"
                             >
-                                Move to PostHog Cloud
+                                Move to Insights Cloud
                             </LemonButton>
                         </div>
                     </div>

@@ -2,20 +2,20 @@ import { LemonBanner } from '@posthog/lemon-ui'
 
 import { ErrorEventType } from 'lib/components/Errors/types'
 
-interface PostHogSDKIssueBannerProps {
+interface InsightsSDKIssueBannerProps {
     event?: ErrorEventType | null
 }
 
-export function PostHogSDKIssueBanner({ event }: PostHogSDKIssueBannerProps): JSX.Element | null {
+export function InsightsSDKIssueBanner({ event }: InsightsSDKIssueBannerProps): JSX.Element | null {
     if (!event) {
         return null
     }
 
-    const isPostHogSDKIssue = event.properties.$exception_values?.some((v: string) =>
+    const isInsightsSDKIssue = event.properties.$exception_values?.some((v: string) =>
         v.includes('persistence.isDisabled is not a function')
     )
 
-    if (!isPostHogSDKIssue) {
+    if (!isInsightsSDKIssue) {
         return null
     }
 
@@ -25,7 +25,7 @@ export function PostHogSDKIssueBanner({ event }: PostHogSDKIssueBannerProps): JS
             action={{ to: 'https://status.posthog.com/incidents/l70cgmt7475m', children: 'Read more' }}
             className="mb-4"
         >
-            This issue was captured because of a bug in the PostHog SDK. We've fixed the issue, and you won't be charged
+            This issue was captured because of a bug in the Insights SDK. We've fixed the issue, and you won't be charged
             for any of these exception events. We recommend setting this issue's status to "Suppressed".
         </LemonBanner>
     )

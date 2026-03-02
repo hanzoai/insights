@@ -69,7 +69,7 @@ export const productScenes: Record<string, () => Promise<any>> = {
             '../../products/error_tracking/frontend/scenes/ErrorTrackingConfigurationScene/ErrorTrackingConfigurationScene'
         ),
     FeatureFlagTemplates: () => import('../../products/feature_flags/frontend/FeatureFlagTemplatesScene'),
-    Game368Hedgehogs: () => import('../../products/games/368Hedgehogs/368Hedgehogs'),
+    Game368Mascots: () => import('../../products/games/368Mascots/368Mascots'),
     Links: () => import('../../products/links/frontend/LinksScene'),
     Link: () => import('../../products/links/frontend/LinkScene'),
     LiveDebugger: () => import('../../products/live_debugger/frontend/LiveDebugger'),
@@ -131,7 +131,7 @@ export const productRoutes: Record<string, [string, string]> = {
     '/error_tracking/alerts/:id': ['CustomFunction', 'errorTrackingAlert'],
     '/error_tracking/alerts/new/:templateId': ['CustomFunction', 'errorTrackingAlertNew'],
     '/feature_flags/templates': ['FeatureFlagTemplates', 'featureFlagTemplates'],
-    '/games/368hedgehogs': ['Game368Hedgehogs', 'game368Hedgehogs'],
+    '/games/368mascots': ['Game368Mascots', 'game368Mascots'],
     '/links': ['Links', 'links'],
     '/link/:id': ['Link', 'link'],
     '/live-debugger': ['LiveDebugger', 'liveDebugger'],
@@ -313,7 +313,7 @@ export const productConfiguration: Record<string, any> = {
         name: 'Feature flag templates',
         defaultDocsPath: '/docs/feature-flags/creating-feature-flags',
     },
-    Game368Hedgehogs: { name: '368Hedgehogs', projectBased: true, activityScope: 'Games' },
+    Game368Mascots: { name: '368Mascots', projectBased: true, activityScope: 'Games' },
     Links: {
         name: 'Links',
         projectBased: true,
@@ -620,7 +620,7 @@ export const productUrls = {
         }
         return `/feature_flags/new?${params.toString()}`
     },
-    game368hedgehogs: (): string => `/games/368hedgehogs`,
+    game368mascots: (): string => `/games/368mascots`,
     groups: (groupTypeIndex: string | number): string => `/groups/${groupTypeIndex}`,
     groupsNew: (groupTypeIndex: string | number): string => `/groups/${groupTypeIndex}/new`,
     group: (groupTypeIndex: string | number, groupKey: string, encode: boolean = true, tab?: string | null): string =>
@@ -1579,7 +1579,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
 
 /** This const is auto-generated, as is the whole file */
 export const getTreeItemsGames = (): FileSystemImport[] => [
-    { path: '368 Hedgehogs', href: urls.game368hedgehogs() },
+    { path: '368 Mascots', href: urls.game368mascots() },
 ]
 
 /** This const is auto-generated, as is the whole file */

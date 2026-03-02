@@ -13,7 +13,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog Python library using pip:</Markdown>
+                    <Markdown>Install the Insights Python library using pip:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -29,12 +29,12 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize the PostHog client with your project API key and host from your project settings:
+                        Initialize the Insights client with your project API key and host from your project settings:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -67,7 +67,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Once installed, PostHog will automatically start capturing events. You can also manually send
+                        Once installed, Insights will automatically start capturing events. You can also manually send
                         events to test your integration:
                     </Markdown>
                     {PythonEventCapture && <PythonEventCapture />}

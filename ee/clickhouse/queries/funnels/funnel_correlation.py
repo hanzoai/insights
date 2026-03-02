@@ -951,7 +951,7 @@ def get_entity_odds_ratio(event_contingency_table: EventContingencyTable, prior_
 def build_selector(elements: list[dict[str, Any]]) -> str:
     # build a CSS select given an "elements_chain"
     # NOTE: my source of what this should be doing is
-    # https://github.com/PostHog/posthog/blob/cc054930a47fb59940531e99a856add49a348ee5/frontend/src/scenes/events/createActionFromEvent.tsx#L36:L36
+    # https://github.com/Insights/posthog/blob/cc054930a47fb59940531e99a856add49a348ee5/frontend/src/scenes/events/createActionFromEvent.tsx#L36:L36
     #
     def element_to_selector(element: dict[str, Any]) -> str:
         if attr_id := element.get("attr_id"):

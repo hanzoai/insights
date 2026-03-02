@@ -16,8 +16,8 @@ from products.data_warehouse.backend.models.data_modeling_job import DataModelin
 
 
 class TestDataWarehouseAPI(APIBaseTest):
-    @patch("products.data_warehouse.backend.api.data_warehouse.execute_hogql_query")
-    def test_property_values_returns_results_with_cache_control(self, mock_execute_hogql_query):
+    @patch("products.data_warehouse.backend.api.data_warehouse.execute_insightsql_query")
+    def test_property_values_returns_results_with_cache_control(self, mock_execute_insightsql_query):
         table = DataWarehouseTable.objects.create(
             name="sample_table",
             format=DataWarehouseTable.TableFormat.Parquet,
@@ -26,7 +26,7 @@ class TestDataWarehouseAPI(APIBaseTest):
             columns={"name": "String"},
         )
 
-        mock_execute_hogql_query.return_value = SimpleNamespace(results=[["alpha"], [["beta", "gamma"]], [True]])
+        mock_execute_insightsql_query.return_value = SimpleNamespace(results=[["alpha"], [["beta", "gamma"]], [True]])
 
         response = self.client.get(
             f"/api/projects/{self.team.id}/data_warehouse/property_values?key=name&table_name={table.name}"

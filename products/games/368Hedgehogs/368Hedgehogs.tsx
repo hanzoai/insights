@@ -1,4 +1,4 @@
-import './368Hedgehogs.scss'
+import './368Mascots.scss'
 
 import { useCallback, useRef, useState } from 'react'
 
@@ -8,12 +8,12 @@ import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 
 // ==========================================================================
-export type Hog = 'hog1' | 'hog2' | 'hog3' | 'hog4'
+export type Icon = 'icon1' | 'icon2' | 'icon3' | 'icon4'
 export type Orientation = 'horizontal' | 'vertical'
 
 interface Piece {
     orientation: Orientation
-    cells: [Hog, Hog]
+    cells: [Icon, Icon]
 }
 
 interface DragPayload {
@@ -22,20 +22,20 @@ interface DragPayload {
 }
 
 const BOARD_SIZE = 6
-const EMOJIS: Hog[] = ['hog1', 'hog2', 'hog3', 'hog4']
+const EMOJIS: Icon[] = ['icon1', 'icon2', 'icon3', 'icon4']
 
-const IMAGE_MAP: Record<Hog, string> = {
-    hog1: '/static/hedgehog/burning-money-hog.png',
-    hog2: '/static/hedgehog/police-hog.png',
-    hog3: '/static/hedgehog/sleeping-hog.png',
-    hog4: '/static/hedgehog/warning-hog.png',
+const IMAGE_MAP: Record<Icon, string> = {
+    hog1: '/static/mascot/burning-money-hog.png',
+    hog2: '/static/mascot/police-hog.png',
+    hog3: '/static/mascot/sleeping-hog.png',
+    hog4: '/static/mascot/warning-hog.png',
 }
 
-type Board = (Hog | null)[][] // 6×6 grid
+type Board = (Icon | null)[][] // 6×6 grid
 
 // ==========================================================================
 // Helpers
-const makeEmptyBoard = (): Board => Array.from({ length: BOARD_SIZE }, () => Array<Hog | null>(BOARD_SIZE).fill(null))
+const makeEmptyBoard = (): Board => Array.from({ length: BOARD_SIZE }, () => Array<Icon | null>(BOARD_SIZE).fill(null))
 
 // Generate a piece that **can actually be placed** on the current board.
 // Returns null if the board has no legal placement left.
@@ -64,7 +64,7 @@ const genPieceForBoard = (board: Board): Piece | null => {
     }
 
     const orientation = legalOrientations[Math.floor(Math.random() * legalOrientations.length)] as Orientation
-    const cells: [Hog, Hog] = [
+    const cells: [Icon, Icon] = [
         EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
         EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
     ]
@@ -366,7 +366,7 @@ const CritterMatchGame: React.FC = () => {
 
     // ------------------------------------------------------------------------
     return (
-        <div className="Game368Hedgehogs">
+        <div className="Game368Mascots">
             <div className="cmg-container">
                 <h2 className="flex gap-2 items-center">
                     {gameOver ? (

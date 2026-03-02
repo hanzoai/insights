@@ -59,7 +59,7 @@ class GenericInsightsSerializer(serializers.Serializer):
     )
     properties = PropertySerializer(required=False, help_text=property_help_text)
     filter_test_accounts = serializers.BooleanField(
-        help_text='Whether to filter out internal and test accounts. See "project settings" in your PostHog account for the filters.',
+        help_text='Whether to filter out internal and test accounts. See "project settings" in your Insights account for the filters.',
         default=False,
     )
     date_from = serializers.CharField(

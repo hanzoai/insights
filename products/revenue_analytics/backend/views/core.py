@@ -5,7 +5,7 @@ from typing import Literal, Optional
 
 from posthog.schema import DatabaseSchemaManagedViewTableKind, RevenueAnalyticsEventItem
 
-from posthog.hogql import ast
+from posthog.insightsql import ast
 
 from posthog.models.team.team import Team
 
@@ -26,7 +26,7 @@ class BuiltQuery:
     key: str
     # Prefix used as source_label and to name the view
     prefix: str
-    # HogQL AST for the view
+    # InsightsQL AST for the view
     query: ast.Expr
     # Useful for debugging purposes, only asserted by in tests
     test_comments: str | None = None

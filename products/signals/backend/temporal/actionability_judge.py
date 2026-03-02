@@ -39,7 +39,7 @@ class ActionabilityJudgeResponse(BaseModel):
 ACTIONABILITY_JUDGE_SYSTEM_PROMPT = """You are an actionability judge reviewing a signal report to determine whether it can be acted on by an autonomous coding agent.
 
 The coding agent that would receive this report has:
-- MCP access to PostHog tools (analytics, feature flags, experiments, session replays, etc.)
+- MCP access to Insights tools (analytics, feature flags, experiments, session replays, etc.)
 - Code access to the underlying codebase the report is about, with the ability to write and open PRs
 - The ability to execute commands in a sandboxed environment
 

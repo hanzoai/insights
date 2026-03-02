@@ -9,7 +9,7 @@ import { EventHeaders, Person, PipelineEvent, PreIngestionEvent, Team } from '..
 import { DependencyUnavailableError } from '../../../utils/db/error'
 import { timeoutGuard } from '../../../utils/db/utils'
 import { logger } from '../../../utils/logger'
-import { captureException } from '../../../utils/posthog'
+import { captureException } from '../../../utils/insights'
 import { TeamManager } from '../../../utils/team-manager'
 import { GroupTypeManager } from '../group-type-manager'
 import { BatchWritingGroupStore } from '../groups/batch-writing-group-store'

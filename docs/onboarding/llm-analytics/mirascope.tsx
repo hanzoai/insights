@@ -9,13 +9,13 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The Mirascope integration uses
-                        PostHog's OpenAI wrapper since Mirascope supports passing a custom OpenAI client.
+                        Setting up analytics starts with installing the Insights SDK. The Mirascope integration uses
+                        Insights's OpenAI wrapper since Mirascope supports passing a custom OpenAI client.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
             content: (
                 <>
                     <Markdown>
-                        Install Mirascope with OpenAI support. PostHog instruments your LLM calls by wrapping the
+                        Install Mirascope with OpenAI support. Insights instruments your LLM calls by wrapping the
                         OpenAI client that Mirascope uses under the hood.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
             ),
         },
         {
-            title: 'Initialize PostHog and Mirascope',
+            title: 'Initialize Insights and Mirascope',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog OpenAI wrapper and
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
                         pass it to Mirascope's `@call` decorator via the `client` parameter.
                     </Markdown>
 
@@ -79,8 +79,8 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
                             Mirascope's `@call` decorator accepts a `client` parameter for passing a custom OpenAI client.
-                            PostHog's `OpenAI` wrapper is a proper subclass of `openai.OpenAI`, so it works directly.
-                            PostHog captures `$ai_generation` events automatically without proxying your calls.
+                            Insights's `OpenAI` wrapper is a proper subclass of `openai.OpenAI`, so it works directly.
+                            Insights captures `$ai_generation` events automatically without proxying your calls.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -92,7 +92,7 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
             content: (
                 <>
                     <Markdown>
-                        Use Mirascope as normal, passing the wrapped client to the call decorator. PostHog automatically
+                        Use Mirascope as normal, passing the wrapped client to the call decorator. Insights automatically
                         captures an `$ai_generation` event for each LLM call.
                     </Markdown>
 

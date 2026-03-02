@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
-export enum PosthogJwtAudience {
-    SUBSCRIPTION_PREFERENCES = 'posthog:messaging:subscription_preferences',
+export enum InsightsJwtAudience {
+    SUBSCRIPTION_PREFERENCES = 'insights:messaging:subscription_preferences',
 }
 
 export class JWT {
@@ -15,13 +15,13 @@ export class JWT {
         this.secrets = saltKeys
     }
 
-    sign(payload: object, audience: PosthogJwtAudience, options?: jwt.SignOptions): string {
+    sign(payload: object, audience: InsightsJwtAudience, options?: jwt.SignOptions): string {
         return jwt.sign(payload, this.secrets[0], { ...options, audience: audience })
     }
 
     verify(
         token: string,
-        audience: PosthogJwtAudience,
+        audience: InsightsJwtAudience,
         options?: jwt.VerifyOptions & { ignoreVerificationErrors?: boolean }
     ): string | jwt.Jwt | jwt.JwtPayload | undefined {
         let error: Error | undefined

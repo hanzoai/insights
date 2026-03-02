@@ -26,7 +26,7 @@ export interface ChangelogFlagPayload {
     // For optimal display, ensure images are reasonably sized (e.g., width < 800px)
     // and optimized for web (e.g., < 500KB).
     // We suggest you upload it to a CDN to reduce load times/server load.
-    // If you're a PostHog employee, check https://posthog.com/handbook/engineering/posthog-com/assets out
+    // If you're an Insights employee, check https://posthog.com/handbook/engineering/posthog-com/assets out
     markdown: string
 
     // Optional fields used if you want to override this to a specific person rather than Joe

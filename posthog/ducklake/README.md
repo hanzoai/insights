@@ -66,7 +66,7 @@ Re-running a copy simply overwrites the same table. Choose the bucket so its lif
 
 Temporal workers must be able to:
 
-1. Read from the existing PostHog object storage bucket where Delta tables live (already required for the modeling pipeline).
+1. Read from the existing Insights object storage bucket where Delta tables live (already required for the modeling pipeline).
 2. Read/write/delete within the DuckLake data bucket referenced by `DUCKLAKE_BUCKET`.
 
 For AWS S3, grant the worker role at least `s3:ListBucket`, `s3:GetObject`, `s3:PutObject`, and `s3:DeleteObject` on the DuckLake bucket/prefix (plus `s3:CreateBucket` if you want local MinIO-style auto-creation). For MinIO, reuse the same access/secret keys configured in the `DUCKLAKE_*` variables and ensure they have full access to the DuckLake bucket.
@@ -81,7 +81,7 @@ Follow these checklists to exercise the DuckLake copy workflows on a local check
    Run `hogli start` (or `bin/start`) so Postgres, MinIO, Temporal, and all DuckLake defaults are up. Make sure the `ducklake-data-modeling-copy-workflow` feature flag is enabled for the team you plan to use.
 
 2. **Trigger a model materialization from the app**
-   In the PostHog UI, open Data Warehouse → Views, pick (or create) a view, open the Materialization section, enable it if needed, and click **Sync now**. This schedules the `data-modeling-run` workflow for that team/view.
+   In the Insights UI, open Data Warehouse → Views, pick (or create) a view, open the Materialization section, enable it if needed, and click **Sync now**. This schedules the `data-modeling-run` workflow for that team/view.
 
 3. **Observe the data-modeling workflow**
    Visit the Temporal UI at `http://localhost:8081/namespaces/default/workflows` and confirm a `data-modeling-run` execution appears. Wait for it to finish successfully.
@@ -122,7 +122,7 @@ Follow these checklists to exercise the DuckLake copy workflows on a local check
    Run `hogli start` (or `bin/start`) so Postgres, MinIO, Temporal, and all DuckLake defaults are up. Make sure the `ducklake-data-imports-copy-workflow` feature flag is enabled for the team you plan to use.
 
 2. **Trigger a data import sync from the app**
-   In the PostHog UI, open Data Warehouse → Sources, connect a source (e.g., Stripe, Hubspot), select the schemas to sync, and click **Sync**. This schedules the `external-data-job` workflow.
+   In the Insights UI, open Data Warehouse → Sources, connect a source (e.g., Stripe, Hubspot), select the schemas to sync, and click **Sync**. This schedules the `external-data-job` workflow.
 
 3. **Observe the external-data-job workflow**
    Visit the Temporal UI at `http://localhost:8081/namespaces/default/workflows` and confirm an `external-data-job` execution appears. Wait for it to finish successfully.

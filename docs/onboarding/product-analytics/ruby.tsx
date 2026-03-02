@@ -11,7 +11,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add the PostHog Ruby gem to your Gemfile:</Markdown>
+                    <Markdown>Add the Insights Ruby gem to your Gemfile:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -27,11 +27,11 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize the PostHog client with your API key and host:</Markdown>
+                    <Markdown>Initialize the Insights client with your API key and host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -40,7 +40,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                 code: dedent`
                                 require 'posthog'
                                 
-                                posthog = PostHog::Client.new({
+                                posthog = Insights::Client.new({
                                     api_key: "<ph_project_api_key>",
                                     host: "<ph_client_api_host>",
                                     on_error: Proc.new { |status, msg| print msg }

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="customfunction",
             name="type",
             field=models.CharField(
                 blank=True,
@@ -27,5 +27,5 @@ class Migration(migrations.Migration):
                 null=True,
             ),
         ),
-        migrations.RunSQL("UPDATE posthog_hogfunction SET type = 'destination' WHERE type IS NULL", "SELECT 1"),
+        migrations.RunSQL("UPDATE posthog_customfunction SET type = 'destination' WHERE type IS NULL", "SELECT 1"),
     ]

@@ -6,18 +6,18 @@ import path from 'path'
 
 import { parseJSON } from '../../utils/json-parse'
 import { UUIDT } from '../../utils/utils'
-import { HogBytecode } from '../types'
+import { ScriptBytecode } from '../types'
 import { Semaphore } from '../utils/sempahore'
 
 const ROOT_DIR = path.join(__dirname, '..', '..', '..', '..')
 const CACHE_FILE = path.join(__dirname, '.tmp/cache.json')
 
-let CACHE: Record<string, HogBytecode> | null = null
+let CACHE: Record<string, ScriptBytecode> | null = null
 const CONCURRENT_WORKERS = 10
 
 const semaphore = new Semaphore(CONCURRENT_WORKERS)
 
-export async function compileHog(hog: string): Promise<HogBytecode> {
+export async function compileScript(scriptSource: string): Promise<ScriptBytecode> {
     return semaphore.run(async () => {
         if (CACHE === null) {
             mkdirSync(path.dirname(CACHE_FILE), { recursive: true })
@@ -31,21 +31,21 @@ export async function compileHog(hog: string): Promise<HogBytecode> {
         }
         CACHE = CACHE ?? {}
 
-        if (CACHE[hog]) {
-            return CACHE[hog]
+        if (CACHE[scriptSource]) {
+            return CACHE[scriptSource]
         }
 
-        // We invoke the ./bin/hog from the root of the directory like bin/hoge <file.hog> [output.hoge]
+        // We invoke the ./bin/script-compiler from the root of the directory like bin/script-compile <file.src> [output.out]
         // We need to write and read from a temp file
         const uuid = new UUIDT().toString()
-        const tempFile = path.join(tmpdir(), `hog-${uuid}.hog`)
-        await writeFile(tempFile, hog)
+        const tempFile = path.join(tmpdir(), `script-${uuid}.src`)
+        await writeFile(tempFile, scriptSource)
 
-        const outputFile = path.join(tmpdir(), `hog-${uuid}.hoge`)
+        const outputFile = path.join(tmpdir(), `script-${uuid}.out`)
         try {
             await new Promise((resolve, reject) => {
                 exec(
-                    `cd ${ROOT_DIR} && ./bin/hoge ${tempFile} ${outputFile}`,
+                    `cd ${ROOT_DIR} && ./bin/script-compile ${tempFile} ${outputFile}`,
                     {
                         env: {
                             ...process.env,
@@ -56,13 +56,13 @@ export async function compileHog(hog: string): Promise<HogBytecode> {
                 )
             })
         } catch (error) {
-            console.error('Failed to compile hog:', hog)
+            console.error('Failed to compile script:', scriptSource)
             throw error
         }
 
         const output = parseJSON(await readFile(outputFile, 'utf-8'))
 
-        CACHE[hog] = output
+        CACHE[scriptSource] = output
 
         await writeFile(CACHE_FILE, JSON.stringify(CACHE, null, 2))
 

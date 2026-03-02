@@ -4,7 +4,7 @@ import Redis, { RedisOptions } from 'ioredis'
 import { RedisPool } from '../../types'
 import { logger } from '../../utils/logger'
 import { killGracefully } from '../../utils/utils'
-import { captureException } from '../posthog'
+import { captureException } from '../insights'
 
 /** Number of Redis error events until the server is killed gracefully. */
 const REDIS_ERROR_COUNTER_LIMIT = 10

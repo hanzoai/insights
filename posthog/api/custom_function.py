@@ -30,7 +30,7 @@ from posthog.cdp.validation import (
     InputsSchemaItemSerializer,
     InputsSerializer,
     MappingsSerializer,
-    compile_hog,
+    compile_script,
     generate_template_bytecode,
 )
 from posthog.exceptions_capture import capture_exception
@@ -202,7 +202,7 @@ class CustomFunctionSerializer(CustomFunctionMinimalSerializer):
             if template_id:
                 template = CustomFunctionTemplate.objects.get(template_id=data["template_id"])
                 if template:
-                    data["hog"] = data.get("hog") or template.code
+                    data["custom_script"] = data.get("hog") or template.code
                     data["inputs_schema"] = data.get("inputs_schema") or template.inputs_schema
                     data["inputs"] = data.get("inputs") or {}
                     data["icon_url"] = data.get("icon_url") or template.icon_url
@@ -259,7 +259,7 @@ class CustomFunctionSerializer(CustomFunctionMinimalSerializer):
 
         if "hog" in attrs:
             # First check the raw code size before trying to compile/transpile it
-            hog_code_size = len(attrs["hog"].encode("utf-8"))
+            hog_code_size = len(attrs["custom_script"].encode("utf-8"))
             if hog_code_size > MAX_HOG_CODE_SIZE_BYTES:
                 raise serializers.ValidationError(
                     {
@@ -273,7 +273,7 @@ class CustomFunctionSerializer(CustomFunctionMinimalSerializer):
                     attrs["transpiled"] = get_transpiled_function(
                         CustomFunction(
                             team=team,
-                            hog=attrs["hog"],
+                            hog=attrs["custom_script"],
                             filters=attrs["filters"],
                             inputs=attrs["inputs"],
                         )
@@ -282,7 +282,7 @@ class CustomFunctionSerializer(CustomFunctionMinimalSerializer):
                     raise serializers.ValidationError({"custom_script": "Error in TypeScript code"})
                 attrs["bytecode"] = None
             else:
-                attrs["bytecode"] = compile_hog(attrs["hog"], hog_type)
+                attrs["bytecode"] = compile_script(attrs["custom_script"], hog_type)
                 attrs["transpiled"] = None
 
         if is_create:

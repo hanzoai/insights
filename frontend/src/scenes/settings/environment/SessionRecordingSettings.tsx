@@ -124,7 +124,7 @@ function PayloadWarning(): JSX.Element {
             </p>{' '}
             <p>
                 If they could contain sensitive data, you should provide a function to mask the data when you initialise
-                PostHog.{' '}
+                Insights.{' '}
                 <Link
                     to="https://posthog.com/docs/session-replay/network-recording#sensitive-information"
                     target="blank"

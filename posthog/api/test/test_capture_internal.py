@@ -224,7 +224,7 @@ class TestCaptureInternal(BaseTest):
             "$app_version": "1.0",
             "$app_namespace": "com.posthog.android.sample",
             "$app_build": 1,
-            "$app_name": "PostHog Android Sample",
+            "$app_name": "Insights Android Sample",
             "$device_manufacturer": "Google",
             "$device_model": "sdk_gphone64_arm64",
             "$device_name": "emu64a",

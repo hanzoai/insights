@@ -52,14 +52,14 @@ def send_email_subscription_report(
     is_invite = invite_message is not None
     self_invite = inviter and inviter.email == email
 
-    subject = "PostHog Report"
+    subject = "Insights Report"
     invite_summary = None
 
     resource_info = subscription.resource_info
     if not resource_info:
         raise NotImplementedError("This type of subscription resource is not supported")
 
-    subject = f"PostHog {resource_info.kind} report - {resource_info.name}"
+    subject = f"Insights {resource_info.kind} report - {resource_info.name}"
     campaign_key = f"{resource_info.kind.lower()}_subscription_report_{subscription.next_delivery_date.isoformat()}"
 
     unsubscribe_url = absolute_uri(f"/unsubscribe?token={get_unsubscribe_token(subscription, email)}&{utm_tags}")
@@ -67,10 +67,10 @@ def send_email_subscription_report(
     if is_invite:
         invite_summary = f"This subscription is {subscription.summary}. The next subscription will be sent on {subscription.next_delivery_date.strftime('%A %B %d, %Y')}"
         if self_invite:
-            subject = f"You have been subscribed to a PostHog {resource_info.kind}"
+            subject = f"You have been subscribed to a Insights {resource_info.kind}"
         else:
             inviter_name = (inviter.first_name if inviter else None) or "Someone"
-            subject = f"{inviter_name} subscribed you to a PostHog {resource_info.kind}"
+            subject = f"{inviter_name} subscribed you to a Insights {resource_info.kind}"
         campaign_key = f"{resource_info.kind.lower()}_subscription_new_{uuid.uuid4()}"
 
     message = EmailMessage(

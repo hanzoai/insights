@@ -48,7 +48,7 @@ export default function LoginPage(): JSX.Element {
                         <div className="card-body">
                             <div className="text-center mb-6">
                                 <h1 className="text-3xl font-bold">Welcome back!</h1>
-                                <p className="text-base-content/70 mt-2">Sign into your hedgehog account</p>
+                                <p className="text-base-content/70 mt-2">Sign into your mascot account</p>
                             </div>
 
                             {error && (
@@ -67,7 +67,7 @@ export default function LoginPage(): JSX.Element {
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        placeholder="hedgehog@example.com"
+                                        placeholder="mascot@example.com"
                                         className="input input-bordered w-full input-lg focus:ring-2 focus:ring-primary/20 transition-all"
                                         required
                                     />

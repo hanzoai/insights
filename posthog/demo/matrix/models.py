@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 if TYPE_CHECKING:
     from posthog.demo.matrix.matrix import Cluster, Matrix
 
-# Refer to https://github.com/PostHog/posthog-ai-costs-app/tree/main/src/ai-cost-data for missing models
+# Refer to https://github.com/Insights/posthog-ai-costs-app/tree/main/src/ai-cost-data for missing models
 LLM_COSTS_BY_MODEL = {
     "gpt-4o": {"prompt_token": 2.5 / 1e6, "completion_token": 10 / 1e6},
     "gpt-4o-mini": {"prompt_token": 0.15 / 1e6, "completion_token": 0.6 / 1e6},
@@ -120,7 +120,7 @@ class SimEvent:
 
 
 class SimClient(ABC):
-    """An abstract PostHog client."""
+    """An abstract Insights client."""
 
     LIB_NAME: str  # Used for `$lib` property
     LIB_VERSION: str  # Used for `$lib_version` property
@@ -419,7 +419,7 @@ class SimPerson(ABC):
 
     # Constant properties
     in_product_id: str  # User ID within the product being simulated (freeform string)
-    in_posthog_id: Optional[UUID]  # PostHog person ID (must be a UUID)
+    in_posthog_id: Optional[UUID]  # Person ID (must be a UUID)
     country_code: str
     region: str
     city: str

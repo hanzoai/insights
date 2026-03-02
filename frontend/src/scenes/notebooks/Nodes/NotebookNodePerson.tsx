@@ -11,7 +11,7 @@ import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { compactNumber } from 'lib/utils'
 import { formatCurrency } from 'lib/utils/geography/currency'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { PersonIcon } from 'scenes/persons/PersonDisplay'
 import { asDisplay } from 'scenes/persons/person-utils'
 import { personLogic } from 'scenes/persons/personLogic'
@@ -267,7 +267,7 @@ type NotebookNodePersonAttributes = {
     distinctId: string | undefined
 }
 
-export const NotebookNodePerson = createPostHogWidgetNode<NotebookNodePersonAttributes>({
+export const NotebookNodePerson = createInsightsWidgetNode<NotebookNodePersonAttributes>({
     nodeType: NotebookNodeType.Person,
     titlePlaceholder: 'Person',
     Component,

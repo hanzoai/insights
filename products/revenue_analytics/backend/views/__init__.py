@@ -3,7 +3,7 @@ from typing import ClassVar, Optional
 
 from posthog.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql.database.models import SavedQuery
+from posthog.insightsql.database.models import SavedQuery
 
 
 class RevenueAnalyticsBaseView(SavedQuery, ABC):

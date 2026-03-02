@@ -31,7 +31,7 @@ import {
     InsightsQLASTQuery,
     InsightsQLMetadata,
     InsightsQLQuery,
-    HogQuery,
+    ScriptQuery,
     InsightActorsQuery,
     InsightFilter,
     InsightFilterProperty,
@@ -159,8 +159,8 @@ export function isInsightVizNode(node?: Record<string, any> | null): node is Ins
     return node?.kind === NodeKind.InsightVizNode
 }
 
-export function isHogQuery(node?: Record<string, any> | null): node is HogQuery {
-    return node?.kind === NodeKind.HogQuery
+export function isScriptQuery(node?: Record<string, any> | null): node is ScriptQuery {
+    return node?.kind === NodeKind.ScriptQuery
 }
 
 export function isInsightsQLQuery(node?: Record<string, any> | null): node is InsightsQLQuery {
@@ -689,14 +689,14 @@ export function taxonomicGroupFilterToInsightsQL(
     return null
 }
 
-export function isInsightsQLAggregation(hogQl: string): boolean {
+export function isInsightsQLAggregation(insightsQl: string): boolean {
     return (
-        hogQl.includes('count(') ||
-        hogQl.includes('any(') ||
-        hogQl.includes('sum(') ||
-        hogQl.includes('avg(') ||
-        hogQl.includes('min(') ||
-        hogQl.includes('max(')
+        insightsQl.includes('count(') ||
+        insightsQl.includes('any(') ||
+        insightsQl.includes('sum(') ||
+        insightsQl.includes('avg(') ||
+        insightsQl.includes('min(') ||
+        insightsQl.includes('max(')
     )
 }
 

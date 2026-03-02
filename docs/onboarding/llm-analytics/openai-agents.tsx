@@ -8,12 +8,12 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog Python SDK.
+                        Setting up analytics starts with installing the Insights Python SDK.
                     </Markdown>
 
                     <CodeBlock
@@ -31,8 +31,8 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
             content: (
                 <>
                     <Markdown>
-                        Install the OpenAI Agents SDK. PostHog instruments your agent runs by registering a tracing
-                        processor. The PostHog SDK **does not** proxy your calls.
+                        Install the OpenAI Agents SDK. Insights instruments your agent runs by registering a tracing
+                        processor. The Insights SDK **does not** proxy your calls.
                     </Markdown>
 
                     <CodeBlock
@@ -44,7 +44,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but
                             you will need to capture the data in the right format. See the schema in the [manual capture
                             section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more
@@ -55,14 +55,14 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
             ),
         },
         {
-            title: 'Initialize PostHog tracing',
+            title: 'Initialize Insights tracing',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
+                        Initialize Insights with your project API key and host from [your project
                         settings](https://app.posthog.com/settings/project), then call `instrument()` to register
-                        PostHog tracing with the OpenAI Agents SDK. This automatically captures all agent traces,
+                        Insights tracing with the OpenAI Agents SDK. This automatically captures all agent traces,
                         spans, and LLM generations.
                     </Markdown>
 
@@ -103,7 +103,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
             content: (
                 <>
                     <Markdown>
-                        Run your OpenAI agents as normal. PostHog automatically captures `$ai_generation` events for
+                        Run your OpenAI agents as normal. Insights automatically captures `$ai_generation` events for
                         LLM calls and `$ai_span` events for agent execution, tool calls, and handoffs.
                     </Markdown>
 
@@ -117,7 +117,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 instructions="You are a helpful assistant.",
                             )
 
-                            result = Runner.run_sync(agent, "Tell me a fun fact about hedgehogs")
+                            result = Runner.run_sync(agent, "Tell me a fun fact about mascots")
                             print(result.final_output)
                         `}
                     />
@@ -138,7 +138,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
             content: (
                 <>
                     <Markdown>
-                        PostHog captures the full trace hierarchy for complex agent workflows including handoffs and
+                        Insights captures the full trace hierarchy for complex agent workflows including handoffs and
                         tool calls.
                     </Markdown>
 

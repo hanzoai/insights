@@ -400,7 +400,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             "team_id": self.team.id,
             "functions": [
                 {
-                    "id": "test-hog-function-1",
+                    "id": "test-custom-function-1",
                     "name": "Test Function 1",
                     "type": "destination",
                     "created_by_email": "creator1@example.com",
@@ -409,10 +409,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 95,
                     "failed": 5,
                     "failure_rate": 5.0,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-1",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-1",
                 },
                 {
-                    "id": "test-hog-function-2",
+                    "id": "test-custom-function-2",
                     "name": "Test Function 2",
                     "type": "transformation",
                     "created_by_email": "creator2@example.com",
@@ -421,7 +421,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 200,
                     "failed": 50,
                     "failure_rate": 20.0,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-2",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-2",
                 },
             ],
         }
@@ -443,7 +443,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             "team_id": self.team.id,
             "functions": [
                 {
-                    "id": "test-hog-function-1",
+                    "id": "test-custom-function-1",
                     "name": "Webhook Alert System",
                     "type": "destination",
                     "created_by_email": "admin@company.com",
@@ -452,10 +452,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 1000,
                     "failed": 50000,
                     "failure_rate": 98.0,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-1",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-1",
                 },
                 {
-                    "id": "test-hog-function-2",
+                    "id": "test-custom-function-2",
                     "name": "Slack Notifications",
                     "type": "transformation",
                     "created_by_email": None,  # Test case for missing creator
@@ -464,10 +464,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 1500000,
                     "failed": 25000,
                     "failure_rate": 1.6,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-2",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-2",
                 },
                 {
-                    "id": "test-hog-function-3",
+                    "id": "test-custom-function-3",
                     "name": "Email Campaign Processor",
                     "type": "destination",
                     "created_by_email": "developer@company.com",
@@ -476,10 +476,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 75000,
                     "failed": 3500,
                     "failure_rate": 4.5,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-3",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-3",
                 },
                 {
-                    "id": "test-hog-function-4",
+                    "id": "test-custom-function-4",
                     "name": "Data Warehouse Sync",
                     "type": "destination",
                     "created_by_email": "data-team@company.com",
@@ -488,10 +488,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 2000000,
                     "failed": 150000,
                     "failure_rate": 7.0,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-4",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-4",
                 },
                 {
-                    "id": "test-hog-function-5",
+                    "id": "test-custom-function-5",
                     "name": "Analytics Dashboard Feed",
                     "type": "transformation",
                     "created_by_email": "analytics@company.com",
@@ -500,7 +500,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 500000,
                     "failed": 12000,
                     "failure_rate": 2.3,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-5",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-5",
                 },
             ],
         }
@@ -553,7 +553,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             "team_id": self.team.id,
             "functions": [
                 {
-                    "id": "test-hog-function-1",
+                    "id": "test-custom-function-1",
                     "name": "Webhook Alert System",
                     "type": "destination",
                     "created_by_email": "user@example.com",
@@ -562,10 +562,10 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 1000,
                     "failed": 50000,
                     "failure_rate": 98.0,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-1",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-1",
                 },
                 {
-                    "id": "test-hog-function-2",
+                    "id": "test-custom-function-2",
                     "name": "Slack Notifications",
                     "type": "transformation",
                     "created_by_email": "another@example.com",
@@ -574,7 +574,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 1500000,
                     "failed": 25000,
                     "failure_rate": 1.6,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-2",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-2",
                 },
             ],
         }
@@ -746,7 +746,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             "team_id": self.team.id,
             "functions": [
                 {
-                    "id": "test-hog-function-1",
+                    "id": "test-custom-function-1",
                     "name": "Test Function 1",
                     "type": "destination",
                     "created_by_email": "test@example.com",
@@ -755,7 +755,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
                     "succeeded": 95,
                     "failed": 5,
                     "failure_rate": 5.0,
-                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-hog-function-1",
+                    "url": "http://localhost:8000/project/1/pipeline/destinations/test-custom-function-1",
                 },
             ],
         }

@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 from django.db.models import Q
 
-from posthog.hogql.database.models import (
+from posthog.insightsql.database.models import (
     BooleanDatabaseField,
     DateDatabaseField,
     DateTimeDatabaseField,
@@ -47,7 +47,7 @@ def get_view_or_table_by_name(team, name) -> Union["DataWarehouseSavedQuery", "D
 
 def validate_source_prefix(prefix: str | None) -> tuple[bool, str]:
     """
-    Validate that prefix will form valid HogQL/ClickHouse identifiers.
+    Validate that prefix will form valid InsightsQL/ClickHouse identifiers.
 
     Valid prefixes must:
     - Contain only letters, numbers, and underscores
@@ -66,7 +66,7 @@ def validate_source_prefix(prefix: str | None) -> tuple[bool, str]:
     if not cleaned:
         return False, "Prefix cannot consist of only underscores"
 
-    # Check if prefix matches HogQL identifier rules
+    # Check if prefix matches InsightsQL identifier rules
     # Must start with letter or underscore, contain only letters, digits, underscores
     if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", cleaned):
         return (
@@ -79,7 +79,7 @@ def validate_source_prefix(prefix: str | None) -> tuple[bool, str]:
 
 def remove_named_tuples(type):
     """Remove named tuples from query"""
-    from products.data_warehouse.backend.models.table import CLICKHOUSE_HOGQL_MAPPING
+    from products.data_warehouse.backend.models.table import CLICKHOUSE_INSIGHTSQL_MAPPING
 
     tokenified_type = re.split(r"(\W)", type)
     filtered_tokens = []
@@ -108,7 +108,7 @@ def remove_named_tuples(type):
                 if i < len(tokenified_type):
                     filtered_tokens.append(tokenified_type[i])
         elif (
-            token == "Nullable" or (len(token) == 1 and not token.isalnum()) or token in CLICKHOUSE_HOGQL_MAPPING.keys()
+            token == "Nullable" or (len(token) == 1 and not token.isalnum()) or token in CLICKHOUSE_INSIGHTSQL_MAPPING.keys()
         ):
             filtered_tokens.append(token)
         i += 1
@@ -130,7 +130,7 @@ def clean_type(column_type: str) -> str:
     return column_type
 
 
-CLICKHOUSE_HOGQL_MAPPING = {
+CLICKHOUSE_INSIGHTSQL_MAPPING = {
     "UUID": StringDatabaseField,
     "String": StringDatabaseField,
     "Nothing": UnknownDatabaseField,
@@ -160,7 +160,7 @@ CLICKHOUSE_HOGQL_MAPPING = {
     "Enum8": StringDatabaseField,
 }
 
-STR_TO_HOGQL_MAPPING = {
+STR_TO_INSIGHTSQL_MAPPING = {
     "BooleanDatabaseField": BooleanDatabaseField,
     "DateDatabaseField": DateDatabaseField,
     "DateTimeDatabaseField": DateTimeDatabaseField,

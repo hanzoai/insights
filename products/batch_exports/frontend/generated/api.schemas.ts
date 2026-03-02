@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 /**
@@ -241,7 +241,7 @@ export interface BatchExportApi {
      */
     end_at?: string | null
     readonly latest_runs: readonly BatchExportRunApi[]
-    hogql_query?: string
+    insightsql_query?: string
     /** A schema of custom fields to select when exporting data. */
     readonly schema: unknown | null
     filters?: unknown | null
@@ -308,7 +308,7 @@ export interface PatchedBatchExportApi {
      */
     end_at?: string | null
     readonly latest_runs?: readonly BatchExportRunApi[]
-    hogql_query?: string
+    insightsql_query?: string
     /** A schema of custom fields to select when exporting data. */
     readonly schema?: unknown | null
     filters?: unknown | null

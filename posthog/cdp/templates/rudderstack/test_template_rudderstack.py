@@ -49,7 +49,7 @@ class TestTemplateRudderstack(BaseCustomFunctionTemplateTest):
                     "batch": [
                         {
                             "context": {
-                                "app": {"name": "PostHogPlugin"},
+                                "app": {"name": "InsightsPlugin"},
                                 "os": {},
                                 "page": {
                                     "url": "https://example.com",

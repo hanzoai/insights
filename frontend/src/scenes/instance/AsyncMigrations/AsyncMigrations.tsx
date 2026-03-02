@@ -78,7 +78,7 @@ export function AsyncMigrations(): JSX.Element {
         title: 'Migration',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             const link =
-                'https://github.com/PostHog/posthog/blob/master/posthog/async_migrations/migrations/' +
+                'https://github.com/Insights/posthog/blob/master/posthog/async_migrations/migrations/' +
                 asyncMigration.name +
                 '.py'
             return <LemonTableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />
@@ -208,13 +208,13 @@ export function AsyncMigrations(): JSX.Element {
     }
 
     const minVersionColumn: AsyncMigrationColumnType = {
-        title: 'Minimum PostHog version',
+        title: 'Minimum Insights version',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             return <div>{asyncMigration.posthog_min_version}</div>
         },
     }
     const maxVersionColumn: AsyncMigrationColumnType = {
-        title: 'Maximum PostHog version',
+        title: 'Maximum Insights version',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             return <div>{asyncMigration.posthog_max_version}</div>
         },

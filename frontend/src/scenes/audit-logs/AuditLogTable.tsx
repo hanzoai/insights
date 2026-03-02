@@ -38,7 +38,7 @@ const columns: LemonTableColumns<HumanizedActivityLogItem> = [
             <ProfilePicture
                 showName={true}
                 user={{
-                    first_name: logItem.isSystem ? 'PostHog' : logItem.name,
+                    first_name: logItem.isSystem ? 'Insights' : logItem.name,
                     email: logItem.email ?? undefined,
                 }}
                 type={logItem.isSystem ? 'system' : 'person'}

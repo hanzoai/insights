@@ -4,7 +4,7 @@ Dagster job to backfill ClickHouse events to customer-specific ducklings.
 This job exports events from ClickHouse's `posthog.events` table to customer S3 buckets
 as Parquet files, then registers those files with their DuckLake catalog.
 
-Unlike the main DuckLake backfill (events_backfill_to_ducklake.py) which targets PostHog's
+Unlike the main DuckLake backfill (events_backfill_to_ducklake.py) which targets Insights's
 shared DuckLake, this job targets individual customer "ducklings" - isolated DuckLake
 instances with their own RDS catalog and S3 bucket.
 

@@ -7,7 +7,7 @@ import structlog
 import posthoganalytics
 import temporalio.activity
 
-from posthog.temporal.ingestion_acceptance_test.client import PostHogClient
+from posthog.temporal.ingestion_acceptance_test.client import InsightsClient
 from posthog.temporal.ingestion_acceptance_test.config import Config
 from posthog.temporal.ingestion_acceptance_test.results import TestSuiteResult
 from posthog.temporal.ingestion_acceptance_test.runner import run_tests
@@ -52,7 +52,7 @@ async def run_ingestion_acceptance_tests() -> dict:
     )
 
     tests = discover_tests()
-    client = PostHogClient(config, posthog_sdk)
+    client = InsightsClient(config, posthog_sdk)
     with ThreadPoolExecutor() as executor:
         result: TestSuiteResult = await asyncio.to_thread(run_tests, config, tests, client, executor)
 

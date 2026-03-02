@@ -1,19 +1,19 @@
 """
-Hanzo IAM Organization Pipeline for PostHog Social Auth.
+Hanzo IAM Organization Pipeline for Insights Social Auth.
 
 This pipeline function runs during OIDC/SSO login and ensures the user
-is assigned to the correct PostHog Organization based on their IAM org claim.
+is assigned to the correct Insights Organization based on their IAM org claim.
 
 IAM (Casdoor/hanzo.id) provides the `owner` claim in userinfo which contains
 the organization slug (e.g., "hanzo", "lux", "zoo").
 
 This module:
   1. Extracts the org slug from the OIDC response `owner` field
-  2. Creates or finds a PostHog Organization matching the IAM org
+  2. Creates or finds a Insights Organization matching the IAM org
   3. Ensures a default Team exists within the organization
   4. Adds the user as a member of the organization (if not already)
 
-This prevents cross-org data leakage by ensuring all PostHog data
+This prevents cross-org data leakage by ensuring all Insights data
 (events, dashboards, insights, feature flags, etc.) is scoped to the
 correct Organization->Team hierarchy.
 """
@@ -46,14 +46,14 @@ def _extract_iam_org_slug(response: dict, kwargs: dict) -> Optional[str]:
 
 
 def _ensure_organization(org_slug: str) -> Organization:
-    """Find or create a PostHog Organization for the given IAM org slug.
+    """Find or create a Insights Organization for the given IAM org slug.
 
     Uses the slug as a stable identifier. The Organization name is
     title-cased from the slug.
     """
     org_name = org_slug.replace("-", " ").replace("_", " ").title()
 
-    # Try to find by slug first (PostHog organizations have a slug field)
+    # Try to find by slug first (Insights organizations have a slug field)
     try:
         org = Organization.objects.get(slug=org_slug)
         return org
@@ -71,7 +71,7 @@ def _ensure_organization(org_slug: str) -> Organization:
     with transaction.atomic():
         org = Organization.objects.create(name=org_name)
         # Update the slug to match the IAM org slug
-        # (PostHog auto-generates slugs, but we want deterministic mapping)
+        # (Insights auto-generates slugs, but we want deterministic mapping)
         Organization.objects.filter(id=org.id).update(slug=org_slug)
         org.refresh_from_db()
 
@@ -88,7 +88,7 @@ def _ensure_organization(org_slug: str) -> Organization:
 def _ensure_default_team(org: Organization) -> Team:
     """Ensure the organization has at least one team (project).
 
-    PostHog requires a Team for event ingestion. If the org has no teams,
+    Insights requires a Team for event ingestion. If the org has no teams,
     create a default one.
     """
     team = Team.objects.filter(organization=org).first()
@@ -153,11 +153,11 @@ def iam_org_assign(
     *args: Any,
     **kwargs: Any,
 ) -> Optional[dict]:
-    """Social auth pipeline: assign user to IAM org in PostHog.
+    """Social auth pipeline: assign user to IAM org in Insights.
 
     This function is called during the OIDC login pipeline. It:
       1. Reads the IAM org slug from the OIDC response
-      2. Finds or creates the PostHog Organization
+      2. Finds or creates the Insights Organization
       3. Ensures a default Team exists
       4. Adds the user as a member
 

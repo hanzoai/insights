@@ -21,7 +21,7 @@ class CustomerIOImportService:
         self.user = user
         self.client: Optional[CustomerIOClient] = None
         self.api_key = api_key
-        self.topic_mapping: dict[str, str] = {}  # Maps Customer.io topic IDs to PostHog MessageCategory IDs
+        self.topic_mapping: dict[str, str] = {}  # Maps Customer.io topic IDs to Insights MessageCategory IDs
         self.topic_names: dict[str, str] = {}  # Maps topic IDs to their display names
         self.all_processed_users: set[str] = set()  # Track ALL unique users across API and CSV
         self.progress: dict[str, Any] = {
@@ -196,7 +196,7 @@ class CustomerIOImportService:
                     # Extract topic ID (handle both "topic_1" and "1" formats)
                     topic_id = topic_key.replace("topic_", "")
 
-                    # Map to PostHog category ID
+                    # Map to Insights category ID
                     category_id = self.topic_mapping.get(topic_id) or self.topic_mapping.get(f"topic_{topic_id}")
 
                     if category_id:

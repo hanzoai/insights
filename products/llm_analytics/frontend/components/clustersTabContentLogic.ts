@@ -4,7 +4,7 @@ import posthog from 'posthog-js'
 
 import api from 'lib/api'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import { NOISE_CLUSTER_ID } from '../clusters/constants'
 import { Cluster } from '../clusters/types'
@@ -37,8 +37,8 @@ export const clustersTabContentLogic = kea<clustersTabContentLogicType>([
             [] as ClusterInfo[],
             {
                 loadClusters: async () => {
-                    const response = await api.queryHogQL(
-                        hogql`
+                    const response = await api.queryInsightsQL(
+                        insightsql`
                             SELECT
                                 JSONExtractString(properties, '$ai_clustering_run_id') as run_id,
                                 JSONExtractRaw(properties, '$ai_clusters') as clusters_json,

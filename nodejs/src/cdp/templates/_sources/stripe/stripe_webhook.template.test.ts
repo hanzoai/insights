@@ -30,7 +30,7 @@ describe('stripe webhook template', () => {
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
 
-        expect(response.capturedPostHogEvents).toMatchObject([
+        expect(response.capturedInsightsEvents).toMatchObject([
             {
                 distinct_id: 'cus_1234',
                 event: 'stripe.invoice.payment_succeeded',
@@ -40,7 +40,7 @@ describe('stripe webhook template', () => {
             },
         ])
 
-        expect(response.capturedPostHogEvents).toMatchSnapshot()
+        expect(response.capturedInsightsEvents).toMatchSnapshot()
     })
 
     it('should not include all properties if include_all_properties is false', async () => {
@@ -57,9 +57,9 @@ describe('stripe webhook template', () => {
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
 
-        expect(response.capturedPostHogEvents[0].properties).toMatchInlineSnapshot(`
+        expect(response.capturedInsightsEvents[0].properties).toMatchInlineSnapshot(`
             {
-              "$hog_function_execution_count": 1,
+              "$custom_function_execution_count": 1,
             }
         `)
     })
@@ -82,10 +82,10 @@ describe('stripe webhook template', () => {
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
 
-        expect(response.capturedPostHogEvents[0].properties).toMatchObject({
-            $hog_function_execution_count: 1,
+        expect(response.capturedInsightsEvents[0].properties).toMatchObject({
+            $custom_function_execution_count: 1,
             account_country: 'US',
-            account_name: 'PostHog - modified',
+            account_name: 'Insights - modified',
         })
     })
 
@@ -144,7 +144,7 @@ describe('stripe webhook template', () => {
 
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
-        expect(response.capturedPostHogEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
     })
 
     it.each([
@@ -168,8 +168,8 @@ describe('stripe webhook template', () => {
             }
         )
 
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].distinct_id).toEqual(`${key}:1234`)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].distinct_id).toEqual(`${key}:1234`)
     })
 })
 

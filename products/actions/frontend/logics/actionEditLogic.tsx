@@ -55,7 +55,7 @@ export const actionEditLogic = kea<actionEditLogicType>([
         setCreateNew: (createNew: boolean) => ({ createNew }),
         actionAlreadyExists: (actionId: number | null) => ({ actionId }),
         deleteAction: true,
-        migrateToHogFunction: true,
+        migrateToCustomFunction: true,
     }),
     reducers({
         createNew: [

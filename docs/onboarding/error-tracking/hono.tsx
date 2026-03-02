@@ -26,8 +26,8 @@ export const getHonoSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             language: 'typescript',
                             file: 'index.ts',
                             code: dedent`
-                              import { PostHog } from 'posthog-node'
-                              const posthog = new PostHog(process.env.POSTHOG_PUBLIC_KEY, { host: 'https://us.i.posthog.com' })
+                              import { Insights } from 'posthog-node'
+                              const posthog = new Insights(process.env.POSTHOG_PUBLIC_KEY, { host: 'https://us.i.posthog.com' })
                               app.onError(async (err, c) => {
                                 posthog.captureException(err, 'user_distinct_id_with_err_rethrow', {
                                   path: c.req.path,
@@ -55,9 +55,9 @@ export const getHonoSteps = (ctx: OnboardingComponentsContext): StepDefinition[]
         content: (
             <Markdown>
                 {dedent`
-                    Before proceeding, let's make sure exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),

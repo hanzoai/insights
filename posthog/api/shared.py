@@ -16,7 +16,7 @@ from posthog.models.project import Project
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
-    hedgehog_config = serializers.SerializerMethodField()
+    mascot_config = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -28,26 +28,26 @@ class UserBasicSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "is_email_verified",
-            "hedgehog_config",
+            "mascot_config",
             "role_at_organization",
         ]
 
-    def get_hedgehog_config(self, user: User) -> Optional[dict]:
-        if user.hedgehog_config:
-            if user.hedgehog_config.get("version") == 2:
-                actor_options = user.hedgehog_config.get("actor_options", {})
+    def get_mascot_config(self, user: User) -> Optional[dict]:
+        if user.mascot_config:
+            if user.mascot_config.get("version") == 2:
+                actor_options = user.mascot_config.get("actor_options", {})
                 return {
-                    "use_as_profile": user.hedgehog_config.get("use_as_profile"),
+                    "use_as_profile": user.mascot_config.get("use_as_profile"),
                     "color": actor_options.get("color"),
                     "accessories": actor_options.get("accessories"),
                     "skin": actor_options.get("skin"),
                 }
             else:
                 return {
-                    "use_as_profile": user.hedgehog_config.get("use_as_profile"),
-                    "color": user.hedgehog_config.get("color"),
-                    "accessories": user.hedgehog_config.get("accessories"),
-                    "skin": user.hedgehog_config.get("skin"),
+                    "use_as_profile": user.mascot_config.get("use_as_profile"),
+                    "color": user.mascot_config.get("color"),
+                    "accessories": user.mascot_config.get("accessories"),
+                    "skin": user.mascot_config.get("skin"),
                 }
         return None
 

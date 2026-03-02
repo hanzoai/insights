@@ -513,9 +513,9 @@ class BillingServiceUser:
 
 class BillingServiceAuthentication(authentication.BaseAuthentication):
     """
-    Authenticates requests from the billing service to PostHog.
+    Authenticates requests from the billing service to Insights.
 
-    The billing service signs JWTs using the shared license secret (same secret PostHog
+    The billing service signs JWTs using the shared license secret (same secret Insights
     uses when calling the billing service, but in reverse direction).
     """
 

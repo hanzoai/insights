@@ -1,14 +1,14 @@
 ---
 name: hogli
 description: >
-  PostHog developer CLI and repo tooling reference. Use when the user mentions
+  Insights developer CLI and repo tooling reference. Use when the user mentions
   hogli, asks about repo CLI tools, bin scripts, Makefiles, how to run/build/test/lint,
   or any dev environment commands.
 ---
 
-# hogli - PostHog Developer CLI
+# hogli - Insights Developer CLI
 
-Unified CLI for PostHog development. Wraps all repo scripts, bin commands, and tooling behind a single entry point. There is no Makefile — hogli is the equivalent.
+Unified CLI for Insights development. Wraps all repo scripts, bin commands, and tooling behind a single entry point. There is no Makefile — hogli is the equivalent.
 
 Run `hogli --help` to get the full, current command list. Run `hogli <command> --help` for any subcommand.
 

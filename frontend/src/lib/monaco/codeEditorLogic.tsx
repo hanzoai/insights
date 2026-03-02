@@ -27,7 +27,7 @@ import { setLatestVersionsOnQuery } from '~/queries/utils'
 
 import type { codeEditorLogicType } from './codeEditorLogicType'
 
-const METADATA_LANGUAGES = [HogLanguage.hog, HogLanguage.insightsQL, HogLanguage.insightsQLExpr, HogLanguage.hogTemplate]
+const METADATA_LANGUAGES = [HogLanguage.hog, HogLanguage.insightsQL, HogLanguage.insightsQLExpr, HogLanguage.scriptTemplate]
 
 export interface ModelMarker extends editor.IMarkerData {
     insightsQLFix?: string

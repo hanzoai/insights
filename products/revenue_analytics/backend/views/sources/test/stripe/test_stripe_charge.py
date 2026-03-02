@@ -22,8 +22,8 @@ class TestChargeStripeBuilder(StripeSourceBaseTest):
         self.assertQueryContainsFields(query.query, CHARGE_SCHEMA)
         self.assertBuiltQueryStructure(query, str(charge_table.id), f"stripe.{self.external_data_source.prefix}")
 
-        # Print and snapshot the generated HogQL query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_no_charge_schema(self):
@@ -42,8 +42,8 @@ class TestChargeStripeBuilder(StripeSourceBaseTest):
             expected_test_comments="no_schema",
         )
 
-        # Print and snapshot the generated HogQL query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_charge_schema_but_no_table(self):
@@ -68,8 +68,8 @@ class TestChargeStripeBuilder(StripeSourceBaseTest):
             expected_test_comments="no_table",
         )
 
-        # Print and snapshot the generated HogQL query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_no_source(self):
@@ -87,7 +87,7 @@ class TestChargeStripeBuilder(StripeSourceBaseTest):
         self.setup_stripe_external_data_source(schemas=[CHARGE_RESOURCE_NAME])
 
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Check for currency conversion functions in the query
         # The specific implementation may vary, but should include conversion logic

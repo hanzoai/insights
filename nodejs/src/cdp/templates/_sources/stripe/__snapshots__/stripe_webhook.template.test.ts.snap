@@ -6,7 +6,7 @@ exports[`stripe webhook template should invoke the function 1`] = `
     "distinct_id": "cus_1234",
     "event": "stripe.invoice.payment_succeeded",
     "properties": {
-      "$hog_function_execution_count": 1,
+      "$custom_function_execution_count": 1,
       "account_country": "US",
       "account_name": "PostHog",
       "account_tax_ids": null,

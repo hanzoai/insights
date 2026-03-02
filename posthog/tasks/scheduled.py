@@ -277,7 +277,7 @@ def setup_periodic_tasks(sender: Celery, **kwargs: Any) -> None:
         name="send Error Tracking weekly digest",
     )
 
-    # PostHog Cloud cron jobs
+    # Insights Cloud cron jobs
     # NOTE: We can't use is_cloud here as some Django elements aren't loaded yet. We check in the task execution instead
     # Verify that persons data is in sync every day at 4 AM UTC
     sender.add_periodic_task(crontab(hour="4", minute="0"), verify_persons_data_in_sync.s())

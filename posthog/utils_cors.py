@@ -39,7 +39,7 @@ KNOWN_ORIGINS = {
 def cors_response(request: HttpRequest, response: HttpResponse) -> HttpResponse:
     """
     Returns a HttpResponse with CORS headers set to allow all origins.
-    Only use this for endpoints that get called by the PostHog JS SDK.
+    Only use this for endpoints that get called by the Insights JS SDK.
     """
     if not request.headers.get("origin"):
         return response

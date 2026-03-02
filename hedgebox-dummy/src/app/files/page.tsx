@@ -37,7 +37,7 @@ export default function FilesPage(): React.JSX.Element {
 
         const newFile: HedgeboxFile = {
             id: `file_${Date.now()}`,
-            name: `hedgehog-adventure-${Date.now()}.jpg`,
+            name: `mascot-adventure-${Date.now()}.jpg`,
             type: 'image/jpeg',
             size: fileSize,
             uploadedAt: new Date(),
@@ -114,7 +114,7 @@ export default function FilesPage(): React.JSX.Element {
                         <div>
                             <h1 className="text-4xl font-bold mb-2">Welcome back, {user.name.split(' ')[0]}! 🦔</h1>
                             <p className="text-base-content/70 text-lg">
-                                Manage your hedgehog files with spike-proof security
+                                Manage your mascot files with spike-proof security
                             </p>
                         </div>
                         <div className="stats shadow">
@@ -201,7 +201,7 @@ export default function FilesPage(): React.JSX.Element {
                     <div className="text-center py-20 animate-fade-in">
                         <div className="text-8xl mb-4">📁</div>
                         <h3 className="text-2xl font-bold mb-2">No files yet</h3>
-                        <p className="text-base-content/70 mb-6">Upload your first hedgehog files to get started!</p>
+                        <p className="text-base-content/70 mb-6">Upload your first mascot files to get started!</p>
                         <button onClick={handleFileUpload} className="btn btn-primary btn-lg">
                             📤 Upload Your First File
                         </button>

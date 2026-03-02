@@ -1,7 +1,7 @@
 {
     "name": "Hubspot",
-    "url": "https://github.com/PostHog/hubspot-plugin",
-    "description": "Send contact data to Hubspot on PostHog identify events.",
+    "url": "https://github.com/Insights/hubspot-plugin",
+    "description": "Send contact data to Hubspot on Insights identify events.",
     "main": "index.ts",
     "config": [
         {
@@ -15,7 +15,7 @@
         },
         {
             "key": "triggeringEvents",
-            "hint": "A comma-separated list of PostHog events you want to trigger Contact creation in HubSpot. By default, we recommend using the $identify event.",
+            "hint": "A comma-separated list of Insights events you want to trigger Contact creation in HubSpot. By default, we recommend using the $identify event.",
             "name": "Triggering events",
             "type": "string",
             "default": "$identify",
@@ -23,8 +23,8 @@
         },
         {
             "key": "additionalPropertyMappings",
-            "hint": "A mapping of additional PostHog event or person properties to map to newly created Hubspot Contacts. Provide a comma-separated mapping of: personPropertyName:hubSpotPropertyName",
-            "name": "Additional PostHog to HubSpot property mappings",
+            "hint": "A mapping of additional Insights event or person properties to map to newly created Hubspot Contacts. Provide a comma-separated mapping of: personPropertyName:hubSpotPropertyName",
+            "name": "Additional Insights to HubSpot property mappings",
             "type": "string",
             "default": "",
             "required": false
@@ -40,7 +40,7 @@
         {
             "key": "postHogUrl",
             "hint": "Deprecated",
-            "name": "PostHog Instance",
+            "name": "Insights Instance",
             "type": "string",
             "default": "https://app.posthog.com",
             "required": false
@@ -48,7 +48,7 @@
         {
             "key": "posthogApiKey",
             "hint": "Deprecated",
-            "name": "PostHog API Key",
+            "name": "Insights API Key",
             "type": "string",
             "default": "",
             "secret": true,

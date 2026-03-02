@@ -6,7 +6,7 @@ from django.db import models, transaction
 
 import structlog
 
-from posthog.hogql.database.models import (
+from posthog.insightsql.database.models import (
     BooleanDatabaseField,
     DateDatabaseField,
     DateTimeDatabaseField,
@@ -202,7 +202,7 @@ class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTMod
         return [
             ExpectedView(
                 name=view.name,
-                query={"kind": "HogQLQuery", "query": view.query},
+                query={"kind": "InsightsQLQuery", "query": view.query},
                 columns=self._get_columns_from_fields(view.fields),
             )
             for view in expected_views
@@ -212,7 +212,7 @@ class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTMod
     def _get_columns_from_fields(fields: dict[str, FieldOrTable]) -> dict[str, dict[str, Any]]:
         return {
             field_name: {
-                "hogql": type(field_obj).__name__,
+                "insightsql": type(field_obj).__name__,
                 "clickhouse": DataWarehouseManagedViewSet._get_clickhouse_type(field_obj),
                 "valid": True,
             }
@@ -221,7 +221,7 @@ class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTMod
 
     @staticmethod
     def _get_clickhouse_type(field) -> str:
-        """Convert HogQL field type to ClickHouse type string."""
+        """Convert InsightsQL field type to ClickHouse type string."""
 
         # NOTE: This function has a really bad smell
         # These types won't usually map appropriately because it's hard to predict what Clickhouse is actually storing

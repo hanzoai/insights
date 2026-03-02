@@ -338,7 +338,7 @@ class AzureBlobBatchExportInputs(BaseBatchExportInputs):
 class WorkflowsBatchExportInputs(BaseBatchExportInputs):
     """Inputs for Workflows export workflow.
 
-    NOTE: "Workflows" in this context refers to PostHog Workflows. PostHog Workflows
+    NOTE: "Workflows" in this context refers to Insights Workflows. Insights Workflows
     are not related to Temporal Workflows.
     """
 

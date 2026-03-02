@@ -3,13 +3,13 @@ from datetime import timedelta
 
 from temporalio import common, workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.enforce_max_replay_retention.activities import enforce_max_replay_retention
 from posthog.temporal.enforce_max_replay_retention.types import EnforceMaxReplayRetentionInput
 
 
 @workflow.defn(name="enforce-max-replay-retention")
-class EnforceMaxReplayRetentionWorkflow(PostHogWorkflow):
+class EnforceMaxReplayRetentionWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> EnforceMaxReplayRetentionInput:
         """Parse input from the management command CLI."""

@@ -3,7 +3,7 @@ import { useValues } from 'kea'
 import { productTourLogic } from '../productTourLogic'
 import { isBannerAnnouncement } from '../productToursLogic'
 import { hasElementTarget } from '../stepUtils'
-import { PostHogLogo } from './icons'
+import { InsightsLogo } from './icons'
 
 export function FooterPreview({ tourId }: { tourId: string }): JSX.Element | null {
     const { productTour, productTourForm, selectedStepIndex } = useValues(productTourLogic({ id: tourId }))
@@ -71,7 +71,7 @@ export function FooterPreview({ tourId }: { tourId: string }): JSX.Element | nul
             )}
             {showBranding && (
                 <div className="StepContentEditor__branding">
-                    Tour by <PostHogLogo />
+                    Tour by <InsightsLogo />
                 </div>
             )}
         </>

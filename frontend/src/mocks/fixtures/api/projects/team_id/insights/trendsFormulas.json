@@ -175,7 +175,7 @@
         "last_name": "",
         "email": "test@posthog.com",
         "is_email_verified": null,
-        "hedgehog_config": null,
+        "mascot_config": null,
         "role_at_organization": null
     },
     "description": "",
@@ -191,7 +191,7 @@
         "last_name": "",
         "email": "test@posthog.com",
         "is_email_verified": null,
-        "hedgehog_config": null,
+        "mascot_config": null,
         "role_at_organization": null
     },
     "is_sample": false,

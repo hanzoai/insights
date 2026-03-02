@@ -1,10 +1,10 @@
 #
 # docker-compose file used ONLY for local development.
 # For more info, see:
-# https://posthog.com/handbook/engineering/developing-locally
+# https://insights.hanzo.ai/handbook/engineering/developing-locally
 #
-# PostHog has sunset support for self-hosted K8s deployments.
-# See: https://posthog.com/blog/sunsetting-helm-support-posthog
+# Insights has sunset support for self-hosted K8s deployments.
+# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-posthog
 #
 
 services:

@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { IconTrash } from '@posthog/icons'
 import { LemonButton, LemonDivider, LemonSelect } from '@posthog/lemon-ui'
 
-import { SupermanHog } from 'lib/components/hedgehogs'
+import { SupermanHog } from 'lib/components/mascots'
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
 import { teamLogic } from 'scenes/teamLogic'
 import { userLogic } from 'scenes/userLogic'
@@ -52,9 +52,9 @@ function SuperpowersContent(): JSX.Element {
             <div className="flex items-center gap-4 -mt-2">
                 <SupermanHog className="w-24 h-24 shrink-0" />
                 <div>
-                    <h2 className="text-xl font-bold mb-1">Super Hog Powers</h2>
+                    <h2 className="text-xl font-bold mb-1">Super Powers</h2>
                     <p className="text-secondary text-sm">
-                        With great power comes great responsibility. Use these wisely, fellow hog.
+                        With great power comes great responsibility. Use these wisely, fellow user.
                     </p>
                 </div>
             </div>
@@ -90,7 +90,7 @@ function SuperpowersContent(): JSX.Element {
             <LemonDivider />
 
             <div>
-                <h3 className="font-semibold mb-2">PostHog status</h3>
+                <h3 className="font-semibold mb-2">Insights status</h3>
                 <div className="space-y-2">
                     <div className="flex items-center justify-between p-2 border rounded">
                         <div>

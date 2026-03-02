@@ -25,10 +25,10 @@ from .core import (
 
 READ_TAXONOMY_TOOL_DESCRIPTION = """
 Use this tool to explore the user's taxonomy (i.e. data schema).
-The user implements PostHog SDKs to collect events, properties, and property values. They are used by users to create insights with visualizations, SQL queries, watch session recordings, filter data, target particular users or groups by traits or behavior, etc.
+The user implements Insights SDKs to collect events, properties, and property values. They are used by users to create insights with visualizations, SQL queries, watch session recordings, filter data, target particular users or groups by traits or behavior, etc.
 Each event, action, and entity has its own data schema. You must verify that specific combinations exist before using it anywhere else.
 Events or properties starting from "$" are system properties automatically captured by SDKs.
-Do not rely on your training data or PostHog defaults for events or properties. Always use this tool to confirm what actually exists in the user's project before referencing any event, property, or property value.
+Do not rely on your training data or Insights defaults for events or properties. Always use this tool to confirm what actually exists in the user's project before referencing any event, property, or property value.
 
 # Examples of when to use the read_taxonomy tool
 
@@ -44,7 +44,7 @@ Assistant: I've found matching combinations...
 
 <reasoning>
 The assistant used the read_taxonomy tool because:
-1. The user is asking about **their custom data schema** in PostHog.
+1. The user is asking about **their custom data schema** in Insights.
 2. The assistant needs to find a specific combination of events, properties, and property values that can be used to track revenue.
 </reasoning>
 </example>
@@ -52,9 +52,9 @@ The assistant used the read_taxonomy tool because:
 # Examples of when NOT to use the read_taxonomy tool
 
 <example>
-User: What system properties does PostHog capture?
-Assistant: I'm going to search PostHog documentation to find the system properties that are automatically captured by SDKs.
-*Begins searching PostHog documentation*
+User: What system properties does Insights capture?
+Assistant: I'm going to search Insights documentation to find the system properties that are automatically captured by SDKs.
+*Begins searching Insights documentation*
 
 <reasoning>
 The assistant did not use the read_taxonomy tool because it is an informational request. The user is simply asking for documentation search.

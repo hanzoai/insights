@@ -33,7 +33,7 @@ import { PostgresRouter } from '../utils/db/postgres'
 import { createRedisPoolFromConfig } from '../utils/db/redis'
 import { EventIngestionRestrictionManager } from '../utils/event-ingestion-restrictions'
 import { logger } from '../utils/logger'
-import { captureException } from '../utils/posthog'
+import { captureException } from '../utils/insights'
 import { PromiseScheduler } from '../utils/promise-scheduler'
 import { captureIngestionWarning } from '../worker/ingestion/utils'
 import { KafkaOffsetManager } from './kafka/offset-manager'
@@ -64,9 +64,9 @@ export type SessionRecordingIngesterHub = SessionRecordingConfig &
         // For restriction manager redis pool (must match the ingestion redis that Django writes to)
         | 'INGESTION_REDIS_HOST'
         | 'INGESTION_REDIS_PORT'
-        | 'POSTHOG_REDIS_HOST'
-        | 'POSTHOG_REDIS_PORT'
-        | 'POSTHOG_REDIS_PASSWORD'
+        | 'INSIGHTS_REDIS_HOST'
+        | 'INSIGHTS_REDIS_PORT'
+        | 'INSIGHTS_REDIS_PASSWORD'
         // For encryption key management
         | 'SESSION_RECORDING_KMS_ENDPOINT'
         | 'SESSION_RECORDING_DYNAMODB_ENDPOINT'
@@ -156,10 +156,10 @@ export class SessionRecordingIngester {
 
         // Session recording uses its own Redis instance with fallback to default
         this.redisPool = createRedisPoolFromConfig({
-            connection: hub.POSTHOG_SESSION_RECORDING_REDIS_HOST
+            connection: hub.INSIGHTS_SESSION_RECORDING_REDIS_HOST
                 ? {
-                      url: hub.POSTHOG_SESSION_RECORDING_REDIS_HOST,
-                      options: { port: hub.POSTHOG_SESSION_RECORDING_REDIS_PORT ?? 6379 },
+                      url: hub.INSIGHTS_SESSION_RECORDING_REDIS_HOST,
+                      options: { port: hub.INSIGHTS_SESSION_RECORDING_REDIS_PORT ?? 6379 },
                       name: 'session-recording-redis',
                   }
                 : { url: hub.REDIS_URL, name: 'session-recording-redis-fallback' },
@@ -176,10 +176,10 @@ export class SessionRecordingIngester {
                       options: { port: hub.INGESTION_REDIS_PORT },
                       name: 'ingestion-redis',
                   }
-                : hub.POSTHOG_REDIS_HOST
+                : hub.INSIGHTS_REDIS_HOST
                   ? {
-                        url: hub.POSTHOG_REDIS_HOST,
-                        options: { port: hub.POSTHOG_REDIS_PORT, password: hub.POSTHOG_REDIS_PASSWORD },
+                        url: hub.INSIGHTS_REDIS_HOST,
+                        options: { port: hub.INSIGHTS_REDIS_PORT, password: hub.INSIGHTS_REDIS_PASSWORD },
                         name: 'ingestion-redis',
                     }
                   : { url: hub.REDIS_URL, name: 'ingestion-redis' },

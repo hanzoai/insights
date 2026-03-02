@@ -8,7 +8,7 @@ const schema = EntitySearchSchema
 
 type Params = z.infer<typeof schema>
 
-// Map entity types to their URL paths in PostHog
+// Map entity types to their URL paths in Insights
 const ENTITY_URL_PATHS: Record<string, string> = {
     insight: 'insights',
     dashboard: 'dashboard',

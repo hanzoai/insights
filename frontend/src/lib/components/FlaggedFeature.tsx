@@ -4,7 +4,7 @@ import { FeatureFlagKey } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { featureFlagLogic, getFeatureFlagPayload } from 'lib/logic/featureFlagLogic'
 
-export type PostHogFeatureProps = {
+export type InsightsFeatureProps = {
     flag: FeatureFlagKey
     /** What specific state or variant of feature flag needs to be active. */
     match?: string | boolean
@@ -14,7 +14,7 @@ export type PostHogFeatureProps = {
     fallback?: React.ReactNode
 }
 
-export function FlaggedFeature({ flag, match, children, fallback }: PostHogFeatureProps): JSX.Element | null {
+export function FlaggedFeature({ flag, match, children, fallback }: InsightsFeatureProps): JSX.Element | null {
     const { featureFlags } = useValues(featureFlagLogic)
 
     const showFlaggedFeature = useFeatureFlag('FLAGGED_FEATURE_INDICATOR')

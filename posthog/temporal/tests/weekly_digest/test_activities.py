@@ -577,7 +577,7 @@ async def test_generate_organization_digest_batch(mock_redis, common_input, dige
 
 @pytest.mark.asyncio
 async def test_send_weekly_digest_batch(mock_redis, common_input, digest):
-    """Test sending weekly digest batch with mock Redis and PostHog client."""
+    """Test sending weekly digest batch with mock Redis and Insights client."""
     batch = (0, 1)
     input_data = SendWeeklyDigestBatchInput(
         batch=batch, dry_run=False, allow_already_sent=False, digest=digest, common=common_input
@@ -645,7 +645,7 @@ async def test_send_weekly_digest_batch(mock_redis, common_input, digest):
                     with patch("posthog.temporal.weekly_digest.activities.redis.from_url", return_value=mock_redis):
                         await send_weekly_digest_batch(input_data)
 
-    # Verify PostHog client was called
+    # Verify Insights client was called
     mock_ph_client.capture.assert_called_once()
 
     # Verify messaging record was updated
@@ -721,7 +721,7 @@ async def test_send_weekly_digest_batch_dry_run(mock_redis, common_input, digest
                     with patch("posthog.temporal.weekly_digest.activities.redis.from_url", return_value=mock_redis):
                         await send_weekly_digest_batch(input_data)
 
-    # In dry run mode, PostHog client should not be called
+    # In dry run mode, Insights client should not be called
     mock_ph_client.capture.assert_not_called()
 
 

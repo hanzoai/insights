@@ -5,11 +5,11 @@ import { useValues } from 'kea'
 import md5 from 'md5'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
-import { HedgehogModeProfile } from 'lib/components/HedgehogMode/HedgehogModeStatic'
+import { MascotModeProfile } from 'lib/components/MascotMode/MascotModeStatic'
 import { fullName, inStorybookTestRunner } from 'lib/utils'
 import { userLogic } from 'scenes/userLogic'
 
-import { HedgehogConfig, MinimalHedgehogConfig, UserBasicType } from '~/types'
+import { MascotConfig, MinimalMascotConfig, UserBasicType } from '~/types'
 
 import { Lettermark, LettermarkColor } from '../Lettermark/Lettermark'
 import { IconRobot } from '../icons'
@@ -17,7 +17,7 @@ import { IconRobot } from '../icons'
 export interface ProfilePictureProps {
     user?:
         | (Pick<Partial<UserBasicType>, 'first_name' | 'email' | 'last_name'> & {
-              hedgehog_config?: MinimalHedgehogConfig | HedgehogConfig
+              mascot_config?: MinimalMascotConfig | MascotConfig
           })
         | null
     name?: string
@@ -46,10 +46,10 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
 
     const combinedNameAndEmail = name && email ? `${name} <${email}>` : name || email
 
-    const hedgehogProfile = !!user?.hedgehog_config?.use_as_profile
+    const mascotProfile = !!user?.mascot_config?.use_as_profile
 
     const gravatarUrl = useMemo(() => {
-        if (hedgehogProfile || inStorybookTestRunner()) {
+        if (mascotProfile || inStorybookTestRunner()) {
             return // There are no guarantees on how long it takes to fetch a Gravatar, so we skip this in snapshots
         }
         // Check if Gravatar exists
@@ -58,7 +58,7 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
             const hash = md5(identifier.trim().toLowerCase())
             return `https://www.gravatar.com/avatar/${hash}?s=96&d=404`
         }
-    }, [email, hedgehogProfile, name])
+    }, [email, mascotProfile, name])
 
     useEffect(() => {
         const controller = new AbortController()
@@ -84,8 +84,8 @@ export const ProfilePicture = React.forwardRef<HTMLSpanElement, ProfilePicturePr
 
     const pictureComponent = (
         <span className={clsx('ProfilePicture ph-no-capture', size, className)} ref={ref}>
-            {hedgehogProfile && user.hedgehog_config ? (
-                <HedgehogModeProfile config={user.hedgehog_config} size="100%" />
+            {mascotProfile && user.mascot_config ? (
+                <MascotModeProfile config={user.mascot_config} size="100%" />
             ) : (
                 gravatarLoaded !== true && (
                     <>

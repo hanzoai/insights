@@ -30,7 +30,7 @@ def create_performance_event(
         "current_url": current_url,
         "timestamp": timestamp_str,
         "entry_type": entry_type,
-        "name": "https://posthog.com/static/js/1.0.0/PostHog.js",
+        "name": "https://posthog.com/static/js/1.0.0/Insights.js",
     }
 
     data.update(kwargs)

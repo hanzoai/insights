@@ -207,7 +207,7 @@ export class CyclotronJobQueue {
             this.producerForceScheduledToPostgres &&
             invocation.queueScheduledAt &&
             invocation.queueScheduledAt > DateTime.now().plus({ milliseconds: JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS }) &&
-            invocation.queue !== 'hogoverflow' // overflow is always sent to kafka
+            invocation.queue !== 'scriptoverflow' // overflow is always sent to kafka
         ) {
             // Kafka doesn't support delays so if enabled we should force scheduled jobs to postgres
             return 'postgres'
@@ -247,12 +247,12 @@ export class CyclotronJobQueue {
         ])
 
         if (this.shadowPostgres && Date.now() >= this.shadowCircuitOpenUntil) {
-            const hogInvocations = invocations.filter((x) => x.queue === 'hog')
-            if (!hogInvocations.length) {
+            const scriptInvocations = invocations.filter((x) => x.queue === 'custom_script')
+            if (!scriptInvocations.length) {
                 return
             }
             void this.shadowPostgres
-                .queueInvocations(hogInvocations)
+                .queueInvocations(scriptInvocations)
                 .then(() => {
                     this.shadowFailures = 0
                 })

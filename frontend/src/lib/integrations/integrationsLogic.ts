@@ -203,7 +203,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
             LemonDialog.open({
                 title: `Do you want to disconnect from this ${integration.kind} integration?`,
                 description:
-                    'This cannot be undone. PostHog resources configured to use this integration will remain but will stop working.',
+                    'This cannot be undone. Insights resources configured to use this integration will remain but will stop working.',
                 primaryButton: {
                     children: 'Yes, disconnect',
                     status: 'danger',

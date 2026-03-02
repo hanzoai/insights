@@ -356,7 +356,7 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
             (rawLocalItems, taxonomicGroups, group): ListFuse => {
                 // maps e.g. "selector" to its display value "CSS Selector"
                 // so a search of "css" matches something
-                function asPostHogName(
+                function asInsightsName(
                     g: TaxonomicFilterGroup,
                     item: EventDefinition | CohortType
                 ): string | undefined {
@@ -367,7 +367,7 @@ export const infiniteListLogic = kea<infiniteListLogicType>([
                     const itemGroup = getItemGroup(item, taxonomicGroups, group)
                     return {
                         name: itemGroup?.getName?.(item) || '',
-                        posthogName: asPostHogName(itemGroup, item),
+                        posthogName: asInsightsName(itemGroup, item),
                         item: item,
                     }
                 })

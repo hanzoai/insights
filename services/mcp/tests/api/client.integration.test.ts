@@ -366,7 +366,7 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
                     query: {
                         kind: 'DataVisualizationNode',
                         source: {
-                            kind: 'HogQLQuery',
+                            kind: 'InsightsQLQuery',
                             query: 'SELECT 1 as test',
                             filters: {
                                 dateRange: {
@@ -844,14 +844,14 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
             })
         })
 
-        describe('HogQL Query Tests', () => {
-            it('should create HogQL insight with basic query', async () => {
+        describe('InsightsQL Query Tests', () => {
+            it('should create InsightsQL insight with basic query', async () => {
                 const insightData: CreateInsightInput = {
-                    name: 'Basic HogQL Test',
+                    name: 'Basic InsightsQL Test',
                     query: {
                         kind: 'DataVisualizationNode' as const,
                         source: {
-                            kind: 'HogQLQuery' as const,
+                            kind: 'InsightsQLQuery' as const,
                             query: "SELECT count() as total_events FROM events WHERE event = '$pageview'",
                             filters: {
                                 dateRange: {
@@ -875,13 +875,13 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
                 }
             })
 
-            it('should create HogQL insight with aggregation query', async () => {
+            it('should create InsightsQL insight with aggregation query', async () => {
                 const insightData: CreateInsightInput = {
-                    name: 'HogQL Aggregation Test',
+                    name: 'InsightsQL Aggregation Test',
                     query: {
                         kind: 'DataVisualizationNode' as const,
                         source: {
-                            kind: 'HogQLQuery' as const,
+                            kind: 'InsightsQLQuery' as const,
                             query: `
 								SELECT 
 									toDate(timestamp) as date,
@@ -916,13 +916,13 @@ describe('API Client Integration Tests', { concurrent: false }, () => {
                 }
             })
 
-            it('should create HogQL insight with property filters', async () => {
+            it('should create InsightsQL insight with property filters', async () => {
                 const insightData: CreateInsightInput = {
-                    name: 'HogQL Property Filter Test',
+                    name: 'InsightsQL Property Filter Test',
                     query: {
                         kind: 'DataVisualizationNode' as const,
                         source: {
-                            kind: 'HogQLQuery' as const,
+                            kind: 'InsightsQLQuery' as const,
                             query: `
 								SELECT 
 									JSONExtractString(properties, '$browser') as browser,

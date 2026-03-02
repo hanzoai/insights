@@ -279,7 +279,7 @@ class ConversationViewSet(TeamAndOrgViewSetMixin, ListModelMixin, RetrieveModelM
                 if is_research:
                     detail = RESEARCH_RATE_LIMIT_MESSAGE.format(retry_after=retry_after)
                 else:
-                    detail = f"You've reached PostHog AI's usage limit for the moment. Please try again {retry_after}."
+                    detail = f"You've reached Insights AI's usage limit for the moment. Please try again {retry_after}."
 
                 raise Throttled(wait=wait, detail=detail)
 

@@ -135,7 +135,7 @@ export function CustomFunctionInputs(): JSX.Element {
             identifier="create_custom_function_inputs"
             context={{
                 current_inputs_schema: configuration.inputs_schema ?? [],
-                hog_code: configuration.hog ?? '',
+                hog_code: configuration.custom_script ?? '',
             }}
             contextDescription={{
                 text: 'Current inputs schema',

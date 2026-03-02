@@ -1,6 +1,6 @@
 import { BreakPointFunction } from 'kea'
 
-import { PostHogComDocsURL } from 'lib/lemon-ui/Link/Link'
+import { InsightsComDocsURL } from 'lib/lemon-ui/Link/Link'
 import { UnexpectedNeverError, getDefaultInterval } from 'lib/utils'
 
 import { insightsqlQuery } from '~/queries/query'
@@ -224,7 +224,7 @@ export interface BaseTile {
 }
 
 export interface Docs {
-    url?: PostHogComDocsURL
+    url?: InsightsComDocsURL
     title: string
     description: string | JSX.Element
 }

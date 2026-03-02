@@ -38,7 +38,7 @@ export function GlobalShortcuts(): null {
     const { sidePanelOpen } = useValues(sidePanelStateLogic)
     const isRemovingSidePanelFlag = useFeatureFlag('UX_REMOVE_SIDEPANEL')
 
-    // Open Info tab if scene has panel content, otherwise default to PostHog AI
+    // Open Info tab if scene has panel content, otherwise default to Insights AI
     const defaultTab = scenePanelIsPresent ? SidePanelTab.Info : SidePanelTab.Max
 
     useAppShortcut({

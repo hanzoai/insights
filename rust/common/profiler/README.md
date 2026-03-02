@@ -17,8 +17,8 @@ The core output format and tooling for all of the above is [pprof](https://githu
 This library can be integrated into your Rust workspace project in a couple steps:
 
 1. Add the `common/profiler` dependency to your service. **Replace `common/alloc` dependency if present**
-2. Add the `used_with_profiling!()` macro to your `main.rs`, or replace `common/alloc`'s `used!()` invocation - [example here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L26) as [defined here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/lib.rs#L13-L22)
-3. Add the profiling trigger endpoints to your Axum server's `Router` - [example here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L129-L133) as [defined here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/router.rs#L8-L14)
+2. Add the `used_with_profiling!()` macro to your `main.rs`, or replace `common/alloc`'s `used!()` invocation - [example here](https://github.com/Insights/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L26) as [defined here](https://github.com/Insights/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/lib.rs#L13-L22)
+3. Add the profiling trigger endpoints to your Axum server's `Router` - [example here](https://github.com/Insights/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L129-L133) as [defined here](https://github.com/Insights/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/router.rs#L8-L14)
 
 ...and that's about it! Deploy your service and use the instructions below to get started
 

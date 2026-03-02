@@ -119,7 +119,7 @@ function ErrorView(): JSX.Element | null {
     }
 
     return (
-        <BridgePage view="signup-error" hedgehog message="Oops!" footer={<SupportModalButton />}>
+        <BridgePage view="signup-error" mascot message="Oops!" footer={<SupportModalButton />}>
             <h2>{ErrorMessages[error.code].title}</h2>
             <div className="error-message">{ErrorMessages[error.code].detail}</div>
             <LemonDivider dashed className="my-4" />
@@ -136,7 +136,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
     return (
         <BridgePage
             view="accept-invite"
-            hedgehog
+            mascot
             message={user?.first_name ? `Hey ${user?.first_name}!` : 'Hello!'}
             footer={<SupportModalButton name={user?.first_name} email={user?.email} />}
         >
@@ -222,7 +222,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
     return (
         <BridgePage
             view="invites-signup"
-            hedgehog
+            mascot
             message={
                 <>
                     Welcome to

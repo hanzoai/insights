@@ -49,7 +49,7 @@ jobs:
                   # We look for lines that add or remove posthog-js with a version
                   if echo "$DIFF" | grep -qE '^\+.*"posthog-js":\s*"[^"]+"|^-.*"posthog-js":\s*"[^"]+"'; then
                       echo "posthog-js version change detected, requesting review from client-libraries-approvers"
-                      gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-reviewer "PostHog/client-libraries-approvers"
+                      gh pr edit "${PR_NUMBER}" --repo "${REPO}" --add-reviewer "Insights/client-libraries-approvers"
                       echo "Review requested successfully"
                   else
                       echo "No posthog-js version changes detected"

@@ -1,11 +1,11 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-import { HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS, HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED } from '../index'
+import { CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS, CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED } from '../index'
 
 describe('Transformation templates', () => {
-    const allTransformationTemplates: HogFunctionTemplate[] = [
-        ...HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS,
-        ...HOG_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
+    const allTransformationTemplates: CustomFunctionTemplate[] = [
+        ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS,
+        ...CUSTOM_FUNCTION_TEMPLATES_TRANSFORMATIONS_DEPRECATED,
     ]
 
     it('should have free property set to true for all transformation templates', () => {

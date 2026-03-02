@@ -77,7 +77,7 @@ import { RedisHelpers } from './redis-helpers'
  */
 
 const TIMEZONE_FALLBACK = 'UTC'
-export const COOKIELESS_SENTINEL_VALUE = '$posthog_cookieless'
+export const COOKIELESS_SENTINEL_VALUE = '$insights_cookieless'
 export const COOKIELESS_MODE_FLAG_PROPERTY = '$cookieless_mode'
 export const COOKIELESS_EXTRA_HASH_CONTENTS_PROPERTY = '$cookieless_extra'
 const MAX_NEGATIVE_TIMEZONE_HOURS = 12
@@ -877,8 +877,8 @@ export function createStatelessSessionId(
     hash: Buffer
 ): UUID7 {
     // A sessionId is a UUIDv7, which has a timestamp part and a random part. We need to find a deterministic way to
-    // generate this ID whilst meeting the requirements of posthog session IDs
-    // see https://posthog.com/docs/data/sessions#custom-session-ids
+    // generate this ID whilst meeting the requirements of insights session IDs
+    // see https://hanzo.ai/docs/data/sessions#custom-session-ids
 
     // For the timestamp part, use the start of the day, in this user's timezone
     const timestampOfStartOfDay = toStartOfDayInTimezoneSafe(timestamp, eventTimezone, teamTimeZone).getTime()

@@ -1,7 +1,7 @@
 import { SearchItem } from './searchLogic'
 
 /**
- * Determines whether to skip the "Ask PostHog AI" highlight and auto-highlight
+ * Determines whether to skip the "Ask Insights AI" highlight and auto-highlight
  * the first real search result instead.
  *
  * Returns `true` when the query and results indicate high confidence that the

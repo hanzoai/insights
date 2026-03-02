@@ -42,7 +42,7 @@ export const themes: Theme[] = [
     },
     {
         id: 'livelaughhog',
-        name: 'Live, Laugh, Hog',
+        name: 'Monochrome',
         dark: false,
         sidebarStyle: {
             background:
@@ -58,7 +58,7 @@ export const themes: Theme[] = [
     },
     {
         id: 'herisson',
-        name: 'Live, Laugh, Hog',
+        name: 'Monochrome',
         dark: false,
         mainStyle: {
             background:

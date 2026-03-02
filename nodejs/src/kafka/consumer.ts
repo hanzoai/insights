@@ -29,7 +29,7 @@ import { parseJSON } from '~/utils/json-parse'
 
 import { defaultConfig } from '../config/config'
 import { logger } from '../utils/logger'
-import { captureException } from '../utils/posthog'
+import { captureException } from '../utils/insights'
 import { retryIfRetriable } from '../utils/retries'
 import { promisifyCallback } from '../utils/utils'
 import { ensureTopicExists } from './admin'

@@ -214,7 +214,7 @@ function CloudflareOptInBanner({
                     <li>Understand that this feature is experimental (beta) and may change or be discontinued.</li>
                 </ul>
                 <p className="text-sm">
-                    Cloudflare is not currently listed as a PostHog subprocessor for this feature, and you choose to
+                    Cloudflare is not currently listed as an Insights subprocessor for this feature, and you choose to
                     enable this feature notwithstanding the foregoing. If we decide to make this functionality generally
                     available, we will update our Data Processing Agreement and provide notice in accordance with its
                     terms.

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FilterBar } from 'lib/components/FilterBar'
-import { XRayHog2 } from 'lib/components/hedgehogs'
+import { XRayHog2 } from 'lib/components/mascots'
 import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
 
 import { Tiles } from './WebAnalyticsDashboard'

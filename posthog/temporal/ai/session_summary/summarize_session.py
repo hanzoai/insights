@@ -53,7 +53,7 @@ from posthog.temporal.ai.session_summary.types.video import (
     VideoSegmentSpec,
     VideoSummarySingleSessionInputs,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.client import async_connect
 from posthog.temporal.exports_video.workflow import VideoExportInputs
 
@@ -373,7 +373,7 @@ async def stream_llm_single_session_summary_activity(
 
 
 @temporalio.workflow.defn(name="summarize-session-stream")
-class SummarizeSingleSessionStreamWorkflow(PostHogWorkflow):
+class SummarizeSingleSessionStreamWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> SingleSessionSummaryInputs:
         """Parse inputs from the management command CLI."""
@@ -399,7 +399,7 @@ class SummarizeSingleSessionStreamWorkflow(PostHogWorkflow):
 
 
 @temporalio.workflow.defn(name="summarize-session")
-class SummarizeSingleSessionWorkflow(PostHogWorkflow):
+class SummarizeSingleSessionWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> SingleSessionSummaryInputs:
         """Parse inputs from the management command CLI."""

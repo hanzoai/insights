@@ -5,26 +5,26 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
-    insertHogFunction as _insertHogFunction,
+    insertCustomFunction as _insertCustomFunction,
     createClickhousePerson,
-    createHogFunction,
+    createCustomFunction,
     createKafkaMessage,
 } from '../_tests/fixtures'
-import { HogFunctionType } from '../types'
+import { CustomFunctionType } from '../types'
 import { CdpPersonUpdatesConsumer } from './cdp-person-updates-consumer'
 
 describe('CDP Person Updates Consumer', () => {
     let processor: CdpPersonUpdatesConsumer
     let hub: Hub
     let team: Team
-    let hogFunction: HogFunctionType
+    let customFunction: CustomFunctionType
 
-    const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-        const item = await _insertHogFunction(hub.postgres, team.id, hogFunction)
+    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+        const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
         // Trigger the reload that django would do
-        processor['hogFunctionManager']['onHogFunctionsReloaded'](team.id, [item.id])
+        processor['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -38,15 +38,15 @@ describe('CDP Person Updates Consumer', () => {
         processor = new CdpPersonUpdatesConsumer(hub)
         await processor.start()
 
-        hogFunction = createHogFunction({
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        customFunction = createCustomFunction({
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
             type: 'destination',
         })
 
-        hogFunction.filters = { ...hogFunction.filters, source: 'person-updates' }
-        await insertHogFunction(hogFunction)
+        customFunction.filters = { ...customFunction.filters, source: 'person-updates' }
+        await insertCustomFunction(customFunction)
     })
 
     afterEach(async () => {
@@ -68,7 +68,7 @@ describe('CDP Person Updates Consumer', () => {
             const events = await processor._parseKafkaBatch([createKafkaMessage(createClickhousePerson(999999, {}))])
             expect(events).toHaveLength(0)
         })
-        it('should parse a valid message with an existing team and hog function ', async () => {
+        it('should parse a valid message with an existing team and custom function ', async () => {
             const event = createClickhousePerson(team.id, {
                 id: 'person-id-1',
             })
@@ -92,7 +92,7 @@ describe('CDP Person Updates Consumer', () => {
                         "id": "person-id-1",
                         "name": "person-id-1",
                         "properties": {
-                          "email": "test@posthog.com",
+                          "email": "test@hanzo.ai",
                         },
                         "url": "http://localhost:8000/project/2/person/person-id-1",
                       },
@@ -107,21 +107,21 @@ describe('CDP Person Updates Consumer', () => {
     })
 
     describe('processing', () => {
-        it('should only run hog functions that are filtering for person updates', async () => {
-            const hogFunctionEvents = createHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                ...HOG_FILTERS_EXAMPLES.no_filters,
+        it('should only run custom functions that are filtering for person updates', async () => {
+            const customFunctionEvents = createCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
                 type: 'destination',
             })
 
-            await insertHogFunction(hogFunctionEvents)
+            await insertCustomFunction(customFunctionEvents)
 
             const events = await processor._parseKafkaBatch([createKafkaMessage(createClickhousePerson(team.id, {}))])
             const result = await processor.processBatch(events)
 
             expect(result.invocations).toHaveLength(1)
-            expect(result.invocations[0].functionId).toEqual(hogFunction.id)
+            expect(result.invocations[0].functionId).toEqual(customFunction.id)
         })
     })
 })

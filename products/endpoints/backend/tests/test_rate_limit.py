@@ -65,7 +65,7 @@ class TestCheckAndCacheMaterializationStatus(APIBaseTest):
         EndpointVersion.objects.create(
             endpoint=endpoint,
             version=1,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
         )
 
@@ -85,7 +85,7 @@ class TestCheckAndCacheMaterializationStatus(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name=f"query_{status}",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             is_materialized=True,
             status=status,
             origin=DataWarehouseSavedQuery.Origin.ENDPOINT,
@@ -100,7 +100,7 @@ class TestCheckAndCacheMaterializationStatus(APIBaseTest):
         EndpointVersion.objects.create(
             endpoint=endpoint,
             version=1,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             saved_query=saved_query,
             is_materialized=True,
@@ -150,7 +150,7 @@ class TestIsMaterializedEndpointRequest(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="lazy_query",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             is_materialized=True,
             status=DataWarehouseSavedQuery.Status.COMPLETED,
             origin=DataWarehouseSavedQuery.Origin.ENDPOINT,
@@ -165,7 +165,7 @@ class TestIsMaterializedEndpointRequest(APIBaseTest):
         EndpointVersion.objects.create(
             endpoint=endpoint,
             version=1,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             saved_query=saved_query,
             is_materialized=True,

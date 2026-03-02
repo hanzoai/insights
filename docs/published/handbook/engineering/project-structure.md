@@ -4,14 +4,14 @@ sidebar: Docs
 showTitle: true
 ---
 
-> **Note:** This page refers to our [main product repository](https://github.com/PostHog/posthog), not our website.
+> **Note:** This page refers to our [main product repository](https://github.com/Insights/posthog), not our website.
 
 ## Directory tree
 
 ```text
 .
 ├── bin              # Shell scripts wrapped by hogli, the unified developer CLI
-├── common           # Shared code: hogli CLI, PostHog SQL parser, HogVM, shared UI packages
+├── common           # Shared code: hogli CLI, Insights SQL parser, HogVM, shared UI packages
 ├── ee               # Enterprise platform package features (separate license)
 ├── frontend         # React/TypeScript frontend application
 │   └── src
@@ -19,7 +19,7 @@ showTitle: true
 │       └── lib      # Reusable components and utilities
 │       └── scenes   # Page-specific components
 │       └── queries  # Query builder components
-│       └── toolbar  # PostHog Toolbar code
+│       └── toolbar  # Insights Toolbar code
 ├── livestream       # Golang service for live events API
 ├── playwright       # End-to-end tests using Playwright
 ├── nodejs           # Node.js service for event ingestion and plugins
@@ -39,12 +39,12 @@ showTitle: true
 
 ### `frontend`
 
-The PostHog web application, built with React and TypeScript. Uses [Kea](https://github.com/keajs/kea) for state management.
+The Insights web application, built with React and TypeScript. Uses [Kea](https://github.com/keajs/kea) for state management.
 
 - `src/lib` – Reusable components and utilities
 - `src/scenes` – Page-specific components organized by feature
 - `src/queries` – Query builder and data visualization components
-- `src/toolbar` – Code for the [PostHog Toolbar](https://posthog.com/docs/user-guides/toolbar)
+- `src/toolbar` – Code for the [Insights Toolbar](https://posthog.com/docs/user-guides/toolbar)
 
 ### `posthog`
 
@@ -52,7 +52,7 @@ The Django backend application. Key subdirectories:
 
 - `api` – REST API endpoints and serializers
 - `clickhouse` – ClickHouse schema definitions and migrations
-- `hogql` – PostHog SQL query language compiler and executor
+- `hogql` – Insights SQL query language compiler and executor
 - `models` – Django ORM models (PostgreSQL)
 - `tasks` – Celery background tasks
 
@@ -60,7 +60,7 @@ The Django backend application. Key subdirectories:
 
 Product-specific code organized as **vertical slices**. Each product folder contains its own backend (Django app), frontend (React), and optionally shared code. This structure allows features to evolve independently.
 
-See the [products README](https://github.com/PostHog/posthog/blob/master/products/README.md) for detailed conventions.
+See the [products README](https://github.com/Insights/posthog/blob/master/products/README.md) for detailed conventions.
 
 ### `nodejs`
 
@@ -83,14 +83,14 @@ High-performance Rust services including:
 
 Shared code used across the codebase:
 
-- `hogli` – Unified developer CLI for building, testing, and running PostHog
-- `hogql_parser` – PostHog SQL parser (C++)
+- `hogli` – Unified developer CLI for building, testing, and running Insights
+- `hogql_parser` – Insights SQL parser (C++)
 - `hogvm` – Hog virtual machine
 - `tailwind` – Shared Tailwind configuration
 
 ### `ee`
 
-Enterprise edition licensed features. This directory has a [separate license](https://github.com/PostHog/posthog/blob/master/ee/LICENSE) - not MIT. For 100% FOSS code, see [PostHog/posthog-foss](https://github.com/PostHog/posthog-foss).
+Enterprise edition licensed features. This directory has a [separate license](https://github.com/Insights/posthog/blob/master/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/posthog-foss](https://github.com/Insights/posthog-foss).
 
 ### `playwright`
 

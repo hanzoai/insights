@@ -13,10 +13,10 @@ import { Spinner } from 'lib/lemon-ui/Spinner'
 import { codeEditorLogic } from 'lib/monaco/codeEditorLogic'
 import { codeEditorLogicType } from 'lib/monaco/codeEditorLogicType'
 import { findNextFocusableElement, findPreviousFocusableElement } from 'lib/monaco/domUtils'
-import { initHogLanguage } from 'lib/monaco/languages/hog'
-import { initHogJsonLanguage } from 'lib/monaco/languages/hogJson'
+import { initScriptLanguage } from 'lib/monaco/languages/script'
+import { initHogJsonLanguage } from 'lib/monaco/languages/scriptJson'
 import { initInsightsQLLanguage } from 'lib/monaco/languages/insightsQL'
-import { initHogTemplateLanguage } from 'lib/monaco/languages/hogTemplate'
+import { initHogTemplateLanguage } from 'lib/monaco/languages/scriptTemplate'
 import { initLiquidLanguage } from 'lib/monaco/languages/liquid'
 import { inStorybookTestRunner } from 'lib/utils'
 
@@ -64,13 +64,13 @@ function initEditor(
         initModel(model, builtCodeEditorLogic)
     }
 
-    if (editorProps?.language === 'hog') {
-        initHogLanguage(monaco)
+    if (editorProps?.language === 'custom_script') {
+        initScriptLanguage(monaco)
     }
     if (editorProps?.language === 'insightsQL' || editorProps?.language === 'insightsQLExpr') {
         initInsightsQLLanguage(monaco, editorProps.language as HogLanguage)
     }
-    if (editorProps?.language === 'hogTemplate') {
+    if (editorProps?.language === 'scriptTemplate') {
         initHogTemplateLanguage(monaco)
     }
     if (editorProps?.language === 'hogJson') {
@@ -331,7 +331,7 @@ export function CodeEditor({
         if (onPressCmdEnter) {
             monacoDisposables.current.push(
                 editor.addAction({
-                    id: 'saveAndRunPostHog',
+                    id: 'saveAndRunInsights',
                     label: 'Save and run query',
                     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
                     run: () => {

@@ -2,7 +2,7 @@ from posthog.test.base import BaseTest
 
 from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.posthog.template_posthog import (
-    TemplatePostHogMigrator,
+    TemplateInsightsMigrator,
     template as template_posthog,
 )
 from posthog.models import PluginConfig
@@ -64,7 +64,7 @@ class TestTemplateMigration(BaseTest):
 
     def test_default_config(self):
         obj = self.get_plugin_config({})
-        template = TemplatePostHogMigrator.migrate(obj)
+        template = TemplateInsightsMigrator.migrate(obj)
         assert template["inputs"] == {
             "host": {"value": "us.i.example.com"},
             "token": {"value": "apikey"},
@@ -76,7 +76,7 @@ class TestTemplateMigration(BaseTest):
 
     def test_disable_geoip(self):
         obj = self.get_plugin_config({"disable_geoip": "Yes"})
-        template = TemplatePostHogMigrator.migrate(obj)
+        template = TemplateInsightsMigrator.migrate(obj)
         assert template["inputs"] == {
             "host": {"value": "us.i.example.com"},
             "token": {"value": "apikey"},
@@ -88,7 +88,7 @@ class TestTemplateMigration(BaseTest):
 
     def test_ignore_events(self):
         obj = self.get_plugin_config({"events_to_ignore": "event1, event2, 'smore"})
-        template = TemplatePostHogMigrator.migrate(obj)
+        template = TemplateInsightsMigrator.migrate(obj)
         assert template["inputs"] == {
             "host": {"value": "us.i.example.com"},
             "token": {"value": "apikey"},

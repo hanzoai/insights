@@ -71,7 +71,7 @@ describe('WindowTitlePlugin', () => {
                                                     {
                                                         id: 123456789,
                                                         type: 3,
-                                                        textContent: 'Recordings • PostHog',
+                                                        textContent: 'Recordings • Insights',
                                                     },
                                                 ],
                                             },
@@ -86,7 +86,7 @@ describe('WindowTitlePlugin', () => {
             true,
             { replayer: null as unknown as any }
         )
-        expect(mockCallback).toHaveBeenCalledWith('0191dd6c-cd35-71ad-9114-264ebef5ab38', 'Recordings • PostHog')
+        expect(mockCallback).toHaveBeenCalledWith('0191dd6c-cd35-71ad-9114-264ebef5ab38', 'Recordings • Insights')
 
         mockCallback.mockClear()
 
@@ -94,7 +94,7 @@ describe('WindowTitlePlugin', () => {
             {
                 type: 3,
                 windowId: '0191dd6c-cd35-71ad-9114-264ebef5ab38',
-                data: { texts: [{ id: 123, value: 'PostHog • A new title' }] },
+                data: { texts: [{ id: 123, value: 'Insights • A new title' }] },
             } as any,
             true,
             { replayer: null as unknown as any }
@@ -106,13 +106,13 @@ describe('WindowTitlePlugin', () => {
             {
                 type: 3,
                 windowId: '0191dd6c-cd35-71ad-9114-264ebef5ab38',
-                data: { source: 0, texts: [{ id: 123456789, value: 'PostHog • A new title' }] },
+                data: { source: 0, texts: [{ id: 123456789, value: 'Insights • A new title' }] },
             } as any,
             true,
             { replayer: null as unknown as any }
         )
         // callback for title node
-        expect(mockCallback).toHaveBeenCalledWith('0191dd6c-cd35-71ad-9114-264ebef5ab38', 'PostHog • A new title')
+        expect(mockCallback).toHaveBeenCalledWith('0191dd6c-cd35-71ad-9114-264ebef5ab38', 'Insights • A new title')
 
         // new full snapshot
         mockCallback.mockClear()
@@ -130,7 +130,7 @@ describe('WindowTitlePlugin', () => {
             {
                 type: 3,
                 windowId: '0191dd6c-cd35-71ad-9114-264ebef5ab38',
-                data: { source: 0, texts: [{ id: 123456789, value: 'PostHog • A new title' }] },
+                data: { source: 0, texts: [{ id: 123456789, value: 'Insights • A new title' }] },
             } as any,
             true,
             { replayer: null as unknown as any }
@@ -172,7 +172,7 @@ describe('WindowTitlePlugin', () => {
                                                 childNodes: [
                                                     {
                                                         type: 3,
-                                                        textContent: 'Recordings • PostHog',
+                                                        textContent: 'Recordings • Insights',
                                                     },
                                                 ],
                                             },

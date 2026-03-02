@@ -17,7 +17,7 @@ class TestNodeViewSet(APIBaseTest):
         self.saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         self.table_node = Node.objects.create(
@@ -239,7 +239,7 @@ class TestEdgeViewSet(APIBaseTest):
         self.saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         self.target_node = Node.objects.create(

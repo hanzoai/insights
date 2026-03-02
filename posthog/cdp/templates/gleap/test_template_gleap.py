@@ -30,7 +30,7 @@ class TestTemplateGleap(BaseCustomFunctionTemplateTest):
             {
                 "method": "POST",
                 "headers": {
-                    "User-Agent": "PostHog Gleap.io App",
+                    "User-Agent": "Insights Gleap.io App",
                     "Api-Token": "uB6Jymn60NN5EEIWgiUzZx13geVlEx26",
                     "Content-Type": "application/json",
                 },

@@ -11,7 +11,7 @@ export const getLaravelSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog PHP library using Composer:</Markdown>
+                    <Markdown>Install the Insights PHP library using Composer:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -27,12 +27,12 @@ export const getLaravelSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog in the `boot` method of `app/Providers/AppServiceProvider.php`:
+                        Initialize Insights in the `boot` method of `app/Providers/AppServiceProvider.php`:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -45,13 +45,13 @@ export const getLaravelSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 namespace App\\Providers;
 
                                 use Illuminate\\Support\\ServiceProvider;
-                                use PostHog\\PostHog;
+                                use Insights\\Insights;
 
                                 class AppServiceProvider extends ServiceProvider
                                 {
                                     public function boot(): void
                                     {
-                                        PostHog::init(
+                                        Insights::init(
                                             '<ph_project_api_key>',
                                             [
                                                 'host' => '<ph_client_api_host>'
@@ -71,14 +71,14 @@ export const getLaravelSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'optional',
             content: (
                 <>
-                    <Markdown>Capture custom events using the PostHog client:</Markdown>
+                    <Markdown>Capture custom events using the Insights client:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'php',
                                 file: 'PHP',
                                 code: dedent`
-                                PostHog::capture([
+                                Insights::capture([
                                     'distinctId' => 'test-user',
                                     'event' => 'test-event',
                                 ]);
