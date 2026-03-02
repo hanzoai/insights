@@ -49,6 +49,7 @@ from insights.temporal.ai.session_summary.state import (
 )
 from insights.temporal.ai.session_summary.types.single import SingleSessionSummaryInputs
 from insights.temporal.ai.session_summary.types.video import (
+    ExtraSummaryContext,
     VideoSegmentOutput,
     VideoSegmentSpec,
     VideoSummarySingleSessionInputs,
