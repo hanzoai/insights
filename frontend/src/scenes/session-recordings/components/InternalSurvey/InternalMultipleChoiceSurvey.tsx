@@ -47,8 +47,8 @@ function PrivacyHelpMessage(): JSX.Element {
     return (
         <>
             <p>
-                PostHog offers a range of controls to limit what data is captured by session recordings. Our privacy
-                controls run in the browser or mobile app. So, masked data is never sent over the network to PostHog.
+                Insights offers a range of controls to limit what data is captured by session recordings. Our privacy
+                controls run in the browser or mobile app. So, masked data is never sent over the network to Insights.
             </p>
             <Link to="https://posthog.com/docs/session-replay/privacy" target="_blank">
                 Learn more
@@ -242,11 +242,11 @@ export function InternalMultipleChoiceSurvey({ surveyId }: InternalSurveyProps):
                                                 type="secondary"
                                                 onClick={() => {
                                                     askSidePanelMax(
-                                                        `I am disabling session replay because of "${openChoice}". Go through PostHog documentation and find a solution to fix this.`
+                                                        `I am disabling session replay because of "${openChoice}". Go through Insights documentation and find a solution to fix this.`
                                                     )
                                                 }}
                                             >
-                                                Ask PostHog AI for help
+                                                Ask Insights AI for help
                                             </LemonButton>
                                         )}
                                     </div>

@@ -123,7 +123,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
                     "distinct_id": self.user.distinct_id,
                     "email": self.user.email,
                     "first_name": "",
-                    "hedgehog_config": None,
+                    "mascot_config": None,
                     "id": self.user.id,
                     "is_email_verified": None,
                     "last_name": "",
@@ -140,7 +140,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
                     "distinct_id": self.user.distinct_id,
                     "email": self.user.email,
                     "first_name": "",
-                    "hedgehog_config": None,
+                    "mascot_config": None,
                     "id": self.user.id,
                     "is_email_verified": None,
                     "last_name": "",
@@ -172,7 +172,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
                     "distinct_id": self.user.distinct_id,
                     "email": self.user.email,
                     "first_name": "",
-                    "hedgehog_config": None,
+                    "mascot_config": None,
                     "id": self.user.id,
                     "is_email_verified": None,
                     "last_name": "",
@@ -189,7 +189,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
                     "distinct_id": self.user.distinct_id,
                     "email": self.user.email,
                     "first_name": "",
-                    "hedgehog_config": None,
+                    "mascot_config": None,
                     "id": self.user.id,
                     "is_email_verified": None,
                     "last_name": "",
@@ -444,7 +444,7 @@ class TestSessionRecordingPlaylist(APIBaseTest, QueryMatchingTest):
     def test_does_not_count_empty_object_as_filters(self) -> None:
         """
         can delete a collection despite there is an empty object for filters
-        a regression test for https://github.com/PostHog/posthog/issues/35820
+        a regression test for https://github.com/Insights/posthog/issues/35820
         """
         create_response = self._create_playlist({"type": "collection"})
         assert "short_id" in create_response.json(), create_response.json()

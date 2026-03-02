@@ -6,7 +6,7 @@ from itertools import batched
 from temporalio import common, workflow
 from temporalio.workflow import ParentClosePolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.delete_recordings.activities import (
     delete_recording_blocks,
     delete_recording_lts_data,
@@ -30,7 +30,7 @@ from posthog.temporal.delete_recordings.types import (
 
 
 @workflow.defn(name="delete-recording")
-class DeleteRecordingWorkflow(PostHogWorkflow):
+class DeleteRecordingWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> Recording:
         """Parse input from the management command CLI."""
@@ -107,7 +107,7 @@ class DeleteRecordingWorkflow(PostHogWorkflow):
 
 
 @workflow.defn(name="delete-recordings-with-person")
-class DeleteRecordingsWithPersonWorkflow(PostHogWorkflow):
+class DeleteRecordingsWithPersonWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> RecordingsWithPersonInput:
         """Parse input from the management command CLI."""
@@ -147,7 +147,7 @@ class DeleteRecordingsWithPersonWorkflow(PostHogWorkflow):
 
 
 @workflow.defn(name="delete-recordings-with-team")
-class DeleteRecordingsWithTeamWorkflow(PostHogWorkflow):
+class DeleteRecordingsWithTeamWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> RecordingsWithTeamInput:
         """Parse input from the management command CLI."""
@@ -188,7 +188,7 @@ class DeleteRecordingsWithTeamWorkflow(PostHogWorkflow):
 
 
 @workflow.defn(name="delete-recordings-with-query")
-class DeleteRecordingsWithQueryWorkflow(PostHogWorkflow):
+class DeleteRecordingsWithQueryWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> RecordingsWithQueryInput:
         """Parse input from the management command CLI."""
@@ -229,7 +229,7 @@ class DeleteRecordingsWithQueryWorkflow(PostHogWorkflow):
 
 
 @workflow.defn(name="delete-recording-metadata")
-class DeleteRecordingMetadataWorkflow(PostHogWorkflow):
+class DeleteRecordingMetadataWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> DeleteRecordingMetadataInput:
         """Parse input from the management command CLI."""

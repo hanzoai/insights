@@ -9,14 +9,14 @@ Embedding Topic
       → Buffer Table (1 dat TTL)
         → Model-Specific MVs (filter from buffer)
           → Model Specific Tables (indexed, 3 month TTL, partitioned weekly)
-            → model specific document_embeddings tables (in hogql)
-              → General document_embeddings table (in hogql) (adds model_name back, dynamically routes queries)
+            → model specific document_embeddings tables (in insightsql)
+              → General document_embeddings table (in insightsql) (adds model_name back, dynamically routes queries)
 ```
 The general structure is to have a table _per embedding model/dimensionality pair_, to allow us to use data skipping vector similarity indexes (which require the vectors in the underlying column to be all the same size). These tables also have a TTL, to keep the size of those indexes bounded, and then there's an extra buffering step so there's one place to atomically halt ingestion during table maintenance. The reason the size of those indexes needs to be bounded is because the _entire index_ needs to be held in memory when used.
 
-Then we expose a lazy table in hogql, which routes the query to the right model-specific table dynamically, on the basis of which model is being used in the `WHERE` clause of the query. This lazy table also adds a `FINAL` to the `JoinExpr`, because the `argMax` subquery approach to selecting the final version of a dataset breaks vector index usage (at least for now - I'm 99% sure the problem is the `GROUP BY` that approach necessitates, as even the example below contains a subquery, just without grouping).
+Then we expose a lazy table in insightsql, which routes the query to the right model-specific table dynamically, on the basis of which model is being used in the `WHERE` clause of the query. This lazy table also adds a `FINAL` to the `JoinExpr`, because the `argMax` subquery approach to selecting the final version of a dataset breaks vector index usage (at least for now - I'm 99% sure the problem is the `GROUP BY` that approach necessitates, as even the example below contains a subquery, just without grouping).
 
-All of this means hogql queries like:
+All of this means insightsql queries like:
 ```sql
 WITH embedText('Bug in session replay page', 'text-embedding-3-large-3072') as query,
 SELECT product, document_type, rendering, content, cosineDistance(embedding, query) as dist FROM document_embeddings WHERE model_name = 'text-embedding-3-large-3072' ORDER BY dist
@@ -221,7 +221,7 @@ EMBEDDING_MODELS_1 = [
 # If you want to add a new model or dimensionality you need to:
 # - Add the new models to a new list like the one above
 # - Create a new list like EMBEDDING_TABLES_1
-# - Add that new list to EMBEDDING_TABLES full-list, so all the HOGQL modelling is automatically updated
+# - Add that new list to EMBEDDING_TABLES full-list, so all the INSIGHTSQL modelling is automatically updated
 # And then write a migration (similar to 0187_model_specific_embedding_tables) that:
 # - Drop the buffer-table-filling MV
 # - Create the new tables and MVs for the new model-specific tables

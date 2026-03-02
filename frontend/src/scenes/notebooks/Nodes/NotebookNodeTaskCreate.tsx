@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { IconPlus } from '@posthog/icons'
 import { LemonButton, LemonTag, LemonTextArea } from '@posthog/lemon-ui'
 
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { NotebookNodeProps, NotebookNodeType } from 'scenes/notebooks/types'
 
 import { tasksLogic } from 'products/tasks/frontend/logics/tasksLogic'
@@ -72,7 +72,7 @@ function Component({ attributes }: NotebookNodeProps<NotebookNodeTaskCreateAttri
     )
 }
 
-export const NotebookNodeTaskCreate = createPostHogWidgetNode<NotebookNodeTaskCreateAttributes>({
+export const NotebookNodeTaskCreate = createInsightsWidgetNode<NotebookNodeTaskCreateAttributes>({
     nodeType: NotebookNodeType.TaskCreate,
     titlePlaceholder: 'Suggested task',
     startExpanded: false,

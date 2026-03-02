@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
-import { EmailTemplate } from 'scenes/hog-functions/email-templater/emailTemplaterLogic'
+import { EmailTemplate } from 'scenes/custom-functions/email-templater/emailTemplaterLogic'
 
 import { UserBasicType } from '~/types'
 
@@ -15,7 +15,7 @@ export interface MessageTemplate {
     name: string
     description: string
     content: {
-        templating: 'liquid' | 'hog'
+        templating: 'liquid' | 'custom_script'
         email: EmailTemplate
     }
     created_at: string | null

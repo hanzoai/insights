@@ -5,12 +5,12 @@ from posthog.test.base import BaseTest, QueryMatchingTest, _create_event
 
 from parameterized import parameterized
 
-from posthog.schema import HogQLQueryModifiers
+from posthog.schema import InsightsQLQueryModifiers
 
-from posthog.hogql import ast
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.preaggregation.sql import SHARDED_PREAGGREGATION_RESULTS_TABLE
@@ -33,7 +33,7 @@ class TestPatternDetection(BaseTest):
     """Tests for individual pattern detection functions."""
 
     def test_is_person_id_field(self):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         # Positive cases
         assert _is_person_id_field(ast.Field(chain=["person_id"]))
@@ -49,9 +49,9 @@ class TestPatternDetection(BaseTest):
         assert not _is_person_id_field(ast.Field(chain=["event"]))
 
     def test_is_timestamp_field(self):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
 
         # Positive cases
         assert _is_timestamp_field(ast.Field(chain=["timestamp"]), context)
@@ -64,8 +64,8 @@ class TestPatternDetection(BaseTest):
         assert not _is_timestamp_field(ast.Constant(value="timestamp"), context)
 
     def test_is_pageview_filter(self):
-        from posthog.hogql import ast
-        from posthog.hogql.ast import CompareOperationOp
+        from posthog.insightsql import ast
+        from posthog.insightsql.ast import CompareOperationOp
 
         # Positive cases: event = '$pageview'
         expr1 = ast.CompareOperation(
@@ -92,7 +92,7 @@ class TestPatternDetection(BaseTest):
         assert not _is_pageview_filter(expr4)
 
     def test_is_uniq_exact_persons_call(self):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         # Positive cases: uniqExact(person_id)
         expr1 = ast.Call(name="uniqExact", args=[ast.Field(chain=["person_id"])])
@@ -123,9 +123,9 @@ class TestPatternDetection(BaseTest):
         assert not _is_uniq_exact_persons_call(expr7)
 
     def test_is_to_start_of_day_timestamp(self):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
 
         # Positive cases: toStartOfDay(timestamp)
         expr1 = ast.Call(name="toStartOfDay", args=[ast.Field(chain=["timestamp"])])
@@ -151,10 +151,10 @@ class TestPatternDetection(BaseTest):
         assert not _is_to_start_of_day_timestamp(expr5, context)
 
     def test_extract_timestamp_range(self):
-        from posthog.hogql import ast
-        from posthog.hogql.ast import CompareOperationOp
+        from posthog.insightsql import ast
+        from posthog.insightsql.ast import CompareOperationOp
 
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
 
         # Test case: timestamp >= '2024-01-01' AND timestamp < '2024-02-01'
         where_exprs: list[ast.Expr] = [
@@ -177,7 +177,7 @@ class TestPatternDetection(BaseTest):
         assert end_dt == datetime(2024, 2, 1, 0, 0, 0)
 
     def test_flatten_and(self):
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         # Simple case: already flat
         expr1 = ast.Constant(value=1)
@@ -213,7 +213,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp)
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert _is_daily_unique_persons_pageviews_query(node, context)
 
     def test_count_distinct_variant(self):
@@ -226,7 +226,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp)
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert _is_daily_unique_persons_pageviews_query(node, context)
 
     def test_with_alias(self):
@@ -239,7 +239,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp) AS day
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert _is_daily_unique_persons_pageviews_query(node, context)
 
     def test_with_toStartOfDay_in_where_clause(self):
@@ -253,7 +253,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp)
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert _is_daily_unique_persons_pageviews_query(node, context)
 
     def test_with_single_bound_date_range_not_supported(self):
@@ -266,7 +266,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp)
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         # Should match and infer end date
         assert not _is_daily_unique_persons_pageviews_query(node, context)
 
@@ -281,7 +281,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp), properties.$browser
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert _is_daily_unique_persons_pageviews_query(node, context)
 
     def test_with_multiple_breakdowns(self):
@@ -295,7 +295,7 @@ class TestQueryPatternDetection(BaseTest):
             GROUP BY toStartOfDay(timestamp), properties.$browser, properties.$os
         """
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert _is_daily_unique_persons_pageviews_query(node, context)
 
     @parameterized.expand(
@@ -348,7 +348,7 @@ class TestQueryPatternDetection(BaseTest):
     )
     def test_non_matching_queries(self, name, query):
         node = self._parse_select(query)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         assert not _is_daily_unique_persons_pageviews_query(node, context), f"Query should not match: {name}"
 
 
@@ -360,7 +360,7 @@ class TestQueryTransformation(BaseTest, QueryMatchingTest):
     def _parse_and_transform(self, query: str) -> str:
         node = parse_select(query)
         assert isinstance(node, ast.SelectQuery)
-        context = HogQLContext(team_id=self.team.pk, team=self.team)
+        context = InsightsQLContext(team_id=self.team.pk, team=self.team)
         transformer = Transformer(context)
         transformed = transformer.visit(node)
         return str(transformed)
@@ -656,15 +656,15 @@ class TestLazyComputedResultsEquivalence(BaseTest):
         """
 
         # Query without lazy computation
-        result_without = execute_hogql_query(
-            query=query, team=self.team, modifiers=HogQLQueryModifiers(usePreaggregatedIntermediateResults=False)
+        result_without = execute_insightsql_query(
+            query=query, team=self.team, modifiers=InsightsQLQueryModifiers(usePreaggregatedIntermediateResults=False)
         )
 
         # Query with lazy computation
-        result_with = execute_hogql_query(
+        result_with = execute_insightsql_query(
             query=query,
             team=self.team,
-            modifiers=HogQLQueryModifiers(usePreaggregatedIntermediateResults=True),
+            modifiers=InsightsQLQueryModifiers(usePreaggregatedIntermediateResults=True),
         )
 
         assert result_without.results == result_with.results, (

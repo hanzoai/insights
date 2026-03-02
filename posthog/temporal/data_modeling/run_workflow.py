@@ -40,7 +40,7 @@ from posthog.models import Team
 from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from posthog.settings.base_variables import TEST
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger
@@ -174,7 +174,7 @@ async def run_dag_activity(inputs: RunDagActivityInputs) -> Results:
       Both steps are achieved with a dlt pipeline.
     * A model is considered "ready to run" if all of its ancestors have successfully ran
       already or if it has no ancestors.
-    * PostHog tables (e.g. events, persons, sessions) are assumed to be always available
+    * Insights tables (e.g. events, persons, sessions) are assumed to be always available
       and up to date, and thus can be considered to have ran successfully.
 
     This activity runs the following algorithm:
@@ -1539,8 +1539,8 @@ class RunWorkflowInputs:
 
 
 @temporalio.workflow.defn(name="data-modeling-run")
-class RunWorkflow(PostHogWorkflow):
-    """A Temporal Workflow to run PostHog data models.
+class RunWorkflow(InsightsWorkflow):
+    """A Temporal Workflow to run Insights data models.
 
     A model is defined by a label, a saved query that dictates how to select the data that
     makes up the model, and the path or paths to the model through all of its ancestors.

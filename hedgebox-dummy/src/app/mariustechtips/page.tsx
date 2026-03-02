@@ -39,7 +39,7 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                         </div>
                     </div>
                     <h1 className="text-4xl font-bold mb-2">Marius' Tech Tips</h1>
-                    <p className="text-base-content/70 text-lg">Daily tips and tricks for tech-savvy hedgehogs</p>
+                    <p className="text-base-content/70 text-lg">Daily tips and tricks for tech-savvy mascots</p>
                 </div>
 
                 {/* Featured Article */}
@@ -50,19 +50,19 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                             🔥 5 File Sharing Mistakes That Could Cost You Your Spikes
                         </h2>
                         <div className="text-base-content/70 mb-6">
-                            <span>By Marius Hedgehog</span> • <span>December 15, 2024</span> • <span>5 min read</span>
+                            <span>By Marius Mascot</span> • <span>December 15, 2024</span> • <span>5 min read</span>
                         </div>
 
                         <div className="prose max-w-none">
                             <p className="text-lg mb-4">
-                                Hey fellow hedgehogs! 🦔 Today I'm sharing the most common file sharing mistakes I see
-                                in the hedgehog community. These errors can lead to lost files, security breaches, and
+                                Hey fellow mascots! 🦔 Today I'm sharing the most common file sharing mistakes I see
+                                in the mascot community. These errors can lead to lost files, security breaches, and
                                 even worse - detached spikes!
                             </p>
 
                             <h3 className="text-xl font-bold mb-3">1. Not Using Encrypted File Sharing</h3>
                             <p className="mb-4">
-                                Many hedgehogs still share files through unencrypted channels. This is like rolling down
+                                Many mascots still share files through unencrypted channels. This is like rolling down
                                 a hill without your protective spikes! Always ensure your file sharing platform uses
                                 end-to-end encryption.
                             </p>
@@ -85,7 +85,7 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                                     <h4 className="font-bold">Pro Tip from Marius:</h4>
                                     <p>
                                         Look for platforms that offer military-grade encryption. Your files should be as
-                                        protected as a hedgehog's vulnerable belly!
+                                        protected as a mascot's vulnerable belly!
                                     </p>
                                 </div>
                             </div>
@@ -99,7 +99,7 @@ export default function MariusTechTipsPage(): React.JSX.Element {
 
                             <h3 className="text-xl font-bold mb-3">3. Ignoring File Size Limits</h3>
                             <p className="mb-4">
-                                Large files can slow down your entire workflow. Optimize your hedgehog photos and burrow
+                                Large files can slow down your entire workflow. Optimize your mascot photos and burrow
                                 blueprints before sharing. Consider using compression or breaking large projects into
                                 smaller chunks.
                             </p>
@@ -110,16 +110,16 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <div className="card bg-base-100 shadow-sm">
                                         <div className="card-body">
-                                            <h5 className="card-title text-lg">10ft Hedgehog Garden Statue</h5>
-                                            <p className="text-sm">Show your hedgehog pride in your garden!</p>
+                                            <h5 className="card-title text-lg">10ft Mascot Garden Statue</h5>
+                                            <p className="text-sm">Show your mascot pride in your garden!</p>
                                             <div className="card-actions justify-end">
                                                 <Link
-                                                    href="https://shop.example.com/products/10ft-hedgehog-statue?utm_source=hedgebox&utm_medium=paid"
+                                                    href="https://shop.example.com/products/10ft-mascot-statue?utm_source=hedgebox&utm_medium=paid"
                                                     className="btn btn-primary btn-sm"
                                                     onClick={() =>
                                                         handleProductAdClick(
                                                             1,
-                                                            'https://shop.example.com/products/10ft-hedgehog-statue?utm_source=hedgebox&utm_medium=paid'
+                                                            'https://shop.example.com/products/10ft-mascot-statue?utm_source=hedgebox&utm_medium=paid'
                                                         )
                                                     }
                                                 >
@@ -132,7 +132,7 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                                     <div className="card bg-base-100 shadow-sm">
                                         <div className="card-body">
                                             <h5 className="card-title text-lg">Hedge-Watching Cruise</h5>
-                                            <p className="text-sm">Luxury cruise to observe hedgehogs in the wild!</p>
+                                            <p className="text-sm">Luxury cruise to observe mascots in the wild!</p>
                                             <div className="card-actions justify-end">
                                                 <Link
                                                     href="https://travel.example.com/cruise/hedge-watching?utm_source=hedgebox&utm_medium=paid"
@@ -155,13 +155,13 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                             <h3 className="text-xl font-bold mb-3">4. Not Backing Up Shared Files</h3>
                             <p className="mb-4">
                                 Always keep copies of important files. Cloud storage is great, but having multiple
-                                backups ensures you'll never lose those precious hedgehog family photos or important
+                                backups ensures you'll never lose those precious mascot family photos or important
                                 burrow documentation.
                             </p>
 
                             <h3 className="text-xl font-bold mb-3">5. Using Weak Passwords</h3>
                             <p className="mb-4">
-                                "hedgehog123" is NOT a secure password! Use complex passwords with a mix of letters,
+                                "mascot123" is NOT a secure password! Use complex passwords with a mix of letters,
                                 numbers, and symbols. Consider using a password manager to keep track of all your
                                 credentials.
                             </p>
@@ -187,7 +187,7 @@ export default function MariusTechTipsPage(): React.JSX.Element {
                                         <Link href="/" className="link link-primary font-semibold">
                                             Hedgebox
                                         </Link>
-                                        . It's built specifically for hedgehogs who take their file security seriously!
+                                        . It's built specifically for mascots who take their file security seriously!
                                     </p>
                                 </div>
                             </div>

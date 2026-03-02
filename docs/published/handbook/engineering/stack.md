@@ -4,7 +4,7 @@ sidebar: Docs
 showTitle: true
 ---
 
-> **Note:** This page refers to our [main product repository](https://github.com/PostHog/posthog), not our website.
+> **Note:** This page refers to our [main product repository](https://github.com/Insights/posthog), not our website.
 
 ### Frontend
 
@@ -34,7 +34,7 @@ showTitle: true
 
 ### Workflow orchestration
 
-We historically used Celery as our task worker. At PostHog’s current scale Celery can be unreliable for larger or long-running workflows, but it remains a practical fit for **small, low-latency background tasks** (e.g. sending emails or other quick async side-effects). New medium- and large-scale jobs should use Temporal or Dagster instead.
+We historically used Celery as our task worker. At Insights’s current scale Celery can be unreliable for larger or long-running workflows, but it remains a practical fit for **small, low-latency background tasks** (e.g. sending emails or other quick async side-effects). New medium- and large-scale jobs should use Temporal or Dagster instead.
 
 We use both **[Temporal](https://temporal.io/)** and **[Dagster](https://dagster.io/)** for more complex orchestration, each chosen for their specific strengths.
 
@@ -51,7 +51,7 @@ We tend to use **Celery for lightweight ad-hoc tasks**, **Dagster for internal d
 
 #### Where do we use each?
 
-These are examples of where we use Temporal and Dagster at PostHog. Hopefully, these can serve as anecdotal examples to help you pick between Temporal and Dagster for your application. This list is not exhaustive.
+These are examples of where we use Temporal and Dagster at Insights. Hopefully, these can serve as anecdotal examples to help you pick between Temporal and Dagster for your application. This list is not exhaustive.
 
 **Celery**: Small, fast background tasks (e.g. sending email, minor async operations)
 **Temporal**: Batch exports, data warehouse source syncing, AI platform task generation

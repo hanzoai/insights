@@ -1586,7 +1586,7 @@
                     "type": "string"
                 },
                 "query": {
-                    "description": "SQL SELECT statement to execute. Mostly standard ClickHouse SQL with PostHog-specific additions.",
+                    "description": "SQL SELECT statement to execute. Mostly standard ClickHouse SQL with Insights-specific additions.",
                     "type": "string"
                 }
             },
@@ -1709,7 +1709,7 @@
                 "errorTracking",
                 "experiments",
                 "featureFlags",
-                "game368hedgehogs",
+                "game368mascots",
                 "heatmaps",
                 "ingestionWarnings",
                 "insights",
@@ -11231,7 +11231,7 @@
             "required": ["fields", "id", "name", "query", "type"],
             "type": "object"
         },
-        "DatabaseSchemaPostHogTable": {
+        "DatabaseSchemaInsightsTable": {
             "additionalProperties": false,
             "properties": {
                 "fields": {
@@ -11377,7 +11377,7 @@
         "DatabaseSchemaTable": {
             "anyOf": [
                 {
-                    "$ref": "#/definitions/DatabaseSchemaPostHogTable"
+                    "$ref": "#/definitions/DatabaseSchemaInsightsTable"
                 },
                 {
                     "$ref": "#/definitions/DatabaseSchemaSystemTable"
@@ -17145,7 +17145,7 @@
             },
             "type": "object"
         },
-        "HedgehogActorAccessoryOption": {
+        "MascotActorAccessoryOption": {
             "enum": [
                 "beret",
                 "cap",
@@ -17166,11 +17166,11 @@
             ],
             "type": "string"
         },
-        "HedgehogActorColorOption": {
+        "MascotActorColorOption": {
             "enum": ["green", "red", "blue", "purple", "dark", "light", "greyscale", "sepia", "invert", "rainbow"],
             "type": "string"
         },
-        "HedgehogActorSkinOption": {
+        "MascotActorSkinOption": {
             "enum": ["default", "spiderhog", "robohog", "hogzilla", "ghost"],
             "type": "string"
         },
@@ -21754,19 +21754,19 @@
             "enum": ["campaigns"],
             "type": "string"
         },
-        "MinimalHedgehogConfig": {
+        "MinimalMascotConfig": {
             "additionalProperties": false,
             "properties": {
                 "accessories": {
                     "items": {
-                        "$ref": "#/definitions/HedgehogActorAccessoryOption"
+                        "$ref": "#/definitions/MascotActorAccessoryOption"
                     },
                     "type": "array"
                 },
                 "color": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/HedgehogActorColorOption"
+                            "$ref": "#/definitions/MascotActorColorOption"
                         },
                         {
                             "type": "null"
@@ -21776,7 +21776,7 @@
                 "skin": {
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/HedgehogActorSkinOption"
+                            "$ref": "#/definitions/MascotActorSkinOption"
                         },
                         {
                             "type": "null"
@@ -21955,7 +21955,7 @@
             "type": "object"
         },
         "NodeKind": {
-            "description": "PostHog Query Schema definition.\n\nThis file acts as the source of truth for:\n\n- frontend/src/queries/schema.json   - generated from typescript via \"pnpm --filter=@posthog/frontend run schema:build:json\"\n\n- posthog/schema.py   - generated from json the above json via \"pnpm -w run schema:build:python\"",
+            "description": "Insights Query Schema definition.\n\nThis file acts as the source of truth for:\n\n- frontend/src/queries/schema.json   - generated from typescript via \"pnpm --filter=@posthog/frontend run schema:build:json\"\n\n- posthog/schema.py   - generated from json the above json via \"pnpm -w run schema:build:python\"",
             "enum": [
                 "EventsNode",
                 "GroupNode",
@@ -23271,7 +23271,7 @@
                 },
                 "query": {
                     "$ref": "#/definitions/QuerySchema",
-                    "description": "Submit a JSON string representing a query for PostHog data analysis, for example a InsightsQL query.\n\nExample payload:\n\n```\n\n{\"query\": {\"kind\": \"InsightsQLQuery\", \"query\": \"select * from events limit 100\"}}\n\n```\n\nFor more details on InsightsQL queries, see the [PostHog InsightsQL documentation](/docs/insightsql#api-access)."
+                    "description": "Submit a JSON string representing a query for Insights data analysis, for example a InsightsQL query.\n\nExample payload:\n\n```\n\n{\"query\": {\"kind\": \"InsightsQLQuery\", \"query\": \"select * from events limit 100\"}}\n\n```\n\nFor more details on InsightsQL queries, see the [Insights InsightsQL documentation](/docs/insightsql#api-access)."
                 },
                 "refresh": {
                     "$ref": "#/definitions/RefreshType",
@@ -33074,8 +33074,8 @@
                 "first_name": {
                     "type": "string"
                 },
-                "hedgehog_config": {
-                    "$ref": "#/definitions/MinimalHedgehogConfig"
+                "mascot_config": {
+                    "$ref": "#/definitions/MinimalMascotConfig"
                 },
                 "id": {
                     "type": "number"

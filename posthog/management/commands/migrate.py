@@ -35,7 +35,7 @@ from common.migration_utils import (
 
 
 def get_managed_apps() -> set[str]:
-    """Get apps we manage migrations for (PostHog apps, not third-party)."""
+    """Get apps we manage migrations for (Insights apps, not third-party)."""
     try:
         return get_managed_app_names(Path(settings.BASE_DIR))
     except Exception as e:

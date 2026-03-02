@@ -245,7 +245,7 @@ const FilterGroupValues = ({ allowInitiallyOpen }: { allowInitiallyOpen: boolean
                         filter={filterOrGroup}
                         onRemove={() => removeGroupValue(index)}
                         onChange={(value) => replaceGroupValue(index, value)}
-                        initiallyOpen={allowInitiallyOpen && filterOrGroup.type != PropertyFilterType.HogQL}
+                        initiallyOpen={allowInitiallyOpen && filterOrGroup.type != PropertyFilterType.InsightsQL}
                     />
                 )
             })}

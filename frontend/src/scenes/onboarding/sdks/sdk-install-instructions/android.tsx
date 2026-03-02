@@ -33,8 +33,8 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
     override fun onCreate() {
         super.onCreate()
 
-        // Create a PostHog Config with the given API key and host
-        val config = PostHogAndroidConfig(
+        // Create an Insights Config with the given API key and host
+        val config = InsightsAndroidConfig(
             apiKey = POSTHOG_API_KEY,
             host = POSTHOG_HOST
         )
@@ -54,8 +54,8 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
                 : ''
         }
 
-        // Setup PostHog with the given Context and Config
-        PostHogAndroid.setup(this, config)
+        // Setup Insights with the given Context and Config
+        InsightsAndroid.setup(this, config)
     }
 }`}
         </CodeSnippet>
@@ -77,15 +77,15 @@ export function SDKInstallAndroidTrackScreenInstructions(): JSX.Element {
     return (
         <>
             <p>
-                With <code>captureScreenViews = true</code>, PostHog will try to record all screen changes
+                With <code>captureScreenViews = true</code>, Insights will try to record all screen changes
                 automatically.
             </p>
             <p>
                 If you want to manually send a new screen capture event, use the <code>screen</code> function.
             </p>
-            <CodeSnippet language={Language.Kotlin}>{`import com.posthog.PostHog
+            <CodeSnippet language={Language.Kotlin}>{`import com.posthog.Insights
 
-PostHog.screen(
+Insights.screen(
     screenTitle = "Dashboard",
     properties = mapOf(
         "background" to "blue",

@@ -108,7 +108,7 @@ export function EventConfigurationModal({ event, onClose }: EventConfigurationMo
                 <div className="space-y-4">
                     {!originalEvent && (
                         <LemonBanner type="info" className="text-sm">
-                            <strong>How it works:</strong> PostHog will track this event and use these properties for
+                            <strong>How it works:</strong> Insights will track this event and use these properties for
                             revenue calculations. You can always modify these settings later.
                         </LemonBanner>
                     )}

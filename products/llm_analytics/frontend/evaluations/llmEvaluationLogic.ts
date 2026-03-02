@@ -447,7 +447,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
         },
 
         setSelectedProvider: ({ provider }) => {
-            // When provider changes, auto-select user's first key if they have one, otherwise use PostHog default
+            // When provider changes, auto-select user's first key if they have one, otherwise use Insights default
             const keysForProvider = values.providerKeysByProvider[provider] || []
             const keyId = keysForProvider.length > 0 ? keysForProvider[0].id : null
             actions.loadAvailableModels({ provider, keyId })
@@ -483,11 +483,11 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
             }
             // Auto-select the first available model if none selected
             if (!values.selectedModel && availableModels.length > 0) {
-                // When using PostHog key (no selectedKeyId), pick first PostHog-available model
+                // When using Insights key (no selectedKeyId), pick first Insights-available model
                 if (!values.selectedKeyId) {
-                    const firstPostHogModel = availableModels.find((m: AvailableModel) => m.posthog_available)
-                    if (firstPostHogModel) {
-                        actions.setSelectedModel(firstPostHogModel.id)
+                    const firstInsightsModel = availableModels.find((m: AvailableModel) => m.posthog_available)
+                    if (firstInsightsModel) {
+                        actions.setSelectedModel(firstInsightsModel.id)
                     }
                 } else {
                     actions.setSelectedModel(availableModels[0].id)

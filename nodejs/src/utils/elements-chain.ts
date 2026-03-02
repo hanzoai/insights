@@ -1,6 +1,6 @@
 import { Element } from '../types'
 import { escapeQuotes } from './db/utils'
-import { captureException } from './posthog'
+import { captureException } from './insights'
 import { createTrackedRE2 } from './tracked-re2'
 
 // Below splits all elements by ;, while ignoring escaped quotes and semicolons within quotes

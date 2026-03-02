@@ -23,20 +23,20 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
             eventType,
             enabled,
         }),
-        setHidePostHogProperties: (hide: boolean) => ({ hide }),
-        setHidePostHogFlags: (hide: boolean) => ({ hide }),
+        setHideInsightsProperties: (hide: boolean) => ({ hide }),
+        setHideInsightsFlags: (hide: boolean) => ({ hide }),
     }),
     reducers({
-        hidePostHogProperties: [
+        hideInsightsProperties: [
             false,
             {
-                setHidePostHogProperties: (_, { hide }) => hide,
+                setHideInsightsProperties: (_, { hide }) => hide,
             },
         ],
-        hidePostHogFlags: [
+        hideInsightsFlags: [
             false,
             {
-                setHidePostHogFlags: (_, { hide }) => hide,
+                setHideInsightsFlags: (_, { hide }) => hide,
             },
         ],
         searchText: [
@@ -134,8 +134,8 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
         ],
 
         expandedProperties: [
-            (s) => [s.expandedEvent, s.events, s.hidePostHogProperties, s.hidePostHogFlags],
-            (expandedEvent, events, hidePostHogProperties, hidePostHogFlags) => {
+            (s) => [s.expandedEvent, s.events, s.hideInsightsProperties, s.hideInsightsFlags],
+            (expandedEvent, events, hideInsightsProperties, hideInsightsFlags) => {
                 if (!expandedEvent) {
                     return []
                 }
@@ -144,17 +144,17 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
                     return []
                 }
 
-                const posthogPropertiesFiltered = hidePostHogProperties
+                const posthogPropertiesFiltered = hideInsightsProperties
                     ? Object.fromEntries(
                           Object.entries(allProperties).filter(([key]) => {
-                              const isPostHogProperty = key.startsWith('$') && PROPERTY_KEYS.includes(key)
-                              const isNonDollarPostHogProperty = CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(key)
-                              return !isPostHogProperty && !isNonDollarPostHogProperty
+                              const isInsightsProperty = key.startsWith('$') && PROPERTY_KEYS.includes(key)
+                              const isNonDollarInsightsProperty = CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(key)
+                              return !isInsightsProperty && !isNonDollarInsightsProperty
                           })
                       )
                     : allProperties
 
-                const posthogFlagsFiltered = hidePostHogFlags
+                const posthogFlagsFiltered = hideInsightsFlags
                     ? Object.fromEntries(
                           Object.entries(posthogPropertiesFiltered).filter(([key]) => {
                               if (key === '$active_feature_flags') {

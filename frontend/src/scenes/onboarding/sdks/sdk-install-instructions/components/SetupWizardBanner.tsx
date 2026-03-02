@@ -40,7 +40,7 @@ const SetupWizardBanner = ({
                     <LemonTag type="warning">BETA</LemonTag> AI setup wizard
                 </h3>
                 <div className="flex flex-col p-2">
-                    <p className="font-normal pb-1">Try using the AI setup wizard to automatically install PostHog.</p>
+                    <p className="font-normal pb-1">Try using the AI setup wizard to automatically install Insights.</p>
                     <p className="font-normal pb-2">
                         Run the following command from the root of your {integrationName} project.
                     </p>

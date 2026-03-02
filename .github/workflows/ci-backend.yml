@@ -709,7 +709,7 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Get app token for OpenAPI type commits
-              if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog'
+              if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'Insights/posthog'
               id: openapi-app-token
               uses: getsentry/action-github-app-token@d4b5da6c5e37703f8c3b3e43abb5705b46e159cc # v3.0.0
               with:
@@ -737,7 +737,7 @@ jobs:
 
                   # On non-PR builds or fork PRs, fail with instructions
                   if [ "$EVENT_NAME" != "pull_request" ] || \
-                     [ "$HEAD_REPO" != "PostHog/posthog" ]; then
+                     [ "$HEAD_REPO" != "Insights/posthog" ]; then
                       echo ""
                       echo "::error::OpenAPI types are out of date!"
                       echo ""
@@ -1247,14 +1247,14 @@ jobs:
 
             - name: Verify new snapshots for flakiness
               # Only in UPDATE mode - CHECK mode doesn't update snapshots
-              if: ${{ needs.detect-snapshot-mode.outputs.mode == 'update' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events }}
+              if: ${{ needs.detect-snapshot-mode.outputs.mode == 'update' && github.event.pull_request.head.repo.full_name == 'Insights/posthog' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events }}
               shell: bash
               run: |
                   .github/scripts/verify-new-snapshots.sh
 
             - name: Generate snapshot patch
               # Only in UPDATE mode - CHECK mode verifies snapshots match exactly
-              if: ${{ needs.detect-snapshot-mode.outputs.mode == 'update' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events }}
+              if: ${{ needs.detect-snapshot-mode.outputs.mode == 'update' && github.event.pull_request.head.repo.full_name == 'Insights/posthog' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events }}
               shell: bash
               run: |
                   mkdir -p /tmp/patches
@@ -1270,7 +1270,7 @@ jobs:
 
             - name: Upload snapshot patch
               # Only in UPDATE mode
-              if: ${{ needs.detect-snapshot-mode.outputs.mode == 'update' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events }}
+              if: ${{ needs.detect-snapshot-mode.outputs.mode == 'update' && github.event.pull_request.head.repo.full_name == 'Insights/posthog' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events }}
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               with:
                   name: snapshot-patch-${{ matrix.segment }}-${{ matrix.group }}
@@ -1397,7 +1397,7 @@ jobs:
         needs: [changes, detect-snapshot-mode, django]
         # Only in UPDATE mode - CHECK mode verifies snapshots match exactly
         # Run even if some matrix jobs failed (to commit snapshots from passing jobs)
-        if: ${{ always() && needs.detect-snapshot-mode.outputs.mode == 'update' && needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog' }}
+        if: ${{ always() && needs.detect-snapshot-mode.outputs.mode == 'update' && needs.changes.outputs.backend == 'true' && github.event.pull_request.head.repo.full_name == 'Insights/posthog' }}
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -1633,13 +1633,13 @@ jobs:
         name: Calculate running time
         needs: [django_tests, async-migrations]
         runs-on: ubuntu-latest
-        if: # Run on pull requests to PostHog/posthog + on PostHog/posthog outside of PRs - but never on forks or Dependabot (no secrets access)
+        if: # Run on pull requests to Insights/posthog + on Insights/posthog outside of PRs - but never on forks or Dependabot (no secrets access)
             always() && github.actor != 'dependabot[bot]' && (
-            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'PostHog/posthog') ||
-            (github.event_name != 'pull_request' && github.repository == 'PostHog/posthog'))
+            (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == 'Insights/posthog') ||
+            (github.event_name != 'pull_request' && github.repository == 'Insights/posthog'))
         steps:
-            - name: Capture running time to PostHog
-              uses: PostHog/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
+            - name: Capture running time to Insights
+              uses: Insights/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
               with:
                   posthog-token: ${{ secrets.POSTHOG_API_TOKEN }}
                   event: 'posthog-ci-running-time'

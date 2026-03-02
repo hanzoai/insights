@@ -18,13 +18,13 @@ function LaravelInstallSnippet(): JSX.Element {
 namespace App\\Providers;
 
 use Illuminate\\Support\\ServiceProvider;
-use PostHog\\PostHog;
+use Insights\\Insights;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        PostHog::init(
+        Insights::init(
             '${currentTeam?.api_token}',
             [
                 'host' => '${apiHostOrigin()}'
@@ -44,7 +44,7 @@ export function SDKInstallLaravelInstructions(): JSX.Element {
             <LaravelConfigSnippet />
             <h3>Configure</h3>
             <p>
-                Initialize PostHog in the <code>boot</code> method of <code>app/Providers/AppServiceProvider.php</code>
+                Initialize Insights in the <code>boot</code> method of <code>app/Providers/AppServiceProvider.php</code>
             </p>
             <LaravelInstallSnippet />
         </>

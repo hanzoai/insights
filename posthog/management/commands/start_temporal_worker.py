@@ -11,7 +11,7 @@ from collections import defaultdict
 import structlog
 from temporalio import workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 with workflow.unsafe.imports_passed_through():
     from django.conf import settings
@@ -273,7 +273,7 @@ _task_queue_specs = [
 # the same queue. We aggregate with defaultdict(set) so all workflows/activities
 # registered for a shared queue name are combined, ensuring the worker registers
 # everything it should.
-_workflows: defaultdict[str, set[type[PostHogWorkflow]]] = defaultdict(set)
+_workflows: defaultdict[str, set[type[InsightsWorkflow]]] = defaultdict(set)
 _activities: defaultdict[str, set[typing.Callable[..., typing.Any]]] = defaultdict(set)
 for task_queue_name, workflows_for_queue, activities_for_queue in _task_queue_specs:
     _workflows[task_queue_name].update(workflows_for_queue)  # type: ignore

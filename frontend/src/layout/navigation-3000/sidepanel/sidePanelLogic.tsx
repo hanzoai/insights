@@ -73,7 +73,7 @@ export const sidePanelLogic = kea<sidePanelLogicType>([
             (isCloudOrDev, sceneSidePanelContext, currentTeam) => {
                 const tabs: SidePanelTab[] = []
 
-                /* Always show PostHog AI at the top of the tabs list
+                /* Always show Insights AI at the top of the tabs list
                  * ALL DEVS, add an F for Max if you are here and you see this:
                  *  F
                  */

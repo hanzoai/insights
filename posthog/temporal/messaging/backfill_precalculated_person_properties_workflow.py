@@ -12,7 +12,7 @@ from structlog.contextvars import bind_contextvars
 from posthog.clickhouse.query_tagging import Feature, Product, tags_context
 from posthog.kafka_client.client import KafkaProducer
 from posthog.kafka_client.topics import KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger
@@ -373,7 +373,7 @@ async def backfill_precalculated_person_properties_activity(
 
 
 @temporalio.workflow.defn(name="backfill-precalculated-person-properties")
-class BackfillPrecalculatedPersonPropertiesWorkflow(PostHogWorkflow):
+class BackfillPrecalculatedPersonPropertiesWorkflow(InsightsWorkflow):
     """Workflow that backfills precalculated person properties for a cohort."""
 
     @staticmethod

@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { LemonButton, LemonModal, Link } from '@posthog/lemon-ui'
 
-import { BigLeaguesHog } from 'lib/components/hedgehogs'
+import { BigLeaguesHog } from 'lib/components/mascots'
 import { BillingAddonFeaturesList } from 'scenes/billing/BillingAddonFeaturesList'
 import { BillingProductAddonActions } from 'scenes/billing/BillingProductAddonActions'
 import { billingProductLogic } from 'scenes/billing/billingProductLogic'

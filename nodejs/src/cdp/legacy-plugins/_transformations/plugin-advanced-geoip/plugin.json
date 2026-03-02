@@ -1,7 +1,7 @@
 {
     "name": "Advanced GeoIP",
     "url": "https://github.com/paolodamico/posthog-app-advanced-geoip",
-    "description": "Advanced GeoIP filtering app for PostHog",
+    "description": "Advanced GeoIP filtering app for Insights",
     "main": "index.ts",
     "posthogVersion": ">=1.25.0",
     "config": [

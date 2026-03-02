@@ -7,9 +7,9 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.visitor import CloningVisitor
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.visitor import CloningVisitor
 
 from posthog.exceptions_capture import capture_exception
 from posthog.models.team import Team
@@ -169,7 +169,7 @@ class EndpointVersion(models.Model):
         query_kind = self.query.get("kind") if self.query else None
 
         MATERIALIZABLE_QUERY_TYPES = {
-            "HogQLQuery",
+            "InsightsQLQuery",
             "TrendsQuery",
             "FunnelsQuery",
             "LifecycleQuery",
@@ -186,7 +186,7 @@ class EndpointVersion(models.Model):
             )
 
         # Check for multiple breakdowns in insight queries
-        if query_kind != "HogQLQuery":
+        if query_kind != "InsightsQLQuery":
             breakdown_filter = self.query.get("breakdownFilter") or {}
             breakdowns = breakdown_filter.get("breakdowns") or []
             if len(breakdowns) > 1:
@@ -200,9 +200,9 @@ class EndpointVersion(models.Model):
             if not can_materialize:
                 return False, f"Variables not supported: {reason}"
 
-        if query_kind == "HogQLQuery":
-            hogql_query = self.query.get("query")
-            if not hogql_query or not isinstance(hogql_query, str):
+        if query_kind == "InsightsQLQuery":
+            insightsql_query = self.query.get("query")
+            if not insightsql_query or not isinstance(insightsql_query, str):
                 return False, "Query is empty or invalid."
 
         return True, ""
@@ -210,27 +210,27 @@ class EndpointVersion(models.Model):
     @staticmethod
     def extract_columns(query: dict, team_id: int) -> list[dict]:
         """Extract SELECT column names and types by describing the query against ClickHouse."""
-        if query.get("kind") != "HogQLQuery":
+        if query.get("kind") != "InsightsQLQuery":
             return []
-        hogql_string = query.get("query", "")
-        if not hogql_string:
+        insightsql_string = query.get("query", "")
+        if not insightsql_string:
             return []
         try:
-            from posthog.hogql.query import HogQLQueryExecutor
+            from posthog.insightsql.query import InsightsQLQueryExecutor
 
             from posthog.clickhouse.client import sync_execute
 
-            parsed = parse_select(hogql_string)
+            parsed = parse_select(insightsql_string)
             cleaned = _PLACEHOLDER_REPLACER.visit(parsed)
 
             team = Team.objects.get(pk=team_id)
-            executor = HogQLQueryExecutor(query=cleaned, team=team, limit_context=None)
+            executor = InsightsQLQueryExecutor(query=cleaned, team=team, limit_context=None)
             clickhouse_sql, clickhouse_context = executor.generate_clickhouse_sql()
 
             if not clickhouse_sql:
                 return []
 
-            # nosemgrep: clickhouse-fstring-param-audit (clickhouse_sql is compiler output from HogQLQueryExecutor, not user input)
+            # nosemgrep: clickhouse-fstring-param-audit (clickhouse_sql is compiler output from InsightsQLQueryExecutor, not user input)
             rows = sync_execute(
                 f"DESCRIBE TABLE ({clickhouse_sql})",
                 clickhouse_context.values,

@@ -19,7 +19,7 @@ export function AILiabilityNotice(): JSX.Element | null {
     return (
         <div className="flex flex-col mb-2 max-w-160 w-full px-3">
             <LemonBanner type="ai" onClose={dismissLiabilityNotice}>
-                PostHog AI uses third-party LLM providers (OpenAI and Anthropic). Your data will not be used for
+                Insights AI uses third-party LLM providers (OpenAI and Anthropic). Your data will not be used for
                 training models.
                 {isAdminOrOwner && (
                     <>

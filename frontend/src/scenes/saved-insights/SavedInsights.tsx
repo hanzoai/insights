@@ -288,7 +288,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.DatabaseSchemaQuery]: {
         name: 'Database Schema',
-        description: 'Introspect the PostHog database schema.',
+        description: 'Introspect the Insights database schema.',
         icon: IconInsightsQL,
         inMenu: true,
     },
@@ -370,7 +370,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         icon: IconTrends,
         inMenu: true,
     },
-    [NodeKind.HogQuery]: {
+    [NodeKind.ScriptQuery]: {
         name: 'Hog',
         description: 'Custom query.',
         icon: IconInsightsQL,

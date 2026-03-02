@@ -1,7 +1,7 @@
 """OpenRouter provider for unified LLM client.
 
 OpenRouter is an LLM gateway with an OpenAI-compatible API that exposes models
-from many providers. It is BYOKEY-only (no PostHog trial key).
+from many providers. It is BYOKEY-only (no Insights trial key).
 """
 
 import logging
@@ -25,7 +25,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 # For App Attribution
 OPENROUTER_HEADERS = {
     "HTTP-Referer": "https://posthog.com",
-    "X-Title": "PostHog",
+    "X-Title": "Insights",
 }
 
 

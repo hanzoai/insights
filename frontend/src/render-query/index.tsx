@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client'
 
 import { initKea } from '~/initKea'
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
-import { loadPostHogJS } from '~/loadPostHogJS'
+import { loadInsightsJS } from '~/loadInsightsJS'
 
 import { RenderQueryApp } from './RenderQueryApp'
 
@@ -14,13 +14,13 @@ import { RenderQueryApp } from './RenderQueryApp'
 // Without this, embeds would send events to app.posthog.com.
 window.JS_POSTHOG_API_KEY = undefined
 
-loadPostHogJS()
+loadInsightsJS()
 initKea({ replaceInitialPathInWindow: false })
 
 function renderApp(): void {
     const root = document.getElementById('root')
     if (!root) {
-        console.error('Attempted to render PostHog render_query app but #root was not found.')
+        console.error('Attempted to render Insights render_query app but #root was not found.')
         return
     }
 

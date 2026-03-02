@@ -21,7 +21,7 @@ const meta: Meta<typeof TaxonomicFilter> = {
         docs: {
             description: {
                 component:
-                    'Taxonomic Filter allows users to select from various categories of data in PostHog, like events, actions, properties, etc. It supports both horizontal and vertical (columnar) layouts.',
+                    'Taxonomic Filter allows users to select from various categories of data in Insights, like events, actions, properties, etc. It supports both horizontal and vertical (columnar) layouts.',
             },
         },
     },
@@ -57,7 +57,7 @@ EventsFree.args = {
 EventsFree.parameters = {
     docs: {
         description: {
-            story: 'Basic TaxonomicFilter with Events and Actions tabs in the free version of PostHog.',
+            story: 'Basic TaxonomicFilter with Events and Actions tabs in the free version of Insights.',
         },
     },
 }
@@ -73,7 +73,7 @@ EventsPremium.args = {
 EventsPremium.parameters = {
     docs: {
         description: {
-            story: 'TaxonomicFilter with Events and Actions tabs in the premium version of PostHog with INGESTION_TAXONOMY feature enabled.',
+            story: 'TaxonomicFilter with Events and Actions tabs in the premium version of Insights with INGESTION_TAXONOMY feature enabled.',
         },
     },
 }

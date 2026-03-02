@@ -1,6 +1,6 @@
 import api from 'lib/api'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import { Cluster, ClusterMetrics, ClusteringLevel } from './types'
 
@@ -41,9 +41,9 @@ export async function loadClusterMetrics(
     // (generations, embeddings, spans) grouped by trace ID.
     const isGeneration = level === 'generation'
 
-    const response = await api.queryHogQL(
+    const response = await api.queryInsightsQL(
         isGeneration
-            ? hogql`
+            ? insightsql`
                 SELECT
                     toString(uuid) as item_id,
                     toFloat(properties.$ai_total_cost_usd) as cost,
@@ -58,7 +58,7 @@ export async function loadClusterMetrics(
                     AND toString(uuid) IN ${allItemIds}
                 LIMIT ${allItemIds.length}
             `
-            : hogql`
+            : insightsql`
                 SELECT
                     JSONExtractString(properties, '$ai_trace_id') as item_id,
                     sum(toFloat(properties.$ai_total_cost_usd)) as cost,

@@ -72,7 +72,7 @@ export function CustomFunctionConfiguration({
     }
 
     const templateInfo =
-        customFunction?.template?.code_language === 'hog' &&
+        customFunction?.template?.code_language === 'custom_script' &&
         customFunction?.template &&
         !customFunction.template.id.startsWith('template-blank-') ? (
             <LemonDropdown showArrow overlay={<CustomFunctionTemplateOptions />}>

@@ -21,8 +21,8 @@ class TestTemplateKlaviyoUser(BaseCustomFunctionTemplateTest):
             "customProperties": {
                 "first_name": "Max",
                 "last_name": "AI",
-                "title": "Hedgehog in Residence",
-                "organization": "PostHog",
+                "title": "Mascot in Residence",
+                "organization": "Insights",
                 "phone_number": "+0123456789",
             },
         }
@@ -55,8 +55,8 @@ class TestTemplateKlaviyoUser(BaseCustomFunctionTemplateTest):
                             "properties": {
                                 "first_name": "Max",
                                 "last_name": "AI",
-                                "title": "Hedgehog in Residence",
-                                "organization": "PostHog",
+                                "title": "Mascot in Residence",
+                                "organization": "Insights",
                                 "phone_number": "+0123456789",
                             },
                             "email": "max@posthog.com",
@@ -76,8 +76,8 @@ class TestTemplateKlaviyoUser(BaseCustomFunctionTemplateTest):
         assert self.get_mock_fetch_calls()[0][1]["body"]["data"]["attributes"]["properties"] == {
             "first_name": "Max",
             "last_name": "AI",
-            "title": "Hedgehog in Residence",
-            "organization": "PostHog",
+            "title": "Mascot in Residence",
+            "organization": "Insights",
             "phone_number": "+0123456789",
         }
 
@@ -88,8 +88,8 @@ class TestTemplateKlaviyoUser(BaseCustomFunctionTemplateTest):
         assert self.get_mock_fetch_calls()[0][1]["body"]["data"]["attributes"]["properties"] == {
             "first_name": "Max",
             "last_name": "AI",
-            "title": "Hedgehog in Residence",
-            "organization": "PostHog",
+            "title": "Mascot in Residence",
+            "organization": "Insights",
             "phone_number": "+0123456789",
             "plan": "pay-as-you-go",
         }

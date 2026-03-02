@@ -7,7 +7,7 @@ import { dayjs } from 'lib/dayjs'
 import { urls } from 'scenes/urls'
 
 import type { batchWorkflowJobsLogicType } from './batchWorkflowJobsLogicType'
-import { HogFlowBatchJob } from './hogflows/types'
+import { CustomFlowBatchJob } from './customflows/types'
 
 export interface BatchWorkflowJobsLogicProps {
     id?: string
@@ -19,14 +19,14 @@ export const batchWorkflowJobsLogic = kea<batchWorkflowJobsLogicType>([
     key((props) => props.id || 'new'),
     lazyLoaders(({ props }) => ({
         batchWorkflowJobs: [
-            null as HogFlowBatchJob[] | null,
+            null as CustomFlowBatchJob[] | null,
             {
                 loadBatchWorkflowJobs: async () => {
                     if (!props.id || props.id === 'new') {
                         return null
                     }
 
-                    return api.hogFlows.getHogFlowBatchJobs(props.id)
+                    return api.customFlows.getCustomFlowBatchJobs(props.id)
                 },
             },
         ],

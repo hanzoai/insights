@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'beta',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Create ClickUp tasks from event data',
     icon_url: '/static/services/clickup.svg',
     category: ['Productivity'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 let res := fetch(f'https://api.clickup.com/api/v2/list/{inputs.listId}/task', {
   'headers': {

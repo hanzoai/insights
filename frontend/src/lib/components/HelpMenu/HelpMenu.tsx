@@ -126,9 +126,9 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                             <span className="size-3 [&>svg]:size-4 mb-3">
                                                 <IconSparkles className="text-ai" />
                                             </span>
-                                            <span className="text-sm font-medium">Ask PostHog AI</span>
+                                            <span className="text-sm font-medium">Ask Insights AI</span>
                                             <span className="text-xs text-tertiary text-center text-pretty">
-                                                PostHog AI answers 80%+ of support questions we receive!
+                                                Insights AI answers 80%+ of support questions we receive!
                                             </span>
                                         </Link>
                                     )}
@@ -201,12 +201,12 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                         render={(props) => (
                                             <Link
                                                 {...props}
-                                                to={urls.moveToPostHogCloud()}
+                                                to={urls.moveToInsightsCloud()}
                                                 buttonProps={{ menuItem: true }}
                                                 data-attr="help-menu-upgrade-to-cloud-button"
                                             >
                                                 <IconConfetti />
-                                                Try PostHog Cloud
+                                                Try Insights Cloud
                                             </Link>
                                         )}
                                     />
@@ -387,7 +387,7 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                             render={
                                                 <ButtonPrimitive
                                                     menuItem
-                                                    tooltip="This is your dedicated PostHog human. Click to copy their email. They can help you with trying out new products, solving problems, and reducing your spend."
+                                                    tooltip="This is your dedicated Insights human. Click to copy their email. They can help you with trying out new products, solving problems, and reducing your spend."
                                                     tooltipPlacement="right"
                                                     data-attr="help-menu-account-owner-button"
                                                 >

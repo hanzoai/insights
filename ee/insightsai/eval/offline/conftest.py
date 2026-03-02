@@ -24,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field, SkipValidation
 from posthog.models import Organization, User
 from posthog.ph_client import get_client
 
-# We want the PostHog set_up_evals fixture here
+# We want the Insights set_up_evals fixture here
 from ee.hogai.eval.conftest import set_up_evals  # noqa: F401
 from ee.hogai.eval.offline.snapshot_loader import SnapshotLoader
 from ee.hogai.eval.schema import DatasetInput, EvalsDockerImageConfig

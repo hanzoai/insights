@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 /**
@@ -91,7 +91,7 @@ export const NullEnumApi = {} as const
 /**
  * @nullable
  */
-export type UserBasicApiHedgehogConfig = { [key: string]: unknown } | null | null
+export type UserBasicApiMascotConfig = { [key: string]: unknown } | null | null
 
 export interface UserBasicApi {
     readonly id: number
@@ -110,7 +110,7 @@ export interface UserBasicApi {
     /** @nullable */
     is_email_verified?: boolean | null
     /** @nullable */
-    readonly hedgehog_config: UserBasicApiHedgehogConfig
+    readonly mascot_config: UserBasicApiMascotConfig
     role_at_organization?: RoleAtOrganizationEnumApi | BlankEnumApi | NullEnumApi | null
 }
 
@@ -266,7 +266,7 @@ export interface ClusteringRunRequestApi {
 * `pca` - pca
 * `tsne` - tsne */
     visualization_method?: VisualizationMethodEnumApi
-    /** Property filters to scope which traces are included in clustering (PostHog standard format) */
+    /** Property filters to scope which traces are included in clustering (Insights standard format) */
     event_filters?: ClusteringRunRequestApiEventFiltersItem[]
 }
 

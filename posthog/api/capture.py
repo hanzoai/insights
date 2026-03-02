@@ -50,7 +50,7 @@ def capture_internal(
 ) -> Response:
     """
     capture_internal submits a single-event capture request payload to the capture-rs backend service.
-    This is the preferred method for publishing events from the Django app on behalf of non-PostHog admin
+    This is the preferred method for publishing events from the Django app on behalf of non-Insights admin
     teams/projects. PLEASE DO NOT write events directly to ingestion Kafka topics - USE THIS!
 
     Args:
@@ -115,7 +115,7 @@ def capture_batch_internal(
 ) -> list[Future]:
     """
     capture_batch_internal submits multiple capture request payloads to
-    PostHog (capture-rs backend) concurrently. capture_batch_internal does
+    Insights (capture-rs backend) concurrently. capture_batch_internal does
     not submit single requests to the capture /batch/ endpoint, so historical
     event submission is not supported.
 

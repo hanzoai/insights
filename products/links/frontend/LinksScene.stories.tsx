@@ -28,7 +28,7 @@ const LINKS_RESULT: LinkType[] = [
         redirect_url: 'https://www.posthog.com',
         short_link_domain: 'phog.gg',
         short_code: 'posthog',
-        description: 'Test link for PostHog',
+        description: 'Test link for Insights',
         created_at: '2023-04-27T11:29:30.798968Z',
         updated_at: '2023-04-27T11:29:30.798968Z',
         created_by: {

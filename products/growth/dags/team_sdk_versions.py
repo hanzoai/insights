@@ -7,10 +7,10 @@ import dagster
 import structlog
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from posthog.schema import HogQLQueryResponse
+from posthog.schema import InsightsQLQueryResponse
 
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.query_tagging import Product, tags_context
 from posthog.dags.common import JobOwners
@@ -47,10 +47,10 @@ QUERY = parse_select("""
 
 # Avoid flakiness with ClickHouse by retrying this 2 more times if it fails
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=10))
-def run_query(team: Team) -> HogQLQueryResponse:
+def run_query(team: Team) -> InsightsQLQueryResponse:
     query_type = "sdk_versions_for_team"
     with tags_context(product=Product.SDK_DOCTOR, team_id=team.pk, org_id=team.organization_id, query_type=query_type):
-        response = execute_hogql_query(QUERY, team, query_type=query_type)
+        response = execute_insightsql_query(QUERY, team, query_type=query_type)
     return response
 
 

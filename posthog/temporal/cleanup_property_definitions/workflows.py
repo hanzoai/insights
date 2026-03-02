@@ -15,11 +15,11 @@ from posthog.temporal.cleanup_property_definitions.types import (
     DeletePostgresPropertyDefinitionsInput,
     PreviewPropertyDefinitionsInput,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 
 @workflow.defn(name="cleanup-property-definitions")
-class CleanupPropertyDefinitionsWorkflow(PostHogWorkflow):
+class CleanupPropertyDefinitionsWorkflow(InsightsWorkflow):
     """Workflow to clean up person property definitions matching a regex pattern.
 
     This workflow deletes property definitions from both PostgreSQL and ClickHouse.

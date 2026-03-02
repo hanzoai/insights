@@ -20,7 +20,7 @@ import {
 } from '../../types'
 import { stringToBoolean } from '../../utils/env-utils'
 import { mutatePostIngestionEventWithElementsList } from '../../utils/event'
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { createTrackedRE2 } from '../../utils/tracked-re2'
 import { stringify } from '../../utils/utils'
 import { ActionManager } from './action-manager'
@@ -60,7 +60,7 @@ export function castingCompare(
     // Do null transformation first
     // Clickhouse treats the string "null" as null, while here we treat them as different values
     // Thus, this check special cases the string "null" to be equal to the null value
-    // See more: https://github.com/PostHog/posthog/issues/12893
+    // See more: https://github.com/Insights/insights/issues/12893
     if (a === null) {
         a = 'null'
     }

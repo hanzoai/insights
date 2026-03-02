@@ -10,7 +10,7 @@ import {
     authorizedUrlListLogic,
     defaultAuthorizedUrlProperties,
 } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
-import { PostHogAppToolbarEvent, calculateViewportRange } from 'lib/components/IframedToolbarBrowser/utils'
+import { InsightsAppToolbarEvent, calculateViewportRange } from 'lib/components/IframedToolbarBrowser/utils'
 import { heatmapDataLogic } from 'lib/components/heatmaps/heatmapDataLogic'
 import { CommonFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
 import { LemonBannerProps } from 'lib/lemon-ui/LemonBanner'
@@ -93,7 +93,7 @@ export const heatmapsBrowserLogic = kea<heatmapsBrowserLogicType>([
         setDataUrl: (url: string | null) => ({ url }),
         setDisplayUrl: (url: string | null) => ({ url }),
         onIframeLoad: true,
-        sendToolbarMessage: (type: PostHogAppToolbarEvent, payload?: Record<string, any>) => ({
+        sendToolbarMessage: (type: InsightsAppToolbarEvent, payload?: Record<string, any>) => ({
             type,
             payload,
         }),
@@ -248,7 +248,7 @@ export const heatmapsBrowserLogic = kea<heatmapsBrowserLogicType>([
                     // must be something that can be parsed as a URL
                     new URL(dataUrl)
                     // and must be a valid URL that our redirects can cope with
-                    // this is a very loose check, but `http:/blaj` is not valid for PostHog
+                    // this is a very loose check, but `http:/blaj` is not valid for Insights
                     // but survives new URL(http:/blaj)
                     return dataUrl.includes('://')
                 } catch {

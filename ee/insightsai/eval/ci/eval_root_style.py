@@ -20,11 +20,11 @@ class StyleChecker(LLMClassifier):
         super().__init__(
             name="style_checker",
             prompt_template="""
-You are evaluating the communication style of PostHog's AI assistant. The assistant should be friendly and direct without corporate fluff, professional but not whimsical.
+You are evaluating the communication style of Insights's AI assistant. The assistant should be friendly and direct without corporate fluff, professional but not whimsical.
 
 The assistant will be talking with a user named {{{user_name}}}.
 
-Based on PostHog's style preferences, evaluate if this response matches their target tone:
+Based on Insights's style preferences, evaluate if this response matches their target tone:
 
 <user_message>
 {{{input}}}
@@ -35,9 +35,9 @@ Based on PostHog's style preferences, evaluate if this response matches their ta
 </assistant_response>
 
 Evaluate this response's style quality. Choose one:
-- perfectly-professional-but-approachable: Perfect PostHog tone - direct, helpful, friendly but not fluffy, gets straight to the point.
+- perfectly-professional-but-approachable: Perfect Insights tone - direct, helpful, friendly but not fluffy, gets straight to the point.
 - visibly-corporate: Visibly formal, uses hedge words like "unfortunately", lacks warmth and personality, uses overly apologetic language like "no worries". Uses the em-dash (—). Doesn't use natural contractions (like "I'll").
-- visibly-whimsical: Visibly flowery, overly enthusiastic, cutesy language, or cringey humor. Forces hedgehog puns/facts without user prompt.
+- visibly-whimsical: Visibly flowery, overly enthusiastic, cutesy language, or cringey humor. Forces mascot puns/facts without user prompt.
 - visibly-fluffy: Uses redundant casual commentary, filler phrases like "Great question!", verbose language that doesn't add value to helping the user, overly casual language that doesn't add value ("I hear you", "You're absolutely right!", "Let's get this sorted out", "Thanks for reaching out", etc.).
 - empty: No response
 
@@ -101,7 +101,7 @@ async def eval_root_style(call_root, pytestconfig):
                 expected="Response should troubleshoot systematically without unnecessary politeness markers",
             ),
             EvalCase(
-                input="How do I track custom events in PostHog?",
+                input="How do I track custom events in Insights?",
                 expected="Response should be instructional and direct, offering to help further with casual language",
             ),
             EvalCase(
@@ -121,7 +121,7 @@ async def eval_root_style(call_root, pytestconfig):
                 expected="Response should offer help directly with casual, helpful language",
             ),
             EvalCase(
-                input="I'm new to PostHog and don't know where to start",
+                input="I'm new to Insights and don't know where to start",
                 expected="Response should be welcoming and guide step-by-step without overwhelming enthusiasm",
             ),
             # Stereotype avoidance tests
@@ -160,11 +160,11 @@ async def eval_root_style(call_root, pytestconfig):
                 expected="Response should provide direct technical help without verbose preambles or fluffy language",
             ),
             EvalCase(
-                input="Why are my PostHog cohorts not updating automatically?",
+                input="Why are my Insights cohorts not updating automatically?",
                 expected="Response should directly explain cohort behavior without unnecessary casual commentary or verbose explanations",
             ),
             EvalCase(
-                input="PostHog feature flags not working in production environment",
+                input="Insights feature flags not working in production environment",
                 expected="Response should get straight to troubleshooting production issues without fluffy language or verbose setup",
             ),
         ],

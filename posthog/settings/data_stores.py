@@ -404,7 +404,7 @@ if get_from_env("POSTHOG_SESSION_RECORDING_REDIS_HOST", ""):
 if not REDIS_URL:
     raise ImproperlyConfigured(
         "Env var REDIS_URL or POSTHOG_REDIS_HOST is absolutely required to run this software.\n"
-        "If upgrading from PostHog 1.0.10 or earlier, see here: "
+        "If upgrading from Insights 1.0.10 or earlier, see here: "
         "https://posthog.com/docs/deployment/upgrading-posthog#upgrading-from-before-1011"
     )
 

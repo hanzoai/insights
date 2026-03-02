@@ -1,5 +1,5 @@
 /**
- * PostHog analytics for MCP UI Apps.
+ * Insights analytics for MCP UI Apps.
  *
  * Uses posthog-js-lite for minimal footprint - we only need capture functionality.
  * Events are only captured if POSTHOG_UI_APPS_TOKEN is set at build time.
@@ -16,18 +16,18 @@ const POSTHOG_HOST =
         ? __POSTHOG_MCP_APPS_ANALYTICS_BASE_URL__
         : 'https://us.posthog.com'
 
-let client: PostHog | null = null
+let client: Insights | null = null
 let currentDistinctId: string | null = null
 
 const log = (...args: any[]): void => {
-    console.debug('[PostHog Analytics]', ...args)
+    console.debug('[Insights Analytics]', ...args)
 }
 
 /**
- * Initialize PostHog for UI Apps tracking.
+ * Initialize Insights for UI Apps tracking.
  * Only initializes if POSTHOG_UI_APPS_TOKEN is set.
  */
-export function initPostHog(appName: string, appVersion: string): void {
+export function initInsights(appName: string, appVersion: string): void {
     if (client) {
         return
     }
@@ -36,7 +36,7 @@ export function initPostHog(appName: string, appVersion: string): void {
         return
     }
 
-    log('Initializing PostHog client', { token: POSTHOG_TOKEN, host: POSTHOG_HOST, appName, appVersion })
+    log('Initializing Insights client', { token: POSTHOG_TOKEN, host: POSTHOG_HOST, appName, appVersion })
     client = new PostHog(POSTHOG_TOKEN, { host: POSTHOG_HOST })
     client.register({
         $mcp_app_name: appName,
@@ -45,11 +45,11 @@ export function initPostHog(appName: string, appVersion: string): void {
 }
 
 /**
- * Identify the user with their PostHog distinct ID from the MCP server.
+ * Identify the user with their Insights distinct ID from the MCP server.
  */
 export function identifyUser(distinctId: string, toolName?: string): void {
     if (!client) {
-        log('PostHog client not initialized while attempting to identify user', { distinctId, toolName })
+        log('Insights client not initialized while attempting to identify user', { distinctId, toolName })
         return
     }
 

@@ -24,7 +24,7 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
             expected_test_comments="no_property",
         )
 
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
         # Test subscription_charge event (has subscriptionProperty)
@@ -36,7 +36,7 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
             "revenue_analytics.events.subscription_charge",
         )
 
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_query_structure_contains_required_fields(self):
@@ -45,13 +45,13 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
 
         query = build(handle)
         self.assertQueryContainsFields(query.query, SUBSCRIPTION_SCHEMA)
-        self.assertQueryMatchesSnapshot(query.query.to_hogql(), replace_all_numbers=True)
+        self.assertQueryMatchesSnapshot(query.query.to_insightsql(), replace_all_numbers=True)
 
     def test_subscription_fields_mapping(self):
         """Test that subscription-specific fields are properly mapped."""
         handle = SourceHandle(type="events", team=self.team, event=self.events[1])
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should map subscription_id from events properties
         self.assertIn("properties.subscription_id AS subscription_id", query_sql)
@@ -82,7 +82,7 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
 
         handle = SourceHandle(type="events", team=self.team, event=event_config)
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should use the custom property names
         self.assertIn("properties.sub_id AS subscription_id", query_sql)
@@ -106,7 +106,7 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
 
         handle = SourceHandle(type="events", team=self.team, event=event_config)
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should default product_id to null when no productProperty
         self.assertIn("NULL AS product_id", query_sql)
@@ -138,13 +138,13 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
         # Verify each query uses the correct subscription property
         handle = SourceHandle(type="events", team=self.team, event=event_config1)
         query = build(handle)
-        created_sql = query.query.to_hogql()
+        created_sql = query.query.to_insightsql()
         self.assertIn("properties.sub_id AS subscription_id", created_sql)
         self.assertIn("min(properties.plan_id) AS product_id", created_sql)
 
         handle = SourceHandle(type="events", team=self.team, event=event_config2)
         query = build(handle)
-        renewed_sql = query.query.to_hogql()
+        renewed_sql = query.query.to_insightsql()
         self.assertIn("properties.subscription_uuid AS subscription_id", renewed_sql)
         self.assertIn("min(properties.service_name) AS product_id", renewed_sql)
 
@@ -169,5 +169,5 @@ class TestSubscriptionEventsBuilder(EventsSourceBaseTest):
             "Empty string subscriptionProperty should be treated as no property configured"
         )
 
-        query_sql = query.query.to_hogql()
-        assert "properties.``" not in query_sql, "Should not generate invalid HogQL with empty property name"
+        query_sql = query.query.to_insightsql()
+        assert "properties.``" not in query_sql, "Should not generate invalid InsightsQL with empty property name"

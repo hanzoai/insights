@@ -11,7 +11,7 @@ import {
     NodeKind,
     ProductKey,
 } from '~/queries/schema/schema-general'
-import { HogQLQueryString, hogql, setLatestVersionsOnQuery } from '~/queries/utils'
+import { InsightsQLQueryString, insightsql, setLatestVersionsOnQuery } from '~/queries/utils'
 import {
     AnyPropertyFilter,
     BaseMathType,
@@ -238,8 +238,8 @@ export const errorTrackingIssueFingerprintsQuery = (
     issue_id: string,
     first_seen: string,
     fingerprints: string[]
-): HogQLQueryString => {
-    return hogql`SELECT properties.$exception_fingerprint as fingerprint, count() as c, groupUniqArray(map('type', properties.$exception_types[1], 'value', properties.$exception_values[1])) as samples
+): InsightsQLQueryString => {
+    return insightsql`SELECT properties.$exception_fingerprint as fingerprint, count() as c, groupUniqArray(map('type', properties.$exception_types[1], 'value', properties.$exception_values[1])) as samples
                 FROM events
                 WHERE event = '$exception' and issue_id = ${issue_id} and has(${fingerprints}, properties.$exception_fingerprint) and timestamp >= toDateTime(${first_seen})
                 GROUP BY properties.$exception_fingerprint`

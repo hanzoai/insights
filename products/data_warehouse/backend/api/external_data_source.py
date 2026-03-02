@@ -16,7 +16,7 @@ from rest_framework.response import Response
 
 from posthog.schema import ProductKey, SourceFieldInputConfig, SourceFieldInputConfigType, SourceFieldSwitchGroupConfig
 
-from posthog.hogql.database.database import Database
+from posthog.insightsql.database.database import Database
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.utils import action

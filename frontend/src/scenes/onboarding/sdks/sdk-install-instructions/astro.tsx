@@ -4,7 +4,7 @@ import { Link } from 'lib/lemon-ui/Link'
 
 import SetupWizardBanner from './components/SetupWizardBanner'
 
-function CreatePostHogAstroFileSnippet(): JSX.Element {
+function CreateInsightsAstroFileSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Bash}>
             {`cd ./src/components 
@@ -34,7 +34,7 @@ function CreateLayoutSnippet(): JSX.Element {
         <CodeSnippet language={Language.Bash}>
             {`cd ./src/layouts
 # or 'cd ./src && mkdir layouts && cd ./layouts' if your layouts folder doesn't exist 
-touch PostHogLayout.astro`}
+touch InsightsLayout.astro`}
         </CodeSnippet>
     )
 }
@@ -43,10 +43,10 @@ function LayoutCodeSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript}>
             {`---
-import PostHog from '../components/posthog.astro'
+import Insights from '../components/posthog.astro'
 ---
 <head>
-    <PostHog />
+    <Insights />
 </head>`}
         </CodeSnippet>
     )
@@ -56,11 +56,11 @@ function IndexPageSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript}>
             {`---
-import PostHogLayout from '../layouts/PostHogLayout.astro';
+import InsightsLayout from '../layouts/InsightsLayout.astro';
 ---
-<PostHogLayout>
+<InsightsLayout>
   <!-- your existing app components -->
-</PostHogLayout>`}
+</InsightsLayout>`}
         </CodeSnippet>
     )
 }
@@ -69,13 +69,13 @@ export function SDKInstallAstroInstructions({ hideWizard }: { hideWizard?: boole
     return (
         <>
             <SetupWizardBanner integrationName="Astro" hide={hideWizard} />
-            <h3>1. Create the PostHog component</h3>
+            <h3>1. Create the Insights component</h3>
             <p>
                 In your <code>src/components</code> folder, create a <code>posthog.astro</code> file:
             </p>
-            <CreatePostHogAstroFileSnippet />
+            <CreateInsightsAstroFileSnippet />
             <p>
-                In this file, add your PostHog web snippet. Be sure to include the <code>is:inline</code> directive{' '}
+                In this file, add your Insights web snippet. Be sure to include the <code>is:inline</code> directive{' '}
                 <Link
                     to="https://docs.astro.build/en/guides/client-side-scripts/#opting-out-of-processing"
                     target="_blank"
@@ -90,11 +90,11 @@ export function SDKInstallAstroInstructions({ hideWizard }: { hideWizard?: boole
             <h3>2. Create a layout</h3>
             <p>
                 Create a layout where we will use <code>posthog.astro</code>. Create a new file{' '}
-                <code>PostHogLayout.astro</code> in your <code>src/layouts</code> folder:
+                <code>InsightsLayout.astro</code> in your <code>src/layouts</code> folder:
             </p>
             <CreateLayoutSnippet />
             <p>
-                Add the following code to <code>PostHogLayout.astro</code>:
+                Add the following code to <code>InsightsLayout.astro</code>:
             </p>
             <LayoutCodeSnippet />
 

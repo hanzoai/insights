@@ -20,7 +20,7 @@ jobs:
         runs-on: ubuntu-latest
         # Skipping on forks as Braintrust credentials are not available there
         if: |
-            github.repository == 'PostHog/posthog' && (
+            github.repository == 'Insights/posthog' && (
                 github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'evals-ready')
             )
 

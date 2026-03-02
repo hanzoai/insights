@@ -1,7 +1,7 @@
 import { TeamManager } from '~/utils/team-manager'
 import { GroupRepository } from '~/worker/ingestion/groups/repositories/group-repository.interface'
 
-import { createHogExecutionGlobals } from '../../_tests/fixtures'
+import { createScriptExecutionGlobals } from '../../_tests/fixtures'
 import { GroupsManagerService, GroupsManagerServiceHub } from './groups-manager.service'
 
 describe('Groups Manager', () => {
@@ -88,7 +88,7 @@ describe('Groups Manager', () => {
         })
 
         it('does nothing if no group properties found', async () => {
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: undefined,
                 event: {
                     properties: {
@@ -123,7 +123,7 @@ describe('Groups Manager', () => {
                 { team_id: 1, group_type_index: 0, group_key: 'id-1', group_properties: { prop: 'value-1' } },
                 { team_id: 1, group_type_index: 1, group_key: 'id-2', group_properties: { prop: 'value-2' } },
             ]
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: undefined,
                 event: {
                     properties: {
@@ -165,17 +165,17 @@ describe('Groups Manager', () => {
 
             const items = [
                 // Should get both groups enriched
-                createHogExecutionGlobals({
+                createScriptExecutionGlobals({
                     groups: undefined,
                     event: { properties: { $groups: { GroupA: 'id-1', GroupB: 'id-2' } } } as any,
                 }),
                 // Should get its group enriched (via reference)
-                createHogExecutionGlobals({
+                createScriptExecutionGlobals({
                     groups: undefined,
                     event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
                 }),
                 // Should get the right group for its team
-                createHogExecutionGlobals({
+                createScriptExecutionGlobals({
                     groups: undefined,
                     project: { id: 2 } as any,
                     event: { properties: { $groups: { GroupA: 'id-1' } } } as any,
@@ -232,7 +232,7 @@ describe('Groups Manager', () => {
         })
 
         it('handles invalid group properties', async () => {
-            const globals = createHogExecutionGlobals({
+            const globals = createScriptExecutionGlobals({
                 groups: undefined,
                 event: {
                     properties: { $groups: { GroupA: { i: 'did', not: 'read', the: 'docs' }, GroupB: 'id-2' } },
@@ -251,12 +251,12 @@ describe('Groups Manager', () => {
 
     it('cached group type queries', async () => {
         const globals = [
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: undefined,
                 project: { id: 1 } as any,
                 event: { properties: { $groups: { GroupA: 'id-1', GroupB: 'id-2' } } } as any,
             }),
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: undefined,
                 project: { id: 2 } as any,
                 event: { properties: { $groups: { GroupA: 'id-1', GroupB: 'id-2' } } } as any,
@@ -276,7 +276,7 @@ describe('Groups Manager', () => {
         mockFetchGroupsByKeys.mockClear()
 
         globals.push(
-            createHogExecutionGlobals({
+            createScriptExecutionGlobals({
                 groups: undefined,
                 project: { id: 3 } as any,
                 event: { properties: { $groups: { GroupA: 'id-1', GroupB: 'id-2' } } } as any,

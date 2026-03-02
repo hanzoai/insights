@@ -4,7 +4,7 @@ import { LemonSkeleton } from '@posthog/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { personLogic } from 'scenes/persons/personLogic'
 
 import { PropertyDefinitionType } from '~/types'
@@ -49,7 +49,7 @@ type NotebookNodePersonPropertiesAttributes = {
     distinctId: string
 }
 
-export const NotebookNodePersonProperties = createPostHogWidgetNode({
+export const NotebookNodePersonProperties = createInsightsWidgetNode({
     nodeType: NotebookNodeType.PersonProperties,
     titlePlaceholder: 'Properties',
     Component,

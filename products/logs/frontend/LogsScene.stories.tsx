@@ -111,11 +111,11 @@ const EXAMPLES: Record<
                 },
             },
             {
-                message: '[CDP-PROCESSED-EVENTS] 🦔 [HogFunction] Filter took longer than expected',
+                message: '[CDP-PROCESSED-EVENTS] 🦔 [CustomFunction] Filter took longer than expected',
                 level: 'warn',
                 attributes: {
-                    hog_function_id: '123',
-                    hog_function_name: 'Filter fail test',
+                    custom_function_id: '123',
+                    custom_function_name: 'Filter fail test',
                     duration: '1000',
                 },
             },

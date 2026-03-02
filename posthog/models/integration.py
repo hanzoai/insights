@@ -517,7 +517,7 @@ class OauthIntegration:
                     "redirect_uri": OauthIntegration.redirect_uri(kind),
                     "grant_type": "authorization_code",
                 },
-                headers={"User-Agent": "PostHog/1.0 by PostHogTeam"},
+                headers={"User-Agent": "Insights/1.0 by InsightsTeam"},
             )
         elif kind == "tiktok-ads":
             # TikTok Ads uses JSON request body instead of form data and maps 'code' to 'auth_code'
@@ -759,7 +759,7 @@ class OauthIntegration:
                     "grant_type": "refresh_token",
                 },
                 # If I use a standard User-Agent, it will throw a 429 too many requests error
-                headers={"User-Agent": "PostHog/1.0 by PostHogTeam"},
+                headers={"User-Agent": "Insights/1.0 by InsightsTeam"},
             )
         elif self.integration.kind == "tiktok-ads":
             res = requests.post(
@@ -1506,7 +1506,7 @@ class LinearIntegration:
         linear_issue_id = dot_get(body, "data.issueCreate.issue.identifier")
 
         attachment_url = f"{settings.SITE_URL}/project/{team_id}/error_tracking/{posthog_issue_id}"
-        link_attachment_query = f'mutation AttachmentCreate {{ attachmentCreate(input: {{ issueId: "{linear_issue_id}", title: "PostHog issue", url: "{attachment_url}" }}) {{ success }} }}'
+        link_attachment_query = f'mutation AttachmentCreate {{ attachmentCreate(input: {{ issueId: "{linear_issue_id}", title: "Insights issue", url: "{attachment_url}" }}) {{ success }} }}'
         self.query(link_attachment_query)
 
         return {"id": linear_issue_id}

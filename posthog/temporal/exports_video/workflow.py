@@ -6,7 +6,7 @@ from typing import Any
 import temporalio.workflow as wf
 from temporalio import common
 
-from posthog.temporal.common.base import PostHogWorkflow  # matches repo conventions
+from posthog.temporal.common.base import InsightsWorkflow  # matches repo conventions
 
 from .activities import build_export_context_activity, record_and_persist_video_activity
 
@@ -18,7 +18,7 @@ class VideoExportInputs:
 
 
 @wf.defn(name="export-video")
-class VideoExportWorkflow(PostHogWorkflow):
+class VideoExportWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> VideoExportInputs:
         return VideoExportInputs(**json.loads(inputs[0]))

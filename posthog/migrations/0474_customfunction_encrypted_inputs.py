@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="customfunction",
             name="encrypted_inputs",
             field=posthog.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
         ),

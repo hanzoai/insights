@@ -151,7 +151,7 @@ describe('plugin-advanced-geoip', () => {
         test('keeps GeoIP if $lib is not on ignore list', () => {
             const meta = resetMeta(defaultMeta) as LegacyTransformationPluginMeta
             const preprocessedEvent = createGeoIPPageview()
-            preprocessedEvent.properties!.$lib = 'posthog-swift'
+            preprocessedEvent.properties!.$lib = 'insights-swift'
             const event = processEvent(preprocessedEvent, meta)
             expect(event!.$set!.$geoip_city_name).toEqual('Ashburn')
             expect(event!.$set!.$geoip_country_name).toEqual('United States')

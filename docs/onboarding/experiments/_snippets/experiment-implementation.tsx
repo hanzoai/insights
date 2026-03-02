@@ -31,15 +31,15 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
 
             // Method two: using the feature flags component
-            import { PostHogFeature } from 'posthog-js/react'
+            import { InsightsFeature } from 'posthog-js/react'
 
             function App() {
                 return (
-                    <PostHogFeature flag='your-experiment-feature-flag' match='test'>
+                    <InsightsFeature flag='your-experiment-feature-flag' match='test'>
                         <div>
                             {/* the component to show */}
                         </div>
-                    </PostHogFeature>
+                    </InsightsFeature>
                 )
             }
 
@@ -74,7 +74,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
                 # so if something goes wrong with flag evaluation, you don't break your app.
         `,
         php: dedent`
-            if (PostHog::getFeatureFlag('your-experiment-feature-flag', 'user distinct id') == 'test') {
+            if (Insights::getFeatureFlag('your-experiment-feature-flag', 'user distinct id') == 'test') {
                 // Do something differently for this user
             } else {
                 // It's a good idea to let control variant always be the default behaviour,
@@ -107,7 +107,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
         `,
         android: dedent`
-            if (PostHog.getFeatureFlag("your-experiment-feature-flag") == "test") {
+            if (Insights.getFeatureFlag("your-experiment-feature-flag") == "test") {
                 // do something
             } else {
                 // It's a good idea to let control variant always be the default behaviour,
@@ -115,7 +115,7 @@ export const ExperimentImplementationSnippet = memo(({ language = 'javascript' }
             }
         `,
         ios: dedent`
-            if (PostHogSDK.shared.getFeatureFlag("your-experiment-feature-flag") as? String == "test") {
+            if (InsightsSDK.shared.getFeatureFlag("your-experiment-feature-flag") as? String == "test") {
                 // do something
             } else {
                 // It's a good idea to let control variant always be the default behaviour,

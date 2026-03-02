@@ -11,7 +11,7 @@ Spin up a full local E2E environment (backend, frontend, docker services, Playwr
 This uses `bin/mprocs-e2e.yaml` under the hood. If you need to reset the E2E database,
 trigger the `reset-db` process in the mprocs UI.
 
-To run tests against an already-running PostHog instance:
+To run tests against an already-running Insights instance:
 
 ```bash
 LOGIN_USERNAME='my@email.address' LOGIN_PASSWORD="the-password" BASE_URL='http://localhost:8010' pnpm --filter=@posthog/playwright exec playwright test --ui

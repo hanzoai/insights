@@ -65,7 +65,7 @@ export function IconAlignRight(): JSX.Element {
     )
 }
 
-export function PostHogLogo(): JSX.Element {
+export function InsightsLogo(): JSX.Element {
     return (
         <svg width="77" height="14" viewBox="0 0 77 14" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g clipPath="url(#posthog-logo-clip)">

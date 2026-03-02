@@ -8,7 +8,7 @@ from temporalio import activity, common, workflow
 
 from posthog.exceptions_capture import capture_exception
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 
 logger = structlog.get_logger()
@@ -47,7 +47,7 @@ async def run_quota_limiting_all_orgs(
 
 
 @workflow.defn(name="run-quota-limiting")
-class RunQuotaLimitingWorkflow(PostHogWorkflow):
+class RunQuotaLimitingWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> RunQuotaLimitingInputs:
         """Parse inputs from the management command CLI."""

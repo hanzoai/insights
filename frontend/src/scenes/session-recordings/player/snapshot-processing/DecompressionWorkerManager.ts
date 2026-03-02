@@ -1,4 +1,4 @@
-import type { PostHog } from 'posthog-js'
+import type { Insights } from 'posthog-js'
 import snappyInit, { decompress_raw } from 'snappy-wasm'
 
 import type { DecompressionRequest, DecompressionResponse } from './decompressionWorker'
@@ -16,7 +16,7 @@ export class DecompressionWorkerManager {
     private pendingRequests = new Map<number, PendingRequest>()
     private workerInitFailed = false
 
-    constructor(private readonly posthog?: PostHog) {
+    constructor(private readonly posthog?: Insights) {
         this.readyPromise = this.initWorker()
     }
 
@@ -207,9 +207,9 @@ export class DecompressionWorkerManager {
 }
 
 let workerManager: DecompressionWorkerManager | null = null
-let currentPosthog: PostHog | undefined
+let currentPosthog: Insights | undefined
 
-export function getDecompressionWorkerManager(posthog?: PostHog): DecompressionWorkerManager {
+export function getDecompressionWorkerManager(posthog?: Insights): DecompressionWorkerManager {
     const configChanged = currentPosthog !== posthog
 
     if (configChanged && workerManager) {

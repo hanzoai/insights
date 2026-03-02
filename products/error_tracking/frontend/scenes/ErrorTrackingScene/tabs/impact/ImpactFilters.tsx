@@ -18,7 +18,7 @@ const InitialState = (): JSX.Element => {
             <h2 className="text-xl font-bold">Understand the impact of issues</h2>
             <div className="text-sm text-secondary mb-2">
                 See what issues are causing the most impact on your conversion, activation or any other event you're
-                tracking in PostHog.
+                tracking in Insights.
             </div>
 
             <EventSelector multiple={false} />

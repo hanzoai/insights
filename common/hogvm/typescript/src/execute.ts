@@ -91,7 +91,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     }
     const rootBytecode = bytecodes.root.bytecode
     if (!rootBytecode || rootBytecode.length === 0 || (rootBytecode[0] !== '_h' && rootBytecode[0] !== '_H')) {
-        throw new HogVMException("Invalid HogQL bytecode, must start with '_H'")
+        throw new HogVMException("Invalid InsightsQL bytecode, must start with '_H'")
     }
     const version = rootBytecode[0] === '_H' ? (rootBytecode[1] ?? 0) : 0
 
@@ -184,7 +184,7 @@ export function exec(input: any[] | VMState | Bytecodes, options?: ExecOptions):
     function popStack(): any {
         if (stack.length === 0) {
             logTelemetry()
-            throw new HogVMException('Invalid HogQL bytecode, stack is empty, can not pop')
+            throw new HogVMException('Invalid InsightsQL bytecode, stack is empty, can not pop')
         }
         memUsed -= memStack.pop() ?? 0
         return stack.pop()

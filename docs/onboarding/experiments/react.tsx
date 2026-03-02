@@ -23,7 +23,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                         {dedent`
                             Experiments run on top of our feature flags. You can define which version of your code runs based on the return value of the feature flag.
 
-                            You can use the \`useFeatureFlagVariantKey\` hook or the \`PostHogFeature\` component:
+                            You can use the \`useFeatureFlagVariantKey\` hook or the \`InsightsFeature\` component:
                         `}
                     </Markdown>
                     {ExperimentImplementation && <ExperimentImplementation language="react" />}
@@ -36,7 +36,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <Markdown>
                     {dedent`
-                        Once you've implemented the feature flag in your code, you'll enable it for a target audience by creating a new experiment in the PostHog dashboard.
+                        Once you've implemented the feature flag in your code, you'll enable it for a target audience by creating a new experiment in the Insights dashboard.
                     `}
                 </Markdown>
             ),

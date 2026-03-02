@@ -107,7 +107,7 @@ const PRODUCT_INFO: Partial<Record<ProductKey, { name: string; description: stri
     },
 }
 
-// Map from tool product keys to PostHog ProductKey enum
+// Map from tool product keys to Insights ProductKey enum
 const TOOL_PRODUCT_TO_PRODUCT_KEY: Record<string, ProductKey> = {
     product_analytics: ProductKey.PRODUCT_ANALYTICS,
     session_replay: ProductKey.SESSION_REPLAY,
@@ -297,7 +297,7 @@ function OnboardingWelcome(): JSX.Element {
                             What are you building and what do you need help with?
                         </div>
                         <div className="text-sm text-muted">
-                            I'll recommend the best PostHog products for your needs. Pick an option or describe what you
+                            I'll recommend the best Insights products for your needs. Pick an option or describe what you
                             need:
                         </div>
                     </div>

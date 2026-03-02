@@ -1,4 +1,4 @@
-"""PostHog API client for acceptance tests."""
+"""Insights API client for acceptance tests."""
 
 import json
 import time
@@ -14,8 +14,8 @@ from .utils import get_service_url
 logger = logging.getLogger(__name__)
 
 
-class PostHogTestClient:
-    """Client for interacting with PostHog API during tests."""
+class InsightsTestClient:
+    """Client for interacting with Insights API during tests."""
 
     def __init__(self, base_url: Optional[str] = None, personal_api_key: Optional[str] = None):
         self.base_url = base_url or get_service_url()
@@ -77,10 +77,10 @@ class PostHogTestClient:
                     time.sleep(1)
                     continue
 
-                # Then try a simple HogQL query to see if the project is ready
+                # Then try a simple InsightsQL query to see if the project is ready
                 query_response = self.session.post(
                     f"{self.base_url}/api/environments/{project_id}/query/",
-                    json={"query": {"kind": "HogQLQuery", "query": "SELECT 1 LIMIT 1"}},
+                    json={"query": {"kind": "InsightsQLQuery", "query": "SELECT 1 LIMIT 1"}},
                 )
                 if query_response.status_code == 200:
                     logger.info("Project %s is ready for queries", project_id)
@@ -99,9 +99,9 @@ class PostHogTestClient:
         logger.warning("Project %s may not be fully ready after %s seconds", project_id, timeout)
 
     def send_capture_event(self, api_key: str, event_data: dict[str, Any]) -> None:
-        """Send an event using the PostHog Python client.
+        """Send an event using the Insights Python client.
 
-        Uses the official PostHog Python client which handles the capture endpoint.
+        Uses the official Insights Python client which handles the capture endpoint.
         """
         # Extract event details
         event_name = event_data.get("event", "test_event")
@@ -109,20 +109,20 @@ class PostHogTestClient:
         properties = event_data.get("properties", {})
         timestamp = event_data.get("timestamp")
 
-        logger.info("Creating PostHog client instance")
+        logger.info("Creating Insights client instance")
         logger.debug("Host: %s", self.base_url)
 
-        # Create PostHog client instance with the API key
+        # Create Insights client instance with the API key
         posthog_client = Posthog(api_key, host=self.base_url, debug=True)
 
-        logger.info("Sending capture event using PostHog client")
+        logger.info("Sending capture event using Insights client")
         logger.debug("Event: %s", event_name)
         logger.debug("Distinct ID: %s", distinct_id)
         logger.debug("Properties: %s", properties)
         if timestamp:
             logger.debug("Timestamp: %s", timestamp)
 
-        # Send event using PostHog client instance
+        # Send event using Insights client instance
         if timestamp:
             posthog_client.capture(
                 distinct_id=distinct_id, event=event_name, properties=properties, timestamp=timestamp
@@ -130,21 +130,21 @@ class PostHogTestClient:
         else:
             posthog_client.capture(distinct_id=distinct_id, event=event_name, properties=properties)
 
-        logger.info("Event sent via PostHog client")
+        logger.info("Event sent via Insights client")
 
         # Flush to ensure the event is sent immediately
-        logger.debug("Flushing PostHog client")
+        logger.debug("Flushing Insights client")
         posthog_client.flush()
-        logger.debug("PostHog client flushed")
+        logger.debug("Insights client flushed")
 
         # Shutdown the client
         posthog_client.shutdown()
 
-    def query_events_hogql(
+    def query_events_insightsql(
         self, project_id: str, event_name: Optional[str] = None, distinct_id: Optional[str] = None, limit: int = 100
     ) -> list[dict[str, Any]]:
-        """Query events using the HogQL query API (recommended method)."""
-        # Build HogQL query
+        """Query events using the InsightsQL query API (recommended method)."""
+        # Build InsightsQL query
         conditions = []
         if event_name:
             conditions.append(f"event = '{event_name}'")
@@ -154,21 +154,21 @@ class PostHogTestClient:
         where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
         query = f"SELECT * FROM events {where_clause} ORDER BY timestamp DESC LIMIT {limit}"
 
-        logger.debug("Executing HogQL query: %s", query)
+        logger.debug("Executing InsightsQL query: %s", query)
         response = self.session.post(
             f"{self.base_url}/api/environments/{project_id}/query/",
-            json={"refresh": "force_blocking", "query": {"kind": "HogQLQuery", "query": query}},
+            json={"refresh": "force_blocking", "query": {"kind": "InsightsQLQuery", "query": query}},
         )
 
-        logger.debug("HogQL query response status: %s", response.status_code)
+        logger.debug("InsightsQL query response status: %s", response.status_code)
         response.raise_for_status()
 
         data = response.json()
-        logger.debug("HogQL query returned %s results", len(data.get("results", [])))
+        logger.debug("InsightsQL query returned %s results", len(data.get("results", [])))
 
-        # Extract events from HogQL response
+        # Extract events from InsightsQL response
         if data.get("results"):
-            # Convert HogQL results to event-like format
+            # Convert InsightsQL results to event-like format
             columns = data.get("columns", [])
             results = []
             for row in data["results"]:
@@ -199,8 +199,8 @@ class PostHogTestClient:
         start_time = time.time()
 
         while time.time() - start_time < timeout:
-            # Use HogQL query (recommended)
-            events = self.query_events_hogql(project_id, event_name, distinct_id, limit=10)
+            # Use InsightsQL query (recommended)
+            events = self.query_events_insightsql(project_id, event_name, distinct_id, limit=10)
 
             for event in events:
                 if event.get("event") == event_name:

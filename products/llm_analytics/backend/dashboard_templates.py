@@ -21,8 +21,8 @@ def get_llm_analytics_default_template() -> DashboardTemplate:
                                 "event": "$ai_generation",
                                 "name": "$ai_generation",
                                 "kind": "EventsNode",
-                                "math": "hogql",
-                                "math_hogql": "COUNT(DISTINCT properties.$ai_trace_id)",
+                                "math": "insightsql",
+                                "math_insightsql": "COUNT(DISTINCT properties.$ai_trace_id)",
                             }
                         ],
                         "dateRange": {"date_from": "-7d"},
@@ -54,7 +54,7 @@ def get_llm_analytics_default_template() -> DashboardTemplate:
                         "dateRange": {"date_from": "-7d"},
                         "properties": [
                             {
-                                "type": "hogql",
+                                "type": "insightsql",
                                 "key": "distinct_id != properties.$ai_trace_id",
                             }
                         ],
@@ -132,7 +132,7 @@ def get_llm_analytics_default_template() -> DashboardTemplate:
                         "dateRange": {"date_from": "-7d"},
                         "properties": [
                             {
-                                "type": "hogql",
+                                "type": "insightsql",
                                 "key": "distinct_id != properties.$ai_trace_id",
                             }
                         ],

@@ -19,7 +19,7 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
 
     def create(self, request, *args, **kwargs) -> Response:
         hog = request.data.get("hog")
-        program = parse_program(hog)
+        program = parse_program(custom_script)
         in_repl = request.data.get("in_repl", "false") in ("true", "True", True)
         locals = request.data.get("locals", []) or []
         try:
@@ -40,5 +40,5 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
         except ExposedInsightsQLError as e:
             return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f"Failed to compile hog: {e}", exc_info=True, error=e)
+            logger.error(f"Failed to compile script: {e}", exc_info=True, error=e)
             return Response({"error": "Internal error when compiling hog"}, status=status.HTTP_400_BAD_REQUEST)

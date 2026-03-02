@@ -8,7 +8,7 @@ from posthog.schema import AssistantTool
 from ee.hogai.tool import MaxTool
 
 
-class PostHogProduct(StrEnum):
+class InsightsProduct(StrEnum):
     PRODUCT_ANALYTICS = "product_analytics"
     SESSION_REPLAY = "session_replay"
     FEATURE_FLAGS = "feature_flags"
@@ -21,8 +21,8 @@ class PostHogProduct(StrEnum):
 
 
 class RecommendProductsArgs(BaseModel):
-    products: list[PostHogProduct] = Field(
-        description="List of PostHog products to recommend based on the user's needs"
+    products: list[InsightsProduct] = Field(
+        description="List of Insights products to recommend based on the user's needs"
     )
     reasoning: str = Field(
         description="Brief explanation of why these products are recommended based on the user's needs"
@@ -31,19 +31,19 @@ class RecommendProductsArgs(BaseModel):
 
 class RecommendProductsTool(MaxTool):
     """
-    Tool for the onboarding agent to recommend PostHog products.
+    Tool for the onboarding agent to recommend Insights products.
     Returns structured product recommendations that can be parsed by the frontend.
     """
 
     name: Literal[AssistantTool.RECOMMEND_PRODUCTS] = AssistantTool.RECOMMEND_PRODUCTS
     description: str = (
-        "Use this tool to recommend PostHog products to the user based on their needs. "
+        "Use this tool to recommend Insights products to the user based on their needs. "
         "Call this tool when you have enough information to make product recommendations. "
         "The products will be displayed to the user in a structured format."
     )
     args_schema: type[BaseModel] = RecommendProductsArgs
 
-    async def _arun_impl(self, products: list[PostHogProduct], reasoning: str) -> tuple[str, dict]:
+    async def _arun_impl(self, products: list[InsightsProduct], reasoning: str) -> tuple[str, dict]:
         artifact = {
             "products": [p.value for p in products],
             "reasoning": reasoning,

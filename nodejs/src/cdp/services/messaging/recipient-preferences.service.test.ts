@@ -1,13 +1,13 @@
-import { FixtureHogFlowBuilder } from '~/cdp/_tests/builders/hogflow.builder'
+import { FixtureCustomFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
 import { createExampleInvocation } from '~/cdp/_tests/fixtures'
-import { CyclotronJobInvocationHogFunction } from '~/cdp/types'
+import { CyclotronJobInvocationCustomFunction } from '~/cdp/types'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 import { logger } from '~/utils/logger'
 import { UUIDT } from '~/utils/utils'
 
-import { HogFlowAction } from '../../../schema/hogflow'
+import { CustomFlowAction } from '../../../schema/customflow'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
 import { RecipientPreferencesService } from './recipient-preferences.service'
 import { RecipientTokensService } from './recipient-tokens.service'
@@ -63,9 +63,9 @@ describe('RecipientPreferencesService', () => {
     })
 
     const createFunctionStepInvocation = (
-        action: Extract<HogFlowAction, { type: 'function' | 'function_email' | 'function_sms' }>
-    ): CyclotronJobInvocationHogFunction => {
-        const hogFlow = new FixtureHogFlowBuilder()
+        action: Extract<CustomFlowAction, { type: 'function' | 'function_email' | 'function_sms' }>
+    ): CyclotronJobInvocationCustomFunction => {
+        const customFlow = new FixtureCustomFlowBuilder()
             .withTeamId(team.id)
             .withWorkflow({
                 actions: {
@@ -94,7 +94,7 @@ describe('RecipientPreferencesService', () => {
             {} as Record<string, any>
         )
 
-        return createExampleInvocation(hogFlow, { inputs })
+        return createExampleInvocation(customFlow, { inputs })
     }
 
     describe('shouldSkipAction', () => {
@@ -102,7 +102,7 @@ describe('RecipientPreferencesService', () => {
             const createEmailAction = (
                 to: string = 'test@example.com',
                 categoryId: string
-            ): Extract<HogFlowAction, { type: 'function_email' }> => ({
+            ): Extract<CustomFlowAction, { type: 'function_email' }> => ({
                 id: 'email',
                 name: 'Send email',
                 description: 'Send an email to the recipient',
@@ -318,7 +318,7 @@ describe('RecipientPreferencesService', () => {
             const createSmsAction = (
                 toNumber: string = '+1234567890',
                 categoryId: string
-            ): Extract<HogFlowAction, { type: 'function_sms' }> => ({
+            ): Extract<CustomFlowAction, { type: 'function_sms' }> => ({
                 id: 'sms',
                 name: 'Send SMS',
                 description: 'Send an SMS to the recipient',
@@ -418,10 +418,10 @@ describe('RecipientPreferencesService', () => {
 
         describe('for other action types', () => {
             it('should return false for function actions', async () => {
-                const action: Extract<HogFlowAction, { type: 'function' }> = {
+                const action: Extract<CustomFlowAction, { type: 'function' }> = {
                     id: 'function',
                     name: 'Execute function',
-                    description: 'Execute a custom hog function',
+                    description: 'Execute a custom custom function',
                     type: 'function',
                     config: {
                         template_id: 'template-function',

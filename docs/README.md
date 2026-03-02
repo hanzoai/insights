@@ -1,4 +1,4 @@
-# PostHog Documentation
+# Insights Documentation
 
 Developer-focused documentation alongside code. Update docs in the same PR as your code changes.
 
@@ -48,9 +48,9 @@ The posthog.com Gatsby build uses gatsby-source-git to clone this monorepo and p
 
 - All published docs must have YAML frontmatter
 - Use relative links between docs: `../contributing/index.md`
-- Docs about PostHog internals → here
+- Docs about Insights internals → here
 - User product docs and tutorials → posthog.com repo
 
 ## Setup
 
-For posthog.com team setting up the integration, see the PRs in PostHog/posthog.com repo.
+For posthog.com team setting up the integration, see the PRs in Insights/posthog.com repo.

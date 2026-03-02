@@ -12,7 +12,7 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Sentry is an error tracking platform. The PostHog-Sentry integration links error data to your
+                        Sentry is an error tracking platform. The Insights-Sentry integration links error data to your
                         analytics, allowing you to see which users experienced errors.
                     </Markdown>
                     <CodeBlock
@@ -34,7 +34,7 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add the Sentry integration when initializing PostHog:</Markdown>
+                    <Markdown>Add the Sentry integration when initializing Insights:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -49,13 +49,13 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
                                   dsn: 'your-sentry-dsn',
                                 })
 
-                                // Initialize PostHog with Sentry integration
+                                // Initialize Insights with Sentry integration
                                 posthog.init('<ph_project_api_key>', {
                                   api_host: '<ph_client_api_host>',
                                   defaults: '2026-01-30'
                                 })
 
-                                // Set PostHog session ID on Sentry scope
+                                // Set Insights session ID on Sentry scope
                                 Sentry.getCurrentScope().setTag('posthog_session_id', posthog.get_session_id())
                             `,
                             },
@@ -63,7 +63,7 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
                     />
                     <CalloutBox type="fyi" title="Full setup guide">
                         <Markdown>
-                            This allows you to link Sentry errors to PostHog sessions. See the [Sentry integration
+                            This allows you to link Sentry errors to Insights sessions. See the [Sentry integration
                             docs](https://posthog.com/docs/libraries/sentry) for the full setup guide.
                         </Markdown>
                     </CalloutBox>

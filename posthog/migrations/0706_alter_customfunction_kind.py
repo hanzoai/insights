@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="customfunction",
             name="kind",
             field=models.CharField(
                 blank=True,

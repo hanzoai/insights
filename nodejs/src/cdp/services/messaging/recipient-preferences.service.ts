@@ -1,31 +1,31 @@
 import { logger } from '~/utils/logger'
 
-import { HogFlowAction } from '../../../schema/hogflow'
-import { CyclotronJobInvocationHogFunction } from '../../types'
+import { CustomFlowAction } from '../../../schema/customflow'
+import { CyclotronJobInvocationCustomFunction } from '../../types'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
 
 type MessageFunctionActionType = 'function_email' | 'function_sms'
 
-type MessageAction = Extract<HogFlowAction, { type: MessageFunctionActionType }>
+type MessageAction = Extract<CustomFlowAction, { type: MessageFunctionActionType }>
 
 export class RecipientPreferencesService {
     constructor(private recipientsManager: RecipientsManagerService) {}
 
     public async shouldSkipAction(
-        invocation: CyclotronJobInvocationHogFunction,
-        action: HogFlowAction
+        invocation: CyclotronJobInvocationCustomFunction,
+        action: CustomFlowAction
     ): Promise<boolean> {
         return (
             this.isSubjectToRecipientPreferences(action) && (await this.isRecipientOptedOutOfAction(invocation, action))
         )
     }
 
-    private isSubjectToRecipientPreferences(action: HogFlowAction): action is MessageAction {
+    private isSubjectToRecipientPreferences(action: CustomFlowAction): action is MessageAction {
         return ['function_email', 'function_sms'].includes(action.type)
     }
 
     private async isRecipientOptedOutOfAction(
-        invocation: CyclotronJobInvocationHogFunction,
+        invocation: CyclotronJobInvocationCustomFunction,
         action: MessageAction
     ): Promise<boolean> {
         let identifier

@@ -35,7 +35,7 @@ def generate_openapi_spec(
         "openapi": "3.0.3",
         "info": {
             "title": endpoint.name,
-            "description": description or f"PostHog Endpoint: {endpoint.name}",
+            "description": description or f"Insights Endpoint: {endpoint.name}",
             "version": str(target_version.version),
         },
         "servers": [{"url": base_url}],
@@ -70,7 +70,7 @@ def generate_openapi_spec(
                                             "columns": {
                                                 "type": "array",
                                                 "items": {"type": "string"},
-                                                "description": "Column names (for HogQL queries)",
+                                                "description": "Column names (for InsightsQL queries)",
                                             },
                                             "hasMore": {
                                                 "type": "boolean",
@@ -94,7 +94,7 @@ def generate_openapi_spec(
                 "PersonalAPIKey": {
                     "type": "http",
                     "scheme": "bearer",
-                    "description": "Personal API Key from PostHog. Get one at /settings/user-api-keys",
+                    "description": "Personal API Key from Insights. Get one at /settings/user-api-keys",
                 }
             },
             "schemas": _build_component_schemas(endpoint, target_version, team_id),
@@ -207,7 +207,7 @@ def _build_component_schemas(endpoint: Endpoint, version: EndpointVersion, team_
                 },
                 "type": {
                     "type": "string",
-                    "enum": ["event", "person", "session", "cohort", "group", "hogql"],
+                    "enum": ["event", "person", "session", "cohort", "group", "insightsql"],
                     "description": "The type of property filter.",
                 },
             },
@@ -246,8 +246,8 @@ def _build_variables_schema(query: dict, is_materialized: bool, team_id: int) ->
     query_kind = query.get("kind")
     properties: dict = {}
 
-    if query_kind == "HogQLQuery":
-        # HogQL: variables from query definition, with types from InsightVariable model
+    if query_kind == "InsightsQLQuery":
+        # InsightsQL: variables from query definition, with types from InsightVariable model
         variables = query.get("variables", {})
         if variables:
             variable_ids = list(variables.keys())
@@ -303,7 +303,7 @@ def _build_variables_schema(query: dict, is_materialized: bool, team_id: int) ->
 
     return {
         "type": "object",
-        "description": "Query variables. For HogQL: code_names from query. For insights: breakdown property and date_from/date_to.",
+        "description": "Query variables. For InsightsQL: code_names from query. For insights: breakdown property and date_from/date_to.",
         "properties": properties,
         "additionalProperties": False,
     }

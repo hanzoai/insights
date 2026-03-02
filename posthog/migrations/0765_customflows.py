@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddConstraint(
-            model_name="hogflow",
+            model_name="customflow",
             constraint=models.UniqueConstraint(fields=("team", "version", "id"), name="unique_version_per_flow"),
         ),
     ]

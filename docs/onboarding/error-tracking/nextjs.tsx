@@ -15,7 +15,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        PostHog can automatically capture unhandled exceptions in your Next.js app using the JavaScript Web SDK.
+                        Insights can automatically capture unhandled exceptions in your Next.js app using the JavaScript Web SDK.
 
                         You can enable exception autocapture for the JavaScript Web SDK in the **Error tracking** section of [your project settings](https://us.posthog.com/settings/project-error-tracking#exception-autocapture). 
 
@@ -120,7 +120,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         <Tab.Panel>
                             <Markdown>
                                 {dedent`
-                                    For Pages Router, you can use React's [Error Boundaries](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary) to catch JavaScript errors anywhere in the component tree. Create a custom error boundary component and report errors to PostHog in the \`componentDidCatch\` method:
+                                    For Pages Router, you can use React's [Error Boundaries](https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary) to catch JavaScript errors anywhere in the component tree. Create a custom error boundary component and report errors to Insights in the \`componentDidCatch\` method:
                                 `}
                             </Markdown>
                             <CodeBlock
@@ -182,13 +182,13 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
     }
 
     const installServerStep: StepDefinition = {
-        title: 'Installing PostHog SDK for server-side',
+        title: 'Installing Insights SDK for server-side',
         badge: 'required',
         content: (
             <>
                 <Markdown>
                     {dedent`
-                        Next.js enables you to both server-side render pages and add server-side functionality. To integrate PostHog into your Next.js app on the server-side, you can use the [Node SDK](/docs/libraries/node.md).
+                        Next.js enables you to both server-side render pages and add server-side functionality. To integrate Insights into your Next.js app on the server-side, you can use the [Node SDK](/docs/libraries/node.md).
 
                         First, install the \`posthog-node\` library:
                     `}
@@ -203,7 +203,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        For the backend, we can create a \`lib/posthog-server.js\` file. In it, initialize PostHog from \`posthog-node\` as a singleton with your project API key and host from [your project settings](https://app.posthog.com/settings/project).
+                        For the backend, we can create a \`lib/posthog-server.js\` file. In it, initialize Insights from \`posthog-node\` as a singleton with your project API key and host from [your project settings](https://app.posthog.com/settings/project).
 
                         This looks like this:
                     `}
@@ -214,11 +214,11 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'javascript',
                             file: 'lib/posthog-server.js',
                             code: dedent`
-                                import { PostHog } from 'posthog-node'
+                                import { Insights } from 'posthog-node'
                                 let posthogInstance = null
-                                export function getPostHogServer() {
+                                export function getInsightsServer() {
                                   if (!posthogInstance) {
-                                    posthogInstance = new PostHog(
+                                    posthogInstance = new Insights(
                                       process.env.NEXT_PUBLIC_POSTHOG_KEY,
                                       {
                                         host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
@@ -235,7 +235,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        You can now use the \`getPostHogServer\` function to capture exceptions in server-side code.
+                        You can now use the \`getInsightsServer\` function to capture exceptions in server-side code.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -244,7 +244,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'javascript',
                             file: 'JavaScript',
                             code: dedent`
-                                const posthog = getPostHogServer()
+                                const posthog = getInsightsServer()
                                 try {
                                     throw new Error("This is a test exception for error tracking")
                                 } catch (error) {
@@ -268,9 +268,9 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
         content: (
             <Markdown>
                 {dedent`
-                    You should also see events and exceptions in PostHog coming from your server-side code in the activity feed.
+                    You should also see events and exceptions in Insights coming from your server-side code in the activity feed.
 
-                    [Check for server events in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for server events in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),
@@ -288,7 +288,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                         Importantly, you need to:
 
                         1. Set up a \`posthog-node\` client in your server-side code. See our doc on [setting up Next.js server-side analytics](/docs/libraries/next-js#server-side-analytics.md) for more.
-                        2. Check the request is running in the \`nodejs\` runtime to ensure PostHog works. You can call \`posthog.debug()\` to get verbose logging.
+                        2. Check the request is running in the \`nodejs\` runtime to ensure Insights works. You can call \`posthog.debug()\` to get verbose logging.
                         3. Get the \`distinct_id\` from the cookie to connect the error to a specific user.
 
                         This looks like this:
@@ -306,8 +306,8 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 }
                                 export const onRequestError = async (err, request, context) => {
                                   if (process.env.NEXT_RUNTIME === 'nodejs') {
-                                    const { getPostHogServer } = require('./lib/posthog-server')
-                                    const posthog = getPostHogServer()
+                                    const { getInsightsServer } = require('./lib/posthog-server')
+                                    const posthog = getInsightsServer()
                                     let distinctId = null
                                     if (request.headers.cookie) {
                                       // Normalize multiple cookie arrays to string
@@ -321,7 +321,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                           const postHogData = JSON.parse(decodedCookie)
                                           distinctId = postHogData.distinct_id
                                         } catch (e) {
-                                          console.error('Error parsing PostHog cookie:', e)
+                                          console.error('Error parsing Insights cookie:', e)
                                         }
                                       }
                                     }

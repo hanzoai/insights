@@ -32,7 +32,7 @@ function getSourceDisplayStatus(
     const unreleasedDescriptionEl = 'Get notified when this source is available to connect'
     const releasedDescriptionEl = (
         <>
-            Data will be synced to PostHog and regularly refreshed.{' '}
+            Data will be synced to Insights and regularly refreshed.{' '}
             <Link to="https://posthog.com/docs/cdp/sources">Learn more</Link>
         </>
     )
@@ -99,7 +99,7 @@ export const nonCustomFunctionTemplatesLogic = kea<nonCustomFunctionTemplatesLog
                         status: status,
                         description: descriptionEl,
                         code: '',
-                        code_language: 'hog',
+                        code_language: 'custom_script',
                         inputs_schema: [],
                         filters: null,
                         masking: null,
@@ -121,7 +121,7 @@ export const nonCustomFunctionTemplatesLogic = kea<nonCustomFunctionTemplatesLog
                             </>
                         ),
                         code: '',
-                        code_language: 'hog',
+                        code_language: 'custom_script',
                         inputs_schema: [],
                         filters: null,
                         masking: null,
@@ -156,7 +156,7 @@ export const nonCustomFunctionTemplatesLogic = kea<nonCustomFunctionTemplatesLog
                         icon_url: BATCH_EXPORT_ICON_MAP[service],
                         status: service === 'Databricks' ? 'beta' : service === 'AzureBlob' ? 'beta' : 'stable',
                         code: '',
-                        code_language: 'hog',
+                        code_language: 'custom_script',
                         inputs_schema: [],
                         filters: null,
                         masking: null,

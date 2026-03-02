@@ -1,11 +1,11 @@
 ---
 name: survey-sdk-audit
-description: Audit PostHog survey SDK features and version requirements
+description: Audit Insights survey SDK features and version requirements
 ---
 
 # Surveys SDK Feature Audit Skill
 
-Use this skill when auditing survey feature support across PostHog SDKs for `surveyVersionRequirements.ts`.
+Use this skill when auditing survey feature support across Insights SDKs for `surveyVersionRequirements.ts`.
 
 **Feature to audit:** $ARGUMENTS
 
@@ -67,7 +67,7 @@ Then use the echoed path directly in subsequent commands.
 ## Tracking Issue
 
 All survey SDK feature parity work is tracked in:
-**https://github.com/PostHog/posthog/issues/45658**
+**https://github.com/Insights/posthog/issues/45658**
 
 When creating new issues for missing features:
 
@@ -75,7 +75,7 @@ When creating new issues for missing features:
 2. Add the issue to the tracking issue's "Tracked Issues" section as a task list item:
 
    ```markdown
-   - [ ] https://github.com/PostHog/repo/issues/123
+   - [ ] https://github.com/Insights/repo/issues/123
    ```
 
    Note: GitHub automatically expands issue links to show titles, so no description is needed.
@@ -87,7 +87,7 @@ To update the tracking issue body:
 **Step 1**: Fetch the current body to a temp file:
 
 ```bash
-gh api repos/PostHog/posthog/issues/45658 --jq '.body' > /tmp/tracking_issue_body.md
+gh api repos/Insights/posthog/issues/45658 --jq '.body' > /tmp/tracking_issue_body.md
 ```
 
 **Step 2**: Use the Edit tool to modify `/tmp/tracking_issue_body.md`. This ensures the user can review the diff of your changes before proceeding.
@@ -95,7 +95,7 @@ gh api repos/PostHog/posthog/issues/45658 --jq '.body' > /tmp/tracking_issue_bod
 **Step 3**: After the user has approved the edits, push the update:
 
 ```bash
-gh api repos/PostHog/posthog/issues/45658 -X PATCH -f body="$(cat /tmp/tracking_issue_body.md)"
+gh api repos/Insights/posthog/issues/45658 -X PATCH -f body="$(cat /tmp/tracking_issue_body.md)"
 ```
 
 **Important**: Always use the Edit tool on the temp file rather than writing directly. This gives the user visibility into exactly what changes are being made to the tracking issue.
@@ -114,7 +114,7 @@ gh api repos/PostHog/posthog/issues/45658 -X PATCH -f body="$(cat /tmp/tracking_
 
 Flutter wraps native SDKs. Check dependency versions in:
 
-- iOS: `$POSTHOG_FLUTTER_PATH/ios/posthog_flutter.podspec` (look for `s.dependency 'PostHog'`)
+- iOS: `$POSTHOG_FLUTTER_PATH/ios/posthog_flutter.podspec` (look for `s.dependency 'Insights'`)
 - Android: `$POSTHOG_FLUTTER_PATH/android/build.gradle` (look for `posthog-android` dependency)
 
 ## Audit Process
@@ -166,8 +166,8 @@ Key files to check for survey filtering logic:
 - **posthog-js (browser)**: `$POSTHOG_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
 - **posthog-react-native**: `$POSTHOG_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
 - **posthog-react-native**: `$POSTHOG_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
-- **posthog-ios**: `$POSTHOG_IOS_PATH/PostHog/Surveys/PostHogSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
-- **posthog-android**: `$POSTHOG_ANDROID_PATH/posthog-android/src/main/java/com/posthog/android/surveys/PostHogSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
+- **posthog-ios**: `$POSTHOG_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
+- **posthog-android**: `$POSTHOG_ANDROID_PATH/posthog-android/src/main/java/com/posthog/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
 
 **Key utility functions to compare across SDKs:**
 
@@ -218,7 +218,7 @@ For each feature, produce:
         'posthog_flutter': 'X.Y.Z',  // add comment: first version to require native SDK >= X.Y
     },
     unsupportedSdks: [
-        { sdk: 'sdk-name', issue: 'https://github.com/PostHog/repo/issues/123' },  // needs implementation
+        { sdk: 'sdk-name', issue: 'https://github.com/Insights/repo/issues/123' },  // needs implementation
         { sdk: 'sdk-name', issue: false },  // not applicable (e.g., web-only feature)
     ],
     check: (s) => ...,
@@ -231,39 +231,39 @@ For each feature, produce:
 
 ```bash
 # Search in the SDK-specific repo
-gh issue list --repo PostHog/posthog-ios --search "FEATURE_KEYWORD" --state all --limit 20
-gh issue list --repo PostHog/posthog-android --search "FEATURE_KEYWORD" --state all --limit 20
-gh issue list --repo PostHog/posthog-flutter --search "FEATURE_KEYWORD" --state all --limit 20
+gh issue list --repo Insights/posthog-ios --search "FEATURE_KEYWORD" --state all --limit 20
+gh issue list --repo Insights/posthog-android --search "FEATURE_KEYWORD" --state all --limit 20
+gh issue list --repo Insights/posthog-flutter --search "FEATURE_KEYWORD" --state all --limit 20
 
 # Also search with broader terms
-gh issue list --repo PostHog/posthog-ios --search "survey feature flag" --state all --limit 20
+gh issue list --repo Insights/posthog-ios --search "survey feature flag" --state all --limit 20
 ```
 
-Always search issues in the main repo `PostHog/posthog` AND the SDK-specific repo(s) to ensure an issue does not already exist anywhere.
+Always search issues in the main repo `Insights/posthog` AND the SDK-specific repo(s) to ensure an issue does not already exist anywhere.
 
 ### Labels by Repository
 
 | Repository              | Labels for Survey Features |
 | ----------------------- | -------------------------- |
-| PostHog/posthog-js      | `feature/surveys`          |
-| PostHog/posthog-ios     | `Survey`, `enhancement`    |
-| PostHog/posthog-android | `Survey`, `enhancement`    |
-| PostHog/posthog-flutter | `Survey`, `enhancement`    |
+| Insights/posthog-js      | `feature/surveys`          |
+| Insights/posthog-ios     | `Survey`, `enhancement`    |
+| Insights/posthog-android | `Survey`, `enhancement`    |
+| Insights/posthog-flutter | `Survey`, `enhancement`    |
 
 ### Issue Creation Command
 
 ```bash
 # posthog-js (covers browser and react-native)
-gh issue create --repo PostHog/posthog-js --label "feature/surveys" --title "..." --body "..."
+gh issue create --repo Insights/posthog-js --label "feature/surveys" --title "..." --body "..."
 
 # posthog-ios
-gh issue create --repo PostHog/posthog-ios --label "Survey" --label "enhancement" --title "..." --body "..."
+gh issue create --repo Insights/posthog-ios --label "Survey" --label "enhancement" --title "..." --body "..."
 
 # posthog-android
-gh issue create --repo PostHog/posthog-android --label "Survey" --label "enhancement" --title "..." --body "..."
+gh issue create --repo Insights/posthog-android --label "Survey" --label "enhancement" --title "..." --body "..."
 
 # posthog-flutter
-gh issue create --repo PostHog/posthog-flutter --label "Survey" --label "enhancement" --title "..." --body "..."
+gh issue create --repo Insights/posthog-flutter --label "Survey" --label "enhancement" --title "..." --body "..."
 ```
 
 ### Issue Template
@@ -271,7 +271,7 @@ gh issue create --repo PostHog/posthog-flutter --label "Survey" --label "enhance
 ```markdown
 ## 🚨 IMPORTANT
 
-This issue is likely user-facing in the main PostHog app, see [`surveyVersionRequirements.ts`](https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
+This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/Insights/posthog/blob/master/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
 
 ## Summary
 
@@ -292,7 +292,7 @@ For mobile-specific patterns, see posthog-react-native: `packages/react-native/s
 
 ## Tracking
 
-This is tracked in the survey SDK feature parity issue: https://github.com/PostHog/posthog/issues/45658
+This is tracked in the survey SDK feature parity issue: https://github.com/Insights/posthog/issues/45658
 
 _This issue was generated by Claude using the `/survey-sdk-audit` skill._
 ```
@@ -310,7 +310,7 @@ Before finishing the audit, verify all steps are complete:
 - [ ] **Search for existing issues** - Before creating new ones
 - [ ] **Create GitHub issues** - For any unsupported SDKs (with proper labels)
 - [ ] **Update surveyVersionRequirements.ts** - Fix versions and add issue links to unsupportedSdks
-- [ ] **Update tracking issue** - Add new issues to https://github.com/PostHog/posthog/issues/45658
+- [ ] **Update tracking issue** - Add new issues to https://github.com/Insights/posthog/issues/45658
 
 ## Common Pitfalls
 

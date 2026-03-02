@@ -47,7 +47,7 @@ if (res.status != 200 or res.body.ok == false) {
             "integration_key": "slack_workspace",
             "integration_field": "slack_channel",
             "label": "Channel to post to",
-            "description": "Select the channel to post to (e.g. #general). The PostHog app must be installed in the workspace.",
+            "description": "Select the channel to post to (e.g. #general). The Insights app must be installed in the workspace.",
             "secret": False,
             "hidden": False,
             "required": True,
@@ -56,7 +56,7 @@ if (res.status != 200 or res.body.ok == false) {
             "key": "icon_emoji",
             "type": "string",
             "label": "Emoji icon",
-            "default": ":hedgehog:",
+            "default": ":mascot:",
             "required": False,
             "secret": False,
             "hidden": False,
@@ -65,7 +65,7 @@ if (res.status != 200 or res.body.ok == false) {
             "key": "username",
             "type": "string",
             "label": "Bot name",
-            "default": "PostHog",
+            "default": "Insights",
             "required": False,
             "secret": False,
             "hidden": False,
@@ -88,7 +88,7 @@ if (res.status != 200 or res.body.ok == false) {
                     "elements": [
                         {
                             "url": "{person.url}",
-                            "text": {"text": "View Person in PostHog", "type": "plain_text"},
+                            "text": {"text": "View Person in Insights", "type": "plain_text"},
                             "type": "button",
                         },
                         {

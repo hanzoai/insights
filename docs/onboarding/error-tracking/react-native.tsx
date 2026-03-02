@@ -22,7 +22,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 </CalloutBox>
                 <Markdown>
                     {dedent`
-                        You can autocapture exceptions by configuring the \`errorTracking\` when setting up PostHog:
+                        You can autocapture exceptions by configuring the \`errorTracking\` when setting up Insights:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -31,7 +31,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                             language: 'jsx',
                             file: 'React Native',
                             code: dedent`
-                              export const posthog = new PostHog('<ph_project_api_key>', {
+                              export const posthog = new Insights('<ph_project_api_key>', {
                                 errorTracking: {
                                   autocapture: {
                                     uncaughtExceptions: true,
@@ -66,7 +66,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             <>
                 <Markdown>
                     {dedent`
-                        You can use the \`PostHogErrorBoundary\` component to capture rendering errors thrown by components:
+                        You can use the \`InsightsErrorBoundary\` component to capture rendering errors thrown by components:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -75,19 +75,19 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                             language: 'jsx',
                             file: 'React Native',
                             code: dedent`
-                                import { PostHogProvider, PostHogErrorBoundary } from 'posthog-react-native'
+                                import { InsightsProvider, InsightsErrorBoundary } from 'posthog-react-native'
                                 import { View, Text } from 'react-native'
 
                                 const App = () => {
                                   return (
-                                    <PostHogProvider apiKey="<ph_project_api_key>">
-                                      <PostHogErrorBoundary
+                                    <InsightsProvider apiKey="<ph_project_api_key>">
+                                      <InsightsErrorBoundary
                                         fallback={YourFallbackComponent}
                                         additionalProperties={{ screen: "home" }}
                                       >
                                         <YourApp />
-                                      </PostHogErrorBoundary>
-                                    </PostHogProvider>
+                                      </InsightsErrorBoundary>
+                                    </InsightsProvider>
                                   )
                                 }
 
@@ -106,7 +106,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <CalloutBox type="caution" title="Duplicate errors with console capture">
                     <Markdown>
                         {dedent`
-                            If you have both \`PostHogErrorBoundary\` and \`console\` capture enabled in your \`errorTracking\` config, render errors will be captured twice. This is because React logs all errors to the console by default. To avoid this, set \`console: []\` on \`errorTracking.autocapture\` (for example, \`errorTracking: { autocapture: { console: [] } }\`) when using \`PostHogErrorBoundary\`.
+                            If you have both \`InsightsErrorBoundary\` and \`console\` capture enabled in your \`errorTracking\` config, render errors will be captured twice. This is because React logs all errors to the console by default. To avoid this, set \`console: []\` on \`errorTracking.autocapture\` (for example, \`errorTracking: { autocapture: { console: [] } }\`) when using \`InsightsErrorBoundary\`.
                         `}
                     </Markdown>
                 </CalloutBox>
@@ -163,9 +163,9 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
         content: (
             <Markdown>
                 {dedent`
-                    Before proceeding, let's make sure exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),
@@ -182,7 +182,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                     - No native Android and iOS exception capture
                     - No automatic source map uploads on React Native web
 
-                    These features will be added in future releases. We recommend you stay up to date with the latest version of the PostHog React Native SDK.
+                    These features will be added in future releases. We recommend you stay up to date with the latest version of the Insights React Native SDK.
                 `}
             </Markdown>
         ),

@@ -11,16 +11,16 @@ from django.db.models import Q
 import chdb
 import structlog
 
-from posthog.schema import DatabaseSerializedFieldType, HogQLQueryModifiers
+from posthog.schema import DatabaseSerializedFieldType, InsightsQLQueryModifiers
 
-from posthog.hogql import ast
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.models import FieldOrTable
-from posthog.hogql.database.s3_table import (
-    DataWarehouseTable as HogQLDataWarehouseTable,
+from posthog.insightsql import ast
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.models import FieldOrTable
+from posthog.insightsql.database.s3_table import (
+    DataWarehouseTable as InsightsQLDataWarehouseTable,
     build_function_call,
 )
-from posthog.hogql.escape_sql import escape_clickhouse_identifier
+from posthog.insightsql.escape_sql import escape_clickhouse_identifier
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.query_tagging import Product, tag_queries
@@ -33,8 +33,8 @@ from posthog.temporal.data_imports.pipelines.pipeline.consts import PARTITION_KE
 
 from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
 from products.data_warehouse.backend.models.util import (
-    CLICKHOUSE_HOGQL_MAPPING,
-    STR_TO_HOGQL_MAPPING,
+    CLICKHOUSE_INSIGHTSQL_MAPPING,
+    STR_TO_INSIGHTSQL_MAPPING,
     clean_type,
     remove_named_tuples,
 )
@@ -151,7 +151,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
         return self.name[len(prefix) :]
 
     def validate_column_type(self, column_key) -> bool:
-        from posthog.hogql.query import execute_hogql_query
+        from posthog.insightsql.query import execute_insightsql_query
 
         if column_key not in self.columns.keys():
             raise Exception(f"Column {column_key} does not exist on table: {self.name}")
@@ -162,10 +162,10 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
                 select_from=ast.JoinExpr(table=ast.Field(chain=[self.name])),
             )
 
-            execute_hogql_query(
+            execute_insightsql_query(
                 query,
                 self.team,
-                modifiers=HogQLQueryModifiers(s3TableUseInvalidColumns=True),
+                modifiers=InsightsQLQueryModifiers(s3TableUseInvalidColumns=True),
             )
             return True
         except:
@@ -178,7 +178,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
         self,
         safe_expose_ch_error: bool = True,
     ) -> DataWarehouseTableColumns:
-        placeholder_context = HogQLContext(team_id=self.team.pk)
+        placeholder_context = InsightsQLContext(team_id=self.team.pk)
         s3_table_func = build_function_call(
             url=self.url_pattern,
             queryable_folder=self.queryable_folder,
@@ -245,7 +245,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
 
         columns = {
             str(item[0]): {
-                "hogql": CLICKHOUSE_HOGQL_MAPPING[clean_type(str(item[1]))].__name__,
+                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
                 "clickhouse": item[1],
                 "valid": True,
             }
@@ -256,7 +256,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
 
     def get_max_value_for_column(self, column: str) -> Any | None:
         try:
-            placeholder_context = HogQLContext(team_id=self.team.pk)
+            placeholder_context = InsightsQLContext(team_id=self.team.pk)
             s3_table_func = build_function_call(
                 url=self.url_pattern,
                 queryable_folder=self.queryable_folder,
@@ -285,7 +285,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
             return None
 
     def get_count(self, safe_expose_ch_error=True) -> int:
-        placeholder_context = HogQLContext(team_id=self.team.pk)
+        placeholder_context = InsightsQLContext(team_id=self.team.pk)
         s3_table_func = build_function_call(
             url=self.url_pattern,
             queryable_folder=self.queryable_folder,
@@ -332,9 +332,9 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
 
         return int(result[0][0])
 
-    def get_function_call(self) -> tuple[str, HogQLContext]:
+    def get_function_call(self) -> tuple[str, InsightsQLContext]:
         try:
-            placeholder_context = HogQLContext(team_id=self.team.pk)
+            placeholder_context = InsightsQLContext(team_id=self.team.pk)
             s3_table_func = build_function_call(
                 url=self.url_pattern,
                 queryable_folder=self.queryable_folder,
@@ -350,7 +350,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
             raise
         return s3_table_func, placeholder_context
 
-    def hogql_definition(self, modifiers: Optional[HogQLQueryModifiers] = None) -> HogQLDataWarehouseTable:
+    def insightsql_definition(self, modifiers: Optional[InsightsQLQueryModifiers] = None) -> InsightsQLDataWarehouseTable:
         columns = self.columns or {}
 
         fields: dict[str, FieldOrTable] = {}
@@ -385,12 +385,12 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
 
             # Support for 'old' style columns
             if isinstance(type, str):
-                hogql_type_str = clickhouse_type.partition("(")[0]
-                hogql_type = CLICKHOUSE_HOGQL_MAPPING[hogql_type_str]
+                insightsql_type_str = clickhouse_type.partition("(")[0]
+                insightsql_type = CLICKHOUSE_INSIGHTSQL_MAPPING[insightsql_type_str]
             else:
-                hogql_type = STR_TO_HOGQL_MAPPING[type["hogql"]]
+                insightsql_type = STR_TO_INSIGHTSQL_MAPPING[type["insightsql"]]
 
-            fields[column] = hogql_type(name=column, nullable=is_nullable)
+            fields[column] = insightsql_type(name=column, nullable=is_nullable)
 
         # Replace fields with any redefined fields if they exist
         external_table_fields = external_tables.get(self.table_name_without_prefix())
@@ -410,7 +410,7 @@ class DataWarehouseTable(CreatedMetaFields, UpdatedMetaFields, UUIDTModel, Delet
                 del fields[PARTITION_KEY]
                 fields = {**fields, **default_fields}
 
-        return HogQLDataWarehouseTable(
+        return InsightsQLDataWarehouseTable(
             name=self.name,
             url=self.url_pattern,
             queryable_folder=self.queryable_folder,

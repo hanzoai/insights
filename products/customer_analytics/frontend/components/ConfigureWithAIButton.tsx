@@ -39,7 +39,7 @@ export function ConfigureWithAIButton({
             size="small"
             type="tertiary"
             icon={<IconSparkles className="text-accent" />}
-            tooltip="Configure with PostHog AI"
+            tooltip="Configure with Insights AI"
             onClick={handleClick}
             className="border border-accent border-dashed p-1"
             data-attr="customer-analytics-configure-event-with-ai"

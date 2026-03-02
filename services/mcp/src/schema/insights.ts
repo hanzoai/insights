@@ -81,7 +81,7 @@ export const ListInsightsSchema = z.object({
     search: z.string().optional(),
 })
 
-export type PostHogInsight = z.infer<typeof InsightSchema>
+export type InsightsInsight = z.infer<typeof InsightSchema>
 export type CreateInsightInput = z.infer<typeof CreateInsightInputSchema>
 export type UpdateInsightInput = z.infer<typeof UpdateInsightInputSchema>
 export type ListInsightsData = z.infer<typeof ListInsightsSchema>

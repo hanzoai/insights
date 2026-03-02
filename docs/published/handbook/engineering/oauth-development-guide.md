@@ -6,7 +6,7 @@ showTitle: true
 
 # OAuth Development Guide
 
-This guide helps developers set up and test PostHog's OAuth apps locally.
+This guide helps developers set up and test Insights's OAuth apps locally.
 
 ## Quick Start
 
@@ -66,7 +66,7 @@ You can view and test the OAuth flow from Django admin:
 
 - Display name for the application
 - Shown to users during authorization
-- Example: "PostHog Mobile App", "Analytics Dashboard"
+- Example: "Insights Mobile App", "Analytics Dashboard"
 
 **Client ID** (auto-generated)
 
@@ -99,7 +99,7 @@ See [Client Types](#client-types) section for detailed explanation.
 **Redirect URIs** (required)
 
 - Whitespace-separated list of valid redirect URIs
-- PostHog will only redirect to these URIs after authorization
+- Insights will only redirect to these URIs after authorization
 - **HTTPS required** for non-localhost URIs
 - **HTTP allowed** only for localhost/loopback addresses (127.0.0.1)
 - No fragments (#) allowed
@@ -122,7 +122,7 @@ See [Client Types](#client-types) section for detailed explanation.
 
 **User**
 
-- The PostHog user who created the application
+- The Insights user who created the application
 - Not used for access control
 - Helps track who created the app
 
@@ -241,7 +241,7 @@ See [Client Types](#client-types) section for detailed explanation.
 
 OAuth supports all the same scopes as Personal API Keys. Each scope has a `read` and/or `write` action (e.g., `experiment:read`, `experiment:write`).
 
-For a complete list of available scopes, see [frontend/src/lib/scopes.tsx](https://github.com/PostHog/posthog/blob/master/frontend/src/lib/scopes.tsx#L15).
+For a complete list of available scopes, see [frontend/src/lib/scopes.tsx](https://github.com/Insights/posthog/blob/master/frontend/src/lib/scopes.tsx#L15).
 
 ### OpenID Connect Scopes
 

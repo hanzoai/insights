@@ -7,11 +7,11 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
 
     return [
         {
-            title: 'Install the PostHog Nuxt module',
+            title: 'Install the Insights Nuxt module',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog Nuxt module using your package manager:</Markdown>
+                    <Markdown>Install the Insights Nuxt module using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -75,8 +75,8 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                       },
                                       sourcemaps: {
                                         enabled: true,
-                                        project: '<ph_project_id>', // Your project ID from PostHog settings https://app.posthog.com/settings/environment#variables
-                                        personalApiKey: '<ph_personal_api_key>', // Your personal API key from PostHog settings https://app.posthog.com/settings/user-api-keys (requires organization:read and error_tracking:write scopes)
+                                        project: '<ph_project_id>', // Your project ID from Insights settings https://app.posthog.com/settings/environment#variables
+                                        personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings https://app.posthog.com/settings/user-api-keys (requires organization:read and error_tracking:write scopes)
                                         releaseName: 'my-application', // Optional: defaults to git repository name
                                         releaseVersion: '1.0.0', // Optional: defaults to current git commit
                                       },
@@ -94,7 +94,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                     <Markdown>
                         {dedent`
                         The module will automatically:
-                        - Initialize PostHog on both Vue (client side) and Nitro (server side)
+                        - Initialize Insights on both Vue (client side) and Nitro (server side)
                         - Capture exceptions on both client and server
                         - Generate and upload source maps during build
                       `}
@@ -131,7 +131,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                             },
                         ]}
                     />
-                    <Markdown>On the server side instantiate PostHog using:</Markdown>
+                    <Markdown>On the server side instantiate Insights using:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -139,7 +139,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'server/api/example.js',
                                 code: dedent`
                                   const runtimeConfig = useRuntimeConfig()
-                                  const posthog = new PostHog(
+                                  const posthog = new Insights(
                                     runtimeConfig.public.posthogPublicKey,
                                     {
                                       host: runtimeConfig.public.posthogHost,
@@ -176,7 +176,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                         ]}
                     />
                     <Markdown>
-                        The PostHog module will automatically **generate and upload source maps** to PostHog during the
+                        The Insights module will automatically **generate and upload source maps** to Insights during the
                         build process.
                     </Markdown>
                 </>
@@ -191,9 +191,9 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                     {dedent`
                         Before proceeding, confirm that source maps are being properly uploaded.
 
-                        You can verify the injection is successful by checking your \`.mjs.map\` source map files for \`//# chunkId=\` comments. Make sure to serve these injected files in production, PostHog will check for the \`//# chunkId\` comments to display the correct stack traces.
+                        You can verify the injection is successful by checking your \`.mjs.map\` source map files for \`//# chunkId=\` comments. Make sure to serve these injected files in production, Insights will check for the \`//# chunkId\` comments to display the correct stack traces.
 
-                        [Check symbol sets in PostHog](https://app.posthog.com/settings/project-error-tracking#error-tracking-symbol-sets)
+                        [Check symbol sets in Insights](https://app.posthog.com/settings/project-error-tracking#error-tracking-symbol-sets)
                     `}
                 </Markdown>
             ),
@@ -205,9 +205,9 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <Markdown>
                     {dedent`
-                        Before proceeding, let's make sure exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                        Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                        [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                        [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                     `}
                 </Markdown>
             ),

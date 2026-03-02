@@ -37,7 +37,7 @@ type UnsubscribeReason = {
 
 export const UNSUBSCRIBE_REASONS: UnsubscribeReason[] = [
     { reason: 'Too expensive', question: 'What will you be using instead?' },
-    { reason: 'Not getting enough value', question: 'What prevented you from getting more value out of PostHog?' },
+    { reason: 'Not getting enough value', question: 'What prevented you from getting more value out of Insights?' },
     { reason: 'Not using the product', question: 'Why are you not using the product?' },
     { reason: 'Found a better alternative', question: 'What service will you be moving to?' },
     { reason: 'Poor customer support', question: 'Please provide details on your support experience.' },
@@ -152,8 +152,8 @@ export const billingProductLogic = kea<billingProductLogicType>([
         setTrialLoading: (loading: boolean) => ({ loading }),
         setUnsubscribeModalStep: (step: number) => ({ step }),
         resetUnsubscribeModalStep: true,
-        setHedgehogSatisfied: (satisfied: boolean) => ({ satisfied }),
-        triggerMoreHedgehogs: true,
+        setMascotSatisfied: (satisfied: boolean) => ({ satisfied }),
+        triggerMoreMascots: true,
         removeBillingLimitNextPeriod: (productType: string) => ({ productType }),
         showConfirmUpgradeModal: true,
         hideConfirmUpgradeModal: true,
@@ -260,10 +260,10 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 resetUnsubscribeModalStep: () => 1,
             },
         ],
-        hedgehogSatisfied: [
+        mascotSatisfied: [
             false as boolean,
             {
-                setHedgehogSatisfied: (_, { satisfied }) => satisfied,
+                setMascotSatisfied: (_, { satisfied }) => satisfied,
             },
         ],
         confirmUpgradeModalOpen: [
@@ -765,7 +765,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 actions.loadBilling()
             }
         },
-        triggerMoreHedgehogs: async (_, breakpoint) => {
+        triggerMoreMascots: async (_, breakpoint) => {
             for (let i = 0; i < 5; i++) {
                 props.hogfettiTrigger?.()
                 await breakpoint(200)

@@ -1,4 +1,4 @@
-import { HogBytecode } from '../cdp/types'
+import { ScriptBytecode } from '../cdp/types'
 import { PropertyFilter } from '../types'
 
 export interface Evaluation {
@@ -20,7 +20,7 @@ export interface EvaluationConditionSet {
     id: string
     rollout_percentage: number
     properties: PropertyFilter[]
-    bytecode?: HogBytecode // Compiled on save in Python, embedded in JSON
+    bytecode?: ScriptBytecode // Compiled on save in Python, embedded in JSON
     bytecode_error?: string
 }
 

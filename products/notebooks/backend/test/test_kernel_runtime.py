@@ -302,7 +302,7 @@ class TestKernelRuntimeService(BaseTest):
             sandbox_id=runtime.sandbox_id,
         )
         marker = service._notebook_bridge_marker(handle)
-        bridge_payload = {"call": "hogql_execute", "query": "select 1", "response_path": "/tmp/resp.json"}
+        bridge_payload = {"call": "insightsql_execute", "query": "select 1", "response_path": "/tmp/resp.json"}
         bridge_payload_json = json.dumps(bridge_payload)
         bridge_message = f"{marker}{len(bridge_payload_json)} {bridge_payload_json}\n"
         payload_out: dict[str, Any] = {
@@ -364,7 +364,7 @@ class TestKernelRuntimeService(BaseTest):
             sandbox_id=runtime.sandbox_id,
         )
         marker = service._notebook_bridge_marker(handle)
-        bridge_payload = {"call": "hogql_execute", "query": "select 1", "response_path": "/tmp/resp.json"}
+        bridge_payload = {"call": "insightsql_execute", "query": "select 1", "response_path": "/tmp/resp.json"}
         bridge_payload_json = json.dumps(bridge_payload)
         bridge_message = f"{marker}{len(bridge_payload_json)} {bridge_payload_json}\n"
         payload_out: dict[str, Any] = {
@@ -429,28 +429,28 @@ class TestKernelRuntimeService(BaseTest):
             (
                 "marker_not_at_line_start",
                 "__NOTEBOOK_BRIDGE__",
-                ['hello __NOTEBOOK_BRIDGE__41 {"call":"hogql_execute","query":"select"}\n'],
-                ['hello __NOTEBOOK_BRIDGE__41 {"call":"hogql_execute","query":"select"}\n'],
+                ['hello __NOTEBOOK_BRIDGE__41 {"call":"insightsql_execute","query":"select"}\n'],
+                ['hello __NOTEBOOK_BRIDGE__41 {"call":"insightsql_execute","query":"select"}\n'],
                 [],
             ),
             (
                 "payload_extraction",
                 "__NOTEBOOK_BRIDGE__",
                 [
-                    '__NOTEBOOK_BRIDGE__41 {"call":"hogql_execute","query":"select"}\nworld\n',
+                    '__NOTEBOOK_BRIDGE__41 {"call":"insightsql_execute","query":"select"}\nworld\n',
                 ],
                 ["world\n"],
-                ['{"call":"hogql_execute","query":"select"}'],
+                ['{"call":"insightsql_execute","query":"select"}'],
             ),
             (
                 "payload_split_across_chunks",
                 "__NOTEBOOK_BRIDGE__",
                 [
-                    '__NOTEBOOK_BRIDGE__41 {"call":"hogql_execute",',
+                    '__NOTEBOOK_BRIDGE__41 {"call":"insightsql_execute",',
                     '"query":"select"}\nnext\n',
                 ],
                 ["", "next\n"],
-                ['{"call":"hogql_execute","query":"select"}'],
+                ['{"call":"insightsql_execute","query":"select"}'],
             ),
         ]
     )

@@ -33,7 +33,7 @@ class ClerkSource(SimpleSource[ClerkSourceConfig]):
             name=SchemaExternalDataSourceType.CLERK,
             label="Clerk",
             betaSource=True,
-            caption="""Enter your Clerk secret key to automatically pull your Clerk data into the PostHog Data warehouse.
+            caption="""Enter your Clerk secret key to automatically pull your Clerk data into the Insights Data warehouse.
 
 You can find your secret key in your [Clerk Dashboard](https://dashboard.clerk.com/) under **API Keys**.
 

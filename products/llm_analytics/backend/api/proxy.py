@@ -176,7 +176,7 @@ class LLMProxyViewSet(viewsets.ViewSet):
             # Provider is always explicit from request
             provider = data.get("provider")
 
-            # Generate tracking parameters for PostHog analytics
+            # Generate tracking parameters for Insights analytics
             trace_id = str(uuid.uuid4())
             distinct_id = getattr(request.user, "email", "") if request.user and request.user.is_authenticated else ""
             properties = {"ai_product": "playground"}

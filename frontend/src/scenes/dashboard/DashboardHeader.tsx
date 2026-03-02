@@ -411,7 +411,7 @@ export function DashboardHeader(): JSX.Element | null {
                             }}
                         >
                             <IconGraph />
-                            Open insights in new PostHog tabs
+                            Open insights in new Insights tabs
                         </ButtonPrimitive>
                     )}
                 </ScenePanelActionsSection>

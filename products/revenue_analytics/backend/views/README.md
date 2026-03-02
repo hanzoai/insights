@@ -34,7 +34,7 @@ The system follows a builder pattern where:
 
 ### 2. Data Sources
 
-1. Events (`sources/events/`): Transforms PostHog events into revenue views using team-configured revenue events.
+1. Events (`sources/events/`): Transforms Insights events into revenue views using team-configured revenue events.
 2. Stripe (`sources/stripe/`)
 
 ### 3. Schema System
@@ -419,7 +419,7 @@ There are many more tests in `products/revenue_analytics/backend/hogql_queries/t
 
 ## View Registration
 
-Views are automatically registered in PostHog's HogQL database schema through the orchestrator. The system will:
+Views are automatically registered in Insights's HogQL database schema through the orchestrator. The system will:
 
 1. Discover your source through `ExternalDataSource` records
 2. Run your builders for each supported view type

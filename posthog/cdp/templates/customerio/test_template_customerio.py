@@ -43,7 +43,7 @@ class TestTemplateCustomerio(BaseCustomFunctionTemplateTest):
             {
                 "method": "POST",
                 "headers": {
-                    "User-Agent": "PostHog Customer.io App",
+                    "User-Agent": "Insights Customer.io App",
                     "Authorization": "Basic U0lURV9JRDpUT0tFTg==",
                     "Content-Type": "application/json",
                 },
@@ -71,7 +71,7 @@ class TestTemplateCustomerio(BaseCustomFunctionTemplateTest):
             {
                 "method": "POST",
                 "headers": {
-                    "User-Agent": "PostHog Customer.io App",
+                    "User-Agent": "Insights Customer.io App",
                     "Authorization": "Basic U0lURV9JRDpUT0tFTg==",
                     "Content-Type": "application/json",
                 },

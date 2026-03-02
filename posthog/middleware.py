@@ -129,7 +129,7 @@ class AllowIPMiddleware:
                 if get_geoip_properties(ip).get("$geoip_country_code", None) not in settings.BLOCKED_GEOIP_REGIONS:
                     return response
         return HttpResponse(
-            "PostHog is not available in your region. If you think this is in error, please contact tim@posthog.com.",
+            "Insights is not available in your region. If you think this is in error, please contact tim@posthog.com.",
             status=403,
         )
 
@@ -164,7 +164,7 @@ class CsvNeverCacheMiddleware:
 class AutoProjectMiddleware:
     """Automatic switching of the user's current project to that of the item being accessed if possible.
 
-    Sometimes you get sent a link to PostHog that points to an item from a different project than the one you currently
+    Sometimes you get sent a link to Insights that points to an item from a different project than the one you currently
     are in. With this middleware, if you have access to the target project, you are seamlessly switched to it,
     instead of seeing a 404 eror.
     """
@@ -479,7 +479,7 @@ class CustomPrometheusMetrics(Metrics):
         return super().register_metric(metric_cls, name, documentation, labelnames=labelnames, **kwargs)
 
 
-class PostHogTokenCookieMiddleware(SessionMiddleware):
+class InsightsTokenCookieMiddleware(SessionMiddleware):
     """
     Adds two secure cookies to enable auto-filling the current project token on the docs.
     """

@@ -42,7 +42,7 @@ import { QUESTION_SUGGESTIONS_DATA, maxLogic } from './maxLogic'
 import { maxThreadLogic } from './maxThreadLogic'
 
 const meta: Meta = {
-    title: 'Scenes-App/PostHog AI',
+    title: 'Scenes-App/Insights AI',
     decorators: [
         mswDecorator({
             post: {
@@ -2011,7 +2011,7 @@ export const ThreadWithMultiQuestionForm: StoryFn = () => {
         {
             id: 'use_case',
             title: 'Use case',
-            question: 'What is your primary use case for PostHog?',
+            question: 'What is your primary use case for Insights?',
             options: [
                 { value: 'Product Analytics', description: 'Track your product metrics and KPIs' },
                 {
@@ -2075,7 +2075,7 @@ export const ThreadWithMultiQuestionForm: StoryFn = () => {
                             'event: message',
                             `data: ${JSON.stringify({
                                 ...humanMessage,
-                                content: 'Help me get started with PostHog',
+                                content: 'Help me get started with Insights',
                             })}`,
                             'event: message',
                             `data: ${JSON.stringify(multiQuestionFormMessage)}`,
@@ -2094,7 +2094,7 @@ export const ThreadWithMultiQuestionForm: StoryFn = () => {
         if (dataProcessingAccepted) {
             setTimeout(() => {
                 setConversationId(CONVERSATION_ID)
-                askMax('Help me get started with PostHog')
+                askMax('Help me get started with Insights')
             }, 0)
         }
     }, [dataProcessingAccepted, setConversationId, askMax])

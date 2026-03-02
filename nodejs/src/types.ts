@@ -53,12 +53,12 @@ export enum PluginServerMode {
     cdp_cyclotron_worker = 'cdp-cyclotron-worker',
     cdp_precalculated_filters = 'cdp-precalculated-filters',
     cdp_cohort_membership = 'cdp-cohort-membership',
-    cdp_cyclotron_worker_hogflow = 'cdp-cyclotron-worker-hogflow',
+    cdp_cyclotron_worker_customflow = 'cdp-cyclotron-worker-customflow',
     cdp_api = 'cdp-api',
     cdp_legacy_on_event = 'cdp-legacy-on-event',
     evaluation_scheduler = 'evaluation-scheduler',
     ingestion_logs = 'ingestion-logs',
-    cdp_batch_hogflow_requests = 'cdp-batch-hogflow-requests',
+    cdp_batch_customflow_requests = 'cdp-batch-customflow-requests',
     cdp_cyclotron_shadow_worker = 'cdp-cyclotron-shadow-worker',
     recording_api = 'recording-api',
 }
@@ -147,7 +147,7 @@ export type CdpConfig = {
     CDP_WATCHER_DISABLED_TEMPORARY_TTL: number // How long a function should be temporarily disabled for
     CDP_WATCHER_DISABLED_TEMPORARY_MAX_COUNT: number // How many times a function can be disabled before it is disabled permanently
     CDP_WATCHER_AUTOMATICALLY_DISABLE_FUNCTIONS: boolean // If true then degraded functions will be automatically disabled
-    CDP_WATCHER_SEND_EVENTS: boolean // If true then the watcher will send events to posthog for messaging
+    CDP_WATCHER_SEND_EVENTS: boolean // If true then the watcher will send events to insights for messaging
     CDP_WATCHER_OBSERVE_RESULTS_BUFFER_TIME_MS: number // How long to buffer results before observing them
     CDP_WATCHER_OBSERVE_RESULTS_BUFFER_MAX_RESULTS: number // How many results to buffer before observing them
     CDP_RATE_LIMITER_BUCKET_SIZE: number // The total bucket size
@@ -157,7 +157,7 @@ export type CdpConfig = {
     DISABLE_OPENTELEMETRY_TRACING: boolean
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_KIND: CyclotronJobQueueKind
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: CyclotronJobQueueSource
-    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING: string // A comma-separated list of queue to mode like `hog:kafka,fetch:postgres,*:kafka` with * being the default
+    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING: string // A comma-separated list of queue to mode like `custom_script:kafka,fetch:postgres,*:kafka` with * being the default
     CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_TEAM_MAPPING: string // Like the above but with a team check too
     CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_FORCE_SCHEDULED_TO_POSTGRES: boolean // If true then scheduled jobs will be routed to postgres even if they are mapped to kafka
 
@@ -182,8 +182,8 @@ export type CdpConfig = {
     CDP_FETCH_BACKOFF_MAX_MS: number
     CDP_OVERFLOW_QUEUE_ENABLED: boolean
 
-    HOG_FUNCTION_MONITORING_APP_METRICS_TOPIC: string
-    HOG_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: string
+    CUSTOM_FUNCTION_MONITORING_APP_METRICS_TOPIC: string
+    CUSTOM_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: string
 
     CDP_EMAIL_TRACKING_URL: string
 
@@ -350,8 +350,8 @@ export type SessionRecordingConfig = {
     SESSION_RECORDING_OVERFLOW_MIN_PER_BATCH: number
     SESSION_RECORDING_MAX_PARALLEL_FLUSHES: number
 
-    POSTHOG_SESSION_RECORDING_REDIS_HOST: string | undefined
-    POSTHOG_SESSION_RECORDING_REDIS_PORT: number | undefined
+    INSIGHTS_SESSION_RECORDING_REDIS_HOST: string | undefined
+    INSIGHTS_SESSION_RECORDING_REDIS_PORT: number | undefined
 
     SESSION_RECORDING_MAX_BATCH_SIZE_KB: number
     SESSION_RECORDING_MAX_BATCH_AGE_MS: number
@@ -411,11 +411,11 @@ export interface PluginsServerConfig
     PERSONS_READONLY_DATABASE_URL: string // Optional read-only replica to the persons Postgres database
     PLUGIN_STORAGE_DATABASE_URL: string // Optional read-write Postgres database for plugin storage
     POSTGRES_CONNECTION_POOL_SIZE: number
-    POSTHOG_DB_NAME: string | null
-    POSTHOG_DB_USER: string
-    POSTHOG_DB_PASSWORD: string
-    POSTHOG_POSTGRES_HOST: string
-    POSTHOG_POSTGRES_PORT: number
+    INSIGHTS_DB_NAME: string | null
+    INSIGHTS_DB_USER: string
+    INSIGHTS_DB_PASSWORD: string
+    INSIGHTS_POSTGRES_HOST: string
+    INSIGHTS_POSTGRES_PORT: number
     POSTGRES_BEHAVIORAL_COHORTS_HOST: string
     POSTGRES_BEHAVIORAL_COHORTS_USER: string
     POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: string
@@ -424,10 +424,10 @@ export interface PluginsServerConfig
     // Redis params for the ingestion services
     INGESTION_REDIS_HOST: string
     INGESTION_REDIS_PORT: number
-    // Redis params for the core posthog (django+celery) services
-    POSTHOG_REDIS_PASSWORD: string
-    POSTHOG_REDIS_HOST: string
-    POSTHOG_REDIS_PORT: number
+    // Redis params for the core insights (django+celery) services
+    INSIGHTS_REDIS_PASSWORD: string
+    INSIGHTS_REDIS_HOST: string
+    INSIGHTS_REDIS_PORT: number
     // Common redis params
     REDIS_POOL_MIN_SIZE: number // minimum number of Redis connections to use per thread
     REDIS_POOL_MAX_SIZE: number // maximum number of Redis connections to use per thread
@@ -478,7 +478,7 @@ export interface PluginsServerConfig
     NODEJS_CAPABILITY_GROUPS: string | null
     PLUGIN_SERVER_EVENTS_INGESTION_PIPELINE: string | null // TODO: shouldn't be a string probably
     PLUGIN_LOAD_SEQUENTIALLY: boolean // could help with reducing memory usage spikes on startup
-    /** Label of the PostHog Cloud environment. Null if not running PostHog Cloud. @example 'US' */
+    /** Label of the Insights Cloud environment. Null if not running Insights Cloud. @example 'US' */
     CLOUD_DEPLOYMENT: string | null
     EXTERNAL_REQUEST_TIMEOUT_MS: number
     EXTERNAL_REQUEST_CONNECT_TIMEOUT_MS: number
@@ -492,11 +492,11 @@ export interface PluginsServerConfig
 
     ENCRYPTION_SALT_KEYS: string
 
-    // posthog
-    POSTHOG_API_KEY: string
-    POSTHOG_HOST_URL: string
+    // insights
+    INSIGHTS_API_KEY: string
+    INSIGHTS_HOST_URL: string
 
-    // Super properties for internal analytics (matching Python posthoganalytics.super_properties)
+    // Super properties for internal analytics (matching Python insightsanalytics.super_properties)
     OTEL_SERVICE_NAME: string | null
     OTEL_SERVICE_ENVIRONMENT: string | null
     // Internal API authentication
@@ -510,7 +510,7 @@ export interface PluginsServerConfig
     PROPERTY_DEFS_CONSUMER_ENABLED_TEAMS: string
     PROPERTY_DEFS_WRITE_DISABLED: boolean
 
-    // Shared between ingestion and CDP (used by hog transformer in both)
+    // Shared between ingestion and CDP (used by script transformer in both)
     CDP_HOG_WATCHER_SAMPLE_RATE: number
     CDP_BATCH_WORKFLOW_PRODUCER_BATCH_SIZE: number
 
@@ -540,7 +540,7 @@ export interface Hub extends PluginsServerConfig {
     // what tasks this server will tackle - e.g. ingestion, scheduled plugins or others.
     postgres: PostgresRouter
     redisPool: GenericPool<Redis>
-    posthogRedisPool: GenericPool<Redis>
+    insightsRedisPool: GenericPool<Redis>
     cookielessRedisPool: GenericPool<Redis>
     kafkaProducer: KafkaProducerWrapper
     // tools
@@ -573,9 +573,9 @@ export interface PluginServerCapabilities {
     cdpPersonUpdates?: boolean
     cdpInternalEvents?: boolean
     cdpLegacyOnEvent?: boolean
-    cdpBatchHogFlow?: boolean
+    cdpBatchCustomFlow?: boolean
     cdpCyclotronWorker?: boolean
-    cdpCyclotronWorkerHogFlow?: boolean
+    cdpCyclotronWorkerCustomFlow?: boolean
     cdpPrecalculatedFilters?: boolean
     cdpCohortMembership?: boolean
     cdpApi?: boolean
@@ -1026,7 +1026,7 @@ export interface Hook {
     updated: string
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export enum PropertyOperator {
     Exact = 'exact',
     IsNot = 'is_not',
@@ -1043,29 +1043,29 @@ export enum PropertyOperator {
     IsCleanedPathExact = 'is_cleaned_path_exact',
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 interface PropertyFilterBase {
     key: string
     value?: string | number | Array<string | number> | null
     label?: string
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export interface PropertyFilterWithOperator extends PropertyFilterBase {
     operator?: PropertyOperator
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export interface EventPropertyFilter extends PropertyFilterWithOperator {
     type: 'event'
 }
 
-/** Sync with posthog/frontend/src/types.ts */
-export interface HogQLPropertyFilter extends PropertyFilterWithOperator {
-    type: 'hogql'
+/** Sync with insights/frontend/src/types.ts */
+export interface InsightsQLPropertyFilter extends PropertyFilterWithOperator {
+    type: 'insightsql'
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export interface PersonPropertyFilter extends PropertyFilterWithOperator {
     type: 'person'
 }
@@ -1078,21 +1078,21 @@ export interface DataWarehousePersonPropertyFilter extends PropertyFilterWithOpe
     type: 'data_warehouse_person_property'
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export interface ElementPropertyFilter extends PropertyFilterWithOperator {
     type: 'element'
     key: 'tag_name' | 'text' | 'href' | 'selector'
     value: string | string[]
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export interface CohortPropertyFilter extends PropertyFilterBase {
     type: 'cohort'
     key: 'id'
     value: number | string
 }
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export type PropertyFilter =
     | EventPropertyFilter
     | PersonPropertyFilter
@@ -1100,9 +1100,9 @@ export type PropertyFilter =
     | CohortPropertyFilter
     | DataWarehousePropertyFilter
     | DataWarehousePersonPropertyFilter
-    | HogQLPropertyFilter
+    | InsightsQLPropertyFilter
 
-/** Sync with posthog/frontend/src/types.ts */
+/** Sync with insights/frontend/src/types.ts */
 export enum StringMatching {
     Contains = 'contains',
     Regex = 'regex',

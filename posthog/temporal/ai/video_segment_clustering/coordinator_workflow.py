@@ -21,7 +21,7 @@ from posthog.models.team.team import Team
 from posthog.temporal.ai.video_segment_clustering.clustering_workflow import VideoSegmentClusteringWorkflow
 from posthog.temporal.ai.video_segment_clustering.constants import DEFAULT_LOOKBACK_WINDOW
 from posthog.temporal.ai.video_segment_clustering.models import ClusteringWorkflowInputs, WorkflowResult
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.logger import get_logger
 
 logger = structlog.get_logger(__name__)
@@ -37,7 +37,7 @@ class VideoSegmentClusteringCoordinatorInputs:
 
 
 @temporalio.workflow.defn(name="video-segment-clustering-coordinator")
-class VideoSegmentClusteringCoordinatorWorkflow(PostHogWorkflow):
+class VideoSegmentClusteringCoordinatorWorkflow(InsightsWorkflow):
     """
     This runs on schedule and kicks off task inference (creating proactive tasks) for teams with proactive_tasks_enabled.
     """

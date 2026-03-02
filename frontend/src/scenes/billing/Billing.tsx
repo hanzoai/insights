@@ -10,7 +10,7 @@ import { LemonButton, LemonDivider, LemonInput, Link } from '@posthog/lemon-ui'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { JudgeHog, StarHog } from 'lib/components/hedgehogs'
+import { JudgeHog, StarHog } from 'lib/components/mascots'
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'

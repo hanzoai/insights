@@ -2,7 +2,7 @@ import os
 
 import django
 
-# setup PostHog Django Project
+# setup Insights Django Project
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "posthog.settings")
 
 # Skip the self-capture API token initialization for Dagster

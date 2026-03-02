@@ -118,7 +118,7 @@ class RiskAnalyzer:
         # Check for dangerous operation combinations
         combination_risks = self.check_operation_combinations(migration, operation_risks)
 
-        # Check PostHog policies
+        # Check Insights policies
         policy_violations = self.check_policies(migration)
 
         # Build info messages
@@ -315,7 +315,7 @@ class RiskAnalyzer:
         return ["⚠️  INFO: Migration is marked atomic=False. Ensure data migrations handle failures correctly."]
 
     def check_policies(self, migration) -> list[str]:
-        """Check migration against PostHog coding policies."""
+        """Check migration against Insights coding policies."""
         violations = []
 
         for policy in POSTHOG_POLICIES:

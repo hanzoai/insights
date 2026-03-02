@@ -21,7 +21,7 @@ const DEFAULT_CUSTOM_FUNCTION_CONFIGURATION: Partial<CustomFunctionConfiguration
 
 const DEFAULT_SLACK_INPUTS: Record<string, any> = {
     icon_emoji: { value: ':robot_face:' },
-    username: { value: 'PostHog' },
+    username: { value: 'Insights' },
     blocks: {
         value: [
             { type: 'header', text: { type: 'plain_text', text: '🔴 {event.properties.name}' } },

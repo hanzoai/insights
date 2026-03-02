@@ -5,7 +5,7 @@ import { LemonButton, LemonCheckbox, LemonModal, Link } from '@posthog/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { HeartHog, MailHog, SurprisedHog } from 'lib/components/hedgehogs'
+import { HeartHog, MailHog, SurprisedHog } from 'lib/components/mascots'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'

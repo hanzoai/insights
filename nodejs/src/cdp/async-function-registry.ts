@@ -1,22 +1,22 @@
-import { HogExecutorServiceHub } from './services/hog-executor.service'
+import { ScriptExecutorServiceHub } from './services/script-executor.service'
 import {
-    CyclotronJobInvocationHogFunction,
+    CyclotronJobInvocationCustomFunction,
     CyclotronJobInvocationResult,
-    HogFunctionInvocationGlobalsWithInputs,
+    CustomFunctionInvocationGlobalsWithInputs,
     MinimalLogEntry,
 } from './types'
 
 export type AsyncFunctionContext = {
-    invocation: CyclotronJobInvocationResult<CyclotronJobInvocationHogFunction>['invocation']
-    globals: HogFunctionInvocationGlobalsWithInputs
-    hub: HogExecutorServiceHub
+    invocation: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>['invocation']
+    globals: CustomFunctionInvocationGlobalsWithInputs
+    hub: ScriptExecutorServiceHub
 }
 
 export type AsyncFunctionHandler = {
     execute: (
         args: any[],
         context: AsyncFunctionContext,
-        result: CyclotronJobInvocationResult<CyclotronJobInvocationHogFunction>
+        result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>
     ) => Promise<void> | void
 
     mock: (args: any[], logs: MinimalLogEntry[]) => any

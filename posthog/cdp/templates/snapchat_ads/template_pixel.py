@@ -67,7 +67,7 @@ export function onLoad({ inputs, posthog }) {
         }
     };
     if (posthog.config.debug) {
-        console.log('[PostHog] snaptr init', inputs.pixelId, userProperties);
+        console.log('[Insights] snaptr init', inputs.pixelId, userProperties);
     }
     snaptr('init', inputs.pixelId, userProperties);
 }
@@ -79,7 +79,7 @@ export function onEvent({ inputs, posthog }) {
         }
     };
     if (posthog.config.debug) {
-        console.log('[PostHog] snaptr track', inputs.eventType, eventProperties);
+        console.log('[Insights] snaptr track', inputs.eventType, eventProperties);
     }
     snaptr('track', inputs.eventType, eventProperties);
 }

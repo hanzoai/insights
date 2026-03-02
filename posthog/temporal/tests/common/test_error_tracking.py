@@ -1,4 +1,4 @@
-"""Test that we capture exceptions in activities and workflows to PostHog."""
+"""Test that we capture exceptions in activities and workflows to Insights."""
 
 import uuid
 import datetime as dt
@@ -14,7 +14,7 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import ApplicationError
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from posthog.temporal.common.posthog_client import PostHogClientInterceptor
+from posthog.temporal.common.posthog_client import InsightsClientInterceptor
 
 
 @dataclass
@@ -112,7 +112,7 @@ async def test_exception_capture(fail: bool, capture_additional_properties: bool
             task_queue=task_queue,
             workflows=[OptionallyFailingWorkflow, OptionallyFailingWorkflowWithPropertiesToLog],
             activities=[failing_activity, failing_activity_with_properties_to_log],
-            interceptors=[PostHogClientInterceptor()],
+            interceptors=[InsightsClientInterceptor()],
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             if fail:
@@ -169,7 +169,7 @@ async def test_workflow_only_error_is_captured(temporal_client: Client):
             task_queue=task_queue,
             workflows=[DirectlyFailingWorkflow],
             activities=[],
-            interceptors=[PostHogClientInterceptor()],
+            interceptors=[InsightsClientInterceptor()],
             workflow_runner=UnsandboxedWorkflowRunner(),
         ):
             with pytest.raises(WorkflowFailureError):

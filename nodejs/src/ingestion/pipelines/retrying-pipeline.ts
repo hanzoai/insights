@@ -1,5 +1,5 @@
 import { logger } from '../../utils/logger'
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { retryIfRetriable } from '../../utils/retries'
 import { Pipeline, PipelineResultWithContext } from './pipeline.interface'
 import { dlq } from './results'

@@ -4,7 +4,7 @@ import { IconPlusSmall } from '@posthog/icons'
 import { LemonButton, Spinner } from '@posthog/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { SupportHeroHog } from 'lib/components/hedgehogs'
+import { SupportHeroHog } from 'lib/components/mascots'
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
 import { urls } from 'scenes/urls'
@@ -46,7 +46,7 @@ function SetupPrompt({ className }: Pick<ZendeskSourceSetupPromptProps, 'classNa
             productKey={ProductKey.DATA_WAREHOUSE}
             thingName="data source"
             className={className}
-            description="Use data warehouse sources to import data from Zendesk into PostHog."
+            description="Use data warehouse sources to import data from Zendesk into Insights."
             isEmpty={true}
             docsURL="https://posthog.com/docs/data-warehouse"
             actionElementOverride={

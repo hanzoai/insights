@@ -4,7 +4,7 @@ import { RelatedGroups, RelatedGroupsProps } from 'scenes/groups/RelatedGroups'
 import { urls } from 'scenes/urls'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
-import { createPostHogWidgetNode } from './NodeWrapper'
+import { createInsightsWidgetNode } from './NodeWrapper'
 import { notebookNodeLogic } from './notebookNodeLogic'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeRelatedGroupsAttributes>): JSX.Element | null => {
@@ -26,7 +26,7 @@ const href = ({ id, groupTypeIndex }: NotebookNodeRelatedGroupsAttributes): stri
     return urls.personByUUID(id) + '#activeTab=related'
 }
 
-export const NotebookNodeRelatedGroups = createPostHogWidgetNode<NotebookNodeRelatedGroupsAttributes>({
+export const NotebookNodeRelatedGroups = createInsightsWidgetNode<NotebookNodeRelatedGroupsAttributes>({
     nodeType: NotebookNodeType.RelatedGroups,
     titlePlaceholder: 'Related groups',
     Component,

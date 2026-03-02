@@ -2,7 +2,7 @@
     "$exception_list": [
         {
             "type": "Error",
-            "value": "My first PostHog error!",
+            "value": "My first Insights error!",
             "stacktrace": {
                 "frames": [
                     {
@@ -49,7 +49,7 @@
                             "  res.writeHead(200, { \"Content-Type\": \"text/plain\" });",
                             "  posthog.capture({ event: \"Test event\", distinctId: \"test\" });"
                         ],
-                        "context_line": "  throw new Error(\"My first PostHog error!\");",
+                        "context_line": "  throw new Error(\"My first Insights error!\");",
                         "post_context": [
                             "  res.end(\"Hello World!\\n\");",
                             "});",

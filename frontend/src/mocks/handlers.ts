@@ -146,7 +146,7 @@ export const defaultMocks: Mocks = {
             },
         ],
         '/api/users/@me/two_factor_status/': () => [200, { is_enabled: true, backup_codes: [], method: 'TOTP' }],
-        '/api/users/@me/hedgehog_config/': {
+        '/api/users/@me/mascot_config/': {
             color: null,
             enabled: false,
             accessories: ['tophat', 'sunglasses'],

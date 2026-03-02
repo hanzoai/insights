@@ -12,7 +12,7 @@ import { urls } from 'scenes/urls'
 
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
 import { DataTableRow } from '~/queries/nodes/DataTable/dataTableLogic'
-import { isHogQLQuery } from '~/queries/utils'
+import { isInsightsQLQuery } from '~/queries/utils'
 
 import { LLMAnalyticsTraceEvents } from './components/LLMAnalyticsTraceEvents'
 import { useSortableColumns } from './hooks/useSortableColumns'
@@ -50,8 +50,8 @@ export function LLMAnalyticsSessionsScene(): JSX.Element {
                 showSavedFilters: true,
             }}
             setQuery={(query) => {
-                if (!isHogQLQuery(query.source)) {
-                    console.warn('LLMAnalyticsSessions received a non-HogQL query:', query.source)
+                if (!isInsightsQLQuery(query.source)) {
+                    console.warn('LLMAnalyticsSessions received a non-InsightsQL query:', query.source)
                     return
                 }
                 const { filters = {} } = query.source

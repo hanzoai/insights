@@ -1232,7 +1232,7 @@ segments:
       session_start_time: '2026-01-12T15:30:28.053000+00:00'
       session_duration: 3331
       segment:
-          title: Explore “Ask PostHog AI” and global search
+          title: Explore “Ask Insights AI” and global search
           start_time: '10:44'
           end_time: '11:14'
           description: AI assistant produced request failures and dead-clicks; no useful
@@ -1262,7 +1262,7 @@ segments:
       session_start_time: '2026-01-12T15:31:56.915000+00:00'
       session_duration: 2021
       segment:
-          title: Deep dashboard analysis and PostHog AI chat in project 80620
+          title: Deep dashboard analysis and Insights AI chat in project 80620
           start_time: '23:11'
           end_time: '23:41'
           description: Successfully explored dashboards and engaged with AI despite minor
@@ -1291,7 +1291,7 @@ segments:
       session_start_time: '2026-01-12T15:51:41.327000+00:00'
       session_duration: 2014
       segment:
-          title: Extended PostHog AI chat with repeated follow-ups
+          title: Extended Insights AI chat with repeated follow-ups
           start_time: '27:01'
           end_time: '27:31'
           description: Held extended AI conversation though dead clicks signaled partial
@@ -1419,7 +1419,7 @@ segments:
       session_start_time: '2026-01-12T15:31:17.338000+00:00'
       session_duration: 3283
       segment:
-          title: PostHog AI deep-dive and follow-ups
+          title: Insights AI deep-dive and follow-ups
           start_time: '22:25'
           end_time: '22:55'
           description: Successfully obtained AI guidance despite minor typing frustration.
@@ -1788,7 +1788,7 @@ segments:
       session_start_time: '2026-01-12T15:39:47.194000+00:00'
       session_duration: 2770
       segment:
-          title: Opened PostHog AI side-panel, chatted and explored suggestions
+          title: Opened Insights AI side-panel, chatted and explored suggestions
           start_time: 02:34
           end_time: 03:04
           description: Explored AI assistant; obtained responses despite some toggle frustration
@@ -1990,7 +1990,7 @@ segments:
       session_start_time: '2026-01-12T16:06:25.071000+00:00'
       session_duration: 1012
       segment:
-          title: Asked PostHog AI & closed side-panel
+          title: Asked Insights AI & closed side-panel
           start_time: 03:44
           end_time: 04:14
           description: User queried AI, minor dead-click frustration, then closed panel
@@ -2005,7 +2005,7 @@ segments:
       session_start_time: '2026-01-12T16:02:28.538000+00:00'
       session_duration: 1177
       segment:
-          title: Uses PostHog AI side-panel with frustration
+          title: Uses Insights AI side-panel with frustration
           start_time: 05:07
           end_time: 05:37
           description: AI assistant use led to rage/dead clicks, indicating unresolved confusion
@@ -2019,7 +2019,7 @@ segments:
       session_start_time: '2026-01-12T16:06:03.130000+00:00'
       session_duration: 856
       segment:
-          title: Refine query with PostHog AI and export again
+          title: Refine query with Insights AI and export again
           start_time: 04:29
           end_time: 04:59
           description: Despite input friction and a non-blocking editor error, AI-assisted
@@ -2381,7 +2381,7 @@ segments:
       session_start_time: '2026-01-12T16:09:35.777000+00:00'
       session_duration: 962
       segment:
-          title: Used PostHog AI to refine query and create insight
+          title: Used Insights AI to refine query and create insight
           start_time: 02:03
           end_time: 02:33
           description: AI-assisted query produced insight despite minor non-blocking error
@@ -2409,7 +2409,7 @@ segments:
       session_start_time: '2026-01-12T16:06:03.130000+00:00'
       session_duration: 856
       segment:
-          title: Refine query with PostHog AI and export again
+          title: Refine query with Insights AI and export again
           start_time: 06:11
           end_time: 06:41
           description: Despite input friction and a non-blocking editor error, AI-assisted
@@ -3380,7 +3380,7 @@ segments:
       session_start_time: '2026-01-12T12:22:18.037000+00:00'
       session_duration: 1266
       segment:
-          title: Explore PostHog AI assistant
+          title: Explore Insights AI assistant
           start_time: '10:10'
           end_time: '10:40'
           description: AI assistant used but frustration and query failure limited value
@@ -3394,7 +3394,7 @@ segments:
       session_start_time: '2026-01-12T12:31:20.220000+00:00'
       session_duration: 1164
       segment:
-          title: Use PostHog AI on dashboard (multiple failures)
+          title: Use Insights AI on dashboard (multiple failures)
           start_time: '14:36'
           end_time: '15:06'
           description: AI assistant repeatedly failed, causing frustration and rageclicks;
@@ -3662,10 +3662,10 @@ segments:
       session_start_time: '2026-01-12T12:29:58.461000+00:00'
       session_duration: 85
       segment:
-          title: Attempt to open PostHog data – errors and frustration
+          title: Attempt to open Insights data – errors and frustration
           start_time: 00:09
           end_time: 00:39
-          description: Exceptions and rageclick prevented viewing PostHog dataset
+          description: Exceptions and rageclick prevented viewing Insights dataset
           success: false
           failure_detected: false
           confusion_detected: true
@@ -3934,10 +3934,10 @@ segments:
       session_start_time: '2026-01-12T12:29:58.461000+00:00'
       session_duration: 85
       segment:
-          title: Attempt to open PostHog data – errors and frustration
+          title: Attempt to open Insights data – errors and frustration
           start_time: 00:11
           end_time: 00:41
-          description: Exceptions and rageclick prevented viewing PostHog dataset
+          description: Exceptions and rageclick prevented viewing Insights dataset
           success: false
           failure_detected: true
           confusion_detected: false
@@ -4275,7 +4275,7 @@ segments:
       session_start_time: '2026-01-12T12:31:20.220000+00:00'
       session_duration: 1164
       segment:
-          title: Use PostHog AI on dashboard (multiple failures)
+          title: Use Insights AI on dashboard (multiple failures)
           start_time: '14:36'
           end_time: '15:06'
           description: AI assistant repeatedly failed, causing frustration and rageclicks;
@@ -4824,7 +4824,7 @@ segments:
       session_start_time: '2026-01-11T18:45:25.691000+00:00'
       session_duration: 48
       segment:
-          title: Attempt to access PostHog app login
+          title: Attempt to access Insights app login
           start_time: 00:38
           end_time: 01:08
           description: Dead click and API failures blocked login; user abandoned attempt.
@@ -5638,7 +5638,7 @@ segments:
       session_start_time: '2026-01-07T13:14:11.876000+00:00'
       session_duration: 154
       segment:
-          title: Logged into PostHog
+          title: Logged into Insights
           start_time: 00:05
           end_time: 00:35
           description: User overcame minor API error and logged in successfully
@@ -6093,7 +6093,7 @@ segments:
       session_start_time: '2026-01-07T13:15:42.859000+00:00'
       session_duration: 68
       segment:
-          title: Troubleshooting SQL query in PostHog
+          title: Troubleshooting SQL query in Insights
           start_time: 00:58
           end_time: 01:28
           description: User repeatedly hit blocking SQL errors and left without retrieving
@@ -6179,10 +6179,10 @@ segments:
       session_start_time: '2025-12-19T18:12:31.663000+00:00'
       session_duration: 6431
       segment:
-          title: Explored PostHog AI documentation
+          title: Explored Insights AI documentation
           start_time: 01:01
           end_time: 01:31
-          description: User explored PostHog AI docs despite a non-blocking React error
+          description: User explored Insights AI docs despite a non-blocking React error
           success: true
           failure_detected: true
           confusion_detected: false
@@ -6336,7 +6336,7 @@ segments:
       session_start_time: '2026-01-05T14:07:23.669000+00:00'
       session_duration: 8387
       segment:
-          title: Deep dive into PostHog AI page
+          title: Deep dive into Insights AI page
           start_time: '16:01'
           end_time: '16:31'
           description: User explored AI marketing page despite some frustration clicks
@@ -9296,7 +9296,7 @@ segments:
       session_start_time: '2026-01-06T14:35:59.130000+00:00'
       session_duration: 976
       segment:
-          title: Using PostHog AI side-panel
+          title: Using Insights AI side-panel
           start_time: 05:09
           end_time: 05:39
           description: AI assistant was opened and used; exception logged but chat continued.
@@ -10920,7 +10920,7 @@ segments:
       session_start_time: '2026-01-06T14:35:59.130000+00:00'
       session_duration: 976
       segment:
-          title: Using PostHog AI side-panel
+          title: Using Insights AI side-panel
           start_time: 05:09
           end_time: 05:39
           description: AI assistant was opened and used; exception logged but chat continued.
@@ -12811,7 +12811,7 @@ segments:
       session_start_time: '2026-01-06T10:42:10.132000+00:00'
       session_duration: 1578
       segment:
-          title: Explore insights and try PostHog AI
+          title: Explore insights and try Insights AI
           start_time: 00:20
           end_time: 00:50
           description: User hit paywall, then successfully used AI on LLM dashboard
@@ -13227,10 +13227,10 @@ segments:
       session_start_time: '2026-01-06T09:55:45.521000+00:00'
       session_duration: 1935
       segment:
-          title: Used Feed with PostHog AI side-panel
+          title: Used Feed with Insights AI side-panel
           start_time: 09:55
           end_time: '10:25'
-          description: Engaged PostHog AI, minor dead-click frustration but obtained insight
+          description: Engaged Insights AI, minor dead-click frustration but obtained insight
               data.
           success: true
           failure_detected: false
@@ -13242,7 +13242,7 @@ segments:
       session_start_time: '2026-01-06T10:51:33.720000+00:00'
       session_duration: 1928
       segment:
-          title: Uses PostHog AI sidebar for help & docs
+          title: Uses Insights AI sidebar for help & docs
           start_time: '11:21'
           end_time: '11:51'
           description: AI assistant engaged; answer received though panel felt sluggish.
@@ -13271,7 +13271,7 @@ segments:
       session_start_time: '2026-01-06T09:54:33.091000+00:00'
       session_duration: 2336
       segment:
-          title: Using PostHog AI assistant for insight explanations
+          title: Using Insights AI assistant for insight explanations
           start_time: '26:09'
           end_time: '26:39'
           description: Engaged AI assistant; minor UX hiccups but chat completed
@@ -13313,7 +13313,7 @@ segments:
       session_start_time: '2026-01-06T10:22:47.526000+00:00'
       session_duration: 2619
       segment:
-          title: Chatted with PostHog AI
+          title: Chatted with Insights AI
           start_time: '15:22'
           end_time: '15:52'
           description: Held extended AI chat; some confusion from clicking non-interactive
@@ -13328,10 +13328,10 @@ segments:
       session_start_time: '2026-01-06T10:04:25.750000+00:00'
       session_duration: 3050
       segment:
-          title: Deep dive in PostHog AI side-panel
+          title: Deep dive in Insights AI side-panel
           start_time: 01:35
           end_time: 02:05
-          description: User engages extensively with PostHog AI; minor frustration but keeps
+          description: User engages extensively with Insights AI; minor frustration but keeps
               extracting value.
           success: true
           failure_detected: false
@@ -13343,7 +13343,7 @@ segments:
       session_start_time: '2026-01-06T10:14:13.073000+00:00'
       session_duration: 539
       segment:
-          title: Chats with PostHog AI (two prompts)
+          title: Chats with Insights AI (two prompts)
           start_time: 01:04
           end_time: 01:34
           description: Two AI questions answered; minor non-blocking feature-flag error
@@ -13428,7 +13428,7 @@ segments:
       session_start_time: '2026-01-06T10:20:52.202000+00:00'
       session_duration: 5658
       segment:
-          title: Initial dashboard visit & PostHog AI chat
+          title: Initial dashboard visit & Insights AI chat
           start_time: '17:12'
           end_time: '17:42'
           description: User got AI answers but showed mild frustration clicking non-interactive
@@ -13471,7 +13471,7 @@ segments:
       session_start_time: '2026-01-06T10:42:10.778000+00:00'
       session_duration: 897
       segment:
-          title: PostHog AI assistance and snippet copy
+          title: Insights AI assistance and snippet copy
           start_time: '13:28'
           end_time: '13:58'
           description: Obtained AI-generated help; minor dead click but task completed.
@@ -13485,7 +13485,7 @@ segments:
       session_start_time: '2026-01-06T10:28:51.336000+00:00'
       session_duration: 2195
       segment:
-          title: Explore PostHog AI assistant (first stint)
+          title: Explore Insights AI assistant (first stint)
           start_time: '10:30'
           end_time: '11:00'
           description: AI assistant answered questions despite brief input frustration.
@@ -14855,7 +14855,7 @@ segments:
       session_start_time: '2025-12-29T04:18:23.094000+00:00'
       session_duration: 5362
       segment:
-          title: Dashboard review & PostHog AI exploration
+          title: Dashboard review & Insights AI exploration
           start_time: 02:22
           end_time: 02:52
           description: Reviewed dashboard and experimented with AI; minor dead-click confusion
@@ -16383,7 +16383,7 @@ segments:
       session_start_time: '2025-12-29T16:35:30.121000+00:00'
       session_duration: 1911
       segment:
-          title: Created PostHog account & hit verify-page errors
+          title: Created Insights account & hit verify-page errors
           start_time: '12:58'
           end_time: '13:28'
           description: Account created; verification page threw but did not block progress.
@@ -16610,7 +16610,7 @@ segments:
       session_start_time: '2025-12-29T16:49:51.735000+00:00'
       session_duration: 1357
       segment:
-          title: Searched site and tried PostHog AI assistant
+          title: Searched site and tried Insights AI assistant
           start_time: 08:20
           end_time: 08:50
           description: AI assistant used; minor API failures caused some frustration but
@@ -17704,7 +17704,7 @@ segments:
       session_start_time: '2025-12-29T16:14:44.733000+00:00'
       session_duration: 628
       segment:
-          title: Explored Insights and asked PostHog AI
+          title: Explored Insights and asked Insights AI
           start_time: 01:21
           end_time: 01:51
           description: Got AI response after brief frustration with input box
@@ -17978,7 +17978,7 @@ segments:
       session_start_time: '2025-12-29T16:49:51.735000+00:00'
       session_duration: 1357
       segment:
-          title: Searched site and tried PostHog AI assistant
+          title: Searched site and tried Insights AI assistant
           start_time: 09:34
           end_time: '10:04'
           description: AI assistant used; minor API failures caused some frustration but
@@ -18605,7 +18605,7 @@ segments:
       session_start_time: '2025-12-29T16:35:30.121000+00:00'
       session_duration: 1911
       segment:
-          title: Created PostHog account & hit verify-page errors
+          title: Created Insights account & hit verify-page errors
           start_time: '12:58'
           end_time: '13:28'
           description: Account created; verification page threw but did not block progress.
@@ -18959,7 +18959,7 @@ segments:
       session_start_time: '2025-12-29T16:49:51.735000+00:00'
       session_duration: 1357
       segment:
-          title: Searched site and tried PostHog AI assistant
+          title: Searched site and tried Insights AI assistant
           start_time: 08:20
           end_time: 08:50
           description: AI assistant used; minor API failures caused some frustration but
@@ -23918,7 +23918,7 @@ segments:
       session_start_time: '2025-12-19T09:49:07.912000+00:00'
       session_duration: 34
       segment:
-          title: Attempted login on PostHog homepage
+          title: Attempted login on Insights homepage
           start_time: 00:13
           end_time: 00:43
           description: Login submission did not progress; user experienced dead click and
@@ -24247,7 +24247,7 @@ segments:
       session_start_time: '2025-12-19T00:34:51.234000+00:00'
       session_duration: 685
       segment:
-          title: Email-MFA login to PostHog Cloud
+          title: Email-MFA login to Insights Cloud
           start_time: 00:45
           end_time: 01:15
           description: Completed email-MFA login despite minor “Team ID” errors.
@@ -29077,7 +29077,7 @@ segments:
       session_start_time: '2025-12-17T19:23:08.411000+00:00'
       session_duration: 5003
       segment:
-          title: Search page – intensive PostHog AI & SQL use
+          title: Search page – intensive Insights AI & SQL use
           start_time: '22:30'
           end_time: '23:00'
           description: Heavy AI-driven querying succeeded despite editor errors
@@ -29164,7 +29164,7 @@ segments:
       session_start_time: '2025-12-17T03:02:17.498000+00:00'
       session_duration: 4293
       segment:
-          title: Built new dashboard 892555 & explored with PostHog AI
+          title: Built new dashboard 892555 & explored with Insights AI
           start_time: '23:45'
           end_time: '24:15'
           description: User built new dashboard, added insights, engaged with AI assistant
@@ -29206,7 +29206,7 @@ segments:
       session_start_time: '2025-12-18T11:08:53.771000+00:00'
       session_duration: 4311
       segment:
-          title: Starts on existing dashboard and chats with PostHog AI
+          title: Starts on existing dashboard and chats with Insights AI
           start_time: 03:35
           end_time: 04:05
           description: AI chat works; minor dead-click but no blockage
@@ -30420,7 +30420,7 @@ segments:
       session_start_time: '2025-12-17T17:02:44.769000+00:00'
       session_duration: 2256
       segment:
-          title: Browsing PostHog marketing site & handbook
+          title: Browsing Insights marketing site & handbook
           start_time: '30:01'
           end_time: '30:31'
           description: Read marketing pages despite non-blocking errors and a minor dead-click
@@ -30533,7 +30533,7 @@ segments:
       session_start_time: '2025-12-17T17:16:50.325000+00:00'
       session_duration: 1392
       segment:
-          title: Extended PostHog AI chat attempts with repeated failures
+          title: Extended Insights AI chat attempts with repeated failures
           start_time: 08:30
           end_time: 09:00
           description: AI stayed in “Thinking…” loop, user frustrated.
@@ -31247,7 +31247,7 @@ segments:
       session_start_time: '2025-12-17T17:02:44.769000+00:00'
       session_duration: 2256
       segment:
-          title: Browsing PostHog marketing site & handbook
+          title: Browsing Insights marketing site & handbook
           start_time: '29:01'
           end_time: '29:31'
           description: Read marketing pages despite non-blocking errors and a minor dead-click
@@ -39438,10 +39438,10 @@ segments:
       session_start_time: '2025-12-11T14:12:25.263000+00:00'
       session_duration: 253
       segment:
-          title: Authenticated into PostHog app
+          title: Authenticated into Insights app
           start_time: 00:26
           end_time: 00:56
-          description: Successfully authenticated into PostHog despite a non-blocking exception
+          description: Successfully authenticated into Insights despite a non-blocking exception
           success: true
           failure_detected: true
           confusion_detected: false
@@ -39794,7 +39794,7 @@ segments:
       session_start_time: '2025-12-11T15:59:58.383000+00:00'
       session_duration: 670
       segment:
-          title: Logged into PostHog app via SSO
+          title: Logged into Insights app via SSO
           start_time: 00:55
           end_time: 01:25
           description: SSO login succeeded despite minor API hiccup
@@ -40998,10 +40998,10 @@ segments:
       session_start_time: '2025-12-11T14:12:25.263000+00:00'
       session_duration: 253
       segment:
-          title: Authenticated into PostHog app
+          title: Authenticated into Insights app
           start_time: 00:26
           end_time: 00:56
-          description: Successfully authenticated into PostHog despite a non-blocking exception
+          description: Successfully authenticated into Insights despite a non-blocking exception
           success: true
           failure_detected: true
           confusion_detected: false
@@ -41083,7 +41083,7 @@ segments:
       session_start_time: '2025-12-11T14:58:58.427000+00:00'
       session_duration: 880
       segment:
-          title: Login to PostHog Cloud
+          title: Login to Insights Cloud
           start_time: '11:02'
           end_time: '11:32'
           description: Logged into Cloud despite non-blocking API errors
@@ -41309,7 +41309,7 @@ segments:
       session_start_time: '2025-12-11T14:14:41.098000+00:00'
       session_duration: 2614
       segment:
-          title: Applied to PostHog Startup Program
+          title: Applied to Insights Startup Program
           start_time: 01:12
           end_time: 01:42
           description: Despite initial friction, user successfully submitted Startup Program
@@ -43089,10 +43089,10 @@ segments:
       session_start_time: '2025-12-11T14:12:25.263000+00:00'
       session_duration: 253
       segment:
-          title: Authenticated into PostHog app
+          title: Authenticated into Insights app
           start_time: 00:26
           end_time: 00:56
-          description: Successfully authenticated into PostHog despite a non-blocking exception
+          description: Successfully authenticated into Insights despite a non-blocking exception
           success: true
           failure_detected: true
           confusion_detected: false
@@ -44185,7 +44185,7 @@ segments:
       session_start_time: '2025-12-11T14:14:41.098000+00:00'
       session_duration: 2614
       segment:
-          title: Applied to PostHog Startup Program
+          title: Applied to Insights Startup Program
           start_time: 01:12
           end_time: 01:42
           description: Despite initial friction, user successfully submitted Startup Program
@@ -46592,7 +46592,7 @@ segments:
       session_start_time: '2025-12-08T17:06:50.245000+00:00'
       session_duration: 261
       segment:
-          title: Attempted to reach PostHog login
+          title: Attempted to reach Insights login
           start_time: 00:24
           end_time: 00:54
           description: User reached login page but left quickly; no errors seen
@@ -46649,7 +46649,7 @@ segments:
       session_start_time: '2025-12-08T17:06:50.245000+00:00'
       session_duration: 261
       segment:
-          title: Attempted to reach PostHog login
+          title: Attempted to reach Insights login
           start_time: 00:24
           end_time: 00:54
           description: User reached login page but left quickly; no errors seen
@@ -47413,7 +47413,7 @@ segments:
       session_start_time: '2025-12-10T17:56:46.129000+00:00'
       session_duration: 795
       segment:
-          title: Open PostHog AI and ask first question
+          title: Open Insights AI and ask first question
           start_time: 02:08
           end_time: 02:38
           description: AI assisted; initial rageclick but question answered
@@ -47427,7 +47427,7 @@ segments:
       session_start_time: '2025-12-10T17:47:51.742000+00:00'
       session_duration: 2007
       segment:
-          title: Open PostHog AI panel and attempt chat
+          title: Open Insights AI panel and attempt chat
           start_time: '14:18'
           end_time: '14:48'
           description: AI assistant opened but repeated request failures and dead click
@@ -47442,7 +47442,7 @@ segments:
       session_start_time: '2025-12-10T18:02:52.979000+00:00'
       session_duration: 902
       segment:
-          title: Experiment with PostHog AI on a user profile
+          title: Experiment with Insights AI on a user profile
           start_time: '10:15'
           end_time: '10:45'
           description: AI side-panel threw TypeErrors; user abandoned the chat.
@@ -47456,7 +47456,7 @@ segments:
       session_start_time: '2025-12-10T18:13:33.706000+00:00'
       session_duration: 1025
       segment:
-          title: Aborted first key creation & opened PostHog AI
+          title: Aborted first key creation & opened Insights AI
           start_time: 00:28
           end_time: 00:58
           description: Abandoned first key attempt; AI panel showed non-blocking error.
@@ -47669,7 +47669,7 @@ segments:
       session_start_time: '2025-12-10T17:53:32.501000+00:00'
       session_duration: 1466
       segment:
-          title: Deep dive on dashboard with PostHog AI and insight editing
+          title: Deep dive on dashboard with Insights AI and insight editing
           start_time: 08:25
           end_time: 08:55
           description: Used AI assistant and edited insight, minor confusion noted
@@ -48192,7 +48192,7 @@ segments:
       session_start_time: '2025-12-10T17:56:00.170000+00:00'
       session_duration: 1135
       segment:
-          title: Seeks help through PostHog AI side-panel
+          title: Seeks help through Insights AI side-panel
           start_time: 05:09
           end_time: 05:39
           description: Consults AI; receives answer yet unresolved query issues persist.
@@ -48206,7 +48206,7 @@ segments:
       session_start_time: '2025-12-10T17:47:51.742000+00:00'
       session_duration: 2007
       segment:
-          title: Open PostHog AI panel and attempt chat
+          title: Open Insights AI panel and attempt chat
           start_time: '14:18'
           end_time: '14:48'
           description: AI assistant opened but repeated request failures and dead click
@@ -48221,7 +48221,7 @@ segments:
       session_start_time: '2025-12-10T18:02:52.979000+00:00'
       session_duration: 902
       segment:
-          title: Experiment with PostHog AI on a user profile
+          title: Experiment with Insights AI on a user profile
           start_time: '10:15'
           end_time: '10:45'
           description: AI side-panel threw TypeErrors; user abandoned the chat.
@@ -48680,7 +48680,7 @@ segments:
       session_start_time: '2025-12-10T17:47:51.742000+00:00'
       session_duration: 2007
       segment:
-          title: Open PostHog AI panel and attempt chat
+          title: Open Insights AI panel and attempt chat
           start_time: '14:01'
           end_time: '14:31'
           description: AI assistant opened but repeated request failures and dead click
@@ -48709,7 +48709,7 @@ segments:
       session_start_time: '2025-12-10T17:53:32.501000+00:00'
       session_duration: 1466
       segment:
-          title: Deep dive on dashboard with PostHog AI and insight editing
+          title: Deep dive on dashboard with Insights AI and insight editing
           start_time: 08:25
           end_time: 08:55
           description: Used AI assistant and edited insight, minor confusion noted
@@ -49074,7 +49074,7 @@ segments:
       session_start_time: '2025-12-10T17:56:00.170000+00:00'
       session_duration: 1135
       segment:
-          title: Seeks help through PostHog AI side-panel
+          title: Seeks help through Insights AI side-panel
           start_time: 05:09
           end_time: 05:39
           description: Consults AI; receives answer yet unresolved query issues persist.
@@ -49088,7 +49088,7 @@ segments:
       session_start_time: '2025-12-10T17:47:51.742000+00:00'
       session_duration: 2007
       segment:
-          title: Open PostHog AI panel and attempt chat
+          title: Open Insights AI panel and attempt chat
           start_time: '14:18'
           end_time: '14:48'
           description: AI assistant opened but repeated request failures and dead click
@@ -49103,7 +49103,7 @@ segments:
       session_start_time: '2025-12-10T18:02:52.979000+00:00'
       session_duration: 902
       segment:
-          title: Experiment with PostHog AI on a user profile
+          title: Experiment with Insights AI on a user profile
           start_time: '10:15'
           end_time: '10:45'
           description: AI side-panel threw TypeErrors; user abandoned the chat.
@@ -49433,7 +49433,7 @@ segments:
       session_start_time: '2025-12-10T17:47:51.742000+00:00'
       session_duration: 2007
       segment:
-          title: Open PostHog AI panel and attempt chat
+          title: Open Insights AI panel and attempt chat
           start_time: '14:01'
           end_time: '14:31'
           description: AI assistant opened but repeated request failures and dead click
@@ -49462,7 +49462,7 @@ segments:
       session_start_time: '2025-12-10T17:53:32.501000+00:00'
       session_duration: 1466
       segment:
-          title: Deep dive on dashboard with PostHog AI and insight editing
+          title: Deep dive on dashboard with Insights AI and insight editing
           start_time: 08:25
           end_time: 08:55
           description: Used AI assistant and edited insight, minor confusion noted
@@ -50363,7 +50363,7 @@ segments:
       session_start_time: '2025-12-05T16:24:52.036000+00:00'
       session_duration: 329
       segment:
-          title: Explored About PostHog modal
+          title: Explored About Insights modal
           start_time: 01:48
           end_time: 02:18
           description: User viewed and closed About modal without issues.
@@ -60145,7 +60145,7 @@ segments:
       session_start_time: '2025-12-04T10:11:22.522000+00:00'
       session_duration: 578
       segment:
-          title: Tried PostHog AI in experiment – reauth blocked
+          title: Tried Insights AI in experiment – reauth blocked
           start_time: 04:13
           end_time: 04:43
           description: AI use halted by reauth prompt and abandoned after frustration
@@ -60305,7 +60305,7 @@ segments:
       session_start_time: '2025-12-04T09:45:38.324000+00:00'
       session_duration: 2217
       segment:
-          title: Explored PostHog AI assistance
+          title: Explored Insights AI assistance
           start_time: 02:16
           end_time: 02:46
           description: Consulted AI, ignored non-blocking errors, closed panel smoothly
@@ -60827,7 +60827,7 @@ segments:
       session_start_time: '2025-12-03T18:53:31.507000+00:00'
       session_duration: 94
       segment:
-          title: Started login on PostHog
+          title: Started login on Insights
           start_time: 00:05
           end_time: 00:35
           description: Login flow started but abandoned before submission
@@ -68938,7 +68938,7 @@ segments:
       session_start_time: '2025-12-03T04:14:54.184000+00:00'
       session_duration: 29
       segment:
-          title: Attempted to log in to PostHog
+          title: Attempted to log in to Insights
           start_time: 00:10
           end_time: 00:40
           description: Login was blocked by a client request failure; repeated submits showed
@@ -69343,7 +69343,7 @@ segments:
       session_start_time: '2025-12-03T03:18:23.687000+00:00'
       session_duration: 36
       segment:
-          title: Load PostHog project dashboard
+          title: Load Insights project dashboard
           start_time: 00:18
           end_time: 00:48
           description: Dashboard loaded with minor non-blocking feature-flag errors; no
@@ -69845,7 +69845,7 @@ segments:
       session_start_time: '2025-12-02T22:42:47.604000+00:00'
       session_duration: 3762
       segment:
-          title: Used PostHog AI assistant
+          title: Used Insights AI assistant
           start_time: 00:53
           end_time: 01:23
           description: User chatted with AI; minor dead-click friction
@@ -70072,7 +70072,7 @@ segments:
       session_start_time: '2025-11-26T23:04:35.948000+00:00'
       session_duration: 24137
       segment:
-          title: Use PostHog AI assistant
+          title: Use Insights AI assistant
           start_time: 09:02
           end_time: 09:32
           description: AI assistant errored; user copied text but no auto-insight delivered.
@@ -70086,10 +70086,10 @@ segments:
       session_start_time: '2025-12-01T06:30:18.970000+00:00'
       session_duration: 49353
       segment:
-          title: Edit insight and try PostHog AI (multiple errors)
+          title: Edit insight and try Insights AI (multiple errors)
           start_time: '21:27'
           end_time: '21:57'
-          description: Editing stalled as PostHog AI repeatedly failed and triggered frustration.
+          description: Editing stalled as Insights AI repeatedly failed and triggered frustration.
           success: false
           failure_detected: true
           confusion_detected: false
@@ -70100,7 +70100,7 @@ segments:
       session_start_time: '2025-12-02T22:42:47.604000+00:00'
       session_duration: 3762
       segment:
-          title: Used PostHog AI assistant
+          title: Used Insights AI assistant
           start_time: 00:53
           end_time: 01:23
           description: User chatted with AI; minor dead-click friction
@@ -70144,10 +70144,10 @@ segments:
       session_start_time: '2025-12-01T06:30:18.970000+00:00'
       session_duration: 49353
       segment:
-          title: Edit insight and try PostHog AI (multiple errors)
+          title: Edit insight and try Insights AI (multiple errors)
           start_time: 09:29
           end_time: 09:59
-          description: Editing stalled as PostHog AI repeatedly failed and triggered frustration.
+          description: Editing stalled as Insights AI repeatedly failed and triggered frustration.
           success: false
           failure_detected: false
           confusion_detected: true
@@ -70573,7 +70573,7 @@ segments:
       session_start_time: '2025-12-02T22:42:47.604000+00:00'
       session_duration: 3762
       segment:
-          title: Used PostHog AI assistant
+          title: Used Insights AI assistant
           start_time: 00:53
           end_time: 01:23
           description: User chatted with AI; minor dead-click friction
@@ -70817,7 +70817,7 @@ segments:
       session_start_time: '2025-11-29T07:53:30.433000+00:00'
       session_duration: 2425
       segment:
-          title: Read PostHog blog post and followed external link
+          title: Read Insights blog post and followed external link
           start_time: 00:08
           end_time: 00:38
           description: User dealt with two dead-clicks then successfully navigated to external
@@ -71875,7 +71875,7 @@ segments:
       session_start_time: '2025-11-29T07:52:53.409000+00:00'
       session_duration: 367
       segment:
-          title: Tried to log into PostHog
+          title: Tried to log into Insights
           start_time: 00:09
           end_time: 00:39
           description: Login page showed, user left without signing in
@@ -71917,7 +71917,7 @@ segments:
       session_start_time: '2025-11-29T07:53:30.433000+00:00'
       session_duration: 2425
       segment:
-          title: Read PostHog blog post and followed external link
+          title: Read Insights blog post and followed external link
           start_time: 00:08
           end_time: 00:38
           description: User dealt with two dead-clicks then successfully navigated to external
@@ -71960,7 +71960,7 @@ segments:
       session_start_time: '2025-11-29T07:55:20.327000+00:00'
       session_duration: 293
       segment:
-          title: Explored PostHog handbook via table-of-contents links
+          title: Explored Insights handbook via table-of-contents links
           start_time: 01:00
           end_time: 01:30
           description: User browsed multiple handbook chapters smoothly; one dead-click
@@ -73641,7 +73641,7 @@ segments:
       session_start_time: '2025-12-02T14:24:03.454000+00:00'
       session_duration: 491
       segment:
-          title: Attempt to log into PostHog app (US and EU)
+          title: Attempt to log into Insights app (US and EU)
           start_time: 02:31
           end_time: 03:01
           description: Server errors blocked login; user gave up after region switches.

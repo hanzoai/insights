@@ -156,15 +156,15 @@ class OAuthApplication(AbstractApplication):
         null=True, blank=True, help_text="When the client_id was issued (for DCR clients)"
     )
 
-    # Verification status - manually set by PostHog staff
+    # Verification status - manually set by Insights staff
     is_verified: models.BooleanField = models.BooleanField(
-        default=False, help_text="True if this application has been verified by PostHog"
+        default=False, help_text="True if this application has been verified by Insights"
     )
 
-    # First-party flag - manually set by PostHog staff
+    # First-party flag - manually set by Insights staff
     # First-party apps skip the OAuth consent screen and can use direct token exchange
     is_first_party: models.BooleanField = models.BooleanField(
-        default=False, help_text="True if this is a first-party PostHog application that skips OAuth consent"
+        default=False, help_text="True if this is a first-party Insights application that skips OAuth consent"
     )
 
     auth_brand: models.CharField = models.CharField(

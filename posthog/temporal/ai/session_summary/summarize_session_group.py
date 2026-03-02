@@ -51,7 +51,7 @@ from posthog.temporal.ai.session_summary.types.group import (
     SessionSummaryStreamUpdate,
 )
 from posthog.temporal.ai.session_summary.types.single import SingleSessionSummaryInputs
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.client import async_connect
 
 from ee.hogai.session_summaries.constants import (
@@ -272,7 +272,7 @@ MAX_STATUS_HISTORY = 50
 
 
 @temporalio.workflow.defn(name="summarize-session-group")
-class SummarizeSessionGroupWorkflow(PostHogWorkflow):
+class SummarizeSessionGroupWorkflow(InsightsWorkflow):
     def __init__(self) -> None:
         super().__init__()
         self._total_sessions = 0

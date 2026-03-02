@@ -3,7 +3,7 @@ import subprocess
 from urllib.parse import quote_plus
 
 import pytest
-from posthog.test.base import PostHogTestCase, run_clickhouse_statement_in_parallel
+from posthog.test.base import InsightsTestCase, run_clickhouse_statement_in_parallel
 
 from django.conf import settings
 from django.core.management.commands.flush import Command as FlushCommand
@@ -345,7 +345,7 @@ def patch_flush_command_for_persons_db(monkeypatch):
 
 @pytest.fixture
 def base_test_mixin_fixture():
-    kls = PostHogTestCase()
+    kls = InsightsTestCase()
     kls.setUp()
     kls.setUpTestData()
 
@@ -412,8 +412,8 @@ def mock_email_mfa_verifier(request, mocker):
 def pytest_configure(config):
     """
     Configure pytest-django to allow access to persons databases by default.
-    This is needed for tests that don't inherit from PostHogTestCase.
-    Most tests inherit from PostHogTestCase which already sets databases correctly,
+    This is needed for tests that don't inherit from InsightsTestCase.
+    Most tests inherit from InsightsTestCase which already sets databases correctly,
     but this ensures any remaining TestCase/TransactionTestCase also have access.
     """
     from django.test import TestCase, TransactionTestCase

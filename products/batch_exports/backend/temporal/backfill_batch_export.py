@@ -17,7 +17,7 @@ from asgiref.sync import sync_to_async
 
 from posthog.batch_exports.models import BatchExport, BatchExportBackfill
 from posthog.batch_exports.service import BackfillBatchExportInputs, BackfillDetails, unpause_batch_export
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.client import connect
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_write_only_logger
@@ -279,7 +279,7 @@ def backfill_range(
 
 
 @temporalio.workflow.defn(name="backfill-batch-export")
-class BackfillBatchExportWorkflow(PostHogWorkflow):
+class BackfillBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to manage a backfill of a batch export.
 
     Temporal Schedule backfills are limited in the number of batch periods we can buffer. This limit

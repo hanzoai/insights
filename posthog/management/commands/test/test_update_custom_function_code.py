@@ -59,16 +59,16 @@ class TestUpdateCustomFunctionCode(BaseTest):
                 deleted=True,
             )
 
-    @patch("posthog.management.commands.update_custom_function_code.compile_hog")
-    def test_update_linkedin_api_version_dry_run(self, mock_compile_hog):
+    @patch("posthog.management.commands.update_custom_function_code.compile_script")
+    def test_update_linkedin_api_version_dry_run(self, mock_compile_script):
         """Test dry run mode - should show what would be updated without making changes."""
-        mock_compile_hog.return_value = "compiled_bytecode"
+        mock_compile_script.return_value = "compiled_bytecode"
 
         out = StringIO()
         call_command("update_custom_function_code", replace_key="linked-api-version-update", dry_run=True, stdout=out)
 
         # Should have compiled but not saved anything
-        assert mock_compile_hog.call_count == 1
+        assert mock_compile_script.call_count == 1
 
         # Check that no functions were actually updated
         self.linkedin_function1.refresh_from_db()
@@ -80,16 +80,16 @@ class TestUpdateCustomFunctionCode(BaseTest):
         self.assertIn("Updated: 1", output)
         self.assertIn("Update completed", output)
 
-    @patch("posthog.management.commands.update_custom_function_code.compile_hog")
-    def test_update_linkedin_api_version_actual_update(self, mock_compile_hog):
+    @patch("posthog.management.commands.update_custom_function_code.compile_script")
+    def test_update_linkedin_api_version_actual_update(self, mock_compile_script):
         """Test actual update - should update LinkedIn functions with old API version."""
-        mock_compile_hog.return_value = "compiled_bytecode"
+        mock_compile_script.return_value = "compiled_bytecode"
 
         out = StringIO()
         call_command("update_custom_function_code", replace_key="linked-api-version-update", stdout=out)
 
         # Should have compiled and saved the functions that needed updating
-        assert mock_compile_hog.call_count == 1
+        assert mock_compile_script.call_count == 1
 
         # Check that functions were actually updated
         self.linkedin_function1.refresh_from_db()
@@ -105,14 +105,14 @@ class TestUpdateCustomFunctionCode(BaseTest):
         self.assertIn("Updated: 1", output)
         self.assertIn("Update completed", output)
 
-    @patch("posthog.cdp.validation.compile_hog")
-    def test_invalid_replace_key(self, mock_compile_hog):
+    @patch("posthog.cdp.validation.compile_script")
+    def test_invalid_replace_key(self, mock_compile_script):
         """Test handling of invalid replace key."""
         out = StringIO()
         call_command("update_custom_function_code", replace_key="invalid-key", stdout=out)
 
         # Should not have compiled anything
-        assert mock_compile_hog.call_count == 0
+        assert mock_compile_script.call_count == 0
 
         output = out.getvalue()
         self.assertIn("Invalid replace key provided: invalid-key", output)
@@ -125,8 +125,8 @@ class TestUpdateCustomFunctionCode(BaseTest):
         output = out.getvalue()
         self.assertIn("Invalid replace key provided: None", output)
 
-    @patch("posthog.cdp.validation.compile_hog")
-    def test_no_matching_functions(self, mock_compile_hog):
+    @patch("posthog.cdp.validation.compile_script")
+    def test_no_matching_functions(self, mock_compile_script):
         """Test when no functions match the criteria."""
         # Delete all LinkedIn functions
         CustomFunction.objects.filter(template_id="template-linkedin-ads").delete()
@@ -135,7 +135,7 @@ class TestUpdateCustomFunctionCode(BaseTest):
         call_command("update_custom_function_code", replace_key="linked-api-version-update", stdout=out)
 
         # Should not have compiled anything
-        assert mock_compile_hog.call_count == 0
+        assert mock_compile_script.call_count == 0
 
         output = out.getvalue()
         self.assertIn("Found 0 destinations to process", output)

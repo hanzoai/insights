@@ -24,7 +24,7 @@ FAILED_EVENTS_TABLE_NAME = f"{EVENTS_TABLE_NAME}_failed"
 
 """
 Migration Summary
-- Context: https://github.com/PostHog/posthog/issues/5684
+- Context: https://github.com/Insights/posthog/issues/5684
 - Operations:
     0. Create a new table with the updated schema: `SAMPLE BY cityHash64(distinct_id)` + `ORDER BY (team_id, toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid))`
     1. Start backfilling the new table (online) with data from partitions that are unlikely to be getting inserts (previous month and under)

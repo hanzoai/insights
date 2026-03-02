@@ -7,7 +7,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from '~/loadPostHogJS'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
 import { JSInstallSnippet } from './js-web'
 
@@ -72,7 +72,7 @@ export function SDKInstallNuxtJSInstructions(): JSX.Element {
             <JSInstallSnippet />
             <h3>Add environment variables</h3>
             <p>
-                Add your PostHog API key and host to your <code>nuxt.config.js</code> file.
+                Add your Insights API key and host to your <code>nuxt.config.js</code> file.
             </p>
             <NuxtEnvVarsSnippet />
 

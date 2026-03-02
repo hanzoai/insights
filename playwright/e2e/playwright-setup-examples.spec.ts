@@ -1,7 +1,7 @@
 /**
- * Examples showing how to use the PostHog playwright setup library
+ * Examples showing how to use the Insights playwright setup library
  *
- * This demonstrates different ways to create PostHog workspaces
+ * This demonstrates different ways to create Insights workspaces
  * (organizations, projects, teams) for your tests.
  */
 import { expect } from '@playwright/test'
@@ -29,7 +29,7 @@ testWithWorkspace('test with pre-created workspace', async ({ page, workspace, p
     await playwrightSetup.loginAndNavigateToTeam(page, workspace)
 
     // Test your feature here
-    await expect(page).toHaveTitle(/PostHog/)
+    await expect(page).toHaveTitle(/Insights/)
 })
 
 test('test with API calls', async ({ page, playwrightSetup }) => {

@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="customfunction",
             name="transpiled",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name="hogfunction",
+            model_name="customfunction",
             name="type",
             field=models.CharField(
                 blank=True,
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
             ),
         ),
         AddIndexConcurrently(
-            model_name="hogfunction",
+            model_name="customfunction",
             index=models.Index(fields=["type", "enabled", "team"], name="posthog_hog_type_6f8967_idx"),
         ),
     ]

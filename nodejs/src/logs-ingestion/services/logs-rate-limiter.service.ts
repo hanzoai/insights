@@ -22,7 +22,7 @@ export type LogsRateLimiterServiceHub = Pick<
 >
 
 export const BASE_REDIS_KEY =
-    process.env.NODE_ENV == 'test' ? '@posthog-test/logs-rate-limiter' : '@posthog/logs-rate-limiter'
+    process.env.NODE_ENV == 'test' ? '@insights-test/logs-rate-limiter' : '@posthog/logs-rate-limiter'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/tokens`
 
 export type LogsRateLimit = {

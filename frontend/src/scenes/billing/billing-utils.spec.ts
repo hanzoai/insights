@@ -438,8 +438,8 @@ describe('getUsageLimitConsequence', () => {
         expect(getUsageLimitConsequence('Feature flags & Experiments')).toEqual('feature flags will not evaluate')
     })
 
-    it('should return specific message for PostHog AI', () => {
-        expect(getUsageLimitConsequence('PostHog AI')).toEqual('PostHog AI will be unavailable')
+    it('should return specific message for Insights AI', () => {
+        expect(getUsageLimitConsequence('Insights AI')).toEqual('Insights AI will be unavailable')
     })
 
     it('should return generic message for other products', () => {
@@ -478,22 +478,22 @@ describe('buildUsageLimitExceededMessage', () => {
         )
     })
 
-    it('should build message for PostHog AI with specific consequence', () => {
-        const result = buildUsageLimitExceededMessage([{ name: 'PostHog AI', subscribed: true }])
+    it('should build message for Insights AI with specific consequence', () => {
+        const result = buildUsageLimitExceededMessage([{ name: 'Insights AI', subscribed: true }])
         expect(result.title).toEqual('Usage limit exceeded')
         expect(result.message).toEqual(
-            'You have exceeded the usage limit for PostHog AI. Please increase your billing limit or PostHog AI will be unavailable.'
+            'You have exceeded the usage limit for Insights AI. Please increase your billing limit or Insights AI will be unavailable.'
         )
     })
 
-    it('should build message for PostHog AI with other products', () => {
+    it('should build message for Insights AI with other products', () => {
         const result = buildUsageLimitExceededMessage([
-            { name: 'PostHog AI', subscribed: true },
+            { name: 'Insights AI', subscribed: true },
             { name: 'Session replay', subscribed: true },
         ])
         expect(result.title).toEqual('Usage limits exceeded')
         expect(result.message).toEqual(
-            'You have exceeded the usage limit for PostHog AI and Session replay. Please increase your billing limit or PostHog AI will be unavailable and data loss may occur.'
+            'You have exceeded the usage limit for Insights AI and Session replay. Please increase your billing limit or Insights AI will be unavailable and data loss may occur.'
         )
     })
 

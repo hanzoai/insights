@@ -8,7 +8,7 @@ import { getSeriesColorPalette } from 'lib/colors'
 import { Spinner } from 'lib/lemon-ui/Spinner/Spinner'
 import { downloadFile } from 'lib/utils'
 
-import { FilmCameraHog } from '../hedgehogs'
+import { FilmCameraHog } from '../mascots'
 import {
     type DrawingItem,
     type HistoryItem,

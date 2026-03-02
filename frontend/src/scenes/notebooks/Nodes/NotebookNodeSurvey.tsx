@@ -7,7 +7,7 @@ import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { IconSurveys } from 'lib/lemon-ui/icons'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { SurveyDisplaySummary } from 'scenes/surveys/Survey'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'
 import { SurveyResult } from 'scenes/surveys/SurveyView'
@@ -112,7 +112,7 @@ type NotebookNodeSurveyAttributes = {
     id: string
 }
 
-export const NotebookNodeSurvey = createPostHogWidgetNode<NotebookNodeSurveyAttributes>({
+export const NotebookNodeSurvey = createInsightsWidgetNode<NotebookNodeSurveyAttributes>({
     nodeType: NotebookNodeType.Survey,
     titlePlaceholder: 'Survey',
     Component,

@@ -7,7 +7,7 @@ import { LemonDivider, LemonTag } from '@posthog/lemon-ui'
 import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { urls } from '~/scenes/urls'
 import { EarlyAccessFeatureStage, EarlyAccessFeatureType } from '~/types'
@@ -127,7 +127,7 @@ type NotebookNodeEarlyAccessAttributes = {
     id: EarlyAccessFeatureLogicProps['id']
 }
 
-export const NotebookNodeEarlyAccessFeature = createPostHogWidgetNode<NotebookNodeEarlyAccessAttributes>({
+export const NotebookNodeEarlyAccessFeature = createInsightsWidgetNode<NotebookNodeEarlyAccessAttributes>({
     nodeType: NotebookNodeType.EarlyAccessFeature,
     titlePlaceholder: 'Early Access Management',
     Component,

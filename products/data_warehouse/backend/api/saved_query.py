@@ -20,12 +20,12 @@ from temporalio.client import ScheduleActionExecutionStartWorkflow
 
 from posthog.schema import DataWarehouseManagedViewsetKind, ProductKey
 
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database, SerializedField, serialize_fields
-from posthog.hogql.errors import ExposedHogQLError
-from posthog.hogql.parser import parse_select
-from posthog.hogql.placeholders import FindPlaceholders
-from posthog.hogql.printer import prepare_and_print_ast
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database, SerializedField, serialize_fields
+from posthog.insightsql.errors import ExposedInsightsQLError
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.placeholders import FindPlaceholders
+from posthog.insightsql.printer import prepare_and_print_ast
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.shared import UserBasicSerializer
@@ -50,7 +50,7 @@ from products.data_warehouse.backend.data_load.saved_query_service import (
     unpause_saved_query_schedule,
 )
 from products.data_warehouse.backend.models import (
-    CLICKHOUSE_HOGQL_MAPPING,
+    CLICKHOUSE_INSIGHTSQL_MAPPING,
     DataModelingJob,
     DataWarehouseJoin,
     DataWarehouseModelPath,
@@ -93,9 +93,9 @@ class DataWarehouseSavedQuerySerializerMixin:
         if not database:
             database = Database.create_for(team_id=team_id)
 
-        context = HogQLContext(team_id=team_id, database=database)
+        context = InsightsQLContext(team_id=team_id, database=database)
 
-        fields = serialize_fields(view.hogql_definition().fields, context, view.name_chain, table_type="external")
+        fields = serialize_fields(view.insightsql_definition().fields, context, view.name_chain, table_type="external")
         return [
             SerializedField(
                 key=field.name,
@@ -218,7 +218,7 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
                 else:
                     columns = {
                         str(item[0]): {
-                            "hogql": CLICKHOUSE_HOGQL_MAPPING[clean_type(str(item[1]))].__name__,
+                            "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
                             "clickhouse": item[1],
                             "valid": True,
                         }
@@ -326,7 +326,7 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
                     else:
                         columns = {
                             str(item[0]): {
-                                "hogql": CLICKHOUSE_HOGQL_MAPPING[clean_type(str(item[1]))].__name__,
+                                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
                                 "clickhouse": item[1],
                                 "valid": True,
                             }
@@ -403,7 +403,7 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
     def validate_query(self, query):
         team_id = self.context["team_id"]
 
-        context = HogQLContext(team_id=team_id, enable_select_queries=True)
+        context = InsightsQLContext(team_id=team_id, enable_select_queries=True)
         select_ast = parse_select(query["query"])
 
         find_placeholders = FindPlaceholders()
@@ -426,7 +426,7 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
                 settings=None,
             )
         except Exception as err:
-            if isinstance(err, ExposedHogQLError):
+            if isinstance(err, ExposedInsightsQLError):
                 error = str(err)
                 raise exceptions.ValidationError(detail=f"Invalid query: {error}")
             elif not settings.DEBUG:
@@ -441,8 +441,8 @@ class DataWarehouseSavedQuerySerializer(DataWarehouseSavedQuerySerializerMixin, 
             if self.instance.name == name:
                 return name
 
-        name_exists_in_hogql_database = self.context["database"].has_table(name)
-        if name_exists_in_hogql_database:
+        name_exists_in_insightsql_database = self.context["database"].has_table(name)
+        if name_exists_in_insightsql_database:
             raise serializers.ValidationError("A table with this name already exists.")
 
         return name

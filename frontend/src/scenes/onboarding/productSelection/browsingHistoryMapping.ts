@@ -72,10 +72,10 @@ export function isValidProdInterest(value: string): value is WebsiteBrowsingHist
 }
 
 /**
- * Reads the browsing history from PostHog's `prod_interest` super property.
+ * Reads the browsing history from Insights's `prod_interest` super property.
  * Returns an empty array if not available.
  */
-export function getBrowsingHistoryFromPostHog(): string[] {
+export function getBrowsingHistoryFromInsights(): string[] {
     const prodInterest = window.posthog?.get_property?.('prod_interest')
     if (Array.isArray(prodInterest)) {
         return prodInterest.filter(isValidProdInterest)

@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 /**
@@ -84,7 +84,7 @@ export const NullEnumApi = {} as const
  * `log_entry` - log_entry
  * `behavioral` - behavioral
  * `session` - session
- * `hogql` - hogql
+ * `insightsql` - insightsql
  * `data_warehouse` - data_warehouse
  * `data_warehouse_person_property` - data_warehouse_person_property
  * `error_tracking_issue` - error_tracking_issue
@@ -112,7 +112,7 @@ export const PropertyItemTypeEnumApi = {
     LogEntry: 'log_entry',
     Behavioral: 'behavioral',
     Session: 'session',
-    Hogql: 'hogql',
+    InsightsQL: 'insightsql',
     DataWarehouse: 'data_warehouse',
     DataWarehousePersonProperty: 'data_warehouse_person_property',
     ErrorTrackingIssue: 'error_tracking_issue',
@@ -390,7 +390,7 @@ export type PersonsBulkDeleteCreateParams = {
     distinct_ids?: { [key: string]: unknown }
     format?: PersonsBulkDeleteCreateFormat
     /**
-     * A list of PostHog person IDs, up to 1000 of them. We'll delete all the persons listed.
+     * A list of Insights person IDs, up to 1000 of them. We'll delete all the persons listed.
      */
     ids?: { [key: string]: unknown }
     /**

@@ -20,7 +20,7 @@ import { counterParseError } from '../consumers/metrics'
 import { ActionManager } from '../legacy-webhooks/action-manager'
 import { ActionMatcher } from '../legacy-webhooks/action-matcher'
 import { addGroupPropertiesToPostIngestionEvent } from '../legacy-webhooks/utils'
-import { cdpTrackedFetch } from '../services/hog-executor.service'
+import { cdpTrackedFetch } from '../services/script-executor.service'
 
 /** Narrowed Hub type for LegacyWebhookService */
 export type LegacyWebhookServiceHub = Pick<
@@ -123,7 +123,7 @@ export class LegacyWebhookService {
                     // This is very inefficient, we always pull group properties for all groups (up to 5) for this event
                     // from PG if a webhook is defined for this team.
                     // Instead we should be lazily loading group properties only when needed, but this is the fastest way to fix this consumer
-                    // that will be deprecated in the near future by CDP/Hog
+                    // that will be deprecated in the near future by CDP/Script
                     const event = await addGroupPropertiesToPostIngestionEvent(
                         eventWithoutGroups,
                         this.hub.groupTypeManager,

@@ -12,7 +12,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Docusaurus is a popular static site generator for documentation. You can add PostHog using the
+                        Docusaurus is a popular static site generator for documentation. You can add Insights using the
                         official plugin:
                     </Markdown>
                     <CodeBlock
@@ -70,7 +70,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
             title: 'View events',
             content: (
                 <Markdown>
-                    Start your Docusaurus site and visit a few pages. PostHog will automatically capture pageviews and
+                    Start your Docusaurus site and visit a few pages. Insights will automatically capture pageviews and
                     other events.
                 </Markdown>
             ),

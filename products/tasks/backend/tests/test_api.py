@@ -265,9 +265,9 @@ class TestTaskAPI(BaseTaskAPITest):
             ("organization", "posthog", ["posthog/posthog", "posthog/posthog-js", "other/posthog"], [0, 1]),
             ("organization", "other", ["posthog/posthog", "other/repo1", "other/repo2"], [1, 2]),
             # Case insensitive tests
-            ("repository", "PostHog/PostHog", ["posthog/posthog", "posthog/posthog-js"], [0]),
-            ("repository", "PostHog", ["posthog/posthog", "other/posthog"], [0, 1]),
-            ("organization", "PostHog", ["posthog/posthog", "posthog/posthog-js", "other/repo"], [0, 1]),
+            ("repository", "Insights/Insights", ["posthog/posthog", "posthog/posthog-js"], [0]),
+            ("repository", "Insights", ["posthog/posthog", "other/posthog"], [0, 1]),
+            ("organization", "Insights", ["posthog/posthog", "posthog/posthog-js", "other/repo"], [0, 1]),
         ]
     )
     def test_filter_by_repository_and_organization(self, filter_param, filter_value, task_repos, expected_indices):

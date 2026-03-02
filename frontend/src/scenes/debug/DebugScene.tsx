@@ -42,13 +42,13 @@ export function DebugScene(): JSX.Element {
                         >
                             SQL Debug
                         </LemonButton>
-                        {featureFlags[FEATURE_FLAGS.HOG] ? (
+                        {featureFlags[FEATURE_FLAGS.SCRIPT] ? (
                             <LemonButton
                                 size="small"
                                 active={query1 === stringifiedExamples.Hoggonacci}
                                 onClick={() => setQuery1(stringifiedExamples.Hoggonacci)}
                             >
-                                Hog
+                                Script
                             </LemonButton>
                         ) : null}
                         <LemonButton

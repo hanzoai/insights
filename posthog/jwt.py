@@ -20,7 +20,7 @@ def encode_jwt(payload: dict, expiry_delta: timedelta, audience: PosthogJwtAudie
     Create a JWT ensuring that the correct audience and signing token is used
     """
     if not isinstance(audience, PosthogJwtAudience):
-        raise Exception("Audience must be in the list of PostHog-supported audiences")
+        raise Exception("Audience must be in the list of Insights-supported audiences")
 
     encoded_jwt = jwt.encode(
         {

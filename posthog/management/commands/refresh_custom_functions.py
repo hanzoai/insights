@@ -18,7 +18,7 @@ class Command(BaseCommand):
             "--team-id", type=int, help="Team ID to refresh CustomFunctions for (if not provided, processes all teams)"
         )
         parser.add_argument(
-            "--hog-function-id",
+            "--custom-function-id",
             type=str,
             help="Specific CustomFunction ID to refresh (if provided, only this function is processed)",
         )

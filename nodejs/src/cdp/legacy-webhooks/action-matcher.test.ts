@@ -90,7 +90,7 @@ describe('ActionMatcher', () => {
                   )
                 : null,
         }
-        await insertRow(hub.postgres, 'posthog_action', action)
+        await insertRow(hub.postgres, 'insights_action', action)
         await actionManager.reloadAction(action.team_id, action.id)
 
         return {
@@ -501,14 +501,14 @@ describe('ActionMatcher', () => {
                 },
             ])
 
-            const eventPosthog = createTestEvent({
-                properties: { $current_url: 'http://posthog.com/pricing' },
+            const eventInsights = createTestEvent({
+                properties: { $current_url: 'http://hanzo.ai/pricing' },
             })
             const eventExample = createTestEvent({
                 properties: { $current_url: 'https://example.com/' },
             })
 
-            expect(actionMatcher.match(eventPosthog)).toEqual([])
+            expect(actionMatcher.match(eventInsights)).toEqual([])
             expect(actionMatcher.match(eventExample)).toEqual([actionDefinition, actionDefinitionEmptyMatching])
         })
 

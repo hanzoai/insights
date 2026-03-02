@@ -5,12 +5,12 @@ import { DateTime, Settings } from 'luxon'
 import { defaultConfig } from '~/config/config'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 
-import { createHogFunction } from '../_tests/fixtures'
+import { createCustomFunction } from '../_tests/fixtures'
 import { createExampleNativeInvocation } from '../_tests/fixtures-native'
 import { NativeDestinationExecutorService } from './native-destination-executor.service'
 
 const inputs = {
-    url: 'https://posthog.com/webhook',
+    url: 'https://hanzo.ai/webhook',
     method: 'POST',
     body: {
         event_name: '$pageview',
@@ -48,7 +48,7 @@ describe('NativeDestinationExecutorService', () => {
 
     describe('native plugins', () => {
         it('should call the plugin perform method', async () => {
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'native-webhook',
             })
@@ -86,13 +86,13 @@ describe('NativeDestinationExecutorService', () => {
             expect(mockFetch).toHaveBeenCalledTimes(1)
             expect(forSnapshot(mockFetch.mock.calls[0])).toMatchInlineSnapshot(`
                 [
-                  "https://posthog.com/webhook",
+                  "https://hanzo.ai/webhook",
                   {
                     "body": "{"event_name":"$pageview"}",
                     "headers": {
                       "Authorization": "Bearer abc",
                       "Content-Type": "application/json",
-                      "User-Agent": "PostHog.com/1.0",
+                      "User-Agent": "Insights.com/1.0",
                     },
                     "method": "POST",
                   },
@@ -101,7 +101,7 @@ describe('NativeDestinationExecutorService', () => {
         })
 
         it('should handle non retryable fetch errors', async () => {
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'native-webhook',
             })
@@ -131,13 +131,13 @@ describe('NativeDestinationExecutorService', () => {
             expect(mockFetch).toHaveBeenCalledTimes(1)
             expect(forSnapshot(mockFetch.mock.calls[0])).toMatchInlineSnapshot(`
                 [
-                  "https://posthog.com/webhook",
+                  "https://hanzo.ai/webhook",
                   {
                     "body": "{"event_name":"$pageview"}",
                     "headers": {
                       "Authorization": "Bearer abc",
                       "Content-Type": "application/json",
-                      "User-Agent": "PostHog.com/1.0",
+                      "User-Agent": "Insights.com/1.0",
                     },
                     "method": "POST",
                   },
@@ -146,9 +146,9 @@ describe('NativeDestinationExecutorService', () => {
 
             expect(result.invocation).toEqual({
                 functionId: expect.any(String),
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: {
                     tries: 1,
                 },
@@ -162,7 +162,7 @@ describe('NativeDestinationExecutorService', () => {
         })
 
         it('should retry retryable fetch errors', async () => {
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'native-webhook',
             })
@@ -192,13 +192,13 @@ describe('NativeDestinationExecutorService', () => {
             expect(mockFetch).toHaveBeenCalledTimes(1)
             expect(forSnapshot(mockFetch.mock.calls[0])).toMatchInlineSnapshot(`
                 [
-                  "https://posthog.com/webhook",
+                  "https://hanzo.ai/webhook",
                   {
                     "body": "{"event_name":"$pageview"}",
                     "headers": {
                       "Authorization": "Bearer abc",
                       "Content-Type": "application/json",
-                      "User-Agent": "PostHog.com/1.0",
+                      "User-Agent": "Insights.com/1.0",
                     },
                     "method": "POST",
                   },
@@ -206,10 +206,10 @@ describe('NativeDestinationExecutorService', () => {
             `)
 
             expect(result.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: { tries: 1 },
                 queueParameters: undefined,
                 queuePriority: 1,
@@ -233,10 +233,10 @@ describe('NativeDestinationExecutorService', () => {
             expect(invocationResults2.finished).toBe(false)
 
             expect(invocationResults2.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: {
                     tries: 2,
                 },
@@ -264,10 +264,10 @@ describe('NativeDestinationExecutorService', () => {
             expect(invocationResults3.finished).toBe(true)
 
             expect(invocationResults3.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: { tries: 3 },
                 queueParameters: undefined,
                 queuePriority: 0,

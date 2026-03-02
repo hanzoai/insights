@@ -265,7 +265,7 @@ class TestFilters(BaseTest):
             InsightsQLFilters(
                 properties=[
                     GroupPropertyFilter(
-                        key="company_name", operator="exact", value="PostHog", type="group", group_type_index=0
+                        key="company_name", operator="exact", value="Insights", type="group", group_type_index=0
                     )
                 ]
             ),
@@ -273,7 +273,7 @@ class TestFilters(BaseTest):
         )
         self.assertEqual(
             self._print_ast(select),
-            f"SELECT group_key FROM groups WHERE equals(properties.company_name, 'PostHog') LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            f"SELECT group_key FROM groups WHERE equals(properties.company_name, 'Insights') LIMIT {MAX_SELECT_RETURNED_ROWS}",
         )
 
     def test_replace_filters_groups_multiple_properties(self):
@@ -282,7 +282,7 @@ class TestFilters(BaseTest):
             InsightsQLFilters(
                 properties=[
                     GroupPropertyFilter(
-                        key="company_name", operator="exact", value="PostHog", type="group", group_type_index=0
+                        key="company_name", operator="exact", value="Insights", type="group", group_type_index=0
                     ),
                     GroupPropertyFilter(
                         key="industry", operator="exact", value="Software", type="group", group_type_index=0
@@ -293,7 +293,7 @@ class TestFilters(BaseTest):
         )
         self.assertEqual(
             self._print_ast(select),
-            f"SELECT group_key FROM groups WHERE and(equals(properties.company_name, 'PostHog'), equals(properties.industry, 'Software')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
+            f"SELECT group_key FROM groups WHERE and(equals(properties.company_name, 'Insights'), equals(properties.industry, 'Software')) LIMIT {MAX_SELECT_RETURNED_ROWS}",
         )
 
     def test_replace_filters_groups_date_and_properties(self):
@@ -303,7 +303,7 @@ class TestFilters(BaseTest):
                 dateRange=DateRange(date_from="2020-02-02"),
                 properties=[
                     GroupPropertyFilter(
-                        key="company_name", operator="exact", value="PostHog", type="group", group_type_index=0
+                        key="company_name", operator="exact", value="Insights", type="group", group_type_index=0
                     )
                 ],
             ),
@@ -312,7 +312,7 @@ class TestFilters(BaseTest):
         self.assertEqual(
             self._print_ast(select),
             "SELECT group_key FROM groups WHERE "
-            "and(equals(properties.company_name, 'PostHog'), "
+            "and(equals(properties.company_name, 'Insights'), "
             f"greaterOrEquals(created_at, toDateTime('2020-02-02 00:00:00.000000'))) LIMIT {MAX_SELECT_RETURNED_ROWS}",
         )
 

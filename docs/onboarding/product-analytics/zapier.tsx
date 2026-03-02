@@ -7,15 +7,15 @@ export const getZapierSteps = (ctx: OnboardingComponentsContext): StepDefinition
 
     return [
         {
-            title: 'Connect PostHog to Zapier',
+            title: 'Connect Insights to Zapier',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Zapier lets you connect PostHog to thousands of other apps. You can use it to send events to
-                        PostHog from other services or trigger actions based on PostHog events. Go to the [PostHog
+                        Zapier lets you connect Insights to thousands of other apps. You can use it to send events to
+                        Insights from other services or trigger actions based on Insights events. Go to the [Insights
                         integration page](https://zapier.com/apps/posthog/integrations) on Zapier and click **Connect
-                        PostHog**. When prompted, enter your PostHog project API key:
+                        Insights**. When prompted, enter your Insights project API key:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -28,7 +28,7 @@ export const getZapierSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             },
                         ]}
                     />
-                    <Markdown>Enter your PostHog host:</Markdown>
+                    <Markdown>Enter your Insights host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -49,12 +49,12 @@ export const getZapierSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Create a Zap that sends events to PostHog using the "Capture Event" action. Events captured via
-                        Zapier will appear in PostHog just like events from any other source.
+                        Create a Zap that sends events to Insights using the "Capture Event" action. Events captured via
+                        Zapier will appear in Insights just like events from any other source.
                     </Markdown>
                     <Markdown>
                         You can use Zapier to connect CRMs, payment processors, customer support tools, and more to your
-                        PostHog analytics.
+                        Insights analytics.
                     </Markdown>
                 </>
             ),

@@ -13,7 +13,7 @@ import temporalio.workflow
 
 from posthog.models.cohort.cohort import Cohort, CohortType
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.logger import get_logger
 from posthog.temporal.messaging.constants import get_child_workflow_id
 from posthog.temporal.messaging.realtime_cohort_calculation_workflow import (
@@ -152,7 +152,7 @@ async def get_realtime_cohort_selection_activity(
 
 
 @temporalio.workflow.defn(name="realtime-cohort-calculation-coordinator")
-class RealtimeCohortCalculationCoordinatorWorkflow(PostHogWorkflow):
+class RealtimeCohortCalculationCoordinatorWorkflow(InsightsWorkflow):
     """Coordinator workflow that spawns multiple child workflows for true parallelism."""
 
     @staticmethod

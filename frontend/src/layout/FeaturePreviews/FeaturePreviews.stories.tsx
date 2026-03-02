@@ -41,7 +41,7 @@ Basic.args = {
         {
             name: 'Data Warehouse',
             description:
-                'The PostHog data warehouse gives you a place to put all of your most important data, query across these datasets, and analyze alongside the product analytics data already in PostHog',
+                'The Insights data warehouse gives you a place to put all of your most important data, query across these datasets, and analyze alongside the product analytics data already in Insights',
             stage: 'beta',
             documentationUrl: 'https://docs.example.com',
             flagKey: 'data-warehouse',

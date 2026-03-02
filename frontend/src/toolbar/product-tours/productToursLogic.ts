@@ -615,7 +615,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 } else {
                     lemonToast.success(isUpdate ? 'Tour saved' : 'Tour created', {
                         button: {
-                            label: 'Open in PostHog',
+                            label: 'Open in Insights',
                             action: () => window.open(editUrl, '_blank'),
                         },
                     })

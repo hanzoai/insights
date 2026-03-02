@@ -9,7 +9,7 @@ import { LemonButton, Link } from '@posthog/lemon-ui'
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { SizeProps } from 'lib/components/AutoSizer/AutoSizer'
 import { TZLabelProps } from 'lib/components/TZLabel'
-import { DetectiveHog } from 'lib/components/hedgehogs'
+import { DetectiveHog } from 'lib/components/mascots'
 
 import { logDetailsModalLogic } from 'products/logs/frontend/components/LogsViewer/LogDetailsModal/logDetailsModalLogic'
 import { logsViewerLogic } from 'products/logs/frontend/components/LogsViewer/logsViewerLogic'

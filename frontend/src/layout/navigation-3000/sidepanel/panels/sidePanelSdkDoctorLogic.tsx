@@ -78,7 +78,7 @@ export type AugmentedTeamSdkVersionsInfoRelease = {
 export type SdkHealthStatus = 'danger' | 'warning' | 'success'
 
 /**
- * SDK Doctor - PostHog SDK Health Monitoring
+ * SDK Doctor - Insights SDK Health Monitoring
  *
  * Detects installed SDKs and their versions across a team's events.
  * Provides smart version outdatedness detection.

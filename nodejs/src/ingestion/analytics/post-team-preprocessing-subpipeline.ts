@@ -4,7 +4,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 
 import { processPersonlessDistinctIdsBatchStep } from '~/worker/ingestion/event-pipeline/processPersonlessDistinctIdsBatchStep'
 
-import { HogTransformerService } from '../../cdp/hog-transformations/hog-transformer.service'
+import { ScriptTransformerService } from '../../cdp/script-transformations/script-transformer.service'
 import { EventHeaders, Hub, Team } from '../../types'
 import { EventIngestionRestrictionManager } from '../../utils/event-ingestion-restrictions'
 import { EventSchemaEnforcementManager } from '../../utils/event-schema-enforcement-manager'
@@ -21,7 +21,7 @@ import {
     createValidateEventUuidStep,
 } from '../event-preprocessing'
 import { createDropOldEventsStep } from '../event-processing/drop-old-events-step'
-import { createPrefetchHogFunctionsStep } from '../event-processing/prefetch-hog-functions-step'
+import { createPrefetchCustomFunctionsStep } from '../event-processing/prefetch-custom-functions-step'
 import { BatchPipelineBuilder } from '../pipelines/builders/batch-pipeline-builders'
 import { OverflowRedirectService } from '../utils/overflow-redirect/overflow-redirect-service'
 
@@ -43,8 +43,8 @@ export interface PostTeamPreprocessingSubpipelineConfig {
     overflowLaneTTLRefreshService?: OverflowRedirectService
     personsStore: PersonsStore
     personsPrefetchEnabled: boolean
-    hogTransformer: HogTransformerService
-    cdpHogWatcherSampleRate: number
+    scriptTransformer: ScriptTransformerService
+    cdpScriptWatcherSampleRate: number
 }
 
 export function createPostTeamPreprocessingSubpipeline<TInput extends PostTeamPreprocessingSubpipelineInput, TContext>(
@@ -62,8 +62,8 @@ export function createPostTeamPreprocessingSubpipeline<TInput extends PostTeamPr
         overflowLaneTTLRefreshService,
         personsStore,
         personsPrefetchEnabled,
-        hogTransformer,
-        cdpHogWatcherSampleRate,
+        scriptTransformer,
+        cdpScriptWatcherSampleRate,
     } = config
 
     return (
@@ -83,7 +83,7 @@ export function createPostTeamPreprocessingSubpipeline<TInput extends PostTeamPr
             })
             // We want to call cookieless with the whole batch at once.
             // IMPORTANT: Cookieless processing changes distinct IDs (cookieless events
-            // are captured with $posthog_cookieless distinct ID and rewritten here).
+            // are captured with $insights_cookieless distinct ID and rewritten here).
             // Any steps that depend on the final distinct ID must run after this step.
             .gather()
             .pipeBatch(createApplyCookielessProcessingStep(cookielessManager))
@@ -95,7 +95,7 @@ export function createPostTeamPreprocessingSubpipeline<TInput extends PostTeamPr
             .pipeBatch(prefetchPersonsStep(personsStore, personsPrefetchEnabled))
             // Batch insert personless distinct IDs after prefetch (uses prefetch cache)
             .pipeBatch(processPersonlessDistinctIdsBatchStep(personsStore, personsPrefetchEnabled))
-            // Prefetch hog functions for all teams in the batch
-            .pipeBatch(createPrefetchHogFunctionsStep(hogTransformer, cdpHogWatcherSampleRate))
+            // Prefetch custom functions for all teams in the batch
+            .pipeBatch(createPrefetchCustomFunctionsStep(scriptTransformer, cdpScriptWatcherSampleRate))
     )
 }

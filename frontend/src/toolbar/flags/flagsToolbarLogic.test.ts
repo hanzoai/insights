@@ -57,7 +57,7 @@ describe('toolbar featureFlagsLogic', () => {
             'flag 3': 'value',
         }
         await expectLogic(logic, () => {
-            logic.actions.setFeatureFlagValueFromPostHogClient(Object.keys(flags), flags)
+            logic.actions.setFeatureFlagValueFromInsightsClient(Object.keys(flags), flags)
         }).toMatchValues({
             userFlags: featureFlags,
             searchTerm: '',

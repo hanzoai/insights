@@ -35,7 +35,7 @@ class RedditAdsSource(SimpleSource[RedditAdsSourceConfig], OAuthMixin):
         return SourceConfig(
             name=SchemaExternalDataSourceType.REDDIT_ADS,
             label="Reddit Ads",
-            caption="Collect campaign data, ad performance, and advertising metrics from Reddit Ads. Ensure you have granted PostHog access to your Reddit Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/reddit-ads).",
+            caption="Collect campaign data, ad performance, and advertising metrics from Reddit Ads. Ensure you have granted Insights access to your Reddit Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/reddit-ads).",
             betaSource=True,
             iconPath="/static/services/reddit.png",
             docsUrl="https://posthog.com/docs/cdp/sources/reddit-ads",

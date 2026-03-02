@@ -13,7 +13,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -47,7 +47,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add your PostHog API key and host to your environment variables:</Markdown>
+                    <Markdown>Add your Insights API key and host to your environment variables:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -64,12 +64,12 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Wrap your app with the `PostHogProvider` component at the root of your application (such as
+                        Wrap your app with the `InsightsProvider` component at the root of your application (such as
                         `main.tsx`):
                     </Markdown>
                     <CodeBlock
@@ -82,7 +82,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                     import { createRoot } from 'react-dom/client'
                                     import './index.css'
                                     import App from './App.jsx'
-                                    import { PostHogProvider } from 'posthog-js/react'
+                                    import { InsightsProvider } from 'posthog-js/react'
 
                                     const options = {
                                       api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -91,9 +91,9 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
                                           <App />
-                                        </PostHogProvider>
+                                        </InsightsProvider>
                                       </StrictMode>
                                     )
                                 `,
@@ -102,7 +102,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                     />
                     <CalloutBox type="fyi" title="defaults option">
                         <Markdown>
-                            The `defaults` option automatically configures PostHog with recommended settings for new
+                            The `defaults` option automatically configures Insights with recommended settings for new
                             projects. See [SDK defaults](https://posthog.com/docs/libraries/js#sdk-defaults) for
                             details.
                         </Markdown>

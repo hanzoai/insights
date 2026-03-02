@@ -18,7 +18,7 @@ import structlog
 from cachetools import cached
 from celery import shared_task
 from dateutil import parser
-from posthoganalytics.client import Client as PostHogClient
+from posthoganalytics.client import Client as InsightsClient
 from psycopg import sql
 from retry import retry
 
@@ -187,7 +187,7 @@ class UsageReportCounters:
     # LLM Analytics
     ai_event_count_in_period: int
 
-    # AI Billing Credits (PostHog AI feature usage)
+    # AI Billing Credits (Insights AI feature usage)
     ai_credits_used_in_period: int
 
     # CDP Delivery
@@ -372,8 +372,8 @@ def get_org_user_count(organization_id: str) -> int:
 
 
 @cached(cache={})
-def get_ph_client(*args: Any, **kwargs: Any) -> PostHogClient:
-    return PostHogClient("sTMFPsFhdP1Ssg", *args, **kwargs)
+def get_ph_client(*args: Any, **kwargs: Any) -> InsightsClient:
+    return InsightsClient("sTMFPsFhdP1Ssg", *args, **kwargs)
 
 
 @shared_task(**USAGE_REPORT_TASK_KWARGS, max_retries=3, rate_limit="5/s")
@@ -517,7 +517,7 @@ def get_teams_with_billable_event_count_in_period(
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
         # Uses the same expression as the one used to de-duplicate events on the merge tree:
-        # https://github.com/PostHog/posthog/blob/master/posthog/models/event/sql.py#L92
+        # https://github.com/Insights/posthog/blob/master/posthog/models/event/sql.py#L92
         distinct_expression = "distinct toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid)"
     else:
         distinct_expression = "1"
@@ -555,7 +555,7 @@ def get_teams_with_billable_enhanced_persons_event_count_in_period(
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
         # Uses the same expression as the one used to de-duplicate events on the merge tree:
-        # https://github.com/PostHog/posthog/blob/master/posthog/models/event/sql.py#L92
+        # https://github.com/Insights/posthog/blob/master/posthog/models/event/sql.py#L92
         distinct_expression = "distinct toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid)"
     else:
         distinct_expression = "1"
@@ -1145,7 +1145,7 @@ def get_teams_with_ai_credits_used_in_period(
                         arrayMap(tc -> JSONExtractString(tc, 'name'), tool_calls) AS tool_names
                     FROM events
                     PREWHERE
-                        -- data inside PostHog project used as ground truth for billing (depends on region)
+                        -- data inside Insights project used as ground truth for billing (depends on region)
                         team_id = %(team_to_query)s
                         AND JSONExtractString(properties, '$group_1') = %(region_url)s
                         AND timestamp >= %(begin)s
@@ -1169,7 +1169,7 @@ def get_teams_with_ai_credits_used_in_period(
                         JSONExtractBool(properties, '$ai_billable') AS ai_billable
                     FROM events
                     PREWHERE
-                        -- data inside PostHog project used as ground truth for billing (depends on region)
+                        -- data inside Insights project used as ground truth for billing (depends on region)
                         team_id = %(team_to_query)s
                         AND JSONExtractString(properties, '$group_1') = %(region_url)s
                         AND timestamp >= %(begin)s
@@ -1704,7 +1704,7 @@ def capture_report(
         )
     except Exception as err:
         logger.exception(
-            f"UsageReport sent to PostHog for organization {organization_id} failed: {str(err)}",
+            f"UsageReport sent to Insights for organization {organization_id} failed: {str(err)}",
         )
         capture_event(
             pha_client=pha_client,
@@ -1738,7 +1738,7 @@ def capture_report(
             )
         except Exception as err:
             logger.exception(
-                f"UsageReport sent to PostHog for user {distinct_id} in organization {organization_id} failed: {str(err)}",
+                f"UsageReport sent to Insights for user {distinct_id} in organization {organization_id} failed: {str(err)}",
             )
             capture_exception(err, {"distinct_id": distinct_id, "organization_id": organization_id})
 
@@ -2365,7 +2365,7 @@ def send_all_org_usage_reports(
                 logger.info(f"Dry run, skipping sending for organization {organization_id}")
                 continue
 
-            # First capture the events to PostHog
+            # First capture the events to Insights
             if not skip_capture_event:
                 try:
                     at_date_str = at_date.isoformat() if at_date else None

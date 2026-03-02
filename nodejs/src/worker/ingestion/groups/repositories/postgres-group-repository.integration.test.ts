@@ -45,7 +45,7 @@ describe('PostgresGroupRepository Integration', () => {
 
     const insertTestTeam = async (teamId: number) => {
         // First create the project that the team references
-        await insertRow(postgres, 'posthog_project', {
+        await insertRow(postgres, 'insights_project', {
             id: teamId,
             organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
             name: `Test Project ${teamId}`,
@@ -53,7 +53,7 @@ describe('PostgresGroupRepository Integration', () => {
         })
 
         // Then create the team
-        await insertRow(postgres, 'posthog_team', {
+        await insertRow(postgres, 'insights_team', {
             id: teamId,
             name: `Test Team ${teamId}`,
             organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
@@ -88,7 +88,7 @@ describe('PostgresGroupRepository Integration', () => {
     const insertTestGroup = async (overrides: Record<string, any> = {}) => {
         const finalTeamId = overrides.team_id || teamId
 
-        await insertRow(postgres, 'posthog_group', {
+        await insertRow(postgres, 'insights_group', {
             team_id: finalTeamId,
             group_type_index: groupTypeIndex,
             group_key: groupKey,
@@ -146,7 +146,7 @@ describe('PostgresGroupRepository Integration', () => {
 
             expect(mockQuery).toHaveBeenCalledWith(
                 PostgresUse.PERSONS_WRITE,
-                'SELECT * FROM posthog_group WHERE team_id = $1 AND group_type_index = $2 AND group_key = $3 FOR UPDATE',
+                'SELECT * FROM insights_group WHERE team_id = $1 AND group_type_index = $2 AND group_key = $3 FOR UPDATE',
                 [teamId, groupTypeIndex, groupKey],
                 'fetchGroup'
             )
@@ -174,7 +174,7 @@ describe('PostgresGroupRepository Integration', () => {
 
             expect(mockQuery).toHaveBeenCalledWith(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_group WHERE team_id = $1 AND group_type_index = $2 AND group_key = $3',
+                'SELECT * FROM insights_group WHERE team_id = $1 AND group_type_index = $2 AND group_key = $3',
                 [teamId, groupTypeIndex, groupKey],
                 'fetchGroup'
             )
@@ -204,13 +204,13 @@ describe('PostgresGroupRepository Integration', () => {
             const group2CreatedAt = DateTime.fromISO('2023-02-01T00:00:00Z').toUTC()
 
             // Insert first group with its own team/project
-            await insertRow(postgres, 'posthog_project', {
+            await insertRow(postgres, 'insights_project', {
                 id: group1ProjectId,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
                 name: `Test Project ${group1ProjectId}`,
                 created_at: new Date().toISOString(),
             })
-            await insertRow(postgres, 'posthog_team', {
+            await insertRow(postgres, 'insights_team', {
                 id: group1TeamId,
                 name: `Test Team ${group1TeamId}`,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
@@ -240,7 +240,7 @@ describe('PostgresGroupRepository Integration', () => {
                 event_properties_numerical: [],
                 session_recording_retention_period: '30d',
             })
-            await insertRow(postgres, 'posthog_group', {
+            await insertRow(postgres, 'insights_group', {
                 team_id: group1TeamId,
                 group_type_index: group1TypeIndex,
                 group_key: group1Key,
@@ -252,13 +252,13 @@ describe('PostgresGroupRepository Integration', () => {
             })
 
             // Insert second group with its own team/project
-            await insertRow(postgres, 'posthog_project', {
+            await insertRow(postgres, 'insights_project', {
                 id: group2ProjectId,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
                 name: `Test Project ${group2ProjectId}`,
                 created_at: new Date().toISOString(),
             })
-            await insertRow(postgres, 'posthog_team', {
+            await insertRow(postgres, 'insights_team', {
                 id: group2TeamId,
                 name: `Test Team ${group2TeamId}`,
                 organization_id: 'ca30f2ec-e9a4-4001-bf27-3ef194086068',
@@ -288,7 +288,7 @@ describe('PostgresGroupRepository Integration', () => {
                 event_properties_numerical: [],
                 session_recording_retention_period: '30d',
             })
-            await insertRow(postgres, 'posthog_group', {
+            await insertRow(postgres, 'insights_group', {
                 team_id: group2TeamId,
                 group_type_index: group2TypeIndex,
                 group_key: group2Key,
@@ -390,7 +390,7 @@ describe('PostgresGroupRepository Integration', () => {
                     propertiesLastUpdatedAt,
                     propertiesLastOperation
                 )
-            ).rejects.toThrow('Parallel posthog_group inserts, retry')
+            ).rejects.toThrow('Parallel insights_group inserts, retry')
         })
 
         it('should handle different group properties', async () => {
@@ -1039,7 +1039,7 @@ describe('PostgresGroupRepository Integration', () => {
 
             expect(mockPostgres.query).toHaveBeenCalledWith(
                 PostgresUse.PERSONS_WRITE,
-                expect.stringContaining('SELECT * FROM posthog_group'),
+                expect.stringContaining('SELECT * FROM insights_group'),
                 [teamId, groupTypeIndex, groupKey],
                 'fetchGroup'
             )
@@ -1060,7 +1060,7 @@ describe('PostgresGroupRepository Integration', () => {
                     propertiesLastUpdatedAt,
                     propertiesLastOperation
                 )
-            ).rejects.toThrow('Parallel posthog_group inserts, retry')
+            ).rejects.toThrow('Parallel insights_group inserts, retry')
         })
     })
 
@@ -1302,7 +1302,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'], // project_id = teamId because insertTestTeam creates project with id = teamId
                 'test-fetch-group-type'
             )
@@ -1334,7 +1334,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify only one record exists
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'],
                 'test-fetch-group-type'
             )
@@ -1411,13 +1411,13 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify both exist independently
             const { rows: rows1 } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE project_id = $1',
+                'SELECT * FROM insights_grouptypemapping WHERE project_id = $1',
                 [localTeamId1],
                 'test-fetch-project1'
             )
             const { rows: rows2 } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE project_id = $1',
+                'SELECT * FROM insights_grouptypemapping WHERE project_id = $1',
                 [localTeamId2],
                 'test-fetch-project2'
             )
@@ -1432,7 +1432,7 @@ describe('PostgresGroupRepository Integration', () => {
             await insertTestTeam(teamId)
 
             // Simulate race condition by directly inserting a group type
-            await insertRow(postgres, 'posthog_grouptypemapping', {
+            await insertRow(postgres, 'insights_grouptypemapping', {
                 team_id: teamId,
                 project_id: teamId,
                 group_type: 'company',
@@ -1464,7 +1464,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'],
                 'test-fetch-group-type'
             )
@@ -1484,7 +1484,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, 'company'],
                 'test-fetch-group-type'
             )
@@ -1509,7 +1509,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was not inserted (transaction rolled back)
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2',
                 [teamId, teamId],
                 'test-fetch-group-types'
             )
@@ -1535,7 +1535,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, specialGroupType],
                 'test-fetch-group-type'
             )
@@ -1562,7 +1562,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, emptyGroupType],
                 'test-fetch-group-type'
             )
@@ -1589,7 +1589,7 @@ describe('PostgresGroupRepository Integration', () => {
             // Verify the group type was actually inserted
             const { rows } = await postgres.query(
                 PostgresUse.PERSONS_READ,
-                'SELECT * FROM posthog_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
+                'SELECT * FROM insights_grouptypemapping WHERE team_id = $1 AND project_id = $2 AND group_type = $3',
                 [teamId, teamId, longGroupType],
                 'test-fetch-group-type'
             )
@@ -1814,44 +1814,44 @@ describe('PostgresGroupRepository Integration', () => {
         })
 
         it('should fetch single group by keys', async () => {
-            const groupProperties = { name: 'PostHog Inc', industry: 'Technology' }
+            const groupProperties = { name: 'Insights Inc', industry: 'Technology' }
 
             // Insert a group
             await repository.insertGroup(
                 teamId,
                 0 as GroupTypeIndex,
-                'posthog',
+                'insights',
                 groupProperties,
                 createdAt,
                 propertiesLastUpdatedAt,
                 propertiesLastOperation
             )
 
-            const result = await repository.fetchGroupsByKeys([teamId], [0 as GroupTypeIndex], ['posthog'])
+            const result = await repository.fetchGroupsByKeys([teamId], [0 as GroupTypeIndex], ['insights'])
 
             expect(result).toHaveLength(1)
             expect(result[0]).toEqual({
                 team_id: teamId,
                 group_type_index: 0,
-                group_key: 'posthog',
+                group_key: 'insights',
                 group_properties: groupProperties,
             })
         })
 
         it('should fetch multiple groups by keys', async () => {
-            const company1Props = { name: 'PostHog Inc', industry: 'Technology' }
+            const company1Props = { name: 'Insights Inc', industry: 'Technology' }
             const company2Props = { name: 'Acme Corp', industry: 'Manufacturing' }
             const org1Props = { name: 'Engineering Team', department: 'Product' }
 
             // Insert multiple groups
-            await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'posthog', company1Props, createdAt, {}, {})
+            await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'insights', company1Props, createdAt, {}, {})
             await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'acme', company2Props, createdAt, {}, {})
             await repository.insertGroup(teamId, 1 as GroupTypeIndex, 'eng-team', org1Props, createdAt, {}, {})
 
             const result = await repository.fetchGroupsByKeys(
                 [teamId, teamId, teamId],
                 [0 as GroupTypeIndex, 0 as GroupTypeIndex, 1 as GroupTypeIndex],
-                ['posthog', 'acme', 'eng-team']
+                ['insights', 'acme', 'eng-team']
             )
 
             expect(result).toHaveLength(3)
@@ -1860,7 +1860,7 @@ describe('PostgresGroupRepository Integration', () => {
                     {
                         team_id: teamId,
                         group_type_index: 0,
-                        group_key: 'posthog',
+                        group_key: 'insights',
                         group_properties: company1Props,
                     },
                     {
@@ -1886,22 +1886,22 @@ describe('PostgresGroupRepository Integration', () => {
         })
 
         it('should handle mixed existing and non-existent groups', async () => {
-            const groupProperties = { name: 'PostHog Inc' }
+            const groupProperties = { name: 'Insights Inc' }
 
             // Insert only one group
-            await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'posthog', groupProperties, createdAt, {}, {})
+            await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'insights', groupProperties, createdAt, {}, {})
 
             const result = await repository.fetchGroupsByKeys(
                 [teamId, teamId],
                 [0 as GroupTypeIndex, 0 as GroupTypeIndex],
-                ['posthog', 'non-existent']
+                ['insights', 'non-existent']
             )
 
             expect(result).toHaveLength(1)
             expect(result[0]).toEqual({
                 team_id: teamId,
                 group_type_index: 0,
-                group_key: 'posthog',
+                group_key: 'insights',
                 group_properties: groupProperties,
             })
         })
@@ -1944,11 +1944,11 @@ describe('PostgresGroupRepository Integration', () => {
         })
 
         it('should return correct types', async () => {
-            const groupProperties = { name: 'PostHog Inc' }
+            const groupProperties = { name: 'Insights Inc' }
 
-            await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'posthog', groupProperties, createdAt, {}, {})
+            await repository.insertGroup(teamId, 0 as GroupTypeIndex, 'insights', groupProperties, createdAt, {}, {})
 
-            const result = await repository.fetchGroupsByKeys([teamId], [0 as GroupTypeIndex], ['posthog'])
+            const result = await repository.fetchGroupsByKeys([teamId], [0 as GroupTypeIndex], ['insights'])
 
             // Verify types are correctly cast (will fail at compile time if not)
             const teamIdResult: TeamId = result[0].team_id

@@ -8,8 +8,8 @@ import { Link } from 'lib/lemon-ui/Link'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { getDataWarehouseSourceUrl } from 'scenes/data-warehouse/settings/DataWarehouseManagedSourcesTable'
 
-import BlushingHog from 'public/hedgehog/blushing-hog.png'
-import IconPostHog from 'public/posthog-icon.svg'
+import BlushingHog from 'public/mascot/blushing-hog.png'
+import IconInsights from 'public/posthog-icon.svg'
 import IconAwsS3 from 'public/services/aws-s3.png'
 import Iconazure from 'public/services/azure.png'
 import IconCloudflare from 'public/services/cloudflare.png'
@@ -60,7 +60,7 @@ export const DATA_WAREHOUSE_SOURCE_ICON_MAP: Record<string, string> = {
     'cloudflare-r2': IconCloudflare,
     azure: Iconazure,
     BlushingHog: BlushingHog, // fallback, we don't know what this is
-    PostHog: IconPostHog,
+    Insights: IconInsights,
 }
 
 export const DATA_WAREHOUSE_SOURCE_ICON_COMPONENT_MAP: Record<string, JSX.Element> = {

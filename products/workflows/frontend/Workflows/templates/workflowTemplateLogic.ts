@@ -5,7 +5,7 @@ import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { userLogic } from 'scenes/userLogic'
 
-import type { HogFlowTemplate } from '../hogflows/types'
+import type { CustomFlowTemplate } from '../customflows/types'
 import { workflowLogic } from '../workflowLogic'
 import type { workflowTemplateLogicType } from './workflowTemplateLogicType'
 import { workflowTemplatesLogic } from './workflowTemplatesLogic'
@@ -27,7 +27,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
     actions({
         showSaveAsTemplateModal: true,
         hideSaveAsTemplateModal: true,
-        updateTemplate: (workflowTemplate: HogFlowTemplate) => ({ workflowTemplate }),
+        updateTemplate: (workflowTemplate: CustomFlowTemplate) => ({ workflowTemplate }),
         showTemplateJsonModal: true,
         hideTemplateJsonModal: true,
     }),
@@ -85,7 +85,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 }
 
                 try {
-                    await api.hogFlowTemplates.createHogFlowTemplate({
+                    await api.customFlowTemplates.createCustomFlowTemplate({
                         ...workflow,
                         name: formValues.name || workflow.name || '',
                         description: formValues.description || workflow.description || '',
@@ -158,7 +158,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 if (props.editTemplateId) {
                     // In edit mode, use workflow values for name/description, but load template for image_url, tags, and scope
                     try {
-                        const template = await api.hogFlowTemplates.getHogFlowTemplate(props.editTemplateId)
+                        const template = await api.customFlowTemplates.getCustomFlowTemplate(props.editTemplateId)
                         actions.setTemplateFormValues({
                             name: workflow.name,
                             description: workflow.description || '', // Use current workflow description
@@ -191,7 +191,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 }
             })
 
-            await api.hogFlowTemplates.updateHogFlowTemplate(workflowTemplate.id, workflowTemplate)
+            await api.customFlowTemplates.updateCustomFlowTemplate(workflowTemplate.id, workflowTemplate)
             lemonToast.success('Template updated')
 
             // Update the template list in workflowTemplatesLogic

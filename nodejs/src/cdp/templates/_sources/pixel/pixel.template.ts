@@ -1,23 +1,23 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
     id: 'template-source-webhook-pixel',
     name: 'Tracking pixel',
     description:
-        'Capture an event using a 1x1 tracking pixel. Useful for embedding tracking where PostHog SDKs are not available such as emails.',
+        'Capture an event using a 1x1 tracking pixel. Useful for embedding tracking where Insights SDKs are not available such as emails.',
     icon_url: '/static/services/webhook.svg',
     category: ['Email', 'Tracking'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 if(inputs.debug) {
   print('Incoming request:', request.query)
 }
 
 if(not empty(inputs.distinct_id) and not empty(inputs.event)) {
-  postHogCapture({
+  insightsCapture({
     'event': inputs.event,
     'distinct_id': inputs.distinct_id,
     'properties': inputs.properties
@@ -56,9 +56,9 @@ return {
             key: 'properties',
             type: 'json',
             label: 'Event properties',
-            description: 'A mapping of the incoming webhook body to the PostHog event properties',
+            description: 'A mapping of the incoming webhook body to the Insights event properties',
             default: {
-                $lib: 'posthog-webhook',
+                $lib: 'insights-webhook',
                 $source_url: '{source.url}',
                 query_params: '{request.query}',
             },

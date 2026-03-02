@@ -10,7 +10,7 @@ import { LemonButton } from '@posthog/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { BuilderHog3 } from 'lib/components/hedgehogs'
+import { BuilderHog3 } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { holidaysMatcher, isChristmas } from 'lib/holidays'
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
@@ -506,7 +506,7 @@ export function InsightValidationError({
                         to="https://posthog.com/docs/user-guides/funnels?utm_medium=in-product&utm_campaign=funnel-exclusion-filter-state"
                         target="_blank"
                     >
-                        Learn more about funnels in PostHog docs
+                        Learn more about funnels in Insights docs
                         <IconOpenInNew style={{ marginLeft: 4, fontSize: '0.85em' }} />
                     </Link>
                 </div>
@@ -640,7 +640,7 @@ export function FunnelSingleStepState({ actionable = true }: FunnelSingleStepSta
                     className="flex items-center justify-center"
                     targetBlankIcon
                 >
-                    Learn more about funnels in PostHog docs
+                    Learn more about funnels in Insights docs
                 </Link>
             </div>
         </div>

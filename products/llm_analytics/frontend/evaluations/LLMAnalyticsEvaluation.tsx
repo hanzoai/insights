@@ -275,7 +275,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                                         }
                                         options={[
                                             ...(keysForSelectedProvider.length === 0
-                                                ? [{ value: 'posthog_default', label: 'PostHog default' }]
+                                                ? [{ value: 'posthog_default', label: 'Insights default' }]
                                                 : []),
                                             ...keysForSelectedProvider.map((key) => ({
                                                 value: key.id,

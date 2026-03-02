@@ -1,7 +1,7 @@
 import cors from 'cors'
 
 /**
- * Custom origin validation function that allows *.posthog.com domains
+ * Custom origin validation function that allows *.hanzo.ai domains
  * without using wildcards for better security
  */
 function isAllowedDomain(origin: string): boolean {
@@ -10,12 +10,12 @@ function isAllowedDomain(origin: string): boolean {
         return true
     }
 
-    // Check if the origin ends with .posthog.com
-    return origin.endsWith('.posthog.com')
+    // Check if the origin ends with .hanzo.ai
+    return origin.endsWith('.hanzo.ai')
 }
 
 /**
- * CORS configuration that allows *.posthog.com domains
+ * CORS configuration that allows *.hanzo.ai domains
  */
 export const corsMiddleware = cors({
     origin: (origin: string | undefined, callback) => {

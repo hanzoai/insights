@@ -50,7 +50,7 @@ const autoWildcardHref = (url: string): string => {
  * we never want to store it as it will mean the heatmap URL is too specific and doesn't match
  * this ensures we never store it
  */
-export function withoutPostHogInit(href: string): string {
+export function withoutInsightsInit(href: string): string {
     try {
         // we can't use `new URL(href)` because it behaves differently between browsers
         // and e.g. converts `https://*.example.com/` to `https://%2A.example.com/`
@@ -77,12 +77,12 @@ export const currentPageLogic = kea<currentPageLogicType>([
         setAutoWildcardEnabled: (enabled: boolean) => ({ enabled }),
     })),
     reducers(() => ({
-        href: [withoutPostHogInit(window.location.href), { setHref: (_, { href }) => withoutPostHogInit(href) }],
+        href: [withoutInsightsInit(window.location.href), { setHref: (_, { href }) => withoutInsightsInit(href) }],
         wildcardHref: [
-            withoutPostHogInit(window.location.href),
+            withoutInsightsInit(window.location.href),
             {
-                setHref: (_, { href }) => withoutPostHogInit(href),
-                setWildcardHref: (_, { href }) => withoutPostHogInit(href),
+                setHref: (_, { href }) => withoutInsightsInit(href),
+                setWildcardHref: (_, { href }) => withoutInsightsInit(href),
             },
         ],
         autoWildcardEnabled: [
@@ -107,7 +107,7 @@ export const currentPageLogic = kea<currentPageLogicType>([
         cache.disposables.add(
             makeNavigateWrapper((): void => {
                 if (window.location.href !== values.href) {
-                    actions.setHref(withoutPostHogInit(window.location.href))
+                    actions.setHref(withoutInsightsInit(window.location.href))
                     if (values.autoWildcardEnabled) {
                         actions.autoWildcardHref()
                     }

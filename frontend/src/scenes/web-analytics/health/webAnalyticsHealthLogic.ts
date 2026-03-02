@@ -138,7 +138,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                         title: '$pageview',
                         description: webAnalyticsHealthStatus.isSendingPageViews
                             ? 'Events are flowing in as expected. Head over to the Web Analytics tab to start reviewing your analytics!'
-                            : 'Complete the PostHog installation to start seeing events in your dashboard.',
+                            : 'Complete the Insights installation to start seeing events in your dashboard.',
                         status: webAnalyticsHealthStatus.isSendingPageViews ? 'success' : 'error',
                         action: webAnalyticsHealthStatus.isSendingPageViews
                             ? undefined
@@ -201,7 +201,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                           title: 'Reverse proxy',
                           description: hasReverseProxy
                               ? 'Reverse proxy is configured! Your tracking requests are routed through your own domain.'
-                              : 'A reverse proxy routes PostHog requests through your own domain and helps prevent ad blockers from blocking tracking. Some metrics may not be accurate until this is configured.',
+                              : 'A reverse proxy routes Insights requests through your own domain and helps prevent ad blockers from blocking tracking. Some metrics may not be accurate until this is configured.',
                           status: hasReverseProxy ? 'success' : 'warning',
                           action: hasReverseProxy
                               ? undefined

@@ -1135,7 +1135,7 @@ def test_parse_prop_clauses_cross_project_cohort_produces_impossible_match():
     assert "0 = 13" in result
 
 
-# Regression test for: https://github.com/PostHog/posthog/pull/9283
+# Regression test for: https://github.com/Insights/posthog/pull/9283
 @pytest.mark.django_db
 def test_parse_prop_clauses_funnel_step_element_prepend_regression(snapshot):
     filter = Filter(

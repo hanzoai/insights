@@ -1,6 +1,6 @@
 # Proto Definitions
 
-Language-agnostic protobuf definitions for PostHog services.
+Language-agnostic protobuf definitions for Insights services.
 
 ## Structure
 

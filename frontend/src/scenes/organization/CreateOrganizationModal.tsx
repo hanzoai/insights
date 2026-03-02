@@ -40,7 +40,7 @@ export function CreateOrganizationModal({
                     Organizations gather people building together.
                     <br />
                     <Link to="https://posthog.com/docs/user-guides/organizations-and-projects" target="_blank">
-                        Learn more in PostHog docs.
+                        Learn more in Insights docs.
                     </Link>
                 </p>
             }

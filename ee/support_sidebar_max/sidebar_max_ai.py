@@ -186,10 +186,10 @@ logger = logging.getLogger(__name__)
 max_search_tool_tool = {
     "name": "max_search_tool",
     "description": (
-        "Searches the PostHog documentation at https://posthog.com/docs, "
+        "Searches the Insights documentation at https://posthog.com/docs, "
         "https://posthog.com/tutorials, to find information relevant to the "
         "user's question. The search query should be a question specific to using "
-        "and configuring PostHog."
+        "and configuring Insights."
     ),
     "cache_control": {"type": "ephemeral"},
     "input_schema": {
@@ -197,7 +197,7 @@ max_search_tool_tool = {
         "properties": {
             "query": {
                 "type": "string",
-                "description": "The search query, in the form of a question, related to PostHog usage and configuration.",
+                "description": "The search query, in the form of a question, related to Insights usage and configuration.",
             }
         },
         "required": ["query"],

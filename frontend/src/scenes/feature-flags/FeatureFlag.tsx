@@ -474,7 +474,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             />
                                             <div className="text-secondary text-sm pl-7">
                                                 When enabled, this flag evaluates according to your release conditions.
-                                                When disabled, this flag will not be evaluated and PostHog SDKs default
+                                                When disabled, this flag will not be evaluated and Insights SDKs default
                                                 to returning <code>false</code>.
                                             </div>
                                         </div>

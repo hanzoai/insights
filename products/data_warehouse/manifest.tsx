@@ -69,7 +69,7 @@ export const manifest: ProductManifest = {
         {
             path: `Sources`,
             category: 'Pipeline',
-            type: 'hog_function/source',
+            type: 'custom_function/source',
             iconType: 'data_pipeline_metadata',
             href: urls.sources(),
             sceneKey: 'Sources',

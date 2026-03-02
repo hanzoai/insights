@@ -131,7 +131,7 @@ export function CLIAuthorize(): JSX.Element {
             view="login"
             {...(!isSuccess
                 ? {
-                      hedgehog: true as const,
+                      mascot: true as const,
                       message: (
                           <>
                               Authorize
@@ -140,7 +140,7 @@ export function CLIAuthorize(): JSX.Element {
                           </>
                       ),
                   }
-                : { hedgehog: false as const })}
+                : { mascot: false as const })}
         >
             {isSuccess ? (
                 <div className="text-center space-y-4">

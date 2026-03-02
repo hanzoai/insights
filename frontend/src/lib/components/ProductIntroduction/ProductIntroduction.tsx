@@ -8,7 +8,7 @@ import { userLogic } from 'scenes/userLogic'
 
 import { ProductKey } from '~/queries/schema/schema-general'
 
-import { BuilderHog3, DetectiveHog } from '../hedgehogs'
+import { BuilderHog3, DetectiveHog } from '../mascots'
 
 /**
  * A component to introduce new users to a product, and to show something

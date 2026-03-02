@@ -11,7 +11,7 @@ from django.db import close_old_connections
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger
 
@@ -125,7 +125,7 @@ async def cache_all_accounts_activity() -> dict[str, typing.Any]:
 
 
 @workflow.defn(name="salesforce-enrichment-async")
-class SalesforceEnrichmentAsyncWorkflow(PostHogWorkflow):
+class SalesforceEnrichmentAsyncWorkflow(InsightsWorkflow):
     """Async workflow to enrich Salesforce accounts with concurrent Harmonic API calls."""
 
     @staticmethod

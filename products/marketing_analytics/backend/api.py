@@ -8,17 +8,17 @@ from rest_framework.viewsets import GenericViewSet
 
 from posthog.schema import SourceMap
 
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.models.team.team import DEFAULT_CURRENCY
 
 from products.data_warehouse.backend.models import DataWarehouseTable
-from products.marketing_analytics.backend.hogql_queries.adapters.base import ExternalConfig, QueryContext
-from products.marketing_analytics.backend.hogql_queries.adapters.factory import MarketingSourceFactory
-from products.marketing_analytics.backend.hogql_queries.adapters.self_managed import SelfManagedAdapter
-from products.marketing_analytics.backend.hogql_queries.utils import map_url_to_provider
+from products.marketing_analytics.backend.insightsql_queries.adapters.base import ExternalConfig, QueryContext
+from products.marketing_analytics.backend.insightsql_queries.adapters.factory import MarketingSourceFactory
+from products.marketing_analytics.backend.insightsql_queries.adapters.self_managed import SelfManagedAdapter
+from products.marketing_analytics.backend.insightsql_queries.utils import map_url_to_provider
 
 logger = structlog.get_logger(__name__)
 
@@ -79,9 +79,9 @@ class MarketingAnalyticsViewSet(TeamAndOrgViewSetMixin, GenericViewSet):
 
             query.limit = ast.Constant(value=10)
 
-            hogql_str = query.to_hogql()
+            insightsql_str = query.to_insightsql()
 
-            result = execute_hogql_query(hogql_str, self.team)
+            result = execute_insightsql_query(insightsql_str, self.team)
 
             return Response(
                 {
@@ -89,7 +89,7 @@ class MarketingAnalyticsViewSet(TeamAndOrgViewSetMixin, GenericViewSet):
                     "row_count": len(result.results) if result.results else 0,
                     "columns": result.columns or [],
                     "sample_data": (result.results or [])[:10],
-                    "hogql": hogql_str,
+                    "insightsql": insightsql_str,
                 }
             )
 

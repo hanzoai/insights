@@ -39,6 +39,6 @@ class TestDag(APIBaseTest):
 
         self.assertIn([child_saved_query.id.hex, "SavedQuery"], dag["nodes"])
         self.assertIn([parent_saved_query.id.hex, "SavedQuery"], dag["nodes"])
-        self.assertIn(["events", "PostHog"], dag["nodes"])
-        self.assertIn(["persons", "PostHog"], dag["nodes"])
+        self.assertIn(["events", "Insights"], dag["nodes"])
+        self.assertIn(["persons", "Insights"], dag["nodes"])
         self.assertEqual(len(dag["nodes"]), 4)

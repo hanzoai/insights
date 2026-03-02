@@ -13,7 +13,7 @@ export const manifest: ProductManifest = {
             import: () => import('./frontend/UserInterviews'),
             projectBased: true,
             activityScope: 'UserInterview',
-            description: 'Record and analyze user interviews with PostHog.',
+            description: 'Record and analyze user interviews with Insights.',
             iconType: 'user_interview',
         },
         UserInterview: {

@@ -30,7 +30,7 @@ describe('ExperimentTypePanel', () => {
 
             expect(screen.getByText(/No-Code experiment/)).toBeInTheDocument()
             expect(
-                screen.getByText('Define variants on your website using the PostHog toolbar, no coding required.')
+                screen.getByText('Define variants on your website using the Insights toolbar, no coding required.')
             ).toBeInTheDocument()
 
             const cards = container.querySelectorAll('[role="button"]')

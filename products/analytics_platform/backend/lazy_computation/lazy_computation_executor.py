@@ -17,17 +17,17 @@ import redis as redis_lib
 import structlog
 from clickhouse_driver.errors import ServerException
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLQuerySettings
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.parser import parse_select
-from posthog.hogql.printer import prepare_and_print_ast
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLQuerySettings
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.printer import prepare_and_print_ast
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
 from posthog.clickhouse.query_tagging import tags_context
 from posthog.models.team import Team
-from posthog.settings import HOGQL_INCREASED_MAX_EXECUTION_TIME
+from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 from posthog.utils import relative_date_parse_with_delta_mapping
 
 from products.analytics_platform.backend.lazy_computation.computation_notifications import (
@@ -522,7 +522,7 @@ def build_lazy_computation_insert_sql(
         query.where = date_range_filter
 
     # Print the SELECT query to ClickHouse SQL
-    context = HogQLContext(team_id=team.id, team=team, enable_select_queries=True, limit_top_select=False)
+    context = InsightsQLContext(team_id=team.id, team=team, enable_select_queries=True, limit_top_select=False)
     select_sql, _ = prepare_and_print_ast(
         query,
         context=context,
@@ -565,8 +565,8 @@ def run_lazy_computation_insert(
             insert_sql,
             values,
             settings={
-                "max_execution_time": HOGQL_INCREASED_MAX_EXECUTION_TIME,
-                **HogQLQuerySettings(load_balancing="in_order").model_dump(exclude_none=True),
+                "max_execution_time": INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME,
+                **InsightsQLQuerySettings(load_balancing="in_order").model_dump(exclude_none=True),
             },
         )
 
@@ -963,8 +963,8 @@ def ensure_precomputed(
                 insert_sql,
                 values,
                 settings={
-                    "max_execution_time": HOGQL_INCREASED_MAX_EXECUTION_TIME,
-                    **HogQLQuerySettings(load_balancing="in_order").model_dump(exclude_none=True),
+                    "max_execution_time": INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME,
+                    **InsightsQLQuerySettings(load_balancing="in_order").model_dump(exclude_none=True),
                 },
             )
 
@@ -1020,7 +1020,7 @@ def _build_manual_insert_sql(
     query.select.append(expires_at_expr)
 
     # Print to SQL
-    context = HogQLContext(team_id=team.id, team=team, enable_select_queries=True, limit_top_select=False)
+    context = InsightsQLContext(team_id=team.id, team=team, enable_select_queries=True, limit_top_select=False)
     select_sql, _ = prepare_and_print_ast(
         query,
         context=context,

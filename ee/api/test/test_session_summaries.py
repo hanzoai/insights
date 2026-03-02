@@ -226,7 +226,7 @@ class TestSessionSummariesAPI(APIBaseTest):
 
         self.assertEqual(response.status_code, 400)
         error: dict[str, Any] = response.json()  # type: ignore[attr-defined]
-        self.assertIn("Session summaries are only supported in PostHog Cloud", str(error))
+        self.assertIn("Session summaries are only supported in Insights Cloud", str(error))
 
     @patch.dict(os.environ, {}, clear=True)  # Remove OPENAI_API_KEY
     def test_create_summaries_no_openai_key(self) -> None:
@@ -235,7 +235,7 @@ class TestSessionSummariesAPI(APIBaseTest):
 
         self.assertEqual(response.status_code, 400)
         error: dict[str, Any] = response.json()  # type: ignore[attr-defined]
-        self.assertIn("Session summaries are only supported in PostHog Cloud", str(error))
+        self.assertIn("Session summaries are only supported in Insights Cloud", str(error))
 
     @patch("ee.api.session_summaries.posthoganalytics.feature_enabled")
     @patch("ee.api.session_summaries.find_sessions_timestamps")

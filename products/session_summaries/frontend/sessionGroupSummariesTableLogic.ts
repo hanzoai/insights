@@ -127,7 +127,7 @@ export const sessionGroupSummariesTableLogic = kea<sessionGroupSummariesTableLog
                 {
                     key: 'session-group-summaries',
                     name: 'Session summaries',
-                    iconType: 'insight/hog',
+                    iconType: 'insight/script',
                 },
             ],
         ],

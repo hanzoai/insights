@@ -17,8 +17,8 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
         query = build(handle)
         self.assertBuiltQueryStructure(query, "purchase", "revenue_analytics.events.purchase")
 
-        # Print and snapshot the generated HogQL AST query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL AST query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_revenue_item_queries_without_currency_aware_decimal(self):
@@ -29,8 +29,8 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
         query = build(handle)
         self.assertBuiltQueryStructure(query, "subscription_charge", "revenue_analytics.events.subscription_charge")
 
-        # Print and snapshot the generated HogQL AST query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL AST query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_query_structure_contains_required_fields(self):
@@ -46,7 +46,7 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
         # Purchase event has currencyAwareDecimal=True
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
         query = build(handle)
-        purchase_sql = query.query.to_hogql()
+        purchase_sql = query.query.to_insightsql()
 
         # Should use is_zero_decimal_in_stripe check
         # by comparing against a list of zero-decimal currencies
@@ -56,7 +56,7 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
         # Subscription charge event has currencyAwareDecimal=False
         handle = SourceHandle(type="events", team=self.team, event=self.events[1])
         query = build(handle)
-        subscription_sql = query.query.to_hogql()
+        subscription_sql = query.query.to_insightsql()
 
         # Should use constant True for enable_currency_aware_divider
         self.assertIn("true AS enable_currency_aware_divider", subscription_sql)
@@ -69,7 +69,7 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
         query = build(handle)
 
         # Test subscription_charge query (has product and subscription properties)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should include is_recurring based on subscription property
         self.assertIn("isNotNull(properties.subscription_id) AS is_recurring", query_sql)
@@ -87,7 +87,7 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
 
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Verify EUR is used as the base currency
         self.assertIn("'EUR' AS currency", query_sql)
@@ -109,7 +109,7 @@ class TestRevenueItemEventsBuilder(EventsSourceBaseTest):
 
         handle = SourceHandle(type="events", team=self.team, event=event_config)
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should be hardcoded to false when no subscription property
         self.assertIn("false AS is_recurring", query_sql)

@@ -172,7 +172,7 @@ export function SurveysEmptyState({ numOfSurveys }: Props): JSX.Element {
                                         icon={<IconSparkles />}
                                         onClick={() => openAi('Create a survey to collect ')}
                                     >
-                                        Create your own custom survey with PostHog AI
+                                        Create your own custom survey with Insights AI
                                     </LemonButton>
                                 </MaxTool>
                             )}

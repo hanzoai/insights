@@ -13,7 +13,7 @@ from posthog.dags.common.resources import ClayWebhookResource
 from posthog.dags.common.utils import compute_dataframe_hashes
 from posthog.models import Team
 
-# PostHog Cloud US team where JobSwitchers_v3 saved query exists
+# Insights Cloud US team where JobSwitchers_v3 saved query exists
 JOB_SWITCHERS_TEAM_ID = 2
 
 # Array fields to progressively truncate when a record exceeds Clay's batch

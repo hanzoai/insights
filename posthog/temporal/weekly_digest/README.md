@@ -1,6 +1,6 @@
 # Weekly Digest
 
-The weekly digest is an email sent to all customers summarizing activity in their PostHog projects over the past week.
+The weekly digest is an email sent to all customers summarizing activity in their Insights projects over the past week.
 
 ## Architecture Overview
 
@@ -89,7 +89,7 @@ Generated via `user_data_key(digest_key, UserDataKey.*, user_id)`:
 │       a. Load user's notification team set                                  │
 │       b. Load user's product suggestion                                     │
 │       c. Create UserSpecificDigest via org_digest.for_user()                │
-│       d. Render payload and send via PostHog capture event                  │
+│       d. Render payload and send via Insights capture event                  │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```

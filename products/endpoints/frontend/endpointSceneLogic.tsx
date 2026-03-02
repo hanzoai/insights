@@ -10,7 +10,7 @@ import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { DataTableNode, EndpointRunRequest, InsightVizNode, Node, NodeKind } from '~/queries/schema/schema-general'
-import { isHogQLQuery, isInsightQueryNode } from '~/queries/utils'
+import { isInsightsQLQuery, isInsightQueryNode } from '~/queries/utils'
 import { Breadcrumb, DataWarehouseSyncInterval, EndpointType, EndpointVersionType } from '~/types'
 
 import { endpointLogic } from './endpointLogic'
@@ -43,8 +43,8 @@ export function generateEndpointPayload(endpoint: EndpointVersionType | null): R
     const isMaterialized = endpoint.is_materialized
     const queryKind = query?.kind
 
-    if (queryKind === NodeKind.HogQLQuery) {
-        // HogQL: include variables with default values
+    if (queryKind === NodeKind.InsightsQLQuery) {
+        // InsightsQL: include variables with default values
         const variables = query.variables || {}
         const entries = Object.entries(variables)
 
@@ -227,11 +227,11 @@ export const endpointSceneLogic = kea<endpointSceneLogicType>([
                     return null
                 }
 
-                if (isHogQLQuery(currentQuery)) {
+                if (isInsightsQLQuery(currentQuery)) {
                     return {
                         kind: NodeKind.DataTableNode,
                         source: currentQuery,
-                        showHogQLEditor: true,
+                        showInsightsQLEditor: true,
                     } as DataTableNode
                 }
 

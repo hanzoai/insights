@@ -64,7 +64,7 @@ class TestEmailSubscriptionsTasks(APIBaseTest):
         assert mocked_email_messages[0].send.call_count == 1
 
         assert f"has subscribed you" in mocked_email_messages[0].html_body
-        assert "Someone subscribed you to a PostHog Insight" == mocked_email_messages[0].subject
+        assert "Someone subscribed you to a Insights Insight" == mocked_email_messages[0].subject
         assert "This subscription is sent every day. The next subscription will be sent on Wednesday February 02, 2022"
         assert "My invite message" in mocked_email_messages[0].html_body
 
@@ -81,7 +81,7 @@ class TestEmailSubscriptionsTasks(APIBaseTest):
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
         assert "You have been subscribed" in mocked_email_messages[0].html_body
-        assert "You have been subscribed to a PostHog Insight" == mocked_email_messages[0].subject
+        assert "You have been subscribed to a Insights Insight" == mocked_email_messages[0].subject
 
     def test_sends_dashboard_subscription(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_ee_email_messages(MockEmailMessage)
@@ -99,5 +99,5 @@ class TestEmailSubscriptionsTasks(APIBaseTest):
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
         assert "You have been subscribed" in mocked_email_messages[0].html_body
-        assert "You have been subscribed to a PostHog Dashboard" == mocked_email_messages[0].subject
+        assert "You have been subscribed to a Insights Dashboard" == mocked_email_messages[0].subject
         assert f"SHOWING 1 OF 10 DASHBOARD INSIGHTS" in mocked_email_messages[0].html_body

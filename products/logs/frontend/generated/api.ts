@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
@@ -32,38 +32,38 @@ export const logsExplainLogWithAICreate = async (
     })
 }
 
-export const getHogFlowTemplatesLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flow_templates/${id}/logs/`
+export const getCustomFlowTemplatesLogsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/custom_flow_templates/${id}/logs/`
 }
 
-export const hogFlowTemplatesLogsRetrieve = async (
+export const customFlowTemplatesLogsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getHogFlowTemplatesLogsRetrieveUrl(projectId, id), {
+    return apiMutator<void>(getCustomFlowTemplatesLogsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getHogFlowsLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_flows/${id}/logs/`
+export const getCustomFlowsLogsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/custom_flows/${id}/logs/`
 }
 
-export const hogFlowsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getHogFlowsLogsRetrieveUrl(projectId, id), {
+export const customFlowsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getCustomFlowsLogsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getHogFunctionsLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/hog_functions/${id}/logs/`
+export const getCustomFunctionsLogsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/custom_functions/${id}/logs/`
 }
 
-export const hogFunctionsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getHogFunctionsLogsRetrieveUrl(projectId, id), {
+export const customFunctionsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getCustomFunctionsLogsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })

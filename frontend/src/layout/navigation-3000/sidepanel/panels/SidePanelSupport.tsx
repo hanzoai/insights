@@ -67,7 +67,7 @@ const StatusPageAlert = (): JSX.Element | null => {
                         </span>
                     </p>
                     <div className="text-sm">
-                        <p className="mb-1">We're aware of an issue that may be affecting your PostHog experience.</p>
+                        <p className="mb-1">We're aware of an issue that may be affecting your Insights experience.</p>
                         <p className="mb-0">
                             You may wish to check our{' '}
                             <span
@@ -376,11 +376,11 @@ export function SidePanelSupport(): JSX.Element {
                     ) : (
                         <>
                             {showMaxAI && isBillingLoaded && (
-                                <Section title="Ask PostHog AI">
+                                <Section title="Ask Insights AI">
                                     <div>
-                                        <p>PostHog AI can now answer 80%+ of the support questions we receive! Nice.</p>
+                                        <p>Insights AI can now answer 80%+ of the support questions we receive! Nice.</p>
                                         <p>
-                                            Let PostHog AI read 100s of pages of docs for you, write SQL queries and
+                                            Let Insights AI read 100s of pages of docs for you, write SQL queries and
                                             expressions, regex patterns, etc.
                                         </p>
                                         <LemonButton
@@ -393,7 +393,7 @@ export function SidePanelSupport(): JSX.Element {
                                             targetBlank={false}
                                             className="mt-2"
                                         >
-                                            Chat with PostHog AI
+                                            Chat with Insights AI
                                         </LemonButton>
                                     </div>
                                 </Section>
@@ -402,7 +402,7 @@ export function SidePanelSupport(): JSX.Element {
                             {showEmailSupport && isBillingLoaded && useProductSupportSidePanel && (
                                 <Section title="Contact us">
                                     <StatusPageAlert />
-                                    <p>Can't find what you need and PostHog AI unable to help?</p>
+                                    <p>Can't find what you need and Insights AI unable to help?</p>
                                     <SidePanelTickets />
                                 </Section>
                             )}
@@ -410,7 +410,7 @@ export function SidePanelSupport(): JSX.Element {
                             {showEmailSupport && isBillingLoaded && !useProductSupportSidePanel && (
                                 <Section title="Contact us">
                                     <StatusPageAlert />
-                                    <p>Can't find what you need and PostHog AI unable to help?</p>
+                                    <p>Can't find what you need and Insights AI unable to help?</p>
                                     <LemonButton
                                         type="secondary"
                                         fullWidth
@@ -494,7 +494,7 @@ export function SidePanelSupport(): JSX.Element {
                                         <LemonButton
                                             type="secondary"
                                             status="alt"
-                                            to="https://github.com/PostHog/posthog/issues/new?&labels=enhancement&template=feature_request.yml"
+                                            to="https://github.com/Insights/posthog/issues/new?&labels=enhancement&template=feature_request.yml"
                                             icon={<IconFeatures />}
                                             targetBlank
                                         >

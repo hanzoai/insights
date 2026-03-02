@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { Spinner } from '@posthog/lemon-ui'
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
-import { SupermanHog } from 'lib/components/hedgehogs'
+import { SupermanHog } from 'lib/components/mascots'
 import { billingLogic } from 'scenes/billing/billingLogic'
 
 import { type BillingProductV2Type, OnboardingStepKey } from '~/types'
@@ -56,7 +56,7 @@ const ProductSubscribed = ({ product }: { product: BillingProductV2Type }): JSX.
         <div className="relative flex flex-col items-center text-center">
             <HogfettiComponent />
 
-            {/* Superman Hog floating animation */}
+            {/* Superman floating animation */}
             <div className="w-40 h-40 animate-float">
                 <SupermanHog className="w-full h-full object-contain" />
             </div>

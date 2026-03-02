@@ -19,7 +19,7 @@ class ReadDataWarehouseSchemaMCPToolArgs(BaseModel):
 @mcp_tool_registry.register(scopes=["warehouse_table:read", "warehouse_view:read"])
 class ReadDataWarehouseSchemaMCPTool(InsightsQLDatabaseMixin, MCPTool[ReadDataWarehouseSchemaMCPToolArgs]):
     """
-    MCP tool that returns core PostHog table schemas (events, groups, persons, sessions).
+    MCP tool that returns core Insights table schemas (events, groups, persons, sessions).
 
     This provides the data model information needed for writing InsightsQL queries.
     """
@@ -38,7 +38,7 @@ class ReadDataWarehouseSchemaMCPTool(InsightsQLDatabaseMixin, MCPTool[ReadDataWa
         core_tables = {"events", "groups", "persons", "sessions"}
         serialized = database.serialize(insightsql_context, include_only=core_tables)
 
-        lines: list[str] = ["# Core PostHog tables", ""]
+        lines: list[str] = ["# Core Insights tables", ""]
 
         for table_name, table in serialized.items():
             lines.append(f"## Table `{table_name}`")
@@ -58,7 +58,7 @@ class ReadDataWarehouseSchemaMCPTool(InsightsQLDatabaseMixin, MCPTool[ReadDataWa
 
         extra_sections = (
             f"{section('Data warehouse tables', warehouse_tables)}"
-            f"{section('PostHog Postgres tables', system_tables)}"
+            f"{section('Insights Postgres tables', system_tables)}"
             f"{section('Data warehouse views', views)}"
         )
 

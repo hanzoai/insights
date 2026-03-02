@@ -292,7 +292,7 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                                             email: billing?.account_owner?.email || '',
                                         })
                                     }}
-                                    tooltip="This is your dedicated PostHog human. Click to copy their email. They can help you with trying out new products, solving problems, and reducing your spend."
+                                    tooltip="This is your dedicated Insights human. Click to copy their email. They can help you with trying out new products, solving problems, and reducing your spend."
                                     tooltipPlacement="right"
                                     data-attr="top-menu-account-owner"
                                 >
@@ -457,14 +457,14 @@ export function AccountMenu({ trigger, ...props }: AccountMenuProps): JSX.Elemen
                     {!isCloud && (
                         <DropdownMenuItem asChild>
                             <Link
-                                to={urls.moveToPostHogCloud()}
+                                to={urls.moveToInsightsCloud()}
                                 buttonProps={{
                                     menuItem: true,
                                 }}
                                 data-attr="top-menu-item-upgrade-to-cloud"
                             >
                                 <IconConfetti />
-                                Try PostHog Cloud
+                                Try Insights Cloud
                             </Link>
                         </DropdownMenuItem>
                     )}

@@ -1674,7 +1674,7 @@ export class ApiClient {
     }
 
     /**
-     * Global search across PostHog entities
+     * Global search across Insights entities
      */
     search({ projectId }: { projectId: string }): Endpoint {
         return {

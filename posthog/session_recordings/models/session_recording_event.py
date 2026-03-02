@@ -4,7 +4,7 @@ from django.utils import timezone
 from posthog.models.team import Team
 
 
-# DEPRECATED: PostHog model is no longer supported or used
+# DEPRECATED: Insights model is no longer supported or used
 class SessionRecordingEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     timestamp = models.DateTimeField(default=timezone.now, blank=True)
@@ -19,7 +19,7 @@ class SessionRecordingEvent(models.Model):
             models.Index(fields=["team_id", "session_id"]),
             models.Index(fields=["team_id", "distinct_id", "timestamp", "session_id"]),
             # The index below exists but was replaced with SQL to avoid some issues
-            # The migration is in 0110, and see https://github.com/PostHog/posthog/issues/4969 for more info
+            # The migration is in 0110, and see https://github.com/Insights/posthog/issues/4969 for more info
             #   models.Index(fields=["team_id", "timestamp"]),
         ]
 

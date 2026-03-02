@@ -128,7 +128,7 @@ export const llmAnalyticsTracesTabLogic = kea<llmAnalyticsTracesTabLogicType>([
                         TaxonomicFilterGroupType.PersonProperties,
                         ...groupsTaxonomicTypes,
                         TaxonomicFilterGroupType.Cohorts,
-                        TaxonomicFilterGroupType.HogQLExpression,
+                        TaxonomicFilterGroupType.InsightsQLExpression,
                     ],
                 }
             },

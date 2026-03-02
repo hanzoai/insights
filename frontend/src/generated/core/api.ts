@@ -2627,27 +2627,27 @@ export const usersDestroy = async (uuid: string, options?: RequestInit): Promise
     })
 }
 
-export const getUsersHedgehogConfigRetrieveUrl = (uuid: string) => {
-    return `/api/users/${uuid}/hedgehog_config/`
+export const getUsersMascotConfigRetrieveUrl = (uuid: string) => {
+    return `/api/users/${uuid}/mascot_config/`
 }
 
-export const usersHedgehogConfigRetrieve = async (uuid: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getUsersHedgehogConfigRetrieveUrl(uuid), {
+export const usersMascotConfigRetrieve = async (uuid: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getUsersMascotConfigRetrieveUrl(uuid), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getUsersHedgehogConfigPartialUpdateUrl = (uuid: string) => {
-    return `/api/users/${uuid}/hedgehog_config/`
+export const getUsersMascotConfigPartialUpdateUrl = (uuid: string) => {
+    return `/api/users/${uuid}/mascot_config/`
 }
 
-export const usersHedgehogConfigPartialUpdate = async (
+export const usersMascotConfigPartialUpdate = async (
     uuid: string,
     patchedUserApi: NonReadonly<PatchedUserApi>,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getUsersHedgehogConfigPartialUpdateUrl(uuid), {
+    return apiMutator<void>(getUsersMascotConfigPartialUpdateUrl(uuid), {
         ...options,
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...options?.headers },

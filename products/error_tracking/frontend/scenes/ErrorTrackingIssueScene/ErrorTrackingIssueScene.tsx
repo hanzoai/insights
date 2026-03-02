@@ -25,7 +25,7 @@ import { SceneExport } from 'scenes/sceneTypes'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { FilterLogicalOperator, PropertyFilterType, PropertyOperator } from '~/types'
 
-import { PostHogSDKIssueBanner } from '../../components/Banners/PostHogSDKIssueBanner'
+import { InsightsSDKIssueBanner } from '../../components/Banners/InsightsSDKIssueBanner'
 import { BreakdownsChart } from '../../components/Breakdowns/BreakdownsChart'
 import { BreakdownsSearchBar } from '../../components/Breakdowns/BreakdownsSearchBar'
 import { MiniBreakdowns } from '../../components/Breakdowns/MiniBreakdowns'
@@ -146,7 +146,7 @@ const RightHandColumn = (): JSX.Element => {
 
     return (
         <div className="flex flex-col flex-1 gap-1 min-h-0 min-w-[375px]">
-            <PostHogSDKIssueBanner event={selectedEvent} />
+            <InsightsSDKIssueBanner event={selectedEvent} />
             <div className="flex-1 min-h-0 flex flex-col">
                 <ExceptionCard
                     issueId={issue?.id ?? 'no-issue'}

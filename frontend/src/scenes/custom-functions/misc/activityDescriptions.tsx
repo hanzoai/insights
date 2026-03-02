@@ -8,7 +8,7 @@ import {
 } from 'lib/components/ActivityLog/humanizeActivity'
 import { LemonDropdown } from 'lib/lemon-ui/LemonDropdown'
 import { Link } from 'lib/lemon-ui/Link'
-import { initHogLanguage } from 'lib/monaco/languages/hog'
+import { initScriptLanguage } from 'lib/monaco/languages/script'
 import { urls } from 'scenes/urls'
 
 import { CustomFunctionTypeType } from '~/types'
@@ -34,8 +34,8 @@ export function Diff({ before, after, language }: DiffProps): JSX.Element {
             modified={after}
             language={language ?? 'json'}
             onMount={(_, monaco) => {
-                if (language === 'hog') {
-                    initHogLanguage(monaco)
+                if (language === 'custom_script') {
+                    initScriptLanguage(monaco)
                 }
             }}
             options={{
@@ -170,13 +170,13 @@ export function customFunctionActivityDescriber(logItem: ActivityLogItem, asNoti
                 }
                 case 'inputs_schema':
                 case 'filters':
-                case 'hog':
+                case 'custom_script':
                 case 'name':
                 case 'description':
                 case 'masking': {
                     const code = (
                         <DiffLink
-                            language={change.field === 'hog' ? 'hog' : 'json'}
+                            language={change.field === 'custom_script' ? 'hog' : 'json'}
                             before={
                                 typeof change.before === 'string'
                                     ? change.before
@@ -186,7 +186,7 @@ export function customFunctionActivityDescriber(logItem: ActivityLogItem, asNoti
                                 typeof change.after === 'string' ? change.after : JSON.stringify(change.after, null, 2)
                             }
                         >
-                            {change.field === 'hog'
+                            {change.field === 'custom_script'
                                 ? 'source code'
                                 : change.field === 'inputs_schema'
                                   ? 'inputs schema'

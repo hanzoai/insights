@@ -72,10 +72,10 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
                   options: { port: serverConfig.INGESTION_REDIS_PORT },
                   name: 'ingestion-redis',
               }
-            : serverConfig.POSTHOG_REDIS_HOST
+            : serverConfig.INSIGHTS_REDIS_HOST
               ? {
-                    url: serverConfig.POSTHOG_REDIS_HOST,
-                    options: { port: serverConfig.POSTHOG_REDIS_PORT, password: serverConfig.POSTHOG_REDIS_PASSWORD },
+                    url: serverConfig.INSIGHTS_REDIS_HOST,
+                    options: { port: serverConfig.INSIGHTS_REDIS_PORT, password: serverConfig.INSIGHTS_REDIS_PASSWORD },
                     name: 'ingestion-redis',
                 }
               : { url: serverConfig.REDIS_URL, name: 'ingestion-redis' },
@@ -99,19 +99,19 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     logger.info('👍', `Cookieless Redis ready`)
 
     const teamManager = new TeamManager(postgres)
-    logger.info('🤔', `Connecting to PostHog Redis...`)
-    const posthogRedisPool = createRedisPoolFromConfig({
-        connection: serverConfig.POSTHOG_REDIS_HOST
+    logger.info('🤔', `Connecting to Insights Redis...`)
+    const insightsRedisPool = createRedisPoolFromConfig({
+        connection: serverConfig.INSIGHTS_REDIS_HOST
             ? {
-                  url: serverConfig.POSTHOG_REDIS_HOST,
-                  options: { port: serverConfig.POSTHOG_REDIS_PORT, password: serverConfig.POSTHOG_REDIS_PASSWORD },
-                  name: 'posthog-redis',
+                  url: serverConfig.INSIGHTS_REDIS_HOST,
+                  options: { port: serverConfig.INSIGHTS_REDIS_PORT, password: serverConfig.INSIGHTS_REDIS_PASSWORD },
+                  name: 'insights-redis',
               }
-            : { url: serverConfig.REDIS_URL, name: 'posthog-redis' },
+            : { url: serverConfig.REDIS_URL, name: 'insights-redis' },
         poolMinSize: serverConfig.REDIS_POOL_MIN_SIZE,
         poolMaxSize: serverConfig.REDIS_POOL_MAX_SIZE,
     })
-    logger.info('👍', `PostHog Redis ready`)
+    logger.info('👍', `Insights Redis ready`)
 
     const pubSub = new PubSub(redisPool)
     await pubSub.start()
@@ -130,14 +130,14 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     await geoipService.get()
     const encryptedFields = new EncryptedFields(serverConfig.ENCRYPTION_SALT_KEYS)
     const integrationManager = new IntegrationManagerService(pubSub, postgres, encryptedFields)
-    const quotaLimiting = new QuotaLimiting(posthogRedisPool, teamManager)
+    const quotaLimiting = new QuotaLimiting(insightsRedisPool, teamManager)
     const internalCaptureService = new InternalCaptureService(serverConfig)
 
     const hub: Hub = {
         ...serverConfig,
         postgres,
         redisPool,
-        posthogRedisPool,
+        insightsRedisPool,
         cookielessRedisPool,
         kafkaProducer,
         groupTypeManager,
@@ -164,12 +164,12 @@ export const closeHub = async (hub: Hub): Promise<void> => {
     await Promise.allSettled([
         hub.kafkaProducer.disconnect(),
         hub.redisPool.drain(),
-        hub.posthogRedisPool.drain(),
+        hub.insightsRedisPool.drain(),
         hub.cookielessRedisPool.drain(),
         hub.postgres?.end(),
     ])
     await hub.redisPool.clear()
-    await hub.posthogRedisPool.clear()
+    await hub.insightsRedisPool.clear()
     await hub.cookielessRedisPool.clear()
     logger.info('💤', 'Closing cookieless manager...')
     hub.cookielessManager.shutdown()

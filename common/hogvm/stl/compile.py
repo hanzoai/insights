@@ -4,10 +4,10 @@
 import glob
 import json
 
-from posthog.hogql import ast
-from posthog.hogql.compiler.bytecode import create_bytecode, parse_program
+from posthog.insightsql import ast
+from posthog.insightsql.compiler.bytecode import create_bytecode, parse_program
 
-source = "common/hogvm/stl/src/*.hog"
+source = "common/hogvm/stl/src/*.iscript"
 target_ts = "common/hogvm/typescript/src/stl/bytecode.ts"
 target_py = "common/hogvm/python/stl/bytecode.py"
 

@@ -14,7 +14,7 @@
  * This is automatically added to structuredContent for tools with UI resources.
  */
 export interface AnalyticsMetadata {
-    /** The user's PostHog distinct ID */
+    /** The user's Insights distinct ID */
     distinctId: string
     /** The name of the tool that generated this result */
     toolName?: string

@@ -1,13 +1,13 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'hidden',
     type: 'destination',
     id: 'template-email',
     name: 'Email',
-    description: 'Sends an email via PostHog email service',
-    icon_url: '/static/posthog-icon.svg',
+    description: 'Sends an email via Insights email service',
+    icon_url: '/static/insights-icon.svg',
     category: ['Custom'],
     code: `
     let res := sendEmail(inputs.email)
@@ -16,7 +16,7 @@ export const template: HogFunctionTemplate = {
         throw Error(f'Email failed to send: {res.error}')
     }
     `,
-    code_language: 'hog',
+    code_language: 'custom_script',
 
     inputs_schema: [
         {
@@ -37,8 +37,8 @@ export const template: HogFunctionTemplate = {
                 replyTo: '',
                 subject: '',
                 preheader: '',
-                text: 'Hello from PostHog!',
-                html: '<div>Hi {{ person.properties.name }}, this email was sent from PostHog!</div>',
+                text: 'Hello from Insights!',
+                html: '<div>Hi {{ person.properties.name }}, this email was sent from Insights!</div>',
             },
             secret: false,
             description: 'The email message to send. Configure the recipient, sender, subject, and content.',

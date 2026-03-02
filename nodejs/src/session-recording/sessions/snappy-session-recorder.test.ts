@@ -908,13 +908,13 @@ describe('SnappySessionRecorder', () => {
             ])
 
             message.snapshot_source = 'mobile'
-            message.snapshot_library = 'posthog-android'
+            message.snapshot_library = 'insights-android'
 
             recorder.recordMessage(message)
             const result = await recorder.end()
 
             expect(result.snapshotSource).toBe('mobile')
-            expect(result.snapshotLibrary).toBe('posthog-android')
+            expect(result.snapshotLibrary).toBe('insights-android')
         })
 
         it('should limit snapshot source and library fields to 1000 characters', async () => {
@@ -958,7 +958,7 @@ describe('SnappySessionRecorder', () => {
             message1.snapshot_library = 'posthog-js'
 
             message2.snapshot_source = 'mobile'
-            message2.snapshot_library = 'posthog-android'
+            message2.snapshot_library = 'insights-android'
 
             recorder.recordMessage(message1)
             recorder.recordMessage(message2)

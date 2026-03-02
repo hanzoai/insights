@@ -200,7 +200,7 @@ export const CUSTOM_FUNCTION_SUB_TEMPLATES: Record<CustomFunctionSubTemplateIdTy
                             elements: [
                                 {
                                     url: '{person.url}',
-                                    text: { text: 'View Person in PostHog', type: 'plain_text' },
+                                    text: { text: 'View Person in Insights', type: 'plain_text' },
                                     type: 'button',
                                 },
                             ],

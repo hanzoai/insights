@@ -53,7 +53,7 @@ class PostgresSource(SimpleSource[PostgresSourceConfig], SSHTunnelMixin, Validat
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
             name=SchemaExternalDataSourceType.POSTGRES,
-            caption="Enter your Postgres credentials to automatically pull your Postgres data into the PostHog Data warehouse",
+            caption="Enter your Postgres credentials to automatically pull your Postgres data into the Insights Data warehouse",
             iconPath="/static/services/postgres.png",
             docsUrl="https://posthog.com/docs/cdp/sources/postgres",
             fields=cast(

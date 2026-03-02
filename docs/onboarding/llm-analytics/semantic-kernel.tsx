@@ -9,13 +9,13 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The Semantic Kernel integration uses
-                        PostHog's OpenAI wrapper.
+                        Setting up analytics starts with installing the Insights SDK. The Semantic Kernel integration uses
+                        Insights's OpenAI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
             content: (
                 <>
                     <Markdown>
-                        Install Semantic Kernel with OpenAI support. PostHog instruments your LLM calls by wrapping the
+                        Install Semantic Kernel with OpenAI support. Insights instruments your LLM calls by wrapping the
                         OpenAI client that Semantic Kernel uses under the hood.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
             ),
         },
         {
-            title: 'Initialize PostHog and Semantic Kernel',
+            title: 'Initialize Insights and Semantic Kernel',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog `AsyncOpenAI` wrapper
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights `AsyncOpenAI` wrapper
                         and pass it to Semantic Kernel's `OpenAIChatCompletion` service.
                     </Markdown>
 
@@ -87,8 +87,8 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            PostHog's `AsyncOpenAI` wrapper is a proper subclass of `openai.AsyncOpenAI`, so it works
-                            directly as the `async_client` parameter in Semantic Kernel's `OpenAIChatCompletion`. PostHog
+                            Insights's `AsyncOpenAI` wrapper is a proper subclass of `openai.AsyncOpenAI`, so it works
+                            directly as the `async_client` parameter in Semantic Kernel's `OpenAIChatCompletion`. Insights
                             captures `$ai_generation` events automatically without proxying your calls.
                         </Markdown>
                     </CalloutBox>
@@ -101,7 +101,7 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
             content: (
                 <>
                     <Markdown>
-                        Use Semantic Kernel as normal. PostHog automatically captures an `$ai_generation` event for each
+                        Use Semantic Kernel as normal. Insights automatically captures an `$ai_generation` event for each
                         LLM call made through the wrapped client.
                     </Markdown>
 
@@ -111,7 +111,7 @@ export const getSemanticKernelSteps = (ctx: OnboardingComponentsContext): StepDe
                             import asyncio
 
                             async def main():
-                                result = await kernel.invoke_prompt("Tell me a fun fact about hedgehogs.")
+                                result = await kernel.invoke_prompt("Tell me a fun fact about mascots.")
                                 print(result)
 
                             asyncio.run(main())

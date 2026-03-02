@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 // Common enums and types
-const NodeKind = z.enum(['TrendsQuery', 'FunnelsQuery', 'HogQLQuery', 'EventsNode'])
+const NodeKind = z.enum(['TrendsQuery', 'FunnelsQuery', 'InsightsQLQuery', 'EventsNode'])
 
 const IntervalType = z.enum(['hour', 'day', 'week', 'month'])
 
@@ -55,14 +55,14 @@ const PropertyGroupFilter = z.object({
 
 const AnyPropertyFilter = z.union([PropertyFilter, PropertyGroupFilter])
 
-const HogQLVariable = z.object({
+const InsightsQLVariable = z.object({
     variableId: z.string(),
     code_name: z.string(),
     value: z.any().optional(),
     isNull: z.boolean().optional(),
 })
 
-const HogQLFilters = z.object({
+const InsightsQLFilters = z.object({
     properties: z.array(AnyPropertyFilter).optional(),
     dateRange: DateRange.optional(),
     filterTestAccounts: z.boolean().optional(),
@@ -156,11 +156,11 @@ const TrendsQuerySchema = InsightsQueryBase.extend({
     conversionGoal: z.any().nullable().optional(),
 })
 
-// HogQL query
-const HogQLQuerySchema = z.object({
-    kind: z.literal('HogQLQuery'),
+// InsightsQL query
+const InsightsQLQuerySchema = z.object({
+    kind: z.literal('InsightsQLQuery'),
     query: z.string(),
-    filters: HogQLFilters.optional(),
+    filters: InsightsQLFilters.optional(),
 })
 
 // Funnels filter
@@ -194,7 +194,7 @@ const InsightVizNodeSchema = z.object({
 
 const DataVisualizationNodeSchema = z.object({
     kind: z.literal('DataVisualizationNode'),
-    source: HogQLQuerySchema,
+    source: InsightsQLQuerySchema,
 })
 
 // Any insight query
@@ -230,13 +230,13 @@ export {
     CompareFilter,
     TrendsFilter,
     FunnelsFilter,
-    // HogQL types
-    HogQLVariable,
-    HogQLFilters,
+    // InsightsQL types
+    InsightsQLVariable,
+    InsightsQLFilters,
     // Queries
     TrendsQuerySchema,
     FunnelsQuerySchema,
-    HogQLQuerySchema,
+    InsightsQLQuerySchema,
     InsightVizNodeSchema,
     DataVisualizationNodeSchema,
     InsightQuerySchema,
@@ -244,5 +244,5 @@ export {
 
 export type TrendsQuery = z.infer<typeof TrendsQuerySchema>
 export type FunnelsQuery = z.infer<typeof FunnelsQuerySchema>
-export type HogQLQuery = z.infer<typeof HogQLQuerySchema>
+export type InsightsQLQuery = z.infer<typeof InsightsQLQuerySchema>
 export type InsightQuery = z.infer<typeof InsightQuerySchema>

@@ -11,7 +11,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add the PostHog Android SDK to your `build.gradle` dependencies:</Markdown>
+                    <Markdown>Add the Insights Android SDK to your `build.gradle` dependencies:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -29,11 +29,11 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize PostHog in your Application class:</Markdown>
+                    <Markdown>Initialize Insights in your Application class:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -50,14 +50,14 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                         override fun onCreate() {
                                             super.onCreate()
 
-                                            // Create a PostHog Config with the given API key and host
-                                            val config = PostHogAndroidConfig(
+                                            // Create a Insights Config with the given API key and host
+                                            val config = InsightsAndroidConfig(
                                                 apiKey = POSTHOG_API_KEY,
                                                 host = POSTHOG_HOST
                                             )
 
-                                            // Setup PostHog with the given Context and Config
-                                            PostHogAndroid.setup(this, config)
+                                            // Setup Insights with the given Context and Config
+                                            InsightsAndroid.setup(this, config)
                                         }
                                     }
                                 `,
@@ -73,7 +73,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Once installed, PostHog will automatically start capturing events. You can also manually send
+                        Once installed, Insights will automatically start capturing events. You can also manually send
                         events to test your integration:
                     </Markdown>
                     <CodeBlock
@@ -82,9 +82,9 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'kotlin',
                                 file: 'Kotlin',
                                 code: dedent`
-                                    import com.posthog.PostHog
+                                    import com.posthog.Insights
 
-                                    PostHog.capture(
+                                    Insights.capture(
                                         event = "button_clicked",
                                         properties = mapOf(
                                             "button_name" to "signup"

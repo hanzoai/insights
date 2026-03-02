@@ -8,7 +8,7 @@ import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { LiveRecordingsCount } from 'lib/components/LiveUserCount'
-import { WarningHog } from 'lib/components/hedgehogs'
+import { WarningHog } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useAsyncHandler } from 'lib/hooks/useAsyncHandler'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
@@ -61,7 +61,7 @@ function Header(): JSX.Element {
                         <LemonMenu
                             items={[
                                 {
-                                    label: 'Playback from PostHog JSON file',
+                                    label: 'Playback from Insights JSON file',
                                     to: urls.replayFilePlayback(),
                                 },
                                 {
@@ -82,7 +82,7 @@ function Header(): JSX.Element {
                                     menuItem: true,
                                 }}
                             >
-                                <IconDocument /> Playback from PostHog JSON file
+                                <IconDocument /> Playback from Insights JSON file
                             </Link>
                             <Link
                                 to={urls.replayKiosk()}

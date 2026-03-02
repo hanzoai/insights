@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'hidden',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Update a Google Sheet with the incoming event data',
     icon_url: '/static/services/google-sheets.svg',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 let res := fetch(f'https://sheets.googleapis.com/v4/spreadsheets/{inputs.spreadsheet_id}/values:batchUpdate', {
     'method': 'POST',

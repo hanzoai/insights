@@ -20,9 +20,9 @@ describe('fetch', () => {
     describe('raiseIfUserProvidedUrlUnsafe', () => {
         it.each([
             'https://google.com?q=20', // Safe
-            'https://posthog.com', // Safe
-            'https://posthog.com/foo/bar', // Safe, with path
-            'https://posthog.com:443', // Safe, good port
+            'https://hanzo.ai', // Safe
+            'https://hanzo.ai/foo/bar', // Safe, with path
+            'https://hanzo.ai:443', // Safe, good port
             'https://1.1.1.1', // Safe, public IP
         ])('should allow safe URLs: %s', async (url) => {
             await expect(raiseIfUserProvidedUrlUnsafe(url)).resolves.not.toThrow()
@@ -31,8 +31,8 @@ describe('fetch', () => {
         it.each([
             ['', 'Invalid URL'],
             ['@@@', 'Invalid URL'],
-            ['posthog.com', 'Invalid URL'],
-            ['ftp://posthog.com', 'Scheme must be either HTTP or HTTPS'],
+            ['hanzo.ai', 'Invalid URL'],
+            ['ftp://hanzo.ai', 'Scheme must be either HTTP or HTTPS'],
             ['http://localhost', 'Hostname is not allowed'],
             ['http://192.168.0.5', 'Hostname is not allowed'],
             ['http://0.0.0.0', 'Hostname is not allowed'],

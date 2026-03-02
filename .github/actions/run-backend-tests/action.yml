@@ -194,7 +194,7 @@ runs:
           # runs, as we want to ignore snapshots diverging there
           if: github.event.pull_request.head.repo.full_name == github.repository || inputs.person-on-events == 'true'
           shell: bash
-          run: echo "PYTEST_ARGS=--snapshot-update" >> $GITHUB_ENV # We can only update snapshots within the PostHog org
+          run: echo "PYTEST_ARGS=--snapshot-update" >> $GITHUB_ENV # We can only update snapshots within the Insights org
 
         - name: Add snapshot flags for subset runs (compat tests)
           # Subset runs don't own snapshots — the main django tests do.

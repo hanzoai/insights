@@ -8,7 +8,7 @@ import { Scene } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
-import { ActionStepType, ActionType, ActivityScope, Breadcrumb, HogFunctionType, ProjectTreeRef } from '~/types'
+import { ActionStepType, ActionType, ActivityScope, Breadcrumb, CustomFunctionType, ProjectTreeRef } from '~/types'
 
 import { actionEditLogic } from './actionEditLogic'
 import type { actionLogicType } from './actionLogicType'
@@ -42,11 +42,11 @@ export const actionLogic = kea<actionLogicType>([
                 },
             },
         ],
-        matchingHogFunctions: [
-            null as HogFunctionType[] | null,
+        matchingCustomFunctions: [
+            null as CustomFunctionType[] | null,
             {
-                loadMatchingHogFunctions: async () => {
-                    const res = await api.hogFunctions.list({
+                loadMatchingCustomFunctions: async () => {
+                    const res = await api.customFunctions.list({
                         filter_groups: [{ actions: [{ id: `${props.id}`, type: 'actions' }] }],
                     })
 

@@ -25,7 +25,7 @@ export const ExperimentTypePanel = ({ experiment, setExperimentType }: Experimen
                     </LemonTag>
                 </span>
             }
-            description="Define variants on your website using the PostHog toolbar, no coding required."
+            description="Define variants on your website using the Insights toolbar, no coding required."
             selected={experiment.type === 'web'}
             onClick={() => setExperimentType('web')}
         />

@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 /**
@@ -117,7 +117,7 @@ export const RoleAtOrganizationEnumApi = {
 /**
  * @nullable
  */
-export type UserBasicApiHedgehogConfig = { [key: string]: unknown } | null | null
+export type UserBasicApiMascotConfig = { [key: string]: unknown } | null | null
 
 export interface UserBasicApi {
     readonly id: number
@@ -136,7 +136,7 @@ export interface UserBasicApi {
     /** @nullable */
     is_email_verified?: boolean | null
     /** @nullable */
-    readonly hedgehog_config: UserBasicApiHedgehogConfig
+    readonly mascot_config: UserBasicApiMascotConfig
     role_at_organization?: RoleAtOrganizationEnumApi | BlankEnumApi | NullEnumApi | null
 }
 

@@ -4,13 +4,13 @@ sidebar: Docs
 showTitle: true
 ---
 
-This is an internal guide to setting up and working with the data warehouse for PostHog engineers. If you're a PostHog user, check out our [data warehouse docs](https://posthog.com/docs/data-warehouse) instead.
+This is an internal guide to setting up and working with the data warehouse for Insights engineers. If you're a Insights user, check out our [data warehouse docs](https://posthog.com/docs/data-warehouse) instead.
 
 ## Adding a new source
 
-Looking to add a new source to data warehouse? [We have a detailed guide in the codebase](https://github.com/PostHog/posthog/blob/master/posthog/temporal/data_imports/sources/README.md).
+Looking to add a new source to data warehouse? [We have a detailed guide in the codebase](https://github.com/Insights/posthog/blob/master/posthog/temporal/data_imports/sources/README.md).
 
-> If you're a customer of PostHog Cloud and are looking to import data into your project, then you're likely looking for [this section of the docs instead](https://posthog.com/docs/cdp/sources)
+> If you're a customer of Insights Cloud and are looking to import data into your project, then you're likely looking for [this section of the docs instead](https://posthog.com/docs/cdp/sources)
 
 ## Importing your local Postgres instance
 
@@ -46,7 +46,7 @@ Once MySQL is installed, create a database and table, insert a row, and create a
 mysql -u root
 ```
 
-```sql runInPostHog=false
+```sql runInInsights=false
 CREATE DATABASE posthog_dw_test;
 CREATE TABLE IF NOT EXISTS payments (id INT AUTO_INCREMENT PRIMARY KEY, timestamp DATETIME, distinct_id VARCHAR(255), amount DECIMAL(10,2));
 
@@ -59,7 +59,7 @@ FLUSH PRIVILEGES;
 
 To verify everything is working as expected:
 
-1. Navigate to "Data pipeline" in the PostHog application.
+1. Navigate to "Data pipeline" in the Insights application.
 2. Create a new MySQL source using the settings above (username and password both being `posthog`)
 3. Once the source is created, click on the "MySQL" item. In the schemas table, click on the triple dot menu and select the "Reload" option.
 
@@ -67,7 +67,7 @@ After the job runs, clicking on the synced table name should take you to your da
 
 ## Working with a MS SQL source
 
-You'll need to install MS SQL drivers for the PostHog app to connect to a MS SQL database. Learn the entire process in [posthog/warehouse/README.md](https://github.com/PostHog/posthog/blob/master/posthog/warehouse/README.md). Without the drivers, you'll get the following error when connecting a SQL database to data warehouse:
+You'll need to install MS SQL drivers for the Insights app to connect to a MS SQL database. Learn the entire process in [posthog/warehouse/README.md](https://github.com/Insights/posthog/blob/master/posthog/warehouse/README.md). Without the drivers, you'll get the following error when connecting a SQL database to data warehouse:
 
 ```text
 symbol not found in flat namespace '_bcp_batch'

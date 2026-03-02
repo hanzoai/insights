@@ -43,7 +43,7 @@ interface CopyVariation {
 
 const BADGE_CONFIG: Record<BillingPlan | StartupProgramLabel, CopyVariation> = {
     [BillingPlan.Free]: {
-        title: 'Get the whole hog.',
+        title: 'Get the full suite.',
         subtitle: 'Only pay for what you use.',
         backgroundColor: 'bg-danger-highlight',
         getDescription: () => (

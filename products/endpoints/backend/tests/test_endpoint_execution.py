@@ -22,11 +22,11 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
 
     Design principles:
     1. `variables` is the preferred mechanism for passing dynamic values
-    2. API behavior is consistent regardless of query type (HogQL vs Insight)
+    2. API behavior is consistent regardless of query type (InsightsQL vs Insight)
     3. API behavior is consistent regardless of materialization status
     4. `date_from` and `date_to` are magic variables for insight endpoints
     5. `query_override` is not allowed
-    6. `filters_override` is deprecated but supported for insight endpoints (not HogQL)
+    6. `filters_override` is deprecated but supported for insight endpoints (not InsightsQL)
     7. Unknown variables cause errors
     """
 
@@ -96,15 +96,15 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         return saved_query
 
     # =========================================================================
-    # NON-MATERIALIZED HOGQL ENDPOINTS
+    # NON-MATERIALIZED INSIGHTSQL ENDPOINTS
     # =========================================================================
 
-    def test_hogql_endpoint_executes_with_default_variable(self):
+    def test_insightsql_endpoint_executes_with_default_variable(self):
         endpoint = create_endpoint_with_version(
-            name="hogql_with_default",
+            name="insightsql_with_default",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -126,12 +126,12 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         # Should count only $pageview events (10 events)
         self.assertEqual(response.json()["results"][0][0], 10)
 
-    def test_hogql_endpoint_executes_with_variable_override(self):
+    def test_insightsql_endpoint_executes_with_variable_override(self):
         endpoint = create_endpoint_with_version(
-            name="hogql_var_override",
+            name="insightsql_var_override",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -155,12 +155,12 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         # Should count only $pageleave events (10 events)
         self.assertEqual(response.json()["results"][0][0], 10)
 
-    def test_hogql_endpoint_rejects_unknown_variable(self):
+    def test_insightsql_endpoint_rejects_unknown_variable(self):
         endpoint = create_endpoint_with_version(
-            name="hogql_unknown_var",
+            name="insightsql_unknown_var",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -183,11 +183,11 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("nonexistent_var", response.json()["detail"])
 
-    def test_hogql_endpoint_rejects_query_override(self):
+    def test_insightsql_endpoint_rejects_query_override(self):
         endpoint = create_endpoint_with_version(
-            name="hogql_no_override",
+            name="insightsql_no_override",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             is_active=True,
         )
@@ -201,11 +201,11 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("query_override", response.json()["detail"])
 
-    def test_hogql_endpoint_rejects_filters_override(self):
+    def test_insightsql_endpoint_rejects_filters_override(self):
         endpoint = create_endpoint_with_version(
-            name="hogql_no_filters",
+            name="insightsql_no_filters",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             is_active=True,
         )
@@ -217,7 +217,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("filters_override is not allowed for HogQL endpoints", response.json()["detail"])
+        self.assertIn("filters_override is not allowed for InsightsQL endpoints", response.json()["detail"])
 
     # =========================================================================
     # NON-MATERIALIZED INSIGHT ENDPOINTS
@@ -396,8 +396,8 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("X-PostHog-Warn", response.headers)
-        self.assertIn("filters_override is deprecated", response.headers["X-PostHog-Warn"])
+        self.assertIn("X-Insights-Warn", response.headers)
+        self.assertIn("filters_override is deprecated", response.headers["X-Insights-Warn"])
 
     def test_insight_endpoint_filters_override_takes_precedence_over_variables(self):
         endpoint = create_endpoint_with_version(
@@ -438,15 +438,15 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(filters_total, vars_total)
 
     # =========================================================================
-    # MATERIALIZED HOGQL ENDPOINTS
+    # MATERIALIZED INSIGHTSQL ENDPOINTS
     # =========================================================================
 
-    def test_materialized_hogql_endpoint_filters_by_variable(self):
+    def test_materialized_insightsql_endpoint_filters_by_variable(self):
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_var",
+            name="mat_insightsql_var",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -477,12 +477,12 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             self.assertIn("event_name", query_sql)
             self.assertIn("$pageleave", query_sql)
 
-    def test_materialized_hogql_endpoint_selects_only_original_columns(self):
+    def test_materialized_insightsql_endpoint_selects_only_original_columns(self):
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_cols",
+            name="mat_insightsql_cols",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -511,12 +511,12 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             self.assertNotIn("*", select_part)
             self.assertNotIn("event_name", select_part.lower())
 
-    def test_materialized_hogql_endpoint_rejects_unknown_variable(self):
+    def test_materialized_insightsql_endpoint_rejects_unknown_variable(self):
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_unknown",
+            name="mat_insightsql_unknown",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -541,12 +541,12 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("not_materialized", response.json()["detail"])
 
-    def test_materialized_hogql_endpoint_requires_variable(self):
+    def test_materialized_insightsql_endpoint_requires_variable(self):
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_required_var",
+            name="mat_insightsql_required_var",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -582,10 +582,10 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         )
 
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_partial_var",
+            name="mat_insightsql_partial_var",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.$browser = {variables.browser}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -626,10 +626,10 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         )
 
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_no_vars",
+            name="mat_insightsql_no_vars",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.$browser = {variables.browser2}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -662,12 +662,12 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         self.assertIn("browser2", detail)
         self.assertIn("required", detail.lower())
 
-    def test_materialized_hogql_endpoint_direct_refresh_bypasses_materialization(self):
+    def test_materialized_insightsql_endpoint_direct_refresh_bypasses_materialization(self):
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_direct",
+            name="mat_insightsql_direct",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -699,7 +699,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             mock_inline.assert_called_once()
             mock_materialized.assert_not_called()
 
-    def test_materialized_hogql_endpoint_filters_by_multiple_variables(self):
+    def test_materialized_insightsql_endpoint_filters_by_multiple_variables(self):
         var2 = InsightVariable.objects.create(
             team=self.team,
             name="Browser",
@@ -709,10 +709,10 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         )
 
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_multi",
+            name="mat_insightsql_multi",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.$browser = {variables.browser}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -747,7 +747,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             self.assertIn("browser", query_sql)
             self.assertIn("safari", query_sql)
 
-    def test_materialized_hogql_endpoint_filters_by_range_variables(self):
+    def test_materialized_insightsql_endpoint_filters_by_range_variables(self):
         start_var = InsightVariable.objects.create(
             team=self.team,
             name="Start Date",
@@ -764,10 +764,10 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
         )
 
         endpoint = create_endpoint_with_version(
-            name="mat_hogql_range",
+            name="mat_insightsql_range",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE timestamp >= {variables.start_date} AND timestamp < {variables.end_date}",
                 "variables": {
                     str(start_var.id): {
@@ -799,7 +799,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             query_sql = mock_exec.call_args[0][0]["query"]["query"].lower()
             self.assertIn("start_date", query_sql)
             self.assertIn("end_date", query_sql)
-            # HogQL prints >= as greaterorequals() and < as less()
+            # InsightsQL prints >= as greaterorequals() and < as less()
             self.assertIn("greaterorequals", query_sql)
             self.assertIn("less(", query_sql)
 
@@ -969,7 +969,7 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
             name="multi_var_endpoint",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.$browser = {variables.browser}",
                 "variables": {
                     str(self.event_name_var.id): {
@@ -1034,11 +1034,11 @@ class TestEndpointExecution(ClickhouseTestMixin, APIBaseTest):
     # ENDPOINT EXECUTION WITHOUT VARIABLES (SIMPLE CASES)
     # =========================================================================
 
-    def test_hogql_endpoint_without_variables_executes(self):
+    def test_insightsql_endpoint_without_variables_executes(self):
         endpoint = create_endpoint_with_version(
-            name="simple_hogql",
+            name="simple_insightsql",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 42 as answer"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 42 as answer"},
             created_by=self.user,
             is_active=True,
         )
