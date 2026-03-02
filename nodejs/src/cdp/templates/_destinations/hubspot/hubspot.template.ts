@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'beta',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Creates a new company in Hubspot whenever an event is triggered.',
     icon_url: '/static/services/hubspot.png',
     category: ['CRM', 'Customer Success'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 let data := {
     'properties': {

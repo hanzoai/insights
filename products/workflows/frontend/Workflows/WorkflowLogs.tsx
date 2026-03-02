@@ -7,10 +7,10 @@ import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/Pr
 import { TZLabel } from 'lib/components/TZLabel'
 import { ListHog, SleepingHog } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
-import { LogsViewer } from 'scenes/custom-functions/logs/LogsViewer'
+import { LogsViewer } from 'scenes/insights-functions/logs/LogsViewer'
 
 import { batchWorkflowJobsLogic } from './batchWorkflowJobsLogic'
-import { CustomFlowBatchJob } from './customflows/types'
+import { InsightsFlowBatchJob } from './insightsflows/types'
 import { renderWorkflowLogMessage } from './logs/log-utils'
 import { workflowLogic } from './workflowLogic'
 
@@ -23,7 +23,7 @@ function WorkflowRunLogs({ id }: WorkflowLogsProps): JSX.Element {
 
     return (
         <LogsViewer
-            sourceType="custom_flow"
+            sourceType="insights_flow"
             sourceId={id}
             instanceLabel="workflow run"
             renderMessage={(m) => renderWorkflowLogMessage(workflow, m)}
@@ -31,7 +31,7 @@ function WorkflowRunLogs({ id }: WorkflowLogsProps): JSX.Element {
     )
 }
 
-function BatchRunHeader({ job }: { job: CustomFlowBatchJob }): JSX.Element {
+function BatchRunHeader({ job }: { job: InsightsFlowBatchJob }): JSX.Element {
     return (
         <div className="flex gap-2 w-full justify-between">
             <strong>{job.id}</strong>
@@ -66,8 +66,8 @@ function BatchRunHeader({ job }: { job: CustomFlowBatchJob }): JSX.Element {
     )
 }
 
-function BatchRunInfo({ job }: { job: CustomFlowBatchJob }): JSX.Element {
-    const { workflow } = useValues(workflowLogic({ id: job.custom_flow }))
+function BatchRunInfo({ job }: { job: InsightsFlowBatchJob }): JSX.Element {
+    const { workflow } = useValues(workflowLogic({ id: job.insights_flow }))
 
     const isFutureJob = job.scheduled_at && dayjs(job.scheduled_at).isAfter(dayjs())
 
@@ -79,7 +79,7 @@ function BatchRunInfo({ job }: { job: CustomFlowBatchJob }): JSX.Element {
         </div>
     ) : (
         <LogsViewer
-            sourceType="custom_flow"
+            sourceType="insights_flow"
             sourceId={job.id}
             groupByInstanceId
             instanceLabel="workflow job"

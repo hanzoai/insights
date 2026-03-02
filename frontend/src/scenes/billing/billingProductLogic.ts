@@ -152,8 +152,8 @@ export const billingProductLogic = kea<billingProductLogicType>([
         setTrialLoading: (loading: boolean) => ({ loading }),
         setUnsubscribeModalStep: (step: number) => ({ step }),
         resetUnsubscribeModalStep: true,
-        setMascotSatisfied: (satisfied: boolean) => ({ satisfied }),
-        triggerMoreMascots: true,
+        setSatisfied: (satisfied: boolean) => ({ satisfied }),
+        triggerConfetti: true,
         removeBillingLimitNextPeriod: (productType: string) => ({ productType }),
         showConfirmUpgradeModal: true,
         hideConfirmUpgradeModal: true,
@@ -260,10 +260,10 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 resetUnsubscribeModalStep: () => 1,
             },
         ],
-        mascotSatisfied: [
+        satisfied: [
             false as boolean,
             {
-                setMascotSatisfied: (_, { satisfied }) => satisfied,
+                setSatisfied: (_, { satisfied }) => satisfied,
             },
         ],
         confirmUpgradeModalOpen: [
@@ -765,7 +765,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
                 actions.loadBilling()
             }
         },
-        triggerMoreMascots: async (_, breakpoint) => {
+        triggerConfetti: async (_, breakpoint) => {
             for (let i = 0; i < 5; i++) {
                 props.hogfettiTrigger?.()
                 await breakpoint(200)

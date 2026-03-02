@@ -8,7 +8,6 @@ import { Link } from 'lib/lemon-ui/Link'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { getDataWarehouseSourceUrl } from 'scenes/data-warehouse/settings/DataWarehouseManagedSourcesTable'
 
-import BlushingHog from 'public/mascot/blushing-hog.png'
 import IconInsights from 'public/posthog-icon.svg'
 import IconAwsS3 from 'public/services/aws-s3.png'
 import Iconazure from 'public/services/azure.png'
@@ -32,7 +31,7 @@ export function mapUrlToProvider(url: string): string {
     } else if (url.includes('.r2.cloudflarestorage.com')) {
         return 'cloudflare-r2'
     }
-    return 'BlushingHog'
+    return 'Insights'
 }
 
 export function mapUrlToSourceName(url: string): string {
@@ -45,7 +44,7 @@ export function mapUrlToSourceName(url: string): string {
     } else if (url.includes('.r2.cloudflarestorage.com')) {
         return 'Cloudflare'
     }
-    return 'BlushingHog'
+    return 'Insights'
 }
 
 const SIZE_PX_MAP = {
@@ -59,7 +58,6 @@ export const DATA_WAREHOUSE_SOURCE_ICON_MAP: Record<string, string> = {
     'google-cloud': IconGoogleCloudStorage,
     'cloudflare-r2': IconCloudflare,
     azure: Iconazure,
-    BlushingHog: BlushingHog, // fallback, we don't know what this is
     Insights: IconInsights,
 }
 

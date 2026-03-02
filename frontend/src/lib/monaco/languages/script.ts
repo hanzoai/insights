@@ -249,7 +249,7 @@ export const language: () => languages.IMonarchLanguage = () => ({
 })
 
 export function initScriptLanguage(monaco: Monaco): void {
-    if (!monaco.languages.getLanguages().some(({ id }) => id === 'custom_script')) {
+    if (!monaco.languages.getLanguages().some(({ id }) => id === 'fn')) {
         monaco.languages.register({ id: 'hog', extensions: ['.hog'], mimetypes: ['application/hog'] })
         monaco.languages.setLanguageConfiguration('hog', conf())
         monaco.languages.setMonarchTokensProvider('hog', language())

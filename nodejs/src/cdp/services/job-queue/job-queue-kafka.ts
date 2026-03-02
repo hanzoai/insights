@@ -135,8 +135,8 @@ export class CyclotronJobQueueKafka {
                 cdpJobSizeKb.observe(value.length / 1024)
 
                 const headers: Record<string, string> = {
-                    // NOTE: Later we should remove customFunctionId as it is no longer used
-                    customFunctionId: x.functionId,
+                    // NOTE: Later we should remove insightsFunctionId as it is no longer used
+                    insightsFunctionId: x.functionId,
                     functionId: x.functionId,
                     teamId: x.teamId.toString(),
                 }
@@ -288,11 +288,11 @@ export function migrateKafkaCyclotronInvocation(invocation: CyclotronJobInvocati
     // Type casting but keeping as a reference
     const unknownInvocation = invocation as Record<string, any>
 
-    if ('customFunctionId' in unknownInvocation) {
+    if ('insightsFunctionId' in unknownInvocation) {
         // Must be the old format
-        unknownInvocation.functionId = unknownInvocation.customFunctionId
+        unknownInvocation.functionId = unknownInvocation.insightsFunctionId
         unknownInvocation.state = {}
-        delete unknownInvocation.customFunctionId
+        delete unknownInvocation.insightsFunctionId
 
         if ('vmState' in unknownInvocation) {
             unknownInvocation.state.vmState = unknownInvocation.vmState

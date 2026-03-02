@@ -8,10 +8,10 @@ import { captureTeamEvent } from '~/utils/insights'
 import { Hub } from '../../../types'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
-    CustomFunctionTiming,
-    CustomFunctionType,
+    InsightsFunctionTiming,
+    InsightsFunctionType,
 } from '../../types'
 
 export type ScriptWatcherServiceHub = Pick<
@@ -54,25 +54,25 @@ export type ScriptWatcherFunctionState = {
     state: ScriptWatcherState
 }
 
-const customFunctionStateChange = new Counter({
-    name: 'cdp_custom_function_state_change',
+const insightsFunctionStateChange = new Counter({
+    name: 'cdp_insights_function_state_change',
     help: 'Number of times a transformation state changed',
     labelNames: ['state', 'kind'],
 })
 
-type CustomFunctionTimingCost = {
+type InsightsFunctionTimingCost = {
     lowerBound: number
     upperBound: number
     cost: number
 }
 
-type CustomFunctionTimingCosts = Partial<Record<CustomFunctionTiming['kind'], CustomFunctionTimingCost>>
+type InsightsFunctionTimingCosts = Partial<Record<InsightsFunctionTiming['kind'], InsightsFunctionTimingCost>>
 
-// Check if the result is of type CyclotronJobInvocationCustomFunction
-export const isCustomFunctionResult = (
+// Check if the result is of type CyclotronJobInvocationInsightsFunction
+export const isInsightsFunctionResult = (
     result: CyclotronJobInvocationResult
-): result is CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction> => {
-    return 'customFunction' in result.invocation
+): result is CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction> => {
+    return 'insightsFunction' in result.invocation
 }
 
 // Helper if you don't care about the forced side of things
@@ -87,7 +87,7 @@ export const effectiveState = (state: ScriptWatcherState) => {
 }
 
 export class ScriptWatcherService {
-    private costsMapping: CustomFunctionTimingCosts
+    private costsMapping: InsightsFunctionTimingCosts
     private lazyLoader: LazyLoader<ScriptWatcherFunctionState>
 
     private queuedResults: {
@@ -131,36 +131,36 @@ export class ScriptWatcherService {
     }
 
     private async onStateChange({
-        customFunction,
+        insightsFunction,
         state,
         previousState,
     }: {
-        customFunction: CustomFunctionType
+        insightsFunction: InsightsFunctionType
         state: ScriptWatcherState
         previousState: ScriptWatcherState
     }) {
-        const team = await this.hub.teamManager.getTeam(customFunction.team_id)
+        const team = await this.hub.teamManager.getTeam(insightsFunction.team_id)
 
         logger.info('[ScriptWatcherService] onStateChange', {
-            customFunctionId: customFunction.id,
-            customFunctionName: customFunction.name,
+            insightsFunctionId: insightsFunction.id,
+            insightsFunctionName: insightsFunction.name,
             state,
             previousState,
         })
 
         if (team && this.hub.CDP_WATCHER_SEND_EVENTS) {
-            captureTeamEvent(team, 'custom_function_state_change', {
-                custom_function_id: customFunction.id,
-                custom_function_type: customFunction.type,
-                custom_function_name: customFunction.name,
-                custom_function_template_id: customFunction.template_id,
+            captureTeamEvent(team, 'insights_function_state_change', {
+                insights_function_id: insightsFunction.id,
+                insights_function_type: insightsFunction.type,
+                insights_function_name: insightsFunction.name,
+                insights_function_template_id: insightsFunction.template_id,
                 state: ScriptWatcherState[state], // Convert numeric state to readable string
                 previous_state: ScriptWatcherState[previousState], // Convert numeric state to readable string
             })
         }
     }
 
-    private rateLimitArgs(id: CustomFunctionType['id'], cost: number) {
+    private rateLimitArgs(id: InsightsFunctionType['id'], cost: number) {
         const nowSeconds = Math.round(Date.now() / 1000)
 
         return [
@@ -190,8 +190,8 @@ export class ScriptWatcherService {
      * Get the persisted states of a list of custom functions
      */
     public async getPersistedStates(
-        ids: CustomFunctionType['id'][]
-    ): Promise<Record<CustomFunctionType['id'], ScriptWatcherFunctionState>> {
+        ids: InsightsFunctionType['id'][]
+    ): Promise<Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>> {
         const idsSet = new Set(ids)
 
         const res = await this.redis.usePipeline({ name: 'getStates' }, (pipeline) => {
@@ -216,19 +216,19 @@ export class ScriptWatcherService {
 
                 return acc
             },
-            {} as Record<CustomFunctionType['id'], ScriptWatcherFunctionState>
+            {} as Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>
         )
     }
 
     /**
      * Like getPersistedStates but returns the state of a single custom function
      */
-    public async getPersistedState(id: CustomFunctionType['id']): Promise<ScriptWatcherFunctionState> {
+    public async getPersistedState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState> {
         const res = await this.getPersistedStates([id])
         return res[id]
     }
 
-    public async getCachedPersistedState(id: CustomFunctionType['id']): Promise<ScriptWatcherFunctionState | null> {
+    public async getCachedPersistedState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState | null> {
         return await this.lazyLoader.get(id)
     }
 
@@ -236,8 +236,8 @@ export class ScriptWatcherService {
      * Like getPersistedStates but returns the effective state (i.e. ignores forcefully set states)
      */
     public async getEffectiveStates(
-        ids: CustomFunctionType['id'][]
-    ): Promise<Record<CustomFunctionType['id'], ScriptWatcherFunctionState>> {
+        ids: InsightsFunctionType['id'][]
+    ): Promise<Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>> {
         const states = await this.getPersistedStates(ids)
         return Object.fromEntries(
             Object.entries(states).map(([id, state]) => [
@@ -250,12 +250,12 @@ export class ScriptWatcherService {
     /**
      * Like getPersistedState but returns the effective state (i.e. ignores forcefully set states)
      */
-    public async getEffectiveState(id: CustomFunctionType['id']): Promise<ScriptWatcherFunctionState> {
+    public async getEffectiveState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState> {
         const res = await this.getEffectiveStates([id])
         return res[id]
     }
 
-    public async getCachedEffectiveState(id: CustomFunctionType['id']): Promise<ScriptWatcherFunctionState | null> {
+    public async getCachedEffectiveState(id: InsightsFunctionType['id']): Promise<ScriptWatcherFunctionState | null> {
         const res = await this.lazyLoader.get(id)
         if (!res) {
             return null
@@ -264,7 +264,7 @@ export class ScriptWatcherService {
         return { state: effectiveState(res.state), tokens: res.tokens }
     }
 
-    public async getAllFunctionStates(): Promise<Record<CustomFunctionType['id'], ScriptWatcherFunctionState>> {
+    public async getAllFunctionStates(): Promise<Record<InsightsFunctionType['id'], ScriptWatcherFunctionState>> {
         // Scan all state keys in Redis
         const stateKeys = await this.redis.useClient({ name: 'scanStates' }, async (client) => {
             const keys: string[] = []
@@ -290,26 +290,26 @@ export class ScriptWatcherService {
         return await this.getPersistedStates(functionIds)
     }
 
-    public async clearLock(id: CustomFunctionType['id']): Promise<void> {
+    public async clearLock(id: InsightsFunctionType['id']): Promise<void> {
         await this.redis.usePipeline({ name: 'clearLock' }, (pipeline) => {
             pipeline.del(`${REDIS_KEY_STATE_LOCK}/${id}`)
         })
     }
 
     public async doStageChanges(
-        changes: [CustomFunctionType, ScriptWatcherState][],
+        changes: [InsightsFunctionType, ScriptWatcherState][],
         forceReset: boolean = false
     ): Promise<void> {
         logger.info('[ScriptWatcherService] Performing state changes', { changes, forceReset })
 
         const res = await this.redis.usePipeline({ name: 'forceStateChange' }, (pipeline) => {
-            for (const [customFunction, state] of changes) {
-                customFunctionStateChange.inc({
+            for (const [insightsFunction, state] of changes) {
+                insightsFunctionStateChange.inc({
                     state: ScriptWatcherState[state],
-                    kind: customFunction.type,
+                    kind: insightsFunction.type,
                 })
 
-                const id = customFunction.id
+                const id = insightsFunction.id
                 const newScore =
                     state === ScriptWatcherState.healthy
                         ? this.hub.CDP_WATCHER_BUCKET_SIZE
@@ -335,12 +335,12 @@ export class ScriptWatcherService {
         const numOperations = forceReset ? 4 : 2
 
         await Promise.all(
-            changes.map(async ([customFunction, state], index) => {
+            changes.map(async ([insightsFunction, state], index) => {
                 const [stateResult] = getRedisPipelineResults(res, index, numOperations)
                 const previousState = Number(stateResult[1] ?? ScriptWatcherState.healthy)
                 if (previousState !== state) {
                     await this.onStateChange({
-                        customFunction,
+                        insightsFunction,
                         state,
                         previousState,
                     })
@@ -349,29 +349,29 @@ export class ScriptWatcherService {
         )
     }
 
-    public async forceStateChange(customFunction: CustomFunctionType, state: ScriptWatcherState): Promise<void> {
-        await this.doStageChanges([[customFunction, state]])
+    public async forceStateChange(insightsFunction: InsightsFunctionType, state: ScriptWatcherState): Promise<void> {
+        await this.doStageChanges([[insightsFunction, state]])
     }
 
     public async observeResults(results: CyclotronJobInvocationResult[]): Promise<void> {
         const functionCosts: Record<
             CyclotronJobInvocation['functionId'],
             {
-                customFunction?: CustomFunctionType
+                insightsFunction?: InsightsFunctionType
                 functionId: CyclotronJobInvocation['functionId']
                 cost: number
             }
         > = {}
 
         results.forEach((result) => {
-            if (!isCustomFunctionResult(result)) {
+            if (!isInsightsFunctionResult(result)) {
                 return
             }
 
             const functionCost = functionCosts[result.invocation.functionId] ?? {
                 functionId: result.invocation.functionId,
                 cost: 0,
-                customFunction: result.invocation.customFunction,
+                insightsFunction: result.invocation.insightsFunction,
             }
 
             if (result.finished) {
@@ -403,7 +403,7 @@ export class ScriptWatcherService {
             return
         }
 
-        const changes: [CustomFunctionType, ScriptWatcherState][] = []
+        const changes: [InsightsFunctionType, ScriptWatcherState][] = []
 
         // Calculate all those that have changed state
         Object.values(functionCosts).map((functionCost, index) => {
@@ -425,8 +425,8 @@ export class ScriptWatcherService {
                     return
                 }
 
-                if (functionCost.customFunction) {
-                    changes.push([functionCost.customFunction, newState])
+                if (functionCost.insightsFunction) {
+                    changes.push([functionCost.insightsFunction, newState])
                 }
             }
         })

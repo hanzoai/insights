@@ -68,8 +68,8 @@ function processArrayChanges<T extends ArrayChangeItem>(
 }
 
 export function workflowActivityDescriber(logItem: ActivityLogItem, asNotification?: boolean): HumanizedChange {
-    if (logItem.scope != 'CustomFlow') {
-        console.error('Workflow describer received a non-CustomFlow activity')
+    if (logItem.scope != 'InsightsFlow') {
+        console.error('Workflow describer received a non-InsightsFlow activity')
         return { description: null }
     }
 

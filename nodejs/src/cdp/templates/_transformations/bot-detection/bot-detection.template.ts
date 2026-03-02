@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: CustomFunctionTemplate = {
     name: 'Filter Bot Events',
     description:
         'Filters out events from known bot user agents. This transformation will drop the event if a bot is detected.',
-    icon_url: '/static/mascot/builder-mascot-01.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Get the user agent value
 let user_agent := event.properties[inputs.userAgent]

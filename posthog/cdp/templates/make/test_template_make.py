@@ -1,10 +1,10 @@
 import pytest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.make.template_make import template as template_make
 
 
-class TestTemplateMake(BaseCustomFunctionTemplateTest):
+class TestTemplateMake(BaseInsightsFunctionTemplateTest):
     template = template_make
 
     def _inputs(self, **kwargs):

@@ -44,13 +44,13 @@ export interface PaginatedMessageCategoryListApi {
 }
 
 /**
- * * `custom_script` - custom_script
+ * * `fn` - fn
  * `liquid` - liquid
  */
 export type Templating186EnumApi = (typeof Templating186EnumApi)[keyof typeof Templating186EnumApi]
 
 export const Templating186EnumApi = {
-    Script: 'custom_script',
+    Script: 'fn',
     Liquid: 'liquid',
 } as const
 
@@ -102,7 +102,6 @@ export const NullEnumApi = {} as const
 /**
  * @nullable
  */
-export type UserBasicApiMascotConfig = { [key: string]: unknown } | null | null
 
 export interface UserBasicApi {
     readonly id: number
@@ -121,7 +120,6 @@ export interface UserBasicApi {
     /** @nullable */
     is_email_verified?: boolean | null
     /** @nullable */
-    readonly mascot_config: UserBasicApiMascotConfig
     role_at_organization?: RoleAtOrganizationEnumApi | BlankEnumApi | NullEnumApi | null
 }
 

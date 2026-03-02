@@ -32,7 +32,6 @@ const meta: Meta<typeof PlayerInspector> = {
                                 last_name: '',
                                 email: 'paul@posthog.com',
                                 is_email_verified: false,
-                                mascot_config: null,
                                 role_at_organization: 'other',
                             },
                             deleted: false,

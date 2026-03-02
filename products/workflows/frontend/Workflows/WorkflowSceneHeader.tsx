@@ -12,7 +12,7 @@ import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { ScenePanel, ScenePanelActionsSection, ScenePanelDivider } from '~/layout/scenes/SceneLayout'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 
-import { CustomFlowManualTriggerButton } from './customflows/CustomFlowManualTriggerButton'
+import { InsightsFlowManualTriggerButton } from './insightsflows/InsightsFlowManualTriggerButton'
 import { SaveAsTemplateModal } from './templates/SaveAsTemplateModal'
 import { workflowTemplateLogic } from './templates/workflowTemplateLogic'
 import { workflowLogic } from './workflowLogic'
@@ -75,7 +75,7 @@ export const WorkflowSceneHeader = (props: WorkflowSceneLogicProps = {}): JSX.El
                 renameDebounceMs={200}
                 actions={
                     <>
-                        {isManualWorkflow && <CustomFlowManualTriggerButton {...props} />}
+                        {isManualWorkflow && <InsightsFlowManualTriggerButton {...props} />}
                         {isSavedWorkflow && (
                             <>
                                 <LemonButton

@@ -16,7 +16,7 @@ import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
-import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
+import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { DuplicateToProjectModal } from 'scenes/surveys/DuplicateToProjectModal'
 import { SurveyNoResponsesBanner } from 'scenes/surveys/SurveyNoResponsesBanner'
@@ -334,7 +334,7 @@ function SurveyViewLegacy({ id }: { id: string }): JSX.Element {
                                 content: (
                                     <div>
                                         <p>Get notified whenever a survey result is submitted</p>
-                                        <LinkedCustomFunctions
+                                        <LinkedInsightsFunctions
                                             type="destination"
                                             subTemplateIds={['survey-response']}
                                             forceFilterGroups={[

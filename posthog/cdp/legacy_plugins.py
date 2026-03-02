@@ -1,10 +1,10 @@
-from posthog.api.custom_function import CustomFunctionSerializer
-from posthog.models.custom_function_template import CustomFunctionTemplate
+from posthog.api.insights_function import InsightsFunctionSerializer
+from posthog.models.insights_function_template import InsightsFunctionTemplate
 
 
-def custom_function_from_plugin_config(plugin_config: dict, serializer_context: dict) -> CustomFunctionSerializer:
+def insights_function_from_plugin_config(plugin_config: dict, serializer_context: dict) -> InsightsFunctionSerializer:
     plugin = plugin_config["plugin"]
-    # Attempts to find a related CustomFunctionTemplate for the plugin config
+    # Attempts to find a related InsightsFunctionTemplate for the plugin config
 
     plugin_id = plugin.url.replace("inline://", "").replace("https://github.com/Insights/", "")
 
@@ -14,7 +14,7 @@ def custom_function_from_plugin_config(plugin_config: dict, serializer_context: 
     if plugin_id == "user-agent":
         plugin_id = "user-agent-plugin"
 
-    template = CustomFunctionTemplate.objects.get(template_id=f"plugin-{plugin_id}")
+    template = InsightsFunctionTemplate.objects.get(template_id=f"plugin-{plugin_id}")
 
     if not template:
         raise Exception(f"Template not found for plugin {plugin_id}")
@@ -29,7 +29,7 @@ def custom_function_from_plugin_config(plugin_config: dict, serializer_context: 
         "name": plugin.name,
         "description": template.description,
         "filters": template.filters,
-        "custom_script": template.code,
+        "fn": template.code,
         "inputs": inputs,
         "enabled": plugin_config.get("enabled", True),
         "icon_url": template.icon_url,
@@ -38,7 +38,7 @@ def custom_function_from_plugin_config(plugin_config: dict, serializer_context: 
         "created_by": serializer_context["request"].user,
     }
 
-    serializer = CustomFunctionSerializer(
+    serializer = InsightsFunctionSerializer(
         data=data,
         context=serializer_context,
     )

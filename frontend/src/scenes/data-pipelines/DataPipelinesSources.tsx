@@ -7,7 +7,7 @@ import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductI
 import { DataWarehouseManagedSourcesTable } from 'scenes/data-warehouse/settings/DataWarehouseManagedSourcesTable'
 import { DataWarehouseSelfManagedSourcesTable } from 'scenes/data-warehouse/settings/DataWarehouseSelfManagedSourcesTable'
 import { dataWarehouseSettingsLogic } from 'scenes/data-warehouse/settings/dataWarehouseSettingsLogic'
-import { CustomFunctionList } from 'scenes/custom-functions/list/CustomFunctionsList'
+import { InsightsFunctionList } from 'scenes/insights-functions/list/InsightsFunctionsList'
 
 import { SceneDivider } from '~/layout/scenes/components/SceneDivider'
 import { SceneSection } from '~/layout/scenes/components/SceneSection'
@@ -43,7 +43,7 @@ export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.E
                         }
                         description="Insights can expose a webhook that you can configure however you need to receive data from a 3rd party with no in-between service necessary"
                     >
-                        <CustomFunctionList logicKey="data-pipelines-custom-functions-source-webhook" type="source_webhook" />
+                        <InsightsFunctionList logicKey="data-pipelines-insights-functions-source-webhook" type="source_webhook" />
                     </SceneSection>
                     <SceneDivider />
                 </>

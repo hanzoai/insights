@@ -8,7 +8,6 @@ import { Toolbar } from './bar/Toolbar'
 import { ToolbarFixedZones } from './bar/ToolbarFixedZones'
 import { toolbarLogic } from './bar/toolbarLogic'
 import { Elements } from './elements/Elements'
-import { MascotButton } from './mascot/MascotButton'
 import { toolbarConfigLogic } from './toolbarConfigLogic'
 
 export function ToolbarContainer(): JSX.Element {
@@ -31,7 +30,6 @@ export function ToolbarContainer(): JSX.Element {
                 <div id="button-toolbar" {...themeProps}>
                     <Toolbar />
                 </div>
-                <MascotButton />
                 <div ref={ref} className="fixed inset-0 pointer-events-none z-[2147483647] [&>*]:pointer-events-auto" />
             </FloatingContainerContext.Provider>
         </Fade>

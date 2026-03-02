@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=True,
     type="destination",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Trigger Zaps in Zapier based on Insights events. NOTE: Typically this is created from within Zapier using the Insights app there.",
     icon_url="/static/services/zapier.png",
     category=["Custom"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 let hook_path := inputs.hook;
 let prefix := 'https://hooks.zapier.com/';

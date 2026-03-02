@@ -9,7 +9,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "value": {
       "instance_id": "<REPLACED-UUID-0>",
       "level": "info",
-      "log_source": "custom_function",
+      "log_source": "insights_function",
       "log_source_id": "<REPLACED-UUID-1>",
       "message": "geoip location data for ip: [REPLACED]",
       "team_id": 2,
@@ -23,7 +23,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "value": {
       "instance_id": "<REPLACED-UUID-0>",
       "level": "debug",
-      "log_source": "custom_function",
+      "log_source": "insights_function",
       "log_source_id": "<REPLACED-UUID-1>",
       "message": "Function completed in [REPLACED]",
       "team_id": 2,
@@ -35,7 +35,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "key": "<REPLACED-UUID-1>",
     "topic": "clickhouse_app_metrics2_test",
     "value": {
-      "app_source": "custom_function",
+      "app_source": "insights_function",
       "app_source_id": "<REPLACED-UUID-1>",
       "count": 1,
       "metric_kind": "success",
@@ -51,7 +51,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "value": {
       "instance_id": "<REPLACED-UUID-2>",
       "level": "debug",
-      "log_source": "custom_function",
+      "log_source": "insights_function",
       "log_source_id": "<REPLACED-UUID-3>",
       "message": "Function completed in [REPLACED]",
       "team_id": 2,
@@ -63,7 +63,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "key": "<REPLACED-UUID-3>",
     "topic": "clickhouse_app_metrics2_test",
     "value": {
-      "app_source": "custom_function",
+      "app_source": "insights_function",
       "app_source_id": "<REPLACED-UUID-3>",
       "count": 1,
       "metric_kind": "success",
@@ -79,7 +79,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "value": {
       "instance_id": "<REPLACED-UUID-4>",
       "level": "debug",
-      "log_source": "custom_function",
+      "log_source": "insights_function",
       "log_source_id": "<REPLACED-UUID-5>",
       "message": "Function completed in [REPLACED]",
       "team_id": 2,
@@ -91,7 +91,7 @@ exports[`ScriptTransformer transformEvent should execute multiple transformation
     "key": "<REPLACED-UUID-5>",
     "topic": "clickhouse_app_metrics2_test",
     "value": {
-      "app_source": "custom_function",
+      "app_source": "insights_function",
       "app_source_id": "<REPLACED-UUID-5>",
       "count": 1,
       "metric_kind": "success",

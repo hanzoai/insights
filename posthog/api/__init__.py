@@ -1,7 +1,7 @@
 from rest_framework import decorators, exceptions, viewsets
 from rest_framework_extensions.routers import NestedRegistryItem
 
-from posthog.api import data_color_theme, custom_flow, custom_flow_template, metalytics, my_notifications, project
+from posthog.api import data_color_theme, insights_flow, insights_flow_template, metalytics, my_notifications, project
 from posthog.api.batch_imports import BatchImportViewSet
 from posthog.api.csp_reporting import CSPReportingViewSet
 from posthog.api.onboarding import OnboardingViewSet
@@ -103,9 +103,9 @@ from . import (
     feature_flag,
     flag_value,
     health_issue,
-    hog,
-    custom_function,
-    custom_function_template,
+    fn,
+    insights_function,
+    insights_function_template,
     ingestion_warnings,
     insight_variable,
     instance_settings,
@@ -962,23 +962,23 @@ projects_router.register(
 )
 
 register_grandfathered_environment_nested_viewset(
-    r"custom_functions",
-    custom_function.CustomFunctionViewSet,
-    "environment_custom_functions",
+    r"insights_functions",
+    insights_function.InsightsFunctionViewSet,
+    "environment_insights_functions",
     ["team_id"],
 )
 
 register_grandfathered_environment_nested_viewset(
-    r"custom_flows",
-    custom_flow.CustomFlowViewSet,
-    "environment_custom_flows",
+    r"insights_flows",
+    insights_flow.InsightsFlowViewSet,
+    "environment_insights_flows",
     ["team_id"],
 )
 
 register_grandfathered_environment_nested_viewset(
-    r"custom_flow_templates",
-    custom_flow_template.CustomFlowTemplateViewSet,
-    "environment_custom_flow_templates",
+    r"insights_flow_templates",
+    insights_flow_template.InsightsFlowTemplateViewSet,
+    "environment_insights_flow_templates",
     ["team_id"],
 )
 
@@ -992,9 +992,9 @@ projects_router.register(
 )
 
 projects_router.register(
-    r"custom_function_templates",
-    custom_function_template.PublicCustomFunctionTemplateViewSet,
-    "project_custom_function_templates",
+    r"insights_function_templates",
+    insights_function_template.PublicInsightsFunctionTemplateViewSet,
+    "project_insights_function_templates",
     ["project_id"],
 )
 
@@ -1006,9 +1006,9 @@ projects_router.register(
 )
 
 projects_router.register(
-    r"hog",
-    hog.HogViewSet,
-    "hog",
+    r"fn",
+    fn.HogViewSet,
+    "fn",
     ["team_id"],
 )
 

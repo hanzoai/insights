@@ -1,6 +1,6 @@
 import { MessageHeader, SESv2Client, SendEmailCommand, SendEmailCommandInput } from '@aws-sdk/client-sesv2'
 
-import { CyclotronJobInvocationCustomFunction, CyclotronJobInvocationResult, IntegrationType } from '~/cdp/types'
+import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, IntegrationType } from '~/cdp/types'
 import { createAddLogFunction, logEntry } from '~/cdp/utils'
 import { createInvocationResult } from '~/cdp/utils/invocation-utils'
 import { CyclotronInvocationQueueParametersEmailType } from '~/schema/cyclotron'
@@ -41,13 +41,13 @@ export class EmailService {
 
     // Send email
     public async executeSendEmail(
-        invocation: CyclotronJobInvocationCustomFunction
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+        invocation: CyclotronJobInvocationInsightsFunction
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         if (invocation.queueParameters?.type !== 'email') {
             throw new Error('Invocation passed to sendEmail is not an email function')
         }
 
-        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(
+        const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(
             invocation,
             {},
             {
@@ -125,7 +125,7 @@ export class EmailService {
 
     // Send email to local maildev instance for testing (DEBUG=1 only)
     private async sendEmailWithMaildev(
-        result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>,
+        result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>,
         params: CyclotronInvocationQueueParametersEmailType
     ): Promise<void> {
         // This can timeout but there is no native timeout so we do our own one
@@ -145,7 +145,7 @@ export class EmailService {
     }
 
     private async sendEmailWithSES(
-        result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>,
+        result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>,
         params: CyclotronInvocationQueueParametersEmailType
     ): Promise<void> {
         if (!this.sesV2Client) {
@@ -183,7 +183,7 @@ export class EmailService {
             FeedbackForwardingEmailAddress: params.from.email,
         }
 
-        const isTransactionalEmail = result.invocation.customFunction.metadata?.message_category_type === 'transactional'
+        const isTransactionalEmail = result.invocation.insightsFunction.metadata?.message_category_type === 'transactional'
         // Automatically add unsubscribe headers for non-transactional emails
         if (sendEmailParams.Content?.Simple && !isTransactionalEmail) {
             sendEmailParams.Content.Simple.Headers = this.generateUnsubscribeHeaders({

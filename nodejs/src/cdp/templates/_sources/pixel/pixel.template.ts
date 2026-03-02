@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
@@ -10,7 +10,7 @@ export const template: CustomFunctionTemplate = {
         'Capture an event using a 1x1 tracking pixel. Useful for embedding tracking where Insights SDKs are not available such as emails.',
     icon_url: '/static/services/webhook.svg',
     category: ['Email', 'Tracking'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 if(inputs.debug) {
   print('Incoming request:', request.query)

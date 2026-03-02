@@ -57,7 +57,7 @@ class Local:
 
 
 @dataclasses.dataclass
-class CustomFunction:
+class InsightsFunction:
     name: str
     params: list[str]
     bytecode: list[Any]
@@ -1048,7 +1048,7 @@ class BytecodeCompiler(Visitor):
             return [*elems, Operation.DICT, len(value.items())]
         if isinstance(value, ast.AST):
             if isinstance(value, ast.Placeholder):
-                if self.mode == "custom_script":
+                if self.mode == "fn":
                     raise QueryError("Placeholders are not allowed in this context")
                 prev_mode = self.mode
                 self.mode = "hog"

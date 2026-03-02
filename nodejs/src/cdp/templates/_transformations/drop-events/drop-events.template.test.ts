@@ -1,4 +1,4 @@
-import { CustomFunctionInvocationGlobals } from '../../../types'
+import { InsightsFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './drop-events.template'
 
@@ -20,7 +20,7 @@ describe('drop-events.template', () => {
     }
 
     const tester = new TemplateTester(testTemplate)
-    let mockGlobals: CustomFunctionInvocationGlobals
+    let mockGlobals: InsightsFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()

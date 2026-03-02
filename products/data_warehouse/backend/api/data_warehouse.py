@@ -19,7 +19,7 @@ from posthog.insightsql.query import execute_insightsql_query
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.batch_exports.models import BatchExportRun
 from posthog.cloud_utils import get_cached_instance_license
-from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionState, CustomFunctionType
+from posthog.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionState, InsightsFunctionType
 from posthog.utils import convert_property_value, flatten
 
 from products.data_warehouse.backend.models import ExternalDataJob, ExternalDataSchema, ExternalDataSource
@@ -644,10 +644,10 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                 )
 
             # Get transformations with issues
-            transformations = CustomFunction.objects.filter(
+            transformations = InsightsFunction.objects.filter(
                 team_id=self.team_id,
                 deleted=False,
-                type=CustomFunctionType.TRANSFORMATION,
+                type=InsightsFunctionType.TRANSFORMATION,
                 enabled=True,
             )
 
@@ -656,17 +656,17 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                     status_data = transformation.status
                     state = status_data.get("state", 0)
                     if state in [
-                        CustomFunctionState.DISABLED.value,
-                        CustomFunctionState.DEGRADED.value,
-                        CustomFunctionState.FORCEFULLY_DISABLED.value,
-                        CustomFunctionState.FORCEFULLY_DEGRADED.value,
+                        InsightsFunctionState.DISABLED.value,
+                        InsightsFunctionState.DEGRADED.value,
+                        InsightsFunctionState.FORCEFULLY_DISABLED.value,
+                        InsightsFunctionState.FORCEFULLY_DEGRADED.value,
                     ]:
                         status_label = (
                             "disabled"
                             if state
                             in [
-                                CustomFunctionState.DISABLED.value,
-                                CustomFunctionState.FORCEFULLY_DISABLED.value,
+                                InsightsFunctionState.DISABLED.value,
+                                InsightsFunctionState.FORCEFULLY_DISABLED.value,
                             ]
                             else "degraded"
                         )
@@ -688,10 +688,10 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                     logger.warning(f"Error processing transformation {transformation.id}", exc_info=e)
 
             # Get destinations with issues
-            hog_destinations = CustomFunction.objects.filter(
+            hog_destinations = InsightsFunction.objects.filter(
                 team_id=self.team_id,
                 deleted=False,
-                type__in=[CustomFunctionType.DESTINATION, CustomFunctionType.SITE_DESTINATION],
+                type__in=[InsightsFunctionType.DESTINATION, InsightsFunctionType.SITE_DESTINATION],
                 enabled=True,
             )
 
@@ -700,17 +700,17 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                     status_data = destination.status
                     state = status_data.get("state", 0)
                     if state in [
-                        CustomFunctionState.DISABLED.value,
-                        CustomFunctionState.DEGRADED.value,
-                        CustomFunctionState.FORCEFULLY_DISABLED.value,
-                        CustomFunctionState.FORCEFULLY_DEGRADED.value,
+                        InsightsFunctionState.DISABLED.value,
+                        InsightsFunctionState.DEGRADED.value,
+                        InsightsFunctionState.FORCEFULLY_DISABLED.value,
+                        InsightsFunctionState.FORCEFULLY_DEGRADED.value,
                     ]:
                         status_label = (
                             "disabled"
                             if state
                             in [
-                                CustomFunctionState.DISABLED.value,
-                                CustomFunctionState.FORCEFULLY_DISABLED.value,
+                                InsightsFunctionState.DISABLED.value,
+                                InsightsFunctionState.FORCEFULLY_DISABLED.value,
                             ]
                             else "degraded"
                         )

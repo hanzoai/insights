@@ -7,11 +7,11 @@ import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import {
     CYCLOTRON_INVOCATION_JOB_QUEUES,
     CyclotronJobInvocation,
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
     CyclotronJobQueueKind,
 } from '../types'
-import { isLegacyPluginCustomFunction, isNativeCustomFunction, isSegmentPluginCustomFunction } from '../utils'
+import { isLegacyPluginInsightsFunction, isNativeInsightsFunction, isSegmentPluginInsightsFunction } from '../utils'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
 
 /**
@@ -45,15 +45,15 @@ export class CdpCyclotronWorker<
 
     @instrumented('cdpConsumer.handleEachBatch.executeInvocations')
     public async processInvocations(invocations: CyclotronJobInvocation[]): Promise<CyclotronJobInvocationResult[]> {
-        const loadedInvocations = await this.loadCustomFunctions(invocations)
+        const loadedInvocations = await this.loadInsightsFunctions(invocations)
 
         return await Promise.all(
             loadedInvocations.map((item) => {
-                if (isNativeCustomFunction(item.customFunction)) {
+                if (isNativeInsightsFunction(item.insightsFunction)) {
                     return this.nativeDestinationExecutorService.execute(item)
-                } else if (isLegacyPluginCustomFunction(item.customFunction)) {
+                } else if (isLegacyPluginInsightsFunction(item.insightsFunction)) {
                     return this.pluginDestinationExecutorService.execute(item)
-                } else if (isSegmentPluginCustomFunction(item.customFunction)) {
+                } else if (isSegmentPluginInsightsFunction(item.insightsFunction)) {
                     return this.segmentDestinationExecutorService.execute(item)
                 } else {
                     return this.scriptExecutor.executeWithAsyncFunctions(item)
@@ -62,17 +62,17 @@ export class CdpCyclotronWorker<
         )
     }
 
-    @instrumented('cdpConsumer.handleEachBatch.loadCustomFunctions')
-    protected async loadCustomFunctions(
+    @instrumented('cdpConsumer.handleEachBatch.loadInsightsFunctions')
+    protected async loadInsightsFunctions(
         invocations: CyclotronJobInvocation[]
-    ): Promise<CyclotronJobInvocationCustomFunction[]> {
-        const loadedInvocations: CyclotronJobInvocationCustomFunction[] = []
+    ): Promise<CyclotronJobInvocationInsightsFunction[]> {
+        const loadedInvocations: CyclotronJobInvocationInsightsFunction[] = []
         const failedInvocations: CyclotronJobInvocation[] = []
 
         await Promise.all(
             invocations.map(async (item) => {
-                const customFunction = await this.customFunctionManager.getCustomFunction(item.functionId)
-                if (!customFunction) {
+                const insightsFunction = await this.insightsFunctionManager.getInsightsFunction(item.functionId)
+                if (!insightsFunction) {
                     logger.error('⚠️', 'Error finding custom function', {
                         id: item.functionId,
                     })
@@ -82,7 +82,7 @@ export class CdpCyclotronWorker<
                     return null
                 }
 
-                if (!customFunction.enabled || customFunction.deleted) {
+                if (!insightsFunction.enabled || insightsFunction.deleted) {
                     logger.info('⚠️', 'Skipping invocation due to custom function being deleted or disabled', {
                         id: item.functionId,
                     })
@@ -94,8 +94,8 @@ export class CdpCyclotronWorker<
 
                 loadedInvocations.push({
                     ...item,
-                    state: item.state as CyclotronJobInvocationCustomFunction['state'],
-                    customFunction,
+                    state: item.state as CyclotronJobInvocationInsightsFunction['state'],
+                    insightsFunction,
                 })
             })
         )
@@ -122,9 +122,9 @@ export class CdpCyclotronWorker<
         const backgroundTask = this.queueInvocationResults(invocationResults).then(() => {
             // NOTE: After this point we parallelize and any issues are logged rather than thrown as retrying now would end up in duplicate messages
             return Promise.allSettled([
-                this.customFunctionMonitoringService
+                this.insightsFunctionMonitoringService
                     .queueInvocationResults(invocationResults)
-                    .then(() => this.customFunctionMonitoringService.flush())
+                    .then(() => this.insightsFunctionMonitoringService.flush())
                     .catch((err) => {
                         captureException(err)
                         logger.error('Error processing invocation results', { err })

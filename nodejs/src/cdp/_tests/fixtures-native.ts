@@ -1,14 +1,14 @@
 import { UUIDT } from '~/utils/utils'
 
-import { CyclotronJobInvocationCustomFunction, CustomFunctionType } from '../types'
-import { createCustomFunction } from './fixtures'
+import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../types'
+import { createInsightsFunction } from './fixtures'
 import { SAMPLE_GLOBALS } from './fixtures'
 
 export const createExampleNativeInvocation = (
-    customFunctionOverrides: Partial<CustomFunctionType> = {},
+    insightsFunctionOverrides: Partial<InsightsFunctionType> = {},
     inputs: Record<string, any> = {}
-): CyclotronJobInvocationCustomFunction => {
-    const customFunction = createCustomFunction(customFunctionOverrides)
+): CyclotronJobInvocationInsightsFunction => {
+    const insightsFunction = createInsightsFunction(insightsFunctionOverrides)
 
     return {
         id: new UUIDT().toString(),
@@ -20,10 +20,10 @@ export const createExampleNativeInvocation = (
             timings: [],
             attempts: 0,
         },
-        teamId: customFunction.team_id,
-        functionId: customFunction.id,
-        customFunction,
-        queue: 'custom_script',
+        teamId: insightsFunction.team_id,
+        functionId: insightsFunction.id,
+        insightsFunction,
+        queue: 'fn',
         queuePriority: 0,
     }
 }

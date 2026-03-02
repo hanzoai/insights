@@ -1,7 +1,7 @@
 import pytest
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.hubspot.template_hubspot import (
     TemplateHubspotMigrator,
     template as template_hubspot,
@@ -12,7 +12,7 @@ from posthog.models import PluginConfig
 from common.hogvm.python.utils import UncaughtHogVMException
 
 
-class TestTemplateHubspot(BaseCustomFunctionTemplateTest):
+class TestTemplateHubspot(BaseInsightsFunctionTemplateTest):
     template = template_hubspot
 
     def _inputs(self, **kwargs):
@@ -85,7 +85,7 @@ EVENT_DEFINITION_RESPONSE = {
 }
 
 
-class TestTemplateHubspotEvent(BaseCustomFunctionTemplateTest):
+class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
     template = template_hubspot_event
 
     def _inputs(self, **kwargs):
@@ -438,5 +438,5 @@ class TestTemplateMigration(BaseTest):
         assert fn["inputs_schema"][0]["key"] == "access_token"
         assert fn["inputs_schema"][0]["type"] == "string"
         assert fn["inputs_schema"][0]["secret"]
-        assert "inputs.oauth.access_token" not in fn["custom_script"]
-        assert "inputs.access_token" in fn["custom_script"]
+        assert "inputs.oauth.access_token" not in fn["fn"]
+        assert "inputs.access_token" in fn["fn"]

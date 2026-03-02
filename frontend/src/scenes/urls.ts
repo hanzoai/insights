@@ -10,7 +10,7 @@ import type { BillingSectionId } from './billing/types'
 import { DataPipelinesNewSceneKind } from './data-pipelines/DataPipelinesNewScene'
 import { OutputTab } from './data-warehouse/editor/outputPaneLogic'
 import type { DataWarehouseSourceSceneTab } from './data-warehouse/settings/DataWarehouseSourceScene'
-import type { CustomFunctionSceneTab } from './custom-functions/CustomFunctionScene'
+import type { InsightsFunctionSceneTab } from './insights-functions/InsightsFunctionScene'
 import type { SettingId, SettingLevelId, SettingSectionId } from './settings/types'
 
 /**
@@ -198,7 +198,7 @@ export const urls = {
         urls.shared(token, exportOptions).replace('/shared/', '/embedded/'),
     debugQuery: (query?: string | Record<string, any>): string =>
         combineUrl('/debug', {}, query ? { q: typeof query === 'string' ? query : JSON.stringify(query) } : {}).url,
-    debugScript: (): string => '/debug/script',
+    debugFn: (): string => '/debug/fn',
     signalsDebug: (): string => '/debug/signals',
     moveToInsightsCloud: (): string => '/move-to-cloud',
     heatmaps: (params?: string): string =>
@@ -224,8 +224,8 @@ export const urls = {
     batchExportNew: (service: string): string => `/pipeline/batch-exports/new/${service}`,
     batchExport: (id: string): string => `/pipeline/batch-exports/${id}`,
     legacyPlugin: (id: string): string => `/pipeline/plugins/${id}`,
-    customFunction: (id: string, tab?: CustomFunctionSceneTab): string => `/functions/${id}${tab ? `?tab=${tab}` : ''}`,
-    customFunctionNew: (templateId: string): string => `/functions/new/${templateId}`,
+    insightsFunction: (id: string, tab?: InsightsFunctionSceneTab): string => `/functions/${id}${tab ? `?tab=${tab}` : ''}`,
+    insightsFunctionNew: (templateId: string): string => `/functions/new/${templateId}`,
     productTours: (): string => '/product_tours',
     productTour: (id: string, params?: string): string =>
         `/product_tours/${id}${params ? `?${params.startsWith('?') ? params.slice(1) : params}` : ''}`,

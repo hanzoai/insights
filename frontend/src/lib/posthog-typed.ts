@@ -327,18 +327,18 @@ interface EventSchemas {
     ai_filter_reset: Record<string, any>
     ai_filter_send: Record<string, any>
     ai_filter_success: Record<string, any>
-    ai_custom_function_accepted: Record<string, any>
-    ai_custom_function_filters_accepted: Record<string, any>
-    ai_custom_function_filters_prompted: Record<string, any>
-    ai_custom_function_filters_prompt_open: Record<string, any>
-    ai_custom_function_filters_rejected: Record<string, any>
-    ai_custom_function_inputs_accepted: Record<string, any>
-    ai_custom_function_inputs_prompted: Record<string, any>
-    ai_custom_function_inputs_prompt_open: Record<string, any>
-    ai_custom_function_inputs_rejected: Record<string, any>
-    ai_custom_function_prompted: Record<string, any>
-    ai_custom_function_prompt_open: Record<string, any>
-    ai_custom_function_rejected: Record<string, any>
+    ai_insights_function_accepted: Record<string, any>
+    ai_insights_function_filters_accepted: Record<string, any>
+    ai_insights_function_filters_prompted: Record<string, any>
+    ai_insights_function_filters_prompt_open: Record<string, any>
+    ai_insights_function_filters_rejected: Record<string, any>
+    ai_insights_function_inputs_accepted: Record<string, any>
+    ai_insights_function_inputs_prompted: Record<string, any>
+    ai_insights_function_inputs_prompt_open: Record<string, any>
+    ai_insights_function_inputs_rejected: Record<string, any>
+    ai_insights_function_prompted: Record<string, any>
+    ai_insights_function_prompt_open: Record<string, any>
+    ai_insights_function_rejected: Record<string, any>
     ai_query_accepted: Record<string, any>
     ai_query_prompt_open: Record<string, any>
     ai_query_rejected: Record<string, any>
@@ -1665,8 +1665,6 @@ interface EventSchemas {
     heartbeat_buffer: Record<string, any>
     'heatmaps_opt_in team setting updated': Record<string, any>
     'heatmaps toggled': Record<string, any>
-    'mascot mode disabled': Record<string, any>
-    'mascot mode enabled': Record<string, any>
     'Hei simen': Record<string, any>
     hello: Record<string, any>
     'Hello!': Record<string, any>
@@ -1685,12 +1683,12 @@ interface EventSchemas {
     'hi there': Record<string, any>
     'hJ@#$#####$#': Record<string, any>
     "HnBReouZ') OR 325=(SELECT 325 FROM PG_SLEEP(15))--": Record<string, any>
-    custom_flow_activated: Record<string, any>
-    custom_flow_created: Record<string, any>
-    custom_flow_started: Record<string, any>
+    insights_flow_activated: Record<string, any>
+    insights_flow_created: Record<string, any>
+    insights_flow_started: Record<string, any>
     'custom function created from plugin config api': Record<string, any>
     'custom function saved': Record<string, any>
-    custom_function_state_change: Record<string, any>
+    insights_function_state_change: Record<string, any>
     'custom function state changed': Record<string, any>
     insightsql_compare: Record<string, any>
     "hOnSbBQb')) OR 874=(SELECT 874 FROM PG_SLEEP(15))--": Record<string, any>

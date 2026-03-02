@@ -28,7 +28,7 @@ describe('insights update person properties template', () => {
                 "distinct_id": "distinct-id",
                 "event": "$set",
                 "properties": {
-                  "$custom_function_execution_count": 1,
+                  "$insights_function_execution_count": 1,
                   "$set": {
                     "foo": "bar",
                     "modified": "1.0.0.xxx",

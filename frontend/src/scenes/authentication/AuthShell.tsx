@@ -1,11 +1,11 @@
+import { ReactNode } from 'react'
+
 import { useValues } from 'kea'
-import type { ReactNode } from 'react'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
-import twigAuthBg from 'public/twig-auth-bg.png'
-
+import twigAuthBg from './twig-auth-bg.svg'
 import { TwigAuthLeftPanel } from './TwigAuthLeftPanel'
 
 interface AuthShellProps {
@@ -17,7 +17,7 @@ interface AuthShellProps {
     leftContainerContent?: JSX.Element
     fixedWidth?: boolean
     sideLogo?: boolean
-    showMascot?: boolean
+    showMascot?: boolean // kept for call-site compat, ignored
     hideFooterForTwig?: boolean
 }
 
@@ -26,11 +26,9 @@ export function AuthShell({
     children,
     header,
     footer,
-    message,
     leftContainerContent,
     fixedWidth,
     sideLogo,
-    showMascot,
     hideFooterForTwig,
 }: AuthShellProps): JSX.Element {
     const { preflight } = useValues(preflightLogic)
@@ -56,20 +54,7 @@ export function AuthShell({
         )
     }
 
-    return showMascot ? (
-        <BridgePage
-            view={view}
-            header={header}
-            footer={footer}
-            leftContainerContent={leftContainerContent}
-            fixedWidth={fixedWidth}
-            sideLogo={sideLogo}
-            mascot={true}
-            message={message}
-        >
-            {children}
-        </BridgePage>
-    ) : (
+    return (
         <BridgePage
             view={view}
             header={header}

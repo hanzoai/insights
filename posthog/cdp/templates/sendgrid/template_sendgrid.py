@@ -1,11 +1,11 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
 
 # Based off of https://www.twilio.com/docs/sendgrid/api-reference/contacts/add-or-update-a-contact
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -14,7 +14,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Update marketing contacts in Sendgrid",
     icon_url="/static/services/sendgrid.png",
     category=["Email Marketing"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.email)) {
     print('`email` input is empty. Not updating contacts.')
@@ -113,13 +113,13 @@ if (res.status > 300) {
 )
 
 
-class TemplateSendGridMigrator(CustomFunctionTemplateMigrator):
+class TemplateSendGridMigrator(InsightsFunctionTemplateMigrator):
     plugin_url = "https://github.com/Insights/sendgrid-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["custom_script"] = hf["code"]
+        hf["fn"] = hf["code"]
         del hf["code"]
 
         sendgridApiKey = obj.config.get("sendgridApiKey", "")

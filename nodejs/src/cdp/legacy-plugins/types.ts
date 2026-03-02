@@ -1,7 +1,7 @@
 import { PluginEvent, ProcessedPluginEvent, StorageExtension } from '@posthog/plugin-scaffold'
 
 import { FetchOptions, FetchResponse } from '../../utils/request'
-import { CustomFunctionTemplate } from '../types'
+import { InsightsFunctionTemplate } from '../types'
 
 export type LegacyPluginLogger = {
     debug: (...args: any[]) => void
@@ -28,13 +28,13 @@ export type LegacyDestinationPluginMeta = LegacyTransformationPluginMeta & {
 }
 
 export type LegacyDestinationPlugin = {
-    template: CustomFunctionTemplate
+    template: InsightsFunctionTemplate
     onEvent(event: ProcessedPluginEvent, meta: LegacyDestinationPluginMeta): Promise<void>
     setupPlugin?: (meta: LegacyDestinationPluginMeta) => Promise<void>
 }
 
 export type LegacyTransformationPlugin = {
-    template: CustomFunctionTemplate
+    template: InsightsFunctionTemplate
     processEvent(event: PluginEvent, meta: LegacyTransformationPluginMeta): PluginEvent | undefined | null
     setupPlugin?: (meta: LegacyTransformationPluginMeta) => void
 }

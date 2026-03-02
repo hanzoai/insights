@@ -46,7 +46,7 @@ describe('pixel template', () => {
                 "distinct_id": "hardcoded",
                 "event": "the event",
                 "properties": {
-                  "$custom_function_execution_count": 1,
+                  "$insights_function_execution_count": 1,
                   "query_params": {
                     "other": "other",
                     "params": "2",

@@ -1,10 +1,10 @@
 import { INSIGHT_ALERT_FIRING_EVENT_ID, INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID } from 'lib/constants'
 import {
-    CUSTOM_FUNCTION_SUB_TEMPLATES,
-    CUSTOM_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
-} from 'scenes/custom-functions/sub-templates/sub-templates'
+    INSIGHTS_FUNCTION_SUB_TEMPLATES,
+    INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES,
+} from 'scenes/insights-functions/sub-templates/sub-templates'
 
-import { CyclotronJobFiltersType, CustomFunctionType, PropertyFilterType, PropertyOperator } from '~/types'
+import { CyclotronJobFiltersType, InsightsFunctionType, PropertyFilterType, PropertyOperator } from '~/types'
 
 export const ALERT_NOTIFICATION_TYPE_SLACK = 'slack' as const
 export const ALERT_NOTIFICATION_TYPE_WEBHOOK = 'webhook' as const
@@ -28,7 +28,7 @@ export const buildAlertFilterConfig = (alertId: string): CyclotronJobFiltersType
 })
 
 const INSIGHT_ALERT_SLACK_INPUTS =
-    CUSTOM_FUNCTION_SUB_TEMPLATES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID].find((t) => t.template_id === 'template-slack')
+    INSIGHTS_FUNCTION_SUB_TEMPLATES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID].find((t) => t.template_id === 'template-slack')
         ?.inputs ?? {}
 
 export type PendingAlertNotification =
@@ -43,12 +43,12 @@ export type PendingAlertNotification =
           webhookUrl: string
       }
 
-export function buildCustomFunctionPayload(
+export function buildInsightsFunctionPayload(
     alertId: string,
     alertName: string | undefined,
     notification: PendingAlertNotification
-): Partial<CustomFunctionType> {
-    const commonProps = CUSTOM_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]
+): Partial<InsightsFunctionType> {
+    const commonProps = INSIGHTS_FUNCTION_SUB_TEMPLATE_COMMON_PROPERTIES[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]
     const base = {
         type: commonProps.type,
         enabled: true,

@@ -1,13 +1,13 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_app",
     id="template-debug-posthog-js",
     name="Insights JS debugger",
     description="Enable extra debugging tools on your posthog-js",
-    icon_url="/static/mascot/builder-icon-01.png",
+    icon_url="",
     category=["Custom"],
     code_language="javascript",
     code="""

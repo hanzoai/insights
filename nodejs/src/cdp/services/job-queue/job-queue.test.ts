@@ -3,8 +3,8 @@ import { DateTime } from 'luxon'
 import { defaultConfig } from '~/config/config'
 import { PluginsServerConfig } from '~/types'
 
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../../_tests/examples'
-import { createScriptExecutionGlobals, createCustomFunction } from '../../_tests/fixtures'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../../_tests/examples'
+import { createScriptExecutionGlobals, createInsightsFunction } from '../../_tests/fixtures'
 import { createInvocation } from '../../utils/invocation-utils'
 import { CyclotronJobQueue, JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS, getProducerMapping } from './job-queue'
 
@@ -12,11 +12,11 @@ describe('CyclotronJobQueue', () => {
     let config: PluginsServerConfig
     let mockConsumeBatch: jest.Mock
 
-    const exampleCustomFunction = createCustomFunction({
+    const exampleInsightsFunction = createInsightsFunction({
         name: 'Test custom function',
-        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+        ...FN_EXAMPLES.simple_fetch,
+        ...FN_INPUTS_EXAMPLES.simple_fetch,
+        ...FN_FILTERS_EXAMPLES.no_filters,
     })
 
     beforeEach(() => {
@@ -30,7 +30,7 @@ describe('CyclotronJobQueue', () => {
         })
 
         it('should initialise', () => {
-            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'fn', mockConsumeBatch)
             expect(queue).toBeDefined()
             expect(queue['consumerMode']).toBe('postgres')
         })
@@ -42,7 +42,7 @@ describe('CyclotronJobQueue', () => {
         })
 
         it('should initialise', () => {
-            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'fn', mockConsumeBatch)
             expect(queue).toBeDefined()
             expect(queue['consumerMode']).toBe('kafka')
         })
@@ -53,7 +53,7 @@ describe('CyclotronJobQueue', () => {
             config.CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE = 'kafka'
             config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING = mapping
             config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_TEAM_MAPPING = teamMapping || ''
-            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'fn', mockConsumeBatch)
             queue['jobQueuePostgres'].startAsProducer = jest.fn()
             queue['jobQueueKafka'].startAsProducer = jest.fn()
             queue['jobQueuePostgres'].queueInvocations = jest.fn()
@@ -112,7 +112,7 @@ describe('CyclotronJobQueue', () => {
                                 ...createScriptExecutionGlobals(),
                                 inputs: {},
                             },
-                            exampleCustomFunction
+                            exampleInsightsFunction
                         ),
                         queueScheduledAt: DateTime.now().plus({
                             milliseconds: JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS + 1000,
@@ -151,7 +151,7 @@ describe('CyclotronJobQueue', () => {
                             ...createScriptExecutionGlobals(),
                             inputs: {},
                         },
-                        exampleCustomFunction
+                        exampleInsightsFunction
                     ),
                     queueScheduledAt: DateTime.now().plus({
                         milliseconds: JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS - 1000,
@@ -175,7 +175,7 @@ describe('CyclotronJobQueue', () => {
             config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING = '*:kafka'
             config.CDP_CYCLOTRON_SHADOW_WRITE_ENABLED = shadowEnabled
             config.CYCLOTRON_SHADOW_DATABASE_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron_shadow'
-            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'fn', mockConsumeBatch)
             queue['jobQueuePostgres'].startAsProducer = jest.fn()
             queue['jobQueueKafka'].startAsProducer = jest.fn()
             queue['jobQueuePostgres'].queueInvocations = jest.fn()
@@ -210,7 +210,7 @@ describe('CyclotronJobQueue', () => {
                         ...createScriptExecutionGlobals(),
                         inputs: {},
                     },
-                    exampleCustomFunction
+                    exampleInsightsFunction
                 ),
             ]
             await queue.queueInvocations(invocations)
@@ -229,7 +229,7 @@ describe('CyclotronJobQueue', () => {
                             ...createScriptExecutionGlobals(),
                             inputs: {},
                         },
-                        exampleCustomFunction
+                        exampleInsightsFunction
                     ),
                     queue: 'customflow' as const,
                 },
@@ -252,7 +252,7 @@ describe('CyclotronJobQueue', () => {
                         ...createScriptExecutionGlobals(),
                         inputs: {},
                     },
-                    exampleCustomFunction
+                    exampleInsightsFunction
                 ),
             ]
 
@@ -272,7 +272,7 @@ describe('CyclotronJobQueue', () => {
                         ...createScriptExecutionGlobals(),
                         inputs: {},
                     },
-                    exampleCustomFunction
+                    exampleInsightsFunction
                 ),
             ]
 
@@ -383,7 +383,7 @@ describe('getProducerMapping', () => {
             'Invalid mapping: wrong_queue:kafka - queue wrong_queue must be one of *, hog, scriptoverflow, customflow',
         ],
         ['hog:kafka:1.1', 'Invalid mapping: script:kafka:1.1 - percentage 1.1 must be 0 < x <= 1'],
-        ['custom_script:kafka', 'No mapping for the default queue for example: *:postgres'],
+        ['fn:kafka', 'No mapping for the default queue for example: *:postgres'],
     ])('should throw for bad values for %s', (mapping, error) => {
         expect(() => getProducerMapping(mapping)).toThrow(error)
     })

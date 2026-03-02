@@ -38,7 +38,7 @@ import { defaultDataTableColumns } from '~/queries/nodes/DataTable/utils'
 import { NodeKind, ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
 import { AccessControlLevel, AccessControlResourceType, ActionStepType, FilterLogicalOperator } from '~/types'
 
-import { ActionCustomFunctions } from '../components/ActionCustomFunctions'
+import { ActionInsightsFunctions } from '../components/ActionInsightsFunctions'
 import { ActionStep } from '../components/ActionStep'
 import { ActionEditLogicProps, DEFAULT_ACTION_STEP, actionEditLogic } from '../logics/actionEditLogic'
 import { actionLogic } from '../logics/actionLogic'
@@ -299,7 +299,7 @@ export function ActionEdit({ action: loadedAction, id, actionLoading }: ActionEd
                 </SceneSection>
             </Form>
             <SceneDivider />
-            <ActionCustomFunctions />
+            <ActionInsightsFunctions />
             <SceneDivider />
             {id && (
                 <>

@@ -15,7 +15,7 @@ type FileSystemLogViewType =
     | 'link'
     | 'notebook'
     | 'session_recording_playlist'
-    | `custom_function/${string}`
+    | `insights_function/${string}`
 
 interface TrackFileSystemLogViewOptions {
     type: FileSystemLogViewType

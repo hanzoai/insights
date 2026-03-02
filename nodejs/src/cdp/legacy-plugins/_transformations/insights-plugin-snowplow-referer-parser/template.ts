@@ -12,7 +12,7 @@ export const insightsPluginSnowplowRefererParser: LegacyTransformationPlugin = {
         id: 'plugin-insights-plugin-snowplow-referer-parser',
         name: 'UTM Referrer',
         description: 'UTM referrer snowplow parser',
-        icon_url: '/static/mascot/builder-mascot-01.png',
+        icon_url: '',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

@@ -32,38 +32,38 @@ export const logsExplainLogWithAICreate = async (
     })
 }
 
-export const getCustomFlowTemplatesLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_flow_templates/${id}/logs/`
+export const getInsightsFlowTemplatesLogsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/insights_flow_templates/${id}/logs/`
 }
 
-export const customFlowTemplatesLogsRetrieve = async (
+export const insightsFlowTemplatesLogsRetrieve = async (
     projectId: string,
     id: string,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getCustomFlowTemplatesLogsRetrieveUrl(projectId, id), {
+    return apiMutator<void>(getInsightsFlowTemplatesLogsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getCustomFlowsLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_flows/${id}/logs/`
+export const getInsightsFlowsLogsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/insights_flows/${id}/logs/`
 }
 
-export const customFlowsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getCustomFlowsLogsRetrieveUrl(projectId, id), {
+export const insightsFlowsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getInsightsFlowsLogsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })
 }
 
-export const getCustomFunctionsLogsRetrieveUrl = (projectId: string, id: string) => {
-    return `/api/projects/${projectId}/custom_functions/${id}/logs/`
+export const getInsightsFunctionsLogsRetrieveUrl = (projectId: string, id: string) => {
+    return `/api/projects/${projectId}/insights_functions/${id}/logs/`
 }
 
-export const customFunctionsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
-    return apiMutator<void>(getCustomFunctionsLogsRetrieveUrl(projectId, id), {
+export const insightsFunctionsLogsRetrieve = async (projectId: string, id: string, options?: RequestInit): Promise<void> => {
+    return apiMutator<void>(getInsightsFunctionsLogsRetrieveUrl(projectId, id), {
         ...options,
         method: 'GET',
     })

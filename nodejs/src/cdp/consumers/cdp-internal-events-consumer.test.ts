@@ -3,9 +3,9 @@ import '../../../tests/helpers/mocks/producer.mock'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
-import { insertCustomFunction as _insertCustomFunction, createInternalEvent, createKafkaMessage } from '../_tests/fixtures'
-import { CustomFunctionType } from '../types'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { insertInsightsFunction as _insertInsightsFunction, createInternalEvent, createKafkaMessage } from '../_tests/fixtures'
+import { InsightsFunctionType } from '../types'
 import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
 describe('CDP Internal Events Consumer', () => {
@@ -13,10 +13,10 @@ describe('CDP Internal Events Consumer', () => {
     let hub: Hub
     let team: Team
 
-    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
-        const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
+    const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
+        const item = await _insertInsightsFunction(hub.postgres, team.id, insightsFunction)
         // Trigger the reload that django would do
-        processor['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
+        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -53,10 +53,10 @@ describe('CDP Internal Events Consumer', () => {
 
         describe('with an existing team and custom function', () => {
             beforeEach(async () => {
-                await insertCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                await insertInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.no_filters,
                     type: 'internal_destination',
                 })
             })

@@ -16,8 +16,6 @@ from posthog.models.project import Project
 
 
 class UserBasicSerializer(serializers.ModelSerializer):
-    mascot_config = serializers.SerializerMethodField()
-
     class Meta:
         model = User
         fields = [
@@ -28,28 +26,8 @@ class UserBasicSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "is_email_verified",
-            "mascot_config",
             "role_at_organization",
         ]
-
-    def get_mascot_config(self, user: User) -> Optional[dict]:
-        if user.mascot_config:
-            if user.mascot_config.get("version") == 2:
-                actor_options = user.mascot_config.get("actor_options", {})
-                return {
-                    "use_as_profile": user.mascot_config.get("use_as_profile"),
-                    "color": actor_options.get("color"),
-                    "accessories": actor_options.get("accessories"),
-                    "skin": actor_options.get("skin"),
-                }
-            else:
-                return {
-                    "use_as_profile": user.mascot_config.get("use_as_profile"),
-                    "color": user.mascot_config.get("color"),
-                    "accessories": user.mascot_config.get("accessories"),
-                    "skin": user.mascot_config.get("skin"),
-                }
-        return None
 
 
 class ProjectBasicSerializer(serializers.ModelSerializer):

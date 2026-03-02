@@ -1,9 +1,9 @@
-import { CustomFunctionInputSchemaType } from '~/cdp/types'
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionInputSchemaType } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
 // Based on https://developers.google.com/google-ads/api/reference/rpc/v21/ClickConversion
 
-const build_inputs = (): CustomFunctionInputSchemaType[] => {
+const build_inputs = (): InsightsFunctionInputSchemaType[] => {
     return [
         {
             key: 'conversionActionId',
@@ -67,7 +67,7 @@ const build_inputs = (): CustomFunctionInputSchemaType[] => {
     ]
 }
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'destination',
@@ -76,7 +76,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Send conversion events to Google Ads',
     icon_url: '/static/services/google-ads.png',
     category: ['Advertisement'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 if (empty(inputs.gclid)) {
     print('Empty \`gclid\`. Skipping...')

@@ -662,7 +662,7 @@ export interface InsightsQLAutocompleteResponse {
 }
 
 export enum HogLanguage {
-    script = 'custom_script',
+    script = 'fn',
     hogJson = 'hogJson',
     insightsQL = 'insightsQL',
     insightsQLExpr = 'insightsQLExpr',

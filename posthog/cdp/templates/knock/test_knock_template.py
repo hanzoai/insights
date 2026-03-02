@@ -1,4 +1,4 @@
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.knock.template_knock import template as template_knock
 
 
@@ -14,7 +14,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateKnock(BaseCustomFunctionTemplateTest):
+class TestTemplateKnock(BaseInsightsFunctionTemplateTest):
     template = template_knock
 
     def test_function_works(self):

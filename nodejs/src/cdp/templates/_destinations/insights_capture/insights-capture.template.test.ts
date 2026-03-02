@@ -28,7 +28,7 @@ describe('insights capture template', () => {
                 "distinct_id": "distinct-id",
                 "event": "event-name",
                 "properties": {
-                  "$custom_function_execution_count": 1,
+                  "$insights_function_execution_count": 1,
                   "foo": "bar",
                   "modified": "1.0.0.xxx",
                 },

@@ -2813,7 +2813,7 @@ PROPERTY_FILTER_VERBOSE_NAME: dict[PropertyOperator, str] = {
 }
 """
 
-CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT = """You are an expert at creating filters for Insights custom functions.
+INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT = """You are an expert at creating filters for Insights custom functions.
 
 Create filters based on the user's instructions. Return the filters as a JSON object with the following structure:
 {
@@ -2851,7 +2851,7 @@ Common operators:
 
 Return ONLY the JSON object inside <filters> tags. Do not add any other text or explanation."""
 
-CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for Insights custom functions.
+INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for Insights custom functions.
 
 Your task is to analyze the hog code and create appropriate input variable schemas based on the instructions.
 CRITICAL: You must extract the EXACT variable names used in the hog code. Look for patterns like:

@@ -21,8 +21,8 @@ import { SharingConfigurationType } from '~/types'
 
 import { getAvailableProductFeatures } from './features'
 import { billingJson } from './fixtures/_billing'
-import _customFunctionTemplatesDestinations from './fixtures/_customFunctionTemplatesDestinations.json'
-import _customFunctionTemplatesTransformations from './fixtures/_customFunctionTemplatesTransformations.json'
+import _insightsFunctionTemplatesDestinations from './fixtures/_insightsFunctionTemplatesDestinations.json'
+import _insightsFunctionTemplatesTransformations from './fixtures/_insightsFunctionTemplatesTransformations.json'
 import * as incidentIoStatusPageAllOK from './fixtures/_incident_io_status_page_all_ok.json'
 import { MockSignature, Mocks, mocksToHandlers } from './utils'
 
@@ -34,21 +34,21 @@ export const toPaginatedResponse = (results: any[]): typeof EMPTY_PAGINATED_RESP
     previous: null,
 })
 
-const customFunctionTemplateRetrieveMock: MockSignature = (req, res, ctx) => {
-    const customFunctionTemplate =
-        _customFunctionTemplatesDestinations.results.find((conf) => conf.id === req.params.id) ||
-        _customFunctionTemplatesTransformations.results.find((conf) => conf.id === req.params.id)
-    if (!customFunctionTemplate) {
+const insightsFunctionTemplateRetrieveMock: MockSignature = (req, res, ctx) => {
+    const insightsFunctionTemplate =
+        _insightsFunctionTemplatesDestinations.results.find((conf) => conf.id === req.params.id) ||
+        _insightsFunctionTemplatesTransformations.results.find((conf) => conf.id === req.params.id)
+    if (!insightsFunctionTemplate) {
         return res(ctx.status(404))
     }
-    return res(ctx.json({ ...customFunctionTemplate }))
+    return res(ctx.json({ ...insightsFunctionTemplate }))
 }
 
-const customFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
+const insightsFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
     const results = req.url.searchParams.get('types')?.includes('transformation')
-        ? _customFunctionTemplatesTransformations
+        ? _insightsFunctionTemplatesTransformations
         : req.url.searchParams.get('types')?.includes('destination')
-          ? _customFunctionTemplatesDestinations
+          ? _insightsFunctionTemplatesDestinations
           : []
 
     return res(ctx.json(results))
@@ -77,7 +77,7 @@ export const defaultMocks: Mocks = {
         '/api/projects/:team_id/cohorts/': toPaginatedResponse([MOCK_DEFAULT_COHORT]),
         '/api/environments/:team_id/dashboards/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/alerts/': EMPTY_PAGINATED_RESPONSE,
-        '/api/environments/:team_id/custom_functions/': EMPTY_PAGINATED_RESPONSE,
+        '/api/environments/:team_id/insights_functions/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/user_product_list/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/dashboard_templates': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/dashboard_templates/repository/': [],
@@ -146,7 +146,6 @@ export const defaultMocks: Mocks = {
             },
         ],
         '/api/users/@me/two_factor_status/': () => [200, { is_enabled: true, backup_codes: [], method: 'TOTP' }],
-        '/api/users/@me/mascot_config/': {
             color: null,
             enabled: false,
             accessories: ['tophat', 'sunglasses'],
@@ -189,9 +188,9 @@ export const defaultMocks: Mocks = {
         '/api/billing/spend/': { results: [] },
         '/api/billing/usage/': { results: [] },
         [`${INCIDENT_IO_STATUS_PAGE_BASE}/api/v1/summary`]: incidentIoStatusPageAllOK,
-        '/api/projects/:team_id/custom_function_templates': customFunctionTemplatesMock,
-        '/api/projects/:team_id/custom_function_templates/:id': customFunctionTemplateRetrieveMock,
-        '/api/projects/:team_id/custom_functions': EMPTY_PAGINATED_RESPONSE,
+        '/api/projects/:team_id/insights_function_templates': insightsFunctionTemplatesMock,
+        '/api/projects/:team_id/insights_function_templates/:id': insightsFunctionTemplateRetrieveMock,
+        '/api/projects/:team_id/insights_functions': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/data_color_themes': MOCK_DATA_COLOR_THEMES,
         '/api/projects/:team_id/session_recording_playlists': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/session_recording_playlists': EMPTY_PAGINATED_RESPONSE,

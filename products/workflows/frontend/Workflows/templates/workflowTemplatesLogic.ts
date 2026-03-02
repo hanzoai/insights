@@ -5,18 +5,18 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
 
-import type { CustomFlowTemplate } from '../customflows/types'
+import type { InsightsFlowTemplate } from '../insightsflows/types'
 import type { workflowTemplatesLogicType } from './workflowTemplatesLogicType'
 
 // Helping kea-typegen navigate the exported default class for Fuse
-export interface Fuse extends FuseClass<CustomFlowTemplate> {}
+export interface Fuse extends FuseClass<InsightsFlowTemplate> {}
 
 export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
     path(['products', 'workflows', 'frontend', 'Workflows', 'workflowTemplatesLogic']),
     actions({
         setTemplateFilter: (search: string) => ({ search }),
         setTagFilter: (tag: string | null) => ({ tag }),
-        deleteCustomFlowTemplate: (template: CustomFlowTemplate) => ({ template }),
+        deleteInsightsFlowTemplate: (template: InsightsFlowTemplate) => ({ template }),
     }),
     reducers({
         templateFilter: [
@@ -34,14 +34,14 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
     }),
     loaders(({ values }) => ({
         workflowTemplates: [
-            [] as CustomFlowTemplate[],
+            [] as InsightsFlowTemplate[],
             {
-                loadWorkflowTemplates: async (): Promise<CustomFlowTemplate[]> => {
-                    const response = await api.customFlowTemplates.getCustomFlowTemplates()
-                    return response.results as CustomFlowTemplate[]
+                loadWorkflowTemplates: async (): Promise<InsightsFlowTemplate[]> => {
+                    const response = await api.insightsFlowTemplates.getInsightsFlowTemplates()
+                    return response.results as InsightsFlowTemplate[]
                 },
-                deleteCustomFlowTemplate: async ({ template }) => {
-                    await api.customFlowTemplates.deleteCustomFlowTemplate(template.id)
+                deleteInsightsFlowTemplate: async ({ template }) => {
+                    await api.insightsFlowTemplates.deleteInsightsFlowTemplate(template.id)
                     return values.workflowTemplates.filter((t) => t.id !== template.id)
                 },
             },
@@ -50,7 +50,7 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
     selectors({
         workflowTemplateFuse: [
             (s) => [s.workflowTemplates],
-            (workflowTemplates: CustomFlowTemplate[]): Fuse => {
+            (workflowTemplates: InsightsFlowTemplate[]): Fuse => {
                 return new FuseClass(workflowTemplates || [], {
                     keys: [{ name: 'name', weight: 2 }, 'description'],
                     threshold: 0.3,
@@ -61,11 +61,11 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
         filteredTemplates: [
             (s) => [s.workflowTemplates, s.templateFilter, s.tagFilter, s.workflowTemplateFuse],
             (
-                workflowTemplates: CustomFlowTemplate[],
+                workflowTemplates: InsightsFlowTemplate[],
                 templateFilter: string,
                 tagFilter: string | null,
                 workflowTemplateFuse: Fuse
-            ): CustomFlowTemplate[] => {
+            ): InsightsFlowTemplate[] => {
                 let filtered = workflowTemplates
 
                 // Filter by tag
@@ -76,7 +76,7 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
                 // Filter by search term using Fuse
                 if (templateFilter) {
                     const searchResults = workflowTemplateFuse.search(templateFilter)
-                    filtered = searchResults.map((result: { item: CustomFlowTemplate }) => result.item)
+                    filtered = searchResults.map((result: { item: InsightsFlowTemplate }) => result.item)
                     // Apply tag filter to search results if active
                     if (tagFilter) {
                         filtered = filtered.filter((template) => template.tags.includes(tagFilter))
@@ -88,7 +88,7 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
         ],
         availableTags: [
             (s) => [s.workflowTemplates],
-            (workflowTemplates: CustomFlowTemplate[]): string[] => {
+            (workflowTemplates: InsightsFlowTemplate[]): string[] => {
                 const tagSet = new Set<string>()
                 workflowTemplates.forEach((template) => {
                     template.tags.forEach((tag) => tagSet.add(tag))

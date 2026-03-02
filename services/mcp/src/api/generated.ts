@@ -39,7 +39,6 @@ export namespace Schemas {
         last_name?: string | undefined
         email: string
         is_email_verified?: (boolean | null) | undefined
-        mascot_config: Record<string, unknown> | null
         role_at_organization?: ((RoleAtOrganizationEnum | BlankEnum | NullEnum) | null) | undefined
     }
     export type Action = {
@@ -3984,27 +3983,10 @@ export namespace Schemas {
         experiments_optimized: boolean | null
         experiments_timestamp_key: string | null
     }>
-    export type MascotColorOptions =
-        | 'green'
-        | 'red'
-        | 'blue'
-        | 'purple'
-        | 'dark'
-        | 'light'
-        | 'sepia'
-        | 'invert'
-        | 'invert-hue'
-        | 'greyscale'
-    export type MinimalMascotConfig = {
-        accessories: Array<string>
-        color?: (MascotColorOptions | null) | undefined
-        use_as_profile: boolean
-    }
     export type UserBasicType = {
         distinct_id: string
         email: string
         first_name: string
-        mascot_config?: (MinimalMascotConfig | null) | undefined
         id: number
         is_email_verified?: (unknown | null) | undefined
         last_name?: (string | null) | undefined
@@ -4710,7 +4692,7 @@ export namespace Schemas {
         display?: DisplayEnum | undefined
         filters: unknown
     }
-    export type CustomFunctionTypeEnum =
+    export type InsightsFunctionTypeEnum =
         | 'destination'
         | 'site_destination'
         | 'internal_destination'
@@ -4728,7 +4710,7 @@ export namespace Schemas {
         | 'integration_field'
         | 'email'
         | 'native_email'
-    export type InputsSchemaItemTemplatingEnum = true | false | 'custom_script' | 'liquid'
+    export type InputsSchemaItemTemplatingEnum = true | false | 'fn' | 'liquid'
     export type InputsSchemaItem = {
         type: InputsSchemaItemTypeEnum
         key: string
@@ -4746,7 +4728,7 @@ export namespace Schemas {
         requiredScopes?: string | undefined
         templating?: InputsSchemaItemTemplatingEnum | undefined
     }
-    export type InputsItemTemplatingEnum = 'custom_script' | 'liquid'
+    export type InputsItemTemplatingEnum = 'fn' | 'liquid'
     export type InputsItem = {
         value?: string | undefined
         templating?: InputsItemTemplatingEnum | undefined
@@ -4754,9 +4736,9 @@ export namespace Schemas {
         order: number
         transpiled: unknown
     }
-    export type CustomFunctionFiltersSourceEnum = 'events' | 'person-updates'
-    export type CustomFunctionFilters = Partial<{
-        source: CustomFunctionFiltersSourceEnum & unknown
+    export type InsightsFunctionFiltersSourceEnum = 'events' | 'person-updates'
+    export type InsightsFunctionFilters = Partial<{
+        source: InsightsFunctionFiltersSourceEnum & unknown
         actions: Array<Record<string, unknown>>
         events: Array<Record<string, unknown>>
         properties: Array<Record<string, unknown>>
@@ -4765,7 +4747,7 @@ export namespace Schemas {
         filter_test_accounts: boolean
         bytecode_error: string
     }>
-    export type CustomFunctionMasking = {
+    export type InsightsFunctionMasking = {
         ttl: number
         threshold?: (number | null) | undefined
         hash: string
@@ -4775,16 +4757,16 @@ export namespace Schemas {
         name: string
         inputs_schema: Array<InputsSchemaItem>
         inputs: Record<string, unknown>
-        filters: CustomFunctionFilters
+        filters: InsightsFunctionFilters
     }>
-    export type CustomFunctionMappingTemplate = {
+    export type InsightsFunctionMappingTemplate = {
         name: string
         include_by_default?: (boolean | null) | undefined
         filters?: (unknown | null) | undefined
         inputs?: (unknown | null) | undefined
         inputs_schema?: (unknown | null) | undefined
     }
-    export type CustomFunctionTemplate = {
+    export type InsightsFunctionTemplate = {
         id: string
         name: string
         description?: (string | null) | undefined
@@ -4798,13 +4780,13 @@ export namespace Schemas {
         icon_url?: (string | null) | undefined
         filters?: (unknown | null) | undefined
         masking?: (unknown | null) | undefined
-        mapping_templates?: (Array<CustomFunctionMappingTemplate> | null) | undefined
+        mapping_templates?: (Array<InsightsFunctionMappingTemplate> | null) | undefined
     }
     export type StateEnum = 0 | 1 | 2 | 3 | 11 | 12
-    export type CustomFunctionStatus = { state: StateEnum; tokens: number }
-    export type CustomFunction = {
+    export type InsightsFunctionStatus = { state: StateEnum; tokens: number }
+    export type InsightsFunction = {
         id: string
-        type?: ((CustomFunctionTypeEnum | NullEnum) | null) | undefined
+        type?: ((InsightsFunctionTypeEnum | NullEnum) | null) | undefined
         name?: (string | null) | undefined
         description?: string | undefined
         created_at: string
@@ -4812,22 +4794,22 @@ export namespace Schemas {
         updated_at: string
         enabled?: boolean | undefined
         deleted?: boolean | undefined
-        custom_script?: string | undefined
+        fn?: string | undefined
         bytecode: unknown | null
         transpiled: string | null
         inputs_schema?: Array<InputsSchemaItem> | undefined
         inputs?: Record<string, unknown> | undefined
-        filters?: CustomFunctionFilters | undefined
-        masking?: ((CustomFunctionMasking & (unknown | null)) | null) | undefined
+        filters?: InsightsFunctionFilters | undefined
+        masking?: ((InsightsFunctionMasking & (unknown | null)) | null) | undefined
         mappings?: (Array<Mappings> | null) | undefined
         icon_url?: (string | null) | undefined
-        template: CustomFunctionTemplate & unknown
+        template: InsightsFunctionTemplate & unknown
         template_id?: (string | null) | undefined
-        status: (CustomFunctionStatus & (unknown | null)) | null
+        status: (InsightsFunctionStatus & (unknown | null)) | null
         execution_order?: (number | null) | undefined
         _create_in_folder?: string | undefined
     }
-    export type CustomFunctionMinimal = {
+    export type InsightsFunctionMinimal = {
         id: string
         type: string | null
         name: string | null
@@ -4836,11 +4818,11 @@ export namespace Schemas {
         created_by: UserBasic & unknown
         updated_at: string
         enabled: boolean
-        custom_script: string
+        fn: string
         filters: unknown | null
         icon_url: string | null
-        template: CustomFunctionTemplate & unknown
-        status: (CustomFunctionStatus & (unknown | null)) | null
+        template: InsightsFunctionTemplate & unknown
+        status: (InsightsFunctionStatus & (unknown | null)) | null
         execution_order: number | null
     }
     export type HogLanguage = 'hog' | 'hogJson' | 'insightsQL' | 'insightsQLExpr' | 'hogTemplate'
@@ -5664,11 +5646,11 @@ export namespace Schemas {
         previous?: (string | null) | undefined
         results: Array<GroupUsageMetric>
     }
-    export type PaginatedCustomFunctionMinimalList = {
+    export type PaginatedInsightsFunctionMinimalList = {
         count: number
         next?: (string | null) | undefined
         previous?: (string | null) | undefined
-        results: Array<CustomFunctionMinimal>
+        results: Array<InsightsFunctionMinimal>
     }
     export type PaginatedInsightList = {
         count: number
@@ -6679,7 +6661,6 @@ export namespace Schemas {
         has_seen_product_intro_for?: (unknown | null) | undefined
         scene_personalisation: Array<ScenePersonalisationBasic>
         theme_mode?: ((ThemeModeEnum | BlankEnum | NullEnum) | null) | undefined
-        mascot_config?: (unknown | null) | undefined
         role_at_organization?: RoleAtOrganizationEnum | undefined
     }
     export type PaginatedUserList = {
@@ -7013,9 +6994,9 @@ export namespace Schemas {
         display: DisplayEnum
         filters: unknown
     }>
-    export type PatchedCustomFunction = Partial<{
+    export type PatchedInsightsFunction = Partial<{
         id: string
-        type: (CustomFunctionTypeEnum | NullEnum) | null
+        type: (InsightsFunctionTypeEnum | NullEnum) | null
         name: string | null
         description: string
         created_at: string
@@ -7023,18 +7004,18 @@ export namespace Schemas {
         updated_at: string
         enabled: boolean
         deleted: boolean
-        custom_script: string
+        fn: string
         bytecode: unknown | null
         transpiled: string | null
         inputs_schema: Array<InputsSchemaItem>
         inputs: Record<string, unknown>
-        filters: CustomFunctionFilters
-        masking: (CustomFunctionMasking & (unknown | null)) | null
+        filters: InsightsFunctionFilters
+        masking: (InsightsFunctionMasking & (unknown | null)) | null
         mappings: Array<Mappings> | null
         icon_url: string | null
-        template: CustomFunctionTemplate & unknown
+        template: InsightsFunctionTemplate & unknown
         template_id: string | null
-        status: (CustomFunctionStatus & (unknown | null)) | null
+        status: (InsightsFunctionStatus & (unknown | null)) | null
         execution_order: number | null
         _create_in_folder: string
     }>
@@ -7470,7 +7451,6 @@ export namespace Schemas {
         has_seen_product_intro_for: unknown | null
         scene_personalisation: Array<ScenePersonalisationBasic>
         theme_mode: (ThemeModeEnum | BlankEnum | NullEnum) | null
-        mascot_config: unknown | null
         role_at_organization: RoleAtOrganizationEnum
     }>
     export type PatchedUserInterview = Partial<{
@@ -9975,9 +9955,9 @@ export namespace Endpoints {
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_custom_functions_list = {
+    export type get_Environments_insights_functions_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/'
+        path: '/api/environments/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -9993,134 +9973,134 @@ export namespace Endpoints {
             }>
             path: { project_id: string }
         }
-        responses: { 200: Schemas.PaginatedCustomFunctionMinimalList }
+        responses: { 200: Schemas.PaginatedInsightsFunctionMinimalList }
     }
-    export type post_Environments_custom_functions_create = {
+    export type post_Environments_insights_functions_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/custom_functions/'
+        path: '/api/environments/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
-        responses: { 201: Schemas.CustomFunction }
+        responses: { 201: Schemas.InsightsFunction }
     }
-    export type get_Environments_custom_functions_retrieve = {
+    export type get_Environments_insights_functions_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/{id}/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
-        responses: { 200: Schemas.CustomFunction }
+        responses: { 200: Schemas.InsightsFunction }
     }
-    export type put_Environments_custom_functions_update = {
+    export type put_Environments_insights_functions_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/custom_functions/{id}/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
-        responses: { 200: Schemas.CustomFunction }
+        responses: { 200: Schemas.InsightsFunction }
     }
-    export type patch_Environments_custom_functions_partial_update = {
+    export type patch_Environments_insights_functions_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/custom_functions/{id}/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.PatchedCustomFunction
+            body: Schemas.PatchedInsightsFunction
         }
-        responses: { 200: Schemas.CustomFunction }
+        responses: { 200: Schemas.InsightsFunction }
     }
-    export type delete_Environments_custom_functions_destroy = {
+    export type delete_Environments_insights_functions_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/custom_functions/{id}/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 405: unknown }
     }
-    export type post_Environments_custom_functions_broadcast_create = {
+    export type post_Environments_insights_functions_broadcast_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/custom_functions/{id}/broadcast/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/broadcast/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
         responses: { 200: unknown }
     }
-    export type post_Environments_custom_functions_invocations_create = {
+    export type post_Environments_insights_functions_invocations_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/custom_functions/{id}/invocations/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/invocations/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_custom_functions_logs_retrieve = {
+    export type get_Environments_insights_functions_logs_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/{id}/logs/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_custom_functions_metrics_retrieve = {
+    export type get_Environments_insights_functions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/{id}/metrics/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_custom_functions_metrics_totals_retrieve = {
+    export type get_Environments_insights_functions_metrics_totals_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/{id}/metrics/totals/'
+        path: '/api/environments/{project_id}/insights_functions/{id}/metrics/totals/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_custom_functions_icon_retrieve = {
+    export type get_Environments_insights_functions_icon_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/icon/'
+        path: '/api/environments/{project_id}/insights_functions/icon/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_custom_functions_icons_retrieve = {
+    export type get_Environments_insights_functions_icons_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/custom_functions/icons/'
+        path: '/api/environments/{project_id}/insights_functions/icons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type patch_Environments_custom_functions_rearrange_partial_update = {
+    export type patch_Environments_insights_functions_rearrange_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/custom_functions/rearrange/'
+        path: '/api/environments/{project_id}/insights_functions/rearrange/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.PatchedCustomFunction
+            body: Schemas.PatchedInsightsFunction
         }
         responses: { 200: unknown }
     }
@@ -13935,7 +13915,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/'
+        path: '/api/projects/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -13951,53 +13931,53 @@ export namespace Endpoints {
             }>
             path: { project_id: string }
         }
-        responses: { 200: Schemas.PaginatedCustomFunctionMinimalList }
+        responses: { 200: Schemas.PaginatedInsightsFunctionMinimalList }
     }
     export type post_Custom_functions_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/custom_functions/'
+        path: '/api/projects/{project_id}/insights_functions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
-        responses: { 201: Schemas.CustomFunction }
+        responses: { 201: Schemas.InsightsFunction }
     }
     export type get_Custom_functions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/{id}/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
-        responses: { 200: Schemas.CustomFunction }
+        responses: { 200: Schemas.InsightsFunction }
     }
     export type put_Custom_functions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/custom_functions/{id}/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
-        responses: { 200: Schemas.CustomFunction }
+        responses: { 200: Schemas.InsightsFunction }
     }
     export type patch_Custom_functions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/custom_functions/{id}/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.PatchedCustomFunction
+            body: Schemas.PatchedInsightsFunction
         }
-        responses: { 200: Schemas.CustomFunction }
+        responses: { 200: Schemas.InsightsFunction }
     }
     export type delete_Custom_functions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/custom_functions/{id}/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14006,29 +13986,29 @@ export namespace Endpoints {
     }
     export type post_Custom_functions_broadcast_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/custom_functions/{id}/broadcast/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/broadcast/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
         responses: { 200: unknown }
     }
     export type post_Custom_functions_invocations_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/custom_functions/{id}/invocations/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/invocations/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.CustomFunction
+            body: Schemas.InsightsFunction
         }
         responses: { 200: unknown }
     }
     export type get_Custom_functions_logs_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/{id}/logs/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14037,7 +14017,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/{id}/metrics/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14046,7 +14026,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_metrics_totals_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/{id}/metrics/totals/'
+        path: '/api/projects/{project_id}/insights_functions/{id}/metrics/totals/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
@@ -14055,7 +14035,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_icon_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/icon/'
+        path: '/api/projects/{project_id}/insights_functions/icon/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14064,7 +14044,7 @@ export namespace Endpoints {
     }
     export type get_Custom_functions_icons_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/custom_functions/icons/'
+        path: '/api/projects/{project_id}/insights_functions/icons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
@@ -14073,12 +14053,12 @@ export namespace Endpoints {
     }
     export type patch_Custom_functions_rearrange_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/custom_functions/rearrange/'
+        path: '/api/projects/{project_id}/insights_functions/rearrange/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.PatchedCustomFunction
+            body: Schemas.PatchedInsightsFunction
         }
         responses: { 200: unknown }
     }
@@ -15630,18 +15610,14 @@ export namespace Endpoints {
         }
         responses: { 204: unknown }
     }
-    export type get_Users_mascot_config_retrieve = {
         method: 'GET'
-        path: '/api/users/{uuid}/mascot_config/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
         }
         responses: { 200: unknown }
     }
-    export type patch_Users_mascot_config_partial_update = {
         method: 'PATCH'
-        path: '/api/users/{uuid}/mascot_config/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15813,13 +15789,13 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/groups/property_definitions/': Endpoints.get_Environments_groups_property_definitions_retrieve
         '/api/environments/{project_id}/groups/property_values/': Endpoints.get_Environments_groups_property_values_retrieve
         '/api/environments/{project_id}/groups/related/': Endpoints.get_Environments_groups_related_retrieve
-        '/api/environments/{project_id}/custom_functions/': Endpoints.get_Environments_custom_functions_list
-        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.get_Environments_custom_functions_retrieve
-        '/api/environments/{project_id}/custom_functions/{id}/logs/': Endpoints.get_Environments_custom_functions_logs_retrieve
-        '/api/environments/{project_id}/custom_functions/{id}/metrics/': Endpoints.get_Environments_custom_functions_metrics_retrieve
-        '/api/environments/{project_id}/custom_functions/{id}/metrics/totals/': Endpoints.get_Environments_custom_functions_metrics_totals_retrieve
-        '/api/environments/{project_id}/custom_functions/icon/': Endpoints.get_Environments_custom_functions_icon_retrieve
-        '/api/environments/{project_id}/custom_functions/icons/': Endpoints.get_Environments_custom_functions_icons_retrieve
+        '/api/environments/{project_id}/insights_functions/': Endpoints.get_Environments_insights_functions_list
+        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.get_Environments_insights_functions_retrieve
+        '/api/environments/{project_id}/insights_functions/{id}/logs/': Endpoints.get_Environments_insights_functions_logs_retrieve
+        '/api/environments/{project_id}/insights_functions/{id}/metrics/': Endpoints.get_Environments_insights_functions_metrics_retrieve
+        '/api/environments/{project_id}/insights_functions/{id}/metrics/totals/': Endpoints.get_Environments_insights_functions_metrics_totals_retrieve
+        '/api/environments/{project_id}/insights_functions/icon/': Endpoints.get_Environments_insights_functions_icon_retrieve
+        '/api/environments/{project_id}/insights_functions/icons/': Endpoints.get_Environments_insights_functions_icons_retrieve
         '/api/environments/{project_id}/insights/': Endpoints.get_Environments_insights_list
         '/api/environments/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Environments_insights_sharing_list
         '/api/environments/{project_id}/insights/{id}/': Endpoints.get_Environments_insights_retrieve
@@ -15966,13 +15942,13 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/groups_types/': Endpoints.get_Groups_types_list
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.get_Groups_types_metrics_list
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.get_Groups_types_metrics_retrieve
-        '/api/projects/{project_id}/custom_functions/': Endpoints.get_Custom_functions_list
-        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.get_Custom_functions_retrieve
-        '/api/projects/{project_id}/custom_functions/{id}/logs/': Endpoints.get_Custom_functions_logs_retrieve
-        '/api/projects/{project_id}/custom_functions/{id}/metrics/': Endpoints.get_Custom_functions_metrics_retrieve
-        '/api/projects/{project_id}/custom_functions/{id}/metrics/totals/': Endpoints.get_Custom_functions_metrics_totals_retrieve
-        '/api/projects/{project_id}/custom_functions/icon/': Endpoints.get_Custom_functions_icon_retrieve
-        '/api/projects/{project_id}/custom_functions/icons/': Endpoints.get_Custom_functions_icons_retrieve
+        '/api/projects/{project_id}/insights_functions/': Endpoints.get_Custom_functions_list
+        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.get_Custom_functions_retrieve
+        '/api/projects/{project_id}/insights_functions/{id}/logs/': Endpoints.get_Custom_functions_logs_retrieve
+        '/api/projects/{project_id}/insights_functions/{id}/metrics/': Endpoints.get_Custom_functions_metrics_retrieve
+        '/api/projects/{project_id}/insights_functions/{id}/metrics/totals/': Endpoints.get_Custom_functions_metrics_totals_retrieve
+        '/api/projects/{project_id}/insights_functions/icon/': Endpoints.get_Custom_functions_icon_retrieve
+        '/api/projects/{project_id}/insights_functions/icons/': Endpoints.get_Custom_functions_icons_retrieve
         '/api/projects/{project_id}/insights/': Endpoints.get_Insights_list
         '/api/projects/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Insights_sharing_list
         '/api/projects/{project_id}/insights/{id}/': Endpoints.get_Insights_retrieve
@@ -16035,7 +16011,6 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.get_Web_experiments_retrieve
         '/api/users/': Endpoints.get_Users_list
         '/api/users/{uuid}/': Endpoints.get_Users_retrieve
-        '/api/users/{uuid}/mascot_config/': Endpoints.get_Users_mascot_config_retrieve
         '/api/users/{uuid}/start_2fa_setup/': Endpoints.get_Users_start_2fa_setup_retrieve
         '/api/users/{uuid}/two_factor_start_setup/': Endpoints.get_Users_two_factor_start_setup_retrieve
         '/api/users/{uuid}/two_factor_status/': Endpoints.get_Users_two_factor_status_retrieve
@@ -16075,9 +16050,9 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/groups/': Endpoints.post_Environments_groups_create
         '/api/environments/{project_id}/groups/delete_property/': Endpoints.post_Environments_groups_delete_property_create
         '/api/environments/{project_id}/groups/update_property/': Endpoints.post_Environments_groups_update_property_create
-        '/api/environments/{project_id}/custom_functions/': Endpoints.post_Environments_custom_functions_create
-        '/api/environments/{project_id}/custom_functions/{id}/broadcast/': Endpoints.post_Environments_custom_functions_broadcast_create
-        '/api/environments/{project_id}/custom_functions/{id}/invocations/': Endpoints.post_Environments_custom_functions_invocations_create
+        '/api/environments/{project_id}/insights_functions/': Endpoints.post_Environments_insights_functions_create
+        '/api/environments/{project_id}/insights_functions/{id}/broadcast/': Endpoints.post_Environments_insights_functions_broadcast_create
+        '/api/environments/{project_id}/insights_functions/{id}/invocations/': Endpoints.post_Environments_insights_functions_invocations_create
         '/api/environments/{project_id}/insights/': Endpoints.post_Environments_insights_create
         '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Environments_insights_sharing_passwords_create
         '/api/environments/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Environments_insights_sharing_refresh_create
@@ -16176,9 +16151,9 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/groups/delete_property/': Endpoints.post_Groups_delete_property_create
         '/api/projects/{project_id}/groups/update_property/': Endpoints.post_Groups_update_property_create
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.post_Groups_types_metrics_create
-        '/api/projects/{project_id}/custom_functions/': Endpoints.post_Custom_functions_create
-        '/api/projects/{project_id}/custom_functions/{id}/broadcast/': Endpoints.post_Custom_functions_broadcast_create
-        '/api/projects/{project_id}/custom_functions/{id}/invocations/': Endpoints.post_Custom_functions_invocations_create
+        '/api/projects/{project_id}/insights_functions/': Endpoints.post_Custom_functions_create
+        '/api/projects/{project_id}/insights_functions/{id}/broadcast/': Endpoints.post_Custom_functions_broadcast_create
+        '/api/projects/{project_id}/insights_functions/{id}/invocations/': Endpoints.post_Custom_functions_invocations_create
         '/api/projects/{project_id}/insights/': Endpoints.post_Insights_create
         '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Insights_sharing_passwords_create
         '/api/projects/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Insights_sharing_refresh_create
@@ -16237,7 +16212,7 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.put_Environments_explicit_members_update
         '/api/environments/{project_id}/file_system/{id}/': Endpoints.put_Environments_file_system_update
         '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.put_Environments_file_system_shortcut_update
-        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.put_Environments_custom_functions_update
+        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.put_Environments_insights_functions_update
         '/api/environments/{project_id}/insights/{id}/': Endpoints.put_Environments_insights_update
         '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.put_Environments_persisted_folder_update
         '/api/environments/{project_id}/persons/{id}/': Endpoints.put_Environments_persons_update
@@ -16273,7 +16248,7 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.put_Groups_types_metrics_update
         '/api/projects/{project_id}/groups_types/create_detail_dashboard/': Endpoints.put_Groups_types_create_detail_dashboard_update
         '/api/projects/{project_id}/groups_types/set_default_columns/': Endpoints.put_Groups_types_set_default_columns_update
-        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.put_Custom_functions_update
+        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.put_Custom_functions_update
         '/api/projects/{project_id}/insights/{id}/': Endpoints.put_Insights_update
         '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.put_Notebooks_update
         '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.put_Persisted_folder_update
@@ -16303,8 +16278,8 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.patch_Environments_explicit_members_partial_update
         '/api/environments/{project_id}/file_system/{id}/': Endpoints.patch_Environments_file_system_partial_update
         '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_Environments_file_system_shortcut_partial_update
-        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.patch_Environments_custom_functions_partial_update
-        '/api/environments/{project_id}/custom_functions/rearrange/': Endpoints.patch_Environments_custom_functions_rearrange_partial_update
+        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.patch_Environments_insights_functions_partial_update
+        '/api/environments/{project_id}/insights_functions/rearrange/': Endpoints.patch_Environments_insights_functions_rearrange_partial_update
         '/api/environments/{project_id}/insights/{id}/': Endpoints.patch_Environments_insights_partial_update
         '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.patch_Environments_persisted_folder_partial_update
         '/api/environments/{project_id}/persons/{id}/': Endpoints.patch_Environments_persons_partial_update
@@ -16351,8 +16326,8 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_File_system_shortcut_partial_update
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.patch_Groups_types_metrics_partial_update
         '/api/projects/{project_id}/groups_types/update_metadata/': Endpoints.patch_Groups_types_update_metadata_partial_update
-        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.patch_Custom_functions_partial_update
-        '/api/projects/{project_id}/custom_functions/rearrange/': Endpoints.patch_Custom_functions_rearrange_partial_update
+        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.patch_Custom_functions_partial_update
+        '/api/projects/{project_id}/insights_functions/rearrange/': Endpoints.patch_Custom_functions_rearrange_partial_update
         '/api/projects/{project_id}/insights/{id}/': Endpoints.patch_Insights_partial_update
         '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.patch_Notebooks_partial_update
         '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.patch_Persisted_folder_partial_update
@@ -16366,7 +16341,6 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/warehouse_tables/{id}/': Endpoints.patch_Warehouse_tables_partial_update
         '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.patch_Web_experiments_partial_update
         '/api/users/{uuid}/': Endpoints.patch_Users_partial_update
-        '/api/users/{uuid}/mascot_config/': Endpoints.patch_Users_mascot_config_partial_update
         '/api/users/cancel_email_change_request/': Endpoints.patch_Users_cancel_email_change_request_partial_update
     }
     delete: {
@@ -16382,7 +16356,7 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.delete_Environments_explicit_members_destroy
         '/api/environments/{project_id}/file_system/{id}/': Endpoints.delete_Environments_file_system_destroy
         '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_Environments_file_system_shortcut_destroy
-        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.delete_Environments_custom_functions_destroy
+        '/api/environments/{project_id}/insights_functions/{id}/': Endpoints.delete_Environments_insights_functions_destroy
         '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_insights_sharing_passwords_destroy
         '/api/environments/{project_id}/insights/{id}/': Endpoints.delete_Environments_insights_destroy
         '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.delete_Environments_persisted_folder_destroy
@@ -16426,7 +16400,7 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_File_system_shortcut_destroy
         '/api/projects/{project_id}/groups_types/{group_type_index}/': Endpoints.delete_Groups_types_destroy
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.delete_Groups_types_metrics_destroy
-        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.delete_Custom_functions_destroy
+        '/api/projects/{project_id}/insights_functions/{id}/': Endpoints.delete_Custom_functions_destroy
         '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Insights_sharing_passwords_destroy
         '/api/projects/{project_id}/insights/{id}/': Endpoints.delete_Insights_destroy
         '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.delete_Notebooks_destroy

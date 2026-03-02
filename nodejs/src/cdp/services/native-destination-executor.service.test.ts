@@ -5,7 +5,7 @@ import { DateTime, Settings } from 'luxon'
 import { defaultConfig } from '~/config/config'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 
-import { createCustomFunction } from '../_tests/fixtures'
+import { createInsightsFunction } from '../_tests/fixtures'
 import { createExampleNativeInvocation } from '../_tests/fixtures-native'
 import { NativeDestinationExecutorService } from './native-destination-executor.service'
 
@@ -48,7 +48,7 @@ describe('NativeDestinationExecutorService', () => {
 
     describe('native plugins', () => {
         it('should call the plugin perform method', async () => {
-            const fn = createCustomFunction({
+            const fn = createInsightsFunction({
                 name: 'Plugin test',
                 template_id: 'native-webhook',
             })
@@ -101,7 +101,7 @@ describe('NativeDestinationExecutorService', () => {
         })
 
         it('should handle non retryable fetch errors', async () => {
-            const fn = createCustomFunction({
+            const fn = createInsightsFunction({
                 name: 'Plugin test',
                 template_id: 'native-webhook',
             })
@@ -146,9 +146,9 @@ describe('NativeDestinationExecutorService', () => {
 
             expect(result.invocation).toEqual({
                 functionId: expect.any(String),
-                customFunction: expect.any(Object),
+                insightsFunction: expect.any(Object),
                 id: expect.any(String),
-                queue: 'custom_script',
+                queue: 'fn',
                 queueMetadata: {
                     tries: 1,
                 },
@@ -162,7 +162,7 @@ describe('NativeDestinationExecutorService', () => {
         })
 
         it('should retry retryable fetch errors', async () => {
-            const fn = createCustomFunction({
+            const fn = createInsightsFunction({
                 name: 'Plugin test',
                 template_id: 'native-webhook',
             })
@@ -206,10 +206,10 @@ describe('NativeDestinationExecutorService', () => {
             `)
 
             expect(result.invocation).toEqual({
-                customFunction: expect.any(Object),
+                insightsFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'custom_script',
+                queue: 'fn',
                 queueMetadata: { tries: 1 },
                 queueParameters: undefined,
                 queuePriority: 1,
@@ -233,10 +233,10 @@ describe('NativeDestinationExecutorService', () => {
             expect(invocationResults2.finished).toBe(false)
 
             expect(invocationResults2.invocation).toEqual({
-                customFunction: expect.any(Object),
+                insightsFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'custom_script',
+                queue: 'fn',
                 queueMetadata: {
                     tries: 2,
                 },
@@ -264,10 +264,10 @@ describe('NativeDestinationExecutorService', () => {
             expect(invocationResults3.finished).toBe(true)
 
             expect(invocationResults3.invocation).toEqual({
-                customFunction: expect.any(Object),
+                insightsFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'custom_script',
+                queue: 'fn',
                 queueMetadata: { tries: 3 },
                 queueParameters: undefined,
                 queuePriority: 0,

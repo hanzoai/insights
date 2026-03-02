@@ -9,15 +9,15 @@ describe('CyclotronJobQueue - kafka', () => {
                 event: { event: 'foo' },
             },
             teamId: 1,
-            queue: 'custom_script',
+            queue: 'fn',
             queuePriority: 0,
             timings: [
                 {
-                    kind: 'custom_script',
+                    kind: 'fn',
                     duration_ms: 0.6164590120315552,
                 },
             ],
-            customFunctionId: '0196a6b9-1104-0000-f099-9cf11985a307',
+            insightsFunctionId: '0196a6b9-1104-0000-f099-9cf11985a307',
             vmState: {
                 bytecodes: {},
                 stack: [],
@@ -50,7 +50,7 @@ describe('CyclotronJobQueue - kafka', () => {
                 {
                   "functionId": "0196a6b9-1104-0000-f099-9cf11985a307",
                   "id": "01971158-5dd2-0000-2dde-9d3478269401",
-                  "queue": "custom_script",
+                  "queue": "fn",
                   "queueParameters": {
                     "body": "",
                     "response": {
@@ -79,7 +79,7 @@ describe('CyclotronJobQueue - kafka', () => {
                     "timings": [
                       {
                         "duration_ms": 0.6164590120315552,
-                        "kind": "custom_script",
+                        "kind": "fn",
                       },
                     ],
                     "vmState": {

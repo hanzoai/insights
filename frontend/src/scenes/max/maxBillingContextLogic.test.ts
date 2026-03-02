@@ -7,7 +7,7 @@ import { BillingUsageResponse, BillingUsageResponseBreakdownType } from 'scenes/
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
-import { BillingPlan, BillingType, CustomFunctionType, StartupProgramLabel, TeamType } from '~/types'
+import { BillingPlan, BillingType, InsightsFunctionType, StartupProgramLabel, TeamType } from '~/types'
 
 import { billingToMaxContext, maxBillingContextLogic } from './maxBillingContextLogic'
 
@@ -254,9 +254,9 @@ const mockBillingSpendResponse: BillingSpendResponse = {
     customer_id: '123',
 }
 
-const mockDestinations: CustomFunctionType[] = [
-    { id: '1', name: 'Destination 1', enabled: true } as CustomFunctionType,
-    { id: '2', name: 'Destination 2', enabled: true } as CustomFunctionType,
+const mockDestinations: InsightsFunctionType[] = [
+    { id: '1', name: 'Destination 1', enabled: true } as InsightsFunctionType,
+    { id: '2', name: 'Destination 2', enabled: true } as InsightsFunctionType,
 ]
 
 describe('maxBillingContextLogic', () => {

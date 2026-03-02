@@ -2,13 +2,13 @@ import json
 
 from posthog.insightsql.compiler.javascript import JavaScriptCompiler
 
-from posthog.cdp.filters import custom_function_filters_to_expr
+from posthog.cdp.filters import insights_function_filters_to_expr
 from posthog.cdp.validation import transpile_template_code
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.plugin import transpile
 
 
-def get_transpiled_function(custom_function: CustomFunction) -> str:
+def get_transpiled_function(insights_function: InsightsFunction) -> str:
     response = ""
 
     # Build the inputs in three parts:
@@ -21,7 +21,7 @@ def get_transpiled_function(custom_function: CustomFunction) -> str:
 
     compiler = JavaScriptCompiler()
 
-    all_inputs = custom_function.inputs or {}
+    all_inputs = insights_function.inputs or {}
     all_inputs = sorted(all_inputs.items(), key=lambda x: x[1].get("order", -1))
     for key, input in all_inputs:
         value = input.get("value")
@@ -52,23 +52,23 @@ def get_transpiled_function(custom_function: CustomFunction) -> str:
 
     response += "return inputs;}\n"
 
-    response += f"const source = {transpile(custom_function.hog, 'site')}();"
+    response += f"const source = {transpile(insights_function.hog, 'site')}();"
 
     # Convert the global filters to code
-    filters_expr = custom_function_filters_to_expr(custom_function.filters or {}, custom_function.team, {})
+    filters_expr = insights_function_filters_to_expr(insights_function.filters or {}, insights_function.team, {})
     filters_code = compiler.visit(filters_expr)
 
     # Convert the mappings to code
     mapping_code = ""
 
-    for mapping in custom_function.mappings or []:
+    for mapping in insights_function.mappings or []:
         mapping_disabled = mapping.get("disabled", False)
         if mapping_disabled:
             continue
 
         mapping_inputs = mapping.get("inputs", {})
         mapping_inputs_schema = mapping.get("inputs_schema", [])
-        mapping_filters_expr = custom_function_filters_to_expr(mapping.get("filters", {}) or {}, custom_function.team, {})
+        mapping_filters_expr = insights_function_filters_to_expr(mapping.get("filters", {}) or {}, insights_function.team, {})
         mapping_filters_code = compiler.visit(mapping_filters_expr)
 
         mapping_code += f"if ({mapping_filters_code}) {{"

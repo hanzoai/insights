@@ -1,11 +1,11 @@
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.loops.template_loops import (
     template as template_loops,
     template_send_event as template_loops_send_event,
 )
 
 
-class TestTemplateLoops(BaseCustomFunctionTemplateTest):
+class TestTemplateLoops(BaseInsightsFunctionTemplateTest):
     template = template_loops
 
     def _inputs(self, **kwargs):
@@ -84,7 +84,7 @@ class TestTemplateLoops(BaseCustomFunctionTemplateTest):
         assert self.get_mock_print_calls() == [("No email set. Skipping...",)]
 
 
-class TestTemplateLoopsEvent(BaseCustomFunctionTemplateTest):
+class TestTemplateLoopsEvent(BaseInsightsFunctionTemplateTest):
     template = template_loops_send_event
 
     def _inputs(self, **kwargs):

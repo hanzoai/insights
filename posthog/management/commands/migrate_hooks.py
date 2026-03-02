@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.core.paginator import Paginator
 
-from posthog.models.custom_functions.custom_function import CustomFunction
-from posthog.plugins.plugin_server_api import reload_all_custom_functions_on_workers
+from posthog.models.insights_functions.insights_function import InsightsFunction
+from posthog.plugins.plugin_server_api import reload_all_insights_functions_on_workers
 from posthog.settings.ee import EE_AVAILABLE
 
 
@@ -11,7 +11,7 @@ def migrate_hooks(hook_ids: list[str], team_ids: list[int], dry_run: bool = Fals
         print("This command is only available in Insights EE")  # noqa: T201
         return
 
-    from ee.api.hooks import create_zapier_custom_function
+    from ee.api.hooks import create_zapier_insights_function
     from ee.models.hook import Hook
 
     if hook_ids and team_ids:
@@ -35,11 +35,11 @@ def migrate_hooks(hook_ids: list[str], team_ids: list[int], dry_run: bool = Fals
 
     for page_number in paginator.page_range:
         page = paginator.page(page_number)
-        custom_functions: list[CustomFunction] = []
+        insights_functions: list[InsightsFunction] = []
 
         for hook in page.object_list:
             try:
-                custom_function = create_zapier_custom_function(
+                insights_function = create_zapier_insights_function(
                     hook,
                     {
                         "user": hook.user,
@@ -48,26 +48,26 @@ def migrate_hooks(hook_ids: list[str], team_ids: list[int], dry_run: bool = Fals
                     },
                     from_migration=True,
                 )
-                custom_functions.append(custom_function)
+                insights_functions.append(insights_function)
             except Exception as e:
                 print(f"Error migrating hook {hook.id}: {e}")  # noqa: T201
                 continue
 
         if not dry_run:
-            CustomFunction.objects.bulk_create(custom_functions)
+            InsightsFunction.objects.bulk_create(insights_functions)
             hook_ids_to_delete.extend([hook.id for hook in page.object_list])
         else:
-            print("Would have created the following CustomFunctions:")  # noqa: T201
-            for custom_function in custom_functions:
-                print(custom_function)  # noqa: T201
+            print("Would have created the following InsightsFunctions:")  # noqa: T201
+            for insights_function in insights_functions:
+                print(insights_function)  # noqa: T201
 
     if not dry_run:
         query.filter(id__in=hook_ids_to_delete).delete()
-        reload_all_custom_functions_on_workers()
+        reload_all_insights_functions_on_workers()
 
 
 class Command(BaseCommand):
-    help = "Migrate zapier hooks to CustomFunctions"
+    help = "Migrate zapier hooks to InsightsFunctions"
 
     def add_arguments(self, parser):
         parser.add_argument(
