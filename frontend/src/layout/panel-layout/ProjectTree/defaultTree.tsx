@@ -21,7 +21,7 @@ import {
     IconFunnels,
     IconGear,
     IconGraph,
-    IconInsightsQL,
+    IconHogQL,
     IconHome,
     IconLifecycle,
     IconLive,
@@ -253,7 +253,7 @@ const iconTypes: Record<FileSystemIconType, { icon: JSX.Element; iconColor?: Fil
         iconColor: ['var(--color-insight-stickiness-light)'],
     },
     'insight/sql': {
-        icon: <IconInsightsQL />,
+        icon: <IconHogQL />,
         iconColor: ['var(--color-insight-sql-light)'],
     },
     team_activity: {

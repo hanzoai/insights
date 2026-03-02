@@ -72,7 +72,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Wrap your app with the `InsightsProvider` component at the root of your application (such as
+                        Wrap your app with the `PostHogProvider` component at the root of your application (such as
                         `main.tsx` if you're using Vite):
                     </Markdown>
                     <CodeBlock
@@ -85,7 +85,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                     import { createRoot } from 'react-dom/client'
                                     import './index.css'
                                     import App from './App.jsx'
-                                    import { InsightsProvider } from '@posthog/react'
+                                    import { PostHogProvider } from '@posthog/react'
 
                                     const options = {
                                       api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -94,9 +94,9 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+                                        <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
                                           <App />
-                                        </InsightsProvider>
+                                        </PostHogProvider>
                                       </StrictMode>
                                     )
                                 `,
@@ -120,7 +120,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                 <>
                     <Markdown>
                         Use the `useInsights` hook to access the Insights instance in any component wrapped by
-                        `InsightsProvider`:
+                        `PostHogProvider`:
                     </Markdown>
                     <CodeBlock
                         blocks={[

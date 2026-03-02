@@ -9,7 +9,7 @@ import {
     IconCursor,
     IconFunnels,
     IconGraph,
-    IconInsightsQL,
+    IconHogQL,
     IconLifecycle,
     IconPeople,
     IconPython,
@@ -245,7 +245,7 @@ const SLASH_COMMANDS: SlashCommandsItem[] = [
     {
         title: 'SQL',
         search: 'sql',
-        icon: <IconInsightsQL color="currentColor" />,
+        icon: <IconHogQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(
                 pos,
@@ -277,7 +277,7 @@ order by count() desc
     {
         title: 'SQL (DuckDB)',
         search: 'duck sql',
-        icon: <IconInsightsQL color="currentColor" />,
+        icon: <IconHogQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(pos, {
                 type: NotebookNodeType.DuckSQL,
@@ -294,7 +294,7 @@ order by count() desc
     {
         title: 'SQL (InsightsQL)',
         search: 'insightsql sql',
-        icon: <IconInsightsQL color="currentColor" />,
+        icon: <IconHogQL color="currentColor" />,
         command: (chain, pos) =>
             chain.insertContentAt(pos, {
                 type: NotebookNodeType.InsightsQLSQL,

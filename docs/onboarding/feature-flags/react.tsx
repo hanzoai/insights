@@ -18,10 +18,10 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             title: 'Use feature flags',
             badge: 'required',
             content: (
-                <Tab.Group tabs={['Using hooks', 'Using InsightsFeature component']}>
+                <Tab.Group tabs={['Using hooks', 'Using PostHogFeature component']}>
                     <Tab.List>
                         <Tab>Using hooks</Tab>
-                        <Tab>Using InsightsFeature component</Tab>
+                        <Tab>Using PostHogFeature component</Tab>
                     </Tab.List>
                     <Tab.Panels>
                         <Tab.Panel>
@@ -51,7 +51,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                         <Tab.Panel>
                             <Markdown>
                                 {dedent`
-                                    The \`InsightsFeature\` component simplifies code by handling feature flag related logic:
+                                    The \`PostHogFeature\` component simplifies code by handling feature flag related logic:
                                 `}
                             </Markdown>
                             <CodeBlock
@@ -60,16 +60,16 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                         language: 'jsx',
                                         file: 'App.tsx',
                                         code: dedent`
-                                            import { InsightsFeature } from '@posthog/react'
+                                            import { PostHogFeature } from '@posthog/react'
 
                                             function App() {
                                                 return (
-                                                    <InsightsFeature flag='show-welcome-message' match={true}>
+                                                    <PostHogFeature flag='show-welcome-message' match={true}>
                                                         <div>
                                                             <h1>Hello</h1>
                                                             <p>Thanks for trying out our feature flags.</p>
                                                         </div>
-                                                    </InsightsFeature>
+                                                    </PostHogFeature>
                                                 )
                                             }
                                         `,
@@ -89,7 +89,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                         language: 'jsx',
                                         file: 'App.tsx',
                                         code: dedent`
-                                            <InsightsFeature flag='show-welcome-message' match={true}>
+                                            <PostHogFeature flag='show-welcome-message' match={true}>
                                                 {(payload) => {
                                                     return (
                                                         <div>
@@ -98,7 +98,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                                         </div>
                                                     )
                                                 }}
-                                            </InsightsFeature>
+                                            </PostHogFeature>
                                         `,
                                     },
                                 ]}
