@@ -1,8 +1,15 @@
+from dataclasses import dataclass
 from typing import Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from insights.schema import ReplayInactivityPeriod
+
+
+@dataclass(frozen=True)
+class ExtraSummaryContext:
+    """Extra context for session summaries (was in ee/models/session_summaries)."""
+    focus_area: str | None = None
 
 
 
