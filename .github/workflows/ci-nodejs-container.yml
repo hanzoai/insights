@@ -19,7 +19,7 @@ jobs:
             contents: read
             pull-requests: read
         timeout-minutes: 5
-        if: github.repository == 'Insights/posthog' && github.event_name != 'merge_group'
+        if: github.repository == 'hanzoai/insights' && github.event_name != 'merge_group'
         name: Determine need to run node Docker build
         outputs:
             node_files: ${{ steps.filter.outputs.node_files }}
@@ -51,7 +51,7 @@ jobs:
             (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.changes.outputs.node_files == 'true') ||
             github.event_name == 'merge_group' ||
             (github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.changes.outputs.node_files == 'true')
-        runs-on: depot-ubuntu-latest
+        runs-on: ubuntu-latest
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow reading the repo contents
@@ -102,8 +102,8 @@ jobs:
               uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               with:
                   images: |
-                      ghcr.io/posthog/posthog-node
-                      posthog/posthog-node
+                      ghcr.io/hanzoai/insights-node
+                      hanzoai/insights-node
                       ${{ steps.aws-ecr.outputs.registry }}/posthog-node
                   tags: |
                       type=ref,event=pr
@@ -142,11 +142,7 @@ jobs:
 
             - name: Report failure
               if: failure()
-              uses: Insights/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
-              with:
-                  posthog-token: ${{ secrets.POSTHOG_API_TOKEN }}
-                  event: 'node-image-build'
-                  properties: '{"status": "failure", "commit_hash": "${{ github.sha }}"}'
+              run: echo "Telemetry capture disabled"
 
     deploy:
         name: Deploy node services
