@@ -31,7 +31,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             <>
                 <Markdown>
                     {dedent`
-                        You can use the \`InsightsErrorBoundary\` component to capture rendering errors thrown by components:
+                        You can use the \`PostHogErrorBoundary\` component to capture rendering errors thrown by components:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -40,16 +40,16 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                             language: 'javascript',
                             file: 'JavaScript',
                             code: dedent`
-                                import { InsightsProvider, InsightsErrorBoundary } from '@posthog/react'
+                                import { PostHogProvider, PostHogErrorBoundary } from '@posthog/react'
                                 const Layout = () => {
                                   return (
-                                    <InsightsProvider apiKey="<ph_project_api_key>">
-                                      <InsightsErrorBoundary
+                                    <PostHogProvider apiKey="<ph_project_api_key>">
+                                      <PostHogErrorBoundary
                                         fallback={<YourFallbackComponent />} // (Optional) Add a fallback component that's shown when an error happens.
                                       >
                                         <YourApp />
-                                      </InsightsErrorBoundary>
-                                    </InsightsProvider>
+                                      </PostHogErrorBoundary>
+                                    </PostHogProvider>
                                   )
                                 }
                                 const YourFallbackComponent = ({ error, componentStack, exceptionEvent }) => {

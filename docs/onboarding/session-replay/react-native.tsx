@@ -82,11 +82,11 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'App.tsx',
                                 code: dedent`
-                                    import { InsightsProvider } from 'posthog-react-native'
+                                    import { PostHogProvider } from 'posthog-react-native'
 
                                     export function MyApp() {
                                         return (
-                                            <InsightsProvider
+                                            <PostHogProvider
                                                 apiKey="<ph_project_api_key>"
                                                 options={{
                                                     host: "<ph_client_api_host>",
@@ -120,7 +120,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                                 }}
                                             >
                                                 <RestOfApp />
-                                            </InsightsProvider>
+                                            </PostHogProvider>
                                         )
                                     }
                                 `,
