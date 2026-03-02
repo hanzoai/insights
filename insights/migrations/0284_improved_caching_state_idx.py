@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name="insightcachingstate",
-            constraint=posthog.models.utils.UniqueConstraintByExpression(
+            constraint=insights.models.utils.UniqueConstraintByExpression(
                 concurrently=True,
                 expression="(insight_id, coalesce(dashboard_tile_id, -1))",
                 name="unique_insight_tile_idx",

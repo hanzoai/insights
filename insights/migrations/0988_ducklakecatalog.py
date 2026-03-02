@@ -22,14 +22,14 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("db_host", models.CharField(max_length=255)),
                 ("db_port", models.IntegerField(default=5432)),
                 ("db_database", models.CharField(default="ducklake", max_length=255)),
                 ("db_username", models.CharField(max_length=255)),
-                ("db_password", posthog.helpers.encrypted_fields.EncryptedTextField(max_length=500)),
+                ("db_password", insights.helpers.encrypted_fields.EncryptedTextField(max_length=500)),
                 ("bucket", models.CharField(max_length=255)),
                 ("bucket_region", models.CharField(default="us-east-1", max_length=50)),
                 (
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "cross_account_external_id",
-                    posthog.helpers.encrypted_fields.EncryptedTextField(
+                    insights.helpers.encrypted_fields.EncryptedTextField(
                         help_text="External ID for cross-account role assumption (encrypted)", max_length=500
                     ),
                 ),

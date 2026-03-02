@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT,
+                        default=insights.models.utils.UUIDT,
                         editable=False,
                         primary_key=True,
                         serialize=False,
@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
                 (
                     "verification_challenge",
                     models.CharField(
-                        default=posthog.models.organization_domain.generate_verification_challenge,
+                        default=insights.models.organization_domain.generate_verification_challenge,
                         max_length=128,
                     ),
                 ),
