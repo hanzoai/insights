@@ -65,7 +65,7 @@ export function SDKInstallAngularInstructions(): JSX.Element {
 
             <h3>Initialize</h3>
             <p>
-                In your <code>src/main.ts</code>, initialize PostHog using your project API key and instance address:
+                In your <code>src/main.ts</code>, initialize Hanzo Insights using your project API key and instance address:
             </p>
             <AngularInitializeCodeSnippet />
         </>
