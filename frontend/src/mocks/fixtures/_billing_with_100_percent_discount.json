@@ -14,7 +14,7 @@
         {
             "key": "zapier",
             "name": "Zapier",
-            "description": "Zapier lets you connect PostHog with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
+            "description": "Zapier lets you connect Insights with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
             "unit": null,
             "limit": null,
             "note": null
@@ -46,7 +46,7 @@
         {
             "key": "apps",
             "name": "Apps library",
-            "description": "Connect your data to PostHog with 50+ apps.",
+            "description": "Connect your data to Insights with 50+ apps.",
             "unit": null,
             "limit": null,
             "note": null
@@ -158,7 +158,7 @@
         {
             "key": "subscriptions",
             "name": "Insight & dashboard subscriptions",
-            "description": "Create a subscription for any insight or dashboard in PostHog to receive regular reports with their updates.",
+            "description": "Create a subscription for any insight or dashboard in Insights to receive regular reports with their updates.",
             "unit": null,
             "limit": null,
             "note": null
@@ -230,7 +230,7 @@
         {
             "key": "team_members",
             "name": "Team members",
-            "description": "PostHog doesn't charge per seat add your entire team!",
+            "description": "Insights doesn't charge per seat add your entire team!",
             "unit": null,
             "limit": null,
             "note": "Unlimited"
@@ -262,7 +262,7 @@
         {
             "key": "social_sso",
             "name": "SSO via Google, Github, or Gitlab",
-            "description": "Log in to PostHog with your Google, Github, or Gitlab account.",
+            "description": "Log in to Insights with your Google, Github, or Gitlab account.",
             "unit": null,
             "limit": null,
             "note": null
@@ -278,7 +278,7 @@
         {
             "key": "sso_enforcement",
             "name": "SSO",
-            "description": "Allow users to sign up and log in to your PostHog account with your specified SSO provider.",
+            "description": "Allow users to sign up and log in to your Insights account with your specified SSO provider.",
             "unit": null,
             "limit": null,
             "note": null
@@ -286,7 +286,7 @@
         {
             "key": "white_labeling",
             "name": "White labeling",
-            "description": "Use your own branding in your PostHog organization.",
+            "description": "Use your own branding in your Insights organization.",
             "unit": null,
             "limit": null,
             "note": null
@@ -294,7 +294,7 @@
         {
             "key": "community_support",
             "name": "Community forum",
-            "description": "Get help from the PostHog community in our public forums.",
+            "description": "Get help from the Insights community in our public forums.",
             "unit": null,
             "limit": null,
             "note": null
@@ -302,7 +302,7 @@
         {
             "key": "dedicated_support",
             "name": "Dedicated Slack channel",
-            "description": "Get help directly in a dedicated Slack channel shared between you and the PostHog team.",
+            "description": "Get help directly in a dedicated Slack channel shared between you and the Insights team.",
             "unit": null,
             "limit": null,
             "note": "$2k/month spend or above"
@@ -439,7 +439,7 @@
                         {
                             "key": "subscriptions",
                             "name": "Insight & dashboard subscriptions",
-                            "description": "Create a subscription for any insight or dashboard in PostHog to receive regular reports with their updates.",
+                            "description": "Create a subscription for any insight or dashboard in Insights to receive regular reports with their updates.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1380,7 +1380,7 @@
                 {
                     "key": "works_with_posthog_js",
                     "name": "Capture sessions without extra code",
-                    "description": "Works with PostHog.js",
+                    "description": "Works with Insights.js",
                     "images": null,
                     "icon_key": "IconBolt",
                     "type": "secondary"
@@ -1535,7 +1535,7 @@
         },
         {
             "name": "Integrations",
-            "description": "Connect PostHog to your favorite tools.",
+            "description": "Connect Insights to your favorite tools.",
             "price_description": null,
             "usage_key": null,
             "image_url": "https://posthog.com/images/product/product-icons/integrations.svg",
@@ -1546,7 +1546,7 @@
                     "plan_key": "free-20230117",
                     "product_key": "integrations",
                     "name": "Integrations",
-                    "description": "Connect PostHog to your favorite tools.",
+                    "description": "Connect Insights to your favorite tools.",
                     "image_url": "https://posthog.com/images/product/product-icons/integrations.svg",
                     "docs_url": "https://posthog.com/docs/apps",
                     "note": null,
@@ -1556,7 +1556,7 @@
                         {
                             "key": "zapier",
                             "name": "Zapier",
-                            "description": "Zapier lets you connect PostHog with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
+                            "description": "Zapier lets you connect Insights with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1588,7 +1588,7 @@
                         {
                             "key": "apps",
                             "name": "Apps library",
-                            "description": "Connect your data to PostHog with 50+ apps.",
+                            "description": "Connect your data to Insights with 50+ apps.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1602,7 +1602,7 @@
                     "plan_key": "paid-20230117",
                     "product_key": "integrations",
                     "name": "Integrations",
-                    "description": "Connect PostHog to your favorite tools.",
+                    "description": "Connect Insights to your favorite tools.",
                     "image_url": "https://posthog.com/images/product/product-icons/integrations.svg",
                     "docs_url": "https://posthog.com/docs/apps",
                     "note": null,
@@ -1612,7 +1612,7 @@
                         {
                             "key": "zapier",
                             "name": "Zapier",
-                            "description": "Zapier lets you connect PostHog with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
+                            "description": "Zapier lets you connect Insights with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1644,7 +1644,7 @@
                         {
                             "key": "apps",
                             "name": "Apps library",
-                            "description": "Connect your data to PostHog with 50+ apps.",
+                            "description": "Connect your data to Insights with 50+ apps.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1721,7 +1721,7 @@
                         {
                             "key": "team_members",
                             "name": "Team members",
-                            "description": "PostHog doesn't charge per seat add your entire team!",
+                            "description": "Insights doesn't charge per seat add your entire team!",
                             "unit": null,
                             "limit": null,
                             "note": "Unlimited"
@@ -1753,7 +1753,7 @@
                         {
                             "key": "social_sso",
                             "name": "SSO via Google, Github, or Gitlab",
-                            "description": "Log in to PostHog with your Google, Github, or Gitlab account.",
+                            "description": "Log in to Insights with your Google, Github, or Gitlab account.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1761,7 +1761,7 @@
                         {
                             "key": "community_support",
                             "name": "Community forum",
-                            "description": "Get help from the PostHog community in our public forum.",
+                            "description": "Get help from the Insights community in our public forum.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1809,7 +1809,7 @@
                         {
                             "key": "team_members",
                             "name": "Team members",
-                            "description": "PostHog doesn't charge per seat add your entire team!",
+                            "description": "Insights doesn't charge per seat add your entire team!",
                             "unit": null,
                             "limit": null,
                             "note": "Unlimited"
@@ -1841,7 +1841,7 @@
                         {
                             "key": "social_sso",
                             "name": "SSO via Google, Github, or Gitlab",
-                            "description": "Log in to PostHog with your Google, Github, or Gitlab account.",
+                            "description": "Log in to Insights with your Google, Github, or Gitlab account.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1857,7 +1857,7 @@
                         {
                             "key": "sso_enforcement",
                             "name": "SSO",
-                            "description": "Allow users to sign up and log in to your PostHog account with your specified SSO provider.",
+                            "description": "Allow users to sign up and log in to your Insights account with your specified SSO provider.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1865,7 +1865,7 @@
                         {
                             "key": "white_labeling",
                             "name": "White labeling",
-                            "description": "Use your own branding in your PostHog organization.",
+                            "description": "Use your own branding in your Insights organization.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1873,7 +1873,7 @@
                         {
                             "key": "community_support",
                             "name": "Community forum",
-                            "description": "Get help from the PostHog community in our public forum.",
+                            "description": "Get help from the Insights community in our public forum.",
                             "unit": null,
                             "limit": null,
                             "note": null
@@ -1881,7 +1881,7 @@
                         {
                             "key": "dedicated_support",
                             "name": "Dedicated Slack channel",
-                            "description": "Get help in a dedicated Slack channel shared between you and the PostHog team.",
+                            "description": "Get help in a dedicated Slack channel shared between you and the Insights team.",
                             "unit": null,
                             "limit": null,
                             "note": "$2k/month spend or above"
@@ -2082,7 +2082,7 @@
                                 {
                                     "key": "zapier",
                                     "name": "Zapier",
-                                    "description": "Zapier lets you connect PostHog with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
+                                    "description": "Zapier lets you connect Insights with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2091,7 +2091,7 @@
                                 {
                                     "key": "apps",
                                     "name": "Apps library",
-                                    "description": "Connect your data to PostHog with 50+ apps.",
+                                    "description": "Connect your data to Insights with 50+ apps.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2151,7 +2151,7 @@
                                 {
                                     "key": "social_sso",
                                     "name": "SSO via Google, Github, or Gitlab",
-                                    "description": "Log in to PostHog with your Google, Github, or Gitlab account.",
+                                    "description": "Log in to Insights with your Google, Github, or Gitlab account.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2178,7 +2178,7 @@
                                 {
                                     "key": "team_members",
                                     "name": "Team members",
-                                    "description": "PostHog doesn't charge per seat - add your entire team!",
+                                    "description": "Insights doesn't charge per seat - add your entire team!",
                                     "unit": null,
                                     "limit": null,
                                     "note": "Unlimited",
@@ -2202,7 +2202,7 @@
                                 {
                                     "key": "community_support",
                                     "name": "Community forum",
-                                    "description": "Get help from the PostHog community in our public forum.",
+                                    "description": "Get help from the Insights community in our public forum.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2284,7 +2284,7 @@
                                 {
                                     "key": "subscriptions",
                                     "name": "Insight & dashboard subscriptions",
-                                    "description": "Create a subscription for any insight or dashboard in PostHog to receive regular reports with their updates.",
+                                    "description": "Create a subscription for any insight or dashboard in Insights to receive regular reports with their updates.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2563,7 +2563,7 @@
                                 {
                                     "key": "zapier",
                                     "name": "Zapier",
-                                    "description": "Zapier lets you connect PostHog with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
+                                    "description": "Zapier lets you connect Insights with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2599,7 +2599,7 @@
                                 {
                                     "key": "apps",
                                     "name": "Apps library",
-                                    "description": "Connect your data to PostHog with 50+ apps.",
+                                    "description": "Connect your data to Insights with 50+ apps.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2641,7 +2641,7 @@
                                 {
                                     "key": "team_members",
                                     "name": "Team members",
-                                    "description": "PostHog doesn't charge per seat - add your entire team!",
+                                    "description": "Insights doesn't charge per seat - add your entire team!",
                                     "unit": null,
                                     "limit": null,
                                     "note": "Unlimited",
@@ -2677,7 +2677,7 @@
                                 {
                                     "key": "social_sso",
                                     "name": "SSO via Google, Github, or Gitlab",
-                                    "description": "Log in to PostHog with your Google, Github, or Gitlab account.",
+                                    "description": "Log in to Insights with your Google, Github, or Gitlab account.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2695,7 +2695,7 @@
                                 {
                                     "key": "sso_enforcement",
                                     "name": "SSO",
-                                    "description": "Allow users to sign up and log in to your PostHog account with your specified SSO provider.",
+                                    "description": "Allow users to sign up and log in to your Insights account with your specified SSO provider.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2710,7 +2710,7 @@
                                 {
                                     "key": "community_support",
                                     "name": "Community forum",
-                                    "description": "Get help from the PostHog community in our public forum.",
+                                    "description": "Get help from the Insights community in our public forum.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -2719,7 +2719,7 @@
                                 {
                                     "key": "dedicated_support",
                                     "name": "Dedicated Slack channel",
-                                    "description": "Get help in a dedicated Slack channel shared between you and the PostHog team.",
+                                    "description": "Get help in a dedicated Slack channel shared between you and the Insights team.",
                                     "unit": null,
                                     "limit": null,
                                     "note": "$2k/month spend or above",
@@ -2819,7 +2819,7 @@
                                 {
                                     "key": "subscriptions",
                                     "name": "Insight & dashboard subscriptions",
-                                    "description": "Create a subscription for any insight or dashboard in PostHog to receive regular reports with their updates.",
+                                    "description": "Create a subscription for any insight or dashboard in Insights to receive regular reports with their updates.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3047,7 +3047,7 @@
                 },
                 {
                     "type": "base",
-                    "name": "PostHog Enterprise",
+                    "name": "Insights Enterprise",
                     "description": "SSO, advanced permissions, and a dedicated Slack channel for support",
                     "price_description": null,
                     "free_allocation": null,
@@ -3098,7 +3098,7 @@
                                 {
                                     "key": "zapier",
                                     "name": "Zapier",
-                                    "description": "Zapier lets you connect PostHog with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
+                                    "description": "Zapier lets you connect Insights with thousands of the most popular apps, so you can automate your work and have more time for what matters most—no code required.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3134,7 +3134,7 @@
                                 {
                                     "key": "apps",
                                     "name": "Apps library",
-                                    "description": "Connect your data to PostHog with 50+ apps.",
+                                    "description": "Connect your data to Insights with 50+ apps.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3176,7 +3176,7 @@
                                 {
                                     "key": "team_members",
                                     "name": "Team members",
-                                    "description": "PostHog doesn't charge per seat - add your entire team!",
+                                    "description": "Insights doesn't charge per seat - add your entire team!",
                                     "unit": null,
                                     "limit": null,
                                     "note": "Unlimited",
@@ -3212,7 +3212,7 @@
                                 {
                                     "key": "social_sso",
                                     "name": "SSO via Google, Github, or Gitlab",
-                                    "description": "Log in to PostHog with your Google, Github, or Gitlab account.",
+                                    "description": "Log in to Insights with your Google, Github, or Gitlab account.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3230,7 +3230,7 @@
                                 {
                                     "key": "sso_enforcement",
                                     "name": "SSO",
-                                    "description": "Allow users to sign up and log in to your PostHog account with your specified SSO provider.",
+                                    "description": "Allow users to sign up and log in to your Insights account with your specified SSO provider.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3263,7 +3263,7 @@
                                 {
                                     "key": "community_support",
                                     "name": "Community forum",
-                                    "description": "Get help from the PostHog community in our public forum.",
+                                    "description": "Get help from the Insights community in our public forum.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3272,7 +3272,7 @@
                                 {
                                     "key": "dedicated_support",
                                     "name": "Dedicated Slack channel",
-                                    "description": "Get help in a dedicated Slack channel shared between you and the PostHog team.",
+                                    "description": "Get help in a dedicated Slack channel shared between you and the Insights team.",
                                     "unit": null,
                                     "limit": null,
                                     "note": "$2k/month spend or above",
@@ -3290,7 +3290,7 @@
                                 {
                                     "key": "account_manager",
                                     "name": "Account manager",
-                                    "description": "Work with a dedicated account manager to help you get the most out of PostHog.",
+                                    "description": "Work with a dedicated account manager to help you get the most out of Insights.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3299,7 +3299,7 @@
                                 {
                                     "key": "training",
                                     "name": "Training sessions",
-                                    "description": "Get training from our team to help you quickly get up and running with PostHog.",
+                                    "description": "Get training from our team to help you quickly get up and running with Insights.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
@@ -3344,7 +3344,7 @@
                                 {
                                     "key": "invoice_payments",
                                     "name": "Payment via invoicing",
-                                    "description": "Pay for your PostHog subscription via invoice.",
+                                    "description": "Pay for your Insights subscription via invoice.",
                                     "unit": null,
                                     "limit": null,
                                     "note": null,
