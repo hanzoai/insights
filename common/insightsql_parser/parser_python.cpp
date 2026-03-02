@@ -217,8 +217,8 @@ static int parser_clear(PyObject* module) {
 
 static struct PyModuleDef parser = {
     .m_base = PyModuleDef_HEAD_INIT,
-    .m_name = "hogql_parser",
-    .m_doc = "HogQL parsing",
+    .m_name = "insightsql_parser",
+    .m_doc = "InsightsQL parsing",
     .m_size = sizeof(parser_state),
     .m_methods = parser_methods,
     .m_slots = parser_slots,
@@ -226,6 +226,6 @@ static struct PyModuleDef parser = {
     .m_clear = parser_clear,
 };
 
-PyMODINIT_FUNC PyInit_hogql_parser(void) {
+PyMODINIT_FUNC PyInit_insightsql_parser(void) {
   return PyModuleDef_Init(&parser);
 }
