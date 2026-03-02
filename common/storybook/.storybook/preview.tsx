@@ -5,7 +5,7 @@ import type { Meta, Parameters, Preview } from '@storybook/react'
 
 import { apiHostOrigin } from 'lib/utils/apiHost'
 
-import { loadPostHogJS } from '~/loadPostHogJS'
+import { loadInsightsJS } from '~/loadInsightsJS'
 import { worker } from '~/mocks/browser'
 import { defaultMocks } from '~/mocks/handlers'
 
@@ -42,7 +42,7 @@ const setupPosthogJs = (): void => {
     // e.g. `/decide/` for feature flags
     window.JS_POSTHOG_HOST = apiHostOrigin()
 
-    loadPostHogJS()
+    loadInsightsJS()
 }
 setupPosthogJs()
 

@@ -7,7 +7,7 @@ from temporalio import activity, common, workflow
 
 from posthog.ducklake.common import attach_catalog, get_config
 from posthog.ducklake.storage import configure_connection
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat_sync import HeartbeaterSync
 from posthog.temporal.ducklake.compaction_types import DucklakeCompactionInput
 
@@ -131,7 +131,7 @@ async def run_ducklake_compaction(input: DucklakeCompactionInput) -> dict:
 
 
 @workflow.defn(name="ducklake-compaction")
-class DucklakeCompactionWorkflow(PostHogWorkflow):
+class DucklakeCompactionWorkflow(InsightsWorkflow):
     """Workflow to compact DuckLake parquet files.
 
     This workflow merges small adjacent parquet files in DuckLake tables

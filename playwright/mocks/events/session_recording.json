@@ -165,7 +165,7 @@
                                                                                     {
                                                                                         "id": 35,
                                                                                         "type": 3,
-                                                                                        "textContent": "Welcome to the PostHog demo environment!"
+                                                                                        "textContent": "Welcome to the Insights demo environment!"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -196,7 +196,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in PostHog within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -844,7 +844,7 @@
                                                                                     {
                                                                                         "id": 35,
                                                                                         "type": 3,
-                                                                                        "textContent": "Welcome to the PostHog demo environment!"
+                                                                                        "textContent": "Welcome to the Insights demo environment!"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -875,7 +875,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in PostHog within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -1420,7 +1420,7 @@
                                                                                     {
                                                                                         "id": 35,
                                                                                         "type": 3,
-                                                                                        "textContent": "Welcome to the PostHog demo environment!"
+                                                                                        "textContent": "Welcome to the Insights demo environment!"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -1451,7 +1451,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in PostHog within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },
@@ -2280,7 +2280,7 @@
                                                                                     {
                                                                                         "id": 35,
                                                                                         "type": 3,
-                                                                                        "textContent": "Welcome to the PostHog demo environment!"
+                                                                                        "textContent": "Welcome to the Insights demo environment!"
                                                                                     }
                                                                                 ]
                                                                             },
@@ -2311,7 +2311,7 @@
                                                                                             {
                                                                                                 "id": 40,
                                                                                                 "type": 3,
-                                                                                                "textContent": "You can\n                            explore the data in PostHog within project \"Hogflix Demo App\"."
+                                                                                                "textContent": "You can\n                            explore the data in Insights within project \"Hogflix Demo App\"."
                                                                                             }
                                                                                         ]
                                                                                     },

@@ -5,7 +5,7 @@
     "main": "dist/index.js",
     "config": [
         {
-            "markdown": "User Agent plugin allows you to populate events with the $browser, $browser_version for PostHog Clients that don't  typically populate these properties"
+            "markdown": "User Agent plugin allows you to populate events with the $browser, $browser_version for Insights Clients that don't  typically populate these properties"
         },
         {
             "key": "overrideUserAgentDetails",

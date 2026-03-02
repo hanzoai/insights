@@ -7,7 +7,7 @@ const TEMPLATE_USERS: Record<string, UserBasicType> = {
         id: 1,
         uuid: 'posthog@posthog.com',
         distinct_id: '1',
-        first_name: 'PostHog',
+        first_name: 'Insights',
         email: 'posthog@posthog.com',
     },
 }
@@ -43,7 +43,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                     content: [
                         {
                             type: 'text',
-                            text: 'Notebooks are a powerful way to collate, analyze, and share PostHog data with others:',
+                            text: 'Notebooks are a powerful way to collate, analyze, and share Insights data with others:',
                         },
                     ],
                 },
@@ -335,7 +335,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                     type: 'ph-embed',
                     attrs: {
                         height: 508,
-                        title: 'PostHog youtube video',
+                        title: 'Insights youtube video',
                         nodeId: '421818d3-65c7-4a14-a22e-924e8c4ee04f',
                         __init: null,
                         children: null,
@@ -359,7 +359,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                     content: [
                         {
                             type: 'text',
-                            text: 'Adding PostHog data to notebooks',
+                            text: 'Adding Insights data to notebooks',
                         },
                     ],
                 },
@@ -368,7 +368,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                     content: [
                         {
                             type: 'text',
-                            text: 'The real power of Notebooks comes from pulling various PostHog resources into the document.',
+                            text: 'The real power of Notebooks comes from pulling various Insights resources into the document.',
                         },
                     ],
                 },
@@ -510,7 +510,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                     content: [
                         {
                             type: 'text',
-                            text: 'You can also drag and drop PostHog elements into a notebook pinned to the sidebar, such as:',
+                            text: 'You can also drag and drop Insights elements into a notebook pinned to the sidebar, such as:',
                         },
                         {
                             type: 'hardBreak',
@@ -691,7 +691,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                                 {
                                     type: 'link',
                                     attrs: {
-                                        href: 'https://github.com/PostHog/posthog/issues/15680 ',
+                                        href: 'https://github.com/Insights/posthog/issues/15680 ',
                                     },
                                 },
                                 {
@@ -734,7 +734,7 @@ export const LOCAL_NOTEBOOK_TEMPLATES: NotebookType[] = [
                                     type: 'bold',
                                 },
                             ],
-                            text: 'What if PostHog looked like a dev tool?',
+                            text: 'What if Insights looked like a dev tool?',
                         },
                     ],
                 },

@@ -612,7 +612,7 @@ async def initialize_self_capture_api_token():
     except (User.DoesNotExist, Team.DoesNotExist, ProgrammingError):
         local_api_key = None
 
-    # This is running _after_ PostHogConfig.ready(), so we re-enable posthoganalytics while setting the params
+    # This is running _after_ InsightsConfig.ready(), so we re-enable posthoganalytics while setting the params
     if local_api_key is not None:
         posthoganalytics.disabled = False
         posthoganalytics.api_key = local_api_key
@@ -963,7 +963,7 @@ class SingletonDecorator:
 
 
 def get_machine_id() -> str:
-    """A MAC address-dependent ID. Useful for PostHog instance analytics."""
+    """A MAC address-dependent ID. Useful for Insights instance analytics."""
     # MAC addresses are 6 bits long, so overflow shouldn't happen
     # hashing here as we don't care about the actual address, just it being rather consistent
     # nosemgrep: python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5
@@ -1092,7 +1092,7 @@ def get_can_create_org(user: Union["AbstractBaseUser", "AnonymousUser"]) -> bool
     """Returns whether a new organization can be created in the current instance.
 
     Organizations can be created only in the following cases:
-    - if on PostHog Cloud
+    - if on Insights Cloud
     - if running end-to-end tests
     - if there's no organization yet
     - if DEBUG is True
@@ -1114,7 +1114,7 @@ def get_can_create_org(user: Union["AbstractBaseUser", "AnonymousUser"]) -> bool
         if license is not None and AvailableFeature.ZAPIER in license.available_features:
             return True
         else:
-            logger.warning("You have configured MULTI_ORG_ENABLED, but not the required premium PostHog plan!")
+            logger.warning("You have configured MULTI_ORG_ENABLED, but not the required premium Insights plan!")
 
     return False
 

@@ -63,9 +63,9 @@ export const DollarPropertiesOnPersonSearchable: StoryFn = () => {
 }
 
 export const DollarPropertiesOnPersonHidden: StoryFn = () => {
-    const { setHidePostHogPropertiesInTable } = useActions(userPreferencesLogic)
+    const { setHideInsightsPropertiesInTable } = useActions(userPreferencesLogic)
 
-    useDelayedOnMountEffect(() => setHidePostHogPropertiesInTable(true))
+    useDelayedOnMountEffect(() => setHideInsightsPropertiesInTable(true))
 
     const properties = {
         pineapple_enjoyment_score: 3,

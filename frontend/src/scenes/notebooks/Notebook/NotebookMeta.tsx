@@ -27,12 +27,12 @@ const syncStatusMap: Record<NotebookSyncStatus, { content: React.ReactNode; tool
                 Saving <Spinner textColored />
             </>
         ),
-        tooltip: 'The changes are being saved to PostHog.',
+        tooltip: 'The changes are being saved to Insights.',
     },
     unsaved: {
         content: 'Edited',
         tooltip:
-            'You have made changes that are saved to your browser. These will be persisted to PostHog periodically.',
+            'You have made changes that are saved to your browser. These will be persisted to Insights periodically.',
     },
     local: {
         content: 'Local',

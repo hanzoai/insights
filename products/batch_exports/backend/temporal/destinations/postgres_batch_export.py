@@ -27,7 +27,7 @@ from posthog.batch_exports.service import (
     BatchExportSchema,
     PostgresBatchExportInputs,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -946,7 +946,7 @@ async def insert_into_postgres_activity_from_stage(inputs: PostgresInsertInputs)
 
 
 @workflow.defn(name="postgres-export", failure_exception_types=[workflow.NondeterminismError])
-class PostgresBatchExportWorkflow(PostHogWorkflow):
+class PostgresBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data into Postgres.
 
     This Workflow is intended to be executed both manually and by a Temporal

@@ -14,7 +14,7 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        if: github.repository == 'PostHog/posthog'
+        if: github.repository == 'Insights/posthog'
         name: Determine need to run proto checks
         outputs:
             proto: ${{ steps.filter.outputs.proto || 'true' }}
@@ -67,7 +67,7 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Check for breaking changes
-              run: buf breaking proto/ --against 'https://github.com/PostHog/posthog.git#branch=master,subdir=proto'
+              run: buf breaking proto/ --against 'https://github.com/Insights/posthog.git#branch=master,subdir=proto'
 
     proto_checks:
         needs: [changes, lint, breaking]

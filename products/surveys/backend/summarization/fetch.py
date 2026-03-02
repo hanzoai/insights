@@ -3,10 +3,10 @@
 from datetime import datetime
 from typing import cast
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
 
-from posthog.hogql_queries.insights.paginators import HogQLHasMorePaginator
+from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from posthog.models import Team
 
 
@@ -38,7 +38,7 @@ def fetch_responses(
     Returns:
         List of response strings
     """
-    paginator = HogQLHasMorePaginator(limit=limit, offset=0)
+    paginator = InsightsQLHasMorePaginator(limit=limit, offset=0)
 
     # Build the base query
     # Use uniqueSurveySubmissionsFilter to deduplicate by $survey_submission_id
@@ -72,7 +72,7 @@ def fetch_responses(
 
     q = parse_select(base_query, placeholders)
 
-    query_response = paginator.execute_hogql_query(
+    query_response = paginator.execute_insightsql_query(
         team=team,
         query_type="survey_response_list_query",
         query=cast(ast.SelectQuery, q),

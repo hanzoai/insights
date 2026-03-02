@@ -198,9 +198,9 @@ export const urls = {
         urls.shared(token, exportOptions).replace('/shared/', '/embedded/'),
     debugQuery: (query?: string | Record<string, any>): string =>
         combineUrl('/debug', {}, query ? { q: typeof query === 'string' ? query : JSON.stringify(query) } : {}).url,
-    debugHog: (): string => '/debug/hog',
+    debugScript: (): string => '/debug/script',
     signalsDebug: (): string => '/debug/signals',
-    moveToPostHogCloud: (): string => '/move-to-cloud',
+    moveToInsightsCloud: (): string => '/move-to-cloud',
     heatmaps: (params?: string): string =>
         `/heatmaps${params ? `?${params.startsWith('?') ? params.slice(1) : params}` : ''}`,
     heatmapNew: (params?: string): string =>

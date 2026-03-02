@@ -178,7 +178,7 @@ function createTestInput(options: {
             event: '$pageview',
             distinct_id: 'user-1',
             ip: null,
-            site_url: 'https://test.posthog.com',
+            site_url: 'https://test.hanzo.ai',
             now: DateTime.utc().toISO()!,
             ...event,
         }),

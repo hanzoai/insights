@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'beta',
     type: 'destination',
@@ -9,11 +9,11 @@ export const template: HogFunctionTemplate = {
     description: 'Creates a new company in Hubspot whenever an event is triggered.',
     icon_url: '/static/services/hubspot.png',
     category: ['CRM', 'Customer Success'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 let data := {
     'properties': {
-        'posthog_group_id': inputs.companyId
+        'insights_group_id': inputs.companyId
     }
 }
 
@@ -25,7 +25,7 @@ for (let key, value in inputs.properties) {
     }
 }
 
-if (empty(data.properties['posthog_group_id'])) {
+if (empty(data.properties['insights_group_id'])) {
     print('\`companyId\` input is empty. Skipping...')
     return
 }
@@ -35,7 +35,7 @@ let headers := {
     'Content-Type': 'application/json'
 }
 
-let res := fetch(f'https://api.hubapi.com/crm/v3/objects/companies/{data.properties['posthog_group_id']}?idProperty=posthog_group_id', {
+let res := fetch(f'https://api.hubapi.com/crm/v3/objects/companies/{data.properties['insights_group_id']}?idProperty=insights_group_id', {
     'method': 'PATCH',
     'headers': headers,
     'body': data
@@ -46,9 +46,9 @@ if (res.status == 404) {
         'method': 'POST',
         'headers': headers,
         'body': {
-            'name': 'posthog_group_id',
-            'label': 'PostHog Group ID',
-            'description': 'Unique Property to map PostHog Group ID with a HubSpot Company Object',
+            'name': 'insights_group_id',
+            'label': 'Insights Group ID',
+            'description': 'Unique Property to map Insights Group ID with a HubSpot Company Object',
             'groupName': 'companyinformation',
             'type': 'string',
             'fieldType': 'text',
@@ -60,7 +60,7 @@ if (res.status == 404) {
     })
 
     if (res2.status >= 400 and not res2.status == 409) {
-        throw Error(f'Error creating unique posthog id property (status {res.status}): {res.body}')
+        throw Error(f'Error creating unique insights id property (status {res.status}): {res.body}')
     }
 
     res := fetch('https://api.hubapi.com/crm/v3/objects/companies', {
@@ -70,17 +70,17 @@ if (res.status == 404) {
     })
 
     if (res.status >= 400) {
-        throw Error(f'Error creating company {data.properties['posthog_group_id']} (status {res.status}): {res.body}')
+        throw Error(f'Error creating company {data.properties['insights_group_id']} (status {res.status}): {res.body}')
     } else {
-        print(f'Successfully created company {data.properties['posthog_group_id']}')
+        print(f'Successfully created company {data.properties['insights_group_id']}')
         return
     }
 }
 
 if (res.status >= 400) {
-    throw Error(f'Error updating company {data.properties['posthog_group_id']} (status {res.status}): {res.body}')
+    throw Error(f'Error updating company {data.properties['insights_group_id']} (status {res.status}): {res.body}')
 } else {
-    print(f'Successfully updated company {data.properties['posthog_group_id']}')
+    print(f'Successfully updated company {data.properties['insights_group_id']}')
 }
 `,
     inputs_schema: [

@@ -7,7 +7,7 @@ from django.db.models import Prefetch
 
 from posthog.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql.timings import HogQLTimings
+from posthog.insightsql.timings import InsightsQLTimings
 
 from posthog.exceptions_capture import capture_exception
 from posthog.models.team.team import Team
@@ -23,7 +23,7 @@ from products.revenue_analytics.backend.views.sources.registry import BUILDERS
 SUPPORTED_SOURCES: list[ExternalDataSourceType] = [ExternalDataSourceType.STRIPE]
 
 
-def _iter_source_handles(team: Team, timings: HogQLTimings) -> Iterable[SourceHandle]:
+def _iter_source_handles(team: Team, timings: InsightsQLTimings) -> Iterable[SourceHandle]:
     with timings.measure("for_events"):
         for event in team.revenue_analytics_config.events:
             yield SourceHandle(type="events", team=team, event=event)
@@ -61,7 +61,7 @@ def _query_to_view(
         id=id,
         name=name,
         prefix=query.prefix,
-        query=query.query.to_hogql(),
+        query=query.query.to_insightsql(),
         fields=schema.fields,
         source_id=str(handle.source.id) if handle.source else None,
         event_name=handle.event.eventName if handle.event else None,
@@ -69,7 +69,7 @@ def _query_to_view(
 
 
 def build_all_revenue_analytics_views(
-    team: Team, timings: Optional[HogQLTimings] = None
+    team: Team, timings: Optional[InsightsQLTimings] = None
 ) -> list[RevenueAnalyticsBaseView]:
     """Build all revenue-analytics views for a team.
 
@@ -78,7 +78,7 @@ def build_all_revenue_analytics_views(
     and names (events omit source_id; warehouse sets it).
     """
     if timings is None:
-        timings = HogQLTimings()
+        timings = InsightsQLTimings()
 
     views: list[RevenueAnalyticsBaseView] = []
     for handle in _iter_source_handles(team, timings):

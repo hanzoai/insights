@@ -4,7 +4,7 @@ from datetime import timedelta
 import temporalio.workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 with temporalio.workflow.unsafe.imports_passed_through():
     from posthog.temporal.experiments.activities import (
@@ -22,7 +22,7 @@ MAX_CONCURRENT_METRICS = 10
 
 
 @temporalio.workflow.defn(name="experiment-regular-metrics-workflow")
-class ExperimentRegularMetricsWorkflow(PostHogWorkflow):
+class ExperimentRegularMetricsWorkflow(InsightsWorkflow):
     """
     Workflow that calculates all experiment metrics for teams scheduled at a given hour.
 
@@ -94,7 +94,7 @@ class ExperimentRegularMetricsWorkflow(PostHogWorkflow):
 
 
 @temporalio.workflow.defn(name="experiment-saved-metrics-workflow")
-class ExperimentSavedMetricsWorkflow(PostHogWorkflow):
+class ExperimentSavedMetricsWorkflow(InsightsWorkflow):
     """
     Workflow that calculates all experiment saved metrics for teams scheduled at a given hour.
 

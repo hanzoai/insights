@@ -101,7 +101,7 @@ export const activityLogTransforms = {
 
 /**
  * Having this function inside the `humanizeActivity module was causing very weird test errors in other modules
- * see https://github.com/PostHog/posthog/pull/12062
+ * see https://github.com/Insights/posthog/pull/12062
  * So, we inject the function instead
  * **/
 export const describerFor = (logItem?: ActivityLogItem): Describer | undefined => {
@@ -122,7 +122,7 @@ export const describerFor = (logItem?: ActivityLogItem): Describer | undefined =
             return flagActivityDescriber
         case ActivityScope.CUSTOM_FUNCTION:
             return customFunctionActivityDescriber
-        case ActivityScope.HOG_FLOW:
+        case ActivityScope.CUSTOM_FLOW:
             return workflowActivityDescriber
         case ActivityScope.COHORT:
             return cohortActivityDescriber

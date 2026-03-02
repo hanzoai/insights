@@ -16,7 +16,7 @@ from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
 from posthog.batch_exports.service import BaseBatchExportInputs, BatchExportInsertInputs, BatchExportModel
 from posthog.models import BatchExport, BatchExportDestination
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.tests.utils.models import afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import (
@@ -105,7 +105,7 @@ class DummyInsertInputs(BatchExportInsertInputs):
 
 
 @workflow.defn(name="dummy-export", failure_exception_types=[workflow.NondeterminismError])
-class DummyExportWorkflow(PostHogWorkflow):
+class DummyExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow for testing the batch export entrypoint."""
 
     @staticmethod

@@ -234,7 +234,7 @@ export type Setting = {
     /** Plaintext description for search indexing when `description` is JSX */
     searchDescription?: string
 
-    /** URL to relevant PostHog documentation */
+    /** URL to relevant Insights documentation */
     docsUrl?: string
 
     /** Platform/SDK availability rendered as badges to the right of the title */

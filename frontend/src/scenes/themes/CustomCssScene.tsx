@@ -122,7 +122,7 @@ export function CustomCssScene(): JSX.Element {
                 }
             />
             <p>
-                You can add custom CSS to change the style of your PostHog instance. If you need some inspiration try
+                You can add custom CSS to change the style of your Insights instance. If you need some inspiration try
                 our templates: <Link onClick={() => setPreviewingCustomCss(TRON_THEME)}>Tron</Link>,{' '}
                 <Link onClick={() => setPreviewingCustomCss(BARBIE_THEME)}>Barbie</Link>
             </p>

@@ -15,7 +15,7 @@ export default function PricingPage(): React.JSX.Element {
                     <div className="text-center mb-16">
                         <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Hedgebox Plan</h1>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                            Whether you're a solo hedgehog or running a full hedgehog business, we have the perfect plan
+                            Whether you're a solo mascot or running a full mascot business, we have the perfect plan
                             for your file sharing needs.
                         </p>
                     </div>
@@ -116,7 +116,7 @@ export default function PricingPage(): React.JSX.Element {
                                     </h3>
                                     <p className="text-gray-600">
                                         We support all file types! From documents and images to videos and archives - if
-                                        hedgehogs need it, we support it.
+                                        mascots need it, we support it.
                                     </p>
                                 </div>
                             </div>
@@ -127,7 +127,7 @@ export default function PricingPage(): React.JSX.Element {
                     <div className="mt-16 text-center">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">Still have questions?</h2>
                         <p className="text-gray-600 mb-6">
-                            Our hedgehog support team is here to help you choose the right plan.
+                            Our mascot support team is here to help you choose the right plan.
                         </p>
                         <Link href="/signup" className="btn btn-primary btn-lg">
                             Start Your Free Trial

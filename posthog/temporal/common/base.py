@@ -2,8 +2,8 @@ import typing
 from abc import ABC, abstractmethod
 
 
-class PostHogWorkflow(ABC):
-    """Base class for Temporal Workflows that can be executed in PostHog."""
+class InsightsWorkflow(ABC):
+    """Base class for Temporal Workflows that can be executed in Insights."""
 
     @classmethod
     def get_name(cls) -> str:

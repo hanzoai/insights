@@ -5,7 +5,7 @@ import posthog from 'posthog-js'
 import { IconArrowLeft, IconEye, IconPlus, IconShield, IconTarget, IconThumbsUp, IconWarning } from '@posthog/icons'
 import { LemonButton, LemonTag, Link } from '@posthog/lemon-ui'
 
-import { JudgeHog } from 'lib/components/hedgehogs'
+import { JudgeHog } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { SceneExport } from 'scenes/sceneTypes'

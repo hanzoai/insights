@@ -99,7 +99,7 @@ class CleanupResult:
 
 @cli.command(
     name="doctor:disk",
-    help="Interactive disk space cleanup for common PostHog dev bloat",
+    help="Interactive disk space cleanup for common Insights dev bloat",
 )
 @click.option("--dry-run", is_flag=True, help="Show what would be cleaned without deleting")
 @click.option("--yes", "-y", is_flag=True, help="Auto-confirm all cleanup operations")
@@ -135,7 +135,7 @@ def doctor_disk(
 
     from hogli.core.manifest import REPO_ROOT
 
-    click.echo("🔍 PostHog Disk Space Cleanup\n")
+    click.echo("🔍 Insights Disk Space Cleanup\n")
 
     if dry_run:
         click.echo("🚀 Running in DRY-RUN mode - no files will be deleted\n")
@@ -158,7 +158,7 @@ def doctor_disk(
             title="🐳 Docker system (images, containers, volumes)",
             description=[
                 "Runs 'docker system prune -a --volumes' to reclaim unused Docker resources.",
-                "PostHog's docker-compose stacks rely on Docker heavily during development.",
+                "Insights's docker-compose stacks rely on Docker heavily during development.",
             ],
             estimate=_estimate_docker_usage,
             cleanup=_cleanup_docker,

@@ -1,10 +1,10 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { windowValues } from 'kea-window-values'
-import { PostHog } from 'posthog-js'
+import { Insights } from 'posthog-js'
 
-import { hedgehogModeLogic } from 'lib/components/HedgehogMode/hedgehogModeLogic'
-import { HedgehogActor } from 'lib/components/HedgehogMode/types'
-import { PostHogAppToolbarEvent } from 'lib/components/IframedToolbarBrowser/utils'
+import { mascotModeLogic } from 'lib/components/MascotMode/mascotModeLogic'
+import { MascotActor } from 'lib/components/MascotMode/types'
+import { InsightsAppToolbarEvent } from 'lib/components/IframedToolbarBrowser/utils'
 
 import { actionsLogic } from '~/toolbar/actions/actionsLogic'
 import { actionsTabLogic } from '~/toolbar/actions/actionsTabLogic'
@@ -22,7 +22,7 @@ import { generatePiiMaskingCSS } from './piiMaskingStyles'
 import type { toolbarLogicType } from './toolbarLogicType'
 
 const MARGIN = 2
-const HEDGEHOG_OFFSET = 80
+const MASCOT_OFFSET = 80
 
 const PII_MASKING_STYLESHEET_ID = 'posthog-pii-masking-styles'
 
@@ -32,7 +32,7 @@ export type MenuState =
     | 'actions'
     | 'flags'
     | 'inspect'
-    | 'hedgehog'
+    | 'mascot'
     | 'debugger'
     | 'experiments'
     | 'web-vitals'
@@ -67,8 +67,8 @@ export const toolbarLogic = kea<toolbarLogicType>([
             ['allExperimentsLoading'],
             webVitalsToolbarLogic,
             ['remoteWebVitalsLoading'],
-            hedgehogModeLogic,
-            ['hedgehogMode'],
+            mascotModeLogic,
+            ['mascotMode'],
         ],
         actions: [
             toolbarConfigLogic,
@@ -102,10 +102,10 @@ export const toolbarLogic = kea<toolbarLogicType>([
     actions(() => ({
         toggleTheme: (theme?: 'light' | 'dark') => ({ theme }),
         toggleMinimized: (minimized?: boolean) => ({ minimized }),
-        setHedgehogModeEnabled: (hedgehogModeEnabled: boolean) => ({ hedgehogModeEnabled }),
+        setMascotModeEnabled: (mascotModeEnabled: boolean) => ({ mascotModeEnabled }),
         setDragPosition: (x: number, y: number) => ({ x, y }),
-        syncWithHedgehog: true,
-        openHedgehogOptions: true,
+        syncWithMascot: true,
+        openMascotOptions: true,
         setVisibleMenu: (visibleMenu: MenuState) => ({
             visibleMenu,
         }),
@@ -194,11 +194,11 @@ export const toolbarLogic = kea<toolbarLogicType>([
                 setFixedPosition: (_, { position }) => position,
             },
         ],
-        hedgehogModeEnabled: [
+        mascotModeEnabled: [
             false,
             { persist: true },
             {
-                setHedgehogModeEnabled: (_, { hedgehogModeEnabled }) => hedgehogModeEnabled,
+                setMascotModeEnabled: (_, { mascotModeEnabled }) => mascotModeEnabled,
                 setCspBlocksNewFunction: (state, { blocked }) => (blocked ? false : state), // if the CSP blocks new Function, disable hedgehod mode
             },
         ],
@@ -352,11 +352,11 @@ export const toolbarLogic = kea<toolbarLogicType>([
             },
         ],
 
-        getHedgehogActor: [
-            (s) => [s.hedgehogMode],
-            (hedgehogMode): (() => HedgehogActor | null) => {
+        getMascotActor: [
+            (s) => [s.mascotMode],
+            (mascotMode): (() => MascotActor | null) => {
                 return () => {
-                    const player = hedgehogMode?.stateManager?.getPlayerHedgehogActor()
+                    const player = mascotMode?.stateManager?.getPlayerMascotActor()
                     if (!player || !player.rigidBody) {
                         return null
                     }
@@ -367,7 +367,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
         ],
         piiWarning: [
             (s) => [s.posthog, s.piiMaskingEnabled],
-            (posthog: PostHog | null, piiMaskingEnabled: boolean) => {
+            (posthog: Insights | null, piiMaskingEnabled: boolean) => {
                 if (!posthog || !piiMaskingEnabled) {
                     return null
                 }
@@ -430,7 +430,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
                 allExperimentsLoading ||
                 remoteWebVitalsLoading,
         ],
-        hedgehogModeAvailable: [
+        mascotModeAvailable: [
             (s) => [s.cspBlocksNewFunction],
             (cspBlocksNewFunction: boolean): boolean => !cspBlocksNewFunction,
         ],
@@ -444,7 +444,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
 
             if (visibleMenu === 'heatmap') {
                 actions.enableHeatmap()
-                values.getHedgehogActor()?.setOnFire(1)
+                values.getMascotActor()?.setOnFire(1)
             } else if (visibleMenu === 'actions') {
                 actions.showButtonActions()
             } else if (visibleMenu === 'experiments') {
@@ -527,22 +527,22 @@ export const toolbarLogic = kea<toolbarLogicType>([
             }
         },
 
-        syncWithHedgehog: () => {
-            const player = values.getHedgehogActor()
+        syncWithMascot: () => {
+            const player = values.getMascotActor()
 
-            if (!values.hedgehogModeEnabled || !player) {
+            if (!values.mascotModeEnabled || !player) {
                 return
             }
 
-            if (values.minimized !== values.hedgehogMode?.gameUI?.visible) {
-                actions.toggleMinimized(values.hedgehogMode?.gameUI?.visible)
+            if (values.minimized !== values.mascotMode?.gameUI?.visible) {
+                actions.toggleMinimized(values.mascotMode?.gameUI?.visible)
             }
 
             if (values.isDragging) {
-                // Set the hedgehog position instead
+                // Set the mascot position instead
                 player.setPosition({
                     x: values.position.x,
-                    y: values.position.y + HEDGEHOG_OFFSET,
+                    y: values.position.y + MASCOT_OFFSET,
                 })
 
                 return
@@ -550,7 +550,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
 
             const { x, y } = player.rigidBody.position
             const newX = x
-            const newY = y - HEDGEHOG_OFFSET
+            const newY = y - MASCOT_OFFSET
             actions.setDragPosition(newX, newY)
         },
 
@@ -561,7 +561,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
             // if embedded, we need to tell the parent window that a new action was created
             // it's ok to use we use a wildcard for the origin bc data isn't sensitive
             // nosemgrep: javascript.browser.security.wildcard-postmessage-configuration.wildcard-postmessage-configuration
-            window.parent.postMessage({ type: PostHogAppToolbarEvent.PH_NEW_ACTION_CREATED, payload: action }, '*')
+            window.parent.postMessage({ type: InsightsAppToolbarEvent.PH_NEW_ACTION_CREATED, payload: action }, '*')
         },
         maybeSendNavigationMessage: () => {
             const currentPath = window.location.pathname
@@ -570,16 +570,16 @@ export const toolbarLogic = kea<toolbarLogicType>([
                 // it's ok to use we use a wildcard for the origin bc data isn't sensitive
                 // nosemgrep: javascript.browser.security.wildcard-postmessage-configuration.wildcard-postmessage-configuration
                 window.parent.postMessage(
-                    { type: PostHogAppToolbarEvent.PH_TOOLBAR_NAVIGATED, payload: { path: currentPath } },
+                    { type: InsightsAppToolbarEvent.PH_TOOLBAR_NAVIGATED, payload: { path: currentPath } },
                     '*'
                 )
             }
         },
-        openHedgehogOptions: () => {
-            values.hedgehogMode?.gameUI?.show({
+        openMascotOptions: () => {
+            values.mascotMode?.gameUI?.show({
                 screen: 'configuration',
                 messages: [],
-                actor: values.getHedgehogActor() ?? undefined,
+                actor: values.getMascotActor() ?? undefined,
             })
         },
         togglePiiMasking: () => {
@@ -617,7 +617,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
         },
     })),
     afterMount(({ actions, values, cache }) => {
-        // Detect whether the page's CSP blocks new Function() — if so, hedgehog mode
+        // Detect whether the page's CSP blocks new Function() — if so, mascot mode
         // (which relies on pixi.js) cannot work and should be disabled.
         try {
             new Function('return true')()
@@ -650,14 +650,14 @@ export const toolbarLogic = kea<toolbarLogicType>([
         )
 
         cache.disposables.add(() => {
-            const syncHedgehogLoop = setInterval(() => {
-                if (values.hedgehogModeEnabled && values.getHedgehogActor()) {
-                    actions.syncWithHedgehog()
+            const syncMascotLoop = setInterval(() => {
+                if (values.mascotModeEnabled && values.getMascotActor()) {
+                    actions.syncWithMascot()
                 }
             }, 100)
 
-            return () => clearInterval(syncHedgehogLoop)
-        }, 'syncHedgehogLoop')
+            return () => clearInterval(syncMascotLoop)
+        }, 'syncMascotLoop')
 
         // Initialize PII masking if already enabled
         // Remove stylesheet on unmount
@@ -688,14 +688,14 @@ export const toolbarLogic = kea<toolbarLogicType>([
             cache.disposables.add(() => {
                 const iframeEventListener = (e: MessageEvent): void => {
                     // TODO: Probably need to have strict checks here
-                    const type: PostHogAppToolbarEvent = e?.data?.type
+                    const type: InsightsAppToolbarEvent = e?.data?.type
 
                     if (!type || !type.startsWith('ph-')) {
                         return
                     }
 
                     switch (type) {
-                        case PostHogAppToolbarEvent.PH_APP_INIT:
+                        case InsightsAppToolbarEvent.PH_APP_INIT:
                             actions.setIsEmbeddedInApp(true)
                             actions.patchHeatmapFilters(e.data.payload.filters)
                             actions.setHeatmapColorPalette(e.data.payload.colorPalette)
@@ -704,9 +704,9 @@ export const toolbarLogic = kea<toolbarLogicType>([
                             actions.toggleClickmapsEnabled(false)
                             // it's ok to use we use a wildcard for the origin bc data isn't sensitive
                             // nosemgrep: javascript.browser.security.wildcard-postmessage-configuration.wildcard-postmessage-configuration
-                            window.parent.postMessage({ type: PostHogAppToolbarEvent.PH_TOOLBAR_READY }, '*')
+                            window.parent.postMessage({ type: InsightsAppToolbarEvent.PH_TOOLBAR_READY }, '*')
                             return
-                        case PostHogAppToolbarEvent.PH_ELEMENT_SELECTOR:
+                        case InsightsAppToolbarEvent.PH_ELEMENT_SELECTOR:
                             if (e.data.payload.enabled) {
                                 actions.enableInspect()
                             } else {
@@ -714,11 +714,11 @@ export const toolbarLogic = kea<toolbarLogicType>([
                                 actions.hideButtonActions()
                             }
                             return
-                        case PostHogAppToolbarEvent.PH_NEW_ACTION_NAME:
+                        case InsightsAppToolbarEvent.PH_NEW_ACTION_NAME:
                             actions.setAutomaticActionCreationEnabled(true, e.data.payload.name)
                             return
                         default:
-                            console.warn(`[PostHog Toolbar] Received unknown parent window message: ${type}`)
+                            console.warn(`[Insights Toolbar] Received unknown parent window message: ${type}`)
                     }
                 }
                 window.addEventListener('message', iframeEventListener, false)
@@ -730,7 +730,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
             // we check if we're in an iframe before this setup to avoid logging warnings to the console
             // it's ok to use we use a wildcard for the origin bc data isn't sensitive
             // nosemgrep: javascript.browser.security.wildcard-postmessage-configuration.wildcard-postmessage-configuration
-            window.parent.postMessage({ type: PostHogAppToolbarEvent.PH_TOOLBAR_INIT }, '*')
+            window.parent.postMessage({ type: InsightsAppToolbarEvent.PH_TOOLBAR_INIT }, '*')
         }
     }),
 ])

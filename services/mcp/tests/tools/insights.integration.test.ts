@@ -2,7 +2,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import {
     type CreatedResources,
-    SAMPLE_HOGQL_QUERIES,
+    SAMPLE_INSIGHTSQL_QUERIES,
     TEST_ORG_ID,
     TEST_PROJECT_ID,
     cleanupResources,
@@ -22,7 +22,7 @@ import updateInsightTool from '@/tools/insights/update'
 import type { Context } from '@/tools/types'
 
 describe('Insights', { concurrent: false }, () => {
-    // All tests run sequentially to avoid conflicts with shared PostHog project
+    // All tests run sequentially to avoid conflicts with shared Insights project
     let context: Context
     const createdResources: CreatedResources = {
         featureFlags: [],
@@ -51,7 +51,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Test Pageview Insight'),
                     description: 'Integration test for pageview insight',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -71,7 +71,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Test Top Events Insight'),
                     description: 'Integration test for top events insight',
-                    query: SAMPLE_HOGQL_QUERIES.topEvents,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.topEvents,
                     favorited: false,
                 },
             }
@@ -90,7 +90,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Test Tagged Insight'),
                     description: 'Integration test with tags',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     tags: ['test', 'integration'],
                     favorited: false,
                 },
@@ -115,7 +115,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Original Insight Name'),
                     description: 'Original description',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -129,7 +129,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: 'Updated Insight Name',
                     description: 'Updated description',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                 },
             }
 
@@ -145,7 +145,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Query Update Test'),
                     description: 'Testing query updates',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -157,7 +157,7 @@ describe('Insights', { concurrent: false }, () => {
             const updateParams = {
                 insightId: createdInsight.id,
                 data: {
-                    query: SAMPLE_HOGQL_QUERIES.topEvents,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.topEvents,
                 },
             }
 
@@ -196,7 +196,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Get Test Insight'),
                     description: 'Test insight for get operation',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -224,7 +224,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Query Test Insight'),
                     description: 'Test insight for query operation',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -255,7 +255,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Delete Test Insight'),
                     description: 'Test insight for deletion',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -284,7 +284,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Workflow Test Insight'),
                     description: 'Testing full workflow',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             }
@@ -301,7 +301,7 @@ describe('Insights', { concurrent: false }, () => {
                 data: {
                     name: 'Updated Workflow Insight',
                     description: 'Updated workflow description',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                 },
             }
 

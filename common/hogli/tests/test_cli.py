@@ -50,7 +50,7 @@ class TestQuickstartCommand:
         """Verify quickstart command displays getting started info."""
         result = runner.invoke(cli, ["quickstart"])
         assert result.exit_code == 0
-        assert "PostHog Development Quickstart" in result.output
+        assert "Insights Development Quickstart" in result.output
         assert "hogli" in result.output
 
 

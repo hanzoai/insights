@@ -35,7 +35,7 @@ function registerQueryResultsApp(server: McpServer, context: Context): void {
     registerApp(server, context, {
         name: 'Query Results',
         uri: QUERY_RESULTS_RESOURCE_URI,
-        description: 'Interactive visualization for PostHog query results (trends, funnels, tables)',
+        description: 'Interactive visualization for Insights query results (trends, funnels, tables)',
         html: queryResultsHtml,
     })
 }

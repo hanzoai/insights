@@ -13,7 +13,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <Blockquote>
                     <Markdown>
-                        **Note:** LLM can be used as a Python SDK or as a proxy server. PostHog observability requires
+                        **Note:** LLM can be used as a Python SDK or as a proxy server. Insights observability requires
                         LLM version 1.77.3 or higher.
                     </Markdown>
                 </Blockquote>
@@ -52,12 +52,12 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             ),
         },
         {
-            title: 'Configure PostHog observability',
+            title: 'Configure Insights observability',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Configure PostHog by setting your project API key and host as well as adding `posthog` to your
+                        Configure Insights by setting your project API key and host as well as adding `posthog` to your
                         LLM callback handlers. You can find your API key in [your project
                         settings](https://app.posthog.com/settings/project).
                     </Markdown>
@@ -75,7 +75,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
                                     os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"  # Optional, defaults to https://app.posthog.com
 
-                                    # Enable PostHog callbacks
+                                    # Enable Insights callbacks
                                     llm.success_callback = ["posthog"]
                                     llm.failure_callback = ["posthog"]  # Optional: also log failures
                                 `,
@@ -110,7 +110,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        Now, when you use LLM to call various LLM providers, PostHog automatically captures an
+                        Now, when you use LLM to call various LLM providers, Insights automatically captures an
                         `$ai_generation` event.
                     </Markdown>
 
@@ -123,10 +123,10 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                     response = llm.completion(
                                         model="gpt-4o-mini",
                                         messages=[
-                                            {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
+                                            {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
                                         metadata={
-                                            "user_id": "user_123",  # Maps to PostHog distinct_id
+                                            "user_id": "user_123",  # Maps to Insights distinct_id
                                             "company": "company_id_in_your_db"  # Custom property
                                         }
                                     )
@@ -147,7 +147,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                       -d '{
                                         "model": "gpt-4o-mini",
                                         "messages": [
-                                          {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
+                                          {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
                                         "metadata": {
                                           "user_id": "user_123",
@@ -188,7 +188,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        PostHog can also capture embedding generations as `$ai_embedding` events through LLM:
+                        Insights can also capture embedding generations as `$ai_embedding` events through LLM:
                     </Markdown>
 
                     <CodeBlock
@@ -201,7 +201,7 @@ export const getLLMSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                         input="The quick brown fox",
                                         model="text-embedding-3-small",
                                         metadata={
-                                            "user_id": "user_123",  # Maps to PostHog distinct_id
+                                            "user_id": "user_123",  # Maps to Insights distinct_id
                                             "company": "company_id_in_your_db"  # Custom property
                                         }
                                     )

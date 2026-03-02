@@ -51,7 +51,7 @@ class SalesforceSource(SimpleSource[SalesforceSourceConfig], OAuthMixin):
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
             name=SchemaExternalDataSourceType.SALESFORCE,
-            caption="Select an existing Salesforce account to link to PostHog or create a new connection",
+            caption="Select an existing Salesforce account to link to Insights or create a new connection",
             iconPath="/static/services/salesforce.png",
             docsUrl="https://posthog.com/docs/cdp/sources/salesforce",
             fields=cast(

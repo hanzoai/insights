@@ -20,8 +20,8 @@ pytestmark = [pytest.mark.django_db]
 class TestDeactivateStaleMaterializationsTask(BaseTest):
     def setUp(self):
         super().setUp()
-        self.sample_hogql_query = {
-            "kind": "HogQLQuery",
+        self.sample_insightsql_query = {
+            "kind": "InsightsQLQuery",
             "query": "SELECT event FROM events LIMIT 100",
         }
 
@@ -36,7 +36,7 @@ class TestDeactivateStaleMaterializationsTask(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name=name,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             last_run_at=last_run_at or timezone.now(),
             sync_frequency_interval=timedelta(hours=24),
@@ -58,7 +58,7 @@ class TestDeactivateStaleMaterializationsTask(BaseTest):
         version = EndpointVersion.objects.create(
             endpoint=endpoint,
             version=1,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             saved_query=saved_query,
             is_materialized=True,
@@ -225,8 +225,8 @@ class TestDeactivateStaleMaterializationsTask(BaseTest):
 class TestDeactivateEndpointMaterialization(BaseTest):
     def setUp(self):
         super().setUp()
-        self.sample_hogql_query = {
-            "kind": "HogQLQuery",
+        self.sample_insightsql_query = {
+            "kind": "InsightsQLQuery",
             "query": "SELECT event FROM events LIMIT 100",
         }
 
@@ -235,7 +235,7 @@ class TestDeactivateEndpointMaterialization(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="to_deactivate",
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             last_run_at=timezone.now(),
             sync_frequency_interval=timedelta(hours=24),
@@ -251,7 +251,7 @@ class TestDeactivateEndpointMaterialization(BaseTest):
         version = EndpointVersion.objects.create(
             endpoint=endpoint,
             version=1,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             saved_query=saved_query,
             is_materialized=True,
@@ -280,7 +280,7 @@ class TestDeactivateEndpointMaterialization(BaseTest):
         version = EndpointVersion.objects.create(
             endpoint=endpoint,
             version=1,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
 

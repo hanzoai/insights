@@ -40,7 +40,7 @@ import {
     isDataVisualizationNode,
     isEndpointsUsageOverviewQuery,
     isEndpointsUsageTrendsQuery,
-    isHogQuery,
+    isScriptQuery,
     isInsightVizNode,
     isMarketingAnalyticsAggregatedQuery,
     isRevenueAnalyticsGrossRevenueQuery,
@@ -283,7 +283,7 @@ export function Query<Q extends Node>(props: QueryProps<Q>): JSX.Element | null 
                 context={queryContext}
             />
         )
-    } else if (isHogQuery(query)) {
+    } else if (isScriptQuery(query)) {
         component = (
             <HogDebug
                 attachTo={props.attachTo}

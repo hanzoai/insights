@@ -2,27 +2,27 @@ import { Message } from 'node-rdkafka'
 
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 
-import { convertToHogFunctionInvocationGlobals } from '../../cdp/utils'
+import { convertToCustomFunctionInvocationGlobals } from '../../cdp/utils'
 import { KAFKA_EVENTS_JSON } from '../../config/kafka-topics'
 import { KafkaConsumer } from '../../kafka/consumer'
 import { HealthCheckResult, Hub, PluginsServerConfig, RawClickHouseEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
-import { captureException } from '../../utils/posthog'
-import { shouldBlockHogFlowDueToQuota } from '../services/hogflows/hogflow-quota-limiting'
+import { captureException } from '../../utils/insights'
+import { shouldBlockCustomFlowDueToQuota } from '../services/customflows/customflow-quota-limiting'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { HogRateLimiterService, HogRateLimiterServiceHub } from '../services/monitoring/hog-rate-limiter.service'
-import { HogWatcherState } from '../services/monitoring/hog-watcher.service'
+import { ScriptRateLimiterService, ScriptRateLimiterServiceHub } from '../services/monitoring/script-rate-limiter.service'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationHogFunction,
-    HogFunctionInvocationGlobals,
-    HogFunctionType,
-    HogFunctionTypeType,
+    CyclotronJobInvocationCustomFunction,
+    CustomFunctionInvocationGlobals,
+    CustomFunctionType,
+    CustomFunctionTypeType,
     MinimalAppMetric,
 } from '../types'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
-import { counterHogFunctionStateOnEvent, counterParseError, counterRateLimited } from './metrics'
+import { counterCustomFunctionStateOnEvent, counterParseError, counterRateLimited } from './metrics'
 import { shouldBlockInvocationDueToQuota } from './quota-limiting-helper'
 
 /**
@@ -30,42 +30,42 @@ import { shouldBlockInvocationDueToQuota } from './quota-limiting-helper'
  * Extends CdpConsumerBaseHub with event consumer-specific fields.
  */
 export type CdpEventsConsumerHub = CdpConsumerBaseHub &
-    HogRateLimiterServiceHub &
+    ScriptRateLimiterServiceHub &
     PluginsServerConfig & // For CyclotronJobQueue (to be narrowed later)
     Pick<Hub, 'teamManager' | 'SITE_URL'>
 
 export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsConsumerHub> extends CdpConsumerBase<THub> {
     protected name = 'CdpEventsConsumer'
-    protected hogTypes: HogFunctionTypeType[] = ['destination']
+    protected scriptTypes: CustomFunctionTypeType[] = ['destination']
     private cyclotronJobQueue: CyclotronJobQueue
     protected kafkaConsumer: KafkaConsumer
 
-    private hogRateLimiter: HogRateLimiterService
+    private scriptRateLimiter: ScriptRateLimiterService
 
     constructor(hub: THub, topic: string = KAFKA_EVENTS_JSON, groupId: string = 'cdp-processed-events-consumer') {
         super(hub)
-        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'hog')
+        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'custom_script')
         this.kafkaConsumer = new KafkaConsumer({ groupId, topic })
-        this.hogRateLimiter = new HogRateLimiterService(hub, this.redis)
+        this.scriptRateLimiter = new ScriptRateLimiterService(hub, this.redis)
     }
 
     public async processBatch(
-        invocationGlobals: HogFunctionInvocationGlobals[]
+        invocationGlobals: CustomFunctionInvocationGlobals[]
     ): Promise<{ backgroundTask: Promise<any>; invocations: CyclotronJobInvocation[] }> {
         if (!invocationGlobals.length) {
             return { backgroundTask: Promise.resolve(), invocations: [] }
         }
 
         const invocationsToBeQueued = [
-            ...(await this.createHogFunctionInvocations(invocationGlobals)),
-            ...(await this.createHogFlowInvocations(invocationGlobals)),
+            ...(await this.createCustomFunctionInvocations(invocationGlobals)),
+            ...(await this.createCustomFlowInvocations(invocationGlobals)),
         ]
 
         return {
             // This is all IO so we can set them off in the background and start processing the next batch
             backgroundTask: Promise.all([
                 this.cyclotronJobQueue.queueInvocations(invocationsToBeQueued),
-                this.hogFunctionMonitoringService.flush().catch((err) => {
+                this.customFunctionMonitoringService.flush().catch((err) => {
                     captureException(err)
                     logger.error('🔴', 'Error producing queued messages for monitoring', { err })
                 }),
@@ -74,41 +74,41 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         }
     }
 
-    protected filterHogFunction(hogFunction: HogFunctionType): boolean {
+    protected filterCustomFunction(customFunction: CustomFunctionType): boolean {
         // By default we filter for those with no filters or filters specifically for events
-        return (hogFunction.filters?.source ?? 'events') === 'events'
+        return (customFunction.filters?.source ?? 'events') === 'events'
     }
 
     /**
-     * Finds all matching hog functions for the given globals.
+     * Finds all matching custom functions for the given globals.
      * Filters them for their disabled state as well as masking configs
      */
     @instrumented('cdpConsumer.handleEachBatch.queueMatchingFunctions')
-    protected async createHogFunctionInvocations(
-        invocationGlobals: HogFunctionInvocationGlobals[]
+    protected async createCustomFunctionInvocations(
+        invocationGlobals: CustomFunctionInvocationGlobals[]
     ): Promise<CyclotronJobInvocation[]> {
-        // TODO: Add a helper to hog functions to determine if they require groups or not and then only load those
+        // TODO: Add a helper to custom functions to determine if they require groups or not and then only load those
         await this.groupsManager.enrichGroups(invocationGlobals)
 
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
-        const hogFunctionsByTeam = await this.hogFunctionManager.getHogFunctionsForTeams(
+        const customFunctionsByTeam = await this.customFunctionManager.getCustomFunctionsForTeams(
             teamsToLoad,
-            this.hogTypes,
-            this.filterHogFunction
+            this.scriptTypes,
+            this.filterCustomFunction
         )
 
         const possibleInvocations = (
             await Promise.all(
                 invocationGlobals.map(async (globals) => {
-                    const teamHogFunctions = hogFunctionsByTeam[globals.project.id]
+                    const teamCustomFunctions = customFunctionsByTeam[globals.project.id]
 
-                    const { invocations, metrics, logs } = await this.hogExecutor.buildHogFunctionInvocations(
-                        teamHogFunctions,
+                    const { invocations, metrics, logs } = await this.scriptExecutor.buildCustomFunctionInvocations(
+                        teamCustomFunctions,
                         globals
                     )
 
-                    this.hogFunctionMonitoringService.queueAppMetrics(metrics, 'hog_function')
-                    this.hogFunctionMonitoringService.queueLogs(logs, 'hog_function')
+                    this.customFunctionMonitoringService.queueAppMetrics(metrics, 'custom_function')
+                    this.customFunctionMonitoringService.queueLogs(logs, 'custom_function')
                     this.heartbeat()
 
                     return invocations
@@ -116,14 +116,14 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             )
         ).flat()
 
-        const states = await instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-            return await this.hogWatcher.getEffectiveStates(possibleInvocations.map((x) => x.hogFunction.id))
+        const states = await instrumentFn('cdpConsumer.handleEachBatch.scriptWatcher.getEffectiveStates', async () => {
+            return await this.scriptWatcher.getEffectiveStates(possibleInvocations.map((x) => x.customFunction.id))
         })
-        const rateLimits = await instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitMany', async () => {
-            return await this.hogRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.hogFunction.id, 1]))
+        const rateLimits = await instrumentFn('cdpConsumer.handleEachBatch.scriptRateLimiter.rateLimitMany', async () => {
+            return await this.scriptRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.customFunction.id, 1]))
         })
 
-        const validInvocations: CyclotronJobInvocationHogFunction[] = []
+        const validInvocations: CyclotronJobInvocationCustomFunction[] = []
 
         // Iterate over adding them to the list and updating their priority
         await Promise.all(
@@ -131,9 +131,9 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 try {
                     const rateLimit = rateLimits[index][1]
                     if (rateLimit.isRateLimited) {
-                        counterRateLimited.labels({ kind: 'hog_function' }).inc()
+                        counterRateLimited.labels({ kind: 'custom_function' }).inc()
                         // NOTE: We don't return here as we are just monitoring this feature currently
-                        // this.hogFunctionMonitoringService.queueAppMetric(
+                        // this.customFunctionMonitoringService.queueAppMetric(
                         //     {
                         //         team_id: item.teamId,
                         //         app_source_id: item.functionId,
@@ -141,35 +141,35 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                         //         metric_name: 'rate_limited',
                         //         count: 1,
                         //     },
-                        //     'hog_function'
+                        //     'custom_function'
                         // )
                         // return
                     }
                 } catch (e) {
                     captureException(e)
-                    logger.error('🔴', 'Error checking rate limit for hog function', { err: e })
+                    logger.error('🔴', 'Error checking rate limit for custom function', { err: e })
                 }
 
                 const isQuotaLimited = await shouldBlockInvocationDueToQuota(item, {
                     hub: this.hub,
-                    hogFunctionMonitoringService: this.hogFunctionMonitoringService,
+                    customFunctionMonitoringService: this.customFunctionMonitoringService,
                 })
 
                 if (isQuotaLimited) {
                     return
                 }
 
-                const state = states[item.hogFunction.id].state
+                const state = states[item.customFunction.id].state
 
-                counterHogFunctionStateOnEvent
+                counterCustomFunctionStateOnEvent
                     .labels({
-                        state: HogWatcherState[state],
-                        kind: item.hogFunction.type,
+                        state: ScriptWatcherState[state],
+                        kind: item.customFunction.type,
                     })
                     .inc()
 
-                if (state === HogWatcherState.disabled) {
-                    this.hogFunctionMonitoringService.queueAppMetric(
+                if (state === ScriptWatcherState.disabled) {
+                    this.customFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: item.teamId,
                             app_source_id: item.functionId,
@@ -177,15 +177,15 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                             metric_name: 'disabled_permanently',
                             count: 1,
                         },
-                        'hog_function'
+                        'custom_function'
                     )
                     return
                 }
 
-                if (state === HogWatcherState.degraded) {
+                if (state === ScriptWatcherState.degraded) {
                     item.queuePriority = 2
                     if (this.hub.CDP_OVERFLOW_QUEUE_ENABLED) {
-                        item.queue = 'hogoverflow'
+                        item.queue = 'scriptoverflow'
                     }
                 }
 
@@ -194,9 +194,9 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         )
 
         // Now we can filter by masking configs
-        const { masked, notMasked: notMaskedInvocations } = await this.hogMasker.filterByMasking(validInvocations)
+        const { masked, notMasked: notMaskedInvocations } = await this.scriptMasker.filterByMasking(validInvocations)
 
-        this.hogFunctionMonitoringService.queueAppMetrics(
+        this.customFunctionMonitoringService.queueAppMetrics(
             masked.map((item) => ({
                 team_id: item.teamId,
                 app_source_id: item.functionId,
@@ -204,7 +204,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 metric_name: 'masked',
                 count: 1,
             })),
-            'hog_function'
+            'custom_function'
         )
 
         const triggeredInvocationsMetrics: MinimalAppMetric[] = []
@@ -222,7 +222,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             })
 
             // Bill once per triggering event, not per destination
-            if (item.hogFunction.type === 'destination') {
+            if (item.customFunction.type === 'destination') {
                 const eventUuid = item.state?.globals?.event?.uuid
                 if (eventUuid && !billedEventUuids.has(eventUuid)) {
                     billedEventUuids.add(eventUuid)
@@ -238,37 +238,37 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             }
         })
 
-        this.hogFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'hog_function')
+        this.customFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'custom_function')
 
         return notMaskedInvocations
     }
 
     /**
-     * Finds all matching hog flows for the given globals.
+     * Finds all matching custom flows for the given globals.
      * Filters them for their disabled state as well as masking configs
      */
     @instrumented('cdpConsumer.handleEachBatch.queueMatchingFlows')
-    protected async createHogFlowInvocations(
-        invocationGlobals: HogFunctionInvocationGlobals[]
+    protected async createCustomFlowInvocations(
+        invocationGlobals: CustomFunctionInvocationGlobals[]
     ): Promise<CyclotronJobInvocation[]> {
         // TODO: Add back in group enrichment if necessary
         // await this.groupsManager.enrichGroups(invocationGlobals)
 
         const teamsToLoad = [...new Set(invocationGlobals.map((x) => x.project.id))]
-        const hogFlowsByTeam = await this.hogFlowManager.getHogFlowsForTeams(teamsToLoad)
+        const customFlowsByTeam = await this.customFlowManager.getCustomFlowsForTeams(teamsToLoad)
 
         const possibleInvocations = (
             await Promise.all(
                 invocationGlobals.map(async (globals) => {
-                    const teamHogFlows = hogFlowsByTeam[globals.project.id]
+                    const teamCustomFlows = customFlowsByTeam[globals.project.id]
 
-                    const { invocations, metrics, logs } = await this.hogFlowExecutor.buildHogFlowInvocations(
-                        teamHogFlows,
+                    const { invocations, metrics, logs } = await this.customFlowExecutor.buildCustomFlowInvocations(
+                        teamCustomFlows,
                         globals
                     )
 
-                    this.hogFunctionMonitoringService.queueAppMetrics(metrics, 'hog_flow')
-                    this.hogFunctionMonitoringService.queueLogs(logs, 'hog_flow')
+                    this.customFunctionMonitoringService.queueAppMetrics(metrics, 'custom_flow')
+                    this.customFunctionMonitoringService.queueLogs(logs, 'custom_flow')
                     this.heartbeat()
 
                     return invocations
@@ -276,11 +276,11 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             )
         ).flat()
 
-        const states = await instrumentFn('cdpConsumer.handleEachBatch.hogWatcher.getEffectiveStates', async () => {
-            return await this.hogWatcher.getEffectiveStates(possibleInvocations.map((x) => x.hogFlow.id))
+        const states = await instrumentFn('cdpConsumer.handleEachBatch.scriptWatcher.getEffectiveStates', async () => {
+            return await this.scriptWatcher.getEffectiveStates(possibleInvocations.map((x) => x.customFlow.id))
         })
-        const rateLimits = await instrumentFn('cdpConsumer.handleEachBatch.hogRateLimiter.rateLimitMany', async () => {
-            return await this.hogRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.hogFlow.id, 1]))
+        const rateLimits = await instrumentFn('cdpConsumer.handleEachBatch.scriptRateLimiter.rateLimitMany', async () => {
+            return await this.scriptRateLimiter.rateLimitMany(possibleInvocations.map((x) => [x.customFlow.id, 1]))
         })
         const validInvocations: CyclotronJobInvocation[] = []
 
@@ -290,8 +290,8 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 try {
                     const rateLimit = rateLimits[index][1]
                     if (rateLimit.isRateLimited) {
-                        counterRateLimited.labels({ kind: 'hog_flow' }).inc()
-                        this.hogFunctionMonitoringService.queueAppMetric(
+                        counterRateLimited.labels({ kind: 'custom_flow' }).inc()
+                        this.customFunctionMonitoringService.queueAppMetric(
                             {
                                 team_id: item.teamId,
                                 app_source_id: item.functionId,
@@ -299,28 +299,28 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                                 metric_name: 'rate_limited',
                                 count: 1,
                             },
-                            'hog_flow'
+                            'custom_flow'
                         )
                         return
                     }
                 } catch (e) {
                     captureException(e)
-                    logger.error('🔴', 'Error checking rate limit for hog flow', { err: e })
+                    logger.error('🔴', 'Error checking rate limit for custom flow', { err: e })
                 }
 
                 // Check quota limits for workflow actions
-                const isQuotaLimited = await shouldBlockHogFlowDueToQuota(item, {
+                const isQuotaLimited = await shouldBlockCustomFlowDueToQuota(item, {
                     hub: this.hub,
-                    hogFunctionMonitoringService: this.hogFunctionMonitoringService,
+                    customFunctionMonitoringService: this.customFunctionMonitoringService,
                 })
 
                 if (isQuotaLimited) {
                     return
                 }
 
-                const state = states[item.hogFlow.id].state
-                if (state === HogWatcherState.disabled) {
-                    this.hogFunctionMonitoringService.queueAppMetric(
+                const state = states[item.customFlow.id].state
+                if (state === ScriptWatcherState.disabled) {
+                    this.customFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: item.teamId,
                             app_source_id: item.functionId,
@@ -328,12 +328,12 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                             metric_name: 'disabled_permanently',
                             count: 1,
                         },
-                        'hog_flow'
+                        'custom_flow'
                     )
                     return
                 }
 
-                if (state === HogWatcherState.degraded) {
+                if (state === ScriptWatcherState.degraded) {
                     item.queuePriority = 2
                 }
 
@@ -342,9 +342,9 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         )
 
         // Now we can filter by masking configs
-        const { masked, notMasked: notMaskedInvocations } = await this.hogMasker.filterByMasking(validInvocations)
+        const { masked, notMasked: notMaskedInvocations } = await this.scriptMasker.filterByMasking(validInvocations)
 
-        this.hogFunctionMonitoringService.queueAppMetrics(
+        this.customFunctionMonitoringService.queueAppMetrics(
             masked.map((item) => ({
                 team_id: item.teamId,
                 app_source_id: item.functionId,
@@ -352,7 +352,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
                 metric_name: 'masked',
                 count: 1,
             })),
-            'hog_flow'
+            'custom_flow'
         )
 
         const triggeredInvocationsMetrics: MinimalAppMetric[] = []
@@ -367,31 +367,31 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
             })
         })
 
-        this.hogFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'hog_flow')
+        this.customFunctionMonitoringService.queueAppMetrics(triggeredInvocationsMetrics, 'custom_flow')
 
         return notMaskedInvocations
     }
 
     @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<HogFunctionInvocationGlobals[]> {
-        const events: HogFunctionInvocationGlobals[] = []
+    public async _parseKafkaBatch(messages: Message[]): Promise<CustomFunctionInvocationGlobals[]> {
+        const events: CustomFunctionInvocationGlobals[] = []
 
         await Promise.all(
             messages.map(async (message) => {
                 try {
                     const clickHouseEvent = parseJSON(message.value!.toString()) as RawClickHouseEvent
 
-                    const [teamHogFunctions, teamHogFlows, team] = await Promise.all([
-                        this.hogFunctionManager.getHogFunctionsForTeam(clickHouseEvent.team_id, this.hogTypes),
-                        this.hogFlowManager.getHogFlowsForTeam(clickHouseEvent.team_id),
+                    const [teamCustomFunctions, teamCustomFlows, team] = await Promise.all([
+                        this.customFunctionManager.getCustomFunctionsForTeam(clickHouseEvent.team_id, this.scriptTypes),
+                        this.customFlowManager.getCustomFlowsForTeam(clickHouseEvent.team_id),
                         this.hub.teamManager.getTeam(clickHouseEvent.team_id),
                     ])
 
-                    if ((!teamHogFunctions.length && !teamHogFlows.length) || !team) {
+                    if ((!teamCustomFunctions.length && !teamCustomFlows.length) || !team) {
                         return
                     }
 
-                    events.push(convertToHogFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
+                    events.push(convertToCustomFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()

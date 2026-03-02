@@ -4,7 +4,7 @@ import { IconDownload } from '@posthog/icons'
 import { LemonButton, LemonTable, LemonTableColumn } from '@posthog/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
-import { PhonePairHogs } from 'lib/components/hedgehogs'
+import { PhonePairHogs } from 'lib/components/mascots'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
 import { createdAtColumn, createdByColumn } from 'lib/lemon-ui/LemonTable/columnUtils'
 import { MaxTool } from 'scenes/max/MaxTool'
@@ -43,7 +43,7 @@ export function UserInterviews(): JSX.Element {
                 productName="User interviews"
                 productKey={ProductKey.USER_INTERVIEWS}
                 thingName="user interview"
-                description="Make full use of user interviews by recording them with PostHog."
+                description="Make full use of user interviews by recording them with Insights."
                 customHog={PhonePairHogs}
                 isEmpty={!userInterviewsLoading && userInterviews.length === 0}
                 actionElementOverride={
@@ -54,7 +54,7 @@ export function UserInterviews(): JSX.Element {
                         to="https://posthog.com/recorder"
                         data-attr="install-recorder"
                     >
-                        Install PostHog Recorder
+                        Install Insights Recorder
                     </LemonButton>
                 }
                 className="my-0"

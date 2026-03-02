@@ -9,7 +9,7 @@ import {
 } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import {
     DEFAULT_HEATMAP_FILTERS,
-    PostHogAppToolbarEvent,
+    InsightsAppToolbarEvent,
     calculateViewportRange,
 } from 'lib/components/IframedToolbarBrowser/utils'
 import { CommonFilters, HeatmapFixedPositionMode } from 'lib/components/heatmaps/types'
@@ -70,7 +70,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         setBrowserUrl: (url: string | null) => ({ url }),
         setProposedBrowserUrl: (url: string | null) => ({ url }),
         onIframeLoad: true,
-        sendToolbarMessage: (type: PostHogAppToolbarEvent, payload?: Record<string, any>) => ({
+        sendToolbarMessage: (type: InsightsAppToolbarEvent, payload?: Record<string, any>) => ({
             type,
             payload,
         }),
@@ -81,7 +81,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
         enableElementSelector: true,
         disableElementSelector: true,
         setNewActionName: (name: string | null) => ({ name }),
-        toolbarMessageReceived: (type: PostHogAppToolbarEvent, payload: Record<string, any>) => ({ type, payload }),
+        toolbarMessageReceived: (type: InsightsAppToolbarEvent, payload: Record<string, any>) => ({ type, payload }),
         setCurrentPath: (path: string) => ({ path }),
         setInitialPath: (path: string) => ({ path }),
     }),
@@ -226,13 +226,13 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
 
         // actions
         enableElementSelector: () => {
-            actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: true })
+            actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: true })
         },
         disableElementSelector: () => {
-            actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: false })
+            actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_ELEMENT_SELECTOR, { enabled: false })
         },
         setNewActionName: ({ name }) => {
-            actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_NEW_ACTION_NAME, { name })
+            actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_NEW_ACTION_NAME, { name })
         },
 
         onIframeLoad: () => {
@@ -241,11 +241,11 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
             // but there's no slam dunk way to do that
 
             const init = (): void => {
-                actions.sendToolbarMessage(PostHogAppToolbarEvent.PH_APP_INIT)
+                actions.sendToolbarMessage(InsightsAppToolbarEvent.PH_APP_INIT)
             }
 
             const onIframeMessage = (e: MessageEvent): void => {
-                const type: PostHogAppToolbarEvent = e?.data?.type
+                const type: InsightsAppToolbarEvent = e?.data?.type
                 const payload = e?.data?.payload
 
                 actions.toolbarMessageReceived(type, payload)
@@ -263,9 +263,9 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
                 }
 
                 switch (type) {
-                    case PostHogAppToolbarEvent.PH_TOOLBAR_INIT:
+                    case InsightsAppToolbarEvent.PH_TOOLBAR_INIT:
                         return init()
-                    case PostHogAppToolbarEvent.PH_TOOLBAR_READY:
+                    case InsightsAppToolbarEvent.PH_TOOLBAR_READY:
                         if (props.userIntent === 'heatmaps') {
                             posthog.capture('in-app heatmap frame loaded', {
                                 inapp_heatmap_page_url_visited: values.browserUrl,
@@ -277,15 +277,15 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
                             return actions.startTrackingLoading()
                         }
                         return
-                    case PostHogAppToolbarEvent.PH_NEW_ACTION_CREATED:
+                    case InsightsAppToolbarEvent.PH_NEW_ACTION_CREATED:
                         actions.setNewActionName(null)
                         actions.disableElementSelector()
                         return
-                    case PostHogAppToolbarEvent.PH_TOOLBAR_NAVIGATED:
+                    case InsightsAppToolbarEvent.PH_TOOLBAR_NAVIGATED:
                         // remove leading / from path
                         return actions.setCurrentPath(payload.path.replace(/^\/+/, ''))
                     default:
-                        console.warn(`[PostHog Heatmaps] Received unknown child window message: ${type}`)
+                        console.warn(`[Insights Heatmaps] Received unknown child window message: ${type}`)
                 }
             }
 

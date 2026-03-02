@@ -241,7 +241,7 @@ export function Thread({ className }: { className?: string }): JSX.Element | nul
                     {conversationId && isPromptVisible && !streamingActive && (
                         <MessageTemplate type="ai">
                             <div className="flex flex-col gap-2">
-                                <span className="text-xs text-muted">How is PostHog AI doing? (optional)</span>
+                                <span className="text-xs text-muted">How is Insights AI doing? (optional)</span>
                                 <FeedbackDisplay conversationId={conversationId} />
                             </div>
                         </MessageTemplate>
@@ -251,7 +251,7 @@ export function Thread({ className }: { className?: string }): JSX.Element | nul
                     )}
                     {conversationId && isThankYouVisible && !streamingActive && (
                         <MessageTemplate type="ai">
-                            <p className="m-0 text-sm text-secondary">Thanks for your feedback and using PostHog AI!</p>
+                            <p className="m-0 text-sm text-secondary">Thanks for your feedback and using Insights AI!</p>
                         </MessageTemplate>
                     )}
                     {conversationId && ticketPromptData.needed && (
@@ -405,7 +405,7 @@ function Message({
                                         <Tooltip
                                             title={
                                                 <>
-                                                    This is a PostHog AI command:
+                                                    This is an Insights AI command:
                                                     <br />
                                                     <i>{maybeCommand.description}</i>
                                                 </>
@@ -625,7 +625,7 @@ function Message({
                         <div className="flex items-center gap-1.5">
                             <IconWarning className="text-xl text-warning" />
                             <i>
-                                PostHog AI is generating this answer one more time because the previous attempt has
+                                Insights AI is generating this answer one more time because the previous attempt has
                                 failed.
                             </i>
                         </div>
@@ -706,7 +706,7 @@ const TextAnswer = React.forwardRef<HTMLDivElement, TextAnswerProps>(function Te
                 <MarkdownMessage content={message.content} id={message.id || 'in-progress'} />
             ) : (
                 <MarkdownMessage
-                    content={message.content || '*PostHog AI has failed to generate an answer. Please try again.*'}
+                    content={message.content || '*Insights AI has failed to generate an answer. Please try again.*'}
                     id={message.id || 'error'}
                 />
             )}
@@ -1498,7 +1498,7 @@ function SuccessActions({
                     {feedbackInputStatus === 'pending' && (
                         <div className="flex w-full gap-1.5 items-center mt-1.5">
                             <LemonInput
-                                placeholder="Help us improve PostHog AI…"
+                                placeholder="Help us improve Insights AI…"
                                 fullWidth
                                 value={feedback}
                                 onChange={(newValue) => setFeedback(newValue)}

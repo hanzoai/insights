@@ -48,8 +48,8 @@ export interface FunnelsQuery {
     }>
 }
 
-export interface HogQLQuery {
-    kind: 'HogQLQuery'
+export interface InsightsQLQuery {
+    kind: 'InsightsQLQuery'
     query: string
 }
 
@@ -81,7 +81,7 @@ export interface FunnelStep {
 
 export type FunnelResult = FunnelStep[] | FunnelStep[][]
 
-export interface HogQLResult {
+export interface InsightsQLResult {
     columns?: string[]
     results?: unknown[][]
 }
@@ -102,8 +102,8 @@ export interface FunnelPayload extends BasePayload {
 }
 
 export interface TablePayload extends BasePayload {
-    query?: HogQLQuery
-    results: HogQLResult
+    query?: InsightsQLQuery
+    results: InsightsQLResult
 }
 
 // ============================================================================
@@ -121,5 +121,5 @@ export interface FunnelVisualizerProps {
 }
 
 export interface TableVisualizerProps {
-    results: HogQLResult
+    results: InsightsQLResult
 }

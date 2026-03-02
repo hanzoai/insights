@@ -15,7 +15,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             <>
                 <Markdown>
                     {dedent`
-                        Exception autocapture can be enabled during initialization of the PostHog client to automatically capture any exception thrown by your Angular application.
+                        Exception autocapture can be enabled during initialization of the Insights client to automatically capture any exception thrown by your Angular application.
 
                         This requires overriding Angular's default \`ErrorHandler\` provider:
                     `}
@@ -31,7 +31,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                               import posthog from 'posthog-js';
                               
                               @Injectable({ providedIn: 'root' })
-                              class PostHogErrorHandler implements ErrorHandler {
+                              class InsightsErrorHandler implements ErrorHandler {
                                 public constructor() {}
                                 public handleError(error: unknown): void {
                                   const extractedError = this._extractError(error) || 'Unknown error';
@@ -90,10 +90,10 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 return isNgZoneEnabled ? Zone.root.run(callback) : callback();
                               }
                               
-                              export function providePostHogErrorHandler(): Provider {
+                              export function provideInsightsErrorHandler(): Provider {
                                 return {
                                   provide: ErrorHandler,
-                                  useValue: new PostHogErrorHandler(),
+                                  useValue: new InsightsErrorHandler(),
                                 };
                               }
                             `,
@@ -102,7 +102,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 />
                 <Markdown>
                     {dedent`
-                        Then, in your \`src/app/app.config.ts\`, import the \`providePostHogErrorHandler\` function and add it to the providers array:
+                        Then, in your \`src/app/app.config.ts\`, import the \`provideInsightsErrorHandler\` function and add it to the providers array:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -116,11 +116,11 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                               import { provideRouter } from '@angular/router';
 
                               import { routes } from './app.routes';
-                              import { providePostHogErrorHandler } from './posthog-error-handler'; // +
+                              import { provideInsightsErrorHandler } from './posthog-error-handler'; // +
                               export const appConfig: ApplicationConfig = {
                                 providers: [
                                   ...
-                                  providePostHogErrorHandler(), // +
+                                  provideInsightsErrorHandler(), // +
                                 ],
                               };
                             `,
@@ -163,9 +163,9 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
         content: (
             <Markdown>
                 {dedent`
-                    Confirm exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),

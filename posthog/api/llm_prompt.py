@@ -18,7 +18,7 @@ from posthog.event_usage import report_team_action, report_user_action
 from posthog.exceptions_capture import capture_exception
 from posthog.models import User
 from posthog.models.llm_prompt import LLMPrompt
-from posthog.permissions import AccessControlPermission, PostHogFeatureFlagPermission
+from posthog.permissions import AccessControlPermission, InsightsFeatureFlagPermission
 from posthog.rate_limit import BurstRateThrottle, SustainedRateThrottle
 from posthog.rbac.access_control_api_mixin import AccessControlViewSetMixin
 
@@ -114,7 +114,7 @@ class LLMPromptViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, Forbid
     scope_object = "llm_prompt"
     queryset = LLMPrompt.objects.all()
     serializer_class = LLMPromptSerializer
-    permission_classes = [PostHogFeatureFlagPermission, AccessControlPermission]
+    permission_classes = [InsightsFeatureFlagPermission, AccessControlPermission]
     posthog_feature_flag = "llm-analytics-prompts"
 
     def safely_get_queryset(self, queryset):

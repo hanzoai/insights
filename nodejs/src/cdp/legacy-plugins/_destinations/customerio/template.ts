@@ -13,7 +13,7 @@ export const customerioPlugin: LegacyDestinationPlugin = {
         id: 'plugin-customerio-plugin',
         name: 'Customer.io',
         description: 'This plugin will send events to Customer.io.',
-        icon_url: 'https://raw.githubusercontent.com/posthog/customerio-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/Insights/customerio-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: `return event`,
@@ -84,7 +84,7 @@ export const customerioPlugin: LegacyDestinationPlugin = {
             {
                 templating: false,
                 key: 'eventsToSend',
-                label: 'PostHog Event Allowlist',
+                label: 'Insights Event Allowlist',
                 type: 'string',
                 description: 'If this is set, only the specified events (comma-separated) will be sent to Customer.io.',
             },

@@ -521,7 +521,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
 
         It should be between 0-6 (Sunday-Saturday) for weekly intervals (this is included in the IntegerField
         validation, so we don't need to validate it here).
-        Sunday is 0 since this is what is used by Temporal and Sunday is also the default week start day in PostHog.
+        Sunday is 0 since this is what is used by Temporal and Sunday is also the default week start day in Insights.
 
         It should be None for all other intervals.
         """

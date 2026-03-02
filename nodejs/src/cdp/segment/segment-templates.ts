@@ -1,15 +1,15 @@
 import { DestinationDefinition, destinations } from '@segment/action-destinations'
 
-import { HogFunctionFilterEvent, HogFunctionInputSchemaType, HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionFilterEvent, CustomFunctionInputSchemaType, CustomFunctionTemplate } from '~/cdp/types'
 
-import { EXTEND_OBJECT_KEY } from '../services/hog-executor.service'
+import { EXTEND_OBJECT_KEY } from '../services/script-executor.service'
 
 export type SegmentDestination = {
-    template: HogFunctionTemplate
+    template: CustomFunctionTemplate
     destination: DestinationDefinition
 }
 
-const translateFilters = (subscribe: string): { events: HogFunctionFilterEvent[] } => {
+const translateFilters = (subscribe: string): { events: CustomFunctionFilterEvent[] } => {
     const mappings = {
         'type = "page"': 'event = "$pageview"',
         'type = "screen"': 'event = "$screen"',
@@ -42,7 +42,7 @@ const translateFilters = (subscribe: string): { events: HogFunctionFilterEvent[]
                 properties: [
                     {
                         key: mapped,
-                        type: 'hogql',
+                        type: 'insightsql',
                         value: null,
                     },
                 ],
@@ -383,7 +383,7 @@ const SECRET_FIELD_NAMES = [
 const translateInputsSchema = (
     inputs_schema: Record<string, any> | undefined,
     mapping?: Record<string, any> | undefined
-): HogFunctionInputSchemaType[] => {
+): CustomFunctionInputSchemaType[] => {
     if (!inputs_schema) {
         return []
     }
@@ -398,7 +398,7 @@ const translateInputsSchema = (
             required: field.required ?? false,
             secret: field.type === 'password' || SECRET_FIELD_NAMES.includes(key.toLowerCase()) ? true : false,
             ...(field.choices ? { choices: field.choices } : {}),
-        })) as HogFunctionInputSchemaType[]
+        })) as CustomFunctionInputSchemaType[]
 }
 
 const getIconUrl = (id: string, slug: string | undefined) => {
@@ -423,7 +423,7 @@ const getIconUrl = (id: string, slug: string | undefined) => {
     }
 
     if (!slug && !(id in icon_overrides)) {
-        return '/static/posthog-icon.svg'
+        return '/static/insights-icon.svg'
     }
 
     return `/static/services/${
@@ -478,7 +478,7 @@ const HIDDEN_DESTINATIONS = [
     'segment-actions-toplyne-cloud',
     'segment-actions-heap-cloud',
 
-    // these destinations require a raw segment event (https://github.com/PostHog/posthog/pull/33451)
+    // these destinations require a raw segment event (https://github.com/Insights/insights/pull/33451)
     'segment-actions-equals',
     'segment-actions-gainsight-px-cloud',
     'segment-actions-iqm',

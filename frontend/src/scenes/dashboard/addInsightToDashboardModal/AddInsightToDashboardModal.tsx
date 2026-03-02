@@ -45,7 +45,7 @@ export function AddInsightToDashboardModal(): JSX.Element {
         ([type, meta]) =>
             meta.inMenu &&
             type !== InsightType.JSON &&
-            type !== InsightType.HOG &&
+            type !== InsightType.SCRIPT &&
             !QUICK_CREATE_TYPES.some((qt) => qt.type === type)
     )
 

@@ -1,19 +1,19 @@
 # Live Debugger
 
-Live Debugger provides runtime inspection capabilities for PostHog users by enabling breakpoints in production code. When a breakpoint is hit, the system captures local variables, stack traces, and execution context without interrupting the running application.
+Live Debugger provides runtime inspection capabilities for Insights users by enabling breakpoints in production code. When a breakpoint is hit, the system captures local variables, stack traces, and execution context without interrupting the running application.
 
 ## Related Projects
 
-- [https://github.com/PostHog/hogtrace](hogtrace), a DTrace-inspired language for defining
+- [https://github.com/Insights/hogtrace](hogtrace), a DTrace-inspired language for defining
   instrumentation scripts. It includes a Rust-based VM that can evaluate expressions within
   the context of the client application safely.
-- [https://github.com/PostHog/libdebugger](libdebugger), a library for runtime instrumentation
+- [https://github.com/Insights/libdebugger](libdebugger), a library for runtime instrumentation
   of Python code.
 
 ## Flow
 
 ```text
-    PostHog UI                                       User Application
+    Insights UI                                       User Application
     ─────────────                                    ────────────────
          │                                                  │
          │ (1) Create breakpoint                            │
@@ -36,14 +36,14 @@ Live Debugger provides runtime inspection capabilities for PostHog users by enab
          │
          │ (5) Query hits (HogQL)
          ▼
-    PostHog UI
+    Insights UI
 ```
 
 ## Architecture
 
-The system consists of three components working together. The backend stores breakpoint definitions in PostgreSQL, associating each breakpoint with a team, repository, file, and line number. When instrumented code executes, it sends breakpoint hit events to PostHog that are stored in ClickHouse for efficient querying. The frontend provides a GitHub repository browser where users can navigate source files, set breakpoints, and inspect captured runtime state.
+The system consists of three components working together. The backend stores breakpoint definitions in PostgreSQL, associating each breakpoint with a team, repository, file, and line number. When instrumented code executes, it sends breakpoint hit events to Insights that are stored in ClickHouse for efficient querying. The frontend provides a GitHub repository browser where users can navigate source files, set breakpoints, and inspect captured runtime state.
 
-Applications poll the external API using a Project API key to fetch active breakpoints for their repository. When code execution reaches a breakpoint line, the instrumentation layer captures the current state and sends it as a PostHog event. The system supports conditional breakpoints through optional Python expressions that determine whether to capture state at a given location.
+Applications poll the external API using a Project API key to fetch active breakpoints for their repository. When code execution reaches a breakpoint line, the instrumentation layer captures the current state and sends it as a Insights event. The system supports conditional breakpoints through optional Python expressions that determine whether to capture state at a given location.
 
 ## API Endpoints
 
@@ -53,7 +53,7 @@ The `/api/environments/:team_id/live_debugger_breakpoints/breakpoint_hits/` endp
 
 ## Data Model
 
-Breakpoints are identified by the combination of team, repository, filename, and line number. Each breakpoint can be enabled or disabled and may include a condition expression. Breakpoint hits are stored as PostHog events with the event name `$data_breakpoint_hit` containing properties for the breakpoint ID, file path, line number, function name, local variables, and stack trace.
+Breakpoints are identified by the combination of team, repository, filename, and line number. Each breakpoint can be enabled or disabled and may include a condition expression. Breakpoint hits are stored as Insights events with the event name `$data_breakpoint_hit` containing properties for the breakpoint ID, file path, line number, function name, local variables, and stack trace.
 
 The system enforces team isolation at both the database and API levels. Breakpoint queries automatically filter by team ID, and attempts to access breakpoints from other teams return 404 responses to prevent information disclosure.
 

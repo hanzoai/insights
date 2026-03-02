@@ -7,5 +7,5 @@ export const TAXONOMIC_GROUP_TYPES = [
     TaxonomicFilterGroupType.EventProperties,
     TaxonomicFilterGroupType.PersonProperties,
     TaxonomicFilterGroupType.Cohorts,
-    TaxonomicFilterGroupType.HogQLExpression,
+    TaxonomicFilterGroupType.InsightsQLExpression,
 ]

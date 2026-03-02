@@ -88,7 +88,7 @@ const BasicTemplate: StoryFn<ToolbarStoryProps> = (props) => {
             '/api/projects/@current/actions/': listActionsAPIResponse,
             '/api/projects/@current/web_experiments/': listExperimentsAPIResponse,
             '/api/environments/@current/web_vitals/': listWebVitalsAPIResponse,
-            '/api/users/@me/hedgehog_config/': {},
+            '/api/users/@me/mascot_config/': {},
         },
     })
 

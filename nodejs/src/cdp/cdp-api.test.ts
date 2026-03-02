@@ -7,21 +7,21 @@ import express from 'ultimate-express'
 
 import { setupExpressApp } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
-import { HogFlow } from '~/schema/hogflow'
+import { CustomFlow } from '~/schema/customflow'
 
 import { forSnapshot } from '../../tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
 import { Hub, Team } from '../types'
 import { closeHub, createHub } from '../utils/db/hub'
 import { UUIDT } from '../utils/utils'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from './_tests/examples'
-import { insertHogFunction as _insertHogFunction, createHogFunction } from './_tests/fixtures'
-import { insertHogFlow as _insertHogFlow } from './_tests/fixtures-hogflows'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from './_tests/examples'
+import { insertCustomFunction as _insertCustomFunction, createCustomFunction } from './_tests/fixtures'
+import { insertCustomFlow as _insertCustomFlow } from './_tests/fixtures-customflows'
 import { deleteKeysWithPrefix } from './_tests/redis'
 import { CdpApi } from './cdp-api'
-import { posthogFilterOutPlugin } from './legacy-plugins/_transformations/posthog-filter-out-plugin/template'
-import { BASE_REDIS_KEY, HogWatcherState } from './services/monitoring/hog-watcher.service'
-import { HogFunctionInvocationGlobals, HogFunctionType } from './types'
+import { insightsFilterOutPlugin } from './legacy-plugins/_transformations/insights-filter-out-plugin/template'
+import { BASE_REDIS_KEY, ScriptWatcherState } from './services/monitoring/script-watcher.service'
+import { CustomFunctionInvocationGlobals, CustomFunctionType } from './types'
 
 describe('CDP API', () => {
     let hub: Hub
@@ -29,17 +29,17 @@ describe('CDP API', () => {
     let app: express.Application
     let server: Server
     let api: CdpApi
-    let hogFunction: HogFunctionType
-    let hogFunctionMultiFetch: HogFunctionType
+    let customFunction: CustomFunctionType
+    let customFunctionMultiFetch: CustomFunctionType
 
-    const globals: Partial<HogFunctionInvocationGlobals> = {
+    const globals: Partial<CustomFunctionInvocationGlobals> = {
         groups: {},
         person: {
             id: '123',
             name: 'Jane Doe',
             url: 'https://example.com/person/123',
             properties: {
-                email: 'example@posthog.com',
+                email: 'example@hanzo.ai',
             },
         },
         event: {
@@ -55,17 +55,17 @@ describe('CDP API', () => {
         },
     }
 
-    const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-        const item = await _insertHogFunction(hub.postgres, team.id, hogFunction)
+    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+        const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
         // Trigger the reload that django would do
-        api['hogFunctionManager']['onHogFunctionsReloaded'](team.id, [item.id])
+        api['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
-    const insertHogFlow = async (hogFlow: Partial<HogFlow>) => {
-        const item = await _insertHogFlow(hub.postgres, { team_id: team.id, ...hogFlow } as HogFlow)
+    const insertCustomFlow = async (customFlow: Partial<CustomFlow>) => {
+        const item = await _insertCustomFlow(hub.postgres, { team_id: team.id, ...customFlow } as CustomFlow)
         // Trigger the reload that django would do
-        api['hogFlowManager']['onHogFlowsReloaded'](team.id, [item.id])
+        api['customFlowManager']['onCustomFlowsReloaded'](team.id, [item.id])
         return item
     }
 
@@ -87,18 +87,18 @@ describe('CDP API', () => {
 
         mockFetch.mockClear()
 
-        hogFunction = await insertHogFunction({
-            name: 'test hog function',
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        customFunction = await insertCustomFunction({
+            name: 'test custom function',
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
         })
 
-        hogFunctionMultiFetch = await insertHogFunction({
-            name: 'test hog function multi fetch',
-            ...HOG_EXAMPLES.recursive_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        customFunctionMultiFetch = await insertCustomFunction({
+            name: 'test custom function multi fetch',
+            ...CUSTOM_SCRIPT_EXAMPLES.recursive_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
         })
     })
 
@@ -107,9 +107,9 @@ describe('CDP API', () => {
         await closeHub(hub)
     })
 
-    it('errors if missing hog function', async () => {
+    it('errors if missing custom function', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${new UUIDT().toString()}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${new UUIDT().toString()}/invocations`)
             .send({ globals })
 
         expect(res.status).toEqual(404)
@@ -117,7 +117,7 @@ describe('CDP API', () => {
 
     it('errors if missing team', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${new UUIDT().toString()}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${new UUIDT().toString()}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals })
 
         expect(res.status).toEqual(404)
@@ -125,7 +125,7 @@ describe('CDP API', () => {
 
     it('errors if missing values', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({})
 
         expect(res.status).toEqual(400)
@@ -134,9 +134,9 @@ describe('CDP API', () => {
         })
     })
 
-    it("does not error if hog function is 'new'", async () => {
+    it("does not error if custom function is 'new'", async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/new/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/new/invocations`)
             .send({ globals })
 
         expect(res.status).toEqual(400)
@@ -144,7 +144,7 @@ describe('CDP API', () => {
 
     it('can invoke a function via the API with mocks', async () => {
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -152,7 +152,7 @@ describe('CDP API', () => {
         expect(res.body.logs.map((log: any) => log.message).slice(0, -1)).toMatchInlineSnapshot(`
             [
               "Async function 'fetch' was mocked with arguments:",
-              "fetch('https://example.com/posthog-webhook', {
+              "fetch('https://example.com/insights-webhook', {
               "headers": {
                 "version": "v=1.0.0"
               },
@@ -177,7 +177,7 @@ describe('CDP API', () => {
                   "name": "Jane Doe",
                   "url": "https://example.com/person/123",
                   "properties": {
-                    "email": "example@posthog.com"
+                    "email": "example@hanzo.ai"
                   }
                 },
                 "event_url": "https://example.com/events/b3a1fe86-b10c-43cc-acaf-d208977608d0/2021-09-28T14:00:00Z-test"
@@ -201,7 +201,7 @@ describe('CDP API', () => {
         )
 
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
         expect(res.status).toEqual(200)
@@ -231,15 +231,15 @@ describe('CDP API', () => {
             })
         )
 
-        hogFunction = await insertHogFunction({
-            name: 'test hog function',
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_fetch,
-            ...HOG_FILTERS_EXAMPLES.elements_text_filter,
+        customFunction = await insertCustomFunction({
+            name: 'test custom function',
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.elements_text_filter,
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
         expect(res.status).toEqual(200)
@@ -269,7 +269,7 @@ describe('CDP API', () => {
         )
         const res = await supertest(app)
             .post(
-                `/api/projects/${hogFunctionMultiFetch.team_id}/hog_functions/${hogFunctionMultiFetch.id}/invocations`
+                `/api/projects/${customFunctionMultiFetch.team_id}/custom_functions/${customFunctionMultiFetch.id}/invocations`
             )
             .send({ globals, mock_async_functions: false })
 
@@ -301,14 +301,14 @@ describe('CDP API', () => {
             })
         })
 
-        hogFunction = await insertHogFunction({
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_google_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        customFunction = await insertCustomFunction({
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_google_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: false })
 
         expect(mockFetch).toHaveBeenCalledWith(
@@ -336,14 +336,14 @@ describe('CDP API', () => {
     })
 
     it('doesnt include enriched values in the mock response', async () => {
-        hogFunction = await insertHogFunction({
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_google_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        customFunction = await insertCustomFunction({
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_google_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -370,28 +370,28 @@ describe('CDP API', () => {
     })
 
     it('handles mappings', async () => {
-        const hogFunction = await insertHogFunction({
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        const customFunction = await insertCustomFunction({
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
             mappings: [
                 {
                     // Filters for pageview or autocapture
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 },
                 {
                     // No filters so should match all events
-                    ...HOG_FILTERS_EXAMPLES.no_filters,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
                 },
                 {
                     // Broken filters so shouldn't match
-                    ...HOG_FILTERS_EXAMPLES.broken_filters,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.broken_filters,
                 },
             ],
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -408,7 +408,7 @@ describe('CDP API', () => {
             {
                 level: 'error',
                 message:
-                    'Error filtering event b3a1fe86-b10c-43cc-acaf-d208977608d0: Invalid HogQL bytecode, stack is empty, can not pop',
+                    'Error filtering event b3a1fe86-b10c-43cc-acaf-d208977608d0: Invalid InsightsQL bytecode, stack is empty, can not pop',
             },
             {
                 level: 'info',
@@ -430,14 +430,14 @@ describe('CDP API', () => {
     })
 
     it('doesnt include enriched values in the mock response', async () => {
-        hogFunction = await insertHogFunction({
-            ...HOG_EXAMPLES.simple_fetch,
-            ...HOG_INPUTS_EXAMPLES.simple_google_fetch,
-            ...HOG_FILTERS_EXAMPLES.no_filters,
+        customFunction = await insertCustomFunction({
+            ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+            ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_google_fetch,
+            ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
         })
 
         const res = await supertest(app)
-            .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+            .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
             .send({ globals, mock_async_functions: true })
 
         expect(res.status).toEqual(200)
@@ -472,7 +472,7 @@ describe('CDP API', () => {
                   "name": "Jane Doe",
                   "url": "https://example.com/person/123",
                   "properties": {
-                    "email": "example@posthog.com"
+                    "email": "example@hanzo.ai"
                   }
                 },
                 "event_url": "https://example.com/events/b3a1fe86-b10c-43cc-acaf-d208977608d0/2021-09-28T14:00:00Z-test"
@@ -485,13 +485,13 @@ describe('CDP API', () => {
     })
 
     describe('transformations', () => {
-        let configuration: HogFunctionType
+        let configuration: CustomFunctionType
 
         beforeEach(() => {
-            configuration = createHogFunction({
+            configuration = createCustomFunction({
                 type: 'transformation',
-                name: posthogFilterOutPlugin.template.name,
-                template_id: 'plugin-posthog-filter-out-plugin',
+                name: insightsFilterOutPlugin.template.name,
+                template_id: 'plugin-insights-filter-out-plugin',
                 inputs: {
                     eventsToDrop: {
                         value: 'drop me',
@@ -499,14 +499,14 @@ describe('CDP API', () => {
                 },
                 team_id: team.id,
                 enabled: true,
-                hog: posthogFilterOutPlugin.template.code,
-                inputs_schema: posthogFilterOutPlugin.template.inputs_schema,
+                script: insightsFilterOutPlugin.template.code,
+                inputs_schema: insightsFilterOutPlugin.template.inputs_schema,
             })
         })
 
         it('processes transformations and returns the result if not null', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${hogFunction.team_id}/hog_functions/new/invocations`)
+                .post(`/api/projects/${customFunction.team_id}/custom_functions/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration })
 
             expect(res.status).toEqual(200)
@@ -539,7 +539,7 @@ describe('CDP API', () => {
             globals.event!.event = 'drop me'
 
             const res = await supertest(app)
-                .post(`/api/projects/${hogFunction.team_id}/hog_functions/new/invocations`)
+                .post(`/api/projects/${customFunction.team_id}/custom_functions/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration })
 
             expect(res.status).toEqual(200)
@@ -548,7 +548,7 @@ describe('CDP API', () => {
         })
     })
 
-    describe('hog function states', () => {
+    describe('custom function states', () => {
         beforeEach(async () => {
             jest.spyOn(hub.teamManager, 'getTeam').mockResolvedValue(team)
             const redis = createRedisV2PoolFromConfig({
@@ -568,19 +568,19 @@ describe('CDP API', () => {
             jest.restoreAllMocks()
         })
 
-        it('returns the states of all hog functions', async () => {
-            await api['hogWatcher'].forceStateChange(hogFunction, HogWatcherState.degraded)
-            await api['hogWatcher'].forceStateChange(hogFunctionMultiFetch, HogWatcherState.disabled)
+        it('returns the states of all custom functions', async () => {
+            await api['scriptWatcher'].forceStateChange(customFunction, ScriptWatcherState.degraded)
+            await api['scriptWatcher'].forceStateChange(customFunctionMultiFetch, ScriptWatcherState.disabled)
 
-            const res = await supertest(app).get('/api/hog_functions/states')
+            const res = await supertest(app).get('/api/custom_functions/states')
             expect(res.status).toEqual(200)
             expect(res.body).toEqual({
                 results: [
                     {
                         function_enabled: true,
-                        function_id: hogFunctionMultiFetch.id,
-                        function_name: 'test hog function multi fetch',
-                        function_team_id: hogFunctionMultiFetch.team_id,
+                        function_id: customFunctionMultiFetch.id,
+                        function_name: 'test custom function multi fetch',
+                        function_team_id: customFunctionMultiFetch.team_id,
                         function_type: 'destination',
                         state: 'disabled',
                         state_numeric: 3,
@@ -588,9 +588,9 @@ describe('CDP API', () => {
                     },
                     {
                         function_enabled: true,
-                        function_id: hogFunction.id,
-                        function_name: 'test hog function',
-                        function_team_id: hogFunction.team_id,
+                        function_id: customFunction.id,
+                        function_name: 'test custom function',
+                        function_team_id: customFunction.team_id,
                         function_type: 'destination',
                         state: 'degraded',
                         state_numeric: 2,
@@ -605,17 +605,17 @@ describe('CDP API', () => {
     describe('body size limits', () => {
         const largePayload = 'x'.repeat(600 * 1024)
 
-        it('accepts large payloads on hog function invocations endpoint', async () => {
+        it('accepts large payloads on custom function invocations endpoint', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${hogFunction.team_id}/hog_functions/${hogFunction.id}/invocations`)
+                .post(`/api/projects/${customFunction.team_id}/custom_functions/${customFunction.id}/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
             expect(res.status).toEqual(200)
         })
 
-        it('accepts large payloads on hog flow invocations endpoint', async () => {
+        it('accepts large payloads on custom flow invocations endpoint', async () => {
             const res = await supertest(app)
-                .post(`/api/projects/${hogFunction.team_id}/hog_flows/new/invocations`)
+                .post(`/api/projects/${customFunction.team_id}/custom_flows/new/invocations`)
                 .send({ globals, mock_async_functions: true, configuration: { large_field: largePayload } })
 
             // 400 from missing flow config, not 413/500 from body size
@@ -631,15 +631,15 @@ describe('CDP API', () => {
         })
     })
 
-    describe('batch hogflow invocations', () => {
-        let batchHogFlow: HogFlow
+    describe('batch customflow invocations', () => {
+        let batchCustomFlow: CustomFlow
         let originalKafkaProducer: any
 
         beforeEach(async () => {
             originalKafkaProducer = hub.kafkaProducer
-            batchHogFlow = await insertHogFlow({
+            batchCustomFlow = await insertCustomFlow({
                 id: new UUIDT().toString(),
-                name: 'test batch hog flow',
+                name: 'test batch custom flow',
                 status: 'active',
                 version: 1,
                 exit_condition: 'exit_on_conversion',
@@ -651,7 +651,7 @@ describe('CDP API', () => {
                         properties: [
                             {
                                 key: 'email',
-                                value: 'test@posthog.com',
+                                value: 'test@hanzo.ai',
                                 operator: 'exact',
                                 type: 'person',
                             },
@@ -668,27 +668,27 @@ describe('CDP API', () => {
         it('errors if missing team', async () => {
             const nonExistentTeamId = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${nonExistentTeamId}/hog_flows/${batchHogFlow.id}/batch_invocations/job-123`)
+                .post(`/api/projects/${nonExistentTeamId}/custom_flows/${batchCustomFlow.id}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(404)
             expect(res.body.error).toEqual('Team not found')
         })
 
-        it('errors if missing hog flow', async () => {
+        it('errors if missing custom flow', async () => {
             const nonExistentUuid = new UUIDT().toString()
             const res = await supertest(app)
-                .post(`/api/projects/${batchHogFlow.team_id}/hog_flows/${nonExistentUuid}/batch_invocations/job-123`)
+                .post(`/api/projects/${batchCustomFlow.team_id}/custom_flows/${nonExistentUuid}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(404)
             expect(res.body.error).toEqual('Workflow not found')
         })
 
-        it('errors if hog flow is not a batch trigger type', async () => {
-            const nonBatchHogFlow = await insertHogFlow({
+        it('errors if custom flow is not a batch trigger type', async () => {
+            const nonBatchCustomFlow = await insertCustomFlow({
                 id: new UUIDT().toString(),
-                name: 'test non-batch hog flow',
+                name: 'test non-batch custom flow',
                 status: 'active',
                 version: 1,
                 exit_condition: 'exit_on_conversion',
@@ -702,7 +702,7 @@ describe('CDP API', () => {
 
             const res = await supertest(app)
                 .post(
-                    `/api/projects/${nonBatchHogFlow.team_id}/hog_flows/${nonBatchHogFlow.id}/batch_invocations/job-123`
+                    `/api/projects/${nonBatchCustomFlow.team_id}/custom_flows/${nonBatchCustomFlow.id}/batch_invocations/job-123`
                 )
                 .send({})
 
@@ -715,7 +715,7 @@ describe('CDP API', () => {
             hub.kafkaProducer = { produce: mockProduce } as any
 
             const res = await supertest(app)
-                .post(`/api/projects/${batchHogFlow.team_id}/hog_flows/${batchHogFlow.id}/batch_invocations/job-123`)
+                .post(`/api/projects/${batchCustomFlow.team_id}/custom_flows/${batchCustomFlow.id}/batch_invocations/job-123`)
                 .send({
                     filters: {
                         filter_test_accounts: true,
@@ -725,46 +725,46 @@ describe('CDP API', () => {
             expect(res.status).toEqual(200)
             expect(res.body).toEqual({ status: 'queued' })
             expect(mockProduce).toHaveBeenCalledWith({
-                topic: 'cdp_batch_hogflow_requests_test',
+                topic: 'cdp_batch_customflow_requests_test',
                 value: Buffer.from(
                     JSON.stringify({
-                        teamId: batchHogFlow.team_id,
-                        hogFlowId: batchHogFlow.id,
+                        teamId: batchCustomFlow.team_id,
+                        customFlowId: batchCustomFlow.id,
                         parentRunId: 'job-123',
                         filters: {
-                            properties: (batchHogFlow as any).trigger.filters.properties,
+                            properties: (batchCustomFlow as any).trigger.filters.properties,
                             filter_test_accounts: true,
                         },
                     })
                 ),
-                key: `${batchHogFlow.team_id}_${batchHogFlow.id}`,
+                key: `${batchCustomFlow.team_id}_${batchCustomFlow.id}`,
             })
         })
 
-        it('queues batch job with filters from hog flow config when not provided', async () => {
+        it('queues batch job with filters from custom flow config when not provided', async () => {
             const mockProduce = jest.fn().mockResolvedValue(undefined)
             hub.kafkaProducer = { produce: mockProduce } as any
 
             const res = await supertest(app)
-                .post(`/api/projects/${batchHogFlow.team_id}/hog_flows/${batchHogFlow.id}/batch_invocations/job-456`)
+                .post(`/api/projects/${batchCustomFlow.team_id}/custom_flows/${batchCustomFlow.id}/batch_invocations/job-456`)
                 .send({})
 
             expect(res.status).toEqual(200)
             expect(res.body).toEqual({ status: 'queued' })
             expect(mockProduce).toHaveBeenCalledWith({
-                topic: 'cdp_batch_hogflow_requests_test',
+                topic: 'cdp_batch_customflow_requests_test',
                 value: Buffer.from(
                     JSON.stringify({
-                        teamId: batchHogFlow.team_id,
-                        hogFlowId: batchHogFlow.id,
+                        teamId: batchCustomFlow.team_id,
+                        customFlowId: batchCustomFlow.id,
                         parentRunId: 'job-456',
                         filters: {
-                            properties: (batchHogFlow as any).trigger.filters.properties,
+                            properties: (batchCustomFlow as any).trigger.filters.properties,
                             filter_test_accounts: false,
                         },
                     })
                 ),
-                key: `${batchHogFlow.team_id}_${batchHogFlow.id}`,
+                key: `${batchCustomFlow.team_id}_${batchCustomFlow.id}`,
             })
         })
 
@@ -772,7 +772,7 @@ describe('CDP API', () => {
             hub.kafkaProducer = undefined as any
 
             const res = await supertest(app)
-                .post(`/api/projects/${batchHogFlow.team_id}/hog_flows/${batchHogFlow.id}/batch_invocations/job-123`)
+                .post(`/api/projects/${batchCustomFlow.team_id}/custom_flows/${batchCustomFlow.id}/batch_invocations/job-123`)
                 .send({})
 
             expect(res.status).toEqual(500)

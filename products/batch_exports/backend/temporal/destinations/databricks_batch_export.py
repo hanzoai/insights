@@ -37,7 +37,7 @@ from posthog.batch_exports.service import (
     DatabricksBatchExportInputs,
 )
 from posthog.models.integration import DatabricksIntegration, Integration
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -272,7 +272,7 @@ class DatabricksClient:
                 http_path=self.http_path,
                 credentials_provider=get_credential_provider,
                 # user agent can be used for usage tracking
-                user_agent_entry="PostHog batch exports",
+                user_agent_entry="Insights batch exports",
                 enable_telemetry=False,
                 _socket_timeout=300,  # Databricks seems to use this for all timeouts
                 _retry_stop_after_attempts_count=2,
@@ -472,7 +472,7 @@ class DatabricksClient:
                     {field_ddl}
                 )
                 USING DELTA
-                COMMENT 'PostHog generated table'
+                COMMENT 'Insights generated table'
                 """
             await self.execute_query(query, fetch_results=False)
         except ServerOperationError as err:
@@ -580,7 +580,7 @@ class DatabricksClient:
         """Asynchronously create a Databricks volume."""
         try:
             await self.execute_query(
-                f"CREATE VOLUME IF NOT EXISTS `{volume}` COMMENT 'PostHog generated volume'",
+                f"CREATE VOLUME IF NOT EXISTS `{volume}` COMMENT 'Insights generated volume'",
                 fetch_results=False,
             )
         except ServerOperationError as err:
@@ -1149,7 +1149,7 @@ async def insert_into_databricks_activity_from_stage(inputs: DatabricksInsertInp
 
 
 @workflow.defn(name="databricks-export", failure_exception_types=[workflow.NondeterminismError])
-class DatabricksBatchExportWorkflow(PostHogWorkflow):
+class DatabricksBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data into Databricks.
 
     This Workflow is intended to be executed both manually and by a Temporal

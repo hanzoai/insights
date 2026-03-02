@@ -32,7 +32,7 @@ import { MouseInteractions, RRWebEventSource, RRWebEventType } from './rrweb-typ
 const TEST_CONFIG = {
     S3_ENDPOINT: 'http://localhost:19000',
     S3_REGION: 'us-east-1',
-    S3_BUCKET: 'posthog',
+    S3_BUCKET: 'insights',
     S3_PREFIX: 'session_recordings_integration_test',
     S3_ACCESS_KEY: 'object_storage_root_user',
     S3_SECRET_KEY: 'object_storage_root_password',
@@ -923,7 +923,7 @@ describe('Session Recording Consumer Integration', () => {
         // Enable console log capture for the primary team so console log tests work
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'UPDATE posthog_team SET capture_console_log_opt_in = true WHERE id = $1',
+            'UPDATE insights_team SET capture_console_log_opt_in = true WHERE id = $1',
             [team.id],
             'enable-console-log-capture'
         )

@@ -1,4 +1,4 @@
-PostHog ClickHouse setup
+Insights ClickHouse setup
 
 # Cluster setup
 

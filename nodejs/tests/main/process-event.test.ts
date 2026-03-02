@@ -14,7 +14,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold/src/types'
 import { KAFKA_GROUPS } from '~/config/kafka-topics'
 import { createRedisFromConfig } from '~/utils/db/redis'
 import { parseRawClickHouseEvent } from '~/utils/event'
-import { captureTeamEvent } from '~/utils/posthog'
+import { captureTeamEvent } from '~/utils/insights'
 import { BatchWritingGroupStore } from '~/worker/ingestion/groups/batch-writing-group-store'
 import { BatchWritingPersonsStore } from '~/worker/ingestion/persons/batch-writing-person-store'
 import { PersonsStore } from '~/worker/ingestion/persons/persons-store'
@@ -36,8 +36,8 @@ import { createUserTeamAndOrganization, getFirstTeam, getTeams, resetTestDatabas
 
 jest.mock('../../src/utils/logger')
 jest.setTimeout(600000) // 600 sec timeout.
-jest.mock('../../src/utils/posthog', () => ({
-    ...jest.requireActual('../../src/utils/posthog'),
+jest.mock('../../src/utils/insights', () => ({
+    ...jest.requireActual('../../src/utils/insights'),
     captureTeamEvent: jest.fn(),
 }))
 
@@ -198,10 +198,10 @@ describe('processEvent', () => {
         const redis = await createRedisFromConfig(
             hub.INGESTION_REDIS_HOST
                 ? { url: hub.INGESTION_REDIS_HOST, options: { port: hub.INGESTION_REDIS_PORT } }
-                : hub.POSTHOG_REDIS_HOST
+                : hub.INSIGHTS_REDIS_HOST
                   ? {
-                        url: hub.POSTHOG_REDIS_HOST,
-                        options: { port: hub.POSTHOG_REDIS_PORT, password: hub.POSTHOG_REDIS_PASSWORD },
+                        url: hub.INSIGHTS_REDIS_HOST,
+                        options: { port: hub.INSIGHTS_REDIS_PORT, password: hub.INSIGHTS_REDIS_PASSWORD },
                     }
                   : { url: hub.REDIS_URL }
         )
@@ -263,7 +263,7 @@ describe('processEvent', () => {
             now: new Date().toISOString(),
             sent_at: new Date().toISOString(),
             ip: null,
-            site_url: 'https://posthog.com',
+            site_url: 'https://hanzo.ai',
             team_id: team.id,
             uuid: new UUIDT().toString(),
         }
@@ -339,7 +339,7 @@ describe('processEvent', () => {
             hub,
             '$identify',
             {
-                // posthog-js will send the previous distinct id as
+                // insights-js will send the previous distinct id as
                 // $anon_distinct_id
                 $anon_distinct_id: currentDistinctId,
                 distinct_id: distinctId,
@@ -374,7 +374,7 @@ describe('processEvent', () => {
     test('anonymized ip capture', async () => {
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'update posthog_team set anonymize_ips = $1',
+            'update insights_team set anonymize_ips = $1',
             [true],
             'testTag'
         )
@@ -624,7 +624,7 @@ describe('processEvent', () => {
     test('capture first team event', async () => {
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE posthog_team
+            `UPDATE insights_team
             SET ingested_event = $1
             WHERE id = $2`,
             [false, team.id],
@@ -899,7 +899,7 @@ describe('processEvent', () => {
     describe('when handling $identify', () => {
         test('we do not alias users if distinct id changes but we are already identified', async () => {
             // This test is in reference to
-            // https://github.com/PostHog/posthog/issues/5527 , where we were
+            // https://github.com/Insights/insights/issues/5527 , where we were
             // correctly identifying that an anonymous user before login should be
             // aliased to the user they subsequently login as, but incorrectly
             // aliasing on subsequent $identify events. The anonymous case is
@@ -949,7 +949,7 @@ describe('processEvent', () => {
 
         test('we do not alias users if distinct id changes but we are already identified, with no anonymous event', async () => {
             // This test is in reference to
-            // https://github.com/PostHog/posthog/issues/5527 , where we were
+            // https://github.com/Insights/insights/issues/5527 , where we were
             // correctly identifying that an anonymous user before login should be
             // aliased to the user they subsequently login as, but incorrectly
             // aliasing on subsequent $identify events. The anonymous case is

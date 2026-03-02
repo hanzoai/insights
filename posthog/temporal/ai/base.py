@@ -1,9 +1,9 @@
 from typing import Any
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 
-class AgentBaseWorkflow(PostHogWorkflow):
+class AgentBaseWorkflow(InsightsWorkflow):
     """Base temporal workflow for processing agents asynchronously."""
 
     async def run(self, inputs: Any) -> None:

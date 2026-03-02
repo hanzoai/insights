@@ -670,7 +670,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                             // Use server-provided message (includes research beta messaging)
                             relevantErrorMessage.content =
                                 e.detail ||
-                                `You've reached PostHog AI's usage limit for the moment. Please try again ${e.formattedRetryAfter}.`
+                                `You've reached Insights AI's usage limit for the moment. Please try again ${e.formattedRetryAfter}.`
                         }
 
                         if (e.status === 402) {

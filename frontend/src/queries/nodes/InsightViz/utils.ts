@@ -7,7 +7,7 @@ import { examples } from '~/queries/examples'
 import {
     DataTableNode,
     DataVisualizationNode,
-    HogQuery,
+    ScriptQuery,
     InsightQueryNode,
     InsightVizNode,
     Node,
@@ -130,20 +130,20 @@ export const queryFromKind = (
 export const getDefaultQuery = (
     insightType: InsightType,
     filterTestAccountsDefault: boolean
-): DataTableNode | DataVisualizationNode | HogQuery | InsightVizNode => {
+): DataTableNode | DataVisualizationNode | ScriptQuery | InsightVizNode => {
     // Web Analytics insights should always come from Web Analytics tiles with a pre-configured query
     // This is a fallback that should rarely be used
     if (insightType === InsightType.WEB_ANALYTICS) {
         throw new Error('Web Analytics insights must be created from Web Analytics tiles')
     }
 
-    if ([InsightType.SQL, InsightType.JSON, InsightType.HOG].includes(insightType)) {
+    if ([InsightType.SQL, InsightType.JSON, InsightType.SCRIPT].includes(insightType)) {
         if (insightType === InsightType.JSON) {
             return examples.TotalEventsTable as DataTableNode
         } else if (insightType === InsightType.SQL) {
             return examples.DataVisualization as DataVisualizationNode
-        } else if (insightType === InsightType.HOG) {
-            return examples.Hoggonacci as HogQuery
+        } else if (insightType === InsightType.SCRIPT) {
+            return examples.Hoggonacci as ScriptQuery
         }
     }
 

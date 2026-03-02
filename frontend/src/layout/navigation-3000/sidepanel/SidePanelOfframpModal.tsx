@@ -49,7 +49,7 @@ export function SidePanelOfframpModal(): JSX.Element {
             title: 'Hello context panel!',
             description: (
                 <>
-                    Contextual info & actions, <strong>PostHog AI</strong>, <strong>Support</strong>,{' '}
+                    Contextual info & actions, <strong>Insights AI</strong>, <strong>Support</strong>,{' '}
                     <strong>Notebooks</strong>, <strong>Discussions</strong> & <strong>Access control</strong> are now
                     neatly tucked away.
                 </>

@@ -1,8 +1,8 @@
 import { Counter } from 'prom-client'
 
 import { QuotaResource } from '../../common/services/quota-limiting.service'
-import { HogFunctionMonitoringService } from '../services/monitoring/hog-function-monitoring.service'
-import { CyclotronJobInvocationHogFunction } from '../types'
+import { CustomFunctionMonitoringService } from '../services/monitoring/custom-function-monitoring.service'
+import { CyclotronJobInvocationCustomFunction } from '../types'
 
 const counterQuotaLimited = new Counter({
     name: 'cdp_function_quota_limited',
@@ -16,7 +16,7 @@ export interface QuotaLimitingContext {
             isTeamQuotaLimited: (teamId: number, resource: QuotaResource) => Promise<boolean>
         }
     }
-    hogFunctionMonitoringService: HogFunctionMonitoringService
+    customFunctionMonitoringService: CustomFunctionMonitoringService
 }
 
 /**
@@ -24,7 +24,7 @@ export interface QuotaLimitingContext {
  * Returns true if the invocation should be blocked, false otherwise.
  */
 export async function shouldBlockInvocationDueToQuota(
-    item: CyclotronJobInvocationHogFunction,
+    item: CyclotronJobInvocationCustomFunction,
     context: QuotaLimitingContext
 ): Promise<boolean> {
     const isQuotaLimited = await context.hub.quotaLimiting.isTeamQuotaLimited(item.teamId, 'cdp_trigger_events')
@@ -32,7 +32,7 @@ export async function shouldBlockInvocationDueToQuota(
     if (isQuotaLimited) {
         counterQuotaLimited.labels({ team_id: item.teamId }).inc()
 
-        context.hogFunctionMonitoringService.queueAppMetric(
+        context.customFunctionMonitoringService.queueAppMetric(
             {
                 team_id: item.teamId,
                 app_source_id: item.functionId,
@@ -40,7 +40,7 @@ export async function shouldBlockInvocationDueToQuota(
                 metric_name: 'quota_limited',
                 count: 1,
             },
-            'hog_function'
+            'custom_function'
         )
         return true
     }

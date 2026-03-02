@@ -26,7 +26,7 @@ from temporalio.client import (
 from temporalio.exceptions import ActivityError, ApplicationError, RetryState
 
 from posthog.models import ProxyRecord
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.client import async_connect
 from posthog.temporal.common.schedule import a_create_schedule
 from posthog.temporal.proxy_service.cloudflare import (
@@ -412,7 +412,7 @@ async def schedule_monitor_job(inputs: ScheduleMonitorJobInputs):
 
 
 @workflow.defn(name="create-proxy")
-class CreateManagedProxyWorkflow(PostHogWorkflow):
+class CreateManagedProxyWorkflow(InsightsWorkflow):
     """A Temporal Workflow to create a Managed reverse Proxy."""
 
     @staticmethod

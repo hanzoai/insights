@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { HogTransformerService } from '../../cdp/hog-transformations/hog-transformer.service'
+import { ScriptTransformerService } from '../../cdp/script-transformations/script-transformer.service'
 import { KafkaProducerWrapper } from '../../kafka/producer'
 import { Hub, Team } from '../../types'
 import { EventIngestionRestrictionManager } from '../../utils/event-ingestion-restrictions'
@@ -43,7 +43,7 @@ export interface JoinedIngestionPipelineConfig {
     kafkaProducer: KafkaProducerWrapper
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
-    hogTransformer: HogTransformerService
+    scriptTransformer: ScriptTransformerService
     eventIngestionRestrictionManager: EventIngestionRestrictionManager
     eventSchemaEnforcementManager: EventSchemaEnforcementManager
     eventSchemaEnforcementEnabled: boolean
@@ -116,7 +116,7 @@ export function createJoinedIngestionPipeline<
         kafkaProducer,
         personsStore,
         groupStore,
-        hogTransformer,
+        scriptTransformer,
         eventIngestionRestrictionManager,
         eventSchemaEnforcementManager,
         eventSchemaEnforcementEnabled,
@@ -149,15 +149,15 @@ export function createJoinedIngestionPipeline<
         overflowLaneTTLRefreshService,
         personsStore,
         personsPrefetchEnabled: hub.PERSONS_PREFETCH_ENABLED,
-        hogTransformer,
-        cdpHogWatcherSampleRate: hub.CDP_HOG_WATCHER_SAMPLE_RATE,
+        scriptTransformer,
+        cdpScriptWatcherSampleRate: hub.CDP_HOG_WATCHER_SAMPLE_RATE,
     }
 
     const perEventConfig: PerDistinctIdPipelineConfig = {
         options: perDistinctIdOptions,
         teamManager,
         groupTypeManager,
-        hogTransformer,
+        scriptTransformer,
         personsStore,
         groupStore,
         kafkaProducer,

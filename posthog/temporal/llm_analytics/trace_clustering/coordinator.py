@@ -16,7 +16,7 @@ import structlog
 import temporalio
 from temporalio.workflow import ChildWorkflowHandle
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.llm_analytics.trace_clustering import constants
 from posthog.temporal.llm_analytics.trace_clustering.constants import (
     CHILD_WORKFLOW_ID_PREFIX,
@@ -65,7 +65,7 @@ class TraceClusteringCoordinatorInputs:
 
 
 @temporalio.workflow.defn(name=COORDINATOR_WORKFLOW_NAME)
-class TraceClusteringCoordinatorWorkflow(PostHogWorkflow):
+class TraceClusteringCoordinatorWorkflow(InsightsWorkflow):
     """
     Coordinator workflow that discovers teams dynamically and spawns child
     workflows for each team. Teams with no traces will complete quickly

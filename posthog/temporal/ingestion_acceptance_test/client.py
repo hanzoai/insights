@@ -1,4 +1,4 @@
-"""PostHog client for acceptance tests using the official SDK."""
+"""Insights client for acceptance tests using the official SDK."""
 
 import json
 import time
@@ -36,7 +36,7 @@ def _person_has_min_timestamp(person: "Person | None", min_timestamp: float | No
 
 @dataclass
 class CapturedEvent:
-    """An event retrieved from the PostHog API."""
+    """An event retrieved from the Insights API."""
 
     uuid: str
     event: str
@@ -47,15 +47,15 @@ class CapturedEvent:
 
 @dataclass
 class Person:
-    """A person retrieved from the PostHog API."""
+    """A person retrieved from the Insights API."""
 
     id: str
     properties: dict[str, Any]
     created_at: str
 
 
-class PostHogClient:
-    """Client for acceptance tests using the official PostHog SDK.
+class InsightsClient:
+    """Client for acceptance tests using the official Insights SDK.
 
     Uses the official SDK for event capture and custom code for InsightsQL queries
     (since the SDK doesn't support querying).
@@ -100,7 +100,7 @@ class PostHogClient:
         distinct_id: str,
         properties: dict[str, Any] | None = None,
     ) -> str:
-        """Send an event using the official PostHog SDK."""
+        """Send an event using the official Insights SDK."""
         event_uuid = str(uuid.uuid4())
 
         logger.info(

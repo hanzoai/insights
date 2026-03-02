@@ -209,7 +209,7 @@ export function SessionAttributionExplorer(): JSX.Element {
                         <p>
                             If you believe that a session is attributed incorrectly, please let us know! If you'd like
                             to customize your Channel attribution, please leave feedback on the{' '}
-                            <Link to="https://github.com/PostHog/posthog/issues/21195">feature request</Link>.
+                            <Link to="https://github.com/Insights/posthog/issues/21195">feature request</Link>.
                         </p>
                     </div>
                     {showSupportOptions ? (

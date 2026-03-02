@@ -48,7 +48,7 @@ jobs:
                     if [[ "$published" != "$local" ]]; then
                       parser_release_needed='true'
                     else
-                      message_body="It looks like the code of \`hogql-parser\` has changed since last push, but its version stayed the same at $local. 👀\nMake sure to resolve this in \`hogql_parser/setup.py\` before merging!${{ github.event.pull_request.head.repo.full_name != 'PostHog/posthog' && '\nThis needs to be performed on a branch created on the PostHog/posthog repo itself. A PostHog team member will assist with this.' || ''}}"
+                      message_body="It looks like the code of \`hogql-parser\` has changed since last push, but its version stayed the same at $local. 👀\nMake sure to resolve this in \`hogql_parser/setup.py\` before merging!${{ github.event.pull_request.head.repo.full_name != 'Insights/posthog' && '\nThis needs to be performed on a branch created on the Insights/posthog repo itself. A Insights team member will assist with this.' || ''}}"
                       gh pr comment ${{ github.event.pull_request.number }} --body "$message_body"
                     fi
                   fi
@@ -60,7 +60,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         timeout-minutes: 30
         if: needs.check-version.outputs.parser-release-needed == 'true' &&
-            github.event.pull_request.head.repo.full_name == 'PostHog/posthog'
+            github.event.pull_request.head.repo.full_name == 'Insights/posthog'
         strategy:
             matrix:
                 # As of October 2023, GitHub doesn't have ARM Actions runners… and ARM emulation is insanely slow

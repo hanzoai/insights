@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { IconChat } from '@posthog/icons'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
-import { WarningHog } from 'lib/components/hedgehogs'
+import { WarningHog } from 'lib/components/mascots'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconWithCount } from 'lib/lemon-ui/icons'
 import { cn } from 'lib/utils/css-classes'

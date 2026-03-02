@@ -148,7 +148,7 @@ class SlackThreadHandler:
         buttons.append(
             {
                 "type": "button",
-                "text": {"type": "plain_text", "text": "Open in PostHog", "emoji": True},
+                "text": {"type": "plain_text", "text": "Open in Insights", "emoji": True},
                 "url": task_url,
             }
         )
@@ -158,7 +158,7 @@ class SlackThreadHandler:
         self._delete_progress_and_post(header, blocks)
 
     def post_error(self, error: str, task_url: str) -> None:
-        """Post error message with link to PostHog for details."""
+        """Post error message with link to Insights for details."""
         header = "*Task Failed* :x:"
         truncated_error = error[:200] if len(error) > 200 else error
 
@@ -170,7 +170,7 @@ class SlackThreadHandler:
                 "elements": [
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "See details in PostHog", "emoji": True},
+                        "text": {"type": "plain_text", "text": "See details in Insights", "emoji": True},
                         "url": task_url,
                     },
                 ],

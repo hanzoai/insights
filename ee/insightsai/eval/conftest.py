@@ -5,7 +5,7 @@ from unittest import mock
 
 from _pytest.terminal import TerminalReporter
 
-# We want the PostHog django_db_setup fixture here
+# We want the Insights django_db_setup fixture here
 from posthog.conftest import _django_db_setup  # noqa: F401
 
 
@@ -31,8 +31,8 @@ def capture_stdout(request, capsys):
         # Get only the line with the results link. The output we are extracting from is something like this:
         # [...]
         # 0.00$ (-00.02%) 'estimated_cost'        (4 improvements, 3 regressions)
-        # See results for braintrust-more-evals-1747934384 at https://www.braintrust.dev/app/PostHog/p/max-ai-memory/experiments/braintrust-more-evals-1747934384
-        # Experiment braintrust-more-evals-1747934384 is running at https://www.braintrust.dev/app/PostHog/p/max-ai-memory/experiments/braintrust-more-evals-1747934384
+        # See results for braintrust-more-evals-1747934384 at https://www.braintrust.dev/app/Insights/p/max-ai-memory/experiments/braintrust-more-evals-1747934384
+        # Experiment braintrust-more-evals-1747934384 is running at https://www.braintrust.dev/app/Insights/p/max-ai-memory/experiments/braintrust-more-evals-1747934384
         # [...]
         results_url = next(line for line in captured.out.split("\n") if "See results for " in line).split(" at ")[1]
         _nodeid_to_results_url_map[request.node.nodeid] = results_url

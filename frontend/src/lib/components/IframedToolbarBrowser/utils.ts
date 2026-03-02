@@ -2,7 +2,7 @@ import { CUSTOM_OPTION_KEY } from 'lib/components/DateFilter/types'
 import { HeatmapFilters } from 'lib/components/heatmaps/types'
 import { dateMapping } from 'lib/utils'
 
-export enum PostHogAppToolbarEvent {
+export enum InsightsAppToolbarEvent {
     PH_TOOLBAR_INIT = 'ph-toolbar-init',
     PH_TOOLBAR_READY = 'ph-toolbar-ready',
     PH_APP_INIT = 'ph-app-init',

@@ -159,9 +159,9 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
         },
     },
     search: {
-        name: 'Search PostHog data',
+        name: 'Search Insights data',
         description:
-            'Search PostHog data for documentation, insights, dashboards, cohorts, actions, experiments, feature flags, notebooks, error tracking issues, surveys, and other.',
+            'Search Insights data for documentation, insights, dashboards, cohorts, actions, experiments, feature flags, notebooks, error tracking issues, surveys, and other.',
         icon: <IconSearch />,
         displayFormatter: function readDataDisplayFormatter(
             toolCall: EnhancedToolCall,
@@ -188,7 +188,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
         subtools: {
             docs: {
                 name: 'Search docs',
-                description: 'Search docs for answers regarding PostHog',
+                description: 'Search docs for answers regarding Insights',
                 icon: <IconBook />,
                 displayFormatter: (toolCall) => {
                     if (toolCall.status === 'completed') {
@@ -444,7 +444,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
     },
     list_data: {
         name: 'List data',
-        description: 'List data with pagination to browse PostHog entities',
+        description: 'List data with pagination to browse Insights entities',
         icon: <IconSearch />,
         displayFormatter: (toolCall) => {
             const kind = typeof toolCall.args?.kind === 'string' ? toolCall.args.kind : null
@@ -878,7 +878,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
         name: 'Write and tweak SQL',
         description: 'Write and tweak SQL right there',
         product: Scene.SQLEditor,
-        icon: iconForType('insight/hog'),
+        icon: iconForType('insight/sql'),
         modes: [AgentMode.SQL],
         displayFormatter: (toolCall) => {
             if (toolCall.status === 'completed') {
@@ -972,7 +972,7 @@ export const MODE_DEFINITIONS: Record<
     },
     [AgentMode.SQL]: {
         name: 'SQL',
-        description: 'Generates and executes SQL queries for your PostHog data and connected data warehouse sources.',
+        description: 'Generates and executes SQL queries for your Insights data and connected data warehouse sources.',
         icon: iconForType('sql_editor'),
         scenes: new Set([Scene.SQLEditor]),
     },
@@ -1002,7 +1002,7 @@ export const MODE_DEFINITIONS: Record<
     },
     [AgentMode.Onboarding]: {
         name: 'Onboarding',
-        description: 'Helps new users discover which PostHog products are right for their needs.',
+        description: 'Helps new users discover which Insights products are right for their needs.',
         icon: iconForType('product_analytics'),
         scenes: new Set([Scene.Onboarding]),
     },
@@ -1070,7 +1070,7 @@ export const AI_GENERALLY_CAN: { icon: JSX.Element; description: string }[] = [
 
 export const AI_GENERALLY_CANNOT: string[] = [
     'Access your source code or third‑party tools',
-    'See data outside this PostHog project',
+    'See data outside this Insights project',
     'Guarantee correctness',
     'Order tungsten cubes',
 ]

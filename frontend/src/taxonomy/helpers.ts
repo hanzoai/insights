@@ -4,7 +4,7 @@ import { CoreFilterDefinition } from '~/types'
 
 import { CORE_FILTER_DEFINITIONS_BY_GROUP } from './taxonomy'
 
-/** Return whether a given filter key is part of PostHog's core (marked by the PostHog logo). */
+/** Return whether a given filter key is part of Insights's core (marked by the Insights logo). */
 
 export function isCoreFilter(key: string): boolean {
     return Object.values(CORE_FILTER_DEFINITIONS_BY_GROUP).some((mapping) => Object.keys(mapping).includes(key))

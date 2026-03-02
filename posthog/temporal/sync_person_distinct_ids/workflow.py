@@ -6,7 +6,7 @@ import dataclasses
 import temporalio.common
 import temporalio.workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.sync_person_distinct_ids.activities import (
     FindOrphanedPersonsInputs,
     LookupPgDistinctIdsInputs,
@@ -92,7 +92,7 @@ class SyncPersonDistinctIdsWorkflowResult:
 
 
 @temporalio.workflow.defn(name="sync-person-distinct-ids")
-class SyncPersonDistinctIdsWorkflow(PostHogWorkflow):
+class SyncPersonDistinctIdsWorkflow(InsightsWorkflow):
     """Workflow to sync missing person distinct IDs from PostgreSQL to ClickHouse.
 
     This workflow:

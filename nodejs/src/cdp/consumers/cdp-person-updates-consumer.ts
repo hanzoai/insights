@@ -7,41 +7,41 @@ import { KAFKA_PERSON } from '../../config/kafka-topics'
 import { ClickHousePerson, Team } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
-import { CyclotronPerson, HogFunctionInvocationGlobals, HogFunctionType, HogFunctionTypeType } from '../types'
+import { CyclotronPerson, CustomFunctionInvocationGlobals, CustomFunctionType, CustomFunctionTypeType } from '../types'
 import { getPersonDisplayName } from '../utils'
 import { CdpEventsConsumer, CdpEventsConsumerHub } from './cdp-events.consumer'
 import { counterParseError } from './metrics'
 
 export class CdpPersonUpdatesConsumer extends CdpEventsConsumer {
     protected name = 'CdpPersonUpdatesConsumer'
-    protected hogTypes: HogFunctionTypeType[] = ['destination']
+    protected scriptTypes: CustomFunctionTypeType[] = ['destination']
 
     constructor(hub: CdpEventsConsumerHub) {
         super(hub, KAFKA_PERSON, 'cdp-person-updates-consumer')
     }
 
-    protected filterHogFunction(hogFunction: HogFunctionType): boolean {
-        return hogFunction.filters?.source === 'person-updates'
+    protected filterCustomFunction(customFunction: CustomFunctionType): boolean {
+        return customFunction.filters?.source === 'person-updates'
     }
 
     // This consumer always parses from kafka
     @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<HogFunctionInvocationGlobals[]> {
+    public async _parseKafkaBatch(messages: Message[]): Promise<CustomFunctionInvocationGlobals[]> {
         return await this.runWithHeartbeat(async () => {
-            const globals: HogFunctionInvocationGlobals[] = []
+            const globals: CustomFunctionInvocationGlobals[] = []
             await Promise.all(
                 messages.map(async (message) => {
                     try {
                         const data = parseJSON(message.value!.toString()) as ClickHousePerson
 
-                        const [teamHogFunctions, team] = await Promise.all([
-                            this.hogFunctionManager.getHogFunctionsForTeam(data.team_id, ['destination']),
+                        const [teamCustomFunctions, team] = await Promise.all([
+                            this.customFunctionManager.getCustomFunctionsForTeam(data.team_id, ['destination']),
                             this.hub.teamManager.getTeam(data.team_id),
                         ])
 
-                        const filteredHogFunctions = teamHogFunctions.filter(this.filterHogFunction)
+                        const filteredCustomFunctions = teamCustomFunctions.filter(this.filterCustomFunction)
 
-                        if (!filteredHogFunctions.length || !team) {
+                        if (!filteredCustomFunctions.length || !team) {
                             return
                         }
 
@@ -62,7 +62,7 @@ function convertClickhousePersonToInvocationGlobals(
     data: ClickHousePerson,
     team: Team,
     siteUrl: string
-): HogFunctionInvocationGlobals {
+): CustomFunctionInvocationGlobals {
     const projectUrl = `${siteUrl}/project/${team.id}`
 
     const person: CyclotronPerson = {
@@ -75,7 +75,7 @@ function convertClickhousePersonToInvocationGlobals(
     person.name = getPersonDisplayName(team, person.id, person.properties)
     person.url = `${projectUrl}/person/${person.id}`
 
-    const context: HogFunctionInvocationGlobals = {
+    const context: CustomFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,

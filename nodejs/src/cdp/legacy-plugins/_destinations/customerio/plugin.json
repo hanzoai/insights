@@ -52,7 +52,7 @@
         },
         {
             "key": "eventsToSend",
-            "name": "PostHog Event Allowlist",
+            "name": "Insights Event Allowlist",
             "type": "string",
             "hint": "If this is set, only the specified events (comma-separated) will be sent to Customer.io."
         }

@@ -92,7 +92,7 @@ export const featurePreviewsLogic = kea<featurePreviewsLogicType>([
                     const feature = values.rawEarlyAccessFeatures.find((f) => f.flagKey === flagKey)
 
                     // TODO: We can stop using this crazy type cast once the companion `posthog-js` PR is merged
-                    // https://github.com/PostHog/posthog-js/pull/2642
+                    // https://github.com/Insights/posthog-js/pull/2642
                     const payload = (feature as any)?.payload as Record<string, any> | undefined
                     if (payload?.product_intent) {
                         const productIntent = payload.product_intent

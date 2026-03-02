@@ -6,9 +6,9 @@ from typing import Literal
 from django.db import transaction
 from django.utils import timezone
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models import Team
 
@@ -32,14 +32,14 @@ class RestoreService:
     @staticmethod
     def _find_distinct_ids_by_person_email(team: Team, email_lower: str) -> list[str]:
         """
-        Find distinct_ids of persons whose email matches via HogQL (ClickHouse).
+        Find distinct_ids of persons whose email matches via InsightsQL (ClickHouse).
         Uses the persons table's built-in pdi lazy join to person_distinct_ids.
         """
         query = parse_select(
             "SELECT DISTINCT pdi.distinct_id FROM persons WHERE lower(properties.email) = {email} LIMIT 1000",
             placeholders={"email": ast.Constant(value=email_lower)},
         )
-        response = execute_hogql_query(query=query, team=team)
+        response = execute_insightsql_query(query=query, team=team)
         return [row[0] for row in (response.results or [])]
 
     @staticmethod
@@ -49,7 +49,7 @@ class RestoreService:
 
         Checks both:
         1. anonymous_traits.email on Ticket (Postgres, fast)
-        2. Person properties.email → distinct_id → Ticket (via HogQL/ClickHouse)
+        2. Person properties.email → distinct_id → Ticket (via InsightsQL/ClickHouse)
         """
         email_lower = email.lower().strip()
 

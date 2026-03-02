@@ -15,10 +15,10 @@ from ee.models.rbac.role import Role, RoleMembership
 logger = logging.getLogger(__name__)
 
 
-class PostHogSCIMGroup(SCIMGroup):
+class InsightsSCIMGroup(SCIMGroup):
     """
-    Adapter to map SCIM Group schema to PostHog RBAC Role model.
-    SCIM Groups are mapped to PostHog Roles for organization-level permissions.
+    Adapter to map SCIM Group schema to Insights RBAC Role model.
+    SCIM Groups are mapped to Insights Roles for organization-level permissions.
     """
 
     resource_type = "Group"
@@ -86,7 +86,7 @@ class PostHogSCIMGroup(SCIMGroup):
         }
 
     @classmethod
-    def from_dict(cls, data: dict, organization_domain: OrganizationDomain) -> "PostHogSCIMGroup":
+    def from_dict(cls, data: dict, organization_domain: OrganizationDomain) -> "InsightsSCIMGroup":
         """
         Create or update a Role from SCIM Group data.
         Upserts role by name matching.
@@ -272,7 +272,7 @@ class PostHogSCIMGroup(SCIMGroup):
                     RoleMembership.objects.filter(role=self.obj).delete()
 
     @classmethod
-    def get_for_organization(cls, organization_domain: OrganizationDomain) -> list["PostHogSCIMGroup"]:
+    def get_for_organization(cls, organization_domain: OrganizationDomain) -> list["InsightsSCIMGroup"]:
         """
         Get all roles (groups) for a specific organization.
         """

@@ -8,7 +8,7 @@ import { NotFound } from 'lib/components/NotFound'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { colonDelimitedDuration } from 'lib/utils'
 import { parseTimestampToMs } from 'lib/utils/timestamps'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { asDisplay } from 'scenes/persons/person-utils'
 import {
     SessionRecordingPlayer,
@@ -150,7 +150,7 @@ type NotebookNodeRecordingAttributes = {
     timestampMs?: number
 }
 
-export const NotebookNodeRecording = createPostHogWidgetNode<NotebookNodeRecordingAttributes>({
+export const NotebookNodeRecording = createInsightsWidgetNode<NotebookNodeRecordingAttributes>({
     nodeType: NotebookNodeType.Recording,
     titlePlaceholder: 'Session recording',
     Component,

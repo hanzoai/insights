@@ -24,7 +24,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -54,7 +54,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -66,7 +66,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
                 "soft_update": True,
@@ -80,7 +80,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -115,7 +115,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -180,7 +180,7 @@ class TestSavedQuery(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="managed_view",
-            query={"kind": "HogQLQuery", "query": "select event as event from events LIMIT 100"},
+            query={"kind": "InsightsQLQuery", "query": "select event as event from events LIMIT 100"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
@@ -200,7 +200,7 @@ class TestSavedQuery(APIBaseTest):
                 {
                     "name": "event_view",
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 100",
                     },
                     "types": [["event", "Nullable(String)"]],
@@ -229,7 +229,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "events",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -242,7 +242,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "test_1",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select * from events where {filters}",
                 },
             },
@@ -258,7 +258,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "test_1",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select * from events where {variables.foo}",
                 },
             },
@@ -274,7 +274,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "test_1",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select * from events where {1 + 2}",
                 },
             },
@@ -311,7 +311,7 @@ class TestSavedQuery(APIBaseTest):
             team=self.team,
             name="deleted_saved_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
             deleted=True,
@@ -320,7 +320,7 @@ class TestSavedQuery(APIBaseTest):
             team=self.team,
             name="saved_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
         )
@@ -340,7 +340,7 @@ class TestSavedQuery(APIBaseTest):
                 team=self.team,
                 name=f"saved_query_{i}",
                 query={
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             )
@@ -360,7 +360,7 @@ class TestSavedQuery(APIBaseTest):
             team=self.team,
             name="deleted_saved_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
             deleted=True,
@@ -379,7 +379,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -404,7 +404,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -437,7 +437,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -451,7 +451,7 @@ class TestSavedQuery(APIBaseTest):
                 {
                     "name": "event_view",
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 100",
                     },
                     "types": [["event", "Nullable(String)"]],
@@ -466,7 +466,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -491,7 +491,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from event_view LIMIT 100",
                 },
             },
@@ -504,7 +504,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -515,7 +515,7 @@ class TestSavedQuery(APIBaseTest):
             f"/api/environments/{self.team.id}/warehouse_saved_queries/" + saved_query_1_response["id"],
             {
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select distinct_id as distinct_id from events LIMIT 100",
                 },
                 "edited_history_id": saved_query_1_response["latest_history_id"],
@@ -546,7 +546,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -558,7 +558,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "outer_event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event from event_view LIMIT 100",
                 },
             },
@@ -571,7 +571,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events",
                 },
             },
@@ -589,7 +589,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events",
                 },
             },
@@ -601,7 +601,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view_2",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from event_view",
                 },
             },
@@ -632,7 +632,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": query,
                 },
             },
@@ -643,7 +643,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view_2",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from event_view",
                 },
             },
@@ -712,7 +712,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": query,
                 },
             },
@@ -723,7 +723,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view_2",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from event_view",
                 },
             },
@@ -734,7 +734,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view_3",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from event_view_2",
                 },
             },
@@ -805,7 +805,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -834,7 +834,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -849,7 +849,7 @@ class TestSavedQuery(APIBaseTest):
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 10",
                     },
                     "edited_history_id": saved_query["latest_history_id"],
@@ -867,7 +867,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -875,7 +875,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(response.status_code, 201, response.content)
         saved_query = response.json()
         self.assertEqual(saved_query["name"], "event_view")
-        self.assertEqual(saved_query["query"]["kind"], "HogQLQuery")
+        self.assertEqual(saved_query["query"]["kind"], "InsightsQLQuery")
         self.assertEqual(saved_query["query"]["query"], "select event as event from events LIMIT 100")
 
         with patch.object(DataWarehouseSavedQuery, "get_columns") as mock_get_columns:
@@ -884,7 +884,7 @@ class TestSavedQuery(APIBaseTest):
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 10",
                     },
                     "edited_history_id": saved_query["latest_history_id"],
@@ -902,14 +902,14 @@ class TestSavedQuery(APIBaseTest):
             self.assertEqual(
                 query_change["after"],
                 {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 10",
                 },
             )
             self.assertEqual(
                 query_change["before"],
                 {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             )
@@ -918,7 +918,7 @@ class TestSavedQuery(APIBaseTest):
             self.assertEqual(
                 query_change["after"],
                 {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             )
@@ -929,7 +929,7 @@ class TestSavedQuery(APIBaseTest):
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 1",
                     },
                     "edited_history_id": saved_query["latest_history_id"],
@@ -945,7 +945,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -953,7 +953,7 @@ class TestSavedQuery(APIBaseTest):
         self.assertEqual(response.status_code, 201, response.content)
         saved_query = response.json()
         self.assertEqual(saved_query["name"], "event_view")
-        self.assertEqual(saved_query["query"]["kind"], "HogQLQuery")
+        self.assertEqual(saved_query["query"]["kind"], "InsightsQLQuery")
         self.assertEqual(saved_query["query"]["query"], "select event as event from events LIMIT 100")
 
         ActivityLog.objects.filter(item_id=saved_query["id"], scope="DataWarehouseSavedQuery").delete()
@@ -964,7 +964,7 @@ class TestSavedQuery(APIBaseTest):
                 f"/api/environments/{self.team.id}/warehouse_saved_queries/{saved_query['id']}",
                 {
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 10",
                     },
                     "edited_history_id": None,
@@ -979,7 +979,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -1044,7 +1044,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "some_event_table",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -1062,7 +1062,7 @@ class TestSavedQuery(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="managed_view",
-            query={"kind": "HogQLQuery", "query": "select event as event from events LIMIT 100"},
+            query={"kind": "InsightsQLQuery", "query": "select event as event from events LIMIT 100"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
@@ -1073,7 +1073,7 @@ class TestSavedQuery(APIBaseTest):
                 {
                     "name": "updated_managed_view",
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "select event as event from events LIMIT 200",
                     },
                 },
@@ -1092,7 +1092,7 @@ class TestSavedQuery(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="managed_view",
-            query={"kind": "HogQLQuery", "query": "select event as event from events LIMIT 100"},
+            query={"kind": "InsightsQLQuery", "query": "select event as event from events LIMIT 100"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
@@ -1118,7 +1118,7 @@ class TestSavedQuery(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="managed_view",
-            query={"kind": "HogQLQuery", "query": "select event as event from events LIMIT 100"},
+            query={"kind": "InsightsQLQuery", "query": "select event as event from events LIMIT 100"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
@@ -1140,7 +1140,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "simple_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -1165,7 +1165,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "parent_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -1179,7 +1179,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "child_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event as event from parent_view LIMIT 50",
                 },
             },
@@ -1193,7 +1193,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "grandchild_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event as event from child_view LIMIT 25",
                 },
             },
@@ -1235,7 +1235,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "view_no_runs",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -1259,7 +1259,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "materialized_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -1312,7 +1312,7 @@ class TestSavedQuery(APIBaseTest):
             {
                 "name": "mixed_status_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },

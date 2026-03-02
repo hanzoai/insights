@@ -13,7 +13,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -43,12 +43,12 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        In your `src/main.ts`, initialize PostHog using your project API key and instance address:
+                        In your `src/main.ts`, initialize Insights using your project API key and instance address:
                     </Markdown>
                     <Tab.Group tabs={['Angular 17+', 'Angular 16 and below']}>
                         <Tab.List>
@@ -59,7 +59,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             <Tab.Panel>
                                 <Markdown>
                                     {dedent`
-                                        For Angular v17 and above, you can set up PostHog as a singleton service. 
+                                        For Angular v17 and above, you can set up Insights as a singleton service. 
                                         To do this, start by creating and injecting a \`PosthogService\` instance.
 
                                         Create a service by running \`ng g service services/posthog\`. The 
@@ -84,9 +84,9 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                                   private router: Router,
                                                   private destroyRef: DestroyRef,
                                                 ) {
-                                                  this.initPostHog();
+                                                  this.initInsights();
                                                 }
-                                                private initPostHog() {
+                                                private initInsights() {
                                                   this.ngZone.runOutsideAngular(() => {
                                                     posthog.init(environment.posthogKey, {
                                                       api_host: environment.posthogHost,
@@ -105,7 +105,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                         to reduce change detection cycles. This is important to avoid performance issues with 
                                         session recording.
                                         Then, inject the service in your app's root component \`app.component.ts\`. 
-                                        This will make sure PostHog is initialized before any other component is rendered.
+                                        This will make sure Insights is initialized before any other component is rendered.
                                     `}
                                 </Markdown>
                                 <CodeBlock
@@ -137,7 +137,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             <Tab.Panel>
                                 <Markdown>
                                     {dedent`
-                                        In your \`src/main.ts\`, initialize PostHog using your project API 
+                                        In your \`src/main.ts\`, initialize Insights using your project API 
                                         key and instance address. You can find both in your 
                                         [project settings](https://us.posthog.com/project/settings).
                                     `}

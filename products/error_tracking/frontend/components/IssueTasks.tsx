@@ -31,7 +31,7 @@ export const IssueTasks = (): JSX.Element => {
     return (
         <ButtonPrimitive fullWidth onClick={onClickCreateTask} disabled={issueLoading}>
             <IconPlus />
-            Create task in PostHog
+            Create task in Insights
         </ButtonPrimitive>
     )
 }
@@ -137,13 +137,13 @@ const createTaskForm = (
     }
 
     description += `---\n\n`
-    description += `**PostHog Error Tracking:** ${posthogUrl}\n`
+    description += `**Insights Error Tracking:** ${posthogUrl}\n`
     description += `**First Seen:** ${new Date(issue.first_seen).toLocaleString()}\n`
 
     const defaultIntegration = githubIntegrations[0]
 
     LemonDialog.openForm({
-        title: 'Create PostHog task',
+        title: 'Create Insights task',
         initialValues: {
             title: issue.name ?? '',
             description: description ?? '',

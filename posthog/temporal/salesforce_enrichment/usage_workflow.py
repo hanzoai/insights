@@ -1,4 +1,4 @@
-"""Salesforce usage enrichment workflow - enriches accounts with PostHog usage signals."""
+"""Salesforce usage enrichment workflow - enriches accounts with usage signals."""
 
 import json
 import asyncio
@@ -12,7 +12,7 @@ from django.db import close_old_connections
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger
 
@@ -38,7 +38,7 @@ _SPECIAL_FIELDS = frozenset({"products_activated_7d", "products_activated_30d"})
 
 @dataclasses.dataclass
 class SalesforceOrgMapping:
-    """Mapping between Salesforce account and PostHog organization."""
+    """Mapping between Salesforce account and Insights organization."""
 
     salesforce_account_id: str
     posthog_org_id: str
@@ -200,8 +200,8 @@ async def update_salesforce_usage_activity(updates: list[SalesforceUsageUpdate])
 
 
 @workflow.defn(name="salesforce-usage-enrichment")
-class SalesforceUsageEnrichmentWorkflow(PostHogWorkflow):
-    """Enrich Salesforce accounts with PostHog usage signals."""
+class SalesforceUsageEnrichmentWorkflow(InsightsWorkflow):
+    """Enrich Salesforce accounts with usage signals."""
 
     @staticmethod
     def parse_inputs(inputs: list[str]) -> UsageEnrichmentInputs:

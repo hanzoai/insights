@@ -136,7 +136,7 @@ export const playerShareLogic = kea<playerShareLogicType>([
                     title: linearLinkForm.issueTitle,
                     description:
                         linearLinkForm.issueDescription +
-                        `\n\nPostHog recording: ${makePrivateLink(props.id, linearLinkForm)}`,
+                        `\n\nInsights recording: ${makePrivateLink(props.id, linearLinkForm)}`,
                     assignee: linearLinkForm.assignee,
                     labels: linearLinkForm.labels,
                 }
@@ -155,7 +155,7 @@ export const playerShareLogic = kea<playerShareLogicType>([
                     title: githubLinkForm.githubIssueTitle,
                     description:
                         githubLinkForm.githubIssueDescription +
-                        `\n\nPostHog recording: ${makePrivateLink(props.id, githubLinkForm)}`,
+                        `\n\nInsights recording: ${makePrivateLink(props.id, githubLinkForm)}`,
                     username: githubLinkForm.githubUsername,
                     repoName: githubLinkForm.githubRepoName,
                 }

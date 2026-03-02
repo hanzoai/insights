@@ -7,7 +7,7 @@ import { sceneLogic } from 'scenes/sceneLogic'
 import { urls } from 'scenes/urls'
 
 import { ErrorTrackingIssue } from '~/queries/schema/schema-general'
-import { FilterLogicalOperator, HogQLPropertyFilter, PropertyFilterType, UniversalFiltersGroup } from '~/types'
+import { FilterLogicalOperator, InsightsQLPropertyFilter, PropertyFilterType, UniversalFiltersGroup } from '~/types'
 
 import { bulkSelectLogic } from '../../logics/bulkSelectLogic'
 import { AssigneeLabelDisplay } from '../Assignee/AssigneeDisplay'
@@ -42,9 +42,9 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
 
     const excludeSelectedIssues = (): void => {
         const quotedIds = selectedIds.map((id) => `'${id}'`).join(', ')
-        const newFilter: HogQLPropertyFilter = {
+        const newFilter: InsightsQLPropertyFilter = {
             key: `issue_id NOT IN (${quotedIds})`,
-            type: PropertyFilterType.HogQL,
+            type: PropertyFilterType.InsightsQL,
             value: null,
         }
 

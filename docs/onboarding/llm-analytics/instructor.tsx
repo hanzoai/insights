@@ -9,12 +9,12 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics
                         works best with our Python and Node SDKs.
                     </Markdown>
 
@@ -45,7 +45,7 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Install Instructor and the OpenAI SDK. PostHog instruments your LLM calls by wrapping the OpenAI
+                        Install Instructor and the OpenAI SDK. Insights instruments your LLM calls by wrapping the OpenAI
                         client, which Instructor uses under the hood.
                     </Markdown>
 
@@ -71,13 +71,13 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
             ),
         },
         {
-            title: 'Initialize PostHog and Instructor',
+            title: 'Initialize Insights and Instructor',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog OpenAI wrapper and
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
                         pass it to Instructor.
                     </Markdown>
 
@@ -111,10 +111,10 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 code: dedent`
                                     import Instructor from '@instructor-ai/instructor'
                                     import { OpenAI } from '@posthog/ai'
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
                                     import { z } from 'zod'
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -132,8 +132,8 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            PostHog's `OpenAI` wrapper is a proper subclass of `openai.OpenAI`, so it works directly
-                            with `instructor.from_openai()`. PostHog captures `$ai_generation` events automatically
+                            Insights's `OpenAI` wrapper is a proper subclass of `openai.OpenAI`, so it works directly
+                            with `instructor.from_openai()`. Insights captures `$ai_generation` events automatically
                             without proxying your calls.
                         </Markdown>
                     </CalloutBox>
@@ -146,7 +146,7 @@ export const getInstructorSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Now use Instructor to extract structured data from LLM responses. PostHog automatically captures
+                        Now use Instructor to extract structured data from LLM responses. Insights automatically captures
                         an `$ai_generation` event for each call.
                     </Markdown>
 

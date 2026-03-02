@@ -497,7 +497,7 @@ export const maxLogic = kea<maxLogicType>([
             }
         }
 
-        // If there is a prefill question from side panel state (from opening PostHog AI within the app), use it
+        // If there is a prefill question from side panel state (from opening Insights AI within the app), use it
         if (
             !values.question &&
             sidePanelStateLogic.isMounted() &&
@@ -625,18 +625,18 @@ export const QUESTION_SUGGESTIONS_DATA: readonly SuggestionGroup[] = [
                 content: 'Calculate a conversion rate for <events or actions>…',
             },
         ],
-        tooltip: 'PostHog AI can generate insights from natural language and tweak existing ones.',
+        tooltip: 'Insights AI can generate insights from natural language and tweak existing ones.',
     },
     {
         label: 'SQL',
-        icon: iconForType('insight/hog'),
+        icon: iconForType('insight/sql'),
         suggestions: [
             {
                 content: 'Write an SQL query to…',
             },
         ],
         url: urls.sqlEditor(),
-        tooltip: 'PostHog AI can generate SQL queries for your PostHog data, both analytics and the data warehouse.',
+        tooltip: 'Insights AI can generate SQL queries for your Insights data, both analytics and the data warehouse.',
     },
     {
         label: 'Session replay',
@@ -647,7 +647,7 @@ export const QUESTION_SUGGESTIONS_DATA: readonly SuggestionGroup[] = [
             },
         ],
         url: productUrls.replay(),
-        tooltip: 'PostHog AI can find session recordings for you.',
+        tooltip: 'Insights AI can find session recordings for you.',
     },
     {
         label: 'SDK setup',
@@ -675,7 +675,7 @@ export const QUESTION_SUGGESTIONS_DATA: readonly SuggestionGroup[] = [
                 content: 'How can I set up the product analytics in…',
             },
         ],
-        tooltip: 'PostHog AI can help you set up PostHog SDKs in your stack.',
+        tooltip: 'Insights AI can help you set up Insights SDKs in your stack.',
     },
     {
         label: 'Feature flags',
@@ -727,7 +727,7 @@ export const QUESTION_SUGGESTIONS_DATA: readonly SuggestionGroup[] = [
             },
         ],
         url: urls.surveys(),
-        tooltip: 'PostHog AI can help you create surveys to collect feedback from your users.',
+        tooltip: 'Insights AI can help you create surveys to collect feedback from your users.',
     },
     {
         label: 'Docs',
@@ -749,7 +749,7 @@ export const QUESTION_SUGGESTIONS_DATA: readonly SuggestionGroup[] = [
                 content: 'How can I capture an exception?',
             },
         ],
-        tooltip: 'PostHog AI has access to PostHog docs and can help you get the most out of PostHog.',
+        tooltip: 'Insights AI has access to Insights docs and can help you get the most out of Insights.',
     },
 ]
 

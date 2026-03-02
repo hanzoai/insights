@@ -10,11 +10,11 @@ import { urls } from 'scenes/urls'
 
 import { deleteFromTree } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
 
-import type { HogFlow } from './hogflows/types'
+import type { CustomFlow } from './customflows/types'
 import type { workflowsLogicType } from './workflowsLogicType'
 
 // Helping kea-typegen navigate the exported default class for Fuse
-export interface Fuse extends FuseClass<HogFlow> {}
+export interface Fuse extends FuseClass<CustomFlow> {}
 
 export interface WorkflowsFilters {
     search: string
@@ -25,11 +25,11 @@ export interface WorkflowsFilters {
 export const workflowsLogic = kea<workflowsLogicType>([
     path(['products', 'workflows', 'frontend', 'workflowsLogic']),
     actions({
-        toggleWorkflowStatus: (workflow: HogFlow) => ({ workflow }),
-        duplicateWorkflow: (workflow: HogFlow) => ({ workflow }),
-        archiveWorkflow: (workflow: HogFlow) => ({ workflow }),
-        restoreWorkflow: (workflow: HogFlow) => ({ workflow }),
-        deleteWorkflow: (workflow: HogFlow) => ({ workflow }),
+        toggleWorkflowStatus: (workflow: CustomFlow) => ({ workflow }),
+        duplicateWorkflow: (workflow: CustomFlow) => ({ workflow }),
+        archiveWorkflow: (workflow: CustomFlow) => ({ workflow }),
+        restoreWorkflow: (workflow: CustomFlow) => ({ workflow }),
+        deleteWorkflow: (workflow: CustomFlow) => ({ workflow }),
         loadWorkflows: () => ({}),
         setFilters: (filters: Partial<WorkflowsFilters>) => ({ filters }),
         setSearchTerm: (search: string) => ({ search }),
@@ -49,20 +49,20 @@ export const workflowsLogic = kea<workflowsLogicType>([
     }),
     loaders(({ actions, values }) => ({
         workflows: [
-            [] as HogFlow[],
+            [] as CustomFlow[],
             {
                 loadWorkflows: async () => {
-                    const response = await api.hogFlows.getHogFlows()
+                    const response = await api.customFlows.getCustomFlows()
                     return response.results
                 },
                 toggleWorkflowStatus: async ({ workflow }) => {
-                    const updatedWorkflow = await api.hogFlows.updateHogFlow(workflow.id, {
+                    const updatedWorkflow = await api.customFlows.updateCustomFlow(workflow.id, {
                         status: workflow.status === 'active' ? 'draft' : 'active',
                     })
                     return values.workflows.map((c) => (c.id === updatedWorkflow.id ? updatedWorkflow : c))
                 },
                 duplicateWorkflow: async ({ workflow }) => {
-                    const duplicatedWorkflow = await api.hogFlows.createHogFlow({
+                    const duplicatedWorkflow = await api.customFlows.createCustomFlow({
                         ...workflow,
                         status: 'draft',
                         name: `${workflow.name} (copy)`,
@@ -84,7 +84,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                             status: 'danger',
                             onClick: async () => {
                                 try {
-                                    await api.hogFlows.updateHogFlow(workflow.id, {
+                                    await api.customFlows.updateCustomFlow(workflow.id, {
                                         status: 'archived',
                                     })
                                     lemonToast.success(`Workflow "${workflow.name}" archived`)
@@ -106,7 +106,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
                 },
                 restoreWorkflow: async ({ workflow }) => {
                     try {
-                        const updatedWorkflow = await api.hogFlows.updateHogFlow(workflow.id, {
+                        const updatedWorkflow = await api.customFlows.updateCustomFlow(workflow.id, {
                             status: 'draft',
                         })
                         lemonToast.success(`Workflow "${workflow.name}" restored to draft status`)
@@ -129,9 +129,9 @@ export const workflowsLogic = kea<workflowsLogicType>([
                             status: 'danger',
                             onClick: async () => {
                                 try {
-                                    await api.hogFlows.deleteHogFlow(workflow.id)
+                                    await api.customFlows.deleteCustomFlow(workflow.id)
                                     lemonToast.success(`Workflow "${workflow.name}" deleted`)
-                                    deleteFromTree('hog_flow/', workflow.id)
+                                    deleteFromTree('custom_flow/', workflow.id)
                                     actions.loadWorkflows()
                                 } catch (error: any) {
                                     lemonToast.error(
@@ -163,7 +163,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
         ],
         filteredWorkflows: [
             (s) => [s.workflows, s.filters, s.workflowsFuse],
-            (workflows, filters, workflowsFuse): HogFlow[] => {
+            (workflows, filters, workflowsFuse): CustomFlow[] => {
                 let filtered = workflows.filter((workflow) => workflow.status !== 'archived')
 
                 // Filter by search term using Fuse
@@ -187,7 +187,7 @@ export const workflowsLogic = kea<workflowsLogicType>([
         ],
         archivedWorkflows: [
             (s) => [s.workflows],
-            (workflows): HogFlow[] => {
+            (workflows): CustomFlow[] => {
                 return workflows.filter((workflow) => workflow.status === 'archived')
             },
         ],

@@ -143,7 +143,7 @@ export function InitialBodyDisplay(): JSX.Element {
         <BodyDisplay
             content={undefined}
             headers={undefined}
-            emptyMessage="Response captured before PostHog was initialized"
+            emptyMessage="Response captured before Insights was initialized"
         />
     )
 }

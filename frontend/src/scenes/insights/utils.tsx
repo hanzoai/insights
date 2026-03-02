@@ -779,10 +779,10 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
         [NodeKind.PathsQuery]: 'insight/paths',
         [NodeKind.StickinessQuery]: 'insight/stickiness',
         [NodeKind.LifecycleQuery]: 'insight/lifecycle',
-        [NodeKind.HogQuery]: 'insight/hog',
-        [NodeKind.InsightsQLQuery]: 'insight/hog',
-        [NodeKind.DataVisualizationNode]: 'insight/hog',
-        [NodeKind.DataTableNode]: 'insight/hog',
+        [NodeKind.ScriptQuery]: 'insight/sql',
+        [NodeKind.InsightsQLQuery]: 'insight/sql',
+        [NodeKind.DataVisualizationNode]: 'insight/sql',
+        [NodeKind.DataTableNode]: 'insight/sql',
     }
 
     const mappedIconType: FileSystemIconType = nodeKindToColor[nodeKind] || 'product_analytics'

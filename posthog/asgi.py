@@ -36,7 +36,7 @@ def lifetime_wrapper(func):
     return inner
 
 
-# PostHogConfig.ready() handles setting the global analytics key in WSGI. The same code couldn't run
+# InsightsConfig.ready() handles setting the global analytics key in WSGI. The same code couldn't run
 # in ASGI because ready() doesn't expose an async interface.
 def self_capture_wrapper(func):
     if not settings.DEBUG or not settings.SELF_CAPTURE:

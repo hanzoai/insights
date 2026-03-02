@@ -21,7 +21,7 @@ export function Login2FA(): JSX.Element {
     return (
         <BridgePage
             view="login"
-            hedgehog
+            mascot
             message={
                 <>
                     Welcome to

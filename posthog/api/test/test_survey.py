@@ -1620,7 +1620,7 @@ class TestSurvey(APIBaseTest):
             linked_flag=linked_flag,
             targeting_flag=targeting_flag,
             internal_targeting_flag=internal_targeting_flag,
-            questions=[{"type": "open", "question": "What's a hedgehog?"}],
+            questions=[{"type": "open", "question": "What's a mascot?"}],
         )
 
         new_filters: dict[str, Any] = {
@@ -1901,7 +1901,7 @@ class TestSurvey(APIBaseTest):
             created_by=self.user,
             name="survey to update",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
         )
 
         response = self.client.patch(
@@ -3004,7 +3004,7 @@ class TestSurveyQuestionValidationWithEnterpriseFeatures(APIBaseTest):
         )
         response_data = response.json()
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response_data
-        assert response_data["detail"] == "You need to upgrade to PostHog Enterprise to use white labelling"
+        assert response_data["detail"] == "You need to upgrade to Insights Enterprise to use white labelling"
 
 
 class TestSurveyWithActions(APIBaseTest):
@@ -3110,7 +3110,7 @@ class TestSurveyWithActions(APIBaseTest):
             created_by=self.user,
             name="survey with actions",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
         )
         survey_with_actions.actions.set(Action.objects.filter(name__in=["user subscribed", "user unsubscribed"]))
         survey_with_actions.save()
@@ -3161,7 +3161,7 @@ class TestSurveyWithActions(APIBaseTest):
             created_by=self.user,
             name="survey with actions",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
         )
         survey_with_actions.actions.set(Action.objects.filter(name__in=["user subscribed", "user unsubscribed"]))
         survey_with_actions.save()
@@ -3578,7 +3578,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
             created_by=self.user,
             name="survey with actions",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
         )
         survey_with_actions.actions.set(Action.objects.filter(name="user subscribed"))
         survey_with_actions.save()
@@ -3599,7 +3599,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
                             {
                                 "id": str(survey_with_actions.questions[0]["id"]),
                                 "type": "open",
-                                "question": "Why's a hedgehog?",
+                                "question": "Why's a mascot?",
                             }
                         ],
                         "conditions": {
@@ -3661,7 +3661,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
             linked_flag=linked_flag,
             targeting_flag=targeting_flag,
             internal_targeting_flag=internal_targeting_flag,
-            questions=[{"type": "open", "question": "What's a hedgehog?"}],
+            questions=[{"type": "open", "question": "What's a mascot?"}],
         )
 
         self.client.logout()
@@ -3682,7 +3682,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
                         {
                             "id": str(survey_with_flags.questions[0]["id"]),
                             "type": "open",
-                            "question": "What's a hedgehog?",
+                            "question": "What's a mascot?",
                         }
                     ],
                     "linked_flag_key": "linked-flag",
@@ -3732,7 +3732,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
             name="Survey 2",
             description="Another description that should be excluded",
             type="popover",
-            questions=[{"type": "open", "question": "What's a hedgehog?"}],
+            questions=[{"type": "open", "question": "What's a mascot?"}],
         )
         self.client.logout()
 
@@ -3759,7 +3759,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
             created_by=self.user,
             name="Survey 1",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
         )
         self.client.logout()
 
@@ -3793,7 +3793,7 @@ class TestSurveysAPIList(BaseTest, QueryMatchingTest):
             created_by=self.user,
             name="Survey 1",
             type="popover",
-            questions=[{"type": "open", "question": "Why's a hedgehog?"}],
+            questions=[{"type": "open", "question": "Why's a mascot?"}],
         )
         self.client.logout()
 
@@ -4796,7 +4796,7 @@ class TestExternalSurveyValidation(APIBaseTest):
             """
         <div style="display: flex; justify-content: center;">
                 <div style="flex: 1;">
-                    <img src="https://www.gardenhealth.com/wp-content/uploads/2019/09/hedgehog_octobergardeningjobs-768x768.webp" alt="Your Image" style="max-width: 100%; height: auto;   opacity: 1;">
+                    <img src="https://www.gardenhealth.com/wp-content/uploads/2019/09/mascot_octobergardeningjobs-768x768.webp" alt="Your Image" style="max-width: 100%; height: auto;   opacity: 1;">
                 </div>
                 <div style="flex: 3; padding:10px;">
                     <p>Help us stay sharp.</p>
@@ -4805,7 +4805,7 @@ class TestExternalSurveyValidation(APIBaseTest):
             """
         <div style="display: flex; justify-content: center;">
                 <div style="flex: 1;">
-                    <img src="https://www.gardenhealth.com/wp-content/uploads/2019/09/hedgehog_octobergardeningjobs-768x768.webp" alt="Your Image" style="max-width: 100%; height: auto;   opacity: 1;">
+                    <img src="https://www.gardenhealth.com/wp-content/uploads/2019/09/mascot_octobergardeningjobs-768x768.webp" alt="Your Image" style="max-width: 100%; height: auto;   opacity: 1;">
                 </div>
                 <div style="flex: 3; padding:10px;">
                     <p>Help us stay sharp.</p>

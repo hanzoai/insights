@@ -43,45 +43,45 @@ def mocked_plugin_requests_get(*args, **kwargs):
         def ok(self):
             return self.status_code < 300
 
-    if args[0] == "https://api.github.com/repos/PostHog/posthog/commits?sha=&path=":
+    if args[0] == "https://api.github.com/repos/Insights/posthog/commits?sha=&path=":
         return MockJSONResponse(
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/PostHog/posthog/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Insights/posthog/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
         )
 
-    if args[0] == "https://api.github.com/repos/PostHog/posthog/commits?sha=main&path=":
+    if args[0] == "https://api.github.com/repos/Insights/posthog/commits?sha=main&path=":
         return MockJSONResponse(
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/PostHog/posthog/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Insights/posthog/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
         )
 
-    if args[0] == "https://api.github.com/repos/PostHog/posthog/commits?sha=main&path=test/path/in/repo":
+    if args[0] == "https://api.github.com/repos/Insights/posthog/commits?sha=main&path=test/path/in/repo":
         return MockJSONResponse(
             [
                 {
                     "sha": "MOCKLATESTCOMMIT",
-                    "html_url": "https://www.github.com/PostHog/posthog/commit/MOCKLATESTCOMMIT",
+                    "html_url": "https://www.github.com/Insights/posthog/commit/MOCKLATESTCOMMIT",
                 }
             ],
             200,
         )
 
-    if args[0] == "https://api.github.com/repos/PostHog/helloworldplugin/commits?sha=&path=":
+    if args[0] == "https://api.github.com/repos/Insights/helloworldplugin/commits?sha=&path=":
         return MockJSONResponse(
             [
                 {
                     "sha": HELLO_WORLD_PLUGIN_GITHUB_ZIP[0],
-                    "html_url": "https://www.github.com/PostHog/helloworldplugin/commit/{}".format(
+                    "html_url": "https://www.github.com/Insights/helloworldplugin/commit/{}".format(
                         HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]
                     ),
                 }
@@ -89,7 +89,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
             200,
         )
 
-    if args[0] == "https://api.github.com/repos/PostHog/helloworldplugin/commits?sha=main&path=":
+    if args[0] == "https://api.github.com/repos/Insights/helloworldplugin/commits?sha=main&path=":
         return MockJSONResponse(
             {"commit": {"sha": HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}},
             200,
@@ -123,20 +123,20 @@ def mocked_plugin_requests_get(*args, **kwargs):
     if args[0] == "https://registry.npmjs.org/@posthog/helloworldplugin/latest":
         return MockJSONResponse({"pkg": "@posthog/helloworldplugin", "version": "MOCK"}, 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]):
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_ZIP[1], 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_ATTACHMENT_ZIP[1], 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_SECRET_GITHUB_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_SECRET_GITHUB_ZIP[1], 200)
 
-    if args[0] == "https://github.com/PostHog/helloworldplugin/archive/{}.zip".format(
+    if args[0] == "https://github.com/Insights/helloworldplugin/archive/{}.zip".format(
         HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[0]
     ):
         return MockBase64Response(HELLO_WORLD_PLUGIN_GITHUB_SUBDIR_ZIP[1], 200)
@@ -178,7 +178,7 @@ def mocked_plugin_requests_get(*args, **kwargs):
     if args[0] == "https://registry.npmjs.org/posthog-helloworld-plugin/-/posthog-helloworld-plugin-0.0.0.tgz":
         return MockBase64Response(HELLO_WORLD_PLUGIN_NPM_TGZ[1], 200)
 
-    if args[0] == "https://raw.githubusercontent.com/PostHog/integrations-repository/main/plugins.json":
+    if args[0] == "https://raw.githubusercontent.com/Insights/integrations-repository/main/plugins.json":
         return MockTextResponse(
             json.dumps(
                 [

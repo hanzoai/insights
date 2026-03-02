@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     status: 'stable',
     free: false,
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Creates an issue for a Linear team',
     icon_url: '/static/services/linear.png',
     category: ['Error tracking'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `fun query(mutation) {
     return fetch('https://api.linear.app/graphql', {
         'body': {
@@ -33,8 +33,8 @@ if (issue_response.status != 200) {
 
 let linear_issue_id := issue_response.body.data.issueCreate.issue.identifier;
 
-let attachment_url := f'{project.url}/error_tracking/{inputs.posthog_issue_id}';
-let attachment_mutation := f'mutation AttachmentCreate \\{ attachmentCreate(input: \\{ issueId: "{linear_issue_id}", title: "PostHog issue", url: "{attachment_url}" }) \\{ success } }';
+let attachment_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}';
+let attachment_mutation := f'mutation AttachmentCreate \\{ attachmentCreate(input: \\{ issueId: "{linear_issue_id}", title: "Insights issue", url: "{attachment_url}" }) \\{ success } }';
 
 query(attachment_mutation);`,
     inputs_schema: [
@@ -76,9 +76,9 @@ query(attachment_mutation);`,
             default: '{event.properties.$exception_values[1]}',
         },
         {
-            key: 'posthog_issue_id',
+            key: 'insights_issue_id',
             type: 'string',
-            label: 'PostHog issue ID',
+            label: 'Insights issue ID',
             secret: false,
             hidden: true,
             required: true,

@@ -26,7 +26,7 @@
             "type": "number"
         },
         "distinct_id": {
-            "description": "PostHog distinct_id",
+            "description": "Insights distinct_id",
             "type": "string"
         },
         "elements_chain": {

@@ -5,12 +5,12 @@ import { LemonCollapse, LemonDivider, ProfilePicture, Spinner, Tooltip } from '@
 
 import PropertyFiltersDisplay from 'lib/components/PropertyFilters/components/PropertyFiltersDisplay'
 import { TZLabel } from 'lib/components/TZLabel'
-import { ListHog, SleepingHog } from 'lib/components/hedgehogs'
+import { ListHog, SleepingHog } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
-import { LogsViewer } from 'scenes/hog-functions/logs/LogsViewer'
+import { LogsViewer } from 'scenes/custom-functions/logs/LogsViewer'
 
 import { batchWorkflowJobsLogic } from './batchWorkflowJobsLogic'
-import { HogFlowBatchJob } from './hogflows/types'
+import { CustomFlowBatchJob } from './customflows/types'
 import { renderWorkflowLogMessage } from './logs/log-utils'
 import { workflowLogic } from './workflowLogic'
 
@@ -23,7 +23,7 @@ function WorkflowRunLogs({ id }: WorkflowLogsProps): JSX.Element {
 
     return (
         <LogsViewer
-            sourceType="hog_flow"
+            sourceType="custom_flow"
             sourceId={id}
             instanceLabel="workflow run"
             renderMessage={(m) => renderWorkflowLogMessage(workflow, m)}
@@ -31,7 +31,7 @@ function WorkflowRunLogs({ id }: WorkflowLogsProps): JSX.Element {
     )
 }
 
-function BatchRunHeader({ job }: { job: HogFlowBatchJob }): JSX.Element {
+function BatchRunHeader({ job }: { job: CustomFlowBatchJob }): JSX.Element {
     return (
         <div className="flex gap-2 w-full justify-between">
             <strong>{job.id}</strong>
@@ -66,8 +66,8 @@ function BatchRunHeader({ job }: { job: HogFlowBatchJob }): JSX.Element {
     )
 }
 
-function BatchRunInfo({ job }: { job: HogFlowBatchJob }): JSX.Element {
-    const { workflow } = useValues(workflowLogic({ id: job.hog_flow }))
+function BatchRunInfo({ job }: { job: CustomFlowBatchJob }): JSX.Element {
+    const { workflow } = useValues(workflowLogic({ id: job.custom_flow }))
 
     const isFutureJob = job.scheduled_at && dayjs(job.scheduled_at).isAfter(dayjs())
 
@@ -79,7 +79,7 @@ function BatchRunInfo({ job }: { job: HogFlowBatchJob }): JSX.Element {
         </div>
     ) : (
         <LogsViewer
-            sourceType="hog_flow"
+            sourceType="custom_flow"
             sourceId={job.id}
             groupByInstanceId
             instanceLabel="workflow job"

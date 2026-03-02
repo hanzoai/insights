@@ -147,9 +147,9 @@ class TestTask(TestCase):
 
     @parameterized.expand(
         [
-            ("PostHog/posthog", "posthog/posthog"),
-            ("posthog/PostHog-JS", "posthog/posthog-js"),
-            ("PostHog/PostHog", "posthog/posthog"),
+            ("Insights/posthog", "posthog/posthog"),
+            ("posthog/Insights-JS", "posthog/posthog-js"),
+            ("Insights/Insights", "posthog/posthog"),
             ("POSTHOG/POSTHOG-JS", "posthog/posthog-js"),
             ("posthog/posthog-js", "posthog/posthog-js"),
         ]
@@ -210,7 +210,7 @@ class TestTaskSlug(TestCase):
             ("JonathanLab", "JON"),
             ("Test Team", "TES"),
             ("ABC", "ABC"),
-            ("PostHog", "POS"),
+            ("Insights", "POS"),
             ("my team", "MYT"),
             ("123test", "123"),
             ("test", "TES"),
@@ -564,12 +564,12 @@ class TestSandboxSnapshot(TestCase):
         snapshot = SandboxSnapshot.objects.create(
             integration=self.integration,
             external_id=external_id,
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Insights/posthog", "Insights/posthog-js"],
             status=status,
         )
         self.assertEqual(snapshot.integration, self.integration)
         self.assertEqual(snapshot.external_id, external_id)
-        self.assertEqual(snapshot.repos, ["PostHog/posthog", "PostHog/posthog-js"])
+        self.assertEqual(snapshot.repos, ["Insights/posthog", "Insights/posthog-js"])
         self.assertEqual(snapshot.status, status)
 
     def test_snapshot_default_values(self):
@@ -582,7 +582,7 @@ class TestSandboxSnapshot(TestCase):
         snapshot = SandboxSnapshot.objects.create(
             integration=self.integration,
             external_id=f"snapshot-{uuid.uuid4()}",
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Insights/posthog", "Insights/posthog-js"],
             status=SandboxSnapshot.Status.COMPLETE,
         )
         self.assertEqual(str(snapshot), f"Snapshot {snapshot.external_id} (Complete, 2 repos)")
@@ -601,9 +601,9 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog", "PostHog/posthog-js"], "PostHog/posthog", True),
-            (["PostHog/posthog", "PostHog/posthog-js"], "PostHog/other", False),
-            ([], "PostHog/posthog", False),
+            (["Insights/posthog", "Insights/posthog-js"], "Insights/posthog", True),
+            (["Insights/posthog", "Insights/posthog-js"], "Insights/other", False),
+            ([], "Insights/posthog", False),
         ]
     )
     def test_has_repo(self, repos, check_repo, expected):
@@ -614,10 +614,10 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog", "PostHog/posthog-js"], ["PostHog/posthog"], True),
-            (["PostHog/posthog", "PostHog/posthog-js"], ["PostHog/posthog", "PostHog/posthog-js"], True),
-            (["PostHog/posthog"], ["PostHog/posthog", "PostHog/posthog-js"], False),
-            ([], ["PostHog/posthog"], False),
+            (["Insights/posthog", "Insights/posthog-js"], ["Insights/posthog"], True),
+            (["Insights/posthog", "Insights/posthog-js"], ["Insights/posthog", "Insights/posthog-js"], True),
+            (["Insights/posthog"], ["Insights/posthog", "Insights/posthog-js"], False),
+            ([], ["Insights/posthog"], False),
         ]
     )
     def test_has_repos(self, snapshot_repos, required_repos, expected):
@@ -643,9 +643,9 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog"], "posthog/posthog", True),
-            (["PostHog/posthog"], "POSTHOG/POSTHOG", True),
-            (["posthog/posthog-js"], "PostHog/PostHog-JS", True),
+            (["Insights/posthog"], "posthog/posthog", True),
+            (["Insights/posthog"], "POSTHOG/POSTHOG", True),
+            (["posthog/posthog-js"], "Insights/Insights-JS", True),
         ]
     )
     def test_has_repo_case_insensitive(self, repos, check_repo, expected):
@@ -656,8 +656,8 @@ class TestSandboxSnapshot(TestCase):
 
     @parameterized.expand(
         [
-            (["PostHog/posthog", "PostHog/posthog-js"], ["posthog/posthog"], True),
-            (["PostHog/posthog", "PostHog/posthog-js"], ["POSTHOG/POSTHOG", "posthog/posthog-js"], True),
+            (["Insights/posthog", "Insights/posthog-js"], ["posthog/posthog"], True),
+            (["Insights/posthog", "Insights/posthog-js"], ["POSTHOG/POSTHOG", "posthog/posthog-js"], True),
         ]
     )
     def test_has_repos_case_insensitive(self, snapshot_repos, required_repos, expected):
@@ -714,54 +714,54 @@ class TestSandboxSnapshot(TestCase):
     def test_get_latest_snapshot_with_repos(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog"],
+            repos=["Insights/posthog"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
         snapshot2 = SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Insights/posthog", "Insights/posthog-js"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
-        result = SandboxSnapshot.get_latest_snapshot_with_repos(self.integration.id, ["PostHog/posthog"])
+        result = SandboxSnapshot.get_latest_snapshot_with_repos(self.integration.id, ["Insights/posthog"])
         self.assertEqual(result, snapshot2)
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["PostHog/posthog", "PostHog/posthog-js"]
+            self.integration.id, ["Insights/posthog", "Insights/posthog-js"]
         )
         self.assertEqual(result, snapshot2)
 
     def test_get_latest_snapshot_with_repos_not_found(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog"],
+            repos=["Insights/posthog"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["PostHog/posthog", "PostHog/other"]
+            self.integration.id, ["Insights/posthog", "Insights/other"]
         )
         self.assertIsNone(result)
 
     def test_get_latest_snapshot_with_repos_ignores_in_progress(self):
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog"],
+            repos=["Insights/posthog"],
             status=SandboxSnapshot.Status.COMPLETE,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
         SandboxSnapshot.objects.create(
             integration=self.integration,
-            repos=["PostHog/posthog", "PostHog/posthog-js"],
+            repos=["Insights/posthog", "Insights/posthog-js"],
             status=SandboxSnapshot.Status.IN_PROGRESS,
             external_id=f"snapshot-{uuid.uuid4()}",
         )
 
         result = SandboxSnapshot.get_latest_snapshot_with_repos(
-            self.integration.id, ["PostHog/posthog", "PostHog/posthog-js"]
+            self.integration.id, ["Insights/posthog", "Insights/posthog-js"]
         )
         self.assertIsNone(result)
 

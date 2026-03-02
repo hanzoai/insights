@@ -3,7 +3,7 @@ import { Gauge } from 'prom-client'
 
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 
-import { HogTransformerHub, HogTransformerService } from '../cdp/hog-transformations/hog-transformer.service'
+import { ScriptTransformerHub, ScriptTransformerService } from '../cdp/script-transformations/script-transformer.service'
 import { KafkaConsumer } from '../kafka/consumer'
 import { KafkaProducerWrapper } from '../kafka/producer'
 import {
@@ -39,14 +39,14 @@ import { RedisOverflowRepository } from './utils/overflow-redirect/overflow-redi
 /**
  * Narrowed Hub type for IngestionConsumer.
  * This includes all fields needed by IngestionConsumer and its dependencies:
- * - HogTransformerService (via HogTransformerHub)
+ * - ScriptTransformerService (via ScriptTransformerHub)
  * - BatchWritingGroupStore (via GroupHub)
  * - EventIngestionRestrictionManager
  * - KafkaProducerWrapper
  * - BatchWritingPersonsStore
  * - Preprocessing and ingestion pipelines
  */
-export type IngestionConsumerHub = HogTransformerHub &
+export type IngestionConsumerHub = ScriptTransformerHub &
     IngestionConsumerConfig &
     Pick<
         Hub,
@@ -57,7 +57,7 @@ export type IngestionConsumerHub = HogTransformerHub &
         | 'clickhouseGroupRepository'
         // KafkaProducerWrapper.create
         | 'KAFKA_CLIENT_RACK'
-        // PreprocessingHub (additional fields not in HogTransformerHub)
+        // PreprocessingHub (additional fields not in ScriptTransformerHub)
         | 'cookielessManager'
         // BatchWritingPersonsStore
         | 'personRepository'
@@ -84,7 +84,7 @@ export class IngestionConsumer {
     isStopping = false
     protected kafkaProducer?: KafkaProducerWrapper
     protected kafkaOverflowProducer?: KafkaProducerWrapper
-    public hogTransformer: HogTransformerService
+    public scriptTransformer: ScriptTransformerService
     private overflowRedirectService?: OverflowRedirectService
     private overflowLaneTTLRefreshService?: OverflowRedirectService
     private tokenDistinctIdsToDrop: string[] = []
@@ -161,7 +161,7 @@ export class IngestionConsumer {
             })
         }
 
-        this.hogTransformer = new HogTransformerService(hub)
+        this.scriptTransformer = new ScriptTransformerService(hub)
 
         this.personsStore = new BatchWritingPersonsStore(this.hub.personRepository, this.hub.kafkaProducer, {
             dbWriteMode: this.hub.PERSON_BATCH_WRITING_DB_WRITE_MODE,
@@ -194,7 +194,7 @@ export class IngestionConsumer {
 
     public async start(): Promise<void> {
         await Promise.all([
-            this.hogTransformer.start(),
+            this.scriptTransformer.start(),
             KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK).then((producer) => {
                 this.kafkaProducer = producer
             }),
@@ -210,7 +210,7 @@ export class IngestionConsumer {
             kafkaProducer: this.kafkaProducer!,
             personsStore: this.personsStore,
             groupStore: this.groupStore,
-            hogTransformer: this.hogTransformer,
+            scriptTransformer: this.scriptTransformer,
             eventIngestionRestrictionManager: this.eventIngestionRestrictionManager,
             eventSchemaEnforcementManager: this.eventSchemaEnforcementManager,
             eventSchemaEnforcementEnabled: this.hub.EVENT_SCHEMA_ENFORCEMENT_ENABLED,
@@ -264,8 +264,8 @@ export class IngestionConsumer {
         await this.kafkaProducer?.disconnect()
         logger.info('🔁', `${this.name} - stopping kafka overflow producer`)
         await this.kafkaOverflowProducer?.disconnect()
-        logger.info('🔁', `${this.name} - stopping hog transformer`)
-        await this.hogTransformer.stop()
+        logger.info('🔁', `${this.name} - stopping script transformer`)
+        await this.scriptTransformer.stop()
         logger.info('👍', `${this.name} - stopped!`)
     }
 
@@ -325,7 +325,7 @@ export class IngestionConsumer {
 
         return {
             backgroundTask: this.runInstrumented('awaitScheduledWork', async () => {
-                await Promise.all([this.promiseScheduler.waitForAll(), this.hogTransformer.processInvocationResults()])
+                await Promise.all([this.promiseScheduler.waitForAll(), this.scriptTransformer.processInvocationResults()])
             }),
         }
     }

@@ -1,7 +1,7 @@
-import { HogFunctionInputSchemaType } from '~/cdp/types'
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionInputSchemaType } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-const build_inputs = (): HogFunctionInputSchemaType[] => {
+const build_inputs = (): CustomFunctionInputSchemaType[] => {
     return [
         {
             key: 'rdt_cid',
@@ -31,7 +31,7 @@ const build_inputs = (): HogFunctionInputSchemaType[] => {
     ]
 }
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'destination',
@@ -40,7 +40,7 @@ export const template: HogFunctionTemplate = {
     description: 'Track how many Reddit users interact with your website.',
     icon_url: '/static/services/reddit.png',
     category: ['Advertisement'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 if (empty(inputs.accountId) or empty(inputs.conversionsAccessToken)) {
     throw Error('Account ID and access token are required')
@@ -97,7 +97,7 @@ let body := {
 };
 
 let url := f'https://ads-api.reddit.com/api/v2.0/conversions/events/{inputs.accountId}';
-let userAgent := 'hog:com.posthog.cdp:0.0.1 (by /u/PostHogTeam)';
+let userAgent := 'hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)';
 let headers := {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {inputs.conversionsAccessToken}',

@@ -713,11 +713,11 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
 
         # Mock the memory initializer to return a product description
         model_mock.return_value = RunnableLambda(
-            lambda x: "Here's what I found on posthog.com: PostHog is a product analytics platform."
+            lambda x: "Here's what I found on posthog.com: Insights is a product analytics platform."
         )
 
         # Mock the finalize node to return compressed memory
-        finalize_mock.return_value = RunnableLambda(lambda _: "PostHog is a product analytics platform.")
+        finalize_mock.return_value = RunnableLambda(lambda _: "Insights is a product analytics platform.")
 
         def mock_response(input_dict):
             input_str = str(input_dict)
@@ -752,7 +752,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
                 "message",
                 # Kinda dirty but currently we determine the routing based on "Here's what I found" appearing in content
                 AssistantMessage(
-                    content="Here's what I found on posthog.com: PostHog is a product analytics platform."
+                    content="Here's what I found on posthog.com: Insights is a product analytics platform."
                 ),
             ),
             ("message", AssistantMessage(content=memory_prompts.SCRAPING_VERIFICATION_MESSAGE)),
@@ -778,7 +778,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
         core_memory = await CoreMemory.objects.aget(team=self.team)
         self.assertEqual(
             core_memory.initial_text,
-            "Question: What does the company do?\nAnswer: Here's what I found on posthog.com: PostHog is a product analytics platform.\nQuestion: What is your target market?\nAnswer:",
+            "Question: What does the company do?\nAnswer: Here's what I found on posthog.com: Insights is a product analytics platform.\nQuestion: What is your target market?\nAnswer:",
         )
 
     @patch("ee.hogai.chat_agent.memory.nodes.MemoryOnboardingFinalizeNode._model")
@@ -797,7 +797,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
 
         # Mock the memory initializer to return a product description
         model_mock.return_value = RunnableLambda(
-            lambda _: "Here's what I found on posthog.com: PostHog is a product analytics platform."
+            lambda _: "Here's what I found on posthog.com: Insights is a product analytics platform."
         )
         onboarding_enquiry_model_mock.return_value = RunnableLambda(lambda _: "===What is your target market?")
 
@@ -829,7 +829,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
                 "message",
                 # Kinda dirty but currently we determine the routing based on "Here's what I found" appearing in content
                 AssistantMessage(
-                    content="Here's what I found on posthog.com: PostHog is a product analytics platform."
+                    content="Here's what I found on posthog.com: Insights is a product analytics platform."
                 ),
             ),
             ("message", AssistantMessage(content=memory_prompts.SCRAPING_VERIFICATION_MESSAGE)),
@@ -1761,7 +1761,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
     @patch("ee.hogai.tools.search.SearchTool._arun_impl", return_value=("Docs doubt it", None))
     @patch(
         "ee.hogai.tools.read_taxonomy.tool.ReadTaxonomyTool._run_impl",
-        return_value=("Hedgehogs have not talked yet", None),
+        return_value=("Mascots have not talked yet", None),
     )
     @patch("ee.hogai.core.agent_modes.executables.AgentExecutable._get_model")
     async def test_root_node_can_execute_multiple_tool_calls(self, root_mock, search_mock, read_taxonomy_mock):
@@ -1785,7 +1785,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
                     {
                         "id": tool_call_id1,
                         "name": "search",
-                        "args": {"kind": "docs", "query": "Do hedgehogs speak?"},
+                        "args": {"kind": "docs", "query": "Do mascots speak?"},
                     },
                     {
                         "id": tool_call_id2,
@@ -1806,7 +1806,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
         )
 
         expected_output = [
-            (AssistantEventType.MESSAGE, HumanMessage(content="Do hedgehogs speak?")),
+            (AssistantEventType.MESSAGE, HumanMessage(content="Do mascots speak?")),
             (
                 AssistantEventType.MESSAGE,
                 AssistantMessage(
@@ -1815,7 +1815,7 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
                         {
                             "id": tool_call_id1,
                             "name": "search",
-                            "args": {"kind": "docs", "query": "Do hedgehogs speak?"},
+                            "args": {"kind": "docs", "query": "Do mascots speak?"},
                         },
                         {
                             "id": tool_call_id2,
@@ -1831,12 +1831,12 @@ class TestChatAgent(ClickhouseTestMixin, BaseAssistantTest):
             ),
             (
                 AssistantEventType.MESSAGE,
-                AssistantToolCallMessage(content="Hedgehogs have not talked yet", tool_call_id=tool_call_id2),
+                AssistantToolCallMessage(content="Mascots have not talked yet", tool_call_id=tool_call_id2),
             ),
             (AssistantEventType.MESSAGE, AssistantMessage(content="No")),
         ]
         output, _ = await self._run_assistant_graph(
-            graph, message="Do hedgehogs speak?", conversation=self.conversation
+            graph, message="Do mascots speak?", conversation=self.conversation
         )
 
         self.assertConversationEqual(output, expected_output)

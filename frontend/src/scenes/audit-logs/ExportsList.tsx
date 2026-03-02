@@ -3,7 +3,7 @@ import { useValues } from 'kea'
 import { IconDownload } from '@posthog/icons'
 import { LemonButton, LemonTable, Tooltip } from '@posthog/lemon-ui'
 
-import { DetectiveHog } from 'lib/components/hedgehogs'
+import { DetectiveHog } from 'lib/components/mascots'
 import { humanFriendlyDetailedTime } from 'lib/utils'
 
 import {

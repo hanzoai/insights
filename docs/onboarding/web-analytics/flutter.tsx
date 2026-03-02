@@ -20,7 +20,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     <>
                         {MobileFinalSteps && <MobileFinalSteps />}
                         <Markdown>
-                            To automatically capture screen views, you can use the `PostHogObserver` with your
+                            To automatically capture screen views, you can use the `InsightsObserver` with your
                             navigation:
                         </Markdown>
                         <CodeBlock

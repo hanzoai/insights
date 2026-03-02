@@ -12,7 +12,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="base_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from postgres.supabase.users LIMIT 100",
             },
             external_tables=["postgres.supabase.users"],
@@ -22,7 +22,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="intermediate_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from base_query LIMIT 100",
             },
             external_tables=["base_query"],
@@ -32,7 +32,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="final_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from intermediate_query LIMIT 100",
             },
             external_tables=["intermediate_query"],
@@ -80,7 +80,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="test_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select * from my_table",
             },
             external_tables=["my_table"],
@@ -106,7 +106,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="base_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select * from postgres.supabase.users",
             },
             external_tables=["postgres.supabase.users"],
@@ -116,7 +116,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="mixed_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select * from base_query join postgres.supabase.events",
             },
             external_tables=["base_query", "postgres.supabase.events"],
@@ -146,7 +146,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="test_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select * from postgres.supabase.users",
             },
             external_tables=["postgres.supabase.users", "postgres.supabase.events"],
@@ -175,7 +175,7 @@ class TestLineage(APIBaseTest):
             team=self.team,
             name="test_query",
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select 1 as value",
             },
             external_tables=[],

@@ -10,8 +10,8 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     free=False,
     type="destination",
     id="template-posthog-replicator",
-    name="PostHog",
-    description="Send a copy of the incoming data in realtime to another PostHog instance",
+    name="Insights",
+    description="Send a copy of the incoming data in realtime to another Insights instance",
     icon_url="/static/posthog-icon.svg",
     category=["Custom", "Analytics"],
     code_language="custom_script",
@@ -45,7 +45,7 @@ fetch(f'{host}/e', {
         {
             "key": "host",
             "type": "string",
-            "label": "PostHog host",
+            "label": "Insights host",
             "description": "For cloud accounts this is either https://us.i.posthog.com or https://eu.i.posthog.com",
             "default": "https://us.i.posthog.com",
             "secret": False,
@@ -54,7 +54,7 @@ fetch(f'{host}/e', {
         {
             "key": "token",
             "type": "string",
-            "label": "PostHog API key",
+            "label": "Insights API key",
             "secret": False,
             "required": True,
         },
@@ -80,13 +80,13 @@ fetch(f'{host}/e', {
 )
 
 
-class TemplatePostHogMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-plugin-replicator"
+class TemplateInsightsMigrator(CustomFunctionTemplateMigrator):
+    plugin_url = "https://github.com/Insights/posthog-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("host", "")

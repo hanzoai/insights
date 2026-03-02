@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from posthog.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql.database.models import BooleanDatabaseField, DecimalDatabaseField, FieldOrTable, StringDatabaseField
+from posthog.insightsql.database.models import BooleanDatabaseField, DecimalDatabaseField, FieldOrTable, StringDatabaseField
 
 
 @dataclass

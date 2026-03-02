@@ -1,9 +1,9 @@
 """
-Emit PostHog analytics events for ticket and message state changes.
+Emit Insights analytics events for ticket and message state changes.
 
 These events power workflow triggers (e.g. "if ticket pending for X days, resolve it").
 All events use the ticket's distinct_id so they're tied to the customer person.
-Events are sent to the customer's PostHog project via their team's API token.
+Events are sent to the customer's Insights project via their team's API token.
 """
 
 from posthog.api.capture import capture_internal

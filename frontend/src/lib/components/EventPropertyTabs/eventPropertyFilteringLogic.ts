@@ -10,24 +10,24 @@ import type { eventPropertyFilteringLogicType } from './eventPropertyFilteringLo
 export const eventPropertyFilteringLogic = kea<eventPropertyFilteringLogicType>([
     path(['lib', 'components', 'EventPropertyTabs', 'eventPropertyFilteringLogic']),
     connect(() => ({
-        values: [userPreferencesLogic, ['hidePostHogPropertiesInTable'], preflightLogic, ['isCloudOrDev']],
+        values: [userPreferencesLogic, ['hideInsightsPropertiesInTable'], preflightLogic, ['isCloudOrDev']],
     })),
     selectors({
         filterProperties: [
-            (s) => [s.hidePostHogPropertiesInTable, s.isCloudOrDev],
-            (hidePostHogPropertiesInTable, isCloudOrDev) => {
+            (s) => [s.hideInsightsPropertiesInTable, s.isCloudOrDev],
+            (hideInsightsPropertiesInTable, isCloudOrDev) => {
                 return (props: Record<string, any>) => {
-                    if (!hidePostHogPropertiesInTable) {
+                    if (!hideInsightsPropertiesInTable) {
                         return props
                     }
 
                     return Object.fromEntries(
                         Object.entries(props).filter(([key]) => {
-                            const isPostHogProperty = key.startsWith('$') && PROPERTY_KEYS.includes(key)
-                            const isNonDollarPostHogProperty =
+                            const isInsightsProperty = key.startsWith('$') && PROPERTY_KEYS.includes(key)
+                            const isNonDollarInsightsProperty =
                                 isCloudOrDev && CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(key)
                             const isSystemProperty = props[key]?.system
-                            return !isPostHogProperty && !isNonDollarPostHogProperty && !isSystemProperty
+                            return !isInsightsProperty && !isNonDollarInsightsProperty && !isSystemProperty
                         })
                     )
                 }

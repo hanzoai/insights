@@ -5,7 +5,7 @@ Data pipelines for LLM analytics and observability.
 ## Overview
 
 The LLMA location contains pipelines for aggregating and analyzing AI/LLM
-events tracked through PostHog. These pipelines power analytics, cost tracking,
+events tracked through Insights. These pipelines power analytics, cost tracking,
 and observability features for AI products.
 
 ## Structure

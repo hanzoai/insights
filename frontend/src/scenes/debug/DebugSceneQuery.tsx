@@ -9,7 +9,7 @@ import { QueryEditor } from '~/queries/QueryEditor/QueryEditor'
 import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { insightVizDataNodeKey } from '~/queries/nodes/InsightViz/InsightViz'
 import { Node } from '~/queries/schema/schema-general'
-import { isDataTableNode, isInsightsQLQuery, isHogQuery, isInsightVizNode } from '~/queries/utils'
+import { isDataTableNode, isInsightsQLQuery, isScriptQuery, isInsightVizNode } from '~/queries/utils'
 
 interface DebugSceneQueryProps {
     queryKey: `new-${string}`
@@ -38,7 +38,7 @@ export function DebugSceneQuery({ query, setQuery, queryKey }: DebugSceneQueryPr
 
     return (
         <>
-            {isHogQuery(parsed) ? (
+            {isScriptQuery(parsed) ? (
                 <HogDebug
                     queryKey={queryKey}
                     query={parsed}

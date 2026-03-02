@@ -63,7 +63,7 @@ import { integer, numerical_key } from './type-utils'
 export { ChartDisplayCategory }
 
 /**
- * PostHog Query Schema definition.
+ * Insights Query Schema definition.
  *
  * This file acts as the source of truth for:
  *
@@ -83,7 +83,7 @@ export enum NodeKind {
     EventsQuery = 'EventsQuery',
     SessionsQuery = 'SessionsQuery',
     PersonsNode = 'PersonsNode',
-    HogQuery = 'HogQuery',
+    ScriptQuery = 'ScriptQuery',
     InsightsQLQuery = 'InsightsQLQuery',
     InsightsQLASTQuery = 'InsightsQLASTQuery',
     InsightsQLMetadata = 'InsightsQLMetadata',
@@ -190,7 +190,7 @@ export type AnyDataNode =
     | InsightActorsQuery
     | InsightActorsQueryOptions
     | SessionsTimelineQuery
-    | HogQuery
+    | ScriptQuery
     | InsightsQLQuery
     | InsightsQLMetadata
     | InsightsQLAutocomplete
@@ -250,7 +250,7 @@ export type QuerySchema =
     | InsightActorsQuery
     | InsightActorsQueryOptions
     | SessionsTimelineQuery
-    | HogQuery
+    | ScriptQuery
     | InsightsQLQuery
     | InsightsQLMetadata
     | InsightsQLAutocomplete
@@ -355,7 +355,7 @@ export interface Node<R extends Record<string, any> = Record<string, any>> {
 
 export type AnyResponseType =
     | Record<string, any>
-    | HogQueryResponse
+    | ScriptQueryResponse
     | InsightsQLQueryResponse
     | InsightsQLMetadataResponse
     | InsightsQLAutocompleteResponse
@@ -480,7 +480,7 @@ export interface InsightsQLASTQuery extends Omit<InsightsQLQuery, 'query' | 'kin
     query: Record<string, any>
 }
 
-export interface HogQueryResponse {
+export interface ScriptQueryResponse {
     results: any
     bytecode?: any[]
     coloredBytecode?: any[]
@@ -488,8 +488,8 @@ export interface HogQueryResponse {
     query_status?: never
 }
 
-export interface HogQuery extends DataNode<HogQueryResponse> {
-    kind: NodeKind.HogQuery
+export interface ScriptQuery extends DataNode<ScriptQueryResponse> {
+    kind: NodeKind.ScriptQuery
     code?: string
 }
 
@@ -662,11 +662,11 @@ export interface InsightsQLAutocompleteResponse {
 }
 
 export enum HogLanguage {
-    hog = 'hog',
+    script = 'custom_script',
     hogJson = 'hogJson',
     insightsQL = 'insightsQL',
     insightsQLExpr = 'insightsQLExpr',
-    hogTemplate = 'hogTemplate',
+    scriptTemplate = 'scriptTemplate',
     liquid = 'liquid',
 }
 
@@ -1816,7 +1816,7 @@ export interface QueryRequest {
     /** @deprecated Use `refresh` instead. */
     async?: boolean
     /**
-     * Submit a JSON string representing a query for PostHog data analysis,
+     * Submit a JSON string representing a query for Insights data analysis,
      * for example a InsightsQL query.
      *
      * Example payload:
@@ -1828,7 +1828,7 @@ export interface QueryRequest {
      * ```
      *
      * For more details on InsightsQL queries,
-     * see the [PostHog InsightsQL documentation](/docs/insightsql#api-access).
+     * see the [Insights InsightsQL documentation](/docs/insightsql#api-access).
      */
     query: QuerySchema
     filters_override?: DashboardFilter
@@ -2906,7 +2906,7 @@ export type FileSystemIconType =
     | 'insight/paths'
     | 'insight/lifecycle'
     | 'insight/stickiness'
-    | 'insight/hog'
+    | 'insight/sql'
     | 'team_activity'
     | 'home'
     | 'apps'
@@ -3098,7 +3098,7 @@ export interface ExperimentTrendsQuery extends DataNode<ExperimentTrendsQueryRes
     experiment_id?: integer
     count_query: TrendsQuery
     // Defaults to $feature_flag_called if not specified
-    // https://github.com/PostHog/posthog/blob/master/posthog/insightsql_queries/experiments/experiment_trends_query_runner.py
+    // https://github.com/Insights/posthog/blob/master/posthog/insightsql_queries/experiments/experiment_trends_query_runner.py
     exposure_query?: TrendsQuery
     fingerprint?: string
 }
@@ -3650,7 +3650,7 @@ export interface DatabaseSchemaMaterializedViewTable extends DatabaseSchemaTable
     status?: string
 }
 
-export interface DatabaseSchemaPostHogTable extends DatabaseSchemaTableCommon {
+export interface DatabaseSchemaInsightsTable extends DatabaseSchemaTableCommon {
     type: 'posthog'
 }
 
@@ -3671,7 +3671,7 @@ export interface DatabaseSchemaBatchExportTable extends DatabaseSchemaTableCommo
 }
 
 export type DatabaseSchemaTable =
-    | DatabaseSchemaPostHogTable
+    | DatabaseSchemaInsightsTable
     | DatabaseSchemaSystemTable
     | DatabaseSchemaDataWarehouseTable
     | DatabaseSchemaViewTable
@@ -5186,7 +5186,7 @@ export enum InfinityValue {
     NEGATIVE_INFINITY_VALUE = -999999,
 }
 
-// PostHog Playwright Setup Types for Playwright Testing
+// Insights Playwright Setup Types for Playwright Testing
 export interface TestSetupRequest {
     data?: Record<string, any>
 }

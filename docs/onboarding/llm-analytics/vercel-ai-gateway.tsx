@@ -8,7 +8,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
@@ -19,7 +19,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
                     </CalloutBox>
 
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics works
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics works
                         best with our Python and Node SDKs.
                     </Markdown>
 
@@ -49,7 +49,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the OpenAI SDK. The PostHog SDK instruments your LLM calls by wrapping the OpenAI client. The PostHog SDK **does not** proxy your calls.</Markdown>
+                    <Markdown>Install the OpenAI SDK. The Insights SDK instruments your LLM calls by wrapping the OpenAI client. The Insights SDK **does not** proxy your calls.</Markdown>
 
                     <CodeBlock
                         blocks={[
@@ -73,15 +73,15 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
             ),
         },
         {
-            title: 'Initialize PostHog and OpenAI client',
+            title: 'Initialize Insights and OpenAI client',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        We call Vercel AI Gateway through the OpenAI client and generate a response. We'll use PostHog's OpenAI
-                        provider to capture all the details of the call. Initialize PostHog with your PostHog project API
+                        We call Vercel AI Gateway through the OpenAI client and generate a response. We'll use Insights's OpenAI
+                        provider to capture all the details of the call. Initialize Insights with your Insights project API
                         key and host from [your project settings](https://app.posthog.com/settings/project), then pass the
-                        PostHog client along with the Vercel AI Gateway base URL to our OpenAI wrapper.
+                        Insights client along with the Vercel AI Gateway base URL to our OpenAI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -110,9 +110,9 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
                                 file: 'Node',
                                 code: dedent`
                                     import { OpenAI } from '@posthog/ai'
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -138,7 +138,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but you
                             will need to capture the data in the right format. See the schema in the [manual capture
                             section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
@@ -153,7 +153,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
             content: (
                 <>
                     <Markdown>
-                        Now, when you call Vercel AI Gateway with the OpenAI SDK, PostHog automatically captures an
+                        Now, when you call Vercel AI Gateway with the OpenAI SDK, Insights automatically captures an
                         `$ai_generation` event. You can also capture or modify additional properties with the distinct ID,
                         trace ID, properties, groups, and privacy mode parameters.
                     </Markdown>
@@ -167,7 +167,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
                                     response = client.chat.completions.create(
                                         model="gpt-4o-mini",
                                         messages=[
-                                            {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
+                                            {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
                                         posthog_distinct_id="user_123", # optional
                                         posthog_trace_id="trace_123", # optional
@@ -185,7 +185,7 @@ export const getVercelAIGatewaySteps = (ctx: OnboardingComponentsContext): StepD
                                 code: dedent`
                                     const completion = await openai.chat.completions.create({
                                         model: "gpt-4o-mini",
-                                        messages: [{ role: "user", content: "Tell me a fun fact about hedgehogs" }],
+                                        messages: [{ role: "user", content: "Tell me a fun fact about mascots" }],
                                         posthogDistinctId: "user_123", // optional
                                         posthogTraceId: "trace_123", // optional
                                         posthogProperties: { conversation_id: "abc123", paid: true }, // optional

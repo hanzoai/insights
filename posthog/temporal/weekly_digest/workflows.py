@@ -7,7 +7,7 @@ from django.conf import settings
 
 from temporalio import common, workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.weekly_digest.activities import (
     count_organizations,
     count_teams,
@@ -37,7 +37,7 @@ from posthog.temporal.weekly_digest.types import (
 
 
 @workflow.defn(name="weekly-digest")
-class WeeklyDigestWorkflow(PostHogWorkflow):
+class WeeklyDigestWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> WeeklyDigestInput:
         """Parse input from the management command CLI."""
@@ -99,7 +99,7 @@ class WeeklyDigestWorkflow(PostHogWorkflow):
 
 
 @workflow.defn(name="generate-digest-data")
-class GenerateDigestDataWorkflow(PostHogWorkflow):
+class GenerateDigestDataWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> GenerateDigestDataInput:
         """Parse input from the management command CLI."""
@@ -189,7 +189,7 @@ class GenerateDigestDataWorkflow(PostHogWorkflow):
 
 
 @workflow.defn(name="send-weekly-digest")
-class SendWeeklyDigestWorkflow(PostHogWorkflow):
+class SendWeeklyDigestWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> SendWeeklyDigestInput:
         """Parse input from the management command CLI."""

@@ -306,7 +306,7 @@ const transformMetricToApi = (metric: any): z.infer<typeof ExperimentMetricSchem
 
 /**
  * Transform tool input to API payload format
- * This bridges the gap between user-friendly input and PostHog API requirements
+ * This bridges the gap between user-friendly input and Insights API requirements
  */
 export const ExperimentCreatePayloadSchema = ToolExperimentCreateSchema.transform((input) => {
     // Transform metrics with proper UUIDs

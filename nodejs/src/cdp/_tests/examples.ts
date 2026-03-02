@@ -1,18 +1,18 @@
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
 
 import { PropertyOperator } from '../../types'
-import { HogFunctionType } from '../types'
+import { CustomFunctionType } from '../types'
 
 /**
- * Hog functions are largely generated and built in the django service, making it tricky to test on this side.
+ * Custom functions are largely generated and built in the django service, making it tricky to test on this side.
  * As such we have a bunch of prebuilt examples here for usage in tests.
  */
 
-export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecode' | 'type'>> = {
+export const CUSTOM_SCRIPT_EXAMPLES: Record<string, Pick<CustomFunctionType, 'custom_script' | 'bytecode' | 'type'>> = {
     // Simple return examples (no async functions)
     simple_return_object: {
         type: 'destination',
-        hog: "return {'status': 'pending', 'priority': 'high', 'ticket_number': 42}",
+        script: "return {'status': 'pending', 'priority': 'high', 'ticket_number': 42}",
         bytecode: [
             '_H',
             1,
@@ -35,7 +35,7 @@ export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecod
     },
     simple_fetch: {
         type: 'destination',
-        hog: "let res := fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.body,\n  'method': inputs.method\n});\n\nprint('Fetch response:', res)",
+        script: "let res := fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.body,\n  'method': inputs.method\n});\n\nprint('Fetch response:', res)",
         bytecode: [
             '_h',
             32,
@@ -86,7 +86,7 @@ export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecod
     },
     recursive_fetch: {
         type: 'destination',
-        hog: "for (let i := 0; i < 10; i := i + 1) {\n  fetch(inputs.url, {\n    'headers': inputs.headers,\n    'body': inputs.body,\n    'method': inputs.method\n  });\n}",
+        script: "for (let i := 0; i < 10; i := i + 1) {\n  fetch(inputs.url, {\n    'headers': inputs.headers,\n    'body': inputs.body,\n    'method': inputs.method\n  });\n}",
         bytecode: [
             '_h',
             33,
@@ -148,7 +148,7 @@ export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecod
     },
     malicious_function: {
         type: 'destination',
-        hog: "fn fibonacci(number) {\n    print('I AM FIBONACCI')\n    if (number < 2) {\n        return number;\n    } else {\n        return fibonacci(number - 1) + fibonacci(number - 2);\n    }\n}\nprint(f'fib {fibonacci(30)}');",
+        script: "fn fibonacci(number) {\n    print('I AM FIBONACCI')\n    if (number < 2) {\n        return number;\n    } else {\n        return fibonacci(number - 1) + fibonacci(number - 2);\n    }\n}\nprint(f'fib {fibonacci(30)}');",
         bytecode: [
             '_h',
             41,
@@ -212,7 +212,7 @@ export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecod
 
     input_printer: {
         type: 'destination',
-        hog: "// I print all of the inputs\n\nprint(inputs.input_1)\nprint({'nested': inputs.secret_input_2})\nprint(inputs.secret_input_2)\nprint(f'substring: {inputs.secret_input_3}')\nprint(inputs)",
+        script: "// I print all of the inputs\n\nprint(inputs.input_1)\nprint({'nested': inputs.secret_input_2})\nprint(inputs.secret_input_2)\nprint(f'substring: {inputs.secret_input_3}')\nprint(inputs)",
         bytecode: [
             '_h',
             32,
@@ -274,9 +274,9 @@ export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecod
             35,
         ],
     },
-    posthog_capture: {
+    insights_capture: {
         type: 'destination',
-        hog: "postHogCapture({\n    'event': f'{event.event} (copy)',\n    'distinct_id': event.distinct_id,\n    'properties': {}\n})",
+        script: "insightsCapture({\n    'event': f'{event.event} (copy)',\n    'distinct_id': event.distinct_id,\n    'properties': {}\n})",
         bytecode: [
             '_h',
             32,
@@ -307,14 +307,14 @@ export const HOG_EXAMPLES: Record<string, Pick<HogFunctionType, 'hog' | 'bytecod
             42,
             3,
             2,
-            'postHogCapture',
+            'insightsCapture',
             1,
             35,
         ],
     },
 }
 
-export const HOG_INPUTS_EXAMPLES: Record<string, Pick<HogFunctionType, 'inputs' | 'inputs_schema'>> = {
+export const CUSTOM_SCRIPT_INPUTS_EXAMPLES: Record<string, Pick<CustomFunctionType, 'inputs' | 'inputs_schema'>> = {
     simple_fetch: {
         inputs_schema: [
             { key: 'url', type: 'string', label: 'Webhook URL', secret: false, required: true },
@@ -336,8 +336,8 @@ export const HOG_INPUTS_EXAMPLES: Record<string, Pick<HogFunctionType, 'inputs' 
         ],
         inputs: {
             url: {
-                value: 'https://example.com/posthog-webhook',
-                bytecode: ['_h', 32, 'https://example.com/posthog-webhook'],
+                value: 'https://example.com/insights-webhook',
+                bytecode: ['_h', 32, 'https://example.com/insights-webhook'],
             },
             method: { value: 'POST' },
             headers: {
@@ -392,11 +392,11 @@ export const HOG_INPUTS_EXAMPLES: Record<string, Pick<HogFunctionType, 'inputs' 
                 bytecode: ['_h', 32, ACCESS_TOKEN_PLACEHOLDER, 32, '123'],
             },
             url: {
-                value: 'https://example.com/posthog-webhook?access_token={inputs.oauth.access_token}',
+                value: 'https://example.com/insights-webhook?access_token={inputs.oauth.access_token}',
                 bytecode: [
                     '_h',
                     32,
-                    'https://example.com/posthog-webhook',
+                    'https://example.com/insights-webhook',
                     32,
                     'access_token',
                     32,
@@ -544,8 +544,8 @@ export const HOG_INPUTS_EXAMPLES: Record<string, Pick<HogFunctionType, 'inputs' 
         ],
         inputs: {
             url: {
-                value: 'https://example.com/posthog-webhook',
-                bytecode: ['_h', 32, 'https://example.com/posthog-webhook'],
+                value: 'https://example.com/insights-webhook',
+                bytecode: ['_h', 32, 'https://example.com/insights-webhook'],
             },
             method: { value: 'POST' },
             headers: {
@@ -574,23 +574,23 @@ export const HOG_INPUTS_EXAMPLES: Record<string, Pick<HogFunctionType, 'inputs' 
     },
 }
 
-export const HOG_FILTERS_EXAMPLES: Record<string, Pick<HogFunctionType, 'filters'>> = {
+export const CUSTOM_SCRIPT_FILTERS_EXAMPLES: Record<string, Pick<CustomFunctionType, 'filters'>> = {
     no_filters: { filters: { events: [], actions: [], bytecode: ['_h', 29] } },
     broken_filters: { filters: { events: [], actions: [], bytecode: ['_H', 1, 29, 35, 35, 35] } },
-    // Test account filter: filters out users with @posthog.com in their email
-    // This simulates filter_test_accounts: true with test_account_filters = [{key: "email", value: "@posthog.com", operator: "not_icontains", type: "person"}]
+    // Test account filter: filters out users with @hanzo.ai in their email
+    // This simulates filter_test_accounts: true with test_account_filters = [{key: "email", value: "@hanzo.ai", operator: "not_icontains", type: "person"}]
     test_account_filter: {
         filters: {
             events: [{ id: '$pageview', name: '$pageview', type: 'events', order: 0 }],
             actions: [],
             filter_test_accounts: true,
-            // Bytecode: (event == "$pageview") AND (NOT (person.properties.email ILIKE "%@posthog.com%"))
+            // Bytecode: (event == "$pageview") AND (NOT (person.properties.email ILIKE "%@hanzo.ai%"))
             bytecode: [
                 '_H',
                 1,
-                // First check: person.properties.email NOT ICONTAINS "@posthog.com"
+                // First check: person.properties.email NOT ICONTAINS "@hanzo.ai"
                 32,
-                '%@posthog.com%', // pattern
+                '%@hanzo.ai%', // pattern
                 32,
                 'email',
                 32,
@@ -626,7 +626,7 @@ export const HOG_FILTERS_EXAMPLES: Record<string, Pick<HogFunctionType, 'filters
                     type: 'events',
                     order: 0,
                     properties: [
-                        { key: '$current_url', type: 'event', value: 'posthog', operator: PropertyOperator.IContains },
+                        { key: '$current_url', type: 'event', value: 'insights', operator: PropertyOperator.IContains },
                     ],
                 },
                 { id: '$autocapture', name: '$autocapture', type: 'events', order: 1 },
@@ -644,7 +644,7 @@ export const HOG_FILTERS_EXAMPLES: Record<string, Pick<HogFunctionType, 'filters
                 3,
                 1,
                 32,
-                '%posthog%',
+                '%insights%',
                 32,
                 '$current_url',
                 32,
@@ -839,7 +839,7 @@ export const HOG_FILTERS_EXAMPLES: Record<string, Pick<HogFunctionType, 'filters
     no_filters_data_warehouse_table: { filters: { source: 'data-warehouse-table', bytecode: ['_h', 29] } },
 }
 
-export const HOG_MASK_EXAMPLES: Record<string, Pick<HogFunctionType, 'masking'>> = {
+export const CUSTOM_MASK_EXAMPLES: Record<string, Pick<CustomFunctionType, 'masking'>> = {
     all: {
         masking: {
             ttl: 30,
@@ -866,7 +866,7 @@ export const HOG_MASK_EXAMPLES: Record<string, Pick<HogFunctionType, 'masking'>>
     },
 }
 
-export const HOG_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_masking'>> = {
+export const CUSTOM_FLOW_MASK_EXAMPLES: Record<string, Pick<any, 'trigger_masking'>> = {
     everyTime: {
         trigger_masking: {
             ttl: 30,

@@ -1,8 +1,8 @@
 from string import Template
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLQuerySettings
-from posthog.hogql.parser import parse_expr
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLQuerySettings
+from posthog.insightsql.parser import parse_expr
 
 
 def get_s3_function_call(s3_folder: str, s3_key: str | None, s3_secret: str | None, num_partitions: int) -> str:
@@ -466,13 +466,13 @@ SETTINGS
 )
 
 
-class HogQLQueryBatchExportSettings(HogQLQuerySettings):
+class InsightsQLQueryBatchExportSettings(InsightsQLQuerySettings):
     optimize_aggregation_in_order: bool | None = True
     max_bytes_before_external_sort: int | None = 50000000000
     max_bytes_before_external_group_by: int | None = 50000000000
 
 
-SELECT_FROM_SESSIONS_HOGQL = ast.SelectQuery(
+SELECT_FROM_SESSIONS_INSIGHTSQL = ast.SelectQuery(
     select=[
         parse_expr("session_id as session_id"),
         parse_expr("toString(session_id_v7) as session_id_v7"),
@@ -524,7 +524,7 @@ SELECT_FROM_SESSIONS_HOGQL = ast.SelectQuery(
         parse_expr("$entry_irclid as entry_irclid"),
     ],
     select_from=ast.JoinExpr(table=ast.Field(chain=["sessions"])),
-    settings=HogQLQueryBatchExportSettings(),
+    settings=InsightsQLQueryBatchExportSettings(),
 )
 
 EXPORT_TO_S3_FROM_DISTRIBUTED_EVENTS_RECENT = Template(

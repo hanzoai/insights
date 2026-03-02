@@ -24,9 +24,9 @@ from posthog.schema import (
     EndpointRefreshMode,
     EndpointRequest,
     EndpointRunRequest,
-    HogQLQuery,
-    HogQLQueryModifiers,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryModifiers,
+    InsightsQLVariable,
     ProductKey,
     QueryRequest,
     QueryStatus,
@@ -34,10 +34,10 @@ from posthog.schema import (
     RefreshType,
 )
 
-from posthog.hogql import ast
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.errors import ExposedHogQLError, ResolutionError
-from posthog.hogql.parser import parse_select
+from posthog.insightsql import ast
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.errors import ExposedInsightsQLError, ResolutionError
+from posthog.insightsql.parser import parse_select
 
 from posthog.api.documentation import extend_schema
 from posthog.api.mixins import PydanticModelMixin
@@ -52,8 +52,8 @@ from posthog.clickhouse.query_tagging import Product, get_query_tag_value, tag_q
 from posthog.errors import ExposedCHQueryError
 from posthog.event_usage import report_user_action
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.hogql_query_runner import HogQLQueryRunner
-from posthog.hogql_queries.query_runner import BLOCKING_EXECUTION_MODES
+from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
+from posthog.insightsql_queries.query_runner import BLOCKING_EXECUTION_MODES
 from posthog.models import User
 from posthog.models.activity_logging.activity_log import (
     ActivityContextBase,
@@ -74,7 +74,7 @@ from products.data_warehouse.backend.models.external_data_schema import (
 from products.endpoints.backend.materialization import (
     VariablePlaceholderFinder,
     analyze_variables_for_materialization,
-    convert_insight_query_to_hogql,
+    convert_insight_query_to_insightsql,
     transform_query_for_materialization,
 )
 from products.endpoints.backend.models import Endpoint, EndpointVersion
@@ -317,22 +317,22 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                     }
                 )
 
-    def _validate_hogql_query(self, query: HogQLQuery) -> None:
-        """Validate that a HogQL query can be parsed and the variables are valid."""
+    def _validate_insightsql_query(self, query: InsightsQLQuery) -> None:
+        """Validate that a InsightsQL query can be parsed and the variables are valid."""
         try:
             ast_node = parse_select(query.query)
-        except ExposedHogQLError as e:
-            raise ValidationError({"query": f"Invalid HogQL query: {e}"}) from e
+        except ExposedInsightsQLError as e:
+            raise ValidationError({"query": f"Invalid InsightsQL query: {e}"}) from e
         except ResolutionError as e:
             capture_exception(e)
-            raise ValidationError({"query": "Invalid HogQL query: unable to resolve table or field references."})
+            raise ValidationError({"query": "Invalid InsightsQL query: unable to resolve table or field references."})
         except Exception as e:
             capture_exception(e)
             raise ValidationError({"query": "Unknown error occurred parsing the query."})
 
         self._validate_variable_placeholders(ast_node, query.variables or {})
 
-    def _validate_variable_placeholders(self, node: ast.AST, variables: Optional[dict[str, HogQLVariable]]) -> None:
+    def _validate_variable_placeholders(self, node: ast.AST, variables: Optional[dict[str, InsightsQLVariable]]) -> None:
         """Validate that every {variables.X} placeholder in the query has a matching variable definition."""
         finder = VariablePlaceholderFinder()
         finder.visit(node)
@@ -405,8 +405,8 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 "and be between 1 and 128 characters long."
             )
 
-        if query and isinstance(query, HogQLQuery) and query.query:
-            self._validate_hogql_query(query)
+        if query and isinstance(query, InsightsQLQuery) and query.query:
+            self._validate_insightsql_query(query)
 
         self._validate_cache_age_seconds(data.cache_age_seconds)
 
@@ -421,7 +421,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         self.validate_request(data, strict=True)
 
         try:
-            query_dict = cast(Union[HogQLQuery, InsightQueryNode], data.query).model_dump()
+            query_dict = cast(Union[InsightsQLQuery, InsightQueryNode], data.query).model_dump()
             endpoint = Endpoint.objects.create(
                 team=self.team,
                 created_by=cast(User, request.user),
@@ -466,7 +466,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
 
             current_version = endpoint.get_version()
             can_materialize, _ = current_version.can_materialize()
-            if can_materialize and query_dict.get("kind") == "HogQLQuery":
+            if can_materialize and query_dict.get("kind") == "InsightsQLQuery":
                 try:
                     sync_frequency = data.sync_frequency or DataWarehouseSyncInterval.FIELD_24HOUR
                     self._enable_materialization(endpoint, sync_frequency, request)
@@ -517,8 +517,8 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         if data.is_materialized is False and data.sync_frequency is not None:
             raise ValidationError({"sync_frequency": "Cannot set sync_frequency when disabling materialization."})
 
-        if data.query and isinstance(data.query, HogQLQuery) and data.query.query:
-            self._validate_hogql_query(data.query)
+        if data.query and isinstance(data.query, InsightsQLQuery) and data.query.query:
+            self._validate_insightsql_query(data.query)
 
     @extend_schema(
         request=EndpointRequest,
@@ -752,16 +752,16 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 origin=DataWarehouseSavedQuery.Origin.ENDPOINT,
             )
 
-        hogql_query = convert_insight_query_to_hogql(version.query, self.team)
+        insightsql_query = convert_insight_query_to_insightsql(version.query, self.team)
 
         variable_infos: list = []
         if version.query.get("variables"):
             can_materialize, reason, variable_infos = analyze_variables_for_materialization(version.query)
 
             if can_materialize and variable_infos:
-                hogql_query = transform_query_for_materialization(hogql_query, variable_infos, self.team)
+                insightsql_query = transform_query_for_materialization(insightsql_query, variable_infos, self.team)
 
-        saved_query.query = hogql_query
+        saved_query.query = insightsql_query
         saved_query.external_tables = saved_query.s3_tables
         saved_query.is_materialized = True
         saved_query.sync_frequency_interval = (
@@ -854,8 +854,8 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             query = version.query
             query_kind = query.get("kind")
 
-            if query_kind == "HogQLQuery":
-                # HogQL: check if request variables are a subset of materialized variables
+            if query_kind == "InsightsQLQuery":
+                # InsightsQL: check if request variables are a subset of materialized variables
                 materialized_vars = self._get_materialized_variables(version)
                 if not materialized_vars:
                     return False
@@ -890,7 +890,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             return []
 
     def _get_original_select_columns(self, query: dict, version: EndpointVersion) -> builtins.list[ast.Expr] | None:
-        """Parse the original HogQL query and return SELECT columns as materialized field references.
+        """Parse the original InsightsQL query and return SELECT columns as materialized field references.
 
         Returns field references for only the original SELECT expressions (not variable columns).
         Returns None if parsing fails, so the caller can fall back to SELECT *.
@@ -917,8 +917,8 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         """Get the set of allowed variable names for this endpoint."""
         query_kind = query.get("kind")
 
-        if query_kind == "HogQLQuery":
-            # HogQL: allowed variables are code_names from query["variables"]
+        if query_kind == "InsightsQLQuery":
+            # InsightsQL: allowed variables are code_names from query["variables"]
             variables = query.get("variables", {})
             return {v.get("code_name") for v in variables.values() if v.get("code_name")} if variables else set()
 
@@ -946,7 +946,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         """
         query_kind = query.get("kind")
 
-        if query_kind == "HogQLQuery":
+        if query_kind == "InsightsQLQuery":
             materialized_vars = self._get_materialized_variables(version)
             return {v.code_name for v in materialized_vars}
 
@@ -1023,7 +1023,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
         query_request_data: dict,
         client_query_id: str | None,
         request: Request,
-        variables_override: builtins.list[HogQLVariable] | None = None,
+        variables_override: builtins.list[InsightsQLVariable] | None = None,
         cache_age_seconds: int | None = None,
         extra_result_fields: dict | None = None,
         debug: bool = False,
@@ -1067,7 +1067,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 "modifiers",
                 "resolved_date_range",
                 "timings",
-                "hogql",
+                "insightsql",
             ]
 
             for field in debug_fields_to_remove:
@@ -1118,7 +1118,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             query_kind = query.get("kind")
 
             select_columns: list[ast.Expr] = [ast.Field(chain=["*"])]
-            if query_kind == "HogQLQuery" and query.get("variables"):
+            if query_kind == "InsightsQLQuery" and query.get("variables"):
                 original_select = self._get_original_select_columns(query, version)
                 if original_select:
                     select_columns = original_select
@@ -1134,9 +1134,9 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             deprecation_headers: dict[str, str] | None = None
 
             # For insight endpoints: filters_override takes precedence over variables (backwards compat)
-            if query_kind != "HogQLQuery" and data.filters_override is not None:
+            if query_kind != "InsightsQLQuery" and data.filters_override is not None:
                 deprecation_headers = {
-                    "X-PostHog-Warn": "filters_override is deprecated. Use variables instead: https://posthog.com/docs/api/endpoints"
+                    "X-Insights-Warn": "filters_override is deprecated. Use variables instead: https://posthog.com/docs/api/endpoints"
                 }
                 # Extract breakdown filter from properties
                 if data.filters_override.properties:
@@ -1152,8 +1152,8 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                                     select_query.where = condition
                             break  # Only use first property filter for materialized
             elif data.variables:
-                if query_kind == "HogQLQuery":
-                    # HogQL: filter by all materialized variable columns
+                if query_kind == "InsightsQLQuery":
+                    # InsightsQL: filter by all materialized variable columns
                     materialized_vars = self._get_materialized_variables(version)
                     for mat_var in materialized_vars:
                         var_value = data.variables.get(mat_var.code_name)
@@ -1179,9 +1179,9 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                             else:
                                 select_query.where = condition
 
-            materialized_hogql_query = HogQLQuery(
-                query=select_query.to_hogql(),
-                modifiers=HogQLQueryModifiers(useMaterializedViews=True),
+            materialized_insightsql_query = InsightsQLQuery(
+                query=select_query.to_insightsql(),
+                modifiers=InsightsQLQueryModifiers(useMaterializedViews=True),
             )
 
             refresh_type = _endpoint_refresh_mode_to_refresh_type(data.refresh)
@@ -1190,7 +1190,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 "client_query_id": data.client_query_id,
                 "name": f"{endpoint.name}_materialized",
                 "refresh": refresh_type,
-                "query": materialized_hogql_query.model_dump(),
+                "query": materialized_insightsql_query.model_dump(),
             }
 
             extra_fields = {
@@ -1240,10 +1240,10 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             raise
 
     def _apply_limit_to_query(self, query: dict, limit: int) -> dict:
-        """Apply limit to HogQL query by modifying the SQL string."""
+        """Apply limit to InsightsQL query by modifying the SQL string."""
         query_kind = query.get("kind")
 
-        if query_kind == "HogQLQuery":
+        if query_kind == "InsightsQLQuery":
             query_string = query.get("query", "")
             parsed = parse_select(query_string)
 
@@ -1253,15 +1253,15 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 parsed.limit = ast.Constant(value=effective_limit)
 
             query = query.copy()
-            query["query"] = parsed.to_hogql()
+            query["query"] = parsed.to_insightsql()
         elif query_kind:
-            raise ValidationError(f"Limit parameter is only supported for HogQLQuery, not {query_kind}")
+            raise ValidationError(f"Limit parameter is only supported for InsightsQLQuery, not {query_kind}")
 
         return query
 
     def _parse_variables(
         self, query: dict[str, dict], variables: dict[str, str]
-    ) -> builtins.list[HogQLVariable] | None:
+    ) -> builtins.list[InsightsQLVariable] | None:
         query_variables = query.get("variables", None)
         if not query_variables:
             return None
@@ -1277,7 +1277,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 raise ValidationError(f"Variable '{request_variable_code_name}' not found in query")
 
             variables_override.append(
-                HogQLVariable(
+                InsightsQLVariable(
                     variableId=variable_id,
                     code_name=request_variable_code_name,
                     value=request_variable_value,
@@ -1342,13 +1342,13 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             deprecation_headers: dict[str, str] | None = None
 
             # For insight endpoints: filters_override takes precedence over variables (backwards compat)
-            if query_kind != "HogQLQuery" and data.filters_override is not None:
+            if query_kind != "InsightsQLQuery" and data.filters_override is not None:
                 filters_override = data.filters_override
                 deprecation_headers = {
-                    "X-PostHog-Warn": "filters_override is deprecated. Use variables instead: https://posthog.com/docs/api/endpoints"
+                    "X-Insights-Warn": "filters_override is deprecated. Use variables instead: https://posthog.com/docs/api/endpoints"
                 }
             elif data.variables:
-                if query_kind == "HogQLQuery":
+                if query_kind == "InsightsQLQuery":
                     variables_override = self._parse_variables(query, data.variables)
                 else:
                     breakdown_filter = query.get("breakdownFilter") or {}
@@ -1485,7 +1485,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 result = self._execute_inline_endpoint(
                     endpoint, data, request, query_to_use, version=version_obj, debug=debug, limit=limit
                 )
-        except (ExposedHogQLError, ExposedCHQueryError) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError) as e:
             logger.exception(
                 "Endpoint execution failed",
                 endpoint_name=endpoint.name,
@@ -1497,7 +1497,7 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 "Endpoint execution failed (HogVM)",
                 endpoint_name=endpoint.name,
             )
-            raise ValidationError("Query execution failed: HogQL virtual machine error")
+            raise ValidationError("Query execution failed: InsightsQL virtual machine error")
         except ResolutionError:
             logger.exception(
                 "Endpoint resolution failed",
@@ -1539,10 +1539,10 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
             raise ValidationError("query_override is not allowed. Use variables instead.")
 
         # Allow filters_override for insight endpoints (deprecated but backwards compatible)
-        # Reject for HogQL endpoints
+        # Reject for InsightsQL endpoints
         if data.filters_override is not None:
-            if query_kind == "HogQLQuery":
-                raise ValidationError("filters_override is not allowed for HogQL endpoints. Use variables instead.")
+            if query_kind == "InsightsQLQuery":
+                raise ValidationError("filters_override is not allowed for InsightsQL endpoints. Use variables instead.")
 
         # Validate refresh mode
         if data.refresh == EndpointRefreshMode.DIRECT and not is_materialized:
@@ -1595,17 +1595,17 @@ class EndpointViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.Model
                 validated_names.append(f"'{name}'")
             names_list = ",".join(validated_names)
 
-            query = HogQLQuery(
+            query = InsightsQLQuery(
                 query=f"select name, max(query_start_time) as last_executed_at from query_log where name in ({names_list}) and endpoint like '%/endpoints/%' and is_personal_api_key_request and query_start_time >= (today() - interval 6 month) group by name",
                 name="get_endpoints_last_execution_times",
             )
-            hogql_runner = HogQLQueryRunner(
+            insightsql_runner = InsightsQLQueryRunner(
                 query=query,
                 team=self.team,
-                modifiers=HogQLQueryModifiers(),
+                modifiers=InsightsQLQueryModifiers(),
                 limit_context=LimitContext.QUERY,
             )
-            result = hogql_runner.calculate()
+            result = insightsql_runner.calculate()
 
             query_status = QueryStatus(id="", team_id=self.team.pk, complete=True, results=result.results)
 

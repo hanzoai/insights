@@ -14,7 +14,7 @@ To enable testing for BigQuery batch exports, we require:
 1. A BigQuery project and dataset
 2. A BigQuery ServiceAccount with access to said project and dataset. See the [BigQuery batch export documentation](https://posthog.com/docs/cdp/batch-exports/bigquery#setting-up-bigquery-access) on detailed steps to setup a ServiceAccount.
 
-Then, a [key](https://cloud.google.com/iam/docs/keys-create-delete#creating) can be created for the BigQuery ServiceAccount and saved to a local file. For PostHog employees, this file should already be available under the PostHog password manager.
+Then, a [key](https://cloud.google.com/iam/docs/keys-create-delete#creating) can be created for the BigQuery ServiceAccount and saved to a local file. For Insights employees, this file should already be available under the Insights password manager.
 
 Tests for BigQuery batch exports can be then run from the root of the `posthog` repo:
 
@@ -38,7 +38,7 @@ To enable testing for Redshift batch exports, we require:
 3. User credentials (user requires `CREATEDB` permissions for testing but **not** superuser access).
 4. (Optional: For 'COPY' tests): An S3 bucket and credentials to access it.
 
-For PostHog employees, check the password manager as a set of development credentials should already be available. You will also need to use the `dev` exit node in Tailscale and be added to the `group:engineering` group in the tailnet policy. With these credentials, and Tailscale setup, we can run the tests from the root of the `posthog` repo with:
+For Insights employees, check the password manager as a set of development credentials should already be available. You will also need to use the `dev` exit node in Tailscale and be added to the `group:engineering` group in the tailnet policy. With these credentials, and Tailscale setup, we can run the tests from the root of the `posthog` repo with:
 
 ```bash
 DEBUG=1 REDSHIFT_HOST=workgroup.111222333.region.redshift-serverless.amazonaws.com REDSHIFT_USER=test_user REDSHIFT_PASSWORD=test_password pytest products/batch_exports/backend/tests/temporal/destinations/redshift
@@ -68,7 +68,7 @@ Additional setup is required to run the tests against an S3 bucket:
 4. Make sure the role/user you are logged in as has permissions to use the bucket and KMS key.
 
 > [!NOTE]
-> For PostHog employees, your password manager contains a set of credentials for S3 batch exports development testing. You may populate your development environment with these credentials and use the provided test bucket and KMS key.
+> For Insights employees, your password manager contains a set of credentials for S3 batch exports development testing. You may populate your development environment with these credentials and use the provided test bucket and KMS key.
 
 With these setup steps done, we can run the S3-specific tests from the root of the `posthog` repo with:
 
@@ -89,7 +89,7 @@ Additional setup is required to run the tests against a GCS bucket:
 5. Generate HMAC keys (AWS compatible access keys). This can be done by going to `Cloud Storage -> Settings -> Interoperability`
 
 > [!NOTE]
-> For PostHog employees, your password manager contains a set of credentials for GCS batch exports development testing. You may populate your development environment with these credentials and use the provided test bucket.
+> For Insights employees, your password manager contains a set of credentials for GCS batch exports development testing. You may populate your development environment with these credentials and use the provided test bucket.
 
 With these setup steps done, we can run the GCS-specific tests from the root of the `posthog` repo with:
 
@@ -112,7 +112,7 @@ To enable testing for Snowflake batch exports, we require:
 2. A Snowflake user and role with the necessary permissions to create and manage tables in the database.
 3. A Snowflake warehouse (compute resource) that the user has access to.
 
-For PostHog employees, check the password manager as a set of development credentials should already be available. You can either use these or ask someone to create a new user for you.
+For Insights employees, check the password manager as a set of development credentials should already be available. You can either use these or ask someone to create a new user for you.
 
 We currently support 2 types of authentication for Snowflake batch exports:
 
@@ -167,7 +167,7 @@ To run tests against a real Azure Storage account (for E2E validation):
 3. Generate a connection string with access to the container
 
 > [!NOTE]
-> For PostHog employees, check the password manager for Azure Storage development credentials.
+> For Insights employees, check the password manager for Azure Storage development credentials.
 
 With these setup steps done, we can run the Azure-specific tests from the root of the `posthog` repo with:
 

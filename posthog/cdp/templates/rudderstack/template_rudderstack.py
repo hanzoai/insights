@@ -18,7 +18,7 @@ fun getPayload() {
     let rudderPayload := {
         'context': {
             'app': {
-                'name': 'PostHogPlugin',
+                'name': 'InsightsPlugin',
             },
             'os': {},
             'page': {},
@@ -133,12 +133,12 @@ if (res.status != 200 or res.body.ok == false) {
 
 
 class TemplateRudderstackMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/rudderstack-posthog-plugin"
+    plugin_url = "https://github.com/Insights/rudderstack-posthog-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("dataPlaneUrl", "https://hosted.rudderlabs.com")

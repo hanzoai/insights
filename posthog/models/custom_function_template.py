@@ -135,10 +135,10 @@ class CustomFunctionTemplate(UUIDTModel):
             self.bytecode = None
             return
         try:
-            from posthog.cdp.validation import compile_hog
+            from posthog.cdp.validation import compile_script
 
             # Compile the hog code_language to bytecode and store it in the database field
-            self.bytecode = compile_hog(self.code, self.type)
+            self.bytecode = compile_script(self.code, self.type)
         except Exception as e:
             logger.error(
                 "Failed to compile template bytecode",

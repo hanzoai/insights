@@ -3,14 +3,14 @@ from zoneinfo import ZoneInfo
 
 from posthog.schema import IntervalType, LogValueResult, LogValuesQuery, LogValuesQueryResponse
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLGlobalSettings
-from posthog.hogql.parser import parse_expr, parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLGlobalSettings
+from posthog.insightsql.parser import parse_expr, parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.client.connection import Workload
-from posthog.hogql_queries.query_runner import AnalyticsQueryRunner
-from posthog.hogql_queries.utils.query_date_range import QueryDateRange
+from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner
+from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
 from posthog.models.filters.mixins.utils import cached_property
 
 from products.logs.backend.logs_query_runner import LogsQueryRunnerMixin
@@ -94,7 +94,7 @@ class LogValuesQueryRunner(AnalyticsQueryRunner[LogValuesQueryResponse], LogsQue
         return ast.And(exprs=exprs)
 
     def _calculate(self) -> LogValuesQueryResponse:
-        response = execute_hogql_query(
+        response = execute_insightsql_query(
             query_type="LogsQuery",
             query=self.to_query(),
             modifiers=self.modifiers,
@@ -114,7 +114,7 @@ class LogValuesQueryRunner(AnalyticsQueryRunner[LogValuesQueryResponse], LogsQue
 
     @cached_property
     def settings(self):
-        return HogQLGlobalSettings(
+        return InsightsQLGlobalSettings(
             # "break" means return partial results if we hit the read limit
             read_overflow_mode="break",
             max_bytes_to_read=MAX_READ_BYTES,

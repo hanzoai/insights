@@ -9,20 +9,20 @@ import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { CdpCyclotronWorker } from '../../src/cdp/consumers/cdp-cyclotron-worker.consumer'
-import { HogFunctionInvocationGlobals, HogFunctionType } from '../../src/cdp/types'
+import { CustomFunctionInvocationGlobals, CustomFunctionType } from '../../src/cdp/types'
 import { KAFKA_APP_METRICS_2, KAFKA_LOG_ENTRIES } from '../../src/config/kafka-topics'
 import { Hub, Team } from '../../src/types'
 import { closeHub, createHub } from '../../src/utils/db/hub'
 import { logger } from '../utils/logger'
-import { HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from './_tests/examples'
+import { CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from './_tests/examples'
 import {
-    insertHogFunction as _insertHogFunction,
-    createHogExecutionGlobals,
+    insertCustomFunction as _insertCustomFunction,
+    createScriptExecutionGlobals,
     insertIntegration,
 } from './_tests/fixtures'
 import { CdpEventsConsumer } from './consumers/cdp-events.consumer'
 import { cdpSeekLatencyMs, cdpSeekResult } from './services/job-queue/job-queue-kafka'
-import { compileHog } from './templates/compiler'
+import { compileScript } from './templates/compiler'
 
 const ActualKafkaProducerWrapper = jest.requireActual('../../src/kafka/producer').KafkaProducerWrapper
 
@@ -36,12 +36,12 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
 
         let hub: Hub
         let team: Team
-        let fnFetchNoFilters: HogFunctionType
-        let globals: HogFunctionInvocationGlobals
+        let fnFetchNoFilters: CustomFunctionType
+        let globals: CustomFunctionInvocationGlobals
         let mockProducerObserver: KafkaProducerObserver
 
-        const insertHogFunction = async (hogFunction: Partial<HogFunctionType>): Promise<HogFunctionType> => {
-            const item = await _insertHogFunction(hub.postgres, team.id, hogFunction)
+        const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>): Promise<CustomFunctionType> => {
+            const item = await _insertCustomFunction(hub.postgres, team.id, customFunction)
             return item
         }
 
@@ -62,7 +62,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
             hub.CDP_FETCH_RETRIES = 2
             hub.CDP_FETCH_BACKOFF_BASE_MS = 100 // fast backoff
             hub.CDP_CYCLOTRON_COMPRESS_KAFKA_DATA = true
-            hub.CYCLOTRON_DATABASE_URL = 'postgres://posthog:posthog@localhost:5432/test_cyclotron'
+            hub.CYCLOTRON_DATABASE_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron'
 
             // If hybrid we enable the scheduling to PG which ensures we test that routing there happens
             hub.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_FORCE_SCHEDULED_TO_POSTGRES = mode === 'hybrid'
@@ -79,7 +79,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 },
             })
 
-            const hog = `
+            const scriptSource = `
             let res := fetch(inputs.url, {
                 'headers': {
                   'Authorization': f'Bearer {inputs.oauth.access_token}',
@@ -91,21 +91,21 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
             print('Fetch response:', res);
             `
 
-            fnFetchNoFilters = await insertHogFunction({
+            fnFetchNoFilters = await insertCustomFunction({
                 type: 'destination',
-                hog: hog,
-                bytecode: await compileHog(hog),
+                script: hog,
+                bytecode: await compileScript(scriptCode),
                 inputs_schema: [
-                    ...(HOG_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
+                    ...(CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
                     { key: 'oauth', type: 'integration', label: 'Slack', secret: false, required: true },
                 ],
                 inputs: {
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch.inputs,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch.inputs,
                     oauth: {
                         value: 1,
                     },
                 },
-                ...HOG_FILTERS_EXAMPLES.no_filters,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
             })
 
             eventsConsumer = new CdpEventsConsumer({
@@ -129,7 +129,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
             })
             await cyclotronWorkerPostgres.start()
 
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -137,7 +137,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                     event: '$pageview',
                     properties: {
-                        $current_url: 'https://posthog.com',
+                        $current_url: 'https://hanzo.ai',
                         $lib_version: '1.0.0',
                     },
                     timestamp: '2024-09-03T09:00:00Z',
@@ -194,9 +194,9 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
 
             expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
                 [
-                  "https://example.com/posthog-webhook",
+                  "https://example.com/insights-webhook",
                   {
-                    "body": "{"event":{"uuid":"b3a1fe86-b10c-43cc-acaf-d208977608d0","event":"$pageview","elements_chain":"","distinct_id":"distinct_id","url":"http://localhost:8000/events/1","properties":{"$current_url":"https://posthog.com","$lib_version":"1.0.0"},"timestamp":"2024-09-03T09:00:00Z"},"groups":{},"nested":{"foo":"http://localhost:8000/events/1"},"person":{"id":"uuid","name":"test","url":"http://localhost:8000/persons/1","properties":{"email":"test@posthog.com","first_name":"Pumpkin"}},"event_url":"http://localhost:8000/events/1-test"}",
+                    "body": "{"event":{"uuid":"b3a1fe86-b10c-43cc-acaf-d208977608d0","event":"$pageview","elements_chain":"","distinct_id":"distinct_id","url":"http://localhost:8000/events/1","properties":{"$current_url":"https://hanzo.ai","$lib_version":"1.0.0"},"timestamp":"2024-09-03T09:00:00Z"},"groups":{},"nested":{"foo":"http://localhost:8000/events/1"},"person":{"id":"uuid","name":"test","url":"http://localhost:8000/persons/1","properties":{"email":"test@hanzo.ai","first_name":"Pumpkin"}},"event_url":"http://localhost:8000/events/1-test"}",
                     "headers": {
                       "Authorization": "Bearer super-secret-token",
                     },
@@ -212,7 +212,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'hog_function',
+                        app_source: 'custom_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
                         count: 1,
                         metric_kind: 'other',
@@ -223,7 +223,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'hog_function',
+                        app_source: 'custom_function',
                         app_source_id: '_event_trigger',
                         count: 1,
                         metric_kind: 'billing',
@@ -234,7 +234,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'hog_function',
+                        app_source: 'custom_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
                         count: 1,
                         metric_kind: 'other',
@@ -245,7 +245,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                 {
                     topic: 'datastore_app_metrics2_test',
                     value: {
-                        app_source: 'hog_function',
+                        app_source: 'custom_function',
                         app_source_id: fnFetchNoFilters.id.toString(),
                         count: 1,
                         metric_kind: 'success',
@@ -260,7 +260,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     topic: 'log_entries_test',
                     value: {
                         level: 'info',
-                        log_source: 'hog_function',
+                        log_source: 'custom_function',
                         log_source_id: fnFetchNoFilters.id.toString(),
                         message: `Fetch response:, {"status":200,"body":{"success":true}}`,
                         team_id: 2,
@@ -270,7 +270,7 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
                     topic: 'log_entries_test',
                     value: {
                         level: 'debug',
-                        log_source: 'hog_function',
+                        log_source: 'custom_function',
                         log_source_id: fnFetchNoFilters.id.toString(),
                         message: expect.stringContaining('Function completed in'),
                         team_id: 2,

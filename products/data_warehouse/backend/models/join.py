@@ -4,12 +4,12 @@ from warnings import warn
 
 from django.db import models
 
-from posthog.hogql import ast
-from posthog.hogql.ast import SelectQuery
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.models import LazyJoinToAdd
-from posthog.hogql.errors import ResolutionError
-from posthog.hogql.parser import parse_expr
+from posthog.insightsql import ast
+from posthog.insightsql.ast import SelectQuery
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.models import LazyJoinToAdd
+from posthog.insightsql.errors import ResolutionError
+from posthog.insightsql.parser import parse_expr
 
 from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTModel
 
@@ -68,13 +68,13 @@ class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
     ):
         def _join_function(
             join_to_add: LazyJoinToAdd,
-            context: HogQLContext,
+            context: InsightsQLContext,
             node: SelectQuery,
         ):
             _source_table_key = override_source_table_key or self.source_table_key
             _joining_table_key = override_joining_table_key or self.joining_table_key
 
-            from posthog.hogql import ast
+            from posthog.insightsql import ast
 
             if not join_to_add.fields_accessed:
                 raise ResolutionError(f"No fields requested from {join_to_add.to_table}")
@@ -108,7 +108,7 @@ class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
     def join_function_for_experiments(self):
         def _join_function_for_experiments(
             join_to_add: LazyJoinToAdd,
-            context: HogQLContext,
+            context: InsightsQLContext,
             node: SelectQuery,
         ):
             if self.joining_table_name != "events":
@@ -137,8 +137,8 @@ class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
                 for expr in node.where.exprs:
                     if isinstance(expr, ast.CompareOperation):
                         if expr.op == ast.CompareOperationOp.GtEq or expr.op == ast.CompareOperationOp.LtEq:
-                            # Match within hogql string because it could be 'toDateTime(timestamp)'
-                            if isinstance(expr.left, ast.Alias) and timestamp_key in expr.left.expr.to_hogql():
+                            # Match within insightsql string because it could be 'toDateTime(timestamp)'
+                            if isinstance(expr.left, ast.Alias) and timestamp_key in expr.left.expr.to_insightsql():
                                 whereExpr.append(
                                     ast.CompareOperation(
                                         op=expr.op, left=ast.Field(chain=["timestamp"]), right=expr.right
@@ -223,6 +223,6 @@ class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         ):
             expr.expr.args[0].chain = [table_name, *expr.expr.args[0].chain]
         else:
-            raise ResolutionError("Data Warehouse Join HogQL expression should be a Field or Call node")
+            raise ResolutionError("Data Warehouse Join InsightsQL expression should be a Field or Call node")
 
         return expr

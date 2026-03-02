@@ -9,12 +9,12 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics
                         works best with our Python and Node SDKs.
                     </Markdown>
 
@@ -45,7 +45,7 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
             content: (
                 <>
                     <Markdown>
-                        Install LangChain. The PostHog SDK instruments your LLM calls by wrapping LangChain. The PostHog
+                        Install LangChain. The Insights SDK instruments your LLM calls by wrapping LangChain. The Insights
                         SDK **does not** proxy your calls.
                     </Markdown>
 
@@ -70,7 +70,7 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but
                             you will need to capture the data in the right format. See the schema in the [manual capture
                             section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more
@@ -81,14 +81,14 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
             ),
         },
         {
-            title: 'Initialize PostHog and LangChain',
+            title: 'Initialize Insights and LangChain',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
+                        Initialize Insights with your project API key and host from [your project
                         settings](https://app.posthog.com/settings/project), then pass it to the LangChain
-                        `CallbackHandler` wrapper. Optionally, you can provide a user distinct ID, trace ID, PostHog
+                        `CallbackHandler` wrapper. Optionally, you can provide a user distinct ID, trace ID, Insights
                         properties, [groups](https://posthog.com/docs/product-analytics/group-analytics), and privacy
                         mode.
                     </Markdown>
@@ -123,12 +123,12 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { PostHog } from 'posthog-node';
+                                    import { Insights } from 'posthog-node';
                                     import { LangChainCallbackHandler } from '@posthog/ai';
                                     import { ChatOpenAI } from '@langchain/openai';
                                     import { ChatPromptTemplate } from '@langchain/core/prompts';
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -219,7 +219,7 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     />
 
                     <Markdown>
-                        PostHog automatically captures an `$ai_generation` event along with these properties:
+                        Insights automatically captures an `$ai_generation` event along with these properties:
                     </Markdown>
 
                     {NotableGenerationProperties && <NotableGenerationProperties />}

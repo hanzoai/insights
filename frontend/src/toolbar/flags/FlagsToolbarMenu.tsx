@@ -39,7 +39,7 @@ export const FlagsToolbarMenu = (): JSX.Element => {
         deleteOverriddenUserFlag,
         getUserFlags,
         checkLocalOverrides,
-        setFeatureFlagValueFromPostHogClient,
+        setFeatureFlagValueFromInsightsClient,
         setDraftPayload,
         savePayloadOverride,
         setPayloadEditorOpen,
@@ -52,14 +52,14 @@ export const FlagsToolbarMenu = (): JSX.Element => {
     const { uiHost, posthog: posthogClient, toolbarFlagsKey } = useValues(toolbarConfigLogic)
 
     useOnMountEffect(() => {
-        posthogClient?.onFeatureFlags(setFeatureFlagValueFromPostHogClient)
+        posthogClient?.onFeatureFlags(setFeatureFlagValueFromInsightsClient)
 
         if (toolbarFlagsKey && posthogClient) {
             // When toolbarFlagsKey is present, flags were pre-loaded via overrideFeatureFlags
 
             // Read the current values directly and update state
             const currentFlags = posthogClient.featureFlags.getFlagVariants()
-            setFeatureFlagValueFromPostHogClient(Object.keys(currentFlags), currentFlags)
+            setFeatureFlagValueFromInsightsClient(Object.keys(currentFlags), currentFlags)
         }
 
         getUserFlags()

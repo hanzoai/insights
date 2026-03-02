@@ -6,7 +6,7 @@ import { defaultConfig } from '~/config/config'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { parseJSON } from '~/utils/json-parse'
 
-import { createHogFunction } from '../_tests/fixtures'
+import { createCustomFunction } from '../_tests/fixtures'
 import {
     amplitudeInputs,
     createExampleSegmentInvocation,
@@ -58,7 +58,7 @@ describe('SegmentDestinationExecutorService', () => {
 
     describe('segment plugins', () => {
         it('should call the plugin perform method', async () => {
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'segment-actions-amplitude',
             })
@@ -101,7 +101,7 @@ describe('SegmentDestinationExecutorService', () => {
                 [
                   "https://api2.amplitude.com/2/httpapi",
                   {
-                    "body": "{"api_key":"api-key","events":[{"os_name":"Mac OS X","os_version":"10.15.7","device_manufacturer":null,"device_model":null,"apiKey":"api-key","user_id":"user-id","secretKey":"secret-key","device_id":"device-id","endpoint":"north_america","user_properties":{"$os":"Mac OS X","_kx":null,"epik":null,"test":"abcdefge","$host":"localhost:8010","dclid":null,"email":"max@posthog.com","gclid":null,"qclid":null,"realm":"hosted-clickhouse","sccid":null,"fbclid":null,"gbraid":null,"gclsrc":null,"igshid":null,"irclid":null,"mc_cid":null,"ttclid":null,"twclid":null,"wbraid":null,"msclkid":null,"rdt_cid":"asdfsad","$browser":"Chrome","utm_term":null,"$pathname":"/project/1/activity/explore","$referrer":"http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta","joined_at":"2025-04-04T11:33:18.022897+00:00","li_fat_id":null,"strapi_id":null,"gad_source":null,"project_id":"<REPLACED-UUID-0>","utm_medium":null,"utm_source":null,"$initial_os":"Mac OS X","$os_version":"10.15.7","utm_content":null,"$current_url":"http://localhost:8000/project/1/activity/explore","$device_type":"Desktop","$initial__kx":null,"instance_tag":"none","instance_url":"http://localhost:8010","is_signed_up":true,"utm_campaign":null,"$initial_epik":null,"$initial_host":"localhost:8010","$screen_width":2560,"project_count":1,"$initial_dclid":null,"$initial_gclid":null,"$initial_qclid":null,"$initial_sccid":null,"$screen_height":1440,"$search_engine":"google","anonymize_data":false,"$geoip_latitude":-33.8715,"$initial_fbclid":null,"$initial_gbraid":null,"$initial_gclsrc":null,"$initial_igshid":null,"$initial_irclid":null,"$initial_mc_cid":null,"$initial_ttclid":null,"$initial_twclid":null,"$initial_wbraid":null,"$raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","$viewport_width":1698,"has_social_auth":false,"organization_id":"<REPLACED-UUID-1>","$browser_version":135,"$geoip_city_name":"Sydney","$geoip_longitude":151.2006,"$geoip_time_zone":"Australia/Sydney","$initial_browser":"Chrome","$initial_msclkid":null,"$initial_rdt_cid":null,"$viewport_height":1328,"has_password_set":true,"social_providers":[],"$initial_pathname":"/organization/billing","$initial_referrer":"$direct","$initial_utm_term":null,"$referring_domain":"localhost:8000","is_email_verified":false,"$geoip_postal_code":"2000","$initial_li_fat_id":null,"organization_count":1,"$creator_event_uuid":"<REPLACED-UUID-2>","$geoip_country_code":"AU","$geoip_country_name":"Australia","$initial_gad_source":null,"$initial_os_version":"15.2","$initial_utm_medium":null,"$initial_utm_source":null,"$initial_current_url":"http://localhost:8010/organization/billing?cancel=true","$initial_device_type":"Desktop","$initial_utm_content":null,"$geoip_continent_code":"OC","$geoip_continent_name":"Oceania","$initial_screen_width":2560,"$initial_utm_campaign":null,"team_member_count_all":1,"$geoip_accuracy_radius":20,"$geoip_city_confidence":null,"$initial_screen_height":1440,"project_setup_complete":false,"$initial_geoip_latitude":-33.8715,"$initial_raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","$initial_viewport_width":1619,"$initial_browser_version":134,"$initial_geoip_city_name":"Sydney","$initial_geoip_longitude":151.2006,"$initial_geoip_time_zone":"Australia/Sydney","$initial_viewport_height":1328,"$geoip_subdivision_1_code":"NSW","$geoip_subdivision_1_name":"New South Wales","$geoip_subdivision_2_code":null,"$geoip_subdivision_2_name":null,"$initial_referring_domain":"$direct","completed_onboarding_once":false,"$initial_geoip_postal_code":"2000","has_seen_product_intro_for":{"surveys":true},"$initial_geoip_country_code":"AU","$initial_geoip_country_name":"Australia","$initial_geoip_continent_code":"OC","$initial_geoip_continent_name":"Oceania","$initial_geoip_accuracy_radius":20,"$initial_geoip_city_confidence":null,"$initial_geoip_subdivision_1_code":"NSW","$initial_geoip_subdivision_1_name":"New South Wales","$initial_geoip_subdivision_2_code":null,"$initial_geoip_subdivision_2_name":null,"current_organization_membership_level":15},"groups":{},"app_version":null,"platform":"Desktop","device_brand":"","carrier":"","country":"Australia","region":"","city":"Sydney","language":null,"utm_properties":{"utm_term":null,"utm_medium":null,"utm_source":null,"utm_content":null,"utm_campaign":null},"referrer":"http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta","internal_partner_action":"logEventV2","debug_mode":true,"library":"segment"}]}",
+                    "body": "{"api_key":"api-key","events":[{"os_name":"Mac OS X","os_version":"10.15.7","device_manufacturer":null,"device_model":null,"apiKey":"api-key","user_id":"user-id","secretKey":"secret-key","device_id":"device-id","endpoint":"north_america","user_properties":{"$os":"Mac OS X","_kx":null,"epik":null,"test":"abcdefge","$host":"localhost:8010","dclid":null,"email":"max@hanzo.ai","gclid":null,"qclid":null,"realm":"hosted-clickhouse","sccid":null,"fbclid":null,"gbraid":null,"gclsrc":null,"igshid":null,"irclid":null,"mc_cid":null,"ttclid":null,"twclid":null,"wbraid":null,"msclkid":null,"rdt_cid":"asdfsad","$browser":"Chrome","utm_term":null,"$pathname":"/project/1/activity/explore","$referrer":"http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta","joined_at":"2025-04-04T11:33:18.022897+00:00","li_fat_id":null,"strapi_id":null,"gad_source":null,"project_id":"<REPLACED-UUID-0>","utm_medium":null,"utm_source":null,"$initial_os":"Mac OS X","$os_version":"10.15.7","utm_content":null,"$current_url":"http://localhost:8000/project/1/activity/explore","$device_type":"Desktop","$initial__kx":null,"instance_tag":"none","instance_url":"http://localhost:8010","is_signed_up":true,"utm_campaign":null,"$initial_epik":null,"$initial_host":"localhost:8010","$screen_width":2560,"project_count":1,"$initial_dclid":null,"$initial_gclid":null,"$initial_qclid":null,"$initial_sccid":null,"$screen_height":1440,"$search_engine":"google","anonymize_data":false,"$geoip_latitude":-33.8715,"$initial_fbclid":null,"$initial_gbraid":null,"$initial_gclsrc":null,"$initial_igshid":null,"$initial_irclid":null,"$initial_mc_cid":null,"$initial_ttclid":null,"$initial_twclid":null,"$initial_wbraid":null,"$raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","$viewport_width":1698,"has_social_auth":false,"organization_id":"<REPLACED-UUID-1>","$browser_version":135,"$geoip_city_name":"Sydney","$geoip_longitude":151.2006,"$geoip_time_zone":"Australia/Sydney","$initial_browser":"Chrome","$initial_msclkid":null,"$initial_rdt_cid":null,"$viewport_height":1328,"has_password_set":true,"social_providers":[],"$initial_pathname":"/organization/billing","$initial_referrer":"$direct","$initial_utm_term":null,"$referring_domain":"localhost:8000","is_email_verified":false,"$geoip_postal_code":"2000","$initial_li_fat_id":null,"organization_count":1,"$creator_event_uuid":"<REPLACED-UUID-2>","$geoip_country_code":"AU","$geoip_country_name":"Australia","$initial_gad_source":null,"$initial_os_version":"15.2","$initial_utm_medium":null,"$initial_utm_source":null,"$initial_current_url":"http://localhost:8010/organization/billing?cancel=true","$initial_device_type":"Desktop","$initial_utm_content":null,"$geoip_continent_code":"OC","$geoip_continent_name":"Oceania","$initial_screen_width":2560,"$initial_utm_campaign":null,"team_member_count_all":1,"$geoip_accuracy_radius":20,"$geoip_city_confidence":null,"$initial_screen_height":1440,"project_setup_complete":false,"$initial_geoip_latitude":-33.8715,"$initial_raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","$initial_viewport_width":1619,"$initial_browser_version":134,"$initial_geoip_city_name":"Sydney","$initial_geoip_longitude":151.2006,"$initial_geoip_time_zone":"Australia/Sydney","$initial_viewport_height":1328,"$geoip_subdivision_1_code":"NSW","$geoip_subdivision_1_name":"New South Wales","$geoip_subdivision_2_code":null,"$geoip_subdivision_2_name":null,"$initial_referring_domain":"$direct","completed_onboarding_once":false,"$initial_geoip_postal_code":"2000","has_seen_product_intro_for":{"surveys":true},"$initial_geoip_country_code":"AU","$initial_geoip_country_name":"Australia","$initial_geoip_continent_code":"OC","$initial_geoip_continent_name":"Oceania","$initial_geoip_accuracy_radius":20,"$initial_geoip_city_confidence":null,"$initial_geoip_subdivision_1_code":"NSW","$initial_geoip_subdivision_1_name":"New South Wales","$initial_geoip_subdivision_2_code":null,"$initial_geoip_subdivision_2_name":null,"current_organization_membership_level":15},"groups":{},"app_version":null,"platform":"Desktop","device_brand":"","carrier":"","country":"Australia","region":"","city":"Sydney","language":null,"utm_properties":{"utm_term":null,"utm_medium":null,"utm_source":null,"utm_content":null,"utm_campaign":null},"referrer":"http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta","internal_partner_action":"logEventV2","debug_mode":true,"library":"segment"}]}",
                     "headers": {
                       "Content-Type": "application/json",
                     },
@@ -114,7 +114,7 @@ describe('SegmentDestinationExecutorService', () => {
         it('should handle non retryable fetch errors', async () => {
             jest.spyOn(amplitudeAction as any, 'perform')
 
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'segment-actions-amplitude',
             })
@@ -149,7 +149,7 @@ describe('SegmentDestinationExecutorService', () => {
                 [
                   "https://api2.amplitude.com/2/httpapi",
                   {
-                    "body": "{"api_key":"api-key","events":[{"os_name":"Mac OS X","os_version":"10.15.7","device_manufacturer":null,"device_model":null,"apiKey":"api-key","user_id":"user-id","secretKey":"secret-key","device_id":"device-id","endpoint":"north_america","user_properties":{"$os":"Mac OS X","_kx":null,"epik":null,"test":"abcdefge","$host":"localhost:8010","dclid":null,"email":"max@posthog.com","gclid":null,"qclid":null,"realm":"hosted-clickhouse","sccid":null,"fbclid":null,"gbraid":null,"gclsrc":null,"igshid":null,"irclid":null,"mc_cid":null,"ttclid":null,"twclid":null,"wbraid":null,"msclkid":null,"rdt_cid":"asdfsad","$browser":"Chrome","utm_term":null,"$pathname":"/project/1/activity/explore","$referrer":"http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta","joined_at":"2025-04-04T11:33:18.022897+00:00","li_fat_id":null,"strapi_id":null,"gad_source":null,"project_id":"<REPLACED-UUID-0>","utm_medium":null,"utm_source":null,"$initial_os":"Mac OS X","$os_version":"10.15.7","utm_content":null,"$current_url":"http://localhost:8000/project/1/activity/explore","$device_type":"Desktop","$initial__kx":null,"instance_tag":"none","instance_url":"http://localhost:8010","is_signed_up":true,"utm_campaign":null,"$initial_epik":null,"$initial_host":"localhost:8010","$screen_width":2560,"project_count":1,"$initial_dclid":null,"$initial_gclid":null,"$initial_qclid":null,"$initial_sccid":null,"$screen_height":1440,"$search_engine":"google","anonymize_data":false,"$geoip_latitude":-33.8715,"$initial_fbclid":null,"$initial_gbraid":null,"$initial_gclsrc":null,"$initial_igshid":null,"$initial_irclid":null,"$initial_mc_cid":null,"$initial_ttclid":null,"$initial_twclid":null,"$initial_wbraid":null,"$raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","$viewport_width":1698,"has_social_auth":false,"organization_id":"<REPLACED-UUID-1>","$browser_version":135,"$geoip_city_name":"Sydney","$geoip_longitude":151.2006,"$geoip_time_zone":"Australia/Sydney","$initial_browser":"Chrome","$initial_msclkid":null,"$initial_rdt_cid":null,"$viewport_height":1328,"has_password_set":true,"social_providers":[],"$initial_pathname":"/organization/billing","$initial_referrer":"$direct","$initial_utm_term":null,"$referring_domain":"localhost:8000","is_email_verified":false,"$geoip_postal_code":"2000","$initial_li_fat_id":null,"organization_count":1,"$creator_event_uuid":"<REPLACED-UUID-2>","$geoip_country_code":"AU","$geoip_country_name":"Australia","$initial_gad_source":null,"$initial_os_version":"15.2","$initial_utm_medium":null,"$initial_utm_source":null,"$initial_current_url":"http://localhost:8010/organization/billing?cancel=true","$initial_device_type":"Desktop","$initial_utm_content":null,"$geoip_continent_code":"OC","$geoip_continent_name":"Oceania","$initial_screen_width":2560,"$initial_utm_campaign":null,"team_member_count_all":1,"$geoip_accuracy_radius":20,"$geoip_city_confidence":null,"$initial_screen_height":1440,"project_setup_complete":false,"$initial_geoip_latitude":-33.8715,"$initial_raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","$initial_viewport_width":1619,"$initial_browser_version":134,"$initial_geoip_city_name":"Sydney","$initial_geoip_longitude":151.2006,"$initial_geoip_time_zone":"Australia/Sydney","$initial_viewport_height":1328,"$geoip_subdivision_1_code":"NSW","$geoip_subdivision_1_name":"New South Wales","$geoip_subdivision_2_code":null,"$geoip_subdivision_2_name":null,"$initial_referring_domain":"$direct","completed_onboarding_once":false,"$initial_geoip_postal_code":"2000","has_seen_product_intro_for":{"surveys":true},"$initial_geoip_country_code":"AU","$initial_geoip_country_name":"Australia","$initial_geoip_continent_code":"OC","$initial_geoip_continent_name":"Oceania","$initial_geoip_accuracy_radius":20,"$initial_geoip_city_confidence":null,"$initial_geoip_subdivision_1_code":"NSW","$initial_geoip_subdivision_1_name":"New South Wales","$initial_geoip_subdivision_2_code":null,"$initial_geoip_subdivision_2_name":null,"current_organization_membership_level":15},"groups":{},"app_version":null,"platform":"Desktop","device_brand":"","carrier":"","country":"Australia","region":"","city":"Sydney","language":null,"utm_properties":{"utm_term":null,"utm_medium":null,"utm_source":null,"utm_content":null,"utm_campaign":null},"referrer":"http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta","internal_partner_action":"logEventV2","debug_mode":true,"library":"segment"}]}",
+                    "body": "{"api_key":"api-key","events":[{"os_name":"Mac OS X","os_version":"10.15.7","device_manufacturer":null,"device_model":null,"apiKey":"api-key","user_id":"user-id","secretKey":"secret-key","device_id":"device-id","endpoint":"north_america","user_properties":{"$os":"Mac OS X","_kx":null,"epik":null,"test":"abcdefge","$host":"localhost:8010","dclid":null,"email":"max@hanzo.ai","gclid":null,"qclid":null,"realm":"hosted-clickhouse","sccid":null,"fbclid":null,"gbraid":null,"gclsrc":null,"igshid":null,"irclid":null,"mc_cid":null,"ttclid":null,"twclid":null,"wbraid":null,"msclkid":null,"rdt_cid":"asdfsad","$browser":"Chrome","utm_term":null,"$pathname":"/project/1/activity/explore","$referrer":"http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta","joined_at":"2025-04-04T11:33:18.022897+00:00","li_fat_id":null,"strapi_id":null,"gad_source":null,"project_id":"<REPLACED-UUID-0>","utm_medium":null,"utm_source":null,"$initial_os":"Mac OS X","$os_version":"10.15.7","utm_content":null,"$current_url":"http://localhost:8000/project/1/activity/explore","$device_type":"Desktop","$initial__kx":null,"instance_tag":"none","instance_url":"http://localhost:8010","is_signed_up":true,"utm_campaign":null,"$initial_epik":null,"$initial_host":"localhost:8010","$screen_width":2560,"project_count":1,"$initial_dclid":null,"$initial_gclid":null,"$initial_qclid":null,"$initial_sccid":null,"$screen_height":1440,"$search_engine":"google","anonymize_data":false,"$geoip_latitude":-33.8715,"$initial_fbclid":null,"$initial_gbraid":null,"$initial_gclsrc":null,"$initial_igshid":null,"$initial_irclid":null,"$initial_mc_cid":null,"$initial_ttclid":null,"$initial_twclid":null,"$initial_wbraid":null,"$raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","$viewport_width":1698,"has_social_auth":false,"organization_id":"<REPLACED-UUID-1>","$browser_version":135,"$geoip_city_name":"Sydney","$geoip_longitude":151.2006,"$geoip_time_zone":"Australia/Sydney","$initial_browser":"Chrome","$initial_msclkid":null,"$initial_rdt_cid":null,"$viewport_height":1328,"has_password_set":true,"social_providers":[],"$initial_pathname":"/organization/billing","$initial_referrer":"$direct","$initial_utm_term":null,"$referring_domain":"localhost:8000","is_email_verified":false,"$geoip_postal_code":"2000","$initial_li_fat_id":null,"organization_count":1,"$creator_event_uuid":"<REPLACED-UUID-2>","$geoip_country_code":"AU","$geoip_country_name":"Australia","$initial_gad_source":null,"$initial_os_version":"15.2","$initial_utm_medium":null,"$initial_utm_source":null,"$initial_current_url":"http://localhost:8010/organization/billing?cancel=true","$initial_device_type":"Desktop","$initial_utm_content":null,"$geoip_continent_code":"OC","$geoip_continent_name":"Oceania","$initial_screen_width":2560,"$initial_utm_campaign":null,"team_member_count_all":1,"$geoip_accuracy_radius":20,"$geoip_city_confidence":null,"$initial_screen_height":1440,"project_setup_complete":false,"$initial_geoip_latitude":-33.8715,"$initial_raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","$initial_viewport_width":1619,"$initial_browser_version":134,"$initial_geoip_city_name":"Sydney","$initial_geoip_longitude":151.2006,"$initial_geoip_time_zone":"Australia/Sydney","$initial_viewport_height":1328,"$geoip_subdivision_1_code":"NSW","$geoip_subdivision_1_name":"New South Wales","$geoip_subdivision_2_code":null,"$geoip_subdivision_2_name":null,"$initial_referring_domain":"$direct","completed_onboarding_once":false,"$initial_geoip_postal_code":"2000","has_seen_product_intro_for":{"surveys":true},"$initial_geoip_country_code":"AU","$initial_geoip_country_name":"Australia","$initial_geoip_continent_code":"OC","$initial_geoip_continent_name":"Oceania","$initial_geoip_accuracy_radius":20,"$initial_geoip_city_confidence":null,"$initial_geoip_subdivision_1_code":"NSW","$initial_geoip_subdivision_1_name":"New South Wales","$initial_geoip_subdivision_2_code":null,"$initial_geoip_subdivision_2_name":null,"current_organization_membership_level":15},"groups":{},"app_version":null,"platform":"Desktop","device_brand":"","carrier":"","country":"Australia","region":"","city":"Sydney","language":null,"utm_properties":{"utm_term":null,"utm_medium":null,"utm_source":null,"utm_content":null,"utm_campaign":null},"referrer":"http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta","internal_partner_action":"logEventV2","debug_mode":true,"library":"segment"}]}",
                     "headers": {
                       "Content-Type": "application/json",
                     },
@@ -160,9 +160,9 @@ describe('SegmentDestinationExecutorService', () => {
 
             expect(result.invocation).toEqual({
                 functionId: expect.any(String),
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: {
                     tries: 1,
                 },
@@ -178,7 +178,7 @@ describe('SegmentDestinationExecutorService', () => {
         it('should retry retryable fetch errors', async () => {
             jest.spyOn(amplitudeAction as any, 'perform')
 
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'segment-actions-amplitude',
             })
@@ -213,7 +213,7 @@ describe('SegmentDestinationExecutorService', () => {
                 [
                   "https://api2.amplitude.com/2/httpapi",
                   {
-                    "body": "{"api_key":"api-key","events":[{"os_name":"Mac OS X","os_version":"10.15.7","device_manufacturer":null,"device_model":null,"apiKey":"api-key","user_id":"user-id","secretKey":"secret-key","device_id":"device-id","endpoint":"north_america","user_properties":{"$os":"Mac OS X","_kx":null,"epik":null,"test":"abcdefge","$host":"localhost:8010","dclid":null,"email":"max@posthog.com","gclid":null,"qclid":null,"realm":"hosted-clickhouse","sccid":null,"fbclid":null,"gbraid":null,"gclsrc":null,"igshid":null,"irclid":null,"mc_cid":null,"ttclid":null,"twclid":null,"wbraid":null,"msclkid":null,"rdt_cid":"asdfsad","$browser":"Chrome","utm_term":null,"$pathname":"/project/1/activity/explore","$referrer":"http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta","joined_at":"2025-04-04T11:33:18.022897+00:00","li_fat_id":null,"strapi_id":null,"gad_source":null,"project_id":"<REPLACED-UUID-0>","utm_medium":null,"utm_source":null,"$initial_os":"Mac OS X","$os_version":"10.15.7","utm_content":null,"$current_url":"http://localhost:8000/project/1/activity/explore","$device_type":"Desktop","$initial__kx":null,"instance_tag":"none","instance_url":"http://localhost:8010","is_signed_up":true,"utm_campaign":null,"$initial_epik":null,"$initial_host":"localhost:8010","$screen_width":2560,"project_count":1,"$initial_dclid":null,"$initial_gclid":null,"$initial_qclid":null,"$initial_sccid":null,"$screen_height":1440,"$search_engine":"google","anonymize_data":false,"$geoip_latitude":-33.8715,"$initial_fbclid":null,"$initial_gbraid":null,"$initial_gclsrc":null,"$initial_igshid":null,"$initial_irclid":null,"$initial_mc_cid":null,"$initial_ttclid":null,"$initial_twclid":null,"$initial_wbraid":null,"$raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","$viewport_width":1698,"has_social_auth":false,"organization_id":"<REPLACED-UUID-1>","$browser_version":135,"$geoip_city_name":"Sydney","$geoip_longitude":151.2006,"$geoip_time_zone":"Australia/Sydney","$initial_browser":"Chrome","$initial_msclkid":null,"$initial_rdt_cid":null,"$viewport_height":1328,"has_password_set":true,"social_providers":[],"$initial_pathname":"/organization/billing","$initial_referrer":"$direct","$initial_utm_term":null,"$referring_domain":"localhost:8000","is_email_verified":false,"$geoip_postal_code":"2000","$initial_li_fat_id":null,"organization_count":1,"$creator_event_uuid":"<REPLACED-UUID-2>","$geoip_country_code":"AU","$geoip_country_name":"Australia","$initial_gad_source":null,"$initial_os_version":"15.2","$initial_utm_medium":null,"$initial_utm_source":null,"$initial_current_url":"http://localhost:8010/organization/billing?cancel=true","$initial_device_type":"Desktop","$initial_utm_content":null,"$geoip_continent_code":"OC","$geoip_continent_name":"Oceania","$initial_screen_width":2560,"$initial_utm_campaign":null,"team_member_count_all":1,"$geoip_accuracy_radius":20,"$geoip_city_confidence":null,"$initial_screen_height":1440,"project_setup_complete":false,"$initial_geoip_latitude":-33.8715,"$initial_raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","$initial_viewport_width":1619,"$initial_browser_version":134,"$initial_geoip_city_name":"Sydney","$initial_geoip_longitude":151.2006,"$initial_geoip_time_zone":"Australia/Sydney","$initial_viewport_height":1328,"$geoip_subdivision_1_code":"NSW","$geoip_subdivision_1_name":"New South Wales","$geoip_subdivision_2_code":null,"$geoip_subdivision_2_name":null,"$initial_referring_domain":"$direct","completed_onboarding_once":false,"$initial_geoip_postal_code":"2000","has_seen_product_intro_for":{"surveys":true},"$initial_geoip_country_code":"AU","$initial_geoip_country_name":"Australia","$initial_geoip_continent_code":"OC","$initial_geoip_continent_name":"Oceania","$initial_geoip_accuracy_radius":20,"$initial_geoip_city_confidence":null,"$initial_geoip_subdivision_1_code":"NSW","$initial_geoip_subdivision_1_name":"New South Wales","$initial_geoip_subdivision_2_code":null,"$initial_geoip_subdivision_2_name":null,"current_organization_membership_level":15},"groups":{},"app_version":null,"platform":"Desktop","device_brand":"","carrier":"","country":"Australia","region":"","city":"Sydney","language":null,"utm_properties":{"utm_term":null,"utm_medium":null,"utm_source":null,"utm_content":null,"utm_campaign":null},"referrer":"http://localhost:8000/project/1/pipeline/new/destination/hog-template-meta-ads?showPaused=true&kind&search=meta","internal_partner_action":"logEventV2","debug_mode":true,"library":"segment"}]}",
+                    "body": "{"api_key":"api-key","events":[{"os_name":"Mac OS X","os_version":"10.15.7","device_manufacturer":null,"device_model":null,"apiKey":"api-key","user_id":"user-id","secretKey":"secret-key","device_id":"device-id","endpoint":"north_america","user_properties":{"$os":"Mac OS X","_kx":null,"epik":null,"test":"abcdefge","$host":"localhost:8010","dclid":null,"email":"max@hanzo.ai","gclid":null,"qclid":null,"realm":"hosted-clickhouse","sccid":null,"fbclid":null,"gbraid":null,"gclsrc":null,"igshid":null,"irclid":null,"mc_cid":null,"ttclid":null,"twclid":null,"wbraid":null,"msclkid":null,"rdt_cid":"asdfsad","$browser":"Chrome","utm_term":null,"$pathname":"/project/1/activity/explore","$referrer":"http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta","joined_at":"2025-04-04T11:33:18.022897+00:00","li_fat_id":null,"strapi_id":null,"gad_source":null,"project_id":"<REPLACED-UUID-0>","utm_medium":null,"utm_source":null,"$initial_os":"Mac OS X","$os_version":"10.15.7","utm_content":null,"$current_url":"http://localhost:8000/project/1/activity/explore","$device_type":"Desktop","$initial__kx":null,"instance_tag":"none","instance_url":"http://localhost:8010","is_signed_up":true,"utm_campaign":null,"$initial_epik":null,"$initial_host":"localhost:8010","$screen_width":2560,"project_count":1,"$initial_dclid":null,"$initial_gclid":null,"$initial_qclid":null,"$initial_sccid":null,"$screen_height":1440,"$search_engine":"google","anonymize_data":false,"$geoip_latitude":-33.8715,"$initial_fbclid":null,"$initial_gbraid":null,"$initial_gclsrc":null,"$initial_igshid":null,"$initial_irclid":null,"$initial_mc_cid":null,"$initial_ttclid":null,"$initial_twclid":null,"$initial_wbraid":null,"$raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36","$viewport_width":1698,"has_social_auth":false,"organization_id":"<REPLACED-UUID-1>","$browser_version":135,"$geoip_city_name":"Sydney","$geoip_longitude":151.2006,"$geoip_time_zone":"Australia/Sydney","$initial_browser":"Chrome","$initial_msclkid":null,"$initial_rdt_cid":null,"$viewport_height":1328,"has_password_set":true,"social_providers":[],"$initial_pathname":"/organization/billing","$initial_referrer":"$direct","$initial_utm_term":null,"$referring_domain":"localhost:8000","is_email_verified":false,"$geoip_postal_code":"2000","$initial_li_fat_id":null,"organization_count":1,"$creator_event_uuid":"<REPLACED-UUID-2>","$geoip_country_code":"AU","$geoip_country_name":"Australia","$initial_gad_source":null,"$initial_os_version":"15.2","$initial_utm_medium":null,"$initial_utm_source":null,"$initial_current_url":"http://localhost:8010/organization/billing?cancel=true","$initial_device_type":"Desktop","$initial_utm_content":null,"$geoip_continent_code":"OC","$geoip_continent_name":"Oceania","$initial_screen_width":2560,"$initial_utm_campaign":null,"team_member_count_all":1,"$geoip_accuracy_radius":20,"$geoip_city_confidence":null,"$initial_screen_height":1440,"project_setup_complete":false,"$initial_geoip_latitude":-33.8715,"$initial_raw_user_agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36","$initial_viewport_width":1619,"$initial_browser_version":134,"$initial_geoip_city_name":"Sydney","$initial_geoip_longitude":151.2006,"$initial_geoip_time_zone":"Australia/Sydney","$initial_viewport_height":1328,"$geoip_subdivision_1_code":"NSW","$geoip_subdivision_1_name":"New South Wales","$geoip_subdivision_2_code":null,"$geoip_subdivision_2_name":null,"$initial_referring_domain":"$direct","completed_onboarding_once":false,"$initial_geoip_postal_code":"2000","has_seen_product_intro_for":{"surveys":true},"$initial_geoip_country_code":"AU","$initial_geoip_country_name":"Australia","$initial_geoip_continent_code":"OC","$initial_geoip_continent_name":"Oceania","$initial_geoip_accuracy_radius":20,"$initial_geoip_city_confidence":null,"$initial_geoip_subdivision_1_code":"NSW","$initial_geoip_subdivision_1_name":"New South Wales","$initial_geoip_subdivision_2_code":null,"$initial_geoip_subdivision_2_name":null,"current_organization_membership_level":15},"groups":{},"app_version":null,"platform":"Desktop","device_brand":"","carrier":"","country":"Australia","region":"","city":"Sydney","language":null,"utm_properties":{"utm_term":null,"utm_medium":null,"utm_source":null,"utm_content":null,"utm_campaign":null},"referrer":"http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta","internal_partner_action":"logEventV2","debug_mode":true,"library":"segment"}]}",
                     "headers": {
                       "Content-Type": "application/json",
                     },
@@ -223,10 +223,10 @@ describe('SegmentDestinationExecutorService', () => {
             `)
 
             expect(result.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: { tries: 1 },
                 queueParameters: undefined,
                 queuePriority: 1,
@@ -252,10 +252,10 @@ describe('SegmentDestinationExecutorService', () => {
             expect(amplitudeAction.perform).toHaveBeenCalledTimes(2)
 
             expect(invocationResults2.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: {
                     tries: 2,
                 },
@@ -285,10 +285,10 @@ describe('SegmentDestinationExecutorService', () => {
             expect(amplitudeAction.perform).toHaveBeenCalledTimes(3)
 
             expect(invocationResults3.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: { tries: 3 },
                 queueParameters: undefined,
                 queuePriority: 0,
@@ -304,7 +304,7 @@ describe('SegmentDestinationExecutorService', () => {
             // https://github.com/segmentio/action-destinations/blob/main/packages/destination-actions/src/destinations/gameball/util.ts#L68
             jest.spyOn(gameballAction as any, 'perform')
 
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'segment-actions-gameball',
             })
@@ -351,10 +351,10 @@ describe('SegmentDestinationExecutorService', () => {
             `)
 
             expect(result.invocation).toEqual({
-                hogFunction: expect.any(Object),
+                customFunction: expect.any(Object),
                 functionId: expect.any(String),
                 id: expect.any(String),
-                queue: 'hog',
+                queue: 'custom_script',
                 queueMetadata: { tries: 1 },
                 queueParameters: undefined,
                 queuePriority: 0,
@@ -369,14 +369,14 @@ describe('SegmentDestinationExecutorService', () => {
             jest.spyOn(pipedriveAction as any, 'perform')
 
             const pipedriveInputs = {
-                domain: 'posthog-sandbox',
+                domain: 'insights-sandbox',
                 match_field: 'email',
                 apiToken: 'api-key',
-                match_value: 'max@posthog.com',
+                match_value: 'max@hanzo.ai',
                 personField: 'id',
                 name: 'Max',
                 organizationField: 'id',
-                email: 'max@posthog.com',
+                email: 'max@hanzo.ai',
                 dealField: 'id',
                 phone: null,
                 custom_fields: {},
@@ -384,7 +384,7 @@ describe('SegmentDestinationExecutorService', () => {
                 debug_mode: true,
             }
 
-            const fn = createHogFunction({
+            const fn = createCustomFunction({
                 name: 'Plugin test',
                 template_id: 'segment-actions-pipedrive',
             })
@@ -417,7 +417,7 @@ describe('SegmentDestinationExecutorService', () => {
             expect(mockFetch).toHaveBeenCalledTimes(2)
             expect(forSnapshot(mockFetch.mock.calls[0])).toMatchInlineSnapshot(`
                 [
-                  "https://posthog-sandbox.pipedrive.com/api/v1/itemSearch/field?term=max%40posthog.com&field_key=email&exact_match=true&field_type=personField&return_item_ids=true&api_token=api-key",
+                  "https://insights-sandbox.pipedrive.com/api/v1/itemSearch/field?term=max%40hanzo.ai&field_key=email&exact_match=true&field_type=personField&return_item_ids=true&api_token=api-key",
                   {
                     "body": undefined,
                     "headers": {},
@@ -427,9 +427,9 @@ describe('SegmentDestinationExecutorService', () => {
             `)
             expect(forSnapshot(mockFetch.mock.calls[1])).toMatchInlineSnapshot(`
                 [
-                  "https://posthog-sandbox.pipedrive.com/api/v1/persons?api_token=api-key",
+                  "https://insights-sandbox.pipedrive.com/api/v1/persons?api_token=api-key",
                   {
-                    "body": "{"name":"Max","email":"max@posthog.com","phone":null}",
+                    "body": "{"name":"Max","email":"max@hanzo.ai","phone":null}",
                     "headers": {
                       "Content-Type": "application/json",
                     },
@@ -454,7 +454,7 @@ describe('SegmentDestinationExecutorService', () => {
                 mockFetch.mockReset()
 
                 const pipedriveInputs = {
-                    domain: 'posthog-sandbox',
+                    domain: 'insights-sandbox',
                     apiToken: 'api-key',
                     person_match_value: 'e252ca85-9ea2-4d17-9d99-5fda5535995d',
                     activity_id: testCase.activity_id,
@@ -475,7 +475,7 @@ describe('SegmentDestinationExecutorService', () => {
                     debug_mode: true,
                 }
 
-                const fn = createHogFunction({
+                const fn = createCustomFunction({
                     name: 'Plugin test',
                     template_id: 'segment-actions-pipedrive',
                 })
@@ -499,11 +499,11 @@ describe('SegmentDestinationExecutorService', () => {
 
                 if (testCase.shouldHaveId) {
                     expect(endpoint).toBe(
-                        `https://posthog-sandbox.pipedrive.com/api/v1/activities/${testCase.activity_id}?api_token=api-key`
+                        `https://insights-sandbox.pipedrive.com/api/v1/activities/${testCase.activity_id}?api_token=api-key`
                     )
                 } else {
                     expect(requestBody).not.toHaveProperty('id')
-                    expect(endpoint).toBe('https://posthog-sandbox.pipedrive.com/api/v1/activities?api_token=api-key')
+                    expect(endpoint).toBe('https://insights-sandbox.pipedrive.com/api/v1/activities?api_token=api-key')
                 }
             }
         })

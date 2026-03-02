@@ -71,7 +71,7 @@ export const customFunctionTestLogic = kea<customFunctionTestLogicType>([
         return id ?? templateId ?? 'new'
     }),
 
-    path((id) => ['scenes', 'pipeline', 'hogfunctions', 'customFunctionTestLogic', id]),
+    path((id) => ['scenes', 'pipeline', 'customfunctions', 'customFunctionTestLogic', id]),
     connect((props: CustomFunctionConfigurationLogicProps) => ({
         values: [
             customFunctionConfigurationLogic(props),
@@ -84,7 +84,7 @@ export const customFunctionTestLogic = kea<customFunctionTestLogicType>([
                 'exampleInvocationGlobals',
                 'sampleGlobalsError',
                 'type',
-                'currentHogCode',
+                'currentScriptCode',
             ],
             groupsModel,
             ['groupTypes'],
@@ -310,7 +310,7 @@ export const customFunctionTestLogic = kea<customFunctionTestLogicType>([
                             : 'Please fix the configuration errors before testing.'
 
                     lemonToast.error(message, {
-                        toastId: 'hogfunction-validation-error',
+                        toastId: 'customfunction-validation-error',
                     })
 
                     // Show the errors in the UI
@@ -321,7 +321,7 @@ export const customFunctionTestLogic = kea<customFunctionTestLogicType>([
                 const parsedData = tryJsonParse(data.globals)
                 const configuration = sanitizeConfiguration(values.configuration) as Record<string, any>
                 configuration.template_id = values.templateId
-                configuration.hog = values.currentHogCode
+                configuration.custom_script = values.currentScriptCode
 
                 // Transformations have a simpler UI just showing the event so we need to map it back to the event
                 const globals =

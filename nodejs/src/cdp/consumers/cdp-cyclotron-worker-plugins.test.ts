@@ -11,12 +11,12 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import {
-    insertHogFunction as _insertHogFunction,
+    insertCustomFunction as _insertCustomFunction,
     createExampleInvocation,
-    createHogExecutionGlobals,
+    createScriptExecutionGlobals,
 } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
-import { HogFunctionInvocationGlobalsWithInputs, HogFunctionType } from '../types'
+import { CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
 import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
 
 jest.setTimeout(1000)
@@ -28,19 +28,19 @@ describe('CdpCyclotronWorkerPlugins', () => {
     let processor: CdpCyclotronWorker
     let hub: Hub
     let team: Team
-    let fn: HogFunctionType
-    let globals: HogFunctionInvocationGlobalsWithInputs
-    const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-        const item = await _insertHogFunction(hub.postgres, team.id, {
-            ...hogFunction,
+    let fn: CustomFunctionType
+    let globals: CustomFunctionInvocationGlobalsWithInputs
+    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+        const item = await _insertCustomFunction(hub.postgres, team.id, {
+            ...customFunction,
             type: 'destination',
         })
         // Trigger the reload that django would do
-        processor['hogFunctionManager']['onHogFunctionsReloaded'](team.id, [item.id])
+        processor['customFunctionManager']['onCustomFunctionsReloaded'](team.id, [item.id])
         return item
     }
 
-    const intercomPlugin = DESTINATION_PLUGINS_BY_ID['plugin-posthog-intercom-plugin']
+    const intercomPlugin = DESTINATION_PLUGINS_BY_ID['plugin-insights-intercom-plugin']
 
     beforeEach(async () => {
         mockFetch.mockResolvedValue({
@@ -66,12 +66,12 @@ describe('CdpCyclotronWorkerPlugins', () => {
         const fixedTime = DateTime.fromObject({ year: 2025, month: 1, day: 1 }, { zone: 'UTC' })
         jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
 
-        fn = await insertHogFunction({
+        fn = await insertCustomFunction({
             name: 'Plugin test',
-            template_id: 'plugin-posthog-intercom-plugin',
+            template_id: 'plugin-insights-intercom-plugin',
         })
         globals = {
-            ...createHogExecutionGlobals({
+            ...createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -79,10 +79,10 @@ describe('CdpCyclotronWorkerPlugins', () => {
                     uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                     event: '$pageview',
                     properties: {
-                        $current_url: 'https://posthog.com',
+                        $current_url: 'https://hanzo.ai',
                         $lib_version: '1.0.0',
                         $set: {
-                            email: 'test@posthog.com',
+                            email: 'test@hanzo.ai',
                         },
                     },
                     timestamp: fixedTime.toISO(),
@@ -91,7 +91,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
             inputs: {
                 intercomApiKey: '1234567890',
                 triggeringEvents: '$identify,mycustomevent',
-                ignoredEmailDomains: 'dev.posthog.com',
+                ignoredEmailDomains: 'dev.hanzo.ai',
                 useEuropeanDataStorage: 'No',
             },
         }
@@ -114,7 +114,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
             const invocation = createExampleInvocation(fn, globals)
             invocation.state.globals.event.event = 'mycustomevent'
             invocation.state.globals.event.properties = {
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
             }
 
             mockFetch.mockResolvedValue({
@@ -136,7 +136,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
                   "event": "mycustomevent",
                   "ip": null,
                   "properties": {
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                   },
                   "team_id": 2,
                   "timestamp": "2025-01-01T00:00:00.000Z",
@@ -149,7 +149,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
                 [
                   "https://api.intercom.io/contacts/search",
                   {
-                    "body": "{"query":{"field":"email","operator":"=","value":"test@posthog.com"}}",
+                    "body": "{"query":{"field":"email","operator":"=","value":"test@hanzo.ai"}}",
                     "headers": {
                       "Accept": "application/json",
                       "Authorization": "Bearer 1234567890",
@@ -163,7 +163,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
                 [
                   "https://api.intercom.io/events",
                   {
-                    "body": "{"event_name":"mycustomevent","created_at":null,"email":"test@posthog.com","id":"distinct_id"}",
+                    "body": "{"event_name":"mycustomevent","created_at":null,"email":"test@hanzo.ai","id":"distinct_id"}",
                     "headers": {
                       "Accept": "application/json",
                       "Authorization": "Bearer 1234567890",
@@ -187,7 +187,7 @@ describe('CdpCyclotronWorkerPlugins', () => {
             const invocation = createExampleInvocation(fn, globals)
             invocation.state.globals.event.event = 'mycustomevent'
             invocation.state.globals.event.properties = {
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
             }
 
             mockFetch.mockRejectedValue(new Error('Test error'))

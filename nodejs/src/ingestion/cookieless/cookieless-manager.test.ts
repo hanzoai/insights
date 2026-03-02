@@ -213,7 +213,7 @@ describe('CookielessManager', () => {
         const setModeForTeam = async (mode: CookielessServerHashMode) => {
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
+                `UPDATE insights_team SET cookieless_server_hash_mode = $1 WHERE id = $2`,
                 [mode, teamId],
                 'set team to cookieless'
             )

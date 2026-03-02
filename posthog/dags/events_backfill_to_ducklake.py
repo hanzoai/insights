@@ -103,7 +103,7 @@ DEFAULT_CLICKHOUSE_SETTINGS = {
 
 # Columns to export from ClickHouse events table.
 # This matches the schema that the DuckLake streaming connector (via Kafka) expects.
-# Note: We use toInt64(team_id) as project_id since they're equivalent in PostHog.
+# Note: We use toInt64(team_id) as project_id since they're equivalent in Insights.
 # Materialized columns (dmat_*) are ClickHouse-specific and not present in DuckLake.
 EVENTS_COLUMNS = """
     toString(uuid) as uuid,
