@@ -13,7 +13,7 @@ import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { ElapsedTime } from '~/queries/nodes/DataNode/ElapsedTime'
 import { Reload } from '~/queries/nodes/DataNode/Reload'
 import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { InsightsQLQueryModifiers, ScriptQuery, ScriptQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers, type ScriptQuery, type ScriptQueryResponse } from '~/queries/schema/schema-general'
 
 export interface ScriptQueryEditorProps {
     query: ScriptQuery
