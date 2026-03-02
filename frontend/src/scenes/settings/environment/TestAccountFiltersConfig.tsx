@@ -77,7 +77,7 @@ function TestAccountFiltersConfig(): JSX.Element {
         <div className="mb-4 flex flex-col gap-2">
             <div className="mb-4 flex flex-col gap-2">
                 <LemonBanner type="info">
-                    When filtering out internal users by person properties, like email, we recommend creating a Cohort
+                    When filtering out internal users by user properties, like email, we recommend creating a Cohort
                     with those properties, and then adding that cohort with a "not in" operator in your ‘Filter out
                     internal and test users’ settings.
                 </LemonBanner>

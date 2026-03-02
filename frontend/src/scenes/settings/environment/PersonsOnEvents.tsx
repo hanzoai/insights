@@ -18,32 +18,32 @@ const POE_OPTIONS: LemonRadioOption<PoEMode>[] = [
         value: 'person_id_override_properties_on_events',
         label: (
             <span className="inline-flex items-center gap-1.5">
-                Use person properties from the time of the event<LemonTag>RECOMMENDED</LemonTag>
+                Use user properties from the time of the event<LemonTag>RECOMMENDED</LemonTag>
             </span>
         ),
         description: (
             <>
-                Fast queries. If the person property is updated, query results on past data <em>won't</em> change.
+                Fast queries. If the user property is updated, query results on past data <em>won't</em> change.
             </>
         ),
     },
     {
         value: 'person_id_override_properties_joined',
-        label: 'Use person properties as of running the query',
+        label: 'Use user properties as of running the query',
         description: (
             <>
-                Slower queries. If the person property is updated, query results on past data <em>will</em> change
+                Slower queries. If the user property is updated, query results on past data <em>will</em> change
                 accordingly.
             </>
         ),
     },
     {
         value: 'person_id_no_override_properties_on_events',
-        label: 'Use person IDs and person properties from the time of the event',
+        label: 'Use user IDs and user properties from the time of the event',
         description: (
             <>
                 Fastest queries,{' '}
-                <span className="underline">but funnels and unique user counts will be inaccurate</span>. If the person
+                <span className="underline">but funnels and unique user counts will be inaccurate</span>. If the user
                 property is updated, query results on past data <em>won't</em> change.
             </>
         ),

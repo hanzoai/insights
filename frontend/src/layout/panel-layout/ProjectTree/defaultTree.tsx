@@ -418,7 +418,7 @@ export const getDefaultTreeGames = (): FileSystemImport[] =>
 
 export const getDefaultTreePersons = (): FileSystemImport[] => [
     {
-        path: 'Persons',
+        path: 'Users',
         category: 'People',
         iconType: 'persons',
         href: urls.persons(),

@@ -18,7 +18,7 @@ export const manifest: ProductManifest = {
     fileSystemTypes: {},
     treeItemsProducts: [
         {
-            path: 'Web analytics',
+            path: 'Web Analytics',
             intents: [ProductKey.WEB_ANALYTICS],
             category: 'Analytics',
             iconType: 'web_analytics',

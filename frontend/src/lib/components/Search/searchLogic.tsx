@@ -330,19 +330,19 @@ export const searchLogic = kea<searchLogicType>([
                     },
                 }))
 
-                // Add Activity manually
+                // Add Event Explorer manually
                 const activityHref = urls.activity(ActivityTab.ExploreEvents)
                 items.push({
                     id: 'app-activity',
-                    name: 'Activity',
-                    displayName: 'Activity',
+                    name: 'Event Explorer',
+                    displayName: 'Event Explorer',
                     category: 'apps',
                     productCategory: null,
                     href: activityHref,
                     icon: <IconClock />,
                     itemType: null,
                     tags: undefined,
-                    lastViewedAt: sceneLogViewsByRef['Activity'] ?? null,
+                    lastViewedAt: sceneLogViewsByRef['EventExplorer'] ?? null,
                     record: {
                         type: 'activity',
                         iconType: undefined,
@@ -380,7 +380,7 @@ export const searchLogic = kea<searchLogicType>([
                 })
 
                 const categorySearchKeywords: Record<string, string[]> = {
-                    Pipeline: ['data pipelines', 'data pipeline'],
+                    'Data Pipeline': ['data pipelines', 'data pipeline'],
                 }
 
                 const items = filteredMetadata.map((item) => ({
@@ -540,8 +540,8 @@ export const searchLogic = kea<searchLogicType>([
             (sceneLogViewsByRef): SearchItem[] => [
                 {
                     id: 'health-pipeline-status',
-                    name: 'Pipeline status',
-                    displayName: 'Pipeline status',
+                    name: 'Data Pipeline status',
+                    displayName: 'Data Pipeline status',
                     category: 'health',
                     href: urls.pipelineStatus(),
                     itemType: 'pipeline_status',

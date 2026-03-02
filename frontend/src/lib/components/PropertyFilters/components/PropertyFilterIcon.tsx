@@ -15,7 +15,7 @@ export function PropertyFilterIcon({ type }: { type?: PropertyFilterType }): JSX
             )
         case 'person':
             return (
-                <Tooltip title="Person property">
+                <Tooltip title="User property">
                     <IconPerson />
                 </Tooltip>
             )

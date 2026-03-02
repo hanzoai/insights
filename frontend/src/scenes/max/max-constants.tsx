@@ -989,7 +989,7 @@ export const MODE_DEFINITIONS: Record<
         ]),
     },
     [AgentMode.ErrorTracking]: {
-        name: 'Error tracking',
+        name: 'Error Tracking',
         description: 'Searches and analyzes error tracking issues to help you understand and fix bugs.',
         icon: iconForType('error_tracking'),
         scenes: new Set([Scene.ErrorTracking]),

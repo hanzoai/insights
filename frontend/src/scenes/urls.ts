@@ -4,7 +4,7 @@ import { getCurrentTeamId } from 'lib/utils/getAppContext'
 
 import { fileSystemTypes, productUrls } from '~/products'
 import { ProductKey, SharingConfigurationSettings } from '~/queries/schema/schema-general'
-import { ActivityTab, AnnotationType, CommentType, OnboardingStepKey, SDKKey } from '~/types'
+import { AnnotationType, CommentType, EventExplorerTab, OnboardingStepKey, SDKKey } from '~/types'
 
 import type { BillingSectionId } from './billing/types'
 import { DataPipelinesNewSceneKind } from './data-pipelines/DataPipelinesNewScene'
@@ -47,7 +47,7 @@ export const urls = {
     models: (): string => '/models',
     sources: (): string => '/data-management/sources',
     transformations: (): string => '/data-management/transformations',
-    activity: (tab: ActivityTab | ':tab' = ActivityTab.ExploreEvents): string => `/activity/${tab}`,
+    activity: (tab: EventExplorerTab | ':tab' = EventExplorerTab.ExploreEvents): string => `/activity/${tab}`,
     event: (id: string, timestamp: string): string =>
         `/events/${encodeURIComponent(id)}/${encodeURIComponent(timestamp)}`,
     ingestionWarnings: (): string => '/data-management/ingestion-warnings',

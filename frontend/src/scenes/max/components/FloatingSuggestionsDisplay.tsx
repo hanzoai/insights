@@ -25,7 +25,7 @@ function useSuggestionHandling(): {
             router.actions.push(group.url)
         }
 
-        // If there's only one suggestion, we can just ask Max directly
+        // If there's only one suggestion, we can just ask the AI directly
         if (group.suggestions.length <= 1) {
             if (checkSuggestionRequiresUserInput(group.suggestions[0].content)) {
                 setQuestion(stripSuggestionPlaceholders(group.suggestions[0].content))

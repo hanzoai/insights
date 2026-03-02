@@ -452,7 +452,7 @@ export const navigation3000Logic = kea<navigation3000LogicType>([
                         },
                         {
                             identifier: Scene.ExploreEvents,
-                            label: 'Activity',
+                            label: 'Events',
                             icon: <IconLive />,
                             to: urls.activity(),
                             tooltipDocLink: 'https://posthog.com/docs/data/events',

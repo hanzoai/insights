@@ -524,7 +524,7 @@ function TargetingSummary({
             {hasTargetingFilters && (
                 <div>
                     <BindLogic logic={featureFlagLogic} props={{ id: tour.internal_targeting_flag?.id || 'new' }}>
-                        <span className="font-medium">Person properties:</span>
+                        <span className="font-medium">User properties:</span>
                         <FeatureFlagReleaseConditions readOnly excludeTitle filters={targetingFlagFilters} />
                     </BindLogic>
                 </div>

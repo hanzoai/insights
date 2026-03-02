@@ -31,7 +31,7 @@ export function PipelineStatusScene(): JSX.Element {
     return (
         <SceneContent>
             <SceneTitleSection
-                name="Pipeline status"
+                name="Data Pipeline status"
                 description="Monitor the status of your data pipelines."
                 resourceType={{
                     to: undefined,

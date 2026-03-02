@@ -67,7 +67,7 @@ export const manifest: ProductManifest = {
             sceneKeys: ['Apps'],
         },
         {
-            path: `Data pipelines`,
+            path: `Data Pipelines`,
             intents: [
                 ProductKey.PIPELINE_BATCH_EXPORTS,
                 ProductKey.PIPELINE_DESTINATIONS,
@@ -84,7 +84,7 @@ export const manifest: ProductManifest = {
     treeItemsMetadata: [
         {
             path: `Transformations`,
-            category: 'Pipeline',
+            category: 'Data Pipeline',
             type: 'insights_function/transformation',
             iconType: 'data_pipeline_metadata',
             href: urls.transformations(),
@@ -93,7 +93,7 @@ export const manifest: ProductManifest = {
         },
         {
             path: `Destinations`,
-            category: 'Pipeline',
+            category: 'Data Pipeline',
             type: 'insights_function/destination',
             iconType: 'data_pipeline_metadata',
             href: urls.destinations(),
@@ -102,7 +102,7 @@ export const manifest: ProductManifest = {
         },
         {
             path: 'Event ingestion warnings',
-            category: 'Pipeline',
+            category: 'Data Pipeline',
             iconType: 'ingestion_warning',
             href: urls.ingestionWarnings(),
             sceneKey: 'IngestionWarnings',

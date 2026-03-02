@@ -27,7 +27,7 @@ export function PersonModeEventPropertyInstructions(): JSX.Element {
                 <Link to="https://posthog.com/docs/data/persons" target="_blank" targetBlankIcon>
                     person profile processing
                 </Link>{' '}
-                enabled. This means a person profile will be created for each user who triggers an event.
+                enabled. This means a user profile will be created for each user who triggers an event.
             </p>
             <p>
                 If you want to disable person profile processing for certain events, send the event with the following

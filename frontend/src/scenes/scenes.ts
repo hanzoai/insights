@@ -76,7 +76,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Billing]: { organizationBased: true, defaultDocsPath: '/pricing' },
     [Scene.Canvas]: {
         projectBased: true,
-        name: 'Canvas',
+        name: 'Notebook',
         description: 'You can change anything you like and it is persisted to the URL for easy sharing.',
         layout: 'app-full-scene-height',
         defaultDocsPath: '/blog/introducing-notebooks',
@@ -228,9 +228,9 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
             'Experiments help you test changes to your product to see which changes will lead to optimal results. Automatic statistical calculations let you see if the results are valid or if they are likely just a chance occurrence.',
         iconType: 'experiment',
     },
-    [Scene.Activity]: {
+    [Scene.EventExplorer]: {
         projectBased: true,
-        name: 'Activity',
+        name: 'Event Explorer',
         defaultDocsPath: '/docs/data/events',
         description: 'Explore your events or see real-time events from your app or website.',
         iconType: 'activity',
@@ -333,7 +333,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     [Scene.Login2FA]: { onlyUnauthenticated: true, name: 'Login 2FA' },
     [Scene.EmailMFAVerify]: { onlyUnauthenticated: true },
     [Scene.Login]: { onlyUnauthenticated: true },
-    [Scene.Max]: { projectBased: true, name: 'Max', layout: 'app-raw-no-header', hideProjectNotice: true },
+    [Scene.Max]: { projectBased: true, name: 'AI Assistant', layout: 'app-raw-no-header', hideProjectNotice: true },
     [Scene.Models]: {
         projectBased: true,
         name: 'Models',
@@ -394,8 +394,8 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     },
     [Scene.Persons]: {
         projectBased: true,
-        name: 'Persons',
-        description: 'A catalog of all the people behind your events',
+        name: 'Users',
+        description: 'A catalog of all the users behind your events',
         activityScope: ActivityScope.PERSON,
         defaultDocsPath: '/docs/data/persons',
         iconType: 'persons',
@@ -442,7 +442,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     },
     [Scene.ReplayPlaylist]: {
         projectBased: true,
-        name: 'Replay playlist',
+        name: 'Session Replay playlist',
         activityScope: ActivityScope.REPLAY,
         defaultDocsPath: '/docs/session-replay',
     },
@@ -454,13 +454,13 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     },
     [Scene.ReplaySingle]: {
         projectBased: true,
-        name: 'Replay recording',
+        name: 'Session Replay recording',
         activityScope: ActivityScope.REPLAY,
         defaultDocsPath: '/docs/session-replay',
     },
     [Scene.Replay]: {
         projectBased: true,
-        name: 'Session replay',
+        name: 'Session Replay',
         activityScope: ActivityScope.REPLAY,
         defaultDocsPath: '/docs/session-replay',
         layout: 'app-full-scene-height',
@@ -512,7 +512,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     },
     [Scene.PipelineStatus]: {
         projectBased: true,
-        name: 'Pipeline status',
+        name: 'Data Pipeline status',
         description: 'Monitor the status of your data pipelines.',
         iconType: 'pipeline_status',
     },
@@ -573,7 +573,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
         defaultDocsPath: '/docs/product-tours',
     },
     [Scene.SystemStatus]: { instanceLevel: true, name: 'Instance panel' },
-    [Scene.ToolbarLaunch]: { projectBased: true, name: 'Launch toolbar', defaultDocsPath: '/docs/toolbar' },
+    [Scene.ToolbarLaunch]: { projectBased: true, name: 'Site Inspector', defaultDocsPath: '/docs/toolbar' },
     [Scene.Sources]: {
         projectBased: true,
         name: 'Sources',
@@ -628,7 +628,7 @@ export const sceneConfigurations: Record<Scene | string, SceneConfig> = {
     },
     [Scene.WebAnalytics]: {
         projectBased: true,
-        name: 'Web analytics',
+        name: 'Web Analytics',
         layout: 'app-container',
         defaultDocsPath: '/docs/web-analytics',
         description: 'Analyze your web analytics data to understand website performance and user behavior.',

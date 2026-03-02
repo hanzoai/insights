@@ -81,7 +81,7 @@ export enum Scene {
     Link = 'Link',
     Links = 'Links',
     LiveDebugger = 'LiveDebugger',
-    Activity = 'Activity',
+    EventExplorer = 'EventExplorer',
     LiveEvents = 'LiveEvents',
     Login = 'Login',
     Login2FA = 'Login2FA',
@@ -238,7 +238,7 @@ export interface Params {
 export interface SceneConfig {
     /** Custom name for the scene */
     name?: string
-    /** Optional static description of the scene or product. Used both in the UI and by Max AI as context on what the scene is for */
+    /** Optional static description of the scene or product. Used both in the UI and by the AI assistant as context on what the scene is for */
     description?: string
     /** Route should only be accessed when logged out (N.B. should be added to posthog/urls.py too) */
     onlyUnauthenticated?: boolean
