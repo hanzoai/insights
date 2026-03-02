@@ -48,9 +48,9 @@ from .group_usage_metric import GroupUsageMetric
 from .group_type_mapping import GroupTypeMapping
 from .heatmap_saved import SavedHeatmap, HeatmapSnapshot
 from .host_definition import HostDefinition
-from .custom_flow import CustomFlow
-from .custom_functions import CustomFunction
-from .custom_function_template import CustomFunctionTemplate
+from .insights_flow import InsightsFlow
+from .insights_functions import InsightsFunction
+from .insights_function_template import InsightsFunctionTemplate
 from .health_issue import HealthIssue
 from .insight import Insight, InsightViewed
 from .insight_caching_state import InsightCachingState
@@ -152,9 +152,9 @@ __all__ = [
     "GroupTypeMapping",
     "HeatmapSnapshot",
     "HealthIssue",
-    "CustomFlow",
-    "CustomFunction",
-    "CustomFunctionTemplate",
+    "InsightsFlow",
+    "InsightsFunction",
+    "InsightsFunctionTemplate",
     "Link",
     "LLMPrompt",
     "HostDefinition",

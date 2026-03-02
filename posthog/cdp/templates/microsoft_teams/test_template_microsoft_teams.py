@@ -1,10 +1,10 @@
 import pytest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.microsoft_teams.template_microsoft_teams import template as template_microsoft_teams
 
 
-class TestTemplateMicrosoftTeams(BaseCustomFunctionTemplateTest):
+class TestTemplateMicrosoftTeams(BaseInsightsFunctionTemplateTest):
     template = template_microsoft_teams
 
     def _inputs(self, **kwargs):

@@ -7,16 +7,16 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 import { insightsFilterOutPlugin } from '../../../src/cdp/legacy-plugins/_transformations/insights-filter-out-plugin/template'
 import { template as defaultTemplate } from '../../../src/cdp/templates/_transformations/default/default.template'
 import { template as geoipTemplate } from '../../../src/cdp/templates/_transformations/geoip/geoip.template'
-import { compileScript } from '../../../src/cdp/templates/compiler'
+import { compileFn } from '../../../src/cdp/templates/compiler'
 import { forSnapshot } from '../../../tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { createCustomFunction, insertCustomFunction } from '../_tests/fixtures'
+import { createInsightsFunction, insertInsightsFunction } from '../_tests/fixtures'
 import { insightsPluginGeoip } from '../legacy-plugins/_transformations/insights-plugin-geoip/template'
 import { propertyFilterPlugin } from '../legacy-plugins/_transformations/property-filter-plugin/template'
 import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
-import { CustomFunctionTemplate } from '../types'
+import { InsightsFunctionTemplate } from '../types'
 import { ScriptTransformerService } from './script-transformer.service'
 
 const createPluginEvent = (event: Partial<PluginEvent> = {}, teamId: number = 1): PluginEvent => {
@@ -62,8 +62,8 @@ describe('ScriptTransformer', () => {
     describe('transformEvent', () => {
         it('handles geoip lookup transformation', async () => {
             // Setup the custom function
-            const scriptByteCode = await compileScript(geoipTemplate.code)
-            const geoIpFunction = createCustomFunction({
+            const scriptByteCode = await compileFn(geoipTemplate.code)
+            const geoIpFunction = createInsightsFunction({
                 type: 'transformation',
                 name: geoipTemplate.name,
                 team_id: teamId,
@@ -72,9 +72,9 @@ describe('ScriptTransformer', () => {
                 execution_order: 1,
                 id: 'd77e792e-0f35-431b-a983-097534aa4767',
             })
-            await insertCustomFunction(hub.postgres, teamId, geoIpFunction)
+            await insertInsightsFunction(hub.postgres, teamId, geoIpFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [geoIpFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [geoIpFunction.id])
 
             const event: PluginEvent = createPluginEvent({}, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -137,7 +137,7 @@ describe('ScriptTransformer', () => {
         })
 
         it('only allow modifying certain properties', async () => {
-            const fn = createCustomFunction({
+            const fn = createInsightsFunction({
                 type: 'transformation',
                 name: 'Modifier',
                 team_id: teamId,
@@ -155,9 +155,9 @@ describe('ScriptTransformer', () => {
                     return returnEvent
                 `,
             })
-            fn.bytecode = await compileScript(fn.custom_script)
-            await insertCustomFunction(hub.postgres, teamId, fn)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [fn.id])
+            fn.bytecode = await compileFn(fn.fn)
+            await insertInsightsFunction(hub.postgres, teamId, fn)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [fn.id])
 
             const event: PluginEvent = createPluginEvent({}, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -184,7 +184,7 @@ describe('ScriptTransformer', () => {
             `)
         })
         it('should execute multiple transformations and produce messages', async () => {
-            const testTemplate: CustomFunctionTemplate = {
+            const testTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -192,7 +192,7 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template that adds a test property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.test_property := 'test_value'
@@ -201,8 +201,8 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const geoTransformationIpByteCode = await compileScript(geoipTemplate.code)
-            const geoIpTransformationFunction = createCustomFunction({
+            const geoTransformationIpByteCode = await compileFn(geoipTemplate.code)
+            const geoIpTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: geoipTemplate.name,
                 team_id: teamId,
@@ -211,8 +211,8 @@ describe('ScriptTransformer', () => {
                 execution_order: 1,
             })
 
-            const defaultTransformationByteCode = await compileScript(defaultTemplate.code)
-            const defaultTransformationFunction = createCustomFunction({
+            const defaultTransformationByteCode = await compileFn(defaultTemplate.code)
+            const defaultTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: defaultTemplate.name,
                 team_id: teamId,
@@ -221,8 +221,8 @@ describe('ScriptTransformer', () => {
                 execution_order: 2,
             })
 
-            const testTransformationByteCode = await compileScript(testTemplate.code)
-            const testTransformationFunction = createCustomFunction({
+            const testTransformationByteCode = await compileFn(testTemplate.code)
+            const testTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
                 team_id: teamId,
@@ -231,17 +231,17 @@ describe('ScriptTransformer', () => {
                 execution_order: 3,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, testTransformationFunction)
-            await insertCustomFunction(hub.postgres, teamId, defaultTransformationFunction)
-            await insertCustomFunction(hub.postgres, teamId, geoIpTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, testTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, defaultTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, geoIpTransformationFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 geoIpTransformationFunction.id,
                 defaultTransformationFunction.id,
                 testTransformationFunction.id,
             ])
 
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -257,10 +257,10 @@ describe('ScriptTransformer', () => {
 
             await scriptTransformer.transformEventAndProduceMessages(event)
 
-            expect(executeCustomFunctionSpy).toHaveBeenCalledTimes(3)
-            expect(executeCustomFunctionSpy.mock.calls[0][0]).toMatchObject({ execution_order: 1 })
-            expect(executeCustomFunctionSpy.mock.calls[1][0]).toMatchObject({ execution_order: 2 })
-            expect(executeCustomFunctionSpy.mock.calls[2][0]).toMatchObject({ execution_order: 3 })
+            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(3)
+            expect(executeInsightsFunctionSpy.mock.calls[0][0]).toMatchObject({ execution_order: 1 })
+            expect(executeInsightsFunctionSpy.mock.calls[1][0]).toMatchObject({ execution_order: 2 })
+            expect(executeInsightsFunctionSpy.mock.calls[2][0]).toMatchObject({ execution_order: 3 })
             expect(event.properties?.test_property).toEqual('test_value')
 
             await scriptTransformer.processInvocationResults()
@@ -279,7 +279,7 @@ describe('ScriptTransformer', () => {
         })
 
         it('should delete a property from previous transformation', async () => {
-            const addingTemplate: CustomFunctionTemplate = {
+            const addingTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -287,7 +287,7 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template that adds a test property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.test_property := 'test_value'
@@ -296,7 +296,7 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const deletingTemplate: CustomFunctionTemplate = {
+            const deletingTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -304,7 +304,7 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template that adds a test property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.test_property := null
@@ -313,33 +313,33 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const addingTransformationFunction = createCustomFunction({
+            const addingTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: addingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(addingTemplate.code),
+                bytecode: await compileFn(addingTemplate.code),
                 execution_order: 1,
             })
 
-            const deletingTransformationFunction = createCustomFunction({
+            const deletingTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: deletingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(deletingTemplate.code),
+                bytecode: await compileFn(deletingTemplate.code),
                 execution_order: 2,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, deletingTransformationFunction)
-            await insertCustomFunction(hub.postgres, teamId, addingTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, deletingTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, addingTransformationFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 addingTransformationFunction.id,
                 deletingTransformationFunction.id,
             ])
 
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -360,12 +360,12 @@ describe('ScriptTransformer', () => {
              * Second call is the deleting the test property
              * hence the result is null
              */
-            expect(executeCustomFunctionSpy).toHaveBeenCalledTimes(2)
+            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(2)
             expect(result?.event?.properties?.test_property).toEqual(null)
         })
 
         it('should allow second transformation to read property added by first transformation', async () => {
-            const firstTemplate: CustomFunctionTemplate = {
+            const firstTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -373,7 +373,7 @@ describe('ScriptTransformer', () => {
                 name: 'First Template',
                 description: 'Adds a property that the second transformation will read',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.added_by_first := 'value_from_first'
@@ -383,7 +383,7 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const secondTemplate: CustomFunctionTemplate = {
+            const secondTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -391,7 +391,7 @@ describe('ScriptTransformer', () => {
                 name: 'Second Template',
                 description: 'Reads property from first transformation and creates a derived property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     // This should be able to read the property added by the first transformation
@@ -402,33 +402,33 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const firstTransformationFunction = createCustomFunction({
+            const firstTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: firstTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(firstTemplate.code),
+                bytecode: await compileFn(firstTemplate.code),
                 execution_order: 1,
             })
 
-            const secondTransformationFunction = createCustomFunction({
+            const secondTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: secondTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(secondTemplate.code),
+                bytecode: await compileFn(secondTemplate.code),
                 execution_order: 2,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, firstTransformationFunction)
-            await insertCustomFunction(hub.postgres, teamId, secondTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, firstTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, secondTransformationFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 firstTransformationFunction.id,
                 secondTransformationFunction.id,
             ])
 
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -444,14 +444,14 @@ describe('ScriptTransformer', () => {
 
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
-            expect(executeCustomFunctionSpy).toHaveBeenCalledTimes(2)
+            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(2)
             expect(result?.event?.properties?.added_by_first).toEqual('value_from_first')
             expect(result?.event?.properties?.derived_from_first).toEqual('derived_from_value_from_first')
             expect(result?.event?.properties?.counter).toEqual(2)
         })
 
         it('should execute tranformation without execution_order last', async () => {
-            const firstTemplate: CustomFunctionTemplate = {
+            const firstTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -459,14 +459,14 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template that adds a test property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     return event
                 `,
                 inputs_schema: [],
             }
 
-            const secondTemplate: CustomFunctionTemplate = {
+            const secondTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -474,14 +474,14 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template that adds a test property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     return event
                 `,
                 inputs_schema: [],
             }
 
-            const thirdTemplate: CustomFunctionTemplate = {
+            const thirdTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'alpha',
                 type: 'transformation',
@@ -489,15 +489,15 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template that adds a test property',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     return event
                 `,
                 inputs_schema: [],
             }
 
-            const firstTransformationByteCode = await compileScript(firstTemplate.code)
-            const firstTransformationFunction = createCustomFunction({
+            const firstTransformationByteCode = await compileFn(firstTemplate.code)
+            const firstTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: firstTemplate.name,
                 team_id: teamId,
@@ -506,8 +506,8 @@ describe('ScriptTransformer', () => {
                 execution_order: 1,
             })
 
-            const secondTransformationByteCode = await compileScript(secondTemplate.code)
-            const secondTransformationFunction = createCustomFunction({
+            const secondTransformationByteCode = await compileFn(secondTemplate.code)
+            const secondTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: secondTemplate.name,
                 team_id: teamId,
@@ -516,8 +516,8 @@ describe('ScriptTransformer', () => {
                 execution_order: 2,
             })
 
-            const thirdTransformationByteCode = await compileScript(thirdTemplate.code)
-            const thirdTransformationFunction = createCustomFunction({
+            const thirdTransformationByteCode = await compileFn(thirdTemplate.code)
+            const thirdTransformationFunction = createInsightsFunction({
                 type: 'transformation',
                 name: thirdTemplate.name,
                 team_id: teamId,
@@ -526,17 +526,17 @@ describe('ScriptTransformer', () => {
                 execution_order: undefined,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, thirdTransformationFunction)
-            await insertCustomFunction(hub.postgres, teamId, secondTransformationFunction)
-            await insertCustomFunction(hub.postgres, teamId, firstTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, thirdTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, secondTransformationFunction)
+            await insertInsightsFunction(hub.postgres, teamId, firstTransformationFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 thirdTransformationFunction.id,
                 secondTransformationFunction.id,
                 firstTransformationFunction.id,
             ])
 
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event: PluginEvent = {
                 ip: '89.160.20.129',
@@ -551,15 +551,15 @@ describe('ScriptTransformer', () => {
             }
 
             await scriptTransformer.transformEventAndProduceMessages(event)
-            expect(executeCustomFunctionSpy).toHaveBeenCalledTimes(3)
-            expect(executeCustomFunctionSpy.mock.calls[0][0]).toMatchObject({ execution_order: 1 })
-            expect(executeCustomFunctionSpy.mock.calls[1][0]).toMatchObject({ execution_order: 2 })
-            expect(executeCustomFunctionSpy.mock.calls[2][0]).toMatchObject({ execution_order: null })
+            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(3)
+            expect(executeInsightsFunctionSpy.mock.calls[0][0]).toMatchObject({ execution_order: 1 })
+            expect(executeInsightsFunctionSpy.mock.calls[1][0]).toMatchObject({ execution_order: 2 })
+            expect(executeInsightsFunctionSpy.mock.calls[2][0]).toMatchObject({ execution_order: null })
         })
 
         it('should track successful and failed transformations', async () => {
             // Create a successful transformation
-            const successTemplate: CustomFunctionTemplate = {
+            const successTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -567,7 +567,7 @@ describe('ScriptTransformer', () => {
                 name: 'Success Template',
                 description: 'A template that should succeed',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.success := true
@@ -577,7 +577,7 @@ describe('ScriptTransformer', () => {
             }
 
             // Create a failing transformation
-            const failingTemplate: CustomFunctionTemplate = {
+            const failingTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -585,7 +585,7 @@ describe('ScriptTransformer', () => {
                 name: 'Failing Template',
                 description: 'A template that should fail',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     // Return invalid result (not an object with properties)
                     return "invalid"
@@ -593,8 +593,8 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const successByteCode = await compileScript(successTemplate.code)
-            const successFunction = createCustomFunction({
+            const successByteCode = await compileFn(successTemplate.code)
+            const successFunction = createInsightsFunction({
                 type: 'transformation',
                 name: successTemplate.name,
                 team_id: teamId,
@@ -603,8 +603,8 @@ describe('ScriptTransformer', () => {
                 execution_order: 1,
             })
 
-            const failByteCode = await compileScript(failingTemplate.code)
-            const failFunction = createCustomFunction({
+            const failByteCode = await compileFn(failingTemplate.code)
+            const failFunction = createInsightsFunction({
                 type: 'transformation',
                 name: failingTemplate.name,
                 team_id: teamId,
@@ -613,10 +613,10 @@ describe('ScriptTransformer', () => {
                 execution_order: 2,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, successFunction)
-            await insertCustomFunction(hub.postgres, teamId, failFunction)
+            await insertInsightsFunction(hub.postgres, teamId, successFunction)
+            await insertInsightsFunction(hub.postgres, teamId, failFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 successFunction.id,
                 failFunction.id,
             ])
@@ -641,7 +641,7 @@ describe('ScriptTransformer', () => {
 
         it('should pull from inputs and encrypted_inputs', async () => {
             // Create a successful transformation
-            const inputSetter: CustomFunctionTemplate = {
+            const inputSetter: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -649,7 +649,7 @@ describe('ScriptTransformer', () => {
                 name: 'Input Setter',
                 description: 'A template that sets the inputs',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.inputs := {
@@ -661,9 +661,9 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const inputSetterByteCode = await compileScript(inputSetter.code)
+            const inputSetterByteCode = await compileFn(inputSetter.code)
 
-            const inputSetterFunction = createCustomFunction({
+            const inputSetterFunction = createInsightsFunction({
                 type: 'transformation',
                 name: inputSetter.name,
                 team_id: teamId,
@@ -683,20 +683,20 @@ describe('ScriptTransformer', () => {
                 inputs: {
                     not_encrypted: {
                         value: 'from not encrypted: {event.event}',
-                        bytecode: await compileScript("return f'from not encrypted: {event.event}'"),
+                        bytecode: await compileFn("return f'from not encrypted: {event.event}'"),
                     },
                 },
                 encrypted_inputs: hub.encryptedFields.encrypt(
                     JSON.stringify({
                         encrypted: {
                             value: 'from encrypted: {event.event}',
-                            bytecode: await compileScript("return f'from encrypted: {event.event}'"),
+                            bytecode: await compileFn("return f'from encrypted: {event.event}'"),
                         },
                     })
                 ) as any,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, inputSetterFunction)
+            await insertInsightsFunction(hub.postgres, teamId, inputSetterFunction)
 
             const event = createPluginEvent(
                 {
@@ -735,7 +735,7 @@ describe('ScriptTransformer', () => {
         })
 
         it('should ignore existing transformation results when adding new ones', async () => {
-            const successTemplate: CustomFunctionTemplate = {
+            const successTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -743,7 +743,7 @@ describe('ScriptTransformer', () => {
                 name: 'Success Template',
                 description: 'A template that should succeed',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.success := true
@@ -752,8 +752,8 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const successByteCode = await compileScript(successTemplate.code)
-            const successFunction = createCustomFunction({
+            const successByteCode = await compileFn(successTemplate.code)
+            const successFunction = createInsightsFunction({
                 type: 'transformation',
                 name: successTemplate.name,
                 team_id: teamId,
@@ -762,9 +762,9 @@ describe('ScriptTransformer', () => {
                 execution_order: 1,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, successFunction)
+            await insertInsightsFunction(hub.postgres, teamId, successFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [successFunction.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [successFunction.id])
 
             const event = createPluginEvent(
                 {
@@ -803,22 +803,22 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: filterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(filterTemplate.custom_script),
+                bytecode: await compileFn(filterTemplate.fn),
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         return event = 'match-me'
                     `),
                     events: [{ id: 'match-me', name: 'match-me', type: 'events', order: 0 }],
                 },
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent(
                 {
@@ -835,7 +835,7 @@ describe('ScriptTransformer', () => {
             // Verify transformation was skipped and tracked
             expect(result.event?.properties?.should_not_be_set).toBeUndefined()
             expect(result.event?.properties?.$transformations_skipped).toEqual([
-                `${customFunction.name} (${customFunction.id})`,
+                `${insightsFunction.name} (${insightsFunction.id})`,
             ])
             expect(result.event?.properties?.original).toBe(true)
             expect(result.event?.properties?.$transformations_succeeded).toBeUndefined()
@@ -875,34 +875,34 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const successFunction = createCustomFunction({
+            const successFunction = createInsightsFunction({
                 type: 'transformation',
                 name: successTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(successTemplate.custom_script),
+                bytecode: await compileFn(successTemplate.fn),
                 execution_order: 1,
             })
 
-            const skippedFunction = createCustomFunction({
+            const skippedFunction = createInsightsFunction({
                 type: 'transformation',
                 name: skippedTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(skippedTemplate.custom_script),
+                bytecode: await compileFn(skippedTemplate.fn),
                 execution_order: 2,
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         return event = 'match-me'
                     `),
                     events: [{ id: 'match-me', name: 'match-me', type: 'events', order: 0 }],
                 },
             })
 
-            await insertCustomFunction(hub.postgres, teamId, successFunction)
-            await insertCustomFunction(hub.postgres, teamId, skippedFunction)
+            await insertInsightsFunction(hub.postgres, teamId, successFunction)
+            await insertInsightsFunction(hub.postgres, teamId, skippedFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 successFunction.id,
                 skippedFunction.id,
             ])
@@ -931,7 +931,7 @@ describe('ScriptTransformer', () => {
         let executeSpy: jest.SpyInstance
 
         beforeEach(async () => {
-            const filterOutPlugin = createCustomFunction({
+            const filterOutPlugin = createInsightsFunction({
                 type: 'transformation',
                 name: insightsFilterOutPlugin.template.name,
                 template_id: 'plugin-insights-filter-out-plugin',
@@ -947,8 +947,8 @@ describe('ScriptTransformer', () => {
                 id: 'c342e9ae-9f76-4379-a465-d33b4826bc05',
             })
 
-            await insertCustomFunction(hub.postgres, teamId, filterOutPlugin)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [filterOutPlugin.id])
+            await insertInsightsFunction(hub.postgres, teamId, filterOutPlugin)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [filterOutPlugin.id])
 
             executeSpy = jest.spyOn(scriptTransformer['pluginExecutor'], 'execute')
         })
@@ -993,7 +993,7 @@ describe('ScriptTransformer', () => {
 
     describe('long event chain', () => {
         it('should handle a long chain of transformations', async () => {
-            const geoIp = createCustomFunction({
+            const geoIp = createInsightsFunction({
                 type: 'transformation',
                 name: insightsPluginGeoip.template.name,
                 template_id: insightsPluginGeoip.template.id,
@@ -1004,7 +1004,7 @@ describe('ScriptTransformer', () => {
                 inputs_schema: insightsPluginGeoip.template.inputs_schema,
             })
 
-            const filterPlugin = createCustomFunction({
+            const filterPlugin = createInsightsFunction({
                 type: 'transformation',
                 name: propertyFilterPlugin.template.name,
                 template_id: propertyFilterPlugin.template.id,
@@ -1019,10 +1019,10 @@ describe('ScriptTransformer', () => {
                 inputs_schema: propertyFilterPlugin.template.inputs_schema,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, geoIp)
-            await insertCustomFunction(hub.postgres, teamId, filterPlugin)
+            await insertInsightsFunction(hub.postgres, teamId, geoIp)
+            await insertInsightsFunction(hub.postgres, teamId, filterPlugin)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [geoIp.id, filterPlugin.id])
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [geoIp.id, filterPlugin.id])
 
             const event: PluginEvent = createPluginEvent({ event: 'keep-me', team_id: teamId })
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -1110,22 +1110,22 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: filterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(filterTemplate.custom_script),
+                bytecode: await compileFn(filterTemplate.fn),
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         return event = 'match-me'
                     `),
                     events: [{ id: 'match-me', name: 'match-me', type: 'events', order: 0 }],
                 },
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'does-not-match-me' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -1135,7 +1135,7 @@ describe('ScriptTransformer', () => {
             expect(result.event?.properties?.$transformations_succeeded).toBeUndefined()
             expect(result.event?.properties?.$transformations_failed).toBeUndefined()
             expect(result.event?.properties?.$transformations_skipped).toEqual([
-                `${customFunction.name} (${customFunction.id})`,
+                `${insightsFunction.name} (${insightsFunction.id})`,
             ])
         })
 
@@ -1156,14 +1156,14 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: filterMatchingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(filterMatchingTemplate.custom_script),
+                bytecode: await compileFn(filterMatchingTemplate.fn),
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         // Filter that matches events with event name 'match-me'
                         return event = 'match-me'
                     `),
@@ -1171,8 +1171,8 @@ describe('ScriptTransformer', () => {
                 },
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             // Test event that should match the filter
             const matchingEvent = createPluginEvent({ event: 'match-me' }, teamId)
@@ -1181,7 +1181,7 @@ describe('ScriptTransformer', () => {
             // Verify transformation was applied
             expect(matchResult.event?.properties?.test_property).toBe('test_value')
             expect(matchResult.event?.properties?.$transformations_succeeded).toContain(
-                `${customFunction.name} (${customFunction.id})`
+                `${insightsFunction.name} (${insightsFunction.id})`
             )
 
             // Test event that shouldn't match the filter
@@ -1193,7 +1193,7 @@ describe('ScriptTransformer', () => {
             expect(nonMatchResult.event?.properties?.$transformations_succeeded).toBeUndefined()
             expect(nonMatchResult.event?.properties?.$transformations_failed).toBeUndefined()
             expect(nonMatchResult.event?.properties?.$transformations_skipped).toEqual([
-                `${customFunction.name} (${customFunction.id})`,
+                `${insightsFunction.name} (${insightsFunction.id})`,
             ])
         })
 
@@ -1214,17 +1214,17 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: noFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(noFilterTemplate.custom_script),
+                bytecode: await compileFn(noFilterTemplate.fn),
                 // No filters defined
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'any-event' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -1232,7 +1232,7 @@ describe('ScriptTransformer', () => {
             // Verify transformation was applied
             expect(result.event?.properties?.no_filter_property).toBe('applied')
             expect(result.event?.properties?.$transformations_succeeded).toContain(
-                `${customFunction.name} (${customFunction.id})`
+                `${insightsFunction.name} (${insightsFunction.id})`
             )
         })
 
@@ -1269,14 +1269,14 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const errorFunction = createCustomFunction({
+            const errorFunction = createInsightsFunction({
                 type: 'transformation',
                 name: errorFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(errorFilterTemplate.custom_script),
+                bytecode: await compileFn(errorFilterTemplate.fn),
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         // Invalid filter that will throw an error
                         lol
                     `),
@@ -1284,24 +1284,24 @@ describe('ScriptTransformer', () => {
                 },
             })
 
-            const workingFunction = createCustomFunction({
+            const workingFunction = createInsightsFunction({
                 type: 'transformation',
                 name: workingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(workingTemplate.custom_script),
+                bytecode: await compileFn(workingTemplate.fn),
             })
 
-            await insertCustomFunction(hub.postgres, teamId, errorFunction)
-            await insertCustomFunction(hub.postgres, teamId, workingFunction)
+            await insertInsightsFunction(hub.postgres, teamId, errorFunction)
+            await insertInsightsFunction(hub.postgres, teamId, workingFunction)
 
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [
                 errorFunction.id,
                 workingFunction.id,
             ])
 
-            const queueAppMetricsSpy = jest.spyOn(scriptTransformer['customFunctionMonitoringService'], 'queueAppMetrics')
-            const queueLogsSpy = jest.spyOn(scriptTransformer['customFunctionMonitoringService'], 'queueLogs')
+            const queueAppMetricsSpy = jest.spyOn(scriptTransformer['insightsFunctionMonitoringService'], 'queueAppMetrics')
+            const queueLogsSpy = jest.spyOn(scriptTransformer['insightsFunctionMonitoringService'], 'queueLogs')
 
             const event = createPluginEvent({ event: 'test-event' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -1316,7 +1316,7 @@ describe('ScriptTransformer', () => {
                         metric_name: 'filtering_failed',
                     }),
                 ]),
-                'custom_function'
+                'insights_function'
             )
             expect(queueLogsSpy).toHaveBeenCalledWith(
                 expect.arrayContaining([
@@ -1324,7 +1324,7 @@ describe('ScriptTransformer', () => {
                         message: expect.stringContaining('Global variable not found'),
                     }),
                 ]),
-                'custom_function'
+                'insights_function'
             )
 
             expect(result.event?.properties?.working_property).toBe('working')
@@ -1353,14 +1353,14 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: multiFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(multiFilterTemplate.custom_script),
+                bytecode: await compileFn(multiFilterTemplate.fn),
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         // First filter checks for 'match-me-1'
                         let filter1 := event = 'match-me-1'
                         // Second filter checks for 'match-me-2'
@@ -1375,8 +1375,8 @@ describe('ScriptTransformer', () => {
                 },
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'does-not-match-any' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -1386,7 +1386,7 @@ describe('ScriptTransformer', () => {
             expect(result.event?.properties?.$transformations_succeeded).toBeUndefined()
             expect(result.event?.properties?.$transformations_failed).toBeUndefined()
             expect(result.event?.properties?.$transformations_skipped).toEqual([
-                `${customFunction.name} (${customFunction.id})`,
+                `${insightsFunction.name} (${insightsFunction.id})`,
             ])
         })
 
@@ -1407,14 +1407,14 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: multiFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(multiFilterTemplate.custom_script),
+                bytecode: await compileFn(multiFilterTemplate.fn),
                 filters: {
-                    bytecode: await compileScript(`
+                    bytecode: await compileFn(`
                         // First filter checks for 'match-me-1'
                         let filter1 := event = 'match-me-1'
                         // Second filter checks for 'match-me-2'
@@ -1425,8 +1425,8 @@ describe('ScriptTransformer', () => {
                 },
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'match-me-1' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
@@ -1434,7 +1434,7 @@ describe('ScriptTransformer', () => {
             // Verify transformation was applied since one filter matched
             expect(result.event?.properties?.should_be_set).toBe(true)
             expect(result.event?.properties?.$transformations_succeeded).toContain(
-                `${customFunction.name} (${customFunction.id})`
+                `${insightsFunction.name} (${insightsFunction.id})`
             )
         })
     })
@@ -1447,7 +1447,7 @@ describe('ScriptTransformer', () => {
         it('should skip ScriptWatcher operations when sample rate is 0', async () => {
             hub.CDP_HOG_WATCHER_SAMPLE_RATE = 0
 
-            const testTemplate: CustomFunctionTemplate = {
+            const testTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -1455,7 +1455,7 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.test_property := true
@@ -1464,17 +1464,17 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(testTemplate.code),
+                bytecode: await compileFn(testTemplate.code),
                 id: '11111111-1111-4111-a111-111111111111',
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const observeResultsSpy = jest.spyOn(scriptTransformer['scriptWatcher'], 'observeResults')
 
@@ -1490,7 +1490,7 @@ describe('ScriptTransformer', () => {
         it('should add watcher promise when sample rate is 1', async () => {
             hub.CDP_HOG_WATCHER_SAMPLE_RATE = 1
 
-            const testTemplate: CustomFunctionTemplate = {
+            const testTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -1498,7 +1498,7 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A simple test template',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.test_property := true
@@ -1507,22 +1507,22 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunctionId = '11111111-1111-4111-a111-111111111111'
-            const customFunction = createCustomFunction({
+            const insightsFunctionId = '11111111-1111-4111-a111-111111111111'
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(testTemplate.code),
-                id: customFunctionId,
+                bytecode: await compileFn(testTemplate.code),
+                id: insightsFunctionId,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             // Add the state to the cache to prevent the error from being thrown
             // This simulates what would happen in production where states would be loaded
-            scriptTransformer['cachedStates'][customFunctionId] = ScriptWatcherState.healthy
+            scriptTransformer['cachedStates'][insightsFunctionId] = ScriptWatcherState.healthy
 
             const observeResultsSpy = jest
                 .spyOn(scriptTransformer['scriptWatcher'], 'observeResults')
@@ -1552,46 +1552,46 @@ describe('ScriptTransformer', () => {
             )
 
             // Save states
-            await scriptTransformer.fetchAndCacheCustomFunctionStates(functionIds)
+            await scriptTransformer.fetchAndCacheInsightsFunctionStates(functionIds)
 
             // Verify states were cached
             expect(scriptTransformer['cachedStates'][functionIds[0]]).toBe(ScriptWatcherState.disabled)
             expect(scriptTransformer['cachedStates'][functionIds[1]]).toBe(ScriptWatcherState.disabled)
 
             // Clear specific state
-            scriptTransformer.clearCustomFunctionStates([functionIds[0]])
+            scriptTransformer.clearInsightsFunctionStates([functionIds[0]])
             expect(scriptTransformer['cachedStates'][functionIds[0]]).toBeUndefined()
             expect(scriptTransformer['cachedStates'][functionIds[1]]).toBe(ScriptWatcherState.disabled)
 
             // Clear all states
-            scriptTransformer.clearCustomFunctionStates()
+            scriptTransformer.clearInsightsFunctionStates()
             expect(scriptTransformer['cachedStates']).toEqual({})
         })
 
         it('should throw error when state is missing from cache', () => {
-            const customFunctionId = '11111111-1111-4111-a111-111111111111'
+            const insightsFunctionId = '11111111-1111-4111-a111-111111111111'
 
             // Create a test custom function
-            createCustomFunction({
+            createInsightsFunction({
                 type: 'transformation',
                 name: 'Test Function',
                 team_id: teamId,
                 enabled: true,
-                id: customFunctionId,
+                id: insightsFunctionId,
             })
 
             // Make sure state is not in cache
-            scriptTransformer.clearCustomFunctionStates()
+            scriptTransformer.clearInsightsFunctionStates()
 
             // Verify state is not in cache initially
-            expect(scriptTransformer['cachedStates'][customFunctionId] || null).toBeNull()
+            expect(scriptTransformer['cachedStates'][insightsFunctionId] || null).toBeNull()
 
             // Create the expected error message
-            const expectedErrorMessage = `Critical error: Missing CustomFunction state in cache for function ${customFunctionId} - this should never happen`
+            const expectedErrorMessage = `Critical error: Missing InsightsFunction state in cache for function ${insightsFunctionId} - this should never happen`
 
             // Define a function that will throw the error
             const throwingFunction = () => {
-                if (!scriptTransformer['cachedStates'][customFunctionId]) {
+                if (!scriptTransformer['cachedStates'][insightsFunctionId]) {
                     throw new Error(expectedErrorMessage)
                 }
                 return 'This should not be returned'
@@ -1606,7 +1606,7 @@ describe('ScriptTransformer', () => {
             hub.CDP_HOG_WATCHER_SAMPLE_RATE = 1
 
             // Create test transformation function
-            const testTemplate: CustomFunctionTemplate = {
+            const testTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -1614,7 +1614,7 @@ describe('ScriptTransformer', () => {
                 name: 'Disabled Test Template',
                 description: 'A test template that should be skipped due to disabled state',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.should_not_be_set := true
@@ -1623,30 +1623,30 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunctionId = '33333333-3333-4333-a333-333333333333'
-            const customFunction = createCustomFunction({
+            const insightsFunctionId = '33333333-3333-4333-a333-333333333333'
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(testTemplate.code),
-                id: customFunctionId,
+                bytecode: await compileFn(testTemplate.code),
+                id: insightsFunctionId,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             // Mock the cached state to indicate the function is disabled
-            scriptTransformer['cachedStates'][customFunctionId] = ScriptWatcherState.disabled
+            scriptTransformer['cachedStates'][insightsFunctionId] = ScriptWatcherState.disabled
 
-            // Create a spy to verify the executeCustomFunction method is not called
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            // Create a spy to verify the executeInsightsFunction method is not called
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event = createPluginEvent({ event: 'test-event' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
-            // Verify the executeCustomFunction method was not called for this function
-            expect(executeCustomFunctionSpy).not.toHaveBeenCalled()
+            // Verify the executeInsightsFunction method was not called for this function
+            expect(executeInsightsFunctionSpy).not.toHaveBeenCalled()
 
             // Verify the transformation result doesn't have the property that would be set
             expect(result.event?.properties?.should_not_be_set).toBeUndefined()
@@ -1656,7 +1656,7 @@ describe('ScriptTransformer', () => {
             expect(result.event?.properties?.$transformations_failed).toBeUndefined()
 
             // Reset spies
-            executeCustomFunctionSpy.mockRestore()
+            executeInsightsFunctionSpy.mockRestore()
         })
 
         it('should execute transformation when scriptwatcher is enabled but function is in healthy state', async () => {
@@ -1664,7 +1664,7 @@ describe('ScriptTransformer', () => {
             hub.CDP_HOG_WATCHER_SAMPLE_RATE = 1
 
             // Create test transformation function
-            const testTemplate: CustomFunctionTemplate = {
+            const testTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -1672,7 +1672,7 @@ describe('ScriptTransformer', () => {
                 name: 'Healthy Test Template',
                 description: 'A test template that should execute because state is healthy',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.should_be_set := true
@@ -1681,41 +1681,41 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunctionId = '55555555-5555-5555-a555-555555555555'
-            const customFunction = createCustomFunction({
+            const insightsFunctionId = '55555555-5555-5555-a555-555555555555'
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(testTemplate.code),
-                id: customFunctionId,
+                bytecode: await compileFn(testTemplate.code),
+                id: insightsFunctionId,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             // Mock the cached state to indicate the function is healthy
-            scriptTransformer['cachedStates'][customFunctionId] = ScriptWatcherState.healthy
+            scriptTransformer['cachedStates'][insightsFunctionId] = ScriptWatcherState.healthy
 
-            // Create a spy to verify the executeCustomFunction method is called
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            // Create a spy to verify the executeInsightsFunction method is called
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event = createPluginEvent({ event: 'test-event' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
-            // Verify the executeCustomFunction method was called for this function
-            expect(executeCustomFunctionSpy).toHaveBeenCalledTimes(1)
+            // Verify the executeInsightsFunction method was called for this function
+            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(1)
 
             // Verify the transformation result has the property that should be set
             expect(result.event?.properties?.should_be_set).toBe(true)
 
             // Verify the transformation is recorded as successful
             expect(result.event?.properties?.$transformations_succeeded).toContain(
-                `${customFunction.name} (${customFunction.id})`
+                `${insightsFunction.name} (${insightsFunction.id})`
             )
 
             // Reset spies
-            executeCustomFunctionSpy.mockRestore()
+            executeInsightsFunctionSpy.mockRestore()
         })
 
         it('should apply transformation when scriptwatcher is disabled even if function state is disabled', async () => {
@@ -1723,7 +1723,7 @@ describe('ScriptTransformer', () => {
             hub.CDP_HOG_WATCHER_SAMPLE_RATE = 0
 
             // Create test transformation function
-            const testTemplate: CustomFunctionTemplate = {
+            const testTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -1731,7 +1731,7 @@ describe('ScriptTransformer', () => {
                 name: 'Test Template',
                 description: 'A test template that should execute despite disabled state because scriptwatcher is off',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.should_be_set := true
@@ -1740,46 +1740,46 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunctionId = '44444444-4444-4444-a444-444444444444'
-            const customFunction = createCustomFunction({
+            const insightsFunctionId = '44444444-4444-4444-a444-444444444444'
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: testTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(testTemplate.code),
-                id: customFunctionId,
+                bytecode: await compileFn(testTemplate.code),
+                id: insightsFunctionId,
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             // Mock the cached state to indicate the function is disabled
-            scriptTransformer['cachedStates'][customFunctionId] = ScriptWatcherState.disabled
+            scriptTransformer['cachedStates'][insightsFunctionId] = ScriptWatcherState.disabled
 
-            // Create a spy to verify the executeCustomFunction method is called
-            const executeCustomFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeCustomFunction')
+            // Create a spy to verify the executeInsightsFunction method is called
+            const executeInsightsFunctionSpy = jest.spyOn(scriptTransformer as any, 'executeInsightsFunction')
 
             const event = createPluginEvent({ event: 'test-event' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)
 
-            // Verify the executeCustomFunction method was called for this function
-            expect(executeCustomFunctionSpy).toHaveBeenCalledTimes(1)
+            // Verify the executeInsightsFunction method was called for this function
+            expect(executeInsightsFunctionSpy).toHaveBeenCalledTimes(1)
 
             // Verify the transformation result has the property that should be set
             expect(result.event?.properties?.should_be_set).toBe(true)
 
             // Verify the transformation is recorded as successful
             expect(result.event?.properties?.$transformations_succeeded).toContain(
-                `${customFunction.name} (${customFunction.id})`
+                `${insightsFunction.name} (${insightsFunction.id})`
             )
 
             // Reset spies
-            executeCustomFunctionSpy.mockRestore()
+            executeInsightsFunctionSpy.mockRestore()
         })
 
         it('should throw when trying to capture events in transformations', async () => {
             // Create a transformation function that captures an event
-            const captureTemplate: CustomFunctionTemplate = {
+            const captureTemplate: InsightsFunctionTemplate = {
                 free: true,
                 status: 'beta',
                 type: 'transformation',
@@ -1787,7 +1787,7 @@ describe('ScriptTransformer', () => {
                 name: 'Capture Template',
                 description: 'A template that captures an event',
                 category: ['Custom'],
-                code_language: 'custom_script',
+                code_language: 'fn',
                 code: `
                     let returnEvent := event
                     returnEvent.properties.captured := true
@@ -1797,7 +1797,7 @@ describe('ScriptTransformer', () => {
                         'event': 'captured_event',
                         'distinct_id': 'captured_user',
                         'properties': {
-                            'source': 'custom_function',
+                            'source': 'insights_function',
                             'original_event': event.event,
                             'original_distinct_id': event.distinct_id,
                             'captured_at': '2024-01-01T00:00:00Z'
@@ -1809,17 +1809,17 @@ describe('ScriptTransformer', () => {
                 inputs_schema: [],
             }
 
-            const customFunction = createCustomFunction({
+            const insightsFunction = createInsightsFunction({
                 type: 'transformation',
                 name: captureTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileScript(captureTemplate.code),
+                bytecode: await compileFn(captureTemplate.code),
                 id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
             })
 
-            await insertCustomFunction(hub.postgres, teamId, customFunction)
-            scriptTransformer['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [customFunction.id])
+            await insertInsightsFunction(hub.postgres, teamId, insightsFunction)
+            scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [insightsFunction.id])
 
             const event = createPluginEvent({ event: 'original-event', distinct_id: 'original_user' }, teamId)
             const result = await scriptTransformer.transformEventAndProduceMessages(event)

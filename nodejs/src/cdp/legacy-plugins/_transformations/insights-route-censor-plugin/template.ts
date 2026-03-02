@@ -14,7 +14,7 @@ export const insightsRouteCensorPlugin: LegacyTransformationPlugin = {
         id: 'plugin-insights-route-censor-plugin',
         name: 'Route Censor',
         description: 'Removes segments of URLs based on route patterns.',
-        icon_url: '/static/mascot/builder-mascot-01.png',
+        icon_url: '',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

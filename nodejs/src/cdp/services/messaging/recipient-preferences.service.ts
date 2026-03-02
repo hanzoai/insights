@@ -1,31 +1,31 @@
 import { logger } from '~/utils/logger'
 
-import { CustomFlowAction } from '../../../schema/customflow'
-import { CyclotronJobInvocationCustomFunction } from '../../types'
+import { InsightsFlowAction } from '../../../schema/customflow'
+import { CyclotronJobInvocationInsightsFunction } from '../../types'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
 
 type MessageFunctionActionType = 'function_email' | 'function_sms'
 
-type MessageAction = Extract<CustomFlowAction, { type: MessageFunctionActionType }>
+type MessageAction = Extract<InsightsFlowAction, { type: MessageFunctionActionType }>
 
 export class RecipientPreferencesService {
     constructor(private recipientsManager: RecipientsManagerService) {}
 
     public async shouldSkipAction(
-        invocation: CyclotronJobInvocationCustomFunction,
-        action: CustomFlowAction
+        invocation: CyclotronJobInvocationInsightsFunction,
+        action: InsightsFlowAction
     ): Promise<boolean> {
         return (
             this.isSubjectToRecipientPreferences(action) && (await this.isRecipientOptedOutOfAction(invocation, action))
         )
     }
 
-    private isSubjectToRecipientPreferences(action: CustomFlowAction): action is MessageAction {
+    private isSubjectToRecipientPreferences(action: InsightsFlowAction): action is MessageAction {
         return ['function_email', 'function_sms'].includes(action.type)
     }
 
     private async isRecipientOptedOutOfAction(
-        invocation: CyclotronJobInvocationCustomFunction,
+        invocation: CyclotronJobInvocationInsightsFunction,
         action: MessageAction
     ): Promise<boolean> {
         let identifier

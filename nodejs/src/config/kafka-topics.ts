@@ -51,7 +51,7 @@ export const KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS = `${prefix}datastore_prefil
 export const KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES = `${prefix}datastore_precalculated_person_properties${suffix}`
 export const KAFKA_COHORT_MEMBERSHIP_CHANGED = `${prefix}cohort_membership_changed${suffix}`
 export const KAFKA_COHORT_MEMBERSHIP_CHANGED_TRIGGER = `${prefix}cohort_membership_changed_trigger${suffix}`
-export const KAFKA_CDP_BATCH_CUSTOMFLOW_REQUESTS = `${prefix}cdp_batch_customflow_requests${suffix}`
+export const KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS = `${prefix}cdp_batch_customflow_requests${suffix}`
 
 // Error tracking topics
 export const KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT = `${prefix}datastore_error_tracking_issue_fingerprint${suffix}`

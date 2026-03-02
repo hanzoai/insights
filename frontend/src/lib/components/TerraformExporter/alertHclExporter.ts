@@ -1,16 +1,16 @@
 import { formatHclValue, sanitizeResourceName } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
 import { AlertType } from '~/lib/components/Alerts/types'
-import { CustomFunctionType } from '~/types'
+import { InsightsFunctionType } from '~/types'
 
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
-import { generateCustomFunctionHCL } from './customFunctionHclExporter'
+import { generateInsightsFunctionHCL } from './insightsFunctionHclExporter'
 
 export interface AlertHclExportOptions extends HclExportOptions {
     /** When provided, uses TF reference instead of hardcoded insight id */
     insightTfReference?: string
     /** Child custom functions to include in export */
-    customFunctions?: CustomFunctionType[]
+    insightsFunctions?: InsightsFunctionType[]
 }
 
 /**
@@ -141,7 +141,7 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
     hclSections.push(result.hcl)
 
     // Generate child custom functions if provided
-    if (options.customFunctions && options.customFunctions.length > 0) {
+    if (options.insightsFunctions && options.insightsFunctions.length > 0) {
         const alertIdReplacements = new Map<string, string>()
         if (alert.id) {
             const alertTfName = sanitizeResourceName(
@@ -152,12 +152,12 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
             alertIdReplacements.set(alert.id, alertTfReference)
         }
 
-        for (const customFunction of options.customFunctions) {
-            const customFunctionResult = generateCustomFunctionHCL(customFunction, { alertIdReplacements })
+        for (const insightsFunction of options.insightsFunctions) {
+            const insightsFunctionResult = generateInsightsFunctionHCL(insightsFunction, { alertIdReplacements })
             hclSections.push('')
-            hclSections.push(customFunctionResult.hcl)
+            hclSections.push(insightsFunctionResult.hcl)
             allWarnings.push(
-                ...customFunctionResult.warnings.map((w) => `[Custom Function: ${customFunction.name || customFunction.id}] ${w}`)
+                ...insightsFunctionResult.warnings.map((w) => `[Custom Function: ${insightsFunction.name || insightsFunction.id}] ${w}`)
             )
         }
     }

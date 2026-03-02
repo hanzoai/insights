@@ -1,12 +1,12 @@
 import { UUIDT } from '../../utils/utils'
-import { CyclotronJobInvocationCustomFunction, CustomFunctionType } from '../types'
-import { SAMPLE_GLOBALS, createCustomFunction } from './fixtures'
+import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../types'
+import { SAMPLE_GLOBALS, createInsightsFunction } from './fixtures'
 
 export const createExampleSegmentInvocation = (
-    customFunctionOverrides: Partial<CustomFunctionType> = {},
+    insightsFunctionOverrides: Partial<InsightsFunctionType> = {},
     inputs: Record<string, any> = {}
-): CyclotronJobInvocationCustomFunction => {
-    const customFunction = createCustomFunction(customFunctionOverrides)
+): CyclotronJobInvocationInsightsFunction => {
+    const insightsFunction = createInsightsFunction(insightsFunctionOverrides)
 
     return {
         id: new UUIDT().toString(),
@@ -18,10 +18,10 @@ export const createExampleSegmentInvocation = (
             timings: [],
             attempts: 0,
         },
-        teamId: customFunction.team_id,
-        functionId: customFunction.id,
-        customFunction,
-        queue: 'custom_script',
+        teamId: insightsFunction.team_id,
+        functionId: insightsFunction.id,
+        insightsFunction,
+        queue: 'fn',
         queuePriority: 0,
     }
 }
@@ -59,7 +59,7 @@ export const amplitudeInputs = {
         utm_term: null,
         $pathname: '/project/1/activity/explore',
         $referrer:
-            'http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta',
+            'http://localhost:8000/project/1/pipeline/new/destination/insights-function-template-meta-ads?showPaused=true&kind&search=meta',
         joined_at: '2025-04-04T11:33:18.022897+00:00',
         li_fat_id: null,
         strapi_id: null,
@@ -196,7 +196,7 @@ export const amplitudeInputs = {
         utm_campaign: null,
     },
     referrer:
-        'http://localhost:8000/project/1/pipeline/new/destination/custom-function-template-meta-ads?showPaused=true&kind&search=meta',
+        'http://localhost:8000/project/1/pipeline/new/destination/insights-function-template-meta-ads?showPaused=true&kind&search=meta',
     library: 'web',
     userAgentData: {
         model: '',

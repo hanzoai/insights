@@ -104,15 +104,6 @@ function copyPublicAssets(): void {
         console.warn('⚠️ Public directory does not exist')
     }
 
-    // Copy mascot-mode assets to dist
-    const mascotModeSrc = resolve('.', 'node_modules', '@posthog', 'mascot-mode', 'assets')
-    const mascotModeDest = resolve('.', 'dist', 'mascot-mode')
-    if (existsSync(mascotModeSrc)) {
-        copyDirectory(mascotModeSrc, mascotModeDest)
-        console.info('✅ Copied mascot-mode assets to dist/mascot-mode')
-    } else {
-        console.warn('⚠️ Mascot-mode assets directory does not exist')
-    }
 }
 
 export function publicAssetsPlugin(): Plugin {

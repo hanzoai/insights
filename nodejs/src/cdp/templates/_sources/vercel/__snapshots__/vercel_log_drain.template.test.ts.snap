@@ -7,7 +7,7 @@ exports[`vercel log drain template should capture all Vercel log properties with
     "event": "$http_log",
     "properties": {
       "$current_url": "https://my-app.vercel.app/api/users?page=1",
-      "$custom_function_execution_count": 1,
+      "$insights_function_execution_count": 1,
       "$ip": "120.75.16.101",
       "$raw_user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
       "branch": null,

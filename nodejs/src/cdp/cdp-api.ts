@@ -5,7 +5,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 
 import { ModifiedRequest } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
-import { KAFKA_CDP_BATCH_CUSTOMFLOW_REQUESTS, KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
+import { KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS, KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
 import { KafkaProducerWrapper } from '~/kafka/producer'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, Hub, PluginServerService } from '../types'
@@ -16,28 +16,28 @@ import './async-functions'
 import {
     CdpSourceWebhooksConsumer,
     CdpSourceWebhooksConsumerHub,
-    CustomFunctionWebhookResult,
+    InsightsFunctionWebhookResult,
     SourceWebhookError,
 } from './consumers/cdp-source-webhooks.consumer'
 import { ScriptTransformerHub, ScriptTransformerService } from './script-transformations/script-transformer.service'
 import { ScriptExecutorExecuteAsyncOptions, ScriptExecutorService, MAX_ASYNC_STEPS } from './services/script-executor.service'
-import { CustomFlowExecutorService, createCustomFlowInvocation } from './services/customflows/customflow-executor.service'
-import { CustomFlowFunctionsService } from './services/customflows/customflow-functions.service'
-import { CustomFlowManagerService } from './services/customflows/customflow-manager.service'
-import { CustomFunctionManagerService } from './services/managers/custom-function-manager.service'
-import { CustomFunctionTemplateManagerService } from './services/managers/custom-function-template-manager.service'
+import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './services/insightsflows/customflow-executor.service'
+import { InsightsFlowFunctionsService } from './services/insightsflows/customflow-functions.service'
+import { InsightsFlowManagerService } from './services/insightsflows/customflow-manager.service'
+import { InsightsFunctionManagerService } from './services/managers/insights-function-manager.service'
+import { InsightsFunctionTemplateManagerService } from './services/managers/insights-function-template-manager.service'
 import { RecipientsManagerService } from './services/managers/recipients-manager.service'
 import { EmailTrackingService } from './services/messaging/email-tracking.service'
 import { RecipientPreferencesService } from './services/messaging/recipient-preferences.service'
 import { RecipientTokensService } from './services/messaging/recipient-tokens.service'
-import { CustomFunctionMonitoringService } from './services/monitoring/custom-function-monitoring.service'
+import { InsightsFunctionMonitoringService } from './services/monitoring/insights-function-monitoring.service'
 import { ScriptWatcherService, ScriptWatcherState } from './services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from './services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from './services/segment-destination-executor.service'
-import { CUSTOM_FUNCTION_TEMPLATES } from './templates'
-import { CustomFunctionInvocationGlobals, CustomFunctionType, MinimalLogEntry } from './types'
-import { convertToCustomFunctionInvocationGlobals, isNativeCustomFunction, isSegmentPluginCustomFunction } from './utils'
-import { convertToCustomFunctionFilterGlobal } from './utils/custom-function-filtering'
+import { INSIGHTS_FUNCTION_TEMPLATES } from './templates'
+import { InsightsFunctionInvocationGlobals, InsightsFunctionType, MinimalLogEntry } from './types'
+import { convertToInsightsFunctionInvocationGlobals, isNativeInsightsFunction, isSegmentPluginInsightsFunction } from './utils'
+import { convertToInsightsFunctionFilterGlobal } from './utils/insights-function-filtering'
 
 /**
  * Hub type for CdpApi.
@@ -62,16 +62,16 @@ export class CdpApi {
     private nativeDestinationExecutorService: NativeDestinationExecutorService
     private segmentDestinationExecutorService: SegmentDestinationExecutorService
 
-    private customFunctionManager: CustomFunctionManagerService
-    private customFunctionTemplateManager: CustomFunctionTemplateManagerService
-    private customFlowManager: CustomFlowManagerService
+    private insightsFunctionManager: InsightsFunctionManagerService
+    private insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
+    private insightsFlowManager: InsightsFlowManagerService
     private recipientsManager: RecipientsManagerService
 
-    private customFlowExecutor: CustomFlowExecutorService
-    private customFlowFunctionsService: CustomFlowFunctionsService
+    private insightsFlowExecutor: InsightsFlowExecutorService
+    private insightsFlowFunctionsService: InsightsFlowFunctionsService
     private scriptWatcher: ScriptWatcherService
     private scriptTransformer: ScriptTransformerService
-    private customFunctionMonitoringService: CustomFunctionMonitoringService
+    private insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     private cdpSourceWebhooksConsumer: CdpSourceWebhooksConsumer
     private emailTrackingService: EmailTrackingService
     private recipientPreferencesService: RecipientPreferencesService
@@ -79,20 +79,20 @@ export class CdpApi {
     private cdpWarehouseKafkaProducer?: KafkaProducerWrapper
 
     constructor(private hub: CdpApiHub) {
-        this.customFunctionManager = new CustomFunctionManagerService(hub)
-        this.customFunctionTemplateManager = new CustomFunctionTemplateManagerService(hub.postgres)
-        this.customFlowManager = new CustomFlowManagerService(hub.postgres, hub.pubSub)
+        this.insightsFunctionManager = new InsightsFunctionManagerService(hub)
+        this.insightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(hub.postgres)
+        this.insightsFlowManager = new InsightsFlowManagerService(hub.postgres, hub.pubSub)
         this.recipientsManager = new RecipientsManagerService(hub.postgres)
         this.scriptExecutor = new ScriptExecutorService(hub)
-        this.customFlowFunctionsService = new CustomFlowFunctionsService(
+        this.insightsFlowFunctionsService = new InsightsFlowFunctionsService(
             hub.SITE_URL,
-            this.customFunctionTemplateManager,
+            this.insightsFunctionTemplateManager,
             this.scriptExecutor
         )
         this.recipientPreferencesService = new RecipientPreferencesService(this.recipientsManager)
         this.recipientTokensService = new RecipientTokensService(hub)
-        this.customFlowExecutor = new CustomFlowExecutorService(
-            this.customFlowFunctionsService,
+        this.insightsFlowExecutor = new InsightsFlowExecutorService(
+            this.insightsFlowFunctionsService,
             this.recipientPreferencesService
         )
         this.nativeDestinationExecutorService = new NativeDestinationExecutorService(hub)
@@ -113,12 +113,12 @@ export class CdpApi {
             })
         )
         this.scriptTransformer = new ScriptTransformerService(hub)
-        this.customFunctionMonitoringService = new CustomFunctionMonitoringService(hub)
+        this.insightsFunctionMonitoringService = new InsightsFunctionMonitoringService(hub)
         this.cdpSourceWebhooksConsumer = new CdpSourceWebhooksConsumer(hub)
         this.emailTrackingService = new EmailTrackingService(
-            this.customFunctionManager,
-            this.customFlowManager,
-            this.customFunctionMonitoringService
+            this.insightsFunctionManager,
+            this.insightsFlowManager,
+            this.insightsFunctionMonitoringService
         )
     }
 
@@ -156,16 +156,16 @@ export class CdpApi {
                 fn(req, res).catch(next)
 
         // API routes (authentication handled globally by middleware)
-        router.post('/api/projects/:team_id/custom_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
-        router.post('/api/projects/:team_id/custom_flows/:id/invocations', asyncHandler(this.postCustomflowInvocation))
+        router.post('/api/projects/:team_id/insights_functions/:id/invocations', asyncHandler(this.postFunctionInvocation))
+        router.post('/api/projects/:team_id/insights_flows/:id/invocations', asyncHandler(this.postCustomflowInvocation))
         router.post(
-            '/api/projects/:team_id/custom_flows/:id/batch_invocations/:parent_run_id',
-            asyncHandler(this.postCustomFlowBatchInvocation)
+            '/api/projects/:team_id/insights_flows/:id/batch_invocations/:parent_run_id',
+            asyncHandler(this.postInsightsFlowBatchInvocation)
         )
-        router.get('/api/projects/:team_id/custom_functions/:id/status', asyncHandler(this.getFunctionStatus()))
-        router.patch('/api/projects/:team_id/custom_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
-        router.get('/api/custom_functions/states', asyncHandler(this.getFunctionStates()))
-        router.get('/api/custom_function_templates', this.getCustomFunctionTemplates)
+        router.get('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.getFunctionStatus()))
+        router.patch('/api/projects/:team_id/insights_functions/:id/status', asyncHandler(this.patchFunctionStatus()))
+        router.get('/api/insights_functions/states', asyncHandler(this.getFunctionStates()))
+        router.get('/api/insights_function_templates', this.getInsightsFunctionTemplates)
         router.post('/api/messaging/generate_preferences_token', asyncHandler(this.generatePreferencesToken()))
         router.get('/api/messaging/validate_preferences_token/:token', asyncHandler(this.validatePreferencesToken()))
 
@@ -192,8 +192,8 @@ export class CdpApi {
         return router
     }
 
-    private getCustomFunctionTemplates = (req: ModifiedRequest, res: express.Response): void => {
-        res.json(CUSTOM_FUNCTION_TEMPLATES)
+    private getInsightsFunctionTemplates = (req: ModifiedRequest, res: express.Response): void => {
+        res.json(INSIGHTS_FUNCTION_TEMPLATES)
     }
 
     private getFunctionStatus =
@@ -218,9 +218,9 @@ export class CdpApi {
             }
 
             const summary = await this.scriptWatcher.getPersistedState(id)
-            const customFunction = await this.customFunctionManager.fetchCustomFunction(id)
+            const insightsFunction = await this.insightsFunctionManager.fetchInsightsFunction(id)
 
-            if (!customFunction) {
+            if (!insightsFunction) {
                 res.status(404).json({ error: 'Custom function not found' })
                 return
             }
@@ -228,7 +228,7 @@ export class CdpApi {
             // Only allow patching the status if it is different from the current status
 
             if (summary.state !== state) {
-                await this.scriptWatcher.forceStateChange(customFunction, state)
+                await this.scriptWatcher.forceStateChange(insightsFunction, state)
             }
 
             // Hacky - wait for a little to give a chance for the state to change
@@ -253,16 +253,16 @@ export class CdpApi {
                     }))
                     .sort((a, b) => b.state_numeric - a.state_numeric)
 
-                const customFunctions = await this.customFunctionManager.getCustomFunctions(
+                const insightsFunctions = await this.insightsFunctionManager.getInsightsFunctions(
                     statesArray.map((x) => x.function_id)
                 )
 
                 const results = statesArray.map((x) => ({
                     ...x,
-                    function_name: customFunctions[x.function_id]?.name,
-                    function_team_id: customFunctions[x.function_id]?.team_id,
-                    function_type: customFunctions[x.function_id]?.type,
-                    function_enabled: customFunctions[x.function_id]?.enabled && !customFunctions[x.function_id]?.deleted,
+                    function_name: insightsFunctions[x.function_id]?.name,
+                    function_team_id: insightsFunctions[x.function_id]?.team_id,
+                    function_type: insightsFunctions[x.function_id]?.type,
+                    function_enabled: insightsFunctions[x.function_id]?.enabled && !insightsFunctions[x.function_id]?.deleted,
                 }))
 
                 res.json({
@@ -293,9 +293,9 @@ export class CdpApi {
 
             const isNewFunction = req.params.id === 'new'
 
-            const customFunction = isNewFunction
+            const insightsFunction = isNewFunction
                 ? null
-                : await this.customFunctionManager.fetchCustomFunction(req.params.id).catch(() => null)
+                : await this.insightsFunctionManager.fetchInsightsFunction(req.params.id).catch(() => null)
             const team = await this.hub.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
             if (!team) {
@@ -303,7 +303,7 @@ export class CdpApi {
             }
 
             globals = clickhouse_event
-                ? convertToCustomFunctionInvocationGlobals(clickhouse_event, team, this.hub.SITE_URL)
+                ? convertToInsightsFunctionInvocationGlobals(clickhouse_event, team, this.hub.SITE_URL)
                 : globals
 
             if (!globals || !globals.event) {
@@ -313,13 +313,13 @@ export class CdpApi {
 
             // NOTE: We allow the custom function to be null if it is a "new" custom function
             // The real security happens at the django layer so this is more of a sanity check
-            if (!isNewFunction && (!customFunction || customFunction.team_id !== team.id)) {
+            if (!isNewFunction && (!insightsFunction || insightsFunction.team_id !== team.id)) {
                 return res.status(404).json({ error: 'Custom function not found' })
             }
 
             // We use the provided config if given, otherwise the function's config
-            const compoundConfiguration: CustomFunctionType = {
-                ...customFunction,
+            const compoundConfiguration: InsightsFunctionType = {
+                ...insightsFunction,
                 ...configuration,
                 team_id: team.id,
             }
@@ -328,7 +328,7 @@ export class CdpApi {
             let result: any = null
             const errors: any[] = []
 
-            const triggerGlobals: CustomFunctionInvocationGlobals = {
+            const triggerGlobals: InsightsFunctionInvocationGlobals = {
                 ...globals,
                 project: {
                     id: team.id,
@@ -343,7 +343,7 @@ export class CdpApi {
                     invocations,
                     logs: filterLogs,
                     metrics: filterMetrics,
-                } = await this.scriptExecutor.buildCustomFunctionInvocations([compoundConfiguration], triggerGlobals)
+                } = await this.scriptExecutor.buildInsightsFunctionInvocations([compoundConfiguration], triggerGlobals)
 
                 // Add metrics to the logs
                 filterMetrics.forEach((metric) => {
@@ -369,9 +369,9 @@ export class CdpApi {
                     )
 
                     let response: any = null
-                    if (isNativeCustomFunction(compoundConfiguration)) {
+                    if (isNativeInsightsFunction(compoundConfiguration)) {
                         response = await this.nativeDestinationExecutorService.execute(invocation)
-                    } else if (isSegmentPluginCustomFunction(compoundConfiguration)) {
+                    } else if (isSegmentPluginInsightsFunction(compoundConfiguration)) {
                         response = await this.segmentDestinationExecutorService.execute(invocation)
                     } else {
                         response = await this.scriptExecutor.executeWithAsyncFunctions(invocation, options)
@@ -433,7 +433,7 @@ export class CdpApi {
             console.error(e)
             res.status(500).json({ errors: [e.message] })
         } finally {
-            await this.customFunctionMonitoringService.flush()
+            await this.insightsFunctionMonitoringService.flush()
         }
     }
 
@@ -452,8 +452,8 @@ export class CdpApi {
                 return
             }
 
-            const isNewCustomFlow = req.params.id === 'new'
-            const customFlow = isNewCustomFlow ? null : await this.customFlowManager.getCustomFlow(req.params.id)
+            const isNewInsightsFlow = req.params.id === 'new'
+            const insightsFlow = isNewInsightsFlow ? null : await this.insightsFlowManager.getInsightsFlow(req.params.id)
 
             const team = await this.hub.teamManager.getTeam(parseInt(team_id)).catch(() => null)
 
@@ -463,12 +463,12 @@ export class CdpApi {
 
             // NOTE: We allow the custom flow to be null if it is a "new" custom flow
             // The real security happens at the django layer so this is more of a sanity check
-            if (!isNewCustomFlow && (!customFlow || customFlow.team_id !== team.id)) {
+            if (!isNewInsightsFlow && (!insightsFlow || insightsFlow.team_id !== team.id)) {
                 return res.status(404).json({ error: 'Custom flow not found' })
             }
 
-            const globals: CustomFunctionInvocationGlobals | null = clickhouse_event
-                ? convertToCustomFunctionInvocationGlobals(
+            const globals: InsightsFunctionInvocationGlobals | null = clickhouse_event
+                ? convertToInsightsFunctionInvocationGlobals(
                       clickhouse_event,
                       team,
                       this.hub.SITE_URL ?? 'http://localhost:8000'
@@ -481,12 +481,12 @@ export class CdpApi {
 
             // We use the provided config if given, otherwise the flow's config
             const compoundConfiguration = {
-                ...customFlow,
+                ...insightsFlow,
                 ...configuration,
                 team_id: team.id,
             }
 
-            const triggerGlobals: CustomFunctionInvocationGlobals = {
+            const triggerGlobals: InsightsFunctionInvocationGlobals = {
                 ...globals,
                 project: {
                     id: team.id,
@@ -495,14 +495,14 @@ export class CdpApi {
                 },
             }
 
-            const filterGlobals = convertToCustomFunctionFilterGlobal({
+            const filterGlobals = convertToInsightsFunctionFilterGlobal({
                 event: globals.event,
                 person: globals.person,
                 groups: globals.groups,
                 variables: globals.variables || {},
             })
 
-            const invocation = createCustomFlowInvocation(triggerGlobals, compoundConfiguration, filterGlobals)
+            const invocation = createInsightsFlowInvocation(triggerGlobals, compoundConfiguration, filterGlobals)
 
             invocation.state.currentAction = current_action_id
                 ? {
@@ -513,7 +513,7 @@ export class CdpApi {
 
             const logs: MinimalLogEntry[] = []
             const options: ScriptExecutorExecuteAsyncOptions = buildScriptExecutorAsyncOptions(mock_async_functions, logs)
-            const result = await this.customFlowExecutor.executeCurrentAction(invocation, { scriptExecutorOptions: options })
+            const result = await this.insightsFlowExecutor.executeCurrentAction(invocation, { scriptExecutorOptions: options })
 
             res.json({
                 nextActionId: result.invocation.state.currentAction?.id,
@@ -529,7 +529,7 @@ export class CdpApi {
         }
     }
 
-    private postCustomFlowBatchInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
+    private postInsightsFlowBatchInvocation = async (req: ModifiedRequest, res: express.Response): Promise<any> => {
         try {
             const { id, team_id, parent_run_id } = req.params
 
@@ -541,9 +541,9 @@ export class CdpApi {
                 return res.status(404).json({ error: 'Team not found' })
             }
 
-            const customFlow = await this.customFlowManager.getCustomFlow(id)
+            const insightsFlow = await this.insightsFlowManager.getInsightsFlow(id)
 
-            if (!customFlow || customFlow.team_id !== team.id) {
+            if (!insightsFlow || insightsFlow.team_id !== team.id) {
                 return res.status(404).json({ error: 'Workflow not found' })
             }
 
@@ -553,24 +553,24 @@ export class CdpApi {
                 return res.status(500).json({ error: 'Kafka producer not available' })
             }
 
-            if (customFlow.trigger.type !== 'batch') {
+            if (insightsFlow.trigger.type !== 'batch') {
                 return res.status(400).json({ error: 'Only batch Workflows are supported for batch jobs' })
             }
 
-            const batchCustomFlowRequest = {
+            const batchInsightsFlowRequest = {
                 teamId: team.id,
-                customFlowId: customFlow.id,
+                insightsFlowId: insightsFlow.id,
                 parentRunId: parent_run_id,
                 filters: {
-                    properties: customFlow.trigger.filters.properties || [],
+                    properties: insightsFlow.trigger.filters.properties || [],
                     filter_test_accounts: req.body.filters?.filter_test_accounts || false,
                 },
             }
 
             await kafkaProducer.produce({
-                topic: KAFKA_CDP_BATCH_CUSTOMFLOW_REQUESTS,
-                value: Buffer.from(JSON.stringify(batchCustomFlowRequest)),
-                key: `${team.id}_${customFlow.id}`,
+                topic: KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS,
+                value: Buffer.from(JSON.stringify(batchInsightsFlowRequest)),
+                key: `${team.id}_${insightsFlow.id}`,
             })
 
             res.json({ status: 'queued' })
@@ -592,7 +592,7 @@ export class CdpApi {
             const result = await this.cdpSourceWebhooksConsumer.processWebhook(webhookId, req)
 
             if (typeof result.execResult === 'object' && result.execResult && 'httpResponse' in result.execResult) {
-                const httpResponse = result.execResult.httpResponse as CustomFunctionWebhookResult
+                const httpResponse = result.execResult.httpResponse as InsightsFunctionWebhookResult
                 if (typeof httpResponse.body === 'string') {
                     return res
                         .status(httpResponse.status)
@@ -641,8 +641,8 @@ export class CdpApi {
                     return res.status(500).json({ error: 'Template did not return a payload' })
                 }
 
-                const customFunction = result.invocation.customFunction
-                const schemaId = customFunction.inputs?.schema_id?.value
+                const insightsFunction = result.invocation.insightsFunction
+                const schemaId = insightsFunction.inputs?.schema_id?.value
                 if (!schemaId) {
                     return res.status(500).json({ error: 'Missing schema_id on custom function' })
                 }
@@ -654,7 +654,7 @@ export class CdpApi {
 
                 await kafkaProducer.produce({
                     topic: KAFKA_WAREHOUSE_SOURCE_WEBHOOKS,
-                    key: `${customFunction.team_id}:${schemaId}`,
+                    key: `${insightsFunction.team_id}:${schemaId}`,
                     value: Buffer.from(JSON.stringify(result.execResult)),
                 })
 

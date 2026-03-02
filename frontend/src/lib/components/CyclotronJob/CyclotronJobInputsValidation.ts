@@ -1,6 +1,6 @@
 import { tryJsonParse } from 'lib/utils'
 import { LiquidRenderer } from 'lib/utils/liquid'
-import { EmailTemplate } from 'scenes/custom-functions/email-templater/emailTemplaterLogic'
+import { EmailTemplate } from 'scenes/insights-functions/email-templater/emailTemplaterLogic'
 
 import { CyclotronJobInputSchemaType, CyclotronJobInputType } from '~/types'
 
@@ -10,7 +10,7 @@ export type CyclotronJobInputsValidationResult = {
 }
 
 const validateInput = (input: CyclotronJobInputType, inputSchema: CyclotronJobInputSchemaType): string | undefined => {
-    const language = input?.templating ?? 'custom_script'
+    const language = input?.templating ?? 'fn'
     const value = input?.value
     if (input?.secret) {
         // We leave unmodified secret values alone

@@ -23,7 +23,7 @@ import { InternalPersonWithDistinctId, PersonRepository } from './person-reposit
 import { PersonRepositoryTransaction } from './person-repository-transaction'
 
 /**
- * Read-only ClickHouse implementation of PersonRepository, primarily used by batch customflows.
+ * Read-only ClickHouse implementation of PersonRepository, primarily used by batch insightsflows.
  *
  * This count/fetch persons by properties implementation mimics the behavior of the existing
  * InsightsQL-based person queries in Python, it should be functionally equivalent to the queries

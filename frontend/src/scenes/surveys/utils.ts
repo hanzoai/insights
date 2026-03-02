@@ -787,5 +787,5 @@ export function newSurveyNotificationUrl(surveyId: string, templateId: string = 
             },
         ],
     }
-    return combineUrl(urls.customFunctionNew(templateId), {}, { configuration: { filters } }).url
+    return combineUrl(urls.insightsFunctionNew(templateId), {}, { configuration: { filters } }).url
 }

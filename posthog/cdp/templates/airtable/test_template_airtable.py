@@ -1,8 +1,8 @@
 from posthog.cdp.templates.airtable.template_airtable import template as template_airtable
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 
 
-class TestTemplateAirtable(BaseCustomFunctionTemplateTest):
+class TestTemplateAirtable(BaseInsightsFunctionTemplateTest):
     template = template_airtable
 
     def test_function_works(self):

@@ -6,14 +6,14 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
     createScriptExecutionGlobals,
-    createCustomFunction,
-    insertCustomFunction,
+    createInsightsFunction,
+    insertInsightsFunction,
 } from '../_tests/fixtures'
-import { CyclotronJobInvocationCustomFunction, CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
+import { CyclotronJobInvocationInsightsFunction, InsightsFunctionInvocationGlobalsWithInputs, InsightsFunctionType } from '../types'
 import { CdpCyclotronShadowWorker } from './cdp-cyclotron-shadow-worker.consumer'
 
 jest.setTimeout(1000)
@@ -22,9 +22,9 @@ describe('CdpCyclotronShadowWorker', () => {
     let processor: CdpCyclotronShadowWorker
     let hub: Hub
     let team: Team
-    let fn: CustomFunctionType
-    let globals: CustomFunctionInvocationGlobalsWithInputs
-    let invocation: CyclotronJobInvocationCustomFunction
+    let fn: InsightsFunctionType
+    let globals: InsightsFunctionInvocationGlobalsWithInputs
+    let invocation: CyclotronJobInvocationInsightsFunction
 
     beforeEach(async () => {
         const fixedTime = DateTime.fromObject({ year: 2025, month: 1, day: 1 }, { zone: 'UTC' })
@@ -37,13 +37,13 @@ describe('CdpCyclotronShadowWorker', () => {
 
         processor = new CdpCyclotronShadowWorker(hub)
 
-        fn = await insertCustomFunction(
+        fn = await insertInsightsFunction(
             hub.postgres,
             team.id,
-            createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+            createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 template_id: 'template-webhook',
             })
         )
@@ -93,8 +93,8 @@ describe('CdpCyclotronShadowWorker', () => {
     })
 
     it('should skip Kafka monitoring in processBatch', async () => {
-        const monitoringSpy = jest.spyOn(processor['customFunctionMonitoringService'], 'queueInvocationResults')
-        const flushSpy = jest.spyOn(processor['customFunctionMonitoringService'], 'flush')
+        const monitoringSpy = jest.spyOn(processor['insightsFunctionMonitoringService'], 'queueInvocationResults')
+        const flushSpy = jest.spyOn(processor['insightsFunctionMonitoringService'], 'flush')
         processor['queueInvocationResults'] = jest.fn().mockResolvedValue(undefined)
 
         await processor.processBatch([invocation])

@@ -8,7 +8,7 @@ import { RawClickHouseEvent, Team, TimestampFormat } from '../types'
 import { parseJSON } from '../utils/json-parse'
 import { UUIDT, castTimestampOrNow, clickHouseTimestampToISO } from '../utils/utils'
 import { CdpDataWarehouseEvent, CdpInternalEvent } from './schema'
-import { CustomFunctionInvocationGlobals, CustomFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
+import { InsightsFunctionInvocationGlobals, InsightsFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
 
 // ID of functions that are hidden from normal users and used by us for special testing
 // For example, transformations use this to only run if in comparison mode
@@ -31,15 +31,15 @@ export const getPersonDisplayName = (team: Team, distinctId: string, properties:
 }
 
 // that we can keep to as a contract
-export function convertToCustomFunctionInvocationGlobals(
+export function convertToInsightsFunctionInvocationGlobals(
     event: RawClickHouseEvent,
     team: Team,
     siteUrl: string
-): CustomFunctionInvocationGlobals {
+): InsightsFunctionInvocationGlobals {
     const properties = event.properties ? parseJSON(event.properties) : {}
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    let person: CustomFunctionInvocationGlobals['person']
+    let person: InsightsFunctionInvocationGlobals['person']
 
     if (event.person_id) {
         const personProperties = event.person_properties ? parseJSON(event.person_properties) : {}
@@ -65,7 +65,7 @@ export function convertToCustomFunctionInvocationGlobals(
             : clickHouseTimestampToISO(event.captured_at)
         : null
 
-    const context: CustomFunctionInvocationGlobals = {
+    const context: InsightsFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
@@ -87,7 +87,7 @@ export function convertToCustomFunctionInvocationGlobals(
     return context
 }
 
-export function convertBatchCustomFlowRequestToCustomFunctionInvocationGlobals({
+export function convertBatchInsightsFlowRequestToInsightsFunctionInvocationGlobals({
     team,
     personId,
     distinctId,
@@ -97,24 +97,24 @@ export function convertBatchCustomFlowRequestToCustomFunctionInvocationGlobals({
     personId: string
     distinctId: string
     siteUrl: string
-}): CustomFunctionInvocationGlobals {
+}): InsightsFunctionInvocationGlobals {
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    const person: CustomFunctionInvocationGlobals['person'] = {
+    const person: InsightsFunctionInvocationGlobals['person'] = {
         id: personId,
         properties: {},
         name: '',
         url: `${projectUrl}/person/${encodeURIComponent(distinctId)}`,
     }
 
-    const context: CustomFunctionInvocationGlobals = {
+    const context: InsightsFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
             url: projectUrl,
         },
         event: {
-            event: '$batch_custom_flow_invocation',
+            event: '$batch_insights_flow_invocation',
             properties: {},
             uuid: new UUIDT().toString(),
             distinct_id: distinctId,
@@ -128,15 +128,15 @@ export function convertBatchCustomFlowRequestToCustomFunctionInvocationGlobals({
     return context
 }
 
-export function convertDataWarehouseEventToCustomFunctionInvocationGlobals(
+export function convertDataWarehouseEventToInsightsFunctionInvocationGlobals(
     event: CdpDataWarehouseEvent,
     team: Team,
     siteUrl: string
-): CustomFunctionInvocationGlobals {
+): InsightsFunctionInvocationGlobals {
     const data = event.properties
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    const context: CustomFunctionInvocationGlobals = {
+    const context: InsightsFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
@@ -156,14 +156,14 @@ export function convertDataWarehouseEventToCustomFunctionInvocationGlobals(
     return context
 }
 
-export function convertInternalEventToCustomFunctionInvocationGlobals(
+export function convertInternalEventToInsightsFunctionInvocationGlobals(
     data: CdpInternalEvent,
     team: Team,
     siteUrl: string
-): CustomFunctionInvocationGlobals {
+): InsightsFunctionInvocationGlobals {
     const projectUrl = `${siteUrl}/project/${team.id}`
 
-    let person: CustomFunctionInvocationGlobals['person']
+    let person: InsightsFunctionInvocationGlobals['person']
 
     if (data.person) {
         const personDisplayName = getPersonDisplayName(team, data.event.distinct_id, data.person.properties)
@@ -189,7 +189,7 @@ export function convertInternalEventToCustomFunctionInvocationGlobals(
         delete properties.exception_props
     }
 
-    const context: CustomFunctionInvocationGlobals = {
+    const context: InsightsFunctionInvocationGlobals = {
         project: {
             id: team.id,
             name: team.name,
@@ -262,16 +262,16 @@ export const fixLogDeduplication = (logs: LogEntry[]): LogEntrySerialized[] => {
     return preparedLogs
 }
 
-export function isLegacyPluginCustomFunction(customFunction: Pick<CustomFunctionType, 'template_id'>): boolean {
-    return customFunction.template_id?.startsWith('plugin-') ?? false
+export function isLegacyPluginInsightsFunction(insightsFunction: Pick<InsightsFunctionType, 'template_id'>): boolean {
+    return insightsFunction.template_id?.startsWith('plugin-') ?? false
 }
 
-export function isSegmentPluginCustomFunction(customFunction: Pick<CustomFunctionType, 'template_id'>): boolean {
-    return customFunction.template_id?.startsWith('segment-') ?? false
+export function isSegmentPluginInsightsFunction(insightsFunction: Pick<InsightsFunctionType, 'template_id'>): boolean {
+    return insightsFunction.template_id?.startsWith('segment-') ?? false
 }
 
-export function isNativeCustomFunction(customFunction: Pick<CustomFunctionType, 'template_id'>): boolean {
-    return customFunction.template_id?.startsWith('native-') ?? false
+export function isNativeInsightsFunction(insightsFunction: Pick<InsightsFunctionType, 'template_id'>): boolean {
+    return insightsFunction.template_id?.startsWith('native-') ?? false
 }
 
 export function isInternalErrorTrackingEvent(event: CdpInternalEvent['event']): boolean {

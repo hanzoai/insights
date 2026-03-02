@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="alpha",
     free=False,
     type="warehouse_source_webhook",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Passthrough webhook that returns the request body as-is",
     icon_url="/static/services/webhook.png",
     category=["Data warehouse"],
-    code_language="custom_script",
+    code_language="fn",
     code="return request.body",
     inputs_schema=[],
 )

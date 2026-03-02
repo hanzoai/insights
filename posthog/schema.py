@@ -332,8 +332,8 @@ class AssistantTool(StrEnum):
     FIX_INSIGHTSQL_QUERY = "fix_insightsql_query"
     ANALYZE_USER_INTERVIEWS = "analyze_user_interviews"
     CREATE_HOG_TRANSFORMATION_FUNCTION = "create_hog_transformation_function"
-    CREATE_CUSTOM_FUNCTION_FILTERS = "create_custom_function_filters"
-    CREATE_CUSTOM_FUNCTION_INPUTS = "create_custom_function_inputs"
+    CREATE_INSIGHTS_FUNCTION_FILTERS = "create_insights_function_filters"
+    CREATE_INSIGHTS_FUNCTION_INPUTS = "create_insights_function_inputs"
     CREATE_MESSAGE_TEMPLATE = "create_message_template"
     FILTER_ERROR_TRACKING_ISSUES = "filter_error_tracking_issues"
     SEARCH_ERROR_TRACKING_ISSUES = "search_error_tracking_issues"
@@ -2039,46 +2039,6 @@ class HeatmapSettings(BaseModel):
     yAxisLabel: str | None = None
 
 
-class MascotActorAccessoryOption(StrEnum):
-    BERET = "beret"
-    CAP = "cap"
-    CHEF = "chef"
-    COWBOY = "cowboy"
-    EYEPATCH = "eyepatch"
-    FLAG = "flag"
-    GLASSES = "glasses"
-    GRADUATION = "graduation"
-    PARROT = "parrot"
-    PARTY = "party"
-    PINEAPPLE = "pineapple"
-    SUNGLASSES = "sunglasses"
-    TOPHAT = "tophat"
-    XMAS_HAT = "xmas-hat"
-    XMAS_ANTLERS = "xmas-antlers"
-    XMAS_SCARF = "xmas-scarf"
-
-
-class MascotActorColorOption(StrEnum):
-    GREEN = "green"
-    RED = "red"
-    BLUE = "blue"
-    PURPLE = "purple"
-    DARK = "dark"
-    LIGHT = "light"
-    GREYSCALE = "greyscale"
-    SEPIA = "sepia"
-    INVERT = "invert"
-    RAINBOW = "rainbow"
-
-
-class MascotActorSkinOption(StrEnum):
-    DEFAULT = "default"
-    SPIDERHOG = "spiderhog"
-    ROBOHOG = "robohog"
-    HOGZILLA = "hogzilla"
-    GHOST = "ghost"
-
-
 class HogCompileResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -2777,16 +2737,6 @@ class MetaAdsTableExclusions(StrEnum):
 
 class MetaAdsTableKeywords(StrEnum):
     CAMPAIGNS = "campaigns"
-
-
-class MinimalMascotConfig(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    accessories: list[MascotActorAccessoryOption] | None = None
-    color: MascotActorColorOption | None = None
-    skin: MascotActorSkinOption | None = None
-    use_as_profile: bool
 
 
 class ModeContext(BaseModel):
@@ -4104,7 +4054,6 @@ class UserBasicType(BaseModel):
     distinct_id: str
     email: str
     first_name: str
-    mascot_config: MinimalMascotConfig | None = None
     id: float
     is_email_verified: Any | None = None
     last_name: str | None = None

@@ -7,10 +7,10 @@ import express from 'ultimate-express'
 import { setupCommonRoutes, setupExpressApp } from './api/router'
 import { getPluginServerCapabilities } from './capabilities'
 import { CdpApi } from './cdp/cdp-api'
-import { CdpBatchCustomFlowRequestsConsumer } from './cdp/consumers/cdp-batch-customflow.consumer'
+import { CdpBatchInsightsFlowRequestsConsumer } from './cdp/consumers/cdp-batch-customflow.consumer'
 import { CdpCohortMembershipConsumer } from './cdp/consumers/cdp-cohort-membership.consumer'
 import { CdpCyclotronShadowWorker } from './cdp/consumers/cdp-cyclotron-shadow-worker.consumer'
-import { CdpCyclotronWorkerCustomFlow } from './cdp/consumers/cdp-cyclotron-worker-customflow.consumer'
+import { CdpCyclotronWorkerInsightsFlow } from './cdp/consumers/cdp-cyclotron-worker-customflow.consumer'
 import { CdpCyclotronWorker } from './cdp/consumers/cdp-cyclotron-worker.consumer'
 import { CdpDatawarehouseEventsConsumer } from './cdp/consumers/cdp-data-warehouse-events.consumer'
 import { CdpEventsConsumer } from './cdp/consumers/cdp-events.consumer'
@@ -259,9 +259,9 @@ export class PluginServer {
                 }
             }
 
-            if (capabilities.cdpCyclotronWorkerCustomFlow) {
+            if (capabilities.cdpCyclotronWorkerInsightsFlow) {
                 serviceLoaders.push(async () => {
-                    const worker = new CdpCyclotronWorkerCustomFlow(hub)
+                    const worker = new CdpCyclotronWorkerInsightsFlow(hub)
                     await worker.start()
                     return worker.service
                 })
@@ -298,9 +298,9 @@ export class PluginServer {
                 })
             }
 
-            if (capabilities.cdpBatchCustomFlow) {
+            if (capabilities.cdpBatchInsightsFlow) {
                 serviceLoaders.push(async () => {
-                    const consumer = new CdpBatchCustomFlowRequestsConsumer(hub)
+                    const consumer = new CdpBatchInsightsFlowRequestsConsumer(hub)
                     await consumer.start()
                     return consumer.service
                 })

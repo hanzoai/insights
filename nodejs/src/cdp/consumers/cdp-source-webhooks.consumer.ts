@@ -2,22 +2,22 @@ import { DateTime } from 'luxon'
 
 import { ModifiedRequest } from '~/api/router'
 import { instrumented } from '~/common/tracing/tracing-utils'
-import { CustomFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/customflow'
 
 import { HealthCheckResult, HealthCheckResultOk, Hub, PluginsServerConfig } from '../../types'
 import { logger } from '../../utils/logger'
 import { PromiseScheduler } from '../../utils/promise-scheduler'
 import { UUID, UUIDT } from '../../utils/utils'
-import { createCustomFlowInvocation } from '../services/customflows/customflow-executor.service'
-import { actionIdForLogging } from '../services/customflows/customflow-utils'
+import { createInsightsFlowInvocation } from '../services/insightsflows/customflow-executor.service'
+import { actionIdForLogging } from '../services/insightsflows/customflow-utils'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import { ScriptWatcherFunctionState, ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import {
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
-    CustomFunctionFilterGlobals,
-    CustomFunctionInvocationGlobals,
-    CustomFunctionType,
+    InsightsFunctionFilterGlobals,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionType,
     LogEntryLevel,
     MinimalAppMetric,
 } from '../types'
@@ -43,15 +43,15 @@ const getFirstHeaderValue = (value: string | string[] | undefined): string | und
     return Array.isArray(value) ? value[0] : value
 }
 
-export type CustomFunctionWebhookResult = {
+export type InsightsFunctionWebhookResult = {
     status: number
     body: Record<string, any> | string
     contentType?: string
 }
 
 export const getCustomHttpResponse = (
-    result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>
-): CustomFunctionWebhookResult | null => {
+    result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>
+): InsightsFunctionWebhookResult | null => {
     if (typeof result.execResult === 'object' && result.execResult && 'httpResponse' in result.execResult) {
         const httpResponse = result.execResult.httpResponse as Record<string, any>
         return {
@@ -89,48 +89,48 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
     constructor(hub: CdpSourceWebhooksConsumerHub) {
         super(hub)
         this.promiseScheduler = new PromiseScheduler()
-        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'custom_script')
+        this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'fn')
     }
 
-    public async getWebhook(webhookId: string): Promise<{ customFlow?: CustomFlow; customFunction: CustomFunctionType } | null> {
+    public async getWebhook(webhookId: string): Promise<{ insightsFlow?: InsightsFlow; insightsFunction: InsightsFunctionType } | null> {
         if (!UUID.validateString(webhookId, false)) {
             return null
         }
 
         // Check for custom functions
-        const customFunction = await this.customFunctionManager.getCustomFunction(webhookId)
-        if (customFunction?.type === 'source_webhook' && customFunction?.enabled) {
-            return { customFunction }
+        const insightsFunction = await this.insightsFunctionManager.getInsightsFunction(webhookId)
+        if (insightsFunction?.type === 'source_webhook' && insightsFunction?.enabled) {
+            return { insightsFunction }
         }
 
-        if (customFunction?.type === 'warehouse_source_webhook' && customFunction?.enabled) {
-            const templateId = customFunction.template_id ?? 'template-warehouse-source-default'
-            const template = await this.customFunctionTemplateManager.getCustomFunctionTemplate(templateId)
+        if (insightsFunction?.type === 'warehouse_source_webhook' && insightsFunction?.enabled) {
+            const templateId = insightsFunction.template_id ?? 'template-warehouse-source-default'
+            const template = await this.insightsFunctionTemplateManager.getInsightsFunctionTemplate(templateId)
             if (template) {
-                customFunction.bytecode = template.bytecode
-                return { customFunction }
+                insightsFunction.bytecode = template.bytecode
+                return { insightsFunction }
             }
         }
 
         // Otherwise check for custom flows
-        const customFlow = await this.customFlowManager.getCustomFlow(webhookId)
+        const insightsFlow = await this.insightsFlowManager.getInsightsFlow(webhookId)
         if (
-            customFlow &&
-            customFlow.status === 'active' &&
-            (customFlow.trigger?.type === 'webhook' ||
-                customFlow.trigger?.type === 'tracking_pixel' ||
-                customFlow.trigger?.type === 'manual' ||
-                customFlow.trigger?.type === 'schedule')
+            insightsFlow &&
+            insightsFlow.status === 'active' &&
+            (insightsFlow.trigger?.type === 'webhook' ||
+                insightsFlow.trigger?.type === 'tracking_pixel' ||
+                insightsFlow.trigger?.type === 'manual' ||
+                insightsFlow.trigger?.type === 'schedule')
         ) {
-            const customFunction = await this.customFlowFunctionsService.buildCustomFunction(customFlow, customFlow.trigger)
+            const insightsFunction = await this.insightsFlowFunctionsService.buildInsightsFunction(insightsFlow, insightsFlow.trigger)
 
-            return { customFlow, customFunction }
+            return { insightsFlow, insightsFunction }
         }
 
         return null
     }
 
-    private buildRequestGlobals(customFunction: CustomFunctionType, req: ModifiedRequest): CustomFunctionInvocationGlobals {
+    private buildRequestGlobals(insightsFunction: InsightsFunctionType, req: ModifiedRequest): InsightsFunctionInvocationGlobals {
         const body: Record<string, any> = req.body
 
         const ipValue = getFirstHeaderValue(req.headers['x-forwarded-for']) || req.socket.remoteAddress || req.ip
@@ -138,7 +138,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
         const ips = ipValue?.split(',').map((ip) => ip.trim()) || []
         const ip = ips[0]
 
-        const projectUrl = `${this.hub.SITE_URL}/project/${customFunction.team_id}`
+        const projectUrl = `${this.hub.SITE_URL}/project/${insightsFunction.team_id}`
         const headers: Record<string, string> = {}
 
         for (const [key, value] of Object.entries(req.headers)) {
@@ -156,11 +156,11 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
 
         return {
             source: {
-                name: customFunction.name ?? `Custom function: ${customFunction.id}`,
-                url: `${projectUrl}/functions/${customFunction.id}`,
+                name: insightsFunction.name ?? `Custom function: ${insightsFunction.id}`,
+                url: `${projectUrl}/functions/${insightsFunction.id}`,
             },
             project: {
-                id: customFunction.team_id,
+                id: insightsFunction.team_id,
                 name: '',
                 url: '',
             },
@@ -185,54 +185,54 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
         }
     }
 
-    private async executeCustomFlow(
+    private async executeInsightsFlow(
         req: ModifiedRequest,
-        customFlow: CustomFlow,
-        customFunction: CustomFunctionType
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+        insightsFlow: InsightsFlow,
+        insightsFunction: InsightsFunctionType
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         logger.info('Executing custom flow trigger', {
-            id: customFlow.id,
-            template_id: customFunction.template_id,
-            team_id: customFlow.team_id,
+            id: insightsFlow.id,
+            template_id: insightsFunction.template_id,
+            team_id: insightsFlow.team_id,
         })
         const invocationId = new UUIDT().toString()
-        const triggerActionId = customFlow.actions.find((action) => action.type === 'trigger')?.id ?? 'trigger_node'
+        const triggerActionId = insightsFlow.actions.find((action) => action.type === 'trigger')?.id ?? 'trigger_node'
 
         const addLog = (level: LogEntryLevel, message: string) => {
-            this.customFunctionMonitoringService.queueLogs(
+            this.insightsFunctionMonitoringService.queueLogs(
                 [
                     {
-                        team_id: customFlow.team_id,
-                        log_source: 'custom_flow',
-                        log_source_id: customFlow.id,
+                        team_id: insightsFlow.team_id,
+                        log_source: 'insights_flow',
+                        log_source_id: insightsFlow.id,
                         instance_id: invocationId,
                         ...logEntry(level, `${actionIdForLogging({ id: triggerActionId })} ${message}`),
                     },
                 ],
-                'custom_flow'
+                'insights_flow'
             )
         }
 
         const addMetric = (metric: Pick<MinimalAppMetric, 'metric_kind' | 'metric_name' | 'count'>) => {
-            this.customFunctionMonitoringService.queueAppMetric(
+            this.insightsFunctionMonitoringService.queueAppMetric(
                 {
-                    team_id: customFlow.team_id,
-                    app_source_id: customFlow.id,
+                    team_id: insightsFlow.team_id,
+                    app_source_id: insightsFlow.id,
                     ...metric,
                 },
-                'custom_flow'
+                'insights_flow'
             )
         }
 
         try {
-            const globals: CustomFunctionInvocationGlobals = this.buildRequestGlobals(customFunction, req)
+            const globals: InsightsFunctionInvocationGlobals = this.buildRequestGlobals(insightsFunction, req)
 
-            const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(customFunction, globals)
-            const invocation = createInvocation(globalsWithInputs, customFunction)
+            const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
+            const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
             // Slightly different handling for custom flows
             // Run the initial step - this allows functions not using fetches to respond immediately
-            const functionResult = await this.customFlowFunctionsService.execute(invocation)
+            const functionResult = await this.insightsFlowFunctionsService.execute(invocation)
             functionResult.logs.forEach((log) => addLog(log.level, log.message))
             functionResult.logs = []
 
@@ -262,10 +262,10 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                 // For workflows, the captured event is only used as trigger data and not to actually capture the event
                 // Remove the execution count property to allow workflow actions to capture events without
                 // triggering the infinite loop protection.
-                const { $custom_function_execution_count, ...cleanProperties } = capturedInsightsEvent.properties || {}
+                const { $insights_function_execution_count, ...cleanProperties } = capturedInsightsEvent.properties || {}
 
                 // Invoke the customflow
-                const triggerGlobals: CustomFunctionInvocationGlobals = {
+                const triggerGlobals: InsightsFunctionInvocationGlobals = {
                     ...invocation.state.globals,
                     event: {
                         ...capturedInsightsEvent,
@@ -275,24 +275,24 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                         url: '',
                     },
                 }
-                const customFlowInvocation = createCustomFlowInvocation(
+                const insightsFlowInvocation = createInsightsFlowInvocation(
                     triggerGlobals,
-                    customFlow,
-                    {} as CustomFunctionFilterGlobals
+                    insightsFlow,
+                    {} as InsightsFunctionFilterGlobals
                 )
 
-                const scheduledAt = customFlow.trigger && 'scheduled_at' in customFlow.trigger && customFlow.trigger.scheduled_at
+                const scheduledAt = insightsFlow.trigger && 'scheduled_at' in insightsFlow.trigger && insightsFlow.trigger.scheduled_at
                 if (scheduledAt) {
                     const scheduledDateTime = DateTime.fromISO(scheduledAt)
                     if (!scheduledDateTime.isValid) {
                         addLog('warn', `Invalid scheduled_at date format: ${scheduledAt}`)
                     } else {
-                        customFlowInvocation.queueScheduledAt = scheduledDateTime
+                        insightsFlowInvocation.queueScheduledAt = scheduledDateTime
                         addLog('info', `Workflow run scheduled for ${scheduledAt}`)
                     }
                 }
 
-                customFlowInvocation.id = invocationId // Keep the IDs consistent
+                insightsFlowInvocation.id = invocationId // Keep the IDs consistent
 
                 addMetric({
                     metric_kind: 'other',
@@ -306,7 +306,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
                     count: 1,
                 })
 
-                await this.cyclotronJobQueue.queueInvocations([customFlowInvocation])
+                await this.cyclotronJobQueue.queueInvocations([insightsFlowInvocation])
             } else {
                 addMetric({
                     metric_kind: 'failure',
@@ -330,7 +330,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
 
             // NOTE: We only return a custom function result. We track out own logs and errors here
             return createInvocationResult(
-                createInvocation({} as any, customFunction),
+                createInvocation({} as any, insightsFunction),
                 {},
                 {
                     finished: false,
@@ -340,24 +340,24 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
         }
     }
 
-    private async executeCustomFunction(
+    private async executeInsightsFunction(
         req: ModifiedRequest,
-        customFunction: CustomFunctionType,
-        customFunctionState: ScriptWatcherFunctionState | null
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
-        let result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>
+        insightsFunction: InsightsFunctionType,
+        insightsFunctionState: ScriptWatcherFunctionState | null
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
+        let result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>
 
         try {
-            const globals: CustomFunctionInvocationGlobals = this.buildRequestGlobals(customFunction, req)
-            const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(customFunction, globals)
-            const invocation = createInvocation(globalsWithInputs, customFunction)
+            const globals: InsightsFunctionInvocationGlobals = this.buildRequestGlobals(insightsFunction, req)
+            const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
+            const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
-            if (customFunctionState?.state === ScriptWatcherState.degraded) {
+            if (insightsFunctionState?.state === ScriptWatcherState.degraded) {
                 // Degraded functions are not executed immediately
                 invocation.queue = 'scriptoverflow'
                 await this.cyclotronJobQueue.queueInvocations([invocation])
 
-                result = createInvocationResult<CyclotronJobInvocationCustomFunction>(
+                result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(
                     invocation,
                     {},
                     {
@@ -412,7 +412,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
         } catch (error) {
             logger.error('Error executing custom function', { error })
             result = createInvocationResult(
-                createInvocation({} as any, customFunction),
+                createInvocation({} as any, insightsFunction),
                 {},
                 {
                     finished: true,
@@ -422,7 +422,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
             )
         }
 
-        await this.customFunctionMonitoringService.queueInvocationResults([result])
+        await this.insightsFunctionMonitoringService.queueInvocationResults([result])
         return result
     }
 
@@ -430,12 +430,12 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
     public async processWebhook(
         identifier: string,
         req: ModifiedRequest
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         // NOTE: To simplify usage we allow setting a range of extensions for webhooks
         // Currently we just ignore it
         const [webhookId, _extension] = identifier.split('.')
 
-        const [webhook, customFunctionState] = await Promise.all([
+        const [webhook, insightsFunctionState] = await Promise.all([
             this.getWebhook(webhookId),
             this.scriptWatcher.getCachedEffectiveState(webhookId),
         ])
@@ -444,28 +444,28 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
             throw new SourceWebhookError(404, 'Not found')
         }
 
-        const { customFunction, customFlow } = webhook
+        const { insightsFunction, insightsFlow } = webhook
 
-        if (customFunctionState?.state === ScriptWatcherState.disabled) {
-            this.customFunctionMonitoringService.queueAppMetric(
+        if (insightsFunctionState?.state === ScriptWatcherState.disabled) {
+            this.insightsFunctionMonitoringService.queueAppMetric(
                 {
-                    team_id: customFunction.team_id,
-                    app_source_id: customFunction.id,
+                    team_id: insightsFunction.team_id,
+                    app_source_id: insightsFunction.id,
                     metric_kind: 'failure',
                     metric_name: 'disabled_permanently',
                     count: 1,
                 },
-                customFlow ? 'custom_flow' : 'custom_function'
+                insightsFlow ? 'insights_flow' : 'insights_function'
             )
             throw new SourceWebhookError(429, 'Disabled')
         }
 
-        const result = customFlow
-            ? await this.executeCustomFlow(req, customFlow, customFunction)
-            : await this.executeCustomFunction(req, customFunction, customFunctionState)
+        const result = insightsFlow
+            ? await this.executeInsightsFlow(req, insightsFlow, insightsFunction)
+            : await this.executeInsightsFunction(req, insightsFunction, insightsFunctionState)
 
         void this.promiseScheduler.schedule(
-            Promise.all([this.customFunctionMonitoringService.flush(), this.scriptWatcher.observeResultsBuffered(result)])
+            Promise.all([this.insightsFunctionMonitoringService.flush(), this.scriptWatcher.observeResultsBuffered(result)])
         )
 
         return result

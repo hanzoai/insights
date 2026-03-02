@@ -7,18 +7,18 @@ def remove_segment_hidden_destinations(apps, schema_editor):
     """
     Mark old destinations as deleted which have the status hidden and where the template id starts with segment-
     """
-    CustomFunction = apps.get_model("posthog", "CustomFunction")
-    CustomFunctionTemplate = apps.get_model("posthog", "CustomFunctionTemplate")
+    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
+    InsightsFunctionTemplate = apps.get_model("posthog", "InsightsFunctionTemplate")
 
-    hidden_segment_templates = CustomFunctionTemplate.objects.filter(
+    hidden_segment_templates = InsightsFunctionTemplate.objects.filter(
         template_id__startswith="segment-", status="hidden"
     ).values_list("template_id", flat=True)
 
-    # Mark all CustomFunction instances that use these templates as deleted
-    CustomFunction.objects.filter(template_id__in=hidden_segment_templates).update(deleted=True)
+    # Mark all InsightsFunction instances that use these templates as deleted
+    InsightsFunction.objects.filter(template_id__in=hidden_segment_templates).update(deleted=True)
 
     # Delete the templates themselves
-    CustomFunctionTemplate.objects.filter(template_id__startswith="segment-", status="hidden").delete()
+    InsightsFunctionTemplate.objects.filter(template_id__startswith="segment-", status="hidden").delete()
 
 
 def reverse_remove_segment_hidden_destinations(apps, schema_editor):

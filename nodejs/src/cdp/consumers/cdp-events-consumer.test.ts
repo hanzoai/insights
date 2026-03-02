@@ -1,23 +1,23 @@
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { CustomFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/customflow'
 
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureCustomFlowBuilder } from '../_tests/builders/customflow.builder'
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/customflow.builder'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
-    insertCustomFunction as _insertCustomFunction,
+    insertInsightsFunction as _insertInsightsFunction,
     createScriptExecutionGlobals,
     createIncomingEvent,
     createInternalEvent,
     createKafkaMessage,
 } from '../_tests/fixtures'
-import { insertCustomFlow as _insertCustomFlow } from '../_tests/fixtures-customflows'
+import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
-import { CustomFunctionInvocationGlobals, CustomFunctionType } from '../types'
+import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { CdpEventsConsumer } from './cdp-events.consumer'
 import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
@@ -36,14 +36,14 @@ describe.each([
     let team2: Team
     let mockQueueInvocations: jest.Mock
 
-    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
-        const teamId = customFunction.team_id ?? team.id
-        const item = await _insertCustomFunction(hub.postgres, teamId, {
-            ...customFunction,
+    const insertInsightsFunction = async (insightsFunction: Partial<InsightsFunctionType>) => {
+        const teamId = insightsFunction.team_id ?? team.id
+        const item = await _insertInsightsFunction(hub.postgres, teamId, {
+            ...insightsFunction,
             type: scriptType,
         })
         // Trigger the reload that django would do
-        processor['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [item.id])
+        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [item.id])
         return item
     }
 
@@ -92,11 +92,11 @@ describe.each([
 
     describe('team filtering', () => {
         it('should not parse events for teams without custom functions', async () => {
-            await insertCustomFunction({
+            await insertInsightsFunction({
                 team_id: team.id,
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const events =
@@ -113,11 +113,11 @@ describe.each([
             expect(invocations).toHaveLength(1)
             expect(invocations[0].project.id).toBe(team.id)
 
-            await insertCustomFunction({
+            await insertInsightsFunction({
                 team_id: team2.id,
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const invocations2 = await processor._parseKafkaBatch(events)
@@ -127,21 +127,21 @@ describe.each([
 
     describe('general event processing', () => {
         describe('common processing', () => {
-            let fnFetchNoFilters: CustomFunctionType
-            let fnPrinterPageviewFilters: CustomFunctionType
-            let globals: CustomFunctionInvocationGlobals
+            let fnFetchNoFilters: InsightsFunctionType
+            let fnPrinterPageviewFilters: InsightsFunctionType
+            let globals: InsightsFunctionInvocationGlobals
 
             beforeEach(async () => {
-                fnFetchNoFilters = await insertCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                fnFetchNoFilters = await insertInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.no_filters,
                 })
 
-                fnPrinterPageviewFilters = await insertCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                fnPrinterPageviewFilters = await insertInsightsFunction({
+                    ...FN_EXAMPLES.input_printer,
+                    ...FN_INPUTS_EXAMPLES.secret_inputs,
+                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
                 globals = createScriptExecutionGlobals({
@@ -159,10 +159,10 @@ describe.each([
                 })
             })
 
-            const matchInvocation = (customFunction: CustomFunctionType, globals: CustomFunctionInvocationGlobals) => {
+            const matchInvocation = (insightsFunction: InsightsFunctionType, globals: InsightsFunctionInvocationGlobals) => {
                 return {
-                    customFunction: {
-                        id: customFunction.id,
+                    insightsFunction: {
+                        id: insightsFunction.id,
                     },
                     state: {
                         globals: {
@@ -205,14 +205,14 @@ describe.each([
                     expect.arrayContaining([
                         expect.objectContaining({
                             value: expect.objectContaining({
-                                app_source: 'custom_function',
+                                app_source: 'insights_function',
                                 app_source_id: fnFetchNoFilters.id,
                                 metric_name: 'triggered',
                             }),
                         }),
                         expect.objectContaining({
                             value: expect.objectContaining({
-                                app_source: 'custom_function',
+                                app_source: 'insights_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
                                 metric_name: 'triggered',
                             }),
@@ -225,7 +225,7 @@ describe.each([
                     const billingMetrics = metrics.filter((m: any) => m.value.metric_name === 'billable_invocation')
                     expect(billingMetrics).toHaveLength(1)
                     expect(billingMetrics[0].value).toMatchObject({
-                        app_source: 'custom_function',
+                        app_source: 'insights_function',
                         app_source_id: '_event_trigger',
                         instance_id: globals.event.uuid,
                         metric_kind: 'billing',
@@ -254,7 +254,7 @@ describe.each([
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: fnPrinterPageviewFilters.id,
                             count: 1,
                             metric_kind: 'other',
@@ -267,7 +267,7 @@ describe.each([
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'other',
@@ -284,7 +284,7 @@ describe.each([
                                   key: expect.any(String),
                                   topic: 'datastore_app_metrics2_test',
                                   value: {
-                                      app_source: 'custom_function',
+                                      app_source: 'insights_function',
                                       app_source_id: '_event_trigger',
                                       instance_id: globals.event.uuid,
                                       count: 1,
@@ -311,7 +311,7 @@ describe.each([
                     {
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'failure',
@@ -322,7 +322,7 @@ describe.each([
                     {
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: fnPrinterPageviewFilters.id,
                             count: 1,
                             metric_kind: 'failure',
@@ -387,24 +387,24 @@ describe.each([
         })
 
         describe('quota limiting', () => {
-            let fnFetchNoFilters: CustomFunctionType
-            let fnPrinterPageviewFilters: CustomFunctionType
-            let globals: CustomFunctionInvocationGlobals
+            let fnFetchNoFilters: InsightsFunctionType
+            let fnPrinterPageviewFilters: InsightsFunctionType
+            let globals: InsightsFunctionInvocationGlobals
 
             beforeEach(async () => {
                 // Create functions for team2 (no data_pipelines feature)
-                fnFetchNoFilters = await insertCustomFunction({
+                fnFetchNoFilters = await insertInsightsFunction({
                     team_id: team2.id,
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.no_filters,
                 })
 
-                fnPrinterPageviewFilters = await insertCustomFunction({
+                fnPrinterPageviewFilters = await insertInsightsFunction({
                     team_id: team2.id,
-                    ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...FN_EXAMPLES.input_printer,
+                    ...FN_INPUTS_EXAMPLES.secret_inputs,
+                    ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
                 // Globals for team2 (without data_pipelines)
@@ -442,7 +442,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'custom_function',
+                                app_source: 'insights_function',
                                 app_source_id: fnFetchNoFilters.id,
                                 count: 1,
                                 metric_kind: 'failure',
@@ -453,7 +453,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'custom_function',
+                                app_source: 'insights_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
                                 count: 1,
                                 metric_kind: 'failure',
@@ -482,7 +482,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'custom_function',
+                                app_source: 'insights_function',
                                 app_source_id: fnFetchNoFilters.id,
                                 count: 1,
                                 metric_kind: 'other',
@@ -493,7 +493,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'custom_function',
+                                app_source: 'insights_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
                                 count: 1,
                                 metric_kind: 'other',
@@ -507,7 +507,7 @@ describe.each([
         })
 
         describe('filtering errors', () => {
-            let globals: CustomFunctionInvocationGlobals
+            let globals: InsightsFunctionInvocationGlobals
 
             beforeEach(() => {
                 globals = createScriptExecutionGlobals({
@@ -526,10 +526,10 @@ describe.each([
             })
 
             it('should filter out functions that error while filtering', async () => {
-                const erroringFunction = await insertCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.broken_filters,
+                const erroringFunction = await insertInsightsFunction({
+                    ...FN_EXAMPLES.input_printer,
+                    ...FN_INPUTS_EXAMPLES.secret_inputs,
+                    ...FN_FILTERS_EXAMPLES.broken_filters,
                 })
                 await processor.processBatch([globals])
                 expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
@@ -537,7 +537,7 @@ describe.each([
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'custom_function',
+                            app_source: 'insights_function',
                             app_source_id: erroringFunction.id,
                             count: 1,
                             metric_kind: 'other',
@@ -564,12 +564,12 @@ describe('custom flow processing', () => {
     let hub: Hub
     let team: Team
 
-    const insertCustomFlow = async (customFlow: CustomFlow) => {
-        const teamId = customFlow.team_id ?? team.id
+    const insertInsightsFlow = async (insightsFlow: InsightsFlow) => {
+        const teamId = insightsFlow.team_id ?? team.id
 
-        const item = await _insertCustomFlow(hub.postgres, customFlow)
+        const item = await _insertInsightsFlow(hub.postgres, insightsFlow)
         // Trigger the reload that django would do
-        processor['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [item.id])
+        processor['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [item.id])
         return item
     }
 
@@ -605,8 +605,8 @@ describe('custom flow processing', () => {
         jest.useRealTimers()
     })
 
-    describe('createCustomFlowInvocations', () => {
-        let globals: CustomFunctionInvocationGlobals
+    describe('createInsightsFlowInvocations', () => {
+        let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(() => {
             globals = createScriptExecutionGlobals({
@@ -625,16 +625,16 @@ describe('custom flow processing', () => {
         })
 
         it('should not create custom flow invocations with no filters', async () => {
-            const customFlow = new FixtureCustomFlowBuilder().withTeamId(team.id).build()
-            customFlow.trigger = {} as any
-            await insertCustomFlow(customFlow)
+            const insightsFlow = new FixtureInsightsFlowBuilder().withTeamId(team.id).build()
+            insightsFlow.trigger = {} as any
+            await insertInsightsFlow(insightsFlow)
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
             expect(invocations).toHaveLength(0)
         })
 
         it('should not create custom flow invocations with webhook triggers', async () => {
-            const customFlow = new FixtureCustomFlowBuilder()
+            const insightsFlow = new FixtureInsightsFlowBuilder()
                 .withTeamId(team.id)
                 .withSimpleWorkflow({
                     trigger: {
@@ -644,26 +644,26 @@ describe('custom flow processing', () => {
                     },
                 })
                 .build()
-            await insertCustomFlow(customFlow)
+            await insertInsightsFlow(insightsFlow)
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
             expect(invocations).toHaveLength(0)
         })
 
         it('should create custom flow invocations with matching filters', async () => {
-            const customFlow = await insertCustomFlow(
-                new FixtureCustomFlowBuilder()
+            const insightsFlow = await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                            filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                         },
                     })
                     .build()
             )
 
-            const noInvocations = await processor['createCustomFlowInvocations']([
+            const noInvocations = await processor['createInsightsFlowInvocations']([
                 {
                     ...globals,
                     event: {
@@ -675,12 +675,12 @@ describe('custom flow processing', () => {
 
             expect(noInvocations).toHaveLength(0)
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: customFlow.id,
-                customFlow: {
-                    id: customFlow.id,
+                functionId: insightsFlow.id,
+                insightsFlow: {
+                    id: insightsFlow.id,
                 },
                 id: expect.any(String),
                 queue: 'customflow',
@@ -694,19 +694,19 @@ describe('custom flow processing', () => {
         })
 
         it('should not produce billable_invocation metrics for custom flow invocations', async () => {
-            await insertCustomFlow(
-                new FixtureCustomFlowBuilder()
+            await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                            filters: FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                         },
                     })
                     .build()
             )
 
-            await processor['createCustomFlowInvocations']([globals])
+            await processor['createInsightsFlowInvocations']([globals])
 
             const producedMetrics =
                 mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
@@ -723,7 +723,7 @@ describe('custom flow processing', () => {
     })
 
     describe('quota limiting for custom flows', () => {
-        let globals: CustomFunctionInvocationGlobals
+        let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(() => {
             globals = createScriptExecutionGlobals({
@@ -749,8 +749,8 @@ describe('custom flow processing', () => {
                     return resource === 'workflow_emails'
                 })
 
-            const customFlow = await insertCustomFlow(
-                new FixtureCustomFlowBuilder()
+            const insightsFlow = await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -758,7 +758,7 @@ describe('custom flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             sendEmail: {
@@ -783,7 +783,7 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
 
             // Should have no invocations returned due to quota limiting
             expect(invocations).toHaveLength(0)
@@ -799,7 +799,7 @@ describe('custom flow processing', () => {
             )
 
             // Flush metrics so we can assert them down below
-            await processor['customFunctionMonitoringService'].flush()
+            await processor['insightsFunctionMonitoringService'].flush()
 
             // Should have queued a quota limited metric
             const producedMetrics =
@@ -808,8 +808,8 @@ describe('custom flow processing', () => {
                 expect.arrayContaining([
                     expect.objectContaining({
                         value: expect.objectContaining({
-                            app_source: 'custom_flow',
-                            app_source_id: customFlow.id,
+                            app_source: 'insights_flow',
+                            app_source_id: insightsFlow.id,
                             metric_kind: 'failure',
                             metric_name: 'quota_limited',
                         }),
@@ -826,8 +826,8 @@ describe('custom flow processing', () => {
                     return resource === 'workflow_destinations_dispatched'
                 })
 
-            await insertCustomFlow(
-                new FixtureCustomFlowBuilder()
+            await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -835,7 +835,7 @@ describe('custom flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             delay: {
@@ -860,7 +860,7 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
 
             expect(invocations).toHaveLength(0)
             expect((processor as any).hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
@@ -873,8 +873,8 @@ describe('custom flow processing', () => {
             // Mock quota limiting for both
             ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(true)
 
-            const customFlow = await insertCustomFlow(
-                new FixtureCustomFlowBuilder()
+            const insightsFlow = await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -882,7 +882,7 @@ describe('custom flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             delay: {
@@ -907,14 +907,14 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
 
             // Should process the workflow since it doesn't have email or destination actions
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: customFlow.id,
-                customFlow: {
-                    id: customFlow.id,
+                functionId: insightsFlow.id,
+                insightsFlow: {
+                    id: insightsFlow.id,
                 },
             })
         })
@@ -923,8 +923,8 @@ describe('custom flow processing', () => {
             // No quota limits
             ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(false)
 
-            const customFlow = await insertCustomFlow(
-                new FixtureCustomFlowBuilder()
+            const insightsFlow = await insertInsightsFlow(
+                new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -932,7 +932,7 @@ describe('custom flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: FN_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             sendEmail: {
@@ -957,13 +957,13 @@ describe('custom flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createCustomFlowInvocations']([globals])
+            const invocations = await processor['createInsightsFlowInvocations']([globals])
 
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: customFlow.id,
-                customFlow: {
-                    id: customFlow.id,
+                functionId: insightsFlow.id,
+                insightsFlow: {
+                    id: insightsFlow.id,
                 },
             })
         })

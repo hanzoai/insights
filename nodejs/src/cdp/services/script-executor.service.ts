@@ -16,20 +16,20 @@ import { UUIDT } from '../../utils/utils'
 import { getAsyncFunctionHandler, getRegisteredAsyncFunctionNames } from '../async-function-registry'
 import '../async-functions'
 import {
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
-    CustomFunctionFilterGlobals,
-    CustomFunctionInvocationGlobals,
-    CustomFunctionInvocationGlobalsWithInputs,
-    CustomFunctionType,
+    InsightsFunctionFilterGlobals,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionInvocationGlobalsWithInputs,
+    InsightsFunctionType,
     LogEntry,
     MinimalAppMetric,
     MinimalLogEntry,
 } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
 import { createAddLogFunction, sanitizeLogMessage } from '../utils'
-import { execScript } from '../utils/script-exec'
-import { convertToCustomFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/custom-function-filtering'
+import { execFn } from '../utils/script-exec'
+import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/insights-function-filtering'
 import { createInvocation, createInvocationResult } from '../utils/invocation-utils'
 import { ScriptInputsService, ScriptInputsServiceHub } from './script-inputs.service'
 import { EmailService, EmailServiceHub } from './messaging/email.service'
@@ -130,14 +130,14 @@ export const MAX_HOG_LOGS = 25
 export const EXTEND_OBJECT_KEY = '$$_extend_object'
 
 const scriptExecutionDuration = new Histogram({
-    name: 'cdp_custom_function_execution_duration_ms',
+    name: 'cdp_insights_function_execution_duration_ms',
     help: 'Processing time and success status of internal functions',
     // We have a timeout so we don't need to worry about much more than that
     buckets: [0, 10, 20, 50, 100, 200, 300, 500, 1000],
 })
 
-const customFunctionStateMemory = new Histogram({
-    name: 'cdp_custom_function_execution_state_memory_kb',
+const insightsFunctionStateMemory = new Histogram({
+    name: 'cdp_insights_function_execution_state_memory_kb',
     help: 'The amount of memory in kb used by a custom function',
     buckets: [0, 50, 100, 250, 500, 1000, 2000, 3000, 5000, Infinity],
 })
@@ -163,35 +163,35 @@ export class ScriptExecutorService {
     }
 
     async buildInputsWithGlobals(
-        customFunction: CustomFunctionType,
-        globals: CustomFunctionInvocationGlobals,
+        insightsFunction: InsightsFunctionType,
+        globals: InsightsFunctionInvocationGlobals,
         additionalInputs?: Record<string, any>
-    ): Promise<CustomFunctionInvocationGlobalsWithInputs> {
-        return this.scriptInputsService.buildInputsWithGlobals(customFunction, globals, additionalInputs)
+    ): Promise<InsightsFunctionInvocationGlobalsWithInputs> {
+        return this.scriptInputsService.buildInputsWithGlobals(insightsFunction, globals, additionalInputs)
     }
 
-    async buildCustomFunctionInvocations(
-        customFunctions: CustomFunctionType[],
-        triggerGlobals: CustomFunctionInvocationGlobals
+    async buildInsightsFunctionInvocations(
+        insightsFunctions: InsightsFunctionType[],
+        triggerGlobals: InsightsFunctionInvocationGlobals
     ): Promise<{
-        invocations: CyclotronJobInvocationCustomFunction[]
+        invocations: CyclotronJobInvocationInsightsFunction[]
         metrics: MinimalAppMetric[]
         logs: LogEntry[]
     }> {
         const metrics: MinimalAppMetric[] = []
         const logs: LogEntry[] = []
-        const invocations: CyclotronJobInvocationCustomFunction[] = []
+        const invocations: CyclotronJobInvocationInsightsFunction[] = []
 
         // TRICKY: The frontend generates filters matching the Clickhouse event type so we are converting back
-        const filterGlobals = convertToCustomFunctionFilterGlobal(triggerGlobals)
+        const filterGlobals = convertToInsightsFunctionFilterGlobal(triggerGlobals)
 
-        const _filterCustomFunction = async (
-            customFunction: CustomFunctionType,
-            filters: CustomFunctionType['filters'],
-            filterGlobals: CustomFunctionFilterGlobals
+        const _filterInsightsFunction = async (
+            insightsFunction: InsightsFunctionType,
+            filters: InsightsFunctionType['filters'],
+            filterGlobals: InsightsFunctionFilterGlobals
         ): Promise<boolean> => {
             const filterResults = await filterFunctionInstrumented({
-                fn: customFunction,
+                fn: insightsFunction,
                 filters,
                 filterGlobals,
             })
@@ -204,30 +204,30 @@ export class ScriptExecutorService {
         }
 
         const _buildInvocation = async (
-            customFunction: CustomFunctionType,
-            additionalInputs?: CustomFunctionType['inputs']
-        ): Promise<CyclotronJobInvocationCustomFunction | null> => {
+            insightsFunction: InsightsFunctionType,
+            additionalInputs?: InsightsFunctionType['inputs']
+        ): Promise<CyclotronJobInvocationInsightsFunction | null> => {
             try {
                 const globalsWithSource = {
                     ...triggerGlobals,
                     source: {
-                        name: customFunction.name ?? `Custom function: ${customFunction.id}`,
-                        url: `${triggerGlobals.project.url}/pipeline/destinations/custom-function-${customFunction.id}/configuration/`,
+                        name: insightsFunction.name ?? `Custom function: ${insightsFunction.id}`,
+                        url: `${triggerGlobals.project.url}/pipeline/destinations/insights-function-${insightsFunction.id}/configuration/`,
                     },
                 }
 
                 const globalsWithInputs = await this.scriptInputsService.buildInputsWithGlobals(
-                    customFunction,
+                    insightsFunction,
                     globalsWithSource,
                     additionalInputs
                 )
 
-                return createInvocation(globalsWithInputs, customFunction)
+                return createInvocation(globalsWithInputs, insightsFunction)
             } catch (error) {
                 logs.push({
-                    team_id: customFunction.team_id,
-                    log_source: 'custom_function',
-                    log_source_id: customFunction.id,
+                    team_id: insightsFunction.team_id,
+                    log_source: 'insights_function',
+                    log_source_id: insightsFunction.id,
                     instance_id: new UUIDT().toString(), // random UUID, like it would be for an invocation
                     timestamp: DateTime.now(),
                     level: 'error',
@@ -235,8 +235,8 @@ export class ScriptExecutorService {
                 })
 
                 metrics.push({
-                    team_id: customFunction.team_id,
-                    app_source_id: customFunction.id,
+                    team_id: insightsFunction.team_id,
+                    app_source_id: insightsFunction.id,
                     metric_kind: 'failure',
                     metric_name: 'inputs_failed',
                     count: 1,
@@ -247,15 +247,15 @@ export class ScriptExecutorService {
         }
 
         await Promise.all(
-            customFunctions.map(async (customFunction) => {
+            insightsFunctions.map(async (insightsFunction) => {
                 // We always check the top level filters
-                if (!(await _filterCustomFunction(customFunction, customFunction.filters, filterGlobals))) {
+                if (!(await _filterInsightsFunction(insightsFunction, insightsFunction.filters, filterGlobals))) {
                     return
                 }
 
                 // Check for non-mapping functions first
-                if (!customFunction.mappings) {
-                    const invocation = await _buildInvocation(customFunction)
+                if (!insightsFunction.mappings) {
+                    const invocation = await _buildInvocation(insightsFunction)
                     if (!invocation) {
                         return
                     }
@@ -265,12 +265,12 @@ export class ScriptExecutorService {
                 }
 
                 await Promise.all(
-                    customFunction.mappings.map(async (mapping) => {
-                        if (!(await _filterCustomFunction(customFunction, mapping.filters, filterGlobals))) {
+                    insightsFunction.mappings.map(async (mapping) => {
+                        if (!(await _filterInsightsFunction(insightsFunction, mapping.filters, filterGlobals))) {
                             return
                         }
 
-                        const invocation = await _buildInvocation(customFunction, mapping.inputs ?? {})
+                        const invocation = await _buildInvocation(insightsFunction, mapping.inputs ?? {})
                         if (!invocation) {
                             return
                         }
@@ -290,18 +290,18 @@ export class ScriptExecutorService {
 
     @instrumented('script-executor.executeWithAsyncFunctions')
     async executeWithAsyncFunctions(
-        invocation: CyclotronJobInvocationCustomFunction,
+        invocation: CyclotronJobInvocationInsightsFunction,
         options?: ScriptExecutorExecuteAsyncOptions
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         let asyncFunctionCount = 0
         const maxAsyncFunctions = options?.maxAsyncFunctions ?? 1
 
-        let result: CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction> | null = null
+        let result: CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction> | null = null
         const metrics: MinimalAppMetric[] = []
         const logs: MinimalLogEntry[] = []
 
         while (!result || !result.finished) {
-            const nextInvocation: CyclotronJobInvocationCustomFunction = result?.invocation ?? invocation
+            const nextInvocation: CyclotronJobInvocationInsightsFunction = result?.invocation ?? invocation
 
             const queueParamsType = nextInvocation.queueParameters?.type
             if (['fetch', 'email'].includes(queueParamsType ?? '')) {
@@ -352,27 +352,27 @@ export class ScriptExecutorService {
 
     @instrumented({ key: 'script-executor.execute', sendException: false })
     async execute(
-        invocation: CyclotronJobInvocationCustomFunction,
+        invocation: CyclotronJobInvocationInsightsFunction,
         options: ScriptExecutorExecuteOptions = {},
         previousResult: Pick<
             Partial<CyclotronJobInvocationResult>,
             'finished' | 'capturedInsightsEvents' | 'logs' | 'metrics' | 'error' | 'execResult'
         > = {}
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         const loggingContext = {
             invocationId: invocation.id,
-            customFunctionId: invocation.customFunction.id,
-            customFunctionName: invocation.customFunction.name,
-            customFunctionUrl: invocation.state.globals.source?.url,
+            insightsFunctionId: invocation.insightsFunction.id,
+            insightsFunctionName: invocation.insightsFunction.name,
+            insightsFunctionUrl: invocation.state.globals.source?.url,
         }
 
         logger.debug('🦔', `[ScriptExecutor] Executing function`, loggingContext)
 
-        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(invocation, {}, previousResult)
+        const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(invocation, {}, previousResult)
         const addLog = createAddLogFunction(result.logs)
 
         try {
-            let globals: CustomFunctionInvocationGlobalsWithInputs
+            let globals: InsightsFunctionInvocationGlobalsWithInputs
             let execRes: ExecResult | undefined = undefined
 
             try {
@@ -382,7 +382,7 @@ export class ScriptExecutorService {
                     globals = invocation.state.globals
                 } else {
                     globals = await this.scriptInputsService.buildInputsWithGlobals(
-                        invocation.customFunction,
+                        invocation.insightsFunction,
                         invocation.state.globals
                     )
                 }
@@ -392,8 +392,8 @@ export class ScriptExecutorService {
                 throw e
             }
 
-            const sensitiveValues = this.getSensitiveValues(invocation.customFunction, globals.inputs)
-            const invocationInput = invocation.state.vmState ?? invocation.customFunction.bytecode
+            const sensitiveValues = this.getSensitiveValues(invocation.insightsFunction, globals.inputs)
+            const invocationInput = invocation.state.vmState ?? invocation.insightsFunction.bytecode
             const eventId = invocation?.state.globals?.event?.uuid || 'Unknown event'
 
             try {
@@ -408,7 +408,7 @@ export class ScriptExecutorService {
                     {} as Record<string, (args: any[]) => Promise<void>>
                 )
 
-                const execScriptOutcome = await execScript(invocationInput, {
+                const execFnOutcome = await execFn(invocationInput, {
                     globals,
                     timeout: this.hub.CDP_WATCHER_HOG_COST_TIMING_UPPER_MS,
                     maxAsyncSteps: MAX_ASYNC_STEPS, // NOTE: This will likely be configurable in the future
@@ -447,11 +447,11 @@ export class ScriptExecutorService {
                             const eventProperties = event.properties || {}
 
                             if (typeof event.event !== 'string') {
-                                throw new Error("[CustomFunction] - insightsCapture call missing 'event' property")
+                                throw new Error("[InsightsFunction] - insightsCapture call missing 'event' property")
                             }
 
                             if (!distinctId) {
-                                throw new Error("[CustomFunction] - insightsCapture call missing 'distinct_id' property")
+                                throw new Error("[InsightsFunction] - insightsCapture call missing 'distinct_id' property")
                             }
 
                             if (result.capturedInsightsEvents.length > 0) {
@@ -462,7 +462,7 @@ export class ScriptExecutorService {
 
                             if (globals.event) {
                                 // Protection to stop a recursive loop
-                                const givenCount = globals.event.properties?.$custom_function_execution_count
+                                const givenCount = globals.event.properties?.$insights_function_execution_count
                                 const executionCount = typeof givenCount === 'number' ? givenCount : 0
 
                                 if (executionCount > 9) {
@@ -474,7 +474,7 @@ export class ScriptExecutorService {
                                 }
 
                                 // Increment the execution count so that we can check it in the future
-                                eventProperties.$custom_function_execution_count = executionCount + 1
+                                eventProperties.$insights_function_execution_count = executionCount + 1
                             }
 
                             result.capturedInsightsEvents.push({
@@ -491,18 +491,18 @@ export class ScriptExecutorService {
                     },
                 })
 
-                scriptExecutionDuration.observe(execScriptOutcome.durationMs)
+                scriptExecutionDuration.observe(execFnOutcome.durationMs)
 
                 result.invocation.state.timings.push({
-                    kind: 'custom_script',
-                    duration_ms: execScriptOutcome.durationMs,
+                    kind: 'fn',
+                    duration_ms: execFnOutcome.durationMs,
                 })
 
-                if (!execScriptOutcome.execResult || execScriptOutcome.error || execScriptOutcome.execResult.error) {
-                    throw execScriptOutcome.error ?? execScriptOutcome.execResult?.error ?? new Error('Unknown error')
+                if (!execFnOutcome.execResult || execFnOutcome.error || execFnOutcome.execResult.error) {
+                    throw execFnOutcome.error ?? execFnOutcome.execResult?.error ?? new Error('Unknown error')
                 }
 
-                execRes = execScriptOutcome.execResult
+                execRes = execFnOutcome.execResult
 
                 // Store the result if execution finished
                 if (execRes.finished && Boolean(execRes.result)) {
@@ -544,13 +544,13 @@ export class ScriptExecutorService {
                     messages.push(`Ops: ${execRes.state.ops}.`)
                     messages.push(`Event: '${globals.event.url}'`)
 
-                    customFunctionStateMemory.observe(execRes.state.maxMemUsed / 1024)
+                    insightsFunctionStateMemory.observe(execRes.state.maxMemUsed / 1024)
 
                     if (execRes.state.maxMemUsed > 1024 * 1024) {
                         // If the memory used is more than a MB then we should log it
                         logger.warn('🦔', `[ScriptExecutor] Function used more than 1MB of memory`, {
-                            customFunctionId: invocation.customFunction.id,
-                            customFunctionName: invocation.customFunction.name,
+                            insightsFunctionId: invocation.insightsFunction.id,
+                            insightsFunctionName: invocation.insightsFunction.name,
                             teamId: invocation.teamId,
                             eventId: invocation.state.globals.event.url,
                             memoryUsedKb: execRes.state.maxMemUsed / 1024,
@@ -569,16 +569,16 @@ export class ScriptExecutorService {
 
     @instrumented('script-executor.executeFetch')
     async executeFetch(
-        invocation: CyclotronJobInvocationCustomFunction
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
-        const templateId = invocation.customFunction.template_id ?? 'unknown'
+        invocation: CyclotronJobInvocationInsightsFunction
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
+        const templateId = invocation.insightsFunction.template_id ?? 'unknown'
         if (invocation.queueParameters?.type !== 'fetch') {
             throw new Error('Bad invocation')
         }
 
         const params = invocation.queueParameters
 
-        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(
+        const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(
             invocation,
             {},
             {
@@ -594,7 +594,7 @@ export class ScriptExecutorService {
             headers['developer-token'] = this.hub.CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN
         }
 
-        const integrationInputs = await this.scriptInputsService.loadIntegrationInputs(invocation.customFunction)
+        const integrationInputs = await this.scriptInputsService.loadIntegrationInputs(invocation.insightsFunction)
 
         if (Object.keys(integrationInputs).length > 0) {
             for (const [key, value] of Object.entries(integrationInputs)) {
@@ -603,7 +603,7 @@ export class ScriptExecutorService {
                     continue
                 }
 
-                const placeholder: string = ACCESS_TOKEN_PLACEHOLDER + invocation.customFunction.inputs?.[key]?.value
+                const placeholder: string = ACCESS_TOKEN_PLACEHOLDER + invocation.insightsFunction.inputs?.[key]?.value
 
                 if (placeholder && accessToken) {
                     const replace = (val: string) => val.replaceAll(placeholder, accessToken)
@@ -664,7 +664,7 @@ export class ScriptExecutorService {
 
             if (canRetry && result.invocation.state.attempts < this.hub.CDP_FETCH_RETRIES) {
                 await fetchResponse?.dump()
-                result.invocation.queue = 'custom_script'
+                result.invocation.queue = 'fn'
                 result.invocation.queueParameters = params
                 result.invocation.queuePriority = invocation.queuePriority + 1
                 result.invocation.queueScheduledAt = DateTime.utc().plus({ milliseconds: backoffMs })
@@ -717,10 +717,10 @@ export class ScriptExecutorService {
         return result
     }
 
-    getSensitiveValues(customFunction: CustomFunctionType, inputs: Record<string, any>): string[] {
+    getSensitiveValues(insightsFunction: InsightsFunctionType, inputs: Record<string, any>): string[] {
         const values: string[] = []
 
-        customFunction.inputs_schema?.forEach((schema) => {
+        insightsFunction.inputs_schema?.forEach((schema) => {
             if (schema.secret || schema.type === 'integration') {
                 const value = inputs[schema.key]
                 if (typeof value === 'string') {

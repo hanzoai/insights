@@ -102,7 +102,6 @@ export const RoleAtOrganizationEnumApi = {
 /**
  * @nullable
  */
-export type UserBasicApiMascotConfig = { [key: string]: unknown } | null | null
 
 export interface UserBasicApi {
     readonly id: number
@@ -121,7 +120,6 @@ export interface UserBasicApi {
     /** @nullable */
     is_email_verified?: boolean | null
     /** @nullable */
-    readonly mascot_config: UserBasicApiMascotConfig
     role_at_organization?: RoleAtOrganizationEnumApi | BlankEnumApi | NullEnumApi | null
 }
 

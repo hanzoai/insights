@@ -21,7 +21,7 @@ import {
     createValidateEventUuidStep,
 } from '../event-preprocessing'
 import { createDropOldEventsStep } from '../event-processing/drop-old-events-step'
-import { createPrefetchCustomFunctionsStep } from '../event-processing/prefetch-custom-functions-step'
+import { createPrefetchInsightsFunctionsStep } from '../event-processing/prefetch-insights-functions-step'
 import { BatchPipelineBuilder } from '../pipelines/builders/batch-pipeline-builders'
 import { OverflowRedirectService } from '../utils/overflow-redirect/overflow-redirect-service'
 
@@ -96,6 +96,6 @@ export function createPostTeamPreprocessingSubpipeline<TInput extends PostTeamPr
             // Batch insert personless distinct IDs after prefetch (uses prefetch cache)
             .pipeBatch(processPersonlessDistinctIdsBatchStep(personsStore, personsPrefetchEnabled))
             // Prefetch custom functions for all teams in the batch
-            .pipeBatch(createPrefetchCustomFunctionsStep(scriptTransformer, cdpScriptWatcherSampleRate))
+            .pipeBatch(createPrefetchInsightsFunctionsStep(scriptTransformer, cdpScriptWatcherSampleRate))
     )
 }

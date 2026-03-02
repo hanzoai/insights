@@ -6,7 +6,7 @@ from parameterized import parameterized
 from rest_framework.exceptions import ValidationError
 
 from posthog.cdp.validation import (
-    CustomFunctionFiltersSerializer,
+    InsightsFunctionFiltersSerializer,
     InputsSchemaItemSerializer,
     MappingsSerializer,
     compile_script,
@@ -76,7 +76,7 @@ def create_example_inputs():
     }
 
 
-class TestCustomFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
     filters_context: dict = {}
 
     def setUp(self):
@@ -425,7 +425,7 @@ class TestCustomFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatchi
             "events": [{"id": "$pageview", "type": "events", "name": "$pageview", "order": 0}],
         }
 
-        serializer = CustomFunctionFiltersSerializer(data=filters, context=self.filters_context)
+        serializer = InsightsFunctionFiltersSerializer(data=filters, context=self.filters_context)
         serializer.is_valid(raise_exception=True)
         value = json.loads(json.dumps(serializer.validated_data))
         assert value == {
@@ -465,7 +465,7 @@ class TestCustomFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatchi
             "events": [{"id": "$pageview", "type": "events", "name": "$pageview", "order": 0}],
         }
 
-        serializer = CustomFunctionFiltersSerializer(data=filters, context=self.filters_context)
+        serializer = InsightsFunctionFiltersSerializer(data=filters, context=self.filters_context)
         serializer.is_valid(raise_exception=True)
         value = json.loads(json.dumps(serializer.validated_data))
         assert value == {

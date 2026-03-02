@@ -13,30 +13,23 @@ import { TaskRunStatusBadge } from './TaskRunStatusBadge'
 import { ConsoleLogEntry } from './session/ConsoleLogEntry'
 import { ToolCallEntry } from './session/ToolCallEntry'
 
-const MASCOT_STATUSES = [
-    'Spiking...',
-    'Mascotging...',
-    'Snuffling...',
-    'Curling up...',
-    'Foraging...',
-    'Quilling...',
-    'Hibernating...',
-    'Scurrying...',
-    'Bristling...',
-    'Noodling...',
-    'Hogwatching...',
-    'Prickling...',
-    'Burrowing...',
-    'Snoot booping...',
-    'Uncurling...',
+const LOADING_STATUSES = [
+    'Processing...',
+    'Analyzing...',
+    'Computing...',
+    'Working...',
+    'Thinking...',
+    'Evaluating...',
+    'Running...',
+    'Calculating...',
 ]
 
-function MascotStatus(): JSX.Element {
-    const [statusIndex, setStatusIndex] = useState(() => Math.floor(Math.random() * MASCOT_STATUSES.length))
+function LoadingStatus(): JSX.Element {
+    const [statusIndex, setStatusIndex] = useState(() => Math.floor(Math.random() * LOADING_STATUSES.length))
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setStatusIndex((prev) => (prev + 1) % MASCOT_STATUSES.length)
+            setStatusIndex((prev) => (prev + 1) % LOADING_STATUSES.length)
         }, 2000)
         return () => clearInterval(interval)
     }, [])
@@ -45,7 +38,7 @@ function MascotStatus(): JSX.Element {
         <div className="flex items-center gap-2 py-2 text-muted">
             <Spinner className="text-xs" />
             <TextMorph as="span" className="text-xs">
-                {MASCOT_STATUSES[statusIndex]}
+                {LOADING_STATUSES[statusIndex]}
             </TextMorph>
         </div>
     )
@@ -156,7 +149,7 @@ export function TaskSessionView({ logs, isPolling, run }: TaskSessionViewProps):
                 {entries.map((entry) => (
                     <LogEntryRenderer key={entry.id} entry={entry} />
                 ))}
-                {isPolling && <MascotStatus />}
+                {isPolling && <LoadingStatus />}
             </div>
         </div>
     )

@@ -58,7 +58,7 @@ export function ErrorTrackingScene(): JSX.Element {
 
     useOnMountEffect(() => {
         const utmSource = new URLSearchParams(window.location.search).get('utm_source')
-        api.customFunctions
+        api.insightsFunctions
             .list({
                 types: ['internal_destination'],
                 filter_groups: ERROR_TRACKING_ALERT_FILTER_GROUPS,

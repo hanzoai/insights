@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 from posthog.insightsql import ast
-from posthog.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTCUSTOM_FUNCTIONS
+from posthog.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
 from posthog.insightsql.parser import parse_expr
 
 
@@ -16,7 +16,7 @@ def is_aggregation_function(function_name: str) -> bool:
         return True
 
     # Also check other function dictionaries for aggregate functions
-    for functions_dict in [INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTCUSTOM_FUNCTIONS]:
+    for functions_dict in [INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS]:
         if normalized_name in functions_dict:
             func_meta = functions_dict[normalized_name]
             if hasattr(func_meta, "aggregate") and func_meta.aggregate:

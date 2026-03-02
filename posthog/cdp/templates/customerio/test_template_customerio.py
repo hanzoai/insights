@@ -5,7 +5,7 @@ from posthog.cdp.templates.customerio.template_customerio import (
     TemplateCustomerioMigrator,
     template as template_customerio,
 )
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.models.plugin import PluginConfig
 
 from common.hogvm.python.utils import UncaughtHogVMException
@@ -27,7 +27,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateCustomerio(BaseCustomFunctionTemplateTest):
+class TestTemplateCustomerio(BaseInsightsFunctionTemplateTest):
     template = template_customerio
 
     def test_function_works(self):
