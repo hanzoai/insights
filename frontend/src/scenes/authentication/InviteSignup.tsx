@@ -46,15 +46,15 @@ function HelperLinks(): JSX.Element {
         <div className="font-bold text-center">
             <Link to="/">App Home</Link>
             <span className="mx-2">|</span>
-            <Link to={`https://posthog.com?${UTM_TAGS}&utm_message=invalid-invite`}>PostHog Website</Link>
+            <Link to={`https://hanzo.ai?${UTM_TAGS}&utm_message=invalid-invite`}>Hanzo Website</Link>
         </div>
     )
 }
 
-function BackToPostHog(): JSX.Element {
+function BackToHanzo(): JSX.Element {
     return (
         <LemonButton type="secondary" icon={<IconChevronLeft />} center fullWidth to={urls.default()}>
-            Go back to PostHog
+            Go back to Hanzo
         </LemonButton>
     )
 }
@@ -72,7 +72,7 @@ function ErrorView(): JSX.Element | null {
                     <b>ask them for a new invite</b>.
                 </>
             ),
-            actions: user ? <BackToPostHog /> : <HelperLinks />,
+            actions: user ? <BackToHanzo /> : <HelperLinks />,
         },
         [ErrorCodes.InvalidRecipient]: {
             title: "Oops! This invite link can't be used",
@@ -103,14 +103,14 @@ function ErrorView(): JSX.Element | null {
                     </div>
                 </>
             ),
-            actions: user ? <BackToPostHog /> : <HelperLinks />,
+            actions: user ? <BackToHanzo /> : <HelperLinks />,
         },
         [ErrorCodes.Unknown]: {
             title: 'Oops! We could not validate this invite link',
             detail: `${
                 error?.detail || ''
             } There was an issue with your invite link, please try again in a few seconds. If the problem persists, contact us.`,
-            actions: user ? <BackToPostHog /> : <HelperLinks />,
+            actions: user ? <BackToHanzo /> : <HelperLinks />,
         },
     }
 
@@ -143,7 +143,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
             <div className="deprecated-space-y-2">
                 <h2>You have been invited to join {invite.organization_name}</h2>
                 <div>
-                    You will accept the invite under your <b>existing PostHog account</b> ({user?.email})
+                    You will accept the invite under your <b>existing Hanzo Insights account</b> ({user?.email})
                 </div>
                 {user && (
                     <div
@@ -175,7 +175,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                             </LemonButton>
                             <div className="mt-2">
                                 <LemonButton type="secondary" center fullWidth icon={<IconChevronLeft />} to="/">
-                                    Go back to PostHog
+                                    Go back to Hanzo
                                 </LemonButton>
                             </div>
                         </>
@@ -187,7 +187,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                             sideIcon={<IconChevronRight />}
                             onClick={() => (window.location.href = '/')}
                         >
-                            Go to PostHog
+                            Go to Hanzo Insights
                         </LemonButton>
                     )}
                 </div>
@@ -226,7 +226,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
             message={
                 <>
                     Welcome to
-                    <br /> PostHog{preflight?.cloud ? ' Cloud' : ''}!
+                    <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
                 </>
             }
             leftContainerContent={
@@ -236,13 +236,13 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                         <span className="text-4xl font-bold border-b border-dashed pb-2">
                             {invite?.organization_name || 'us'}
                         </span>
-                        <span>on PostHog</span>
+                        <span>on Hanzo Insights</span>
                     </div>
                 </div>
             }
             footer={<SupportModalButton name={invite.first_name} email={invite.target_email} />}
         >
-            <h2 className="text-center">Create your PostHog account</h2>
+            <h2 className="text-center">Create your Hanzo Insights account</h2>
             {signupManualErrors?.generic && (
                 <LemonBanner type="error" className="mb-4">
                     {signupManualErrors.generic.detail || 'Could not complete your signup.'}{' '}

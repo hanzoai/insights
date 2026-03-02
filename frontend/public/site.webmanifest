@@ -1,6 +1,6 @@
 {
-    "name": "PostHog",
-    "short_name": "PostHog",
+    "name": "Hanzo Insights",
+    "short_name": "Insights",
     "icons": [
         {
             "src": "/static/icons/android-chrome-192x192.png?v=2023-07-07",
@@ -13,6 +13,6 @@
             "type": "image/png"
         }
     ],
-    "theme_color": "#ffffff",
-    "background_color": "#ffffff"
+    "theme_color": "#000000",
+    "background_color": "#000000"
 }
