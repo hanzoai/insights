@@ -143,7 +143,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
             <div className="deprecated-space-y-2">
                 <h2>You have been invited to join {invite.organization_name}</h2>
                 <div>
-                    You will accept the invite under your <b>existing Hanzo Insights account</b> ({user?.email})
+                    You will accept the invite under your <b>existing Insights account</b> ({user?.email})
                 </div>
                 {user && (
                     <div
@@ -187,7 +187,7 @@ function AuthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite }): 
                             sideIcon={<IconChevronRight />}
                             onClick={() => (window.location.href = '/')}
                         >
-                            Go to Hanzo Insights
+                            Go to Insights
                         </LemonButton>
                     )}
                 </div>
@@ -226,7 +226,7 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
             message={
                 <>
                     Welcome to
-                    <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
+                    <br /> Insights{preflight?.cloud ? ' Cloud' : ''}!
                 </>
             }
             leftContainerContent={
@@ -236,13 +236,13 @@ function UnauthenticatedAcceptInvite({ invite }: { invite: PrevalidatedInvite })
                         <span className="text-4xl font-bold border-b border-dashed pb-2">
                             {invite?.organization_name || 'us'}
                         </span>
-                        <span>on Hanzo Insights</span>
+                        <span>on Insights</span>
                     </div>
                 </div>
             }
             footer={<SupportModalButton name={invite.first_name} email={invite.target_email} />}
         >
-            <h2 className="text-center">Create your Hanzo Insights account</h2>
+            <h2 className="text-center">Create your Insights account</h2>
             {signupManualErrors?.generic && (
                 <LemonBanner type="error" className="mb-4">
                     {signupManualErrors.generic.detail || 'Could not complete your signup.'}{' '}
