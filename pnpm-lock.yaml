@@ -227,8 +227,6 @@ importers:
         specifier: 5.4.5
         version: 5.4.5
 
-  common/hogql_parser: {}
-
   common/hogvm/typescript:
     dependencies:
       luxon:
@@ -286,6 +284,8 @@ importers:
       typescript:
         specifier: 5.4.5
         version: 5.4.5
+
+  common/insightsql_parser: {}
 
   common/plugin_transpiler:
     dependencies:
@@ -495,6 +495,9 @@ importers:
       '@floating-ui/react':
         specifier: ^0.26.9
         version: 0.26.9(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@hanzo/insightsql-parser':
+        specifier: workspace:*
+        version: link:../common/insightsql_parser
       '@lottiefiles/react-lottie-player':
         specifier: ^3.4.7
         version: 3.4.7(react@18.3.1)
@@ -519,9 +522,6 @@ importers:
       '@posthog/hedgehog-mode':
         specifier: ^0.0.48
         version: 0.0.48(prop-types@15.8.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@posthog/hogql-parser':
-        specifier: workspace:*
-        version: link:../common/hogql_parser
       '@posthog/hogvm':
         specifier: workspace:*
         version: link:../common/hogvm/typescript
@@ -20290,8 +20290,8 @@ packages:
     resolution: {integrity: sha512-hAZsKq7Yy11Zu1DE0OzWjw7nnLZmJZYTDZZyEFHZdUhV8FkH5MCfoU1XMaxXovpyW5nq5scPqq0ZDP9Zyl04oQ==}
     engines: {node: '>= 10.0.0'}
 
-  unlayer-types@1.372.0:
-    resolution: {integrity: sha512-VkxM4XkjZAqRXywuY0ZI8feONHEKv/IfuQOWBqho7qpv4/+y4PlzsFAaGklx3D4aZoxa/xCKgJV3FSx69FMQug==}
+  unlayer-types@1.382.0:
+    resolution: {integrity: sha512-BujQISyQvM156n/AkKEN2f3DzMhrR+dx9wLksaPeBI6QDwA7LFkJhMdVi8CtIzIK10E6JTtXG7naX2pD/o79eA==}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -41626,7 +41626,7 @@ snapshots:
   react-email-editor@1.7.11(react@18.3.1):
     dependencies:
       react: 18.3.1
-      unlayer-types: 1.372.0
+      unlayer-types: 1.382.0
 
   react-error-overlay@6.0.9: {}
 
@@ -43794,7 +43794,7 @@ snapshots:
 
   universalify@2.0.0: {}
 
-  unlayer-types@1.372.0: {}
+  unlayer-types@1.382.0: {}
 
   unpipe@1.0.0: {}
 
