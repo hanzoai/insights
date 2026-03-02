@@ -66,7 +66,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             <>
                 <Markdown>
                     {dedent`
-                        You can use the \`InsightsErrorBoundary\` component to capture rendering errors thrown by components:
+                        You can use the \`PostHogErrorBoundary\` component to capture rendering errors thrown by components:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -75,19 +75,19 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                             language: 'jsx',
                             file: 'React Native',
                             code: dedent`
-                                import { InsightsProvider, InsightsErrorBoundary } from 'posthog-react-native'
+                                import { PostHogProvider, PostHogErrorBoundary } from 'posthog-react-native'
                                 import { View, Text } from 'react-native'
 
                                 const App = () => {
                                   return (
-                                    <InsightsProvider apiKey="<ph_project_api_key>">
-                                      <InsightsErrorBoundary
+                                    <PostHogProvider apiKey="<ph_project_api_key>">
+                                      <PostHogErrorBoundary
                                         fallback={YourFallbackComponent}
                                         additionalProperties={{ screen: "home" }}
                                       >
                                         <YourApp />
-                                      </InsightsErrorBoundary>
-                                    </InsightsProvider>
+                                      </PostHogErrorBoundary>
+                                    </PostHogProvider>
                                   )
                                 }
 
@@ -106,7 +106,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <CalloutBox type="caution" title="Duplicate errors with console capture">
                     <Markdown>
                         {dedent`
-                            If you have both \`InsightsErrorBoundary\` and \`console\` capture enabled in your \`errorTracking\` config, render errors will be captured twice. This is because React logs all errors to the console by default. To avoid this, set \`console: []\` on \`errorTracking.autocapture\` (for example, \`errorTracking: { autocapture: { console: [] } }\`) when using \`InsightsErrorBoundary\`.
+                            If you have both \`PostHogErrorBoundary\` and \`console\` capture enabled in your \`errorTracking\` config, render errors will be captured twice. This is because React logs all errors to the console by default. To avoid this, set \`console: []\` on \`errorTracking.autocapture\` (for example, \`errorTracking: { autocapture: { console: [] } }\`) when using \`PostHogErrorBoundary\`.
                         `}
                     </Markdown>
                 </CalloutBox>

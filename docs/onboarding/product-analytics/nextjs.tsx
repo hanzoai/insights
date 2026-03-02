@@ -119,9 +119,9 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { useEffect } from "react"
 
                                                 import posthog from 'posthog-js'
-                                                import { InsightsProvider as PHProvider } from 'posthog-js/react'
+                                                import { PostHogProvider as PHProvider } from 'posthog-js/react'
 
-                                                export function InsightsProvider({ children }: { children: React.ReactNode }) {
+                                                export function PostHogProvider({ children }: { children: React.ReactNode }) {
                                                   useEffect(() => {
                                                     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
                                                       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
@@ -140,7 +140,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                     ]}
                                 />
                                 <Markdown>
-                                    Then import the `InsightsProvider` component in your `app/layout.tsx` and wrap your
+                                    Then import the `PostHogProvider` component in your `app/layout.tsx` and wrap your
                                     app with it:
                                 </Markdown>
                                 <CodeBlock
@@ -150,15 +150,15 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             file: 'app/layout.tsx',
                                             code: dedent`
                                                 import './globals.css'
-                                                import { InsightsProvider } from './providers'
+                                                import { PostHogProvider } from './providers'
 
                                                 export default function RootLayout({ children }: { children: React.ReactNode }) {
                                                   return (
                                                     <html lang="en">
                                                       <body>
-                                                        <InsightsProvider>
+                                                        <PostHogProvider>
                                                           {children}
-                                                        </InsightsProvider>
+                                                        </PostHogProvider>
                                                       </body>
                                                     </html>
                                                   )
@@ -181,7 +181,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { useEffect } from 'react'
                                                 import { Router } from 'next/router'
                                                 import posthog from 'posthog-js'
-                                                import { InsightsProvider } from 'posthog-js/react'
+                                                import { PostHogProvider } from 'posthog-js/react'
                                                 import type { AppProps } from 'next/app'
 
                                                 export default function App({ Component, pageProps }: AppProps) {
@@ -197,9 +197,9 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                   }, [])
 
                                                   return (
-                                                    <InsightsProvider client={posthog}>
+                                                    <PostHogProvider client={posthog}>
                                                       <Component {...pageProps} />
-                                                    </InsightsProvider>
+                                                    </PostHogProvider>
                                                   )
                                                 }
                                             `,
