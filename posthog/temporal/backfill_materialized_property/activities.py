@@ -43,14 +43,14 @@ def _generate_property_extraction_sql(property_type: str) -> str:
     """
     Generate SQL expression to extract property value from JSON properties column.
 
-    Uses %(property_name)s placeholder for safe parameterization (matching HogQL pattern).
+    Uses %(property_name)s placeholder for safe parameterization (matching InsightsQL pattern).
     Caller must pass property_name in the query params dict.
 
-    Mimics the HogQL property type wrappers (toFloat, toBool, toDateTime) applied
+    Mimics the InsightsQL property type wrappers (toFloat, toBool, toDateTime) applied
     to JSON-extracted values to ensure identical behavior.
     """
-    # Base JSON extraction with quote trimming and nullIf handling (same as HogQL printer)
-    # HogQL pattern: replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(...), ''), 'null'), '^"|"$', '')
+    # Base JSON extraction with quote trimming and nullIf handling (same as InsightsQL printer)
+    # InsightsQL pattern: replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(...), ''), 'null'), '^"|"$', '')
     base_extract = (
         "replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, %(property_name)s), ''), 'null'), '^\"|\"$', '')"
     )
@@ -59,17 +59,17 @@ def _generate_property_extraction_sql(property_type: str) -> str:
         return base_extract
 
     elif property_type == PropertyType.Numeric:
-        # Match HogQL's toFloat() - no whitespace trimming, just direct conversion
+        # Match InsightsQL's toFloat() - no whitespace trimming, just direct conversion
         return f"toFloat64OrNull({base_extract})"
 
     elif property_type == PropertyType.Boolean:
-        # Match HogQL's toBool(transform(toString(...), ["true", "false"], [1, 0], None))
-        # Need to use toString() wrapper to match HogQL behavior
+        # Match InsightsQL's toBool(transform(toString(...), ["true", "false"], [1, 0], None))
+        # Need to use toString() wrapper to match InsightsQL behavior
         return f"transform(toString({base_extract}), ['true', 'false'], [1, 0], NULL)"
 
     elif property_type == PropertyType.Datetime:
-        # Match HogQL's toDateTime() -> parseDateTime64BestEffortOrNull with precision 6
-        # See posthog/hogql/printer.py L1391-1392 and posthog/hogql/functions/clickhouse/conversions.py L112-127
+        # Match InsightsQL's toDateTime() -> parseDateTime64BestEffortOrNull with precision 6
+        # See posthog/insightsql/printer.py L1391-1392 and posthog/insightsql/functions/clickhouse/conversions.py L112-127
         # Timezone param omitted - uses server default (UTC). Most datetime strings have explicit
         # timezone info anyway, and for ambiguous strings UTC is a reasonable default.
         return f"parseDateTime64BestEffortOrNull({base_extract}, 6)"

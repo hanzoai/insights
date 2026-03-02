@@ -61,7 +61,7 @@ export interface ListActorsResponse {
     }[]
     missing_persons?: number
     next?: string
-    offset?: number // Offset for HogQL queries
+    offset?: number // Offset for InsightsQL queries
 }
 
 export const personsModalLogic = kea<personsModalLogicType>([

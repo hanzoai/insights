@@ -33,7 +33,7 @@ from posthog.temporal.data_imports.pipelines.common.load import (
 from posthog.temporal.data_imports.pipelines.pipeline.batcher import Batcher
 from posthog.temporal.data_imports.pipelines.pipeline.cdp_producer import CDPProducer
 from posthog.temporal.data_imports.pipelines.pipeline.delta_table_helper import DeltaTableHelper
-from posthog.temporal.data_imports.pipelines.pipeline.hogql_schema import HogQLSchema
+from posthog.temporal.data_imports.pipelines.pipeline.insightsql_schema import InsightsQLSchema
 from posthog.temporal.data_imports.pipelines.pipeline.typings import PipelineResult, ResumableData, SourceResponse
 from posthog.temporal.data_imports.pipelines.pipeline.utils import (
     _append_debug_column_to_pyarrows_table,
@@ -110,7 +110,7 @@ class PipelineNonDLT(Generic[ResumableData]):
     _reset_pipeline: bool
     _delta_table_helper: DeltaTableHelper
     _resumable_source_manager: ResumableSourceManager[ResumableData] | None
-    _internal_schema = HogQLSchema()
+    _internal_schema = InsightsQLSchema()
     _cdp_producer: CDPProducer
     _batcher: Batcher
     _load_id: int
@@ -144,7 +144,7 @@ class PipelineNonDLT(Generic[ResumableData]):
         self._delta_table_helper = DeltaTableHelper(self._resource_name, self._job, self._logger)
         self._resumable_source_manager = resumable_source_manager
         self._batcher = Batcher(self._logger)
-        self._internal_schema = HogQLSchema()
+        self._internal_schema = InsightsQLSchema()
         self._cdp_producer = CDPProducer(
             team_id=self._job.team_id, schema_id=self._schema.id, job_id=job_id, logger=self._logger
         )
@@ -347,7 +347,7 @@ class PipelineNonDLT(Generic[ResumableData]):
             run_id=str(self._job.id),
             team_id=self._job.team_id,
             schema_id=self._schema.id,
-            table_schema_dict=self._internal_schema.to_hogql_types(),
+            table_schema_dict=self._internal_schema.to_insightsql_types(),
             row_count=row_count,
             queryable_folder=queryable_folder,
             table_format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,
@@ -396,7 +396,7 @@ class PipelineNonDLT(Generic[ResumableData]):
             run_id=str(self._job.id),
             team_id=self._job.team_id,
             schema_id=self._schema.id,
-            table_schema_dict=self._internal_schema.to_hogql_types(),
+            table_schema_dict=self._internal_schema.to_insightsql_types(),
             row_count=row_count,
             queryable_folder=queryable_folder,
             table_format=DataWarehouseTable.TableFormat.DeltaS3Wrapper,

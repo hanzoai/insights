@@ -11,7 +11,7 @@ import {
     IconFlask,
     IconFunnels,
     IconGraph,
-    IconHogQL,
+    IconInsightsQL,
     IconLifecycle,
     IconLineGraph,
     IconLive,
@@ -262,34 +262,34 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         icon: IconTrends,
         inMenu: true,
     },
-    [NodeKind.HogQLQuery]: {
+    [NodeKind.InsightsQLQuery]: {
         name: 'SQL',
         description: 'Direct SQL query.',
         icon: IconBrackets,
         inMenu: true,
     },
-    [NodeKind.HogQLASTQuery]: {
+    [NodeKind.InsightsQLASTQuery]: {
         name: 'SQL AST',
         description: 'Direct SQL AST query.',
         icon: IconBrackets,
         inMenu: false,
     },
-    [NodeKind.HogQLMetadata]: {
+    [NodeKind.InsightsQLMetadata]: {
         name: 'SQL Metadata',
         description: 'Metadata for a SQL query.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
-    [NodeKind.HogQLAutocomplete]: {
+    [NodeKind.InsightsQLAutocomplete]: {
         name: 'SQL Autocomplete',
         description: 'Autocomplete for the SQL query editor.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.DatabaseSchemaQuery]: {
         name: 'Database Schema',
         description: 'Introspect the PostHog database schema.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [NodeKind.RevenueAnalyticsMetricsQuery]: {
@@ -372,8 +372,8 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.HogQuery]: {
         name: 'Hog',
-        description: 'Hog query.',
-        icon: IconHogQL,
+        description: 'Custom query.',
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [NodeKind.SessionAttributionExplorerQuery]: {
@@ -474,23 +474,23 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.TeamTaxonomyQuery]: {
         name: 'Team Taxonomy',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.EventTaxonomyQuery]: {
         name: 'Event Taxonomy',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.SuggestedQuestionsQuery]: {
         name: 'AI Suggested Questions',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.ActorsPropertyTaxonomyQuery]: {
         name: 'Actor Property Taxonomy',
         description: "View the taxonomy of the actor's property.",
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.TracesQuery]: {
@@ -516,7 +516,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.VectorSearchQuery]: {
         name: 'Vector Search',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.LogsQuery]: {
@@ -541,17 +541,17 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
     },
     [NodeKind.MarketingAnalyticsTableQuery]: {
         name: 'Marketing Analytics Table',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.MarketingAnalyticsAggregatedQuery]: {
         name: 'Marketing Analytics Aggregated',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.NonIntegratedConversionsTableQuery]: {
         name: 'Non-Integrated Conversions Table',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: false,
     },
     [NodeKind.UsageMetricsQuery]: {
@@ -586,7 +586,7 @@ export const INSIGHT_TYPES_METADATA: Record<InsightType, InsightTypeMetadata> = 
     [InsightType.SQL]: {
         name: 'SQL',
         description: 'Use SQL to query your data.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
         tooltipDocLink: 'https://posthog.com/docs/data-warehouse/sql',
     },
@@ -599,7 +599,7 @@ export const INSIGHT_TYPES_METADATA: Record<InsightType, InsightTypeMetadata> = 
     [InsightType.HOG]: {
         name: 'Hog',
         description: 'Use Hog to query your data.',
-        icon: IconHogQL,
+        icon: IconInsightsQL,
         inMenu: true,
     },
     [InsightType.WEB_ANALYTICS]: {

@@ -6,7 +6,7 @@ from opentelemetry import trace
 
 from posthog.schema import (
     FilterLogicalOperator,
-    HogQLQueryModifiers,
+    InsightsQLQueryModifiers,
     PropertyGroupFilterValue,
     PropertyOperator,
     RecordingOrder,
@@ -14,13 +14,13 @@ from posthog.schema import (
     RecordingsQuery,
 )
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLGlobalSettings
-from posthog.hogql.parser import parse_select
-from posthog.hogql.property import property_to_expr
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLGlobalSettings
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.property import property_to_expr
 
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.insights.paginators import HogQLCursorPaginator, HogQLHasMorePaginator
+from posthog.insightsql_queries.insights.paginators import InsightsQLCursorPaginator, InsightsQLHasMorePaginator
 from posthog.models import Team
 from posthog.session_recordings.queries.sub_queries.base_query import SessionRecordingsListingBaseQuery
 from posthog.session_recordings.queries.sub_queries.cohort_subquery import CohortPropertyGroupsSubQuery
@@ -117,7 +117,7 @@ class SessionRecordingListFromQuery(SessionRecordingsListingBaseQuery):
         self,
         team: Team,
         query: RecordingsQuery,
-        hogql_query_modifiers: HogQLQueryModifiers | None = None,
+        insightsql_query_modifiers: InsightsQLQueryModifiers | None = None,
         allow_event_property_expansion: bool = False,
         **_,
     ):
@@ -151,7 +151,7 @@ class SessionRecordingListFromQuery(SessionRecordingsListingBaseQuery):
         # This provides backward compatibility while making cursor-based the default
         if expanded_query.offset is not None:
             # Backward compatibility: use offset-based pagination when offset is explicitly provided
-            self._paginator: Union[HogQLCursorPaginator, HogQLHasMorePaginator] = HogQLHasMorePaginator(
+            self._paginator: Union[InsightsQLCursorPaginator, InsightsQLHasMorePaginator] = InsightsQLHasMorePaginator(
                 limit=expanded_query.limit or self.SESSION_RECORDINGS_DEFAULT_LIMIT, offset=expanded_query.offset
             )
         else:
@@ -162,7 +162,7 @@ class SessionRecordingListFromQuery(SessionRecordingsListingBaseQuery):
             # Create field index mapping for cursor extraction from tuple results
             field_indices = {field: idx for idx, field in enumerate(self._get_result_columns())}
 
-            self._paginator = HogQLCursorPaginator(
+            self._paginator = InsightsQLCursorPaginator(
                 limit=expanded_query.limit or self.SESSION_RECORDINGS_DEFAULT_LIMIT,
                 after=expanded_query.after,
                 order_field=order_field,
@@ -171,7 +171,7 @@ class SessionRecordingListFromQuery(SessionRecordingsListingBaseQuery):
                 field_indices=field_indices,
                 use_having_clause=True,  # Session recordings query uses GROUP BY, so cursor conditions must be in HAVING
             )
-        self._hogql_query_modifiers = hogql_query_modifiers
+        self._insightsql_query_modifiers = insightsql_query_modifiers
         self._allow_event_property_expansion = allow_event_property_expansion
 
     @tracer.start_as_current_span("SessionRecordingListFromQuery.run")
@@ -179,18 +179,18 @@ class SessionRecordingListFromQuery(SessionRecordingsListingBaseQuery):
         query = self.get_query()
 
         with tracer.start_as_current_span("SessionRecordingListFromQuery.paginate"):
-            paginated_response = self._paginator.execute_hogql_query(
+            paginated_response = self._paginator.execute_insightsql_query(
                 # TODO I guess the paginator needs to know how to handle union queries or all callers are supposed to collapse them or .... 🤷
                 query=cast(ast.SelectQuery, query),
                 team=self._team,
                 query_type="SessionRecordingListQuery",
-                modifiers=self._hogql_query_modifiers,
-                settings=HogQLGlobalSettings(allow_experimental_analyzer=None),  # Using global ClickHouse setting
+                modifiers=self._insightsql_query_modifiers,
+                settings=InsightsQLGlobalSettings(allow_experimental_analyzer=None),  # Using global ClickHouse setting
             )
 
         with tracer.start_as_current_span("SessionRecordingListFromQuery._data_to_return"):
             next_cursor = None
-            if isinstance(self._paginator, HogQLCursorPaginator):
+            if isinstance(self._paginator, InsightsQLCursorPaginator):
                 next_cursor = self._paginator.get_next_cursor()
 
             return SessionRecordingQueryResult(

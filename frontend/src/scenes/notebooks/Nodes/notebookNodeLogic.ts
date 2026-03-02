@@ -20,7 +20,7 @@ import api from 'lib/api'
 import { JSONContent, RichContentNode } from 'lib/components/RichContentEditor/types'
 import { hashCodeForString } from 'lib/utils'
 
-import { isHogQLQuery, isNodeWithSource } from '~/queries/utils'
+import { isInsightsQLQuery, isNodeWithSource } from '~/queries/utils'
 
 import { notebookLogicType } from '../Notebook/notebookLogicType'
 import {
@@ -36,15 +36,15 @@ import {
 import { NotebookNodeMessages, NotebookNodeMessagesListeners } from './messaging/notebook-node-messages'
 import {
     type DuckSqlNodeSummary,
-    type HogqlSqlNodeSummary,
+    type InsightsqlSqlNodeSummary,
     type NotebookDependencyGraph,
     type NotebookDependencyNode,
     type NotebookDependencyUsage,
-    extractHogqlPlaceholders,
+    extractInsightsqlPlaceholders,
     getUniqueDuckSqlReturnVariable,
-    getUniqueHogqlReturnVariable,
+    getUniqueInsightsqlReturnVariable,
     resolveDuckSqlReturnVariable,
-    resolveHogqlReturnVariable,
+    resolveInsightsqlReturnVariable,
 } from './notebookNodeContent'
 import type { notebookNodeLogicType } from './notebookNodeLogicType'
 import {
@@ -61,7 +61,7 @@ import {
 
 export type PythonRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
 export type DuckSqlRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
-export type HogqlSqlRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
+export type InsightsqlSqlRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
 
 type RunPythonCellParams = {
     notebookId: string
@@ -82,14 +82,14 @@ type RunDuckSqlCellParams = {
     executionSandboxId: string | null
 }
 
-type RunHogqlSqlCellParams = {
+type RunInsightsqlSqlCellParams = {
     notebookId: string
     code: string
     placeholders: string[]
     returnVariable: string
     pageSize: number
     updateAttributes: (attributes: Partial<NotebookNodeAttributes<any>>) => void
-    setHogqlSqlRunLoading: (loading: boolean) => void
+    setInsightsqlSqlRunLoading: (loading: boolean) => void
     executionSandboxId: string | null
 }
 
@@ -99,7 +99,7 @@ const isSqlQueryNode = (nodeAttributes: NotebookNodeAttributes<any>): boolean =>
         return false
     }
     if (isNodeWithSource(query)) {
-        return isHogQLQuery(query.source)
+        return isInsightsQLQuery(query.source)
     }
     return false
 }
@@ -119,37 +119,37 @@ const buildDuckSqlCode = (code: string, returnVariable: string, pageSize: number
     )
 }
 
-type HogqlExecuteResponse = {
+type InsightsqlExecuteResponse = {
     results?: any[]
     columns?: string[]
     error?: string
 }
 
-const buildHogqlSqlAssignmentCode = (code: string, returnVariable: string): string => {
-    const resolvedReturnVariable = resolveHogqlReturnVariable(returnVariable)
+const buildInsightsqlSqlAssignmentCode = (code: string, returnVariable: string): string => {
+    const resolvedReturnVariable = resolveInsightsqlReturnVariable(returnVariable)
     const sqlLiteral = JSON.stringify(code ?? '')
-    return `${resolvedReturnVariable} = hogql_execute(${sqlLiteral})`
+    return `${resolvedReturnVariable} = insightsql_execute(${sqlLiteral})`
 }
 
-const buildHogqlSqlExecutionCode = (
+const buildInsightsqlSqlExecutionCode = (
     code: string,
     returnVariable: string,
     pageSize: number,
     placeholders: string[]
 ): string => {
-    const resolvedReturnVariable = resolveHogqlReturnVariable(returnVariable)
+    const resolvedReturnVariable = resolveInsightsqlReturnVariable(returnVariable)
     const sqlLiteral = JSON.stringify(code ?? '')
     const placeholdersLiteral = JSON.stringify(placeholders)
     const previewPageSize = Math.max(1, pageSize || DEFAULT_DATAFRAME_PAGE_SIZE)
     return (
         `import json\n` +
-        `${resolvedReturnVariable} = hogql_execute(${sqlLiteral}, placeholders=${placeholdersLiteral})\n` +
+        `${resolvedReturnVariable} = insightsql_execute(${sqlLiteral}, placeholders=${placeholdersLiteral})\n` +
         `json.dumps(notebook_dataframe_page(${resolvedReturnVariable}, offset=0, limit=${previewPageSize}))`
     )
 }
 
-const buildHogqlDataframeResult = (
-    response: HogqlExecuteResponse,
+const buildInsightsqlDataframeResult = (
+    response: InsightsqlExecuteResponse,
     pageSize: number
 ): NotebookDataframeResult | null => {
     const columns = Array.isArray(response.columns) ? response.columns : []
@@ -186,40 +186,40 @@ const buildHogqlDataframeResult = (
     }
 }
 
-const buildHogqlExecutionResult = ({
+const buildInsightsqlExecutionResult = ({
     response,
     exportedGlobals,
     returnVariable,
     query,
     pageSize,
 }: {
-    response: HogqlExecuteResponse
+    response: InsightsqlExecuteResponse
     exportedGlobals: { name: string; type: string }[]
     returnVariable: string
     query: string
     pageSize: number
 }): PythonExecutionResult => {
     const isError = Boolean(response.error)
-    const dataframeResult = isError ? null : buildHogqlDataframeResult(response, pageSize)
+    const dataframeResult = isError ? null : buildInsightsqlDataframeResult(response, pageSize)
     const variableResponse: PythonKernelVariableResponse = isError
         ? {
               status: 'error',
               type: 'DataFrame',
-              ename: 'HogQLQueryError',
+              ename: 'InsightsQLQueryError',
               evalue: response.error,
               traceback: response.error ? [response.error] : [],
           }
         : {
               status: 'ok',
               type: 'DataFrame',
-              hogql_query: query,
+              insightsql_query: query,
           }
     return {
         status: isError ? 'error' : 'ok',
         stdout: '',
-        stderr: isError ? (response.error ?? 'Failed to run HogQL query.') : '',
+        stderr: isError ? (response.error ?? 'Failed to run InsightsQL query.') : '',
         result: dataframeResult ? JSON.stringify(dataframeResult) : undefined,
-        errorName: isError ? 'HogQLQueryError' : null,
+        errorName: isError ? 'InsightsQLQueryError' : null,
         traceback: isError && response.error ? [response.error] : [],
         variables: mergeExecutionVariables(exportedGlobals, {
             [returnVariable]: variableResponse,
@@ -348,21 +348,21 @@ const isDuckSqlExecutionFresh = (
     )
 }
 
-const isHogqlSqlExecutionFresh = (
+const isInsightsqlSqlExecutionFresh = (
     nodeLogic: BuiltLogic<notebookNodeLogicType>,
     code: string,
     returnVariable: string
 ): boolean => {
-    const { hogqlExecutionCodeHash, hogqlExecution, hogqlExecutionSandboxId } = nodeLogic.values.nodeAttributes
+    const { insightsqlExecutionCodeHash, insightsqlExecution, insightsqlExecutionSandboxId } = nodeLogic.values.nodeAttributes
     const codeHash = hashCodeForString(`${code}\n${returnVariable}`)
     const kernelSandboxId = nodeLogic.values.kernelInfo?.sandbox_id ?? null
     const kernelIsRunning = nodeLogic.values.kernelInfo?.status === 'running'
     const sandboxMatches =
-        hogqlExecutionSandboxId && kernelSandboxId !== null && hogqlExecutionSandboxId === kernelSandboxId
+        insightsqlExecutionSandboxId && kernelSandboxId !== null && insightsqlExecutionSandboxId === kernelSandboxId
     return (
-        hogqlExecutionCodeHash &&
-        hogqlExecutionCodeHash === codeHash &&
-        hogqlExecution?.status === 'ok' &&
+        insightsqlExecutionCodeHash &&
+        insightsqlExecutionCodeHash === codeHash &&
+        insightsqlExecution?.status === 'ok' &&
         sandboxMatches &&
         kernelIsRunning
     )
@@ -381,8 +381,8 @@ const setDependencyNodeQueued = (
         nodeLogic.actions.setDuckSqlRunQueued(queued)
         return
     }
-    if (nodeType === NotebookNodeType.HogQLSQL) {
-        nodeLogic.actions.setHogqlSqlRunQueued(queued)
+    if (nodeType === NotebookNodeType.InsightsQLSQL) {
+        nodeLogic.actions.setInsightsqlSqlRunQueued(queued)
     }
 }
 
@@ -391,15 +391,15 @@ const runDependencyNodes = async ({
     notebookId,
     mode,
     duckSqlNodeSummaries,
-    hogqlSqlNodeSummaries,
+    insightsqlSqlNodeSummaries,
     currentNodeId,
     skipDataframeVariableUpdateForNodeId,
 }: {
     entries: { node: NotebookDependencyNode; nodeLogic: BuiltLogic<notebookNodeLogicType> }[]
     notebookId: string
-    mode: PythonRunMode | DuckSqlRunMode | HogqlSqlRunMode
+    mode: PythonRunMode | DuckSqlRunMode | InsightsqlSqlRunMode
     duckSqlNodeSummaries: DuckSqlNodeSummary[]
-    hogqlSqlNodeSummaries: HogqlSqlNodeSummary[]
+    insightsqlSqlNodeSummaries: InsightsqlSqlNodeSummary[]
     currentNodeId: string
     skipDataframeVariableUpdateForNodeId?: string
 }): Promise<void> => {
@@ -491,36 +491,36 @@ const runDependencyNodes = async ({
                 }
             }
 
-            if (node.nodeType === NotebookNodeType.HogQLSQL) {
+            if (node.nodeType === NotebookNodeType.InsightsQLSQL) {
                 const nodeAttributes = nodeLogic.values.nodeAttributes as {
                     code?: string
                     returnVariable?: string
-                    hogqlExecutionSandboxId?: string | null
+                    insightsqlExecutionSandboxId?: string | null
                 }
                 const nodeCode = nodeAttributes.code ?? node.code ?? ''
-                const nodeReturnVariable = getUniqueHogqlReturnVariable(
-                    hogqlSqlNodeSummaries,
+                const nodeReturnVariable = getUniqueInsightsqlReturnVariable(
+                    insightsqlSqlNodeSummaries,
                     node.nodeId,
-                    nodeAttributes.returnVariable ?? node.returnVariable ?? 'hogql_df'
+                    nodeAttributes.returnVariable ?? node.returnVariable ?? 'insightsql_df'
                 )
-                const placeholders = extractHogqlPlaceholders(nodeCode)
+                const placeholders = extractInsightsqlPlaceholders(nodeCode)
                 const executionSandboxId =
-                    nodeLogic.values.kernelInfo?.sandbox_id ?? nodeAttributes.hogqlExecutionSandboxId ?? null
+                    nodeLogic.values.kernelInfo?.sandbox_id ?? nodeAttributes.insightsqlExecutionSandboxId ?? null
                 if (
                     mode === 'auto' &&
                     node.nodeId !== currentNodeId &&
-                    isHogqlSqlExecutionFresh(nodeLogic, nodeCode, nodeReturnVariable)
+                    isInsightsqlSqlExecutionFresh(nodeLogic, nodeCode, nodeReturnVariable)
                 ) {
                     continue
                 }
-                const { executed, execution } = await runHogqlSqlCell({
+                const { executed, execution } = await runInsightsqlSqlCell({
                     notebookId,
                     code: nodeCode,
                     placeholders,
                     returnVariable: nodeReturnVariable,
                     pageSize: nodeLogic.values.dataframePageSize,
                     updateAttributes: nodeLogic.actions.updateAttributes,
-                    setHogqlSqlRunLoading: nodeLogic.actions.setHogqlSqlRunLoading,
+                    setInsightsqlSqlRunLoading: nodeLogic.actions.setInsightsqlSqlRunLoading,
                     executionSandboxId,
                 })
 
@@ -531,7 +531,7 @@ const runDependencyNodes = async ({
                         node.nodeId !== skipDataframeVariableUpdateForNodeId || !nodeLogic.values.dataframeVariableName
                     if (shouldUpdateDataframeVariable) {
                         nodeLogic.actions.setDataframeVariableName(
-                            nodeLogic.values.hogqlSqlReturnVariable,
+                            nodeLogic.values.insightsqlSqlReturnVariable,
                             previewResult
                         )
                     }
@@ -725,23 +725,23 @@ const runDuckSqlCell = async ({
     }
 }
 
-const runHogqlSqlCell = async ({
+const runInsightsqlSqlCell = async ({
     notebookId,
     code,
     placeholders,
     returnVariable,
     pageSize,
     updateAttributes,
-    setHogqlSqlRunLoading,
+    setInsightsqlSqlRunLoading,
     executionSandboxId,
-}: RunHogqlSqlCellParams): Promise<{ executed: boolean; execution: PythonExecutionResult | null }> => {
-    setHogqlSqlRunLoading(true)
-    const resolvedReturnVariable = resolveHogqlReturnVariable(returnVariable)
+}: RunInsightsqlSqlCellParams): Promise<{ executed: boolean; execution: PythonExecutionResult | null }> => {
+    setInsightsqlSqlRunLoading(true)
+    const resolvedReturnVariable = resolveInsightsqlReturnVariable(returnVariable)
     const placeholderNames = placeholders.filter((placeholder) => placeholder.trim().length > 0)
     const shouldExecuteInKernel = placeholderNames.length > 0
     const executionCode = shouldExecuteInKernel
-        ? buildHogqlSqlExecutionCode(code, returnVariable, pageSize, placeholderNames)
-        : buildHogqlSqlAssignmentCode(code, returnVariable)
+        ? buildInsightsqlSqlExecutionCode(code, returnVariable, pageSize, placeholderNames)
+        : buildInsightsqlSqlAssignmentCode(code, returnVariable)
     let runtimeSandboxId = executionSandboxId
     try {
         let executionResult: PythonExecutionResult | null = null
@@ -750,9 +750,9 @@ const runHogqlSqlCell = async ({
         const exportedGlobals = [{ name: resolvedReturnVariable, type: 'DataFrame' }]
 
         updateAttributes({
-            hogqlExecution: buildPythonExecutionRunning(exportedGlobals),
-            hogqlExecutionCodeHash: codeHash,
-            hogqlExecutionSandboxId: executionSandboxId,
+            insightsqlExecution: buildPythonExecutionRunning(exportedGlobals),
+            insightsqlExecutionCodeHash: codeHash,
+            insightsqlExecutionSandboxId: executionSandboxId,
         })
 
         kernelResponse = (await api.notebooks.kernelExecute(notebookId, {
@@ -764,9 +764,9 @@ const runHogqlSqlCell = async ({
         if (kernelResponse.status === 'error') {
             executionResult = buildPythonExecutionResult(kernelResponse, exportedGlobals)
             updateAttributes({
-                hogqlExecution: executionResult,
-                hogqlExecutionCodeHash: codeHash,
-                hogqlExecutionSandboxId: runtimeSandboxId,
+                insightsqlExecution: executionResult,
+                insightsqlExecutionCodeHash: codeHash,
+                insightsqlExecutionSandboxId: runtimeSandboxId,
             })
             return { executed: true, execution: executionResult }
         }
@@ -774,17 +774,17 @@ const runHogqlSqlCell = async ({
         if (shouldExecuteInKernel) {
             executionResult = buildPythonExecutionResult(kernelResponse, exportedGlobals)
             updateAttributes({
-                hogqlExecution: executionResult,
-                hogqlExecutionCodeHash: codeHash,
-                hogqlExecutionSandboxId: runtimeSandboxId,
+                insightsqlExecution: executionResult,
+                insightsqlExecutionCodeHash: codeHash,
+                insightsqlExecutionSandboxId: runtimeSandboxId,
             })
             return { executed: true, execution: executionResult }
         }
 
-        const queryResponse = await api.notebooks.hogqlExecute(notebookId, {
+        const queryResponse = await api.notebooks.insightsqlExecute(notebookId, {
             query: code,
         })
-        executionResult = buildHogqlExecutionResult({
+        executionResult = buildInsightsqlExecutionResult({
             response: queryResponse,
             exportedGlobals,
             returnVariable: resolvedReturnVariable,
@@ -792,9 +792,9 @@ const runHogqlSqlCell = async ({
             pageSize,
         })
         updateAttributes({
-            hogqlExecution: executionResult,
-            hogqlExecutionCodeHash: codeHash,
-            hogqlExecutionSandboxId: runtimeSandboxId,
+            insightsqlExecution: executionResult,
+            insightsqlExecutionCodeHash: codeHash,
+            insightsqlExecutionSandboxId: runtimeSandboxId,
         })
 
         if (executionResult.status === 'error') {
@@ -803,18 +803,18 @@ const runHogqlSqlCell = async ({
 
         return { executed: true, execution: executionResult }
     } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to run SQL (HogQL) query.'
+        const message = error instanceof Error ? error.message : 'Failed to run SQL (InsightsQL) query.'
         const executionResult = buildPythonExecutionError(message, [
             { name: resolvedReturnVariable, type: 'DataFrame' },
         ])
         updateAttributes({
-            hogqlExecution: executionResult,
-            hogqlExecutionCodeHash: hashCodeForString(`${code}\n${resolvedReturnVariable}`),
-            hogqlExecutionSandboxId: runtimeSandboxId,
+            insightsqlExecution: executionResult,
+            insightsqlExecutionCodeHash: hashCodeForString(`${code}\n${resolvedReturnVariable}`),
+            insightsqlExecutionSandboxId: runtimeSandboxId,
         })
         return { executed: false, execution: executionResult }
     } finally {
-        setHogqlSqlRunLoading(false)
+        setInsightsqlSqlRunLoading(false)
     }
 }
 
@@ -919,10 +919,10 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         runDuckSqlNodeWithMode: (payload: { mode: DuckSqlRunMode }) => payload,
         setDuckSqlRunLoading: (loading: boolean) => ({ loading }),
         setDuckSqlRunQueued: (queued: boolean) => ({ queued }),
-        runHogqlSqlNode: true,
-        runHogqlSqlNodeWithMode: (payload: { mode: HogqlSqlRunMode }) => payload,
-        setHogqlSqlRunLoading: (loading: boolean) => ({ loading }),
-        setHogqlSqlRunQueued: (queued: boolean) => ({ queued }),
+        runInsightsqlSqlNode: true,
+        runInsightsqlSqlNodeWithMode: (payload: { mode: InsightsqlSqlRunMode }) => payload,
+        setInsightsqlSqlRunLoading: (loading: boolean) => ({ loading }),
+        setInsightsqlSqlRunQueued: (queued: boolean) => ({ queued }),
         setDataframeVariableName: (variableName: string | null, initialResult?: NotebookDataframeResult | null) => ({
             variableName,
             initialResult,
@@ -946,7 +946,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 'comments',
                 'pythonNodeSummaries',
                 'duckSqlNodeSummaries',
-                'hogqlSqlNodeSummaries',
+                'insightsqlSqlNodeSummaries',
                 'dependencyGraph',
                 'notebook',
                 'kernelInfo',
@@ -1039,16 +1039,16 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 setDuckSqlRunQueued: (_, { queued }) => queued,
             },
         ],
-        hogqlSqlRunLoading: [
+        insightsqlSqlRunLoading: [
             false,
             {
-                setHogqlSqlRunLoading: (_, { loading }) => loading,
+                setInsightsqlSqlRunLoading: (_, { loading }) => loading,
             },
         ],
-        hogqlSqlRunQueued: [
+        insightsqlSqlRunQueued: [
             false,
             {
-                setHogqlSqlRunQueued: (_, { queued }) => queued,
+                setInsightsqlSqlRunQueued: (_, { queued }) => queued,
             },
         ],
         dataframeVariableName: [
@@ -1125,21 +1125,21 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
         ],
         displayedGlobals: [
             (s) => [s.exportedGlobals, s.pythonExecution],
-            (exportedGlobals, pythonExecution): { name: string; type: string; hogqlQuery?: string }[] => {
+            (exportedGlobals, pythonExecution): { name: string; type: string; insightsqlQuery?: string }[] => {
                 if (!pythonExecution?.variables?.length) {
                     return exportedGlobals
                 }
 
-                const detailsByName = new Map<string, { type: string; hogqlQuery?: string }>(
+                const detailsByName = new Map<string, { type: string; insightsqlQuery?: string }>(
                     pythonExecution.variables.map((variable: PythonExecutionVariable) => [
                         variable.name,
-                        { type: variable.type, hogqlQuery: variable.hogqlQuery },
+                        { type: variable.type, insightsqlQuery: variable.insightsqlQuery },
                     ])
                 )
                 return exportedGlobals.map(({ name, type }) => ({
                     name,
                     type: detailsByName.get(name)?.type ?? type,
-                    hogqlQuery: detailsByName.get(name)?.hogqlQuery,
+                    insightsqlQuery: detailsByName.get(name)?.insightsqlQuery,
                 }))
             },
         ],
@@ -1157,14 +1157,14 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             (duckSqlNodeSummaries, nodeId, nodeAttributes): string =>
                 getUniqueDuckSqlReturnVariable(duckSqlNodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
         ],
-        hogqlSqlNodeIndex: [
-            (s) => [s.hogqlSqlNodeSummaries, s.nodeId],
-            (hogqlSqlNodeSummaries, nodeId) => hogqlSqlNodeSummaries.findIndex((node) => node.nodeId === nodeId),
+        insightsqlSqlNodeIndex: [
+            (s) => [s.insightsqlSqlNodeSummaries, s.nodeId],
+            (insightsqlSqlNodeSummaries, nodeId) => insightsqlSqlNodeSummaries.findIndex((node) => node.nodeId === nodeId),
         ],
-        hogqlSqlReturnVariable: [
-            (s) => [s.hogqlSqlNodeSummaries, s.nodeId, s.nodeAttributes],
-            (hogqlSqlNodeSummaries, nodeId, nodeAttributes): string =>
-                getUniqueHogqlReturnVariable(hogqlSqlNodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
+        insightsqlSqlReturnVariable: [
+            (s) => [s.insightsqlSqlNodeSummaries, s.nodeId, s.nodeAttributes],
+            (insightsqlSqlNodeSummaries, nodeId, nodeAttributes): string =>
+                getUniqueInsightsqlReturnVariable(insightsqlSqlNodeSummaries, nodeId, nodeAttributes.returnVariable ?? ''),
         ],
         dataframeRowCount: [(s) => [s.dataframeResult], (dataframeResult): number => dataframeResult?.rowCount ?? 0],
         duckSqlTablesUsed: [
@@ -1181,10 +1181,10 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             (dependencyGraph, nodeId, duckSqlReturnVariable): NotebookDependencyUsage[] =>
                 dependencyGraph.downstreamUsageByNode[nodeId]?.[duckSqlReturnVariable] ?? [],
         ],
-        hogqlReturnVariableUsage: [
-            (s) => [s.dependencyGraph, s.nodeId, s.hogqlSqlReturnVariable],
-            (dependencyGraph, nodeId, hogqlSqlReturnVariable): NotebookDependencyUsage[] =>
-                dependencyGraph.downstreamUsageByNode[nodeId]?.[hogqlSqlReturnVariable] ?? [],
+        insightsqlReturnVariableUsage: [
+            (s) => [s.dependencyGraph, s.nodeId, s.insightsqlSqlReturnVariable],
+            (dependencyGraph, nodeId, insightsqlSqlReturnVariable): NotebookDependencyUsage[] =>
+                dependencyGraph.downstreamUsageByNode[nodeId]?.[insightsqlSqlReturnVariable] ?? [],
         ],
 
         usageByVariable: [
@@ -1336,7 +1336,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 props.nodeType === NotebookNodeType.Python ||
                 (props.nodeType === NotebookNodeType.Query && isSqlQueryNode(values.nodeAttributes)) ||
                 props.nodeType === NotebookNodeType.DuckSQL ||
-                props.nodeType === NotebookNodeType.HogQLSQL
+                props.nodeType === NotebookNodeType.InsightsQLSQL
             ) {
                 actions.updateAttributes({ showSettings: shouldShowThis })
             }
@@ -1355,7 +1355,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                     (props.nodeType === NotebookNodeType.Python ||
                         (props.nodeType === NotebookNodeType.Query && isSqlQueryNode(values.nodeAttributes)) ||
                         props.nodeType === NotebookNodeType.DuckSQL ||
-                        props.nodeType === NotebookNodeType.HogQLSQL) &&
+                        props.nodeType === NotebookNodeType.InsightsQLSQL) &&
                     __init.showSettings
                 ) {
                     actions.updateAttributes({ showSettings: true })
@@ -1366,7 +1366,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 props.nodeType === NotebookNodeType.Python ||
                 (props.nodeType === NotebookNodeType.Query && isSqlQueryNode(values.nodeAttributes)) ||
                 props.nodeType === NotebookNodeType.DuckSQL ||
-                props.nodeType === NotebookNodeType.HogQLSQL
+                props.nodeType === NotebookNodeType.InsightsQLSQL
             ) {
                 const shouldShowSettings = __init?.showSettings ?? values.nodeAttributes.showSettings
                 if (typeof shouldShowSettings === 'boolean') {
@@ -1398,20 +1398,20 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                     }
                 }
             }
-            if (props.nodeType === NotebookNodeType.HogQLSQL) {
+            if (props.nodeType === NotebookNodeType.InsightsQLSQL) {
                 const currentReturnVariable =
                     typeof values.nodeAttributes.returnVariable === 'string'
                         ? values.nodeAttributes.returnVariable
-                        : 'hogql_df'
-                const uniqueReturnVariable = getUniqueHogqlReturnVariable(
-                    values.hogqlSqlNodeSummaries,
+                        : 'insightsql_df'
+                const uniqueReturnVariable = getUniqueInsightsqlReturnVariable(
+                    values.insightsqlSqlNodeSummaries,
                     values.nodeId,
                     currentReturnVariable
                 )
-                if (uniqueReturnVariable !== resolveHogqlReturnVariable(currentReturnVariable)) {
+                if (uniqueReturnVariable !== resolveInsightsqlReturnVariable(currentReturnVariable)) {
                     actions.updateAttributes({ returnVariable: uniqueReturnVariable })
                 }
-                const cachedExecution = values.nodeAttributes.hogqlExecution
+                const cachedExecution = values.nodeAttributes.insightsqlExecution
                 if (
                     !values.dataframeVariableName &&
                     cachedExecution?.status === 'ok' &&
@@ -1419,7 +1419,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 ) {
                     const previewResult = parseDataframePreview(cachedExecution.result)
                     if (previewResult) {
-                        actions.setDataframeVariableName(values.hogqlSqlReturnVariable, previewResult)
+                        actions.setDataframeVariableName(values.insightsqlSqlReturnVariable, previewResult)
                     }
                 }
             }
@@ -1565,40 +1565,40 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 notebookId: notebook.short_id,
                 mode,
                 duckSqlNodeSummaries: values.duckSqlNodeSummaries,
-                hogqlSqlNodeSummaries: values.hogqlSqlNodeSummaries,
+                insightsqlSqlNodeSummaries: values.insightsqlSqlNodeSummaries,
                 currentNodeId: values.nodeId,
             })
         },
 
-        runHogqlSqlNode: async () => {
-            if (props.nodeType !== NotebookNodeType.HogQLSQL) {
+        runInsightsqlSqlNode: async () => {
+            if (props.nodeType !== NotebookNodeType.InsightsQLSQL) {
                 return
             }
             const notebook = values.notebook
             if (!notebook) {
                 return
             }
-            const { code = '', returnVariable = 'hogql_df' } = values.nodeAttributes as {
+            const { code = '', returnVariable = 'insightsql_df' } = values.nodeAttributes as {
                 code?: string
                 returnVariable?: string
-                hogqlExecutionSandboxId?: string | null
+                insightsqlExecutionSandboxId?: string | null
             }
             const executionSandboxId =
-                values.kernelInfo?.sandbox_id ?? values.nodeAttributes.hogqlExecutionSandboxId ?? null
-            const resolvedReturnVariable = getUniqueHogqlReturnVariable(
-                values.hogqlSqlNodeSummaries,
+                values.kernelInfo?.sandbox_id ?? values.nodeAttributes.insightsqlExecutionSandboxId ?? null
+            const resolvedReturnVariable = getUniqueInsightsqlReturnVariable(
+                values.insightsqlSqlNodeSummaries,
                 values.nodeId,
                 returnVariable
             )
-            const placeholders = extractHogqlPlaceholders(code)
-            const { executed, execution } = await runHogqlSqlCell({
+            const placeholders = extractInsightsqlPlaceholders(code)
+            const { executed, execution } = await runInsightsqlSqlCell({
                 notebookId: notebook.short_id,
                 code,
                 placeholders,
                 returnVariable: resolvedReturnVariable,
                 pageSize: values.dataframePageSize,
                 updateAttributes: actions.updateAttributes,
-                setHogqlSqlRunLoading: actions.setHogqlSqlRunLoading,
+                setInsightsqlSqlRunLoading: actions.setInsightsqlSqlRunLoading,
                 executionSandboxId,
             })
             if (!executed || execution?.status !== 'ok') {
@@ -1606,10 +1606,10 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 return
             }
             const previewResult = parseDataframePreview(execution?.result)
-            actions.setDataframeVariableName(values.hogqlSqlReturnVariable, previewResult)
+            actions.setDataframeVariableName(values.insightsqlSqlReturnVariable, previewResult)
         },
-        runHogqlSqlNodeWithMode: async ({ mode }) => {
-            if (props.nodeType !== NotebookNodeType.HogQLSQL) {
+        runInsightsqlSqlNodeWithMode: async ({ mode }) => {
+            if (props.nodeType !== NotebookNodeType.InsightsQLSQL) {
                 return
             }
             const notebook = values.notebook
@@ -1618,7 +1618,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
             }
 
             if (mode === 'cell') {
-                await actions.runHogqlSqlNode()
+                await actions.runInsightsqlSqlNode()
                 return
             }
 
@@ -1630,7 +1630,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 notebookLogic: values.notebookLogic,
             })
             if (nodesToRunWithLogic.length === 0) {
-                await actions.runHogqlSqlNode()
+                await actions.runInsightsqlSqlNode()
                 return
             }
 
@@ -1639,7 +1639,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 notebookId: notebook.short_id,
                 mode,
                 duckSqlNodeSummaries: values.duckSqlNodeSummaries,
-                hogqlSqlNodeSummaries: values.hogqlSqlNodeSummaries,
+                insightsqlSqlNodeSummaries: values.insightsqlSqlNodeSummaries,
                 currentNodeId: values.nodeId,
             })
         },
@@ -1675,7 +1675,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                 notebookId: notebook.short_id,
                 mode,
                 duckSqlNodeSummaries: values.duckSqlNodeSummaries,
-                hogqlSqlNodeSummaries: values.hogqlSqlNodeSummaries,
+                insightsqlSqlNodeSummaries: values.insightsqlSqlNodeSummaries,
                 currentNodeId: values.nodeId,
             })
         },
@@ -1728,19 +1728,19 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                         notebookId: notebook.short_id,
                         mode: 'cell_upstream',
                         duckSqlNodeSummaries: values.duckSqlNodeSummaries,
-                        hogqlSqlNodeSummaries: values.hogqlSqlNodeSummaries,
+                        insightsqlSqlNodeSummaries: values.insightsqlSqlNodeSummaries,
                         currentNodeId: values.nodeId,
                         skipDataframeVariableUpdateForNodeId: values.nodeId,
                     })
                 }
             }
             if (
-                props.nodeType === NotebookNodeType.HogQLSQL &&
+                props.nodeType === NotebookNodeType.InsightsQLSQL &&
                 nodeLogic &&
-                !isHogqlSqlExecutionFresh(
+                !isInsightsqlSqlExecutionFresh(
                     nodeLogic,
                     (values.nodeAttributes as { code?: string }).code ?? '',
-                    values.hogqlSqlReturnVariable
+                    values.insightsqlSqlReturnVariable
                 )
             ) {
                 const nodesToRunWithLogic = getDependencyEntriesWithLogic({
@@ -1755,7 +1755,7 @@ export const notebookNodeLogic = kea<notebookNodeLogicType>([
                         notebookId: notebook.short_id,
                         mode: 'cell_upstream',
                         duckSqlNodeSummaries: values.duckSqlNodeSummaries,
-                        hogqlSqlNodeSummaries: values.hogqlSqlNodeSummaries,
+                        insightsqlSqlNodeSummaries: values.insightsqlSqlNodeSummaries,
                         currentNodeId: values.nodeId,
                         skipDataframeVariableUpdateForNodeId: values.nodeId,
                     })

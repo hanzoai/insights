@@ -44,8 +44,8 @@ from posthog.utils import GenericEmails
 
 from products.customer_analytics.backend.constants import DEFAULT_ACTIVITY_EVENT
 
-from ...hogql.modifiers import set_default_modifier_values
-from ...schema import CurrencyCode, HogQLQueryModifiers, PathCleaningFilter, PersonsOnEventsMode
+from ...insightsql.modifiers import set_default_modifier_values
+from ...schema import CurrencyCode, InsightsQLQueryModifiers, PathCleaningFilter, PersonsOnEventsMode
 from .extensions import get_or_create_team_extension
 from .team_caching import get_team_in_cache, set_team_in_cache
 
@@ -509,7 +509,7 @@ class Team(UUIDTClassicModel):
     # during feature releases.
     extra_settings = models.JSONField(null=True, blank=True)
 
-    # Environment-level default HogQL query modifiers
+    # Environment-level default InsightsQL query modifiers
     modifiers = models.JSONField(null=True, blank=True)
 
     # This is meant to be used as a stopgap until https://github.com/PostHog/meta/pull/39 gets implemented
@@ -545,7 +545,7 @@ class Team(UUIDTClassicModel):
         max_length=32,
         null=True,
         blank=True,
-        help_text="Custom rate limit for HogQL API queries in #requests/{sec,min,hour,day}",
+        help_text="Custom rate limit for InsightsQL API queries in #requests/{sec,min,hour,day}",
         validators=[validate_rate_limit],
     )
 
@@ -631,14 +631,14 @@ class Team(UUIDTClassicModel):
 
     @property
     def default_modifiers(self) -> dict:
-        modifiers = HogQLQueryModifiers()
+        modifiers = InsightsQLQueryModifiers()
         set_default_modifier_values(modifiers, self)
         return modifiers.model_dump()
 
     @property
     def person_on_events_mode(self) -> PersonsOnEventsMode:
         if self.modifiers and self.modifiers.get("personsOnEventsMode") is not None:
-            # HogQL modifiers (which also act as the project-level setting) take precedence
+            # InsightsQL modifiers (which also act as the project-level setting) take precedence
             mode = PersonsOnEventsMode(self.modifiers["personsOnEventsMode"])
         else:
             # Otherwise use the flag-based default
@@ -732,7 +732,7 @@ class Team(UUIDTClassicModel):
                 {person_query}
             )
         """,
-            {**person_query_params, **filter.hogql_context.values},
+            {**person_query_params, **filter.insightsql_context.values},
         )[0][0]
 
     @lru_cache(maxsize=5)  # noqa: B019 - TODO: refactor to module-level cache

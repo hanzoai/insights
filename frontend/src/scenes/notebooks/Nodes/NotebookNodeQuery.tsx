@@ -14,11 +14,11 @@ import { urls } from 'scenes/urls'
 import { Query } from '~/queries/Query/Query'
 import { DataTableNode, InsightQueryNode, InsightVizNode, NodeKind, QuerySchema } from '~/queries/schema/schema-general'
 import {
-    containsHogQLQuery,
+    containsInsightsQLQuery,
     isActorsQuery,
     isDataTableNode,
     isEventsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightVizNode,
     isNodeWithSource,
     isSavedInsightNode,
@@ -60,7 +60,7 @@ const Component = ({
         let title = 'Query'
 
         if (query.kind === NodeKind.DataTableNode) {
-            if (query.source.kind === 'HogQLQuery') {
+            if (query.source.kind === 'InsightsQLQuery') {
                 title = 'SQL'
             } else if (query.source.kind) {
                 title = query.source.kind.replace('Node', '').replace('Query', '')
@@ -94,7 +94,7 @@ const Component = ({
         if (isDataTableNode(modifiedQuery) || isSavedInsightNode(modifiedQuery)) {
             modifiedQuery.showOpenEditorButton = false
             modifiedQuery.full = false
-            modifiedQuery.showHogQLEditor = false
+            modifiedQuery.showInsightsQLEditor = false
             modifiedQuery.embedded = true
             modifiedQuery.showTimings = false
         }
@@ -166,7 +166,7 @@ export const Settings = ({
 
         if (isDataTableNode(modifiedQuery) || isSavedInsightNode(modifiedQuery)) {
             modifiedQuery.showOpenEditorButton = false
-            modifiedQuery.showHogQLEditor = true
+            modifiedQuery.showInsightsQLEditor = true
             modifiedQuery.showResultsTable = false
 
             modifiedQuery.showReload = true
@@ -193,7 +193,7 @@ export const Settings = ({
 
         if (
             isInsightVizNode(modifiedQuery) &&
-            !isHogQLQuery(modifiedQuery.source) &&
+            !isInsightsQLQuery(modifiedQuery.source) &&
             !isActorsQuery(modifiedQuery.source) &&
             !isDefaultFilterApplied
         ) {
@@ -311,12 +311,12 @@ export const NotebookNodeQuery = createPostHogWidgetNode<NotebookNodeQueryAttrib
     serializedText: (attrs) => {
         let text = ''
         const q = attrs.query
-        if (containsHogQLQuery(q)) {
-            if (isHogQLQuery(q)) {
+        if (containsInsightsQLQuery(q)) {
+            if (isInsightsQLQuery(q)) {
                 text = q.query
             }
             if (isNodeWithSource(q)) {
-                text = isHogQLQuery(q.source) ? q.source.query : ''
+                text = isInsightsQLQuery(q.source) ? q.source.query : ''
             }
         }
         return text

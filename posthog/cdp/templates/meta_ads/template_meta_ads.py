@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="alpha",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send conversion events to Meta Ads",
     icon_url="/static/services/meta-ads.png",
     category=["Advertisement"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let body := {
     'data': [

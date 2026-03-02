@@ -24,6 +24,6 @@ class GroupUsageMetric(UUIDModel, BytecodeModelMixin):
         constraints = [models.UniqueConstraint(fields=["team", "group_type_index", "name"], name="unique_metric_name")]
 
     def get_expr(self):
-        from posthog.cdp.filters import hog_function_filters_to_expr
+        from posthog.cdp.filters import custom_function_filters_to_expr
 
-        return hog_function_filters_to_expr(self.filters, self.team, {})
+        return custom_function_filters_to_expr(self.filters, self.team, {})

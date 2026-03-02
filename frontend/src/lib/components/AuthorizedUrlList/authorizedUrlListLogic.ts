@@ -28,7 +28,7 @@ import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { ExperimentIdType, ToolbarParams, ToolbarUserIntent } from '~/types'
 
 import type { authorizedUrlListLogicType } from './authorizedUrlListLogicType'
@@ -274,7 +274,7 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
         suggestions: {
             __default: [] as SuggestedDomain[],
             loadSuggestions: async () => {
-                const query = hogql`
+                const query = insightsql`
                     select properties.$current_url, count()
                     from events
                         where event = '$pageview'
@@ -286,7 +286,7 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
                     limit 25`
 
                 const currentScene = sceneLogic.findMounted()?.values.activeSceneId ?? 'Settings'
-                const response = await api.queryHogQL(query, {
+                const response = await api.queryInsightsQL(query, {
                     scene: currentScene,
                     productKey: 'platform_and_support',
                 })

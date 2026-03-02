@@ -40,7 +40,7 @@ class ExposedCHQueryError(InternalCHQueryError):
 class ErrorCodeMeta:
     name: str
     user_safe: bool | str = False
-    """Whether this error code is safe to show to the user and couldn't be caught at HogQL level.
+    """Whether this error code is safe to show to the user and couldn't be caught at InsightsQL level.
     If a string is set, it will be used as the error message instead of the ClickHouse one.
     """
 
@@ -271,7 +271,7 @@ CLICKHOUSE_ERROR_CODE_LOOKUP: dict[int, ErrorCodeMeta] = {
     43: ErrorCodeMeta("ILLEGAL_TYPE_OF_ARGUMENT", user_safe=True),
     44: ErrorCodeMeta("ILLEGAL_COLUMN"),
     46: ErrorCodeMeta("UNKNOWN_FUNCTION", user_safe=True),
-    47: ErrorCodeMeta("UNKNOWN_IDENTIFIER", user_safe=True),  # TODO: Unset user_safe once HogQL is accurate in Data WH
+    47: ErrorCodeMeta("UNKNOWN_IDENTIFIER", user_safe=True),  # TODO: Unset user_safe once InsightsQL is accurate in Data WH
     48: ErrorCodeMeta("NOT_IMPLEMENTED"),
     49: ErrorCodeMeta("LOGICAL_ERROR"),
     50: ErrorCodeMeta("UNKNOWN_TYPE"),

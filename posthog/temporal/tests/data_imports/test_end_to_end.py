@@ -35,17 +35,17 @@ from posthog.schema import (
     BreakdownType,
     EventsNode,
     FunnelsQuery,
-    HogQLQueryModifiers,
+    InsightsQLQueryModifiers,
     PersonsOnEventsMode,
 )
 
-from posthog.hogql.modifiers import create_default_modifiers_for_team
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.modifiers import create_default_modifiers_for_team
+from posthog.insightsql.query import execute_insightsql_query
 
-from posthog.hogql_queries.insights.funnels.funnel import FunnelUDF
-from posthog.hogql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
+from posthog.insightsql_queries.insights.funnels.funnel import FunnelUDF
+from posthog.insightsql_queries.insights.funnels.funnel_query_context import FunnelQueryContext
 from posthog.models import DataWarehouseTable
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.team.team import Team
 from posthog.temporal.common.shutdown import ShutdownMonitor, WorkerShuttingDownError
 from posthog.temporal.data_imports.cdp_producer_job import CDPProducerJobWorkflow
@@ -319,7 +319,7 @@ async def _run(
 
         assert schema.last_synced_at == run.created_at
 
-        res = await sync_to_async(execute_hogql_query)(f"SELECT * FROM {table_name}", team)
+        res = await sync_to_async(execute_insightsql_query)(f"SELECT * FROM {table_name}", team)
         assert len(res.results) == 1
 
         for name, field in external_tables.get(table_name, {}).items():
@@ -872,7 +872,7 @@ async def test_postgres_binary_columns(team, postgres_config, postgres_connectio
         mock_data_response=[],
     )
 
-    res = await sync_to_async(execute_hogql_query)(f"SELECT * FROM postgres_binary_col_test", team)
+    res = await sync_to_async(execute_insightsql_query)(f"SELECT * FROM postgres_binary_col_test", team)
     columns = res.columns
 
     assert columns is not None
@@ -945,12 +945,12 @@ async def test_funnels_lazy_joins_ordering(team, stripe_customer, mock_stripe_cl
     funnel_class = FunnelUDF(context=FunnelQueryContext(query=query, team=team))
 
     query_ast = funnel_class.get_query()
-    await sync_to_async(execute_hogql_query)(
+    await sync_to_async(execute_insightsql_query)(
         query_type="FunnelsQuery",
         query=query_ast,
         team=team,
         modifiers=create_default_modifiers_for_team(
-            team, HogQLQueryModifiers(personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED)
+            team, InsightsQLQueryModifiers(personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_OVERRIDE_PROPERTIES_JOINED)
         ),
     )
 
@@ -985,7 +985,7 @@ async def test_postgres_schema_evolution(team, postgres_config, postgres_connect
         sync_type_config={"incremental_field": "id", "incremental_field_type": "integer"},
     )
 
-    res = await sync_to_async(execute_hogql_query)("SELECT * FROM postgres_test_table", team)
+    res = await sync_to_async(execute_insightsql_query)("SELECT * FROM postgres_test_table", team)
     columns = res.columns
 
     assert columns is not None
@@ -1005,7 +1005,7 @@ async def test_postgres_schema_evolution(team, postgres_config, postgres_connect
     await _execute_run(str(uuid.uuid4()), inputs, [])
     await _replay_v3_consumer(team_id=team.pk, schema_id=inputs.external_data_schema_id)
 
-    res = await sync_to_async(execute_hogql_query)("SELECT * FROM postgres_test_table", team)
+    res = await sync_to_async(execute_insightsql_query)("SELECT * FROM postgres_test_table", team)
     columns = res.columns
 
     assert columns is not None
@@ -1048,7 +1048,7 @@ async def test_sql_database_missing_incremental_values(team, postgres_config, po
         sync_type_config={"incremental_field": "id", "incremental_field_type": "integer"},
     )
 
-    res = await sync_to_async(execute_hogql_query)("SELECT * FROM postgres_test_table", team)
+    res = await sync_to_async(execute_insightsql_query)("SELECT * FROM postgres_test_table", team)
     columns = res.columns
 
     assert columns is not None
@@ -1090,7 +1090,7 @@ async def test_sql_database_incremental_initial_value(team, postgres_config, pos
         sync_type_config={"incremental_field": "id", "incremental_field_type": "integer"},
     )
 
-    res = await sync_to_async(execute_hogql_query)("SELECT * FROM postgres_test_table", team)
+    res = await sync_to_async(execute_insightsql_query)("SELECT * FROM postgres_test_table", team)
     columns = res.columns
 
     assert columns is not None
@@ -1142,7 +1142,7 @@ async def test_billing_limits(team, stripe_customer, mock_stripe_client):
     assert job.status == ExternalDataJob.Status.BILLING_LIMIT_REACHED
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)("SELECT * FROM stripe_customer", team)
+        await sync_to_async(execute_insightsql_query)("SELECT * FROM stripe_customer", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1187,7 +1187,7 @@ async def test_create_external_job_failure(team, stripe_customer, mock_stripe_cl
     assert job.status == ExternalDataJob.Status.FAILED
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)("SELECT * FROM stripe_customer", team)
+        await sync_to_async(execute_insightsql_query)("SELECT * FROM stripe_customer", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1238,7 +1238,7 @@ async def test_create_external_job_failure_no_job_model(team, stripe_customer, m
     assert len(jobs) == 0
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)("SELECT * FROM stripe_customer", team)
+        await sync_to_async(execute_insightsql_query)("SELECT * FROM stripe_customer", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1294,7 +1294,7 @@ async def test_non_retryable_error(team, zendesk_brands):
     assert schema.should_sync is False
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)("SELECT * FROM zendesk_brands", team)
+        await sync_to_async(execute_insightsql_query)("SELECT * FROM zendesk_brands", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1348,7 +1348,7 @@ async def test_non_retryable_error_with_special_characters(team, stripe_customer
     assert schema.should_sync is False
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)("SELECT * FROM stripe_customer", team)
+        await sync_to_async(execute_insightsql_query)("SELECT * FROM stripe_customer", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -1403,7 +1403,7 @@ async def test_inconsistent_types_in_data(team):
     )
     await _replay_v3_consumer(team_id=team.pk, schema_id=schema.id)
 
-    res = await sync_to_async(execute_hogql_query)(f"SELECT * FROM zendesk_organizations", team)
+    res = await sync_to_async(execute_insightsql_query)(f"SELECT * FROM zendesk_organizations", team)
     columns = res.columns
     results = res.results
 
@@ -1548,7 +1548,7 @@ async def test_postgres_nan_numerical_values(team, postgres_config, postgres_con
         mock_data_response=[],
     )
 
-    res = await sync_to_async(execute_hogql_query)(f"SELECT * FROM postgres_numerical_nan", team)
+    res = await sync_to_async(execute_insightsql_query)(f"SELECT * FROM postgres_numerical_nan", team)
     columns = res.columns
     results = res.results
 
@@ -2449,7 +2449,7 @@ async def test_row_tracking_incrementing(team, postgres_config, postgres_connect
 
     assert row_count_in_redis == 1
 
-    res = await sync_to_async(execute_hogql_query)(f"SELECT * FROM postgres_row_tracking", team)
+    res = await sync_to_async(execute_insightsql_query)(f"SELECT * FROM postgres_row_tracking", team)
     columns = res.columns
 
     assert columns is not None
@@ -2511,7 +2511,7 @@ async def test_postgres_duplicate_primary_key(team, postgres_config, postgres_co
     )
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)(f"SELECT * FROM postgres_duplicate_primary_key", team)
+        await sync_to_async(execute_insightsql_query)(f"SELECT * FROM postgres_duplicate_primary_key", team)
 
     schema: ExternalDataSchema = await sync_to_async(ExternalDataSchema.objects.get)(id=job.schema_id)
     mock_update_should_sync.assert_called_once_with(
@@ -2556,7 +2556,7 @@ async def test_append_only_table(team, mock_stripe_client):
     await _execute_run(str(uuid.uuid4()), inputs, [])
     await _replay_v3_consumer(team_id=team.pk, schema_id=inputs.external_data_schema_id)
 
-    res = await sync_to_async(execute_hogql_query)("SELECT id FROM stripe_balancetransaction", team)
+    res = await sync_to_async(execute_insightsql_query)("SELECT id FROM stripe_balancetransaction", team)
 
     # We should now have 2 rows with the same `id`
     assert len(res.results) == 2
@@ -2719,7 +2719,7 @@ async def test_billing_limits_too_many_rows(team, postgres_config, postgres_conn
     assert job.status == ExternalDataJob.Status.BILLING_LIMIT_TOO_LOW
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)(f"SELECT * FROM postgres_billing_limits", team)
+        await sync_to_async(execute_insightsql_query)(f"SELECT * FROM postgres_billing_limits", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -2802,7 +2802,7 @@ async def test_billing_limits_too_many_rows_previously(team, postgres_config, po
     assert job.status == ExternalDataJob.Status.BILLING_LIMIT_TOO_LOW
 
     with pytest.raises(Exception):
-        await sync_to_async(execute_hogql_query)(f"SELECT * FROM postgres_billing_limits", team)
+        await sync_to_async(execute_insightsql_query)(f"SELECT * FROM postgres_billing_limits", team)
 
 
 @pytest.mark.django_db(transaction=True)
@@ -3153,7 +3153,7 @@ async def test_non_retryable_error_short_circuiting(team, stripe_customer, mock_
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_cdp_producer_push_to_s3(team, stripe_customer, mock_stripe_client, minio_client):
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "stripe.customer"}]},
@@ -3205,7 +3205,7 @@ async def test_cdp_producer_push_to_s3(team, stripe_customer, mock_stripe_client
 @pytest.mark.django_db(transaction=True)
 @pytest.mark.asyncio
 async def test_cdp_producer_push_to_kafka(team, stripe_customer, mock_stripe_client, minio_client, pipeline_mode):
-    await sync_to_async(HogFunction.objects.create)(
+    await sync_to_async(CustomFunction.objects.create)(
         team=team,
         enabled=True,
         filters={"source": "data-warehouse-table", "data_warehouse": [{"table_name": "stripe.customer"}]},

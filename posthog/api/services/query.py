@@ -10,26 +10,26 @@ from posthog.schema import (
     DatabaseSchemaQuery,
     DatabaseSchemaQueryResponse,
     DataWarehouseViewLink,
-    HogQLAutocomplete,
-    HogQLMetadata,
-    HogQLVariable,
+    InsightsQLAutocomplete,
+    InsightsQLMetadata,
+    InsightsQLVariable,
     HogQuery,
     HogQueryResponse,
     QuerySchemaRoot,
 )
 
-from posthog.hogql.autocomplete import get_hogql_autocomplete
-from posthog.hogql.compiler.bytecode import execute_hog
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database
-from posthog.hogql.metadata import get_hogql_metadata
-from posthog.hogql.modifiers import create_default_modifiers_for_team
+from posthog.insightsql.autocomplete import get_insightsql_autocomplete
+from posthog.insightsql.compiler.bytecode import execute_hog
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.metadata import get_insightsql_metadata
+from posthog.insightsql.modifiers import create_default_modifiers_for_team
 
 from posthog.clickhouse.query_tagging import tag_queries
 from posthog.cloud_utils import is_cloud
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_runner import CacheMissResponse, ExecutionMode, QueryResponse, get_query_runner
+from posthog.insightsql_queries.query_runner import CacheMissResponse, ExecutionMode, QueryResponse, get_query_runner
 from posthog.models import Team, User
 from posthog.schema_migrations.upgrade import upgrade
 
@@ -86,7 +86,7 @@ def process_query_dict(
 
     dashboard_filters = DashboardFilter.model_validate(dashboard_filters_json) if dashboard_filters_json else None
     variables_override = (
-        [HogQLVariable.model_validate(n) for n in variables_override_json.values()] if variables_override_json else None
+        [InsightsQLVariable.model_validate(n) for n in variables_override_json.values()] if variables_override_json else None
     )
 
     return process_query_model(
@@ -109,7 +109,7 @@ def process_query_model(
     query: BaseModel,  # mypy has problems with unions and isinstance
     *,
     dashboard_filters: Optional[DashboardFilter] = None,
-    variables_override: Optional[list[HogQLVariable]] = None,
+    variables_override: Optional[list[InsightsQLVariable]] = None,
     limit_context: Optional[LimitContext] = None,
     execution_mode: ExecutionMode = ExecutionMode.RECENT_CACHE_CALCULATE_BLOCKING_IF_STALE,
     user: Optional[User] = None,
@@ -157,16 +157,16 @@ def process_query_model(
                 )
             except Exception as e:
                 result = HogQueryResponse(results=f"ERROR: {str(e)}")
-        elif isinstance(query, HogQLAutocomplete):
-            result = get_hogql_autocomplete(query=query, team=team)
-        elif isinstance(query, HogQLMetadata):
-            metadata_query = HogQLMetadata.model_validate(query)
-            metadata_response = get_hogql_metadata(query=metadata_query, team=team)
+        elif isinstance(query, InsightsQLAutocomplete):
+            result = get_insightsql_autocomplete(query=query, team=team)
+        elif isinstance(query, InsightsQLMetadata):
+            metadata_query = InsightsQLMetadata.model_validate(query)
+            metadata_response = get_insightsql_metadata(query=metadata_query, team=team)
             result = metadata_response
         elif isinstance(query, DatabaseSchemaQuery):
             joins = DataWarehouseJoin.objects.filter(team_id=team.pk).exclude(deleted=True)
             database = Database.create_for(team=team, modifiers=create_default_modifiers_for_team(team))
-            context = HogQLContext(team_id=team.pk, team=team, database=database)
+            context = InsightsQLContext(team_id=team.pk, team=team, database=database)
             result = DatabaseSchemaQueryResponse(
                 tables=database.serialize(context, include_hidden_posthog_tables=True),
                 joins=[

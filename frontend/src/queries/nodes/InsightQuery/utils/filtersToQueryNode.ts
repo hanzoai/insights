@@ -60,7 +60,7 @@ import {
     FunnelMathType,
     FunnelsFilterType,
     GroupMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     InsightType,
     PathsFilterType,
     RetentionEntity,
@@ -89,7 +89,7 @@ const actorsOnlyMathTypes = [
     BaseMathType.WeeklyActiveUsers,
     BaseMathType.MonthlyActiveUsers,
     GroupMathType.UniqueGroup,
-    HogQLMathType.HogQL,
+    InsightsQLMathType.InsightsQL,
 ]
 
 const funnelsMathTypes = [FunnelMathType.FirstTimeForUser, FunnelMathType.FirstTimeForUserWithFilters]
@@ -172,7 +172,7 @@ export const legacyEntityToNode = (
                 math: entity.math || 'total',
                 math_property: entity.math_property,
                 math_property_type: entity.math_property_type,
-                math_hogql: entity.math_hogql,
+                math_insightsql: entity.math_insightsql,
                 math_group_type_index: entity.math_group_type_index,
             } as any
         }
@@ -489,7 +489,7 @@ export const funnelsFilterToQuery = (filters: Partial<FunnelsFilterType>): Funne
                 : undefined,
         layout: filters.layout,
         hiddenLegendBreakdowns: hiddenLegendKeysToBreakdowns(filters.hidden_legend_keys),
-        funnelAggregateByHogQL: filters.funnel_aggregate_by_hogql,
+        funnelAggregateByInsightsQL: filters.funnel_aggregate_by_insightsql,
     })
 }
 
@@ -509,7 +509,7 @@ export const retentionFilterToQuery = (filters: Partial<RetentionFilterType>): R
 
 export const pathsFilterToQuery = (filters: Partial<PathsFilterType>): PathsFilter => {
     return objectCleanWithEmpty({
-        pathsHogQLExpression: filters.paths_hogql_expression,
+        pathsInsightsQLExpression: filters.paths_insightsql_expression,
         includeEventTypes: filters.include_event_types,
         startPoint: filters.start_point,
         endPoint: filters.end_point,

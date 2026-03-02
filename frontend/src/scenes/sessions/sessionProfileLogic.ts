@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import api from 'lib/api'
 
 import { NodeKind } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { SessionEventType } from '~/types'
 
 import { teamLogic } from '../teamLogic'
@@ -118,7 +118,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                     // V2/AUTO needs timestamp hints due to cityHash64 in the ordering key
                     const sessionQuery =
                         sessionTableVersion === 'v3'
-                            ? hogql`
+                            ? insightsql`
                         SELECT
                             session_id,
                             distinct_id,
@@ -150,7 +150,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                                   // This allows ClickHouse to push predicates down for partition pruning
                                   const { startDate } = getTimestampFromUUIDv7(props.sessionId)
                                   const endDate = new Date(startDate.getTime() + 60 * 60 * 1000) // +1 hour
-                                  return hogql`
+                                  return insightsql`
                         SELECT
                             session_id,
                             distinct_id,
@@ -182,7 +182,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                               })()
 
                     const tags = { scene: 'SessionProfile', productKey: 'persons' }
-                    const response = await api.queryHogQL(sessionQuery, tags)
+                    const response = await api.queryInsightsQL(sessionQuery, tags)
                     const row = response.results?.[0]
 
                     if (!row) {
@@ -195,7 +195,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                     let person_properties: Record<string, any> | null = null
                     if (distinct_id && distinct_id !== '$posthog_cookieless') {
                         try {
-                            const personQuery = hogql`
+                            const personQuery = insightsql`
                                 SELECT properties
                                 FROM persons
                                 WHERE id IN (
@@ -206,7 +206,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                                 )
                                 LIMIT 1
                             `
-                            const personResponse = await api.queryHogQL(personQuery, tags)
+                            const personResponse = await api.queryInsightsQL(personQuery, tags)
                             const personRow = personResponse.results?.[0]
                             if (personRow && personRow[0]) {
                                 person_properties = JSON.parse(personRow[0])
@@ -252,7 +252,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                     const { startDate, endDate } = getTimestampFromUUIDv7(props.sessionId)
                     const eventsQuery =
                         sortOrder === 'asc'
-                            ? hogql`
+                            ? insightsql`
                         SELECT
                             uuid,
                             event,
@@ -275,7 +275,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                         ORDER BY timestamp ASC
                         LIMIT 50
                     `
-                            : hogql`
+                            : insightsql`
                         SELECT
                             uuid,
                             event,
@@ -299,7 +299,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                         LIMIT 50
                     `
 
-                    const response = await api.queryHogQL(eventsQuery, {
+                    const response = await api.queryInsightsQL(eventsQuery, {
                         scene: 'SessionProfile',
                         productKey: 'persons',
                     })
@@ -367,7 +367,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
 
                     const eventsQuery =
                         sortOrder === 'asc'
-                            ? hogql`
+                            ? insightsql`
                         SELECT
                             uuid,
                             event,
@@ -391,7 +391,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                         LIMIT 50
                         OFFSET ${offset}
                     `
-                            : hogql`
+                            : insightsql`
                         SELECT
                             uuid,
                             event,
@@ -416,7 +416,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                         OFFSET ${offset}
                     `
 
-                    const response = await api.queryHogQL(eventsQuery, {
+                    const response = await api.queryInsightsQL(eventsQuery, {
                         scene: 'SessionProfile',
                         productKey: 'persons',
                     })
@@ -484,7 +484,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                     // Use timestamp filtering based on session_id to enable partition pruning
                     // Also filter by event name to improve query performance
                     const { startDate, endDate } = getTimestampFromUUIDv7(props.sessionId)
-                    const detailsQuery = hogql`
+                    const detailsQuery = insightsql`
                         SELECT properties, uuid
                         FROM events
                         WHERE event = ${eventName}
@@ -494,7 +494,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                         LIMIT 1
                     `
 
-                    const response = await api.queryHogQL(detailsQuery, {
+                    const response = await api.queryInsightsQL(detailsQuery, {
                         scene: 'SessionProfile',
                         productKey: 'persons',
                     })
@@ -515,7 +515,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
             {
                 loadTotalEventCount: async () => {
                     const { startDate, endDate } = getTimestampFromUUIDv7(props.sessionId)
-                    const countQuery = hogql`
+                    const countQuery = insightsql`
                         SELECT count(*) as total
                         FROM events
                         WHERE timestamp >= toDateTime(${startDate.toISOString()})
@@ -523,7 +523,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                             AND \`$session_id\` = ${props.sessionId}
                     `
 
-                    const response = await api.queryHogQL(countQuery, {
+                    const response = await api.queryInsightsQL(countQuery, {
                         scene: 'SessionProfile',
                         productKey: 'persons',
                     })
@@ -555,7 +555,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
             {
                 loadSupportTicketEvents: async () => {
                     const { startDate, endDate } = getTimestampFromUUIDv7(props.sessionId)
-                    const ticketsQuery = hogql`
+                    const ticketsQuery = insightsql`
                         SELECT
                             uuid,
                             event,
@@ -570,7 +570,7 @@ export const sessionProfileLogic = kea<sessionProfileLogicType>([
                         ORDER BY timestamp DESC
                     `
 
-                    const response = await api.queryHogQL(ticketsQuery, {
+                    const response = await api.queryInsightsQL(ticketsQuery, {
                         scene: 'SessionProfile',
                         productKey: 'persons',
                     })

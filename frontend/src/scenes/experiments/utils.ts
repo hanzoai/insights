@@ -684,7 +684,7 @@ export function getAllowedMathTypes(metricType: ExperimentMetricType): Experimen
                 ExperimentMetricMathType.Min,
                 ExperimentMetricMathType.Max,
                 ExperimentMetricMathType.UniqueSessions,
-                ExperimentMetricMathType.HogQL,
+                ExperimentMetricMathType.InsightsQL,
             ]
         case ExperimentMetricType.RATIO:
             return [

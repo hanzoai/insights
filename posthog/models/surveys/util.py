@@ -1,7 +1,7 @@
 from enum import StrEnum
 from uuid import UUID
 
-from posthog.hogql.escape_sql import escape_clickhouse_string
+from posthog.insightsql.escape_sql import escape_clickhouse_string
 
 from posthog.models.surveys.survey_response_archive import SurveyResponseArchive
 

@@ -37,8 +37,8 @@ export function DebugScene(): JSX.Element {
                         </LemonButton>
                         <LemonButton
                             size="small"
-                            active={query1 === stringifiedExamples.HogQLRaw}
-                            onClick={() => setQuery1(stringifiedExamples.HogQLRaw)}
+                            active={query1 === stringifiedExamples.InsightsQLRaw}
+                            onClick={() => setQuery1(stringifiedExamples.InsightsQLRaw)}
                         >
                             SQL Debug
                         </LemonButton>
@@ -53,8 +53,8 @@ export function DebugScene(): JSX.Element {
                         ) : null}
                         <LemonButton
                             size="small"
-                            active={query1 === stringifiedExamples.HogQLTable}
-                            onClick={() => setQuery1(stringifiedExamples.HogQLTable)}
+                            active={query1 === stringifiedExamples.InsightsQLTable}
+                            onClick={() => setQuery1(stringifiedExamples.InsightsQLTable)}
                         >
                             SQL Table
                         </LemonButton>
@@ -70,7 +70,7 @@ export function DebugScene(): JSX.Element {
                                 size="small"
                                 placeholder="More sample queries"
                                 options={Object.entries(stringifiedExamples)
-                                    .filter(([k]) => k !== 'HogQLTable' && k !== 'HogQLRaw')
+                                    .filter(([k]) => k !== 'InsightsQLTable' && k !== 'InsightsQLRaw')
                                     .map(([k, v]) => {
                                         return { label: k, value: v }
                                     })}
@@ -87,11 +87,11 @@ export function DebugScene(): JSX.Element {
 
             <div className="flex gap-2">
                 <div className="flex-1 w-1/2">
-                    <DebugSceneQuery query={query1} setQuery={setQuery1} queryKey="new-hogql-debug-1" />
+                    <DebugSceneQuery query={query1} setQuery={setQuery1} queryKey="new-insightsql-debug-1" />
                 </div>
                 {query2 ? (
                     <div className="flex-1 w-1/2">
-                        <DebugSceneQuery query={query2} setQuery={setQuery2} queryKey="new-hogql-debug-2" />
+                        <DebugSceneQuery query={query2} setQuery={setQuery2} queryKey="new-insightsql-debug-2" />
                     </div>
                 ) : null}
             </div>

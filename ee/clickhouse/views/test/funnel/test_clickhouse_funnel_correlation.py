@@ -119,7 +119,7 @@ class FunnelCorrelationTest(BaseTest):
                 ],
                 "skewed": False,
             },
-            "query_method": "hogql",
+            "query_method": "insightsql",
         }
 
     def test_event_correlation_is_partitioned_by_team(self):
@@ -220,7 +220,7 @@ class FunnelCorrelationTest(BaseTest):
             "is_cached": False,
             "last_refresh": "2020-01-01T00:00:00Z",
             "result": {"events": [], "skewed": False},
-            "query_method": "hogql",
+            "query_method": "insightsql",
         }
 
     def test_event_correlation_endpoint_does_not_include_funnel_steps(self):
@@ -282,7 +282,7 @@ class FunnelCorrelationTest(BaseTest):
                 ],
                 "skewed": False,
             },
-            "query_method": "hogql",
+            "query_method": "insightsql",
         }
 
     def test_events_correlation_endpoint_provides_people_drill_down_urls(self):
@@ -602,7 +602,7 @@ class FunnelCorrelationTest(BaseTest):
             "is_cached": False,
             "last_refresh": "2020-01-01T00:00:00Z",
             "result": {"events": [], "skewed": False},
-            "query_method": "hogql",
+            "query_method": "insightsql",
         }
 
     def test_funnel_correlation_with_event_properties_autocapture(self):
@@ -688,7 +688,7 @@ class FunnelCorrelationTest(BaseTest):
             },
             "last_refresh": "2020-01-01T00:00:00Z",
             "is_cached": False,
-            "query_method": "hogql",
+            "query_method": "insightsql",
         }
 
         assert get_people_for_correlation_ok(client=self.client, correlation=response["result"]["events"][0]) == {

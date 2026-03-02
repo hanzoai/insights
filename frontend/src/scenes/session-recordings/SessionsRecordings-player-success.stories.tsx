@@ -171,7 +171,7 @@ const meta: Meta = {
                 '/api/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
-                    if (body.query.kind === 'HogQLQuery' && body.query.query.includes('$session_id as session_id')) {
+                    if (body.query.kind === 'InsightsQLQuery' && body.query.query.includes('$session_id as session_id')) {
                         return res(
                             ctx.json({
                                 results: recordings.map((r) => [

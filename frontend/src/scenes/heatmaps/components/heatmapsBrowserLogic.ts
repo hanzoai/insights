@@ -17,7 +17,7 @@ import { LemonBannerProps } from 'lib/lemon-ui/LemonBanner'
 import { objectsEqual } from 'lib/utils'
 import { removeReplayIframeDataFromLocalStorage } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import type { heatmapsBrowserLogicType } from './heatmapsBrowserLogicType'
 
@@ -117,16 +117,16 @@ export const heatmapsBrowserLogic = kea<heatmapsBrowserLogicType>([
                         return []
                     }
 
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT distinct properties.$current_url AS urls
                         FROM events
                         WHERE timestamp >= now() - INTERVAL 7 DAY
                         AND timestamp <= now()
-                        AND properties.$current_url like '%${hogql.identifier(values.browserSearchTerm)}%'
+                        AND properties.$current_url like '%${insightsql.identifier(values.browserSearchTerm)}%'
                         ORDER BY timestamp DESC
                         LIMIT 100`
 
-                    const res = await api.queryHogQL(query, { scene: 'Heatmaps', productKey: 'heatmaps' })
+                    const res = await api.queryInsightsQL(query, { scene: 'Heatmaps', productKey: 'heatmaps' })
 
                     return res.results?.map((x) => x[0]) as string[]
                 },
@@ -137,7 +137,7 @@ export const heatmapsBrowserLogic = kea<heatmapsBrowserLogicType>([
             null as { url: string; count: number }[] | null,
             {
                 loadTopUrls: async () => {
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT properties.$current_url AS url, count() as count
                         FROM events
                         WHERE timestamp >= now() - INTERVAL 7 DAY
@@ -147,7 +147,7 @@ export const heatmapsBrowserLogic = kea<heatmapsBrowserLogicType>([
                         ORDER BY count DESC
                         LIMIT 10`
 
-                    const res = await api.queryHogQL(query, { scene: 'Heatmaps', productKey: 'heatmaps' })
+                    const res = await api.queryInsightsQL(query, { scene: 'Heatmaps', productKey: 'heatmaps' })
 
                     return res.results?.map((x) => ({ url: x[0], count: x[1] })) as { url: string; count: number }[]
                 },

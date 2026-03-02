@@ -63,7 +63,7 @@ import {
     PlanningStepStatus,
 } from '~/queries/schema/schema-assistant-messages'
 import { DataVisualizationNode, InsightVizNode } from '~/queries/schema/schema-general'
-import { isDataVisualizationNode, isHogQLQuery } from '~/queries/utils'
+import { isDataVisualizationNode, isInsightsQLQuery } from '~/queries/utils'
 import { PendingApproval, Region } from '~/types'
 
 import { ContextSummary } from './Context'
@@ -1214,7 +1214,7 @@ const Visualization = React.memo(function Visualization({
             {isSummaryShown && !isDataVisualizationNode(query) && (
                 <>
                     <SeriesSummary query={query.source} heading={null} />
-                    {!isHogQLQuery(query.source) && (
+                    {!isInsightsQLQuery(query.source) && (
                         <div className="flex flex-wrap gap-4 mt-1 *:grow">
                             <PropertiesSummary properties={query.source.properties} />
                             <InsightBreakdownSummary query={query.source} />

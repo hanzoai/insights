@@ -1,14 +1,14 @@
 import json
 
-from posthog.hogql.compiler.javascript import JavaScriptCompiler
+from posthog.insightsql.compiler.javascript import JavaScriptCompiler
 
-from posthog.cdp.filters import hog_function_filters_to_expr
+from posthog.cdp.filters import custom_function_filters_to_expr
 from posthog.cdp.validation import transpile_template_code
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.plugin import transpile
 
 
-def get_transpiled_function(hog_function: HogFunction) -> str:
+def get_transpiled_function(custom_function: CustomFunction) -> str:
     response = ""
 
     # Build the inputs in three parts:
@@ -21,7 +21,7 @@ def get_transpiled_function(hog_function: HogFunction) -> str:
 
     compiler = JavaScriptCompiler()
 
-    all_inputs = hog_function.inputs or {}
+    all_inputs = custom_function.inputs or {}
     all_inputs = sorted(all_inputs.items(), key=lambda x: x[1].get("order", -1))
     for key, input in all_inputs:
         value = input.get("value")
@@ -39,7 +39,7 @@ def get_transpiled_function(hog_function: HogFunction) -> str:
     # Add all constant inputs directly
     response += "let inputs = {\n" + (",\n".join(inputs_object)) + "};\n"
 
-    # Transpiled Hog code needs a "__getGlobal" function in scope
+    # Transpiled Custom code needs a "__getGlobal" function in scope
     response += "let __getGlobal = (key) => key === 'inputs' ? inputs : globals[key];\n"
 
     if inputs_switch:
@@ -52,23 +52,23 @@ def get_transpiled_function(hog_function: HogFunction) -> str:
 
     response += "return inputs;}\n"
 
-    response += f"const source = {transpile(hog_function.hog, 'site')}();"
+    response += f"const source = {transpile(custom_function.hog, 'site')}();"
 
     # Convert the global filters to code
-    filters_expr = hog_function_filters_to_expr(hog_function.filters or {}, hog_function.team, {})
+    filters_expr = custom_function_filters_to_expr(custom_function.filters or {}, custom_function.team, {})
     filters_code = compiler.visit(filters_expr)
 
     # Convert the mappings to code
     mapping_code = ""
 
-    for mapping in hog_function.mappings or []:
+    for mapping in custom_function.mappings or []:
         mapping_disabled = mapping.get("disabled", False)
         if mapping_disabled:
             continue
 
         mapping_inputs = mapping.get("inputs", {})
         mapping_inputs_schema = mapping.get("inputs_schema", [])
-        mapping_filters_expr = hog_function_filters_to_expr(mapping.get("filters", {}) or {}, hog_function.team, {})
+        mapping_filters_expr = custom_function_filters_to_expr(mapping.get("filters", {}) or {}, custom_function.team, {})
         mapping_filters_code = compiler.visit(mapping_filters_expr)
 
         mapping_code += f"if ({mapping_filters_code}) {{"

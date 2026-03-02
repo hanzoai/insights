@@ -26,7 +26,7 @@ import { posthogNodeInputRule, posthogNodePasteRule, useSyncedAttributes } from 
 import { KNOWN_NODES } from '../utils'
 import { NotebookNodeTitle } from './components/NotebookNodeTitle'
 import { DuckSqlRunMenu } from './components/DuckSqlRunMenu'
-import { HogqlSqlRunMenu } from './components/HogqlSqlRunMenu'
+import { InsightsqlSqlRunMenu } from './components/InsightsqlSqlRunMenu'
 import { PythonRunMenu } from './components/PythonRunMenu'
 import { SlashCommandsPopover } from '../Notebook/SlashCommands'
 import posthog from 'posthog-js'
@@ -87,13 +87,13 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         pythonRunLoading,
         duckSqlRunLoading,
         duckSqlRunQueued,
-        hogqlSqlRunLoading,
-        hogqlSqlRunQueued,
+        insightsqlSqlRunLoading,
+        insightsqlSqlRunQueued,
         pythonRunQueued,
         settingsPlacement: resolvedSettingsPlacement,
         sourceComment,
         duckSqlReturnVariable,
-        hogqlSqlReturnVariable,
+        insightsqlSqlReturnVariable,
         customMenuItems,
         kernelInfo,
     } = useValues(nodeLogic)
@@ -108,7 +108,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
         convertToBacklink,
         runPythonNodeWithMode,
         runDuckSqlNodeWithMode,
-        runHogqlSqlNodeWithMode,
+        runInsightsqlSqlNodeWithMode,
     } = useActions(nodeLogic)
 
     const { ref: inViewRef, inView } = useInView({ triggerOnce: true })
@@ -167,7 +167,7 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     const isDraggable = !!(isEditable && getPos)
     const isPythonNode = nodeType === NotebookNodeType.Python
     const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
-    const isHogqlSqlNode = nodeType === NotebookNodeType.HogQLSQL
+    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
     const runDisabledReason = !notebook ? 'Notebook not loaded' : undefined
     const pythonAttributes = attributes as {
         code?: string
@@ -202,26 +202,26 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
     const duckSqlIsFresh =
         duckSqlHasExecution && duckSqlExecutionCodeHash === duckSqlCodeHash && duckSqlSandboxMatches && kernelIsRunning
     const duckSqlIsStale = duckSqlHasExecution && !duckSqlIsFresh
-    const hogqlSqlAttributes = attributes as {
+    const insightsqlSqlAttributes = attributes as {
         code?: string
-        hogqlExecutionCodeHash?: number | null
-        hogqlExecutionSandboxId?: string | null
+        insightsqlExecutionCodeHash?: number | null
+        insightsqlExecutionSandboxId?: string | null
         returnVariable?: string
     }
-    const hogqlSqlExecutionCodeHash = hogqlSqlAttributes.hogqlExecutionCodeHash ?? null
-    const hogqlSqlCodeHash = hashCodeForString(`${hogqlSqlAttributes.code ?? ''}\n${hogqlSqlReturnVariable}`)
-    const hogqlSqlExecutionSandboxId = hogqlSqlAttributes.hogqlExecutionSandboxId ?? null
-    const hogqlSqlHasExecution = hogqlSqlExecutionCodeHash !== null
-    const hogqlSqlSandboxMatches =
-        hogqlSqlExecutionSandboxId !== null &&
+    const insightsqlSqlExecutionCodeHash = insightsqlSqlAttributes.insightsqlExecutionCodeHash ?? null
+    const insightsqlSqlCodeHash = hashCodeForString(`${insightsqlSqlAttributes.code ?? ''}\n${insightsqlSqlReturnVariable}`)
+    const insightsqlSqlExecutionSandboxId = insightsqlSqlAttributes.insightsqlExecutionSandboxId ?? null
+    const insightsqlSqlHasExecution = insightsqlSqlExecutionCodeHash !== null
+    const insightsqlSqlSandboxMatches =
+        insightsqlSqlExecutionSandboxId !== null &&
         kernelSandboxId !== null &&
-        hogqlSqlExecutionSandboxId === kernelSandboxId
-    const hogqlSqlIsFresh =
-        hogqlSqlHasExecution &&
-        hogqlSqlExecutionCodeHash === hogqlSqlCodeHash &&
-        hogqlSqlSandboxMatches &&
+        insightsqlSqlExecutionSandboxId === kernelSandboxId
+    const insightsqlSqlIsFresh =
+        insightsqlSqlHasExecution &&
+        insightsqlSqlExecutionCodeHash === insightsqlSqlCodeHash &&
+        insightsqlSqlSandboxMatches &&
         kernelIsRunning
-    const hogqlSqlIsStale = hogqlSqlHasExecution && !hogqlSqlIsFresh
+    const insightsqlSqlIsStale = insightsqlSqlHasExecution && !insightsqlSqlIsFresh
 
     const defaultMenuItems: LemonMenuItems = [
         !NON_COPYABLE_NODES.includes(nodeType)
@@ -325,14 +325,14 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
                                                         onRun={(mode) => void runDuckSqlNodeWithMode({ mode })}
                                                     />
                                                 ) : null}
-                                                {isHogqlSqlNode ? (
-                                                    <HogqlSqlRunMenu
-                                                        isFresh={hogqlSqlIsFresh}
-                                                        isStale={hogqlSqlIsStale}
-                                                        loading={hogqlSqlRunLoading}
-                                                        queued={hogqlSqlRunQueued}
+                                                {isInsightsqlSqlNode ? (
+                                                    <InsightsqlSqlRunMenu
+                                                        isFresh={insightsqlSqlIsFresh}
+                                                        isStale={insightsqlSqlIsStale}
+                                                        loading={insightsqlSqlRunLoading}
+                                                        queued={insightsqlSqlRunQueued}
                                                         disabledReason={runDisabledReason}
-                                                        onRun={(mode) => void runHogqlSqlNodeWithMode({ mode })}
+                                                        onRun={(mode) => void runInsightsqlSqlNodeWithMode({ mode })}
                                                     />
                                                 ) : null}
 

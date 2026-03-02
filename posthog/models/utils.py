@@ -20,7 +20,7 @@ from django.db.models import Q, Subquery, UniqueConstraint
 from django.db.models.constraints import BaseConstraint
 from django.utils.text import slugify
 
-from posthog.hogql import ast
+from posthog.insightsql import ast
 
 from posthog.constants import MAX_SLUG_LENGTH
 from posthog.person_db_router import PERSONS_DB_MODELS
@@ -218,8 +218,8 @@ class BytecodeModelMixin(models.Model):
         super().save(*args, **kwargs)
 
     def _refresh_bytecode(self):
-        from posthog.hogql.compiler.bytecode import create_bytecode
-        from posthog.hogql.errors import BaseHogQLError
+        from posthog.insightsql.compiler.bytecode import create_bytecode
+        from posthog.insightsql.errors import BaseInsightsQLError
 
         try:
             expr = self.get_expr()
@@ -227,7 +227,7 @@ class BytecodeModelMixin(models.Model):
             if new_bytecode != self.bytecode or self.bytecode_error is None:
                 self.bytecode = new_bytecode
                 self.bytecode_error = None
-        except BaseHogQLError as e:
+        except BaseInsightsQLError as e:
             # There are several known cases when bytecode generation can fail.
             # Instead of spamming with errors, ignore those cases for now.
             if self.bytecode or self.bytecode_error != str(e):

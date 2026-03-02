@@ -52,7 +52,7 @@ export const TaxonomicBreakdownPopover = ({
             ...groupsTaxonomicTypes,
             TaxonomicFilterGroupType.CohortsWithAllUsers,
             ...(includeSessions ? [TaxonomicFilterGroupType.SessionProperties] : []),
-            TaxonomicFilterGroupType.HogQLExpression,
+            TaxonomicFilterGroupType.InsightsQLExpression,
             TaxonomicFilterGroupType.DataWarehouseProperties,
             TaxonomicFilterGroupType.DataWarehousePersonProperties,
         ]

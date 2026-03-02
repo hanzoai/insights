@@ -15,7 +15,7 @@ import {
     DatabaseSchemaTable,
     DatabaseSchemaViewTable,
     DatabaseSerializedFieldType,
-    HogQLQuery,
+    InsightsQLQuery,
     NodeKind,
 } from '~/queries/schema/schema-general'
 
@@ -276,8 +276,8 @@ export const dataWarehouseSettingsSceneLogic = kea<dataWarehouseSettingsSceneLog
         },
         updateView: ({ query, types }) => {
             if (values.editingView) {
-                const newViewQuery: HogQLQuery = {
-                    kind: NodeKind.HogQLQuery,
+                const newViewQuery: InsightsQLQuery = {
+                    kind: NodeKind.InsightsQLQuery,
                     query: query,
                 }
 

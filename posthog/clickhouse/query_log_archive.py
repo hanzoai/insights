@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS {table_name} (
     lc_dagster__run_id String,  -- comment JSONExtractString(log_comment, 'dagster', 'run_id')
     lc_dagster__owner String,  -- comment JSONExtractString(log_comment, 'dagster', 'tags', 'owner')
 
-    team_id Int64 ALIAS lc_team_id -- alias so that hogql generator can filter by team_id
+    team_id Int64 ALIAS lc_team_id -- alias so that insightsql generator can filter by team_id
 ) ENGINE = {engine}
 """
 
@@ -477,7 +477,7 @@ def QUERY_LOG_ARCHIVE_ADD_LC_QUERY_SQL(table=QUERY_LOG_ARCHIVE_DATA_TABLE):
     """
 
 
-# V10 - adding lc_modifiers to store HogQL query modifiers
+# V10 - adding lc_modifiers to store InsightsQL query modifiers
 def QUERY_LOG_ARCHIVE_ADD_MODIFIERS_COLUMN_SQL(table=QUERY_LOG_ARCHIVE_DATA_TABLE):
     return f"""
     ALTER TABLE {table}

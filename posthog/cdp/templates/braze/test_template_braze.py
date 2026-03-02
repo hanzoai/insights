@@ -1,10 +1,10 @@
 from freezegun import freeze_time
 
 from posthog.cdp.templates.braze.template_braze import template as template_braze
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 
 
-class TestTemplateBraze(BaseHogFunctionTemplateTest):
+class TestTemplateBraze(BaseCustomFunctionTemplateTest):
     template = template_braze
 
     @freeze_time("2024-04-16T12:34:51Z")

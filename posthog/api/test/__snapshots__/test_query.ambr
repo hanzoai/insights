@@ -257,7 +257,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_full_hogql_query
+# name: TestQuery.test_full_insightsql_query
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -281,7 +281,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_full_hogql_query_materialized
+# name: TestQuery.test_full_insightsql_query_materialized
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -305,7 +305,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_full_hogql_query_view
+# name: TestQuery.test_full_insightsql_query_view
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -329,7 +329,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_full_hogql_query_view.1
+# name: TestQuery.test_full_insightsql_query_view.1
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT event_view.event AS event,
@@ -357,7 +357,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter
+# name: TestQuery.test_insightsql_property_filter
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -387,7 +387,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter.1
+# name: TestQuery.test_insightsql_property_filter.1
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -412,7 +412,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter.2
+# name: TestQuery.test_insightsql_property_filter.2
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -442,7 +442,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter.3
+# name: TestQuery.test_insightsql_property_filter.3
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -472,7 +472,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter_materialized
+# name: TestQuery.test_insightsql_property_filter_materialized
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -502,7 +502,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter_materialized.1
+# name: TestQuery.test_insightsql_property_filter_materialized.1
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -527,7 +527,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter_materialized.2
+# name: TestQuery.test_insightsql_property_filter_materialized.2
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -557,7 +557,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_hogql_property_filter_materialized.3
+# name: TestQuery.test_insightsql_property_filter_materialized.3
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT events.event AS event,
@@ -833,7 +833,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_select_hogql_expressions
+# name: TestQuery.test_select_insightsql_expressions
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, 'key'), ''), 'null'), '^"|"$', '') AS key,
@@ -862,7 +862,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_select_hogql_expressions.1
+# name: TestQuery.test_select_insightsql_expressions.1
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT tuple(events.uuid, events.event, events.properties, toTimeZone(events.timestamp, 'UTC'), events.team_id, events.distinct_id, events.elements_chain, toTimeZone(events.created_at, 'UTC'), events.person_mode) AS `tuple(uuid, event, properties, toTimeZone(timestamp, 'UTC'), team_id, distinct_id, elements_chain, toTimeZone(created_at, 'UTC'), person_mode)`,
@@ -889,7 +889,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_select_hogql_expressions.2
+# name: TestQuery.test_select_insightsql_expressions.2
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT count() AS `count()`,
@@ -912,7 +912,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestQuery.test_select_hogql_expressions.3
+# name: TestQuery.test_select_insightsql_expressions.3
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT count() AS `count()`,

@@ -1625,7 +1625,7 @@ def _load_recording_if_matches_filters(
     ch_query_result = SessionRecordingListFromQuery(
         query=prepend_check_query,
         team=team,
-        hogql_query_modifiers=None,
+        insightsql_query_modifiers=None,
         allow_event_property_expansion=allow_event_property_expansion,
     ).run()
 
@@ -1667,7 +1667,7 @@ def list_recordings_from_query(
 
     recordings: list[SessionRecording] = []
     more_recordings_available = False
-    hogql_timings: list[QueryTiming] | None = None
+    insightsql_timings: list[QueryTiming] | None = None
     next_cursor: str | None = None
 
     timer = ServerTimingsGathered()
@@ -1712,9 +1712,9 @@ def list_recordings_from_query(
 
     if should_query_clickhouse:
         with (
-            timer("load_recordings_from_hogql"),
+            timer("load_recordings_from_insightsql"),
             posthoganalytics.new_context(),
-            tracer.start_as_current_span("load_recordings_from_hogql"),
+            tracer.start_as_current_span("load_recordings_from_insightsql"),
         ):
             # Create a copy of the query without session_recording_id for the main query
             # We've already handled session_recording_id separately above
@@ -1727,13 +1727,13 @@ def list_recordings_from_query(
             query_result = SessionRecordingListFromQuery(
                 query=query_for_list,
                 team=team,
-                hogql_query_modifiers=None,
+                insightsql_query_modifiers=None,
                 allow_event_property_expansion=allow_event_property_expansion,
             ).run()
             ch_session_recordings = query_result.results
 
             more_recordings_available = query_result.has_more_recording
-            hogql_timings = query_result.timings
+            insightsql_timings = query_result.timings
             next_cursor = query_result.next_cursor
 
         with timer("build_recordings"), tracer.start_as_current_span("build_recordings"):
@@ -1804,7 +1804,7 @@ def list_recordings_from_query(
             if person:
                 recording.person = person
 
-    return recordings, more_recordings_available, timer.to_header_string(hogql_timings), next_cursor
+    return recordings, more_recordings_available, timer.to_header_string(insightsql_timings), next_cursor
 
 
 def _other_users_viewed(recording_ids_in_list: list[str], user: User | None, team: Team) -> dict[str, list[str]]:

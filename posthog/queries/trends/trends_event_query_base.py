@@ -144,7 +144,7 @@ class TrendsEventQueryBase(EventQuery):
             team_id=self._team_id,
             table_name=self.EVENT_TABLE_ALIAS,
             person_properties_mode=get_person_properties_mode(self._team),
-            hogql_context=self._filter.hogql_context,
+            insightsql_context=self._filter.insightsql_context,
             person_id_joined_alias=self._person_id_alias,
             deep_filtering=deep_filtering,
         )

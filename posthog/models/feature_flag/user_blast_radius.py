@@ -55,8 +55,8 @@ def get_user_blast_radius(
 
 
 def _get_person_blast_radius(team: Team, filter: Filter) -> tuple[int, int]:
-    """Calculate blast radius for person-based feature flags using HogQL."""
-    from posthog.hogql.query import execute_hogql_query
+    """Calculate blast radius for person-based feature flags using InsightsQL."""
+    from posthog.insightsql.query import execute_insightsql_query
 
     properties = filter.property_groups.flat
 
@@ -69,7 +69,7 @@ def _get_person_blast_radius(team: Team, filter: Filter) -> tuple[int, int]:
     select_query = _build_person_count_query(team, filter)
 
     # Execute the query
-    response = execute_hogql_query(
+    response = execute_insightsql_query(
         query=select_query,
         team=team,
     )
@@ -82,9 +82,9 @@ def _get_person_blast_radius(team: Team, filter: Filter) -> tuple[int, int]:
 
 
 def _build_person_count_query(team: Team, filter: Filter):
-    """Build HogQL AST query to count distinct persons matching filters."""
-    from posthog.hogql import ast
-    from posthog.hogql.property import property_to_expr
+    """Build InsightsQL AST query to count distinct persons matching filters."""
+    from posthog.insightsql import ast
+    from posthog.insightsql.property import property_to_expr
 
     # Build the main SELECT with count(DISTINCT persons.id)
     select_query = ast.SelectQuery(
@@ -113,8 +113,8 @@ def _build_person_count_query(team: Team, filter: Filter):
 
 
 def _get_group_blast_radius(team: Team, filter: Filter, group_type_index: GroupTypeIndex) -> tuple[int, int]:
-    """Calculate blast radius for group-based feature flags using HogQL."""
-    from posthog.hogql.query import execute_hogql_query
+    """Calculate blast radius for group-based feature flags using InsightsQL."""
+    from posthog.insightsql.query import execute_insightsql_query
 
     properties = filter.property_groups.flat
 
@@ -135,7 +135,7 @@ def _get_group_blast_radius(team: Team, filter: Filter, group_type_index: GroupT
     select_query = _build_group_count_query(team, filter, group_type_index)
 
     # Execute the query with OFFLINE workload (groups queries can be massive)
-    response = execute_hogql_query(
+    response = execute_insightsql_query(
         query=select_query,
         team=team,
         workload=Workload.OFFLINE,
@@ -148,9 +148,9 @@ def _get_group_blast_radius(team: Team, filter: Filter, group_type_index: GroupT
 
 
 def _build_group_count_query(team: Team, filter: Filter, group_type_index: GroupTypeIndex):
-    """Build HogQL AST query to count distinct groups matching filters."""
-    from posthog.hogql import ast
-    from posthog.hogql.property import property_to_expr
+    """Build InsightsQL AST query to count distinct groups matching filters."""
+    from posthog.insightsql import ast
+    from posthog.insightsql.property import property_to_expr
 
     # Build the main SELECT with count(DISTINCT groups.key)
     select_query = ast.SelectQuery(

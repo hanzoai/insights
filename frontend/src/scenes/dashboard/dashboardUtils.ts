@@ -9,7 +9,7 @@ import { accessLevelSatisfied } from 'lib/utils/accessControlUtils'
 
 import { getQueryBasedInsightModel } from '~/queries/nodes/InsightViz/utils'
 import { pollForResults } from '~/queries/query'
-import { DashboardFilter, HogQLVariable, TileFilters } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable, TileFilters } from '~/queries/schema/schema-general'
 import {
     AccessControlLevel,
     AccessControlResourceType,
@@ -118,7 +118,7 @@ export async function getInsightWithRetry(
     refresh: 'force_blocking' | 'blocking',
     methodOptions?: ApiMethodOptions,
     filtersOverride?: DashboardFilter,
-    variablesOverride?: Record<string, HogQLVariable>,
+    variablesOverride?: Record<string, InsightsQLVariable>,
     tileFiltersOverride?: TileFilters,
     maxAttempts: number = 5,
     initialDelay: number = 1200
@@ -238,8 +238,8 @@ export async function getInsightWithRetry(
     return null
 }
 
-export const parseURLVariables = (searchParams: Record<string, any>): Record<string, Partial<HogQLVariable>> => {
-    const variables: Record<string, Partial<HogQLVariable>> = {}
+export const parseURLVariables = (searchParams: Record<string, any>): Record<string, Partial<InsightsQLVariable>> => {
+    const variables: Record<string, Partial<InsightsQLVariable>> = {}
 
     if (searchParams[SEARCH_PARAM_QUERY_VARIABLES_KEY]) {
         try {

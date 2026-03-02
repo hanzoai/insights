@@ -51,7 +51,7 @@ export function PipelinePluginConfiguration({
         loading,
         configurationChanged,
     } = useValues(logic)
-    const { submitConfiguration, resetConfiguration, migrateToHogFunction } = useActions(logic)
+    const { submitConfiguration, resetConfiguration, migrateToCustomFunction } = useActions(logic)
 
     if (loading && !plugin) {
         return <SpinnerOverlay />
@@ -132,7 +132,7 @@ export function PipelinePluginConfiguration({
                 <div className="shrink-0">{buttons}</div>
             </div>
 
-            {plugin?.hog_function_migration_available && (
+            {plugin?.custom_function_migration_available && (
                 <LemonBanner
                     type="error"
                     action={{
@@ -149,7 +149,7 @@ export function PipelinePluginConfiguration({
                                 },
                                 primaryButton: {
                                     type: 'primary',
-                                    onClick: () => migrateToHogFunction(),
+                                    onClick: () => migrateToCustomFunction(),
                                     children: 'Upgrade',
                                 },
                             }),

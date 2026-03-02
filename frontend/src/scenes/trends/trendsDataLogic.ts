@@ -31,7 +31,7 @@ import { isValidBreakdown } from '~/queries/utils'
 import {
     ChartDisplayType,
     CountPerActorMathType,
-    HogQLMathType,
+    InsightsQLMathType,
     InsightLogicProps,
     IntervalType,
     LifecycleToggle,
@@ -48,7 +48,7 @@ export const RESULT_CUSTOMIZATION_DEFAULT = ResultCustomizationBy.Value
 /** All math types that can result in non-whole numbers. */
 const POSSIBLY_FRACTIONAL_MATH_TYPES: Set<MathType> = new Set(
     [CountPerActorMathType.Average as MathType]
-        .concat(Object.values(HogQLMathType))
+        .concat(Object.values(InsightsQLMathType))
         .concat(Object.values(PropertyMathType))
 )
 

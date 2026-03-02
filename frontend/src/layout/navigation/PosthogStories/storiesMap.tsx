@@ -327,7 +327,7 @@ export const storiesMap: storyGroup[] = [
             {
                 id: 'toolbar-cool-features-image',
                 title: 'Toolbar',
-                description: 'Check out hedgehog mode!',
+                description: 'Check out toolbar features!',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/hoggie_builder_dc64451e64.png',
                 mediaUrl:
                     'https://res.cloudinary.com/dmukukwp6/image/upload/toolbar_cool_features_357aa7fc36_dc294f7fca.png',

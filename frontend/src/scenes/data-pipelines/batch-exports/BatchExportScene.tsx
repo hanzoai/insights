@@ -22,8 +22,8 @@ import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonTab, LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { BatchExportBackfills } from 'scenes/data-pipelines/batch-exports/BatchExportBackfills'
 import { BatchExportRuns } from 'scenes/data-pipelines/batch-exports/BatchExportRuns'
-import { LogsViewer } from 'scenes/hog-functions/logs/LogsViewer'
-import { HogFunctionSkeleton } from 'scenes/hog-functions/misc/HogFunctionSkeleton'
+import { LogsViewer } from 'scenes/custom-functions/logs/LogsViewer'
+import { CustomFunctionSkeleton } from 'scenes/custom-functions/misc/CustomFunctionSkeleton'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -216,7 +216,7 @@ function BatchExportSceneContentInner({
         return (
             <div className="flex flex-col gap-4">
                 <LemonSkeleton className="w-full h-12" />
-                <HogFunctionSkeleton />
+                <CustomFunctionSkeleton />
             </div>
         )
     }

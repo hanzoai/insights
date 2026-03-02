@@ -48,7 +48,7 @@ import {
     BreakdownFilter,
     DashboardFilter,
     DataVisualizationNode,
-    HogQLVariable,
+    InsightsQLVariable,
     NodeKind,
     RefreshType,
 } from '~/queries/schema/schema-general'
@@ -948,7 +948,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
             (
                 dashboard: DashboardType,
                 variables: Variable[],
-                urlVariables: Record<string, HogQLVariable>
+                urlVariables: Record<string, InsightsQLVariable>
             ): { variable: Variable; insightNames: string[] }[] => {
                 const dataVizNodes = (dashboard?.tiles ?? [])
                     .map((n) => ({ query: n.insight?.query, title: n.insight?.name }))
@@ -960,7 +960,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
 
                 const usedVariables = dataVizNodes
                     .map((n) => n.query.source.variables)
-                    .filter((n): n is Record<string, HogQLVariable> => Boolean(n))
+                    .filter((n): n is Record<string, InsightsQLVariable> => Boolean(n))
                     .flatMap((n) => Object.values(n))
                 const uniqueVariables = uniqBy(usedVariables, (n) => n.variableId)
 
@@ -1019,7 +1019,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
         ],
         urlVariables: [
             (s) => [router.selectors.searchParams, s.variables, s.initialVariablesLoaded],
-            (searchParams, variables, initialVariablesLoaded): Record<string, HogQLVariable> => {
+            (searchParams, variables, initialVariablesLoaded): Record<string, InsightsQLVariable> => {
                 if (!initialVariablesLoaded) {
                     // if initial variables are not loaded yet, we can't map the variables in the url
                     return {}
@@ -1027,7 +1027,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
 
                 // try to convert url variables to variables
                 const urlVariablesRaw = parseURLVariables(searchParams)
-                const urlVariables: Record<string, HogQLVariable> = {}
+                const urlVariables: Record<string, InsightsQLVariable> = {}
 
                 for (const [key, value] of Object.entries(urlVariablesRaw)) {
                     const variable = variables.find((variable: Variable) => variable.code_name === key)
@@ -1096,7 +1096,7 @@ export const dashboardLogic = kea<dashboardLogicType>([
                 return (
                     refresh?: RefreshType,
                     filtersOverride?: DashboardFilter,
-                    variablesOverride?: Record<string, HogQLVariable>,
+                    variablesOverride?: Record<string, InsightsQLVariable>,
                     layoutSize?: 'sm' | 'xs'
                 ) =>
                     `api/environments/${teamLogic.values.currentTeamId}/dashboards/${id}/?${toParams({

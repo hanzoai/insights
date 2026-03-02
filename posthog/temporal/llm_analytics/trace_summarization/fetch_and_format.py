@@ -5,9 +5,9 @@ import time
 import structlog
 import temporalio
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models.team import Team
 from posthog.redis import get_async_client
@@ -108,7 +108,7 @@ def _fetch_and_format_generation(
         """
     )
 
-    result = execute_hogql_query(
+    result = execute_insightsql_query(
         query_type="GenerationForSummarization",
         query=query,
         placeholders={

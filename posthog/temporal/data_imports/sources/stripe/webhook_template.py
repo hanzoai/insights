@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="alpha",
     free=False,
     type="warehouse_source_webhook",
@@ -9,7 +9,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Receive Stripe webhook events for data warehouse ingestion",
     icon_url="/static/services/stripe.png",
     category=["Data warehouse"],
-    code_language="hog",
+    code_language="custom_script",
     code="""\
 if(request.method != 'POST') {
   return {

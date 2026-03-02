@@ -7,9 +7,9 @@ import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { databaseTableListLogic } from 'scenes/data-management/database/databaseTableListLogic'
 
-import { hogqlQuery } from '~/queries/query'
+import { insightsqlQuery } from '~/queries/query'
 import { DatabaseSchemaField } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { DataWarehouseViewLink } from '~/types'
 
 import { ViewLinkKeyLabel } from './ViewLinkModal'
@@ -423,7 +423,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
             (s) => [s.selectedJoiningTableName, s.allTables],
             (selectedJoiningTableName, tables) => tables.find((row) => row.name === selectedJoiningTableName),
         ],
-        sourceIsUsingHogQLExpression: [
+        sourceIsUsingInsightsQLExpression: [
             (s) => [s.selectedSourceKey, s.selectedSourceTable],
             (sourceKey, sourceTable) => {
                 if (sourceKey === null) {
@@ -433,7 +433,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
                 return !column
             },
         ],
-        joiningIsUsingHogQLExpression: [
+        joiningIsUsingInsightsQLExpression: [
             (s) => [s.selectedJoiningKey, s.selectedJoiningTable],
             (joiningKey, joiningTable) => {
                 if (joiningKey === null) {
@@ -508,7 +508,7 @@ async function loadTablePreviewData(
     setDataAction: (data: Record<string, any>[]) => void
 ): Promise<void> {
     try {
-        const response = await hogqlQuery(hogql`SELECT * FROM ${hogql.identifier(tableName)} LIMIT 10`)
+        const response = await insightsqlQuery(insightsql`SELECT * FROM ${insightsql.identifier(tableName)} LIMIT 10`)
         const transformedData = (response.results || []).map((row: any[]) =>
             Object.fromEntries((response.columns || []).map((column: string, index: number) => [column, row[index]]))
         )

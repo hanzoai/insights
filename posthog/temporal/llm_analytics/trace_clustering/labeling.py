@@ -38,7 +38,7 @@ def generate_cluster_labels(
     high-quality, distinctive labels for each cluster.
 
     Args:
-        team: Team object for HogQL queries
+        team: Team object for InsightsQL queries
         items: List of all items being clustered with explicit trace_id and generation_id
         labels: Cluster assignments for each item (-1 = noise/outliers)
         item_metadata: Precomputed per-item metadata (x, y, distance, rank)

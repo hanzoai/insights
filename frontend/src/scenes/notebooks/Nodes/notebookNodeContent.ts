@@ -19,11 +19,11 @@ export type DuckSqlNodeSummary = {
     title: string
 }
 
-export type HogqlSqlNodeSummary = {
+export type InsightsqlSqlNodeSummary = {
     nodeId: string
     code: string
     returnVariable: string
-    hogqlSqlIndex: number
+    insightsqlSqlIndex: number
     title: string
 }
 
@@ -53,18 +53,18 @@ export type NotebookDependencyGraph = {
 }
 
 // TODO: The SQL parsing logic in this file is very rough. This is on purpose.
-// The HogQL WASM parser is coming. Once we have that, we'll revisit this part and make it robust.
+// The InsightsQL WASM parser is coming. Once we have that, we'll revisit this part and make it robust.
 
 const stripSqlComments = (sql: string): string => {
     return sql.replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
 }
 
-export const extractHogqlPlaceholders = (sql: string): string[] => {
+export const extractInsightsqlPlaceholders = (sql: string): string[] => {
     const cleanedSql = stripSqlComments(sql || '')
     const placeholders: string[] = []
     const placeholderPattern = /\{([A-Za-z_][\w$]*)\}/g
     const excludedPlaceholderNames = new Set([
-        'filters', // Reserved for auto-injected global date/property filters in HogQL notebook queries.
+        'filters', // Reserved for auto-injected global date/property filters in InsightsQL notebook queries.
     ])
     let match = placeholderPattern.exec(cleanedSql)
     while (match) {
@@ -176,11 +176,11 @@ export const getUniqueDuckSqlReturnVariable = (
     return resolvedReturnVariable
 }
 
-export const resolveHogqlReturnVariable = (returnVariable: string): string => {
-    return returnVariable.trim() || 'hogql_df'
+export const resolveInsightsqlReturnVariable = (returnVariable: string): string => {
+    return returnVariable.trim() || 'insightsql_df'
 }
 
-const buildUniqueHogqlReturnVariable = (baseReturnVariable: string, used: Set<string>): string => {
+const buildUniqueInsightsqlReturnVariable = (baseReturnVariable: string, used: Set<string>): string => {
     const normalizedBase = normalizeSqlIdentifier(baseReturnVariable)
     if (!used.has(normalizedBase)) {
         return baseReturnVariable
@@ -196,18 +196,18 @@ const buildUniqueHogqlReturnVariable = (baseReturnVariable: string, used: Set<st
     }
 }
 
-export const getUniqueHogqlReturnVariable = (
-    nodes: HogqlSqlNodeSummary[],
+export const getUniqueInsightsqlReturnVariable = (
+    nodes: InsightsqlSqlNodeSummary[],
     nodeId: string,
     fallbackReturnVariable: string
 ): string => {
     const used = new Set<string>()
-    let resolvedReturnVariable = resolveHogqlReturnVariable(fallbackReturnVariable)
+    let resolvedReturnVariable = resolveInsightsqlReturnVariable(fallbackReturnVariable)
     let resolvedFromNodes = false
 
     nodes.forEach((node) => {
-        const baseReturnVariable = resolveHogqlReturnVariable(node.returnVariable)
-        const uniqueReturnVariable = buildUniqueHogqlReturnVariable(baseReturnVariable, used)
+        const baseReturnVariable = resolveInsightsqlReturnVariable(node.returnVariable)
+        const uniqueReturnVariable = buildUniqueInsightsqlReturnVariable(baseReturnVariable, used)
         used.add(normalizeSqlIdentifier(uniqueReturnVariable))
 
         if (node.nodeId === nodeId) {
@@ -217,7 +217,7 @@ export const getUniqueHogqlReturnVariable = (
     })
 
     if (!resolvedFromNodes) {
-        resolvedReturnVariable = buildUniqueHogqlReturnVariable(resolvedReturnVariable, used)
+        resolvedReturnVariable = buildUniqueInsightsqlReturnVariable(resolvedReturnVariable, used)
     }
 
     return resolvedReturnVariable
@@ -253,31 +253,31 @@ export const collectPythonNodes = (content?: JSONContent | null): PythonNodeSumm
     return nodes
 }
 
-export const collectHogqlSqlNodes = (content?: JSONContent | null): HogqlSqlNodeSummary[] => {
+export const collectInsightsqlSqlNodes = (content?: JSONContent | null): InsightsqlSqlNodeSummary[] => {
     if (!content || typeof content !== 'object') {
         return []
     }
 
-    const nodes: HogqlSqlNodeSummary[] = []
+    const nodes: InsightsqlSqlNodeSummary[] = []
     const usedReturnVariables = new Set<string>()
 
     const walk = (node: any): void => {
         if (!node || typeof node !== 'object') {
             return
         }
-        if (node.type === NotebookNodeType.HogQLSQL) {
+        if (node.type === NotebookNodeType.InsightsQLSQL) {
             const attrs = node.attrs ?? {}
             const code = typeof attrs.code === 'string' ? attrs.code : ''
-            const baseReturnVariable = resolveHogqlReturnVariable(
-                typeof attrs.returnVariable === 'string' ? attrs.returnVariable : 'hogql_df'
+            const baseReturnVariable = resolveInsightsqlReturnVariable(
+                typeof attrs.returnVariable === 'string' ? attrs.returnVariable : 'insightsql_df'
             )
-            const returnVariable = buildUniqueHogqlReturnVariable(baseReturnVariable, usedReturnVariables)
+            const returnVariable = buildUniqueInsightsqlReturnVariable(baseReturnVariable, usedReturnVariables)
             usedReturnVariables.add(normalizeSqlIdentifier(returnVariable))
             nodes.push({
                 nodeId: attrs.nodeId ?? '',
                 code,
                 returnVariable,
-                hogqlSqlIndex: nodes.length + 1,
+                insightsqlSqlIndex: nodes.length + 1,
                 title: typeof attrs.title === 'string' ? attrs.title : '',
             })
         }
@@ -357,9 +357,9 @@ export const buildNotebookDependencyGraph = (content?: JSONContent | null): Note
     const nodes: NotebookDependencyNode[] = []
     let pythonIndex = 0
     let duckSqlIndex = 0
-    let hogqlSqlIndex = 0
+    let insightsqlSqlIndex = 0
     const usedDuckSqlReturnVariables = new Set<string>()
-    const usedHogqlReturnVariables = new Set<string>()
+    const usedInsightsqlReturnVariables = new Set<string>()
 
     const walk = (node: any): void => {
         if (!node || typeof node !== 'object') {
@@ -404,22 +404,22 @@ export const buildNotebookDependencyGraph = (content?: JSONContent | null): Note
             })
         }
 
-        if (node.type === NotebookNodeType.HogQLSQL) {
+        if (node.type === NotebookNodeType.InsightsQLSQL) {
             const attrs = node.attrs ?? {}
-            hogqlSqlIndex += 1
-            const baseReturnVariable = resolveHogqlReturnVariable(
-                typeof attrs.returnVariable === 'string' ? attrs.returnVariable : 'hogql_df'
+            insightsqlSqlIndex += 1
+            const baseReturnVariable = resolveInsightsqlReturnVariable(
+                typeof attrs.returnVariable === 'string' ? attrs.returnVariable : 'insightsql_df'
             )
-            const returnVariable = buildUniqueHogqlReturnVariable(baseReturnVariable, usedHogqlReturnVariables)
-            usedHogqlReturnVariables.add(normalizeSqlIdentifier(returnVariable))
+            const returnVariable = buildUniqueInsightsqlReturnVariable(baseReturnVariable, usedInsightsqlReturnVariables)
+            usedInsightsqlReturnVariables.add(normalizeSqlIdentifier(returnVariable))
             const code = typeof attrs.code === 'string' ? attrs.code : ''
             nodes.push({
                 nodeId: attrs.nodeId ?? '',
-                nodeType: NotebookNodeType.HogQLSQL,
-                nodeIndex: hogqlSqlIndex,
+                nodeType: NotebookNodeType.InsightsQLSQL,
+                nodeIndex: insightsqlSqlIndex,
                 title: typeof attrs.title === 'string' ? attrs.title : '',
                 exports: returnVariable ? [returnVariable] : [],
-                uses: extractHogqlPlaceholders(code),
+                uses: extractInsightsqlPlaceholders(code),
                 code,
                 returnVariable,
             })

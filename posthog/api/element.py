@@ -99,7 +99,7 @@ class ElementViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 prop_filters, prop_filter_params = parse_prop_grouped_clauses(
                     team_id=self.team.pk,
                     property_group=filter.property_groups,
-                    hogql_context=filter.hogql_context,
+                    insightsql_context=filter.insightsql_context,
                 )
 
             with timer("execute_query"):
@@ -119,7 +119,7 @@ class ElementViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                         **prop_filter_params,
                         **date_params,
                         "filter_event_types": events_filter,
-                        **filter.hogql_context.values,
+                        **filter.insightsql_context.values,
                     },
                 )
 

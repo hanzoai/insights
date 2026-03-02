@@ -94,7 +94,7 @@ export const propertyFilterLogic = kea<propertyFilterLogicType>([
                 ('operator' in property &&
                     property?.operator &&
                     ['is_set', 'is_not_set'].includes(property?.operator)) ||
-                (property?.key && property.type === 'hogql')
+                (property?.key && property.type === 'insightsql')
             ) {
                 actions.update()
             }

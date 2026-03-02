@@ -21,8 +21,8 @@ import { SharingConfigurationType } from '~/types'
 
 import { getAvailableProductFeatures } from './features'
 import { billingJson } from './fixtures/_billing'
-import _hogFunctionTemplatesDestinations from './fixtures/_hogFunctionTemplatesDestinations.json'
-import _hogFunctionTemplatesTransformations from './fixtures/_hogFunctionTemplatesTransformations.json'
+import _customFunctionTemplatesDestinations from './fixtures/_customFunctionTemplatesDestinations.json'
+import _customFunctionTemplatesTransformations from './fixtures/_customFunctionTemplatesTransformations.json'
 import * as incidentIoStatusPageAllOK from './fixtures/_incident_io_status_page_all_ok.json'
 import { MockSignature, Mocks, mocksToHandlers } from './utils'
 
@@ -34,21 +34,21 @@ export const toPaginatedResponse = (results: any[]): typeof EMPTY_PAGINATED_RESP
     previous: null,
 })
 
-const hogFunctionTemplateRetrieveMock: MockSignature = (req, res, ctx) => {
-    const hogFunctionTemplate =
-        _hogFunctionTemplatesDestinations.results.find((conf) => conf.id === req.params.id) ||
-        _hogFunctionTemplatesTransformations.results.find((conf) => conf.id === req.params.id)
-    if (!hogFunctionTemplate) {
+const customFunctionTemplateRetrieveMock: MockSignature = (req, res, ctx) => {
+    const customFunctionTemplate =
+        _customFunctionTemplatesDestinations.results.find((conf) => conf.id === req.params.id) ||
+        _customFunctionTemplatesTransformations.results.find((conf) => conf.id === req.params.id)
+    if (!customFunctionTemplate) {
         return res(ctx.status(404))
     }
-    return res(ctx.json({ ...hogFunctionTemplate }))
+    return res(ctx.json({ ...customFunctionTemplate }))
 }
 
-const hogFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
+const customFunctionTemplatesMock: MockSignature = (req, res, ctx) => {
     const results = req.url.searchParams.get('types')?.includes('transformation')
-        ? _hogFunctionTemplatesTransformations
+        ? _customFunctionTemplatesTransformations
         : req.url.searchParams.get('types')?.includes('destination')
-          ? _hogFunctionTemplatesDestinations
+          ? _customFunctionTemplatesDestinations
           : []
 
     return res(ctx.json(results))
@@ -77,7 +77,7 @@ export const defaultMocks: Mocks = {
         '/api/projects/:team_id/cohorts/': toPaginatedResponse([MOCK_DEFAULT_COHORT]),
         '/api/environments/:team_id/dashboards/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/alerts/': EMPTY_PAGINATED_RESPONSE,
-        '/api/environments/:team_id/hog_functions/': EMPTY_PAGINATED_RESPONSE,
+        '/api/environments/:team_id/custom_functions/': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/user_product_list/': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/dashboard_templates': EMPTY_PAGINATED_RESPONSE,
         '/api/projects/:team_id/dashboard_templates/repository/': [],
@@ -189,9 +189,9 @@ export const defaultMocks: Mocks = {
         '/api/billing/spend/': { results: [] },
         '/api/billing/usage/': { results: [] },
         [`${INCIDENT_IO_STATUS_PAGE_BASE}/api/v1/summary`]: incidentIoStatusPageAllOK,
-        '/api/projects/:team_id/hog_function_templates': hogFunctionTemplatesMock,
-        '/api/projects/:team_id/hog_function_templates/:id': hogFunctionTemplateRetrieveMock,
-        '/api/projects/:team_id/hog_functions': EMPTY_PAGINATED_RESPONSE,
+        '/api/projects/:team_id/custom_function_templates': customFunctionTemplatesMock,
+        '/api/projects/:team_id/custom_function_templates/:id': customFunctionTemplateRetrieveMock,
+        '/api/projects/:team_id/custom_functions': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/data_color_themes': MOCK_DATA_COLOR_THEMES,
         '/api/projects/:team_id/session_recording_playlists': EMPTY_PAGINATED_RESPONSE,
         '/api/environments/:team_id/session_recording_playlists': EMPTY_PAGINATED_RESPONSE,

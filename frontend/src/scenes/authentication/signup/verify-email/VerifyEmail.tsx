@@ -59,7 +59,7 @@ export const VerifyEmailHelpLinks = (): JSX.Element => {
         'Wait 5 minutes. Sometimes it takes a bit for email providers to deliver emails.',
         'Check your spam folder and any firewalls you may have active',
         'Ask your company IT department to allow any emails from @posthog.com',
-        'Channel your inner hedgehog and take another peek at your inbox',
+        'Take another peek at your inbox',
     ]
 
     const handleChecklistChange = (index: number): void => {

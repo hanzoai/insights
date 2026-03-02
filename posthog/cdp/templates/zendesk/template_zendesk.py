@@ -1,8 +1,8 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
 # Bsed off of https://developer.zendesk.com/api-reference/ticketing/users/users/#create-or-update-user
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -11,7 +11,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Update contacts in Zendesk",
     category=["Customer Success"],
     icon_url="/static/services/zendesk.png",
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email) or empty(inputs.name)) {
     print('`email` or `name` input is empty. Not creating a contact.')

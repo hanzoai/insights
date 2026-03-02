@@ -318,7 +318,7 @@ def is_insight_query(query: dict) -> bool:
 
     if kind in INSIGHT_KINDS:
         return True
-    if kind == "HogQLQuery":
+    if kind == "InsightsQLQuery":
         return True
     if kind == "DataTableNode":
         if source and (source.get("kind") or getattr(source, "kind", None)) in INSIGHT_KINDS:
@@ -538,18 +538,18 @@ class ServerTimingsGathered:
     def get_all_timings(self):
         return self.timings_dict
 
-    def generate_timings(self, hogql_timings: list[QueryTiming] | None = None) -> dict[str, float]:
+    def generate_timings(self, insightsql_timings: list[QueryTiming] | None = None) -> dict[str, float]:
         timings_dict = self.get_all_timings()
-        hogql_timings_dict = {}
-        for timing in hogql_timings or []:
-            new_key = f"hogql_{timing.k.lstrip('./').replace('/', '_')}"
-            # HogQL query timings are in seconds, convert to milliseconds
-            hogql_timings_dict[new_key] = timing.t * 1000
-        all_timings = {**timings_dict, **hogql_timings_dict}
+        insightsql_timings_dict = {}
+        for timing in insightsql_timings or []:
+            new_key = f"insightsql_{timing.k.lstrip('./').replace('/', '_')}"
+            # InsightsQL query timings are in seconds, convert to milliseconds
+            insightsql_timings_dict[new_key] = timing.t * 1000
+        all_timings = {**timings_dict, **insightsql_timings_dict}
         return all_timings
 
-    def to_header_string(self, hogql_timings: list[QueryTiming] | None = None) -> str:
-        timings = self.generate_timings(hogql_timings).items()
+    def to_header_string(self, insightsql_timings: list[QueryTiming] | None = None) -> str:
+        timings = self.generate_timings(insightsql_timings).items()
         result: list[str] = []
         current_length = 0
 

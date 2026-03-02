@@ -2,9 +2,9 @@ import dataclasses
 
 from posthog.test.base import BaseTest, ClickhouseTestMixin, _create_event, _create_person
 
-from posthog.hogql.compiler.bytecode import create_bytecode
-from posthog.hogql.hogql import HogQLContext
-from posthog.hogql.property import action_to_expr
+from posthog.insightsql.compiler.bytecode import create_bytecode
+from posthog.insightsql.insightsql import InsightsQLContext
+from posthog.insightsql.property import action_to_expr
 
 from posthog.clickhouse.client import sync_execute
 from posthog.models.action import Action
@@ -12,8 +12,8 @@ from posthog.models.action.util import filter_event, format_action_filter
 from posthog.models.test.test_event_model import filter_by_actions_factory
 
 from common.hogvm.python.operation import (
-    HOGQL_BYTECODE_IDENTIFIER as _H,
-    HOGQL_BYTECODE_VERSION,
+    INSIGHTSQL_BYTECODE_IDENTIFIER as _H,
+    INSIGHTSQL_BYTECODE_VERSION,
     Operation as op,
 )
 
@@ -25,9 +25,9 @@ class MockEvent:
 
 
 def _get_events_for_action(action: Action) -> list[MockEvent]:
-    hogql_context = HogQLContext(team_id=action.team_id)
+    insightsql_context = InsightsQLContext(team_id=action.team_id)
     formatted_query, params = format_action_filter(
-        team_id=action.team_id, action=action, prepend="", hogql_context=hogql_context
+        team_id=action.team_id, action=action, prepend="", insightsql_context=insightsql_context
     )
     query = f"""
         SELECT
@@ -40,7 +40,7 @@ def _get_events_for_action(action: Action) -> list[MockEvent]:
     """
     events = sync_execute(
         query,
-        {"team_id": action.team_id, **params, **hogql_context.values},
+        {"team_id": action.team_id, **params, **insightsql_context.values},
         team_id=action.team_id,
     )
     return [MockEvent(str(uuid), distinct_id) for uuid, distinct_id in events]
@@ -258,7 +258,7 @@ class TestActionFormat(ClickhouseTestMixin, BaseTest):
         events = _get_events_for_action(action1)
         self.assertEqual(len(events), 1)
 
-    def test_filter_with_hogql(self):
+    def test_filter_with_insightsql(self):
         _create_event(
             event="insight viewed",
             team=self.team,
@@ -278,7 +278,7 @@ class TestActionFormat(ClickhouseTestMixin, BaseTest):
             steps_json=[
                 {
                     "event": "insight viewed",
-                    "properties": [{"key": "toInt(properties.filters_count) > 10", "type": "hogql"}],
+                    "properties": [{"key": "toInt(properties.filters_count) > 10", "type": "insightsql"}],
                 }
             ],
         )
@@ -291,7 +291,7 @@ class TestActionFormat(ClickhouseTestMixin, BaseTest):
             action1.bytecode,
             [
                 _H,
-                HOGQL_BYTECODE_VERSION,
+                INSIGHTSQL_BYTECODE_VERSION,
                 # event = 'insight viewed'
                 op.STRING,
                 "insight viewed",
