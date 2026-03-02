@@ -16,7 +16,7 @@ import { Spinner } from 'lib/lemon-ui/Spinner'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import BlankWorkflowHog from 'public/blank-dashboard.png'
+import BlankWorkflowHog from 'public/blank-dashboard-hog.png'
 
 import type { InsightsFlowTemplate } from '../insightsflows/types'
 import { newWorkflowLogic } from '../newWorkflowLogic'
