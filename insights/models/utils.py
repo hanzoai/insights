@@ -266,27 +266,27 @@ def generate_random_token(nbytes: int = 32) -> str:
 
 
 def generate_random_token_project() -> str:
-    return "ha_" + generate_random_token()  # Hanzo Analytics project token
+    return "hi_" + generate_random_token()  # Hanzo Insights project token
 
 
 def generate_random_token_personal() -> str:
     # We want 32 bytes of entropy (https://docs.python.org/3/library/secrets.html#how-many-bytes-should-tokens-use).
     # Note that we store the last 4 characters of a personal API key in plain text in the database, so that users
     # can recognize their keys in the UI. This means we need 3 bytes of extra entropy. Ultimately, we want 35 bytes.
-    return "hax_" + generate_random_token(35)  # Hanzo Analytics personal key
+    return "hix_" + generate_random_token(35)  # Hanzo Insights personal key
 
 
 def generate_random_token_secret() -> str:
     # Similar to personal API keys, but for retrieving feature flag definitions for local evaluation.
-    return "has_" + generate_random_token(35)  # Hanzo Analytics secret key
+    return "his_" + generate_random_token(35)  # Hanzo Insights secret key
 
 
 def generate_random_oauth_access_token(_request) -> str:
-    return "haa_" + generate_random_token()  # Hanzo Analytics access token
+    return "hia_" + generate_random_token()  # Hanzo Insights access token
 
 
 def generate_random_oauth_refresh_token(_request) -> str:
-    return "phr_" + generate_random_token()  # "r" standing for "refresh"
+    return "hir_" + generate_random_token()  # Hanzo Insights refresh token
 
 
 def mask_key_value(value: str) -> str:

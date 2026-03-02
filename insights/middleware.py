@@ -186,7 +186,7 @@ class AutoProjectMiddleware:
             if (
                 len(path_parts) >= 2
                 and path_parts[0] == "project"
-                and (path_parts[1].startswith("phc_") or path_parts[1] in self.token_allowlist)
+                and (path_parts[1].startswith(("hi_", "phc_")) or path_parts[1] in self.token_allowlist)
             ):
 
                 def do_redirect():
