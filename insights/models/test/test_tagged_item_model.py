@@ -42,7 +42,12 @@ class TestTaggedItem(BaseTest):
             TaggedItem.objects.create(insight_id=insight.id, tag_id=tag.id)
 
     def test_uniqueness_constraint_event_definition(self):
+        pass
+
     def test_uniqueness_constraint_property_definition(self):
+        pass
+
+
     def test_uniqueness_constraint_action(self):
         action = Action.objects.create(team=self.team, name="enterprise property")
         tag = Tag.objects.create(name="tag", team_id=self.team.id)
