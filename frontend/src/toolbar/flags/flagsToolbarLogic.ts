@@ -2,7 +2,7 @@ import Fuse from 'fuse.js'
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { encodeParams } from 'kea-router'
-import type { Insights } from 'posthog-js'
+import type { PostHog } from 'posthog-js'
 
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
 
@@ -342,7 +342,7 @@ export const flagsToolbarLogic = kea<flagsToolbarLogicType>([
     permanentlyMount(),
 ])
 
-function getGroups(posthogInstance: Insights | null): Record<string, any> {
+function getGroups(posthogInstance: PostHog | null): Record<string, any> {
     try {
         return posthogInstance?.getGroups() || {}
     } catch {

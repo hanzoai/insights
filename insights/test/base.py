@@ -256,7 +256,7 @@ def clean_varying_query_parts(query, replace_all_numbers):
     # replace django cursors
     query = re.sub(r"_django_curs_[0-9sync_]*\"", r'_django_curs_X"', query)
 
-    # hog ql checks some ids differently
+    # InsightsQL checks some ids differently
     query = re.sub(
         r"equals\(([^.]+\.)?((team|project|cohort)_id)?, \d+\)",
         r"equals(\1\2, 99999)",

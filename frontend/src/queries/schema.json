@@ -482,7 +482,7 @@
                     "$ref": "#/definitions/SessionsTimelineQuery"
                 },
                 {
-                    "$ref": "#/definitions/HogQuery"
+                    "$ref": "#/definitions/ScriptQuery"
                 },
                 {
                     "$ref": "#/definitions/InsightsQLQuery"
@@ -729,7 +729,7 @@
                     "type": "object"
                 },
                 {
-                    "$ref": "#/definitions/HogQueryResponse"
+                    "$ref": "#/definitions/ScriptQueryResponse"
                 },
                 {
                     "$ref": "#/definitions/InsightsQLQueryResponse"
@@ -15772,7 +15772,7 @@
                 "insight/paths",
                 "insight/lifecycle",
                 "insight/stickiness",
-                "insight/hog",
+                "insight/script",
                 "team_activity",
                 "home",
                 "apps",
@@ -17174,7 +17174,7 @@
             "enum": ["default", "spiderhog", "robohog", "hogzilla", "ghost"],
             "type": "string"
         },
-        "HogCompileResponse": {
+        "InsightsQLCompileResponse": {
             "additionalProperties": false,
             "properties": {
                 "bytecode": {
@@ -17189,8 +17189,8 @@
             "required": ["bytecode", "locals"],
             "type": "object"
         },
-        "HogLanguage": {
-            "enum": ["hog", "hogJson", "insightsQL", "insightsQLExpr", "hogTemplate", "liquid"],
+        "InsightsLanguage": {
+            "enum": ["insightsScript", "insightsJson", "insightsQL", "insightsQLExpr", "insightsTemplate", "liquid"],
             "type": "string"
         },
         "InsightsQLASTQuery": {
@@ -17263,7 +17263,7 @@
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/HogLanguage",
+                    "$ref": "#/definitions/InsightsLanguage",
                     "description": "Language to validate"
                 },
                 "modifiers": {
@@ -17366,7 +17366,7 @@
                     "type": "string"
                 },
                 "language": {
-                    "$ref": "#/definitions/HogLanguage",
+                    "$ref": "#/definitions/InsightsLanguage",
                     "description": "Language to validate"
                 },
                 "modifiers": {
@@ -17738,14 +17738,14 @@
             "required": ["variableId", "code_name"],
             "type": "object"
         },
-        "HogQuery": {
+        "ScriptQuery": {
             "additionalProperties": false,
             "properties": {
                 "code": {
                     "type": "string"
                 },
                 "kind": {
-                    "const": "HogQuery",
+                    "const": "ScriptQuery",
                     "type": "string"
                 },
                 "modifiers": {
@@ -17753,7 +17753,7 @@
                     "description": "Modifiers used when performing the query"
                 },
                 "response": {
-                    "$ref": "#/definitions/HogQueryResponse"
+                    "$ref": "#/definitions/ScriptQueryResponse"
                 },
                 "tags": {
                     "$ref": "#/definitions/QueryLogTags"
@@ -17766,7 +17766,7 @@
             "required": ["kind"],
             "type": "object"
         },
-        "HogQueryResponse": {
+        "ScriptQueryResponse": {
             "additionalProperties": false,
             "properties": {
                 "bytecode": {
@@ -21964,7 +21964,7 @@
                 "EventsQuery",
                 "SessionsQuery",
                 "PersonsNode",
-                "HogQuery",
+                "ScriptQuery",
                 "InsightsQLQuery",
                 "InsightsQLASTQuery",
                 "InsightsQLMetadata",
@@ -27714,7 +27714,7 @@
                     "$ref": "#/definitions/SessionsTimelineQuery"
                 },
                 {
-                    "$ref": "#/definitions/HogQuery"
+                    "$ref": "#/definitions/ScriptQuery"
                 },
                 {
                     "$ref": "#/definitions/InsightsQLQuery"

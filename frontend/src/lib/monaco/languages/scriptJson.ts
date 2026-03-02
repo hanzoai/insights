@@ -5,7 +5,7 @@ import { languages } from 'monaco-editor'
 import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
 import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
 
-import { HogLanguage } from '~/queries/schema/schema-general'
+import { InsightsLanguage } from '~/queries/schema/schema-general'
 
 import { conf as _conf, language as _language } from './script'
 
@@ -165,7 +165,7 @@ export function initHogJsonLanguage(monaco: Monaco): void {
         })
         monaco.languages.setLanguageConfiguration('hogJson', conf())
         monaco.languages.setMonarchTokensProvider('hogJson', language())
-        monaco.languages.registerCompletionItemProvider('hogJson', insightsQLAutocompleteProvider(HogLanguage.hogJson))
+        monaco.languages.registerCompletionItemProvider('hogJson', insightsQLAutocompleteProvider(InsightsLanguage.insightsJson))
         monaco.languages.registerCodeActionProvider('hogJson', insightsQLMetadataProvider())
     }
 }

@@ -45,8 +45,8 @@ export function DebugScene(): JSX.Element {
                         {featureFlags[FEATURE_FLAGS.SCRIPT] ? (
                             <LemonButton
                                 size="small"
-                                active={query1 === stringifiedExamples.Hoggonacci}
-                                onClick={() => setQuery1(stringifiedExamples.Hoggonacci)}
+                                active={query1 === stringifiedExamples.FibonacciScript}
+                                onClick={() => setQuery1(stringifiedExamples.FibonacciScript)}
                             >
                                 Script
                             </LemonButton>
