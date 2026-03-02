@@ -38,7 +38,7 @@ function useInsightTypeShortcut(
 /** Registers keyboard shortcuts for creating each insight type. Render this in the SavedInsights scene. */
 export function NewInsightShortcuts(): null {
     const { featureFlags } = useValues(featureFlagLogic)
-    const hogDisabled = !featureFlags[FEATURE_FLAGS.HOG]
+    const scriptDisabled = !featureFlags[FEATURE_FLAGS.INSIGHTS_SCRIPT]
 
     useInsightTypeShortcut(InsightType.TRENDS, keyBinds.tab1, 10)
     useInsightTypeShortcut(InsightType.FUNNELS, keyBinds.tab2, 9)
@@ -47,7 +47,7 @@ export function NewInsightShortcuts(): null {
     useInsightTypeShortcut(InsightType.STICKINESS, keyBinds.tab5, 6)
     useInsightTypeShortcut(InsightType.LIFECYCLE, keyBinds.tab6, 5)
     useInsightTypeShortcut(InsightType.SQL, keyBinds.tab7, 4)
-    useInsightTypeShortcut(InsightType.HOG, keyBinds.tab8, 3, hogDisabled)
+    useInsightTypeShortcut(InsightType.SCRIPT, keyBinds.tab8, 3, scriptDisabled)
 
     return null
 }
@@ -57,7 +57,7 @@ export function OverlayForNewInsightMenu({ dataAttr }: { dataAttr: string }): JS
 
     const menuEntries = Object.entries(INSIGHT_TYPES_METADATA).filter(
         ([insightType]) =>
-            insightType !== InsightType.JSON && (featureFlags[FEATURE_FLAGS.HOG] || insightType !== InsightType.HOG)
+            insightType !== InsightType.JSON && (featureFlags[FEATURE_FLAGS.INSIGHTS_SCRIPT] || insightType !== InsightType.SCRIPT)
     )
 
     return (

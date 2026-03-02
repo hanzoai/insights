@@ -1,7 +1,7 @@
 import FuseClass from 'fuse.js'
 import { actions, kea, key, path, props, reducers, selectors } from 'kea'
 
-import { STL as HOG_STL } from '@posthog/hogvm'
+import { STL as SCRIPT_STL } from '@posthog/hogvm'
 
 import type { cyclotronJobTemplateSuggestionsLogicType } from './cyclotronJobTemplateSuggestionsLogicType'
 
@@ -23,7 +23,7 @@ export type CyclotronJobTemplateSuggestionsLogicProps = {
 // Helping kea-typegen navigate the exported default class for Fuse
 export interface Fuse extends FuseClass<CyclotronJobTemplateOption> {}
 
-const HOG_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
+const SCRIPT_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
     {
         key: 'ternary',
         example: `$1 = true ? 'Yes' : 'No'`,
@@ -36,7 +36,7 @@ const HOG_USAGE_EXAMPLES: CyclotronJobTemplateOption[] = [
     },
 ]
 
-const HOG_STL_EXAMPLES: CyclotronJobTemplateOption[] = Object.entries(HOG_STL).map(([key, value]) => ({
+const SCRIPT_STL_EXAMPLES: CyclotronJobTemplateOption[] = Object.entries(SCRIPT_STL).map(([key, value]) => ({
     key,
     example: value.example,
     description: value.description,
@@ -91,7 +91,7 @@ export const cyclotronJobTemplateSuggestionsLogic = kea<cyclotronJobTemplateSugg
         allOptions: [
             (_, p) => [p.templating],
             (templating): CyclotronJobTemplateOption[] => {
-                return templating === 'fn' ? [...HOG_USAGE_EXAMPLES, ...HOG_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
+                return templating === 'fn' ? [...SCRIPT_USAGE_EXAMPLES, ...SCRIPT_STL_EXAMPLES] : LIQUID_USAGE_EXAMPLES
             },
         ],
 

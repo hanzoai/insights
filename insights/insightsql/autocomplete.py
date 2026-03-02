@@ -9,7 +9,7 @@ from django.db.models.functions.comparison import Coalesce
 from insights.schema import (
     AutocompleteCompletionItem,
     AutocompleteCompletionItemKind,
-    HogLanguage,
+    InsightsLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
 )
@@ -304,7 +304,7 @@ def append_table_field_to_response(
         insert_text=lambda key: f"`{key}`" if any(n in key for n in INSIGHTSQL_CHARACTERS_TO_BE_WRAPPED) else key,
     )
 
-    if language == HogLanguage.HOG_QL or language == HogLanguage.HOG_QL_EXPR:
+    if language == InsightsLanguage.INSIGHTS_QL or language == InsightsLanguage.INSIGHTS_QL_EXPR:
         available_functions = ALL_EXPOSED_FUNCTION_NAMES
     else:
         available_functions = ALL_INSIGHTS_FUNCTIONS
@@ -420,27 +420,27 @@ def get_insightsql_autocomplete(
             query_end = query.endPosition + length_to_add
             select_ast: Optional[ast.AST] = None
 
-            if query.language == HogLanguage.HOG_QL:
+            if query.language == InsightsLanguage.INSIGHTS_QL:
                 with timings.measure("parse_select"):
                     select_ast = parse_select(query_to_try, timings=timings)
                     root_node: ast.AST = select_ast
-            elif query.language == HogLanguage.HOG_QL_EXPR:
+            elif query.language == InsightsLanguage.INSIGHTS_QL_EXPR:
                 with timings.measure("parse_expr"):
                     root_node = parse_expr(query_to_try, timings=timings)
                     select_ast = cast(ast.SelectQuery, clone_expr(source_query, clear_locations=True))
                     select_ast.select = [root_node]
-            elif query.language == HogLanguage.HOG_TEMPLATE:
+            elif query.language == InsightsLanguage.INSIGHTS_TEMPLATE:
                 with timings.measure("parse_template"):
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == HogLanguage.LIQUID:
+            elif query.language == InsightsLanguage.LIQUID:
                 with timings.measure("parse_liquid"):
-                    # Liquid templates are handled similarly to Hog templates for autocomplete
+                    # Liquid templates are handled similarly to Insights templates for autocomplete
                     # We treat them as string templates but with Liquid syntax
                     root_node = parse_string_template(query_to_try, timings=timings)
-            elif query.language == HogLanguage.HOG:
+            elif query.language == InsightsLanguage.INSIGHTS_SCRIPT:
                 with timings.measure("parse_program"):
                     root_node = parse_program(query_to_try, timings=timings)
-            elif query.language == HogLanguage.HOG_JSON:
+            elif query.language == InsightsLanguage.INSIGHTS_JSON:
                 query_to_try, query_start, query_end = extract_json_row(query_to_try, query_start, query_end)
                 if query_to_try == "":
                     break
@@ -450,12 +450,12 @@ def get_insightsql_autocomplete(
 
             with timings.measure("find_node"):
                 # to account for the magic F' symbol we append to change antlr's mode
-                extra = 2 if query.language == HogLanguage.HOG_TEMPLATE else 0
+                extra = 2 if query.language == InsightsLanguage.INSIGHTS_TEMPLATE else 0
                 find_node = GetNodeAtPositionTraverser(root_node, query_start + extra, query_end + extra)
             node = find_node.node
             parent_node = find_node.parent_node
 
-            if HogLanguage.HOG_TEMPLATE and isinstance(node, ast.Constant):
+            if InsightsLanguage.INSIGHTS_TEMPLATE and isinstance(node, ast.Constant):
                 # Do not show suggestions if not inside the {} part in a template string
                 continue
 
@@ -478,8 +478,8 @@ def get_insightsql_autocomplete(
                         if loop_globals != query.globals:
                             break
 
-            if query.language in (HogLanguage.HOG, HogLanguage.HOG_TEMPLATE, HogLanguage.LIQUID):
-                # For Hog and Liquid, first add all local variables in scope
+            if query.language in (InsightsLanguage.INSIGHTS_SCRIPT, InsightsLanguage.INSIGHTS_TEMPLATE, InsightsLanguage.LIQUID):
+                # For Insights Script and Liquid, first add all local variables in scope
                 hog_vars = gather_hog_variables_in_scope(root_node, node)
                 extend_responses(
                     keys=hog_vars,
@@ -487,7 +487,7 @@ def get_insightsql_autocomplete(
                     kind=AutocompleteCompletionItemKind.VARIABLE,
                 )
 
-                if query.language != HogLanguage.LIQUID:
+                if query.language != InsightsLanguage.LIQUID:
                     extend_responses(
                         ALL_INSIGHTS_FUNCTIONS,
                         response.suggestions,

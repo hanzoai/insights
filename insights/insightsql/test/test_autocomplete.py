@@ -4,7 +4,7 @@ from insights.test.base import APIBaseTest, ClickhouseTestMixin
 
 from insights.schema import (
     AutocompleteCompletionItemKind,
-    HogLanguage,
+    InsightsLanguage,
     InsightsQLAutocomplete,
     InsightsQLAutocompleteResponse,
     InsightsQLQuery,
@@ -46,7 +46,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         self, query: str, start: int, end: int, database: Optional[Database] = None
     ) -> InsightsQLAutocompleteResponse:
         autocomplete = InsightsQLAutocomplete(
-            kind="InsightsQLAutocomplete", query=query, language=HogLanguage.HOG_QL, startPosition=start, endPosition=end
+            kind="InsightsQLAutocomplete", query=query, language=InsightsLanguage.INSIGHTS_QL, startPosition=start, endPosition=end
         )
         return get_insightsql_autocomplete(query=autocomplete, team=self.team, database_arg=database)
 
@@ -54,7 +54,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.HOG_QL_EXPR,
+            language=InsightsLanguage.INSIGHTS_QL_EXPR,
             sourceQuery=InsightsQLQuery(query="select * from events"),
             startPosition=start,
             endPosition=end,
@@ -67,7 +67,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.HOG_TEMPLATE,
+            language=InsightsLanguage.INSIGHTS_TEMPLATE,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -78,7 +78,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.HOG_JSON,
+            language=InsightsLanguage.INSIGHTS_JSON,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -91,7 +91,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query=query,
-            language=HogLanguage.HOG,
+            language=InsightsLanguage.INSIGHTS_SCRIPT,
             globals={"event": "$pageview"},
             startPosition=start,
             endPosition=end,
@@ -528,7 +528,7 @@ class TestAutocomplete(ClickhouseTestMixin, APIBaseTest):
         autocomplete = InsightsQLAutocomplete(
             kind="InsightsQLAutocomplete",
             query="SELECT * FROM e",
-            language=HogLanguage.HOG_QL,
+            language=InsightsLanguage.INSIGHTS_QL,
             sourceQuery=InsightsQLQuery(query=""),  # Empty source query
             startPosition=15,
             endPosition=15,

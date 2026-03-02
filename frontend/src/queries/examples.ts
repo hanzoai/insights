@@ -362,7 +362,7 @@ const Script: ScriptQuery = {
     code: 'return 1 + 2;',
 }
 
-const Hoggonacci: ScriptQuery = {
+const FibonacciScript: ScriptQuery = {
     kind: NodeKind.ScriptQuery,
     code: `fn fibonacci(number) {
     if (number < 2) {
@@ -574,7 +574,7 @@ export const examples: Record<string, Node> = setLatestVersionsOnQuery({
     DataVisualization,
     InsightsQLForDataVisualization,
     ScriptQuery,
-    Hoggonacci,
+    FibonacciScript,
     DataWarehouse,
 })
 

@@ -721,7 +721,7 @@ class PluginConfigSerializer(serializers.ModelSerializer):
             # If anything goes wrong with custom function creation, capture the error but continue with plugin creation
             capture_exception(e)
             raise ValidationError(
-                "Plugin creation is no longer possible. Please refer to the Hog Functions documentation for more information."
+                "Plugin creation is no longer possible. Please refer to the Insights Functions documentation for more information."
             )
 
     def update(  # type: ignore
