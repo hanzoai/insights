@@ -3,7 +3,7 @@
         "overview": [
             {
                 "key": "posthog_git_sha",
-                "metric": "PostHog Git SHA",
+                "metric": "Insights Git SHA",
                 "value": "Undefined"
             },
             {
