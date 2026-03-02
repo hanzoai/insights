@@ -15,8 +15,8 @@ describe('ScriptRateLimiter', () => {
         let hub: Hub
         let rateLimiter: ScriptRateLimiterService
         let redis: RedisV2
-        const id1 = 'custom-function-id-1'
-        const id2 = 'custom-function-id-2'
+        const id1 = 'insights-function-id-1'
+        const id2 = 'insights-function-id-2'
 
         beforeEach(async () => {
             hub = await createHub()

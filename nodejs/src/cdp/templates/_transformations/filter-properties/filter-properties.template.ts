@@ -1,15 +1,15 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
     id: 'template-filter-properties',
     name: 'Filter Properties',
     description: 'Filter out specific properties from the event by setting them to null or removing them completely.',
-    icon_url: '/static/mascot/builder-mascot-01.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Check if the event has properties
 if (empty(event.properties)) {

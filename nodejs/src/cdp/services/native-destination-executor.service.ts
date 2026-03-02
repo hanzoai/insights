@@ -4,10 +4,10 @@ import { parseJSON } from '~/utils/json-parse'
 
 import { logger } from '../../utils/logger'
 import { FetchOptions, FetchResponse } from '../../utils/request'
-import { NATIVE_CUSTOM_FUNCTIONS_BY_ID } from '../templates'
-import { CyclotronJobInvocationCustomFunction, CyclotronJobInvocationResult, Response } from '../types'
+import { NATIVE_INSIGHTS_FUNCTIONS_BY_ID } from '../templates'
+import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, Response } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
-import { CDP_TEST_ID, createAddLogFunction, isNativeCustomFunction } from '../utils'
+import { CDP_TEST_ID, createAddLogFunction, isNativeInsightsFunction } from '../utils'
 import { createInvocationResult } from '../utils/invocation-utils'
 import { CdpFetchConfig, cdpTrackedFetch, getNextRetryTime, isFetchResponseRetriable } from './script-executor.service'
 
@@ -49,9 +49,9 @@ export class NativeDestinationExecutorService {
     constructor(private serverConfig: CdpFetchConfig) {}
 
     public async execute(
-        invocation: CyclotronJobInvocationCustomFunction
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
-        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(invocation)
+        invocation: CyclotronJobInvocationInsightsFunction
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
+        const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(invocation)
         const addLog = createAddLogFunction(result.logs)
 
         // Upsert the tries count on the metadata
@@ -62,18 +62,18 @@ export class NativeDestinationExecutorService {
         // Indicates if a retry is possible. Once we have peformed 1 successful non-GET request, we can't retry.
         let retriesPossible = true
 
-        const nativeDestinationId = isNativeCustomFunction(invocation.customFunction)
-            ? invocation.customFunction.template_id
+        const nativeDestinationId = isNativeInsightsFunction(invocation.insightsFunction)
+            ? invocation.insightsFunction.template_id
             : null
 
         try {
-            const nativeDestination = nativeDestinationId ? NATIVE_CUSTOM_FUNCTIONS_BY_ID[nativeDestinationId] : null
+            const nativeDestination = nativeDestinationId ? NATIVE_INSIGHTS_FUNCTIONS_BY_ID[nativeDestinationId] : null
 
             if (!nativeDestination) {
                 throw new Error(`Native destination ${nativeDestinationId} not found`)
             }
 
-            const isTestFunction = invocation.customFunction.name.includes(CDP_TEST_ID)
+            const isTestFunction = invocation.insightsFunction.name.includes(CDP_TEST_ID)
             const start = performance.now()
 
             // All native plugin options are done as inputs
@@ -132,8 +132,8 @@ export class NativeDestinationExecutorService {
                         })
 
                         result.metrics.push({
-                            team_id: invocation.customFunction.team_id,
-                            app_source_id: invocation.customFunction.id,
+                            team_id: invocation.insightsFunction.team_id,
+                            app_source_id: invocation.insightsFunction.id,
                             metric_kind: 'other',
                             metric_name: 'fetch',
                             count: 1,
@@ -160,7 +160,7 @@ export class NativeDestinationExecutorService {
                     const { fetchError, fetchResponse } = await cdpTrackedFetch({
                         url,
                         fetchParams: fetchOptions,
-                        templateId: invocation.customFunction.template_id ?? '',
+                        templateId: invocation.insightsFunction.template_id ?? '',
                     })
 
                     const fetchResponseText = (await fetchResponse?.text()) ?? 'unknown'
@@ -237,7 +237,7 @@ export class NativeDestinationExecutorService {
                 if (retriesPossible) {
                     // We have retries left so we can trigger a retry
                     result.finished = false
-                    result.invocation.queue = 'custom_script'
+                    result.invocation.queue = 'fn'
                     result.invocation.queuePriority = metadata.tries
                     result.invocation.queueScheduledAt = getNextRetryTime(
                         this.serverConfig.CDP_FETCH_BACKOFF_BASE_MS,

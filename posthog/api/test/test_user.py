@@ -126,23 +126,6 @@ class TestUserAPI(APIBaseTest):
             ],
         )
 
-    def test_mascot_config_is_unset(self):
-        self.user.mascot_config = None
-        self.user.save()
-
-        response = self.client.get(f"/api/users/@me/mascot_config/")
-        assert response.status_code == status.HTTP_200_OK
-        # the front end assumes it will _always_ get JSON
-        assert response.json() == {}
-
-    def test_mascot_config_is_set(self):
-        self.user.mascot_config = {"a bag": "of data"}
-        self.user.save()
-
-        response = self.client.get(f"/api/users/@me/mascot_config/")
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == {"a bag": "of data"}
-
     def test_can_only_list_yourself(self):
         """
         At this moment only the current user can be retrieved from this endpoint.

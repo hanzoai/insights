@@ -5,7 +5,7 @@ import {
     DataWarehouseSyncInterval,
     ExternalDataJobStatus,
     ExternalDataSourceSyncSchema,
-    CustomFunctionTemplateType,
+    InsightsFunctionTemplateType,
 } from '~/types'
 
 export const DATAWAREHOUSE_EDITOR_ITEM_ID = 'new-SQL'
@@ -136,5 +136,5 @@ export const cleanSourceId = (id: string): string => id.replace('self-managed-',
  * Managed sources (Stripe, Postgres, etc.) have access control.
  * Self-managed sources (S3, GCS, Azure, R2) do not have access control.
  */
-export const isManagedSourceTemplate = (template: CustomFunctionTemplateType): boolean =>
+export const isManagedSourceTemplate = (template: InsightsFunctionTemplateType): boolean =>
     template.type === 'source' && !isSelfManagedSourceId(template.id)

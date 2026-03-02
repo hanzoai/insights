@@ -1,13 +1,13 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_app",
     id="template-notification-bar",
     name="Notification Bar",
     description="Show a notification bar for your users",
-    icon_url="/static/mascot/list-icon.png",
+    icon_url="",
     category=["Custom", "Analytics"],
     code_language="javascript",
     code="""

@@ -36,7 +36,7 @@ from posthog.logging.timing import timed_log
 from posthog.models import BatchExport, GroupTypeMapping, OrganizationMembership, User
 from posthog.models.dashboard import Dashboard
 from posthog.models.feature_flag import FeatureFlag
-from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionType
+from posthog.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionType
 from posthog.models.organization import Organization
 from posthog.models.plugin import PluginConfig
 from posthog.models.property.util import get_property_string_expr
@@ -191,8 +191,8 @@ class UsageReportCounters:
     ai_credits_used_in_period: int
 
     # CDP Delivery
-    custom_function_calls_in_period: int
-    custom_function_fetch_calls_in_period: int
+    insights_function_calls_in_period: int
+    insights_function_fetch_calls_in_period: int
     cdp_billable_invocations_in_period: int
 
     # SDK usage
@@ -1424,7 +1424,7 @@ def get_teams_with_exceptions_captured_in_period(
 
 @timed_log()
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
-def get_teams_with_custom_function_calls_in_period(
+def get_teams_with_insights_function_calls_in_period(
     begin: datetime,
     end: datetime,
 ) -> list[tuple[int, int]]:
@@ -1432,7 +1432,7 @@ def get_teams_with_custom_function_calls_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_function' AND metric_name IN ('succeeded','failed') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_function' AND metric_name IN ('succeeded','failed') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id, metric_name
     """,
         {"begin": begin, "end": end},
@@ -1445,7 +1445,7 @@ def get_teams_with_custom_function_calls_in_period(
 
 @timed_log()
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
-def get_teams_with_custom_function_fetch_calls_in_period(
+def get_teams_with_insights_function_fetch_calls_in_period(
     begin: datetime,
     end: datetime,
 ) -> list[tuple[int, int]]:
@@ -1453,7 +1453,7 @@ def get_teams_with_custom_function_fetch_calls_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_function' AND metric_name IN ('fetch') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_function' AND metric_name IN ('fetch') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id, metric_name
     """,
         {"begin": begin, "end": end},
@@ -1474,7 +1474,7 @@ def get_teams_with_cdp_billable_invocations_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_function' AND metric_name IN ('billable_invocation') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_function' AND metric_name IN ('billable_invocation') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id
     """,
         {"begin": begin, "end": end},
@@ -1532,8 +1532,8 @@ def get_teams_with_recording_bytes_in_period(
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
 def get_teams_with_active_hog_destinations_in_period() -> list:
     return list(
-        CustomFunction.objects.filter(
-            type=CustomFunctionType.DESTINATION,
+        InsightsFunction.objects.filter(
+            type=InsightsFunctionType.DESTINATION,
             enabled=True,
             deleted=False,
         )
@@ -1546,8 +1546,8 @@ def get_teams_with_active_hog_destinations_in_period() -> list:
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
 def get_teams_with_active_hog_transformations_in_period() -> list:
     return list(
-        CustomFunction.objects.filter(
-            type=CustomFunctionType.TRANSFORMATION,
+        InsightsFunction.objects.filter(
+            type=InsightsFunctionType.TRANSFORMATION,
             enabled=True,
             deleted=False,
         )
@@ -1566,7 +1566,7 @@ def get_teams_with_workflow_emails_sent_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('email') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('email') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id
     """,
         {"begin": begin, "end": end},
@@ -1587,7 +1587,7 @@ def get_teams_with_workflow_push_sent_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('push') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('push') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id
     """,
         {"begin": begin, "end": end},
@@ -1608,7 +1608,7 @@ def get_teams_with_workflow_sms_sent_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('sms') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('sms') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id
     """,
         {"begin": begin, "end": end},
@@ -1629,7 +1629,7 @@ def get_teams_with_workflow_billable_invocations_in_period(
         """
         SELECT team_id, SUM(count) as count
         FROM app_metrics2
-        WHERE app_source='custom_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('fetch') AND timestamp >= %(begin)s AND timestamp < %(end)s
+        WHERE app_source='insights_flow' AND metric_name IN ('billable_invocation') AND metric_kind IN ('fetch') AND timestamp >= %(begin)s AND timestamp < %(end)s
         GROUP BY team_id
     """,
         {"begin": begin, "end": end},
@@ -1995,10 +1995,10 @@ def _get_all_usage_data(period_start: datetime, period_end: datetime) -> dict[st
         "teams_with_ios_exceptions_captured_in_period": exception_metrics_by_library["ios"],
         "teams_with_flutter_exceptions_captured_in_period": exception_metrics_by_library["flutter"],
         "teams_with_unknown_exceptions_captured_in_period": exception_metrics_by_library["unknown"],
-        "teams_with_custom_function_calls_in_period": get_teams_with_custom_function_calls_in_period(
+        "teams_with_insights_function_calls_in_period": get_teams_with_insights_function_calls_in_period(
             period_start, period_end
         ),
-        "teams_with_custom_function_fetch_calls_in_period": get_teams_with_custom_function_fetch_calls_in_period(
+        "teams_with_insights_function_fetch_calls_in_period": get_teams_with_insights_function_fetch_calls_in_period(
             period_start, period_end
         ),
         "teams_with_cdp_billable_invocations_in_period": get_teams_with_cdp_billable_invocations_in_period(
@@ -2144,8 +2144,8 @@ def _get_team_report(all_data: dict[str, Any], team: Team) -> UsageReportCounter
         unknown_exceptions_captured_in_period=all_data["teams_with_unknown_exceptions_captured_in_period"].get(
             team.id, 0
         ),
-        custom_function_calls_in_period=all_data["teams_with_custom_function_calls_in_period"].get(team.id, 0),
-        custom_function_fetch_calls_in_period=all_data["teams_with_custom_function_fetch_calls_in_period"].get(team.id, 0),
+        insights_function_calls_in_period=all_data["teams_with_insights_function_calls_in_period"].get(team.id, 0),
+        insights_function_fetch_calls_in_period=all_data["teams_with_insights_function_fetch_calls_in_period"].get(team.id, 0),
         cdp_billable_invocations_in_period=all_data["teams_with_cdp_billable_invocations_in_period"].get(team.id, 0),
         web_events_count_in_period=all_data["teams_with_web_events_count_in_period"].get(team.id, 0),
         web_lite_events_count_in_period=all_data["teams_with_web_lite_events_count_in_period"].get(team.id, 0),

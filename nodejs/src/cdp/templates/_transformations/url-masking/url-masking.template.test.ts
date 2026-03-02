@@ -1,10 +1,10 @@
-import { CustomFunctionInvocationGlobals } from '../../../types'
+import { InsightsFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './url-masking.template'
 
 describe('url-masking.template', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: CustomFunctionInvocationGlobals
+    let mockGlobals: InsightsFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()

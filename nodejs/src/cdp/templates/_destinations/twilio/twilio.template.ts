@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'hidden',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Send SMS messages using Twilio',
     icon_url: '/static/services/twilio.png',
     category: ['Communication'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 let toNumber := inputs.to_number
 let message := inputs.message

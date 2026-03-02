@@ -1,6 +1,6 @@
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.posthog.template_posthog import (
     TemplateInsightsMigrator,
     template as template_posthog,
@@ -8,7 +8,7 @@ from posthog.cdp.templates.posthog.template_posthog import (
 from posthog.models import PluginConfig
 
 
-class TestTemplatePosthog(BaseCustomFunctionTemplateTest):
+class TestTemplatePosthog(BaseInsightsFunctionTemplateTest):
     template = template_posthog
 
     def test_function_works(self):

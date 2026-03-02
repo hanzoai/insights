@@ -4,10 +4,10 @@ from copy import deepcopy
 
 from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
 from posthog.models.integration import GoogleCloudIntegration
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -16,7 +16,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send data to a Google Pub/Sub topic",
     icon_url="/static/services/google-cloud.png",
     category=["Custom"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 let headers := () -> {
   'Authorization': f'Bearer {inputs.auth.access_token}',
@@ -75,13 +75,13 @@ if (res.status >= 200 and res.status < 300) {
 )
 
 
-class TemplateGooglePubSubMigrator(CustomFunctionTemplateMigrator):
+class TemplateGooglePubSubMigrator(InsightsFunctionTemplateMigrator):
     plugin_url = "https://github.com/Insights/pubsub-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["custom_script"] = hf["code"]
+        hf["fn"] = hf["code"]
         del hf["code"]
 
         exportEventsToIgnore = [x.strip() for x in obj.config.get("exportEventsToIgnore", "").split(",") if x]

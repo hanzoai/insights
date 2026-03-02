@@ -6,7 +6,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from posthog.insightsql.context import InsightsQLContext
 from posthog.insightsql.database.database import Database
 from posthog.insightsql.errors import ExposedInsightsQLError, ResolutionError
-from posthog.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTCUSTOM_FUNCTIONS
+from posthog.insightsql.functions.mapping import INSIGHTSQL_AGGREGATIONS, INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
 from posthog.insightsql.metadata import get_table_names
 from posthog.insightsql.parser import parse_select
 from posthog.insightsql.printer import prepare_and_print_ast
@@ -28,7 +28,7 @@ def get_insightsql_functions() -> str:
 
     ch_functions = list(INSIGHTSQL_CLICKHOUSE_FUNCTIONS.keys())
     ch_aggregations = list(INSIGHTSQL_AGGREGATIONS.keys())
-    ph_functions = list(INSIGHTSQL_POSTCUSTOM_FUNCTIONS.keys())
+    ph_functions = list(INSIGHTSQL_POSTINSIGHTS_FUNCTIONS.keys())
 
     _insightsql_functions = f"""InsightsQL defines what functions are available with most (but not all) having a 1:1 mapping to ClickHouse functions.
 These are the non-aggregated InsightsQL functions:

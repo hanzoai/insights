@@ -2,9 +2,9 @@ import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 
 import { Hub, ProjectId, Team } from '../../../types'
 import { closeHub, createHub } from '../../../utils/db/hub'
-import { createExampleInvocation, createCustomFunction } from '../../_tests/fixtures'
+import { createExampleInvocation, createInsightsFunction } from '../../_tests/fixtures'
 import { deleteKeysWithPrefix } from '../../_tests/redis'
-import { CyclotronJobInvocationCustomFunction, CyclotronJobInvocationResult, CustomFunctionType } from '../../types'
+import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult, InsightsFunctionType } from '../../types'
 import { createInvocationResult } from '../../utils/invocation-utils'
 import { BASE_REDIS_KEY, ScriptWatcherService, ScriptWatcherState } from './script-watcher.service'
 
@@ -19,8 +19,8 @@ describe('ScriptWatcher', () => {
     let watcher: ScriptWatcherService
     let onStateChangeSpy: jest.SpyInstance
     let redis: RedisV2
-    const customFunctionId: string = 'custom-function-id'
-    let customFunction: CustomFunctionType
+    const insightsFunctionId: string = 'insights-function-id'
+    let insightsFunction: InsightsFunctionType
 
     let team: Team
 
@@ -53,7 +53,7 @@ describe('ScriptWatcher', () => {
 
         watcher = new ScriptWatcherService(hub, redis)
         onStateChangeSpy = jest.spyOn(watcher as any, 'onStateChange') as jest.SpyInstance
-        customFunction = createCustomFunction({ id: customFunctionId, team_id: 2 })
+        insightsFunction = createInsightsFunction({ id: insightsFunctionId, team_id: 2 })
     })
 
     afterAll(async () => {
@@ -65,12 +65,12 @@ describe('ScriptWatcher', () => {
         duration?: number
         finished?: boolean
         error?: string
-        kind?: 'custom_script' | 'async_function'
-    }): CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction> => {
-        const invocation = createExampleInvocation({ id: options.id ?? customFunctionId, team_id: 2 })
+        kind?: 'fn' | 'async_function'
+    }): CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction> => {
+        const invocation = createExampleInvocation({ id: options.id ?? insightsFunctionId, team_id: 2 })
         invocation.state.timings = [
             {
-                kind: options.kind ?? 'custom_script',
+                kind: options.kind ?? 'fn',
                 duration_ms: options.duration ?? 0,
             },
         ]
@@ -106,7 +106,7 @@ describe('ScriptWatcher', () => {
                     redis
                 )
             }).toThrow(
-                'Lower bound for kind custom_script of 100ms must be lower than upper bound of 100ms. This is a configuration error.'
+                'Lower bound for kind fn of 100ms must be lower than upper bound of 100ms. This is a configuration error.'
             )
         })
     })
@@ -114,7 +114,7 @@ describe('ScriptWatcher', () => {
     describe('observeResults', () => {
         const cases: [
             { name: string; cost: number; state: number },
-            CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>[],
+            CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>[],
         ][] = [
             [
                 { name: 'should calculate cost and state for single default result', cost: 0, state: 1 },
@@ -162,7 +162,7 @@ describe('ScriptWatcher', () => {
             '%s',
             async (name, expectedScore, results) => {
                 await watcher.observeResults(results)
-                const result = await watcher.getPersistedState(customFunctionId)
+                const result = await watcher.getPersistedState(insightsFunctionId)
                 expect(hub.CDP_WATCHER_BUCKET_SIZE - result.tokens).toEqual(expectedScore.cost)
                 expect(result.state).toEqual(expectedScore.state)
             }
@@ -175,7 +175,7 @@ describe('ScriptWatcher', () => {
                 id: 'id1',
                 finished: true,
                 kind: 'async_function',
-            }) as CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>
+            }) as CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>
 
             // Replace the default timing with multiple timings
             result.invocation.state.timings = [
@@ -188,7 +188,7 @@ describe('ScriptWatcher', () => {
             // If using total duration (incorrect): 300ms total would have a higher cost
 
             await watcher.observeResults([result])
-            const state = await watcher.getPersistedState(customFunctionId)
+            const state = await watcher.getPersistedState(insightsFunctionId)
 
             // Expected: each 100ms timing has minimal cost since it's below the lower threshold
             // This is checking that we're not summing them into a 300ms duration
@@ -203,7 +203,7 @@ describe('ScriptWatcher', () => {
 
             await watcher.observeResults(lotsOfResults)
 
-            expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+            expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                 {
                   "state": 3,
                   "tokens": -1,
@@ -230,18 +230,18 @@ describe('ScriptWatcher', () => {
                 createResult({ duration: 10000, kind: 'async_function' }),
             ])
 
-            expect((await watcher.getPersistedState(customFunctionId)).tokens).toMatchInlineSnapshot(`9880`)
+            expect((await watcher.getPersistedState(insightsFunctionId)).tokens).toMatchInlineSnapshot(`9880`)
             advanceTime(1000)
-            expect((await watcher.getPersistedState(customFunctionId)).tokens).toMatchInlineSnapshot(`9890`)
+            expect((await watcher.getPersistedState(insightsFunctionId)).tokens).toMatchInlineSnapshot(`9890`)
             advanceTime(10000)
-            expect((await watcher.getPersistedState(customFunctionId)).tokens).toMatchInlineSnapshot(`9990`)
+            expect((await watcher.getPersistedState(insightsFunctionId)).tokens).toMatchInlineSnapshot(`9990`)
         })
 
         describe('onStateChange', () => {
             it('should trigger state change events', async () => {
-                await watcher.clearLock(customFunctionId) // For testing the logic
-                await watcher.observeResults(Array(10).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.clearLock(insightsFunctionId) // For testing the logic
+                await watcher.observeResults(Array(10).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 1,
                       "tokens": 8100,
@@ -249,9 +249,9 @@ describe('ScriptWatcher', () => {
                 `)
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(0)
 
-                await watcher.clearLock(customFunctionId) // For testing the logic
-                await watcher.observeResults(Array(10).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.clearLock(insightsFunctionId) // For testing the logic
+                await watcher.observeResults(Array(10).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 2,
                       "tokens": 6200,
@@ -259,14 +259,14 @@ describe('ScriptWatcher', () => {
                 `)
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(1) // New state change
                 expect(onStateChangeSpy).toHaveBeenLastCalledWith({
-                    customFunction,
+                    insightsFunction,
                     state: ScriptWatcherState.degraded,
                     previousState: ScriptWatcherState.healthy,
                 })
 
-                await watcher.clearLock(customFunctionId) // For testing the logic
-                await watcher.observeResults(Array(10).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.clearLock(insightsFunctionId) // For testing the logic
+                await watcher.observeResults(Array(10).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 2,
                       "tokens": 4300,
@@ -274,9 +274,9 @@ describe('ScriptWatcher', () => {
                 `)
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(1) // NO New state change
 
-                await watcher.clearLock(customFunctionId) // For testing the logic
-                await watcher.observeResults(Array(100).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.clearLock(insightsFunctionId) // For testing the logic
+                await watcher.observeResults(Array(100).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 3,
                       "tokens": -1,
@@ -284,7 +284,7 @@ describe('ScriptWatcher', () => {
                 `)
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(2) // New state change
                 expect(onStateChangeSpy).toHaveBeenLastCalledWith({
-                    customFunction,
+                    insightsFunction,
                     state: ScriptWatcherState.disabled,
                     previousState: ScriptWatcherState.degraded,
                 })
@@ -292,8 +292,8 @@ describe('ScriptWatcher', () => {
 
             it('should not transition to disabled if not enabled', async () => {
                 hub.CDP_WATCHER_AUTOMATICALLY_DISABLE_FUNCTIONS = false
-                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 2,
                       "tokens": -1,
@@ -301,25 +301,25 @@ describe('ScriptWatcher', () => {
                 `)
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
                 expect(onStateChangeSpy).toHaveBeenLastCalledWith({
-                    customFunction,
+                    insightsFunction,
                     state: ScriptWatcherState.degraded,
                     previousState: ScriptWatcherState.healthy,
                 })
 
-                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'custom_script' })))
+                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'fn' })))
                 expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
             })
 
             it('should not automatically transition out of disabled', async () => {
-                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 3,
                       "tokens": -1,
                     }
                 `)
                 advanceTime(1000)
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 3,
                       "tokens": 9,
@@ -327,8 +327,8 @@ describe('ScriptWatcher', () => {
                 `)
 
                 advanceTime(1000)
-                await watcher.observeResults(Array(1).fill(createResult({ duration: 10, kind: 'custom_script' })))
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.observeResults(Array(1).fill(createResult({ duration: 10, kind: 'fn' })))
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 3,
                       "tokens": 19,
@@ -338,12 +338,12 @@ describe('ScriptWatcher', () => {
             })
 
             it('should not change states if recently changed', async () => {
-                await watcher.doStageChanges([[customFunction, ScriptWatcherState.healthy]])
-                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'custom_script' })))
-                expect((await watcher.getPersistedState(customFunctionId)).state).toEqual(ScriptWatcherState.healthy)
+                await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.healthy]])
+                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1000, kind: 'fn' })))
+                expect((await watcher.getPersistedState(insightsFunctionId)).state).toEqual(ScriptWatcherState.healthy)
                 const res = await redis.usePipeline({ name: 'getLock' }, (pipeline) => {
-                    pipeline.get(`@insights-test/script-watcher-2/state-lock/${customFunctionId}`)
-                    pipeline.ttl(`@insights-test/script-watcher-2/state-lock/${customFunctionId}`)
+                    pipeline.get(`@insights-test/script-watcher-2/state-lock/${insightsFunctionId}`)
+                    pipeline.ttl(`@insights-test/script-watcher-2/state-lock/${insightsFunctionId}`)
                 })
                 expect(res?.[0]?.[1]).toEqual('1') // The value
                 expect(res?.[1]?.[1]).toBeGreaterThan(hub.CDP_WATCHER_STATE_LOCK_TTL - 5) // The ttl
@@ -351,17 +351,17 @@ describe('ScriptWatcher', () => {
             })
 
             it('should not transition to a different state if forcefully set', async () => {
-                await watcher.doStageChanges([[customFunction, ScriptWatcherState.forcefully_degraded]], true)
-                await watcher.clearLock(customFunctionId)
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.forcefully_degraded]], true)
+                await watcher.clearLock(insightsFunctionId)
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 11,
                       "tokens": 0,
                     }
                 `)
-                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1, kind: 'custom_script' })))
+                await watcher.observeResults(Array(1000).fill(createResult({ duration: 1, kind: 'fn' })))
 
-                expect(await watcher.getPersistedState(customFunctionId)).toMatchInlineSnapshot(`
+                expect(await watcher.getPersistedState(insightsFunctionId)).toMatchInlineSnapshot(`
                     {
                       "state": 11,
                       "tokens": 0,
@@ -373,55 +373,55 @@ describe('ScriptWatcher', () => {
 
     describe('doStateChanges - with resetPool', () => {
         const expectMockCaptureTeamEvent = (state: string, previousState: string) => {
-            expect(mockCaptureTeamEvent).toHaveBeenCalledWith(team, 'custom_function_state_change', {
-                custom_function_id: customFunction.id,
-                custom_function_type: customFunction.type,
-                custom_function_name: customFunction.name,
-                custom_function_template_id: customFunction.template_id,
+            expect(mockCaptureTeamEvent).toHaveBeenCalledWith(team, 'insights_function_state_change', {
+                insights_function_id: insightsFunction.id,
+                insights_function_type: insightsFunction.type,
+                insights_function_name: insightsFunction.name,
+                insights_function_template_id: insightsFunction.template_id,
                 state,
                 previous_state: previousState,
             })
         }
 
         it('should change the state of a custom function', async () => {
-            expect(await watcher.getPersistedState(customFunction.id)).toEqual({
+            expect(await watcher.getPersistedState(insightsFunction.id)).toEqual({
                 state: ScriptWatcherState.healthy,
                 tokens: 10000,
             })
-            await watcher.doStageChanges([[customFunction, ScriptWatcherState.degraded]], true)
-            expect(await watcher.getPersistedState(customFunction.id)).toEqual({
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.degraded]], true)
+            expect(await watcher.getPersistedState(insightsFunction.id)).toEqual({
                 state: ScriptWatcherState.degraded,
                 tokens: 8000,
             })
 
             expect(onStateChangeSpy).toHaveBeenCalledWith({
-                customFunction,
+                insightsFunction,
                 state: ScriptWatcherState.degraded,
                 previousState: ScriptWatcherState.healthy,
             })
         })
 
         it('should only trigger state change events if the state actually changed', async () => {
-            await watcher.doStageChanges([[customFunction, ScriptWatcherState.degraded]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.degraded]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
             expect(onStateChangeSpy).toHaveBeenLastCalledWith({
-                customFunction,
+                insightsFunction,
                 state: ScriptWatcherState.degraded,
                 previousState: ScriptWatcherState.healthy,
             })
             expectMockCaptureTeamEvent('degraded', 'healthy')
 
-            await watcher.doStageChanges([[customFunction, ScriptWatcherState.degraded]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.degraded]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(1)
-            await watcher.doStageChanges([[customFunction, ScriptWatcherState.disabled]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.disabled]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(2)
             expect(onStateChangeSpy).toHaveBeenLastCalledWith({
-                customFunction,
+                insightsFunction,
                 state: ScriptWatcherState.disabled,
                 previousState: ScriptWatcherState.degraded,
             })
             expectMockCaptureTeamEvent('disabled', 'degraded')
-            await watcher.doStageChanges([[customFunction, ScriptWatcherState.disabled]], true)
+            await watcher.doStageChanges([[insightsFunction, ScriptWatcherState.disabled]], true)
             expect(onStateChangeSpy).toHaveBeenCalledTimes(2)
         })
     })

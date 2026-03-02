@@ -9,15 +9,15 @@ import { PostgresRouter } from '../../utils/db/postgres'
 import { UUIDT } from '../../utils/utils'
 import { CohortMembershipChange } from '../consumers/cdp-cohort-membership.consumer'
 import { CdpInternalEvent } from '../schema'
-import { compileScript } from '../templates/compiler'
+import { compileFn } from '../templates/compiler'
 import {
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobQueueKind,
-    DBCustomFunctionTemplate,
-    CustomFunctionInvocationGlobals,
-    CustomFunctionInvocationGlobalsWithInputs,
-    CustomFunctionTemplateCompiled,
-    CustomFunctionType,
+    DBInsightsFunctionTemplate,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionInvocationGlobalsWithInputs,
+    InsightsFunctionTemplateCompiled,
+    InsightsFunctionType,
     IntegrationType,
 } from '../types'
 
@@ -40,8 +40,8 @@ export const SAMPLE_GLOBALS = {
     },
 }
 
-export const createCustomFunction = (customFunction: Partial<CustomFunctionType>) => {
-    const item: CustomFunctionType = {
+export const createInsightsFunction = (insightsFunction: Partial<InsightsFunctionType>) => {
+    const item: InsightsFunctionType = {
         id: randomUUID(),
         type: 'destination',
         name: 'Custom Function',
@@ -49,8 +49,8 @@ export const createCustomFunction = (customFunction: Partial<CustomFunctionType>
         enabled: true,
         script: '',
         bytecode: [],
-        ...customFunction,
-    } as CustomFunctionType
+        ...insightsFunction,
+    } as InsightsFunctionType
 
     return item
 }
@@ -130,16 +130,16 @@ export const createClickhousePerson = (teamId: number, data: Partial<ClickHouseP
     }
 }
 
-export const insertCustomFunction = async (
+export const insertInsightsFunction = async (
     postgres: PostgresRouter,
     team_id: Team['id'],
-    customFunction: Partial<CustomFunctionType> = {}
-): Promise<CustomFunctionType> => {
+    insightsFunction: Partial<InsightsFunctionType> = {}
+): Promise<InsightsFunctionType> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'posthog_customfunction', {
-        ...createCustomFunction({
-            ...customFunction,
+    const res = await insertRow(postgres, 'insights_function', {
+        ...createInsightsFunction({
+            ...insightsFunction,
             team_id: team_id,
         }),
         description: '',
@@ -151,9 +151,9 @@ export const insertCustomFunction = async (
     return res
 }
 
-export const createCustomFunctionTemplate = (
-    customFunctionTemplate: Partial<CustomFunctionTemplateCompiled>
-): CustomFunctionTemplateCompiled => {
+export const createInsightsFunctionTemplate = (
+    insightsFunctionTemplate: Partial<InsightsFunctionTemplateCompiled>
+): InsightsFunctionTemplateCompiled => {
     return {
         id: randomUUID(),
         status: 'stable',
@@ -161,29 +161,29 @@ export const createCustomFunctionTemplate = (
         type: 'destination',
         name: 'Custom Function Template',
         description: 'Custom Function Template',
-        code_language: 'custom_script',
+        code_language: 'fn',
         code: 'Custom Function Template',
         inputs_schema: [],
         category: [],
         bytecode: [],
-        ...customFunctionTemplate,
+        ...insightsFunctionTemplate,
     }
 }
 
-export const insertCustomFunctionTemplate = async (
+export const insertInsightsFunctionTemplate = async (
     postgres: PostgresRouter,
-    customFunctionTemplate: Partial<CustomFunctionTemplateCompiled> = {}
-): Promise<DBCustomFunctionTemplate> => {
+    insightsFunctionTemplate: Partial<InsightsFunctionTemplateCompiled> = {}
+): Promise<DBInsightsFunctionTemplate> => {
     // This is only used for testing so we need to override some values
 
-    const template = createCustomFunctionTemplate({
-        ...customFunctionTemplate,
+    const template = createInsightsFunctionTemplate({
+        ...insightsFunctionTemplate,
     })
-    if (template.code_language === 'custom_script') {
-        template.bytecode = await compileScript(template.code)
+    if (template.code_language === 'fn') {
+        template.bytecode = await compileFn(template.code)
     }
 
-    const res = await insertRow(postgres, 'posthog_customfunctiontemplate', {
+    const res = await insertRow(postgres, 'insights_function_template', {
         id: randomUUID(),
         template_id: template.id,
         sha: 'sha',
@@ -225,8 +225,8 @@ export const insertIntegration = async (
 }
 
 export const createScriptExecutionGlobals = (
-    data: Partial<CustomFunctionInvocationGlobals> = {}
-): CustomFunctionInvocationGlobals => {
+    data: Partial<InsightsFunctionInvocationGlobals> = {}
+): InsightsFunctionInvocationGlobals => {
     return {
         groups: {},
         ...data,
@@ -262,29 +262,29 @@ export const createScriptExecutionGlobals = (
 }
 
 export const createExampleInvocation = (
-    _customFunction: Partial<CustomFunctionType> = {},
-    _globals: Partial<CustomFunctionInvocationGlobalsWithInputs> = {},
-    queue: CyclotronJobQueueKind = 'custom_script'
-): CyclotronJobInvocationCustomFunction => {
-    const customFunction = createCustomFunction(_customFunction)
+    _insightsFunction: Partial<InsightsFunctionType> = {},
+    _globals: Partial<InsightsFunctionInvocationGlobalsWithInputs> = {},
+    queue: CyclotronJobQueueKind = 'fn'
+): CyclotronJobInvocationInsightsFunction => {
+    const insightsFunction = createInsightsFunction(_insightsFunction)
     // Add the source of the trigger to the globals
 
     const globals = createScriptExecutionGlobals(_globals)
     globals.source = {
-        name: customFunction.name ?? `Custom function: ${customFunction.id}`,
-        url: `${globals.project.url}/pipeline/destinations/custom-function-${customFunction.id}/configuration/`,
+        name: insightsFunction.name ?? `Custom function: ${insightsFunction.id}`,
+        url: `${globals.project.url}/pipeline/destinations/insights-function-${insightsFunction.id}/configuration/`,
     }
 
     return {
         id: new UUIDT().toString(),
         state: {
-            globals: globals as CustomFunctionInvocationGlobalsWithInputs,
+            globals: globals as InsightsFunctionInvocationGlobalsWithInputs,
             timings: [],
             attempts: 0,
         },
-        teamId: customFunction.team_id,
-        functionId: customFunction.id,
-        customFunction,
+        teamId: insightsFunction.team_id,
+        functionId: insightsFunction.id,
+        insightsFunction,
         queue,
         queuePriority: 0,
     }

@@ -1,6 +1,6 @@
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.sendgrid.template_sendgrid import (
     TemplateSendGridMigrator,
     template as template_sendgrid,
@@ -8,7 +8,7 @@ from posthog.cdp.templates.sendgrid.template_sendgrid import (
 from posthog.models import PluginConfig
 
 
-class TestTemplateSendgrid(BaseCustomFunctionTemplateTest):
+class TestTemplateSendgrid(BaseInsightsFunctionTemplateTest):
     template = template_sendgrid
 
     def _inputs(self, **kwargs):

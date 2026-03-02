@@ -1,8 +1,8 @@
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.zapier.template_zapier import template as template_zapier
 
 
-class TestTemplateZapier(BaseCustomFunctionTemplateTest):
+class TestTemplateZapier(BaseInsightsFunctionTemplateTest):
     template = template_zapier
 
     def test_function_works_with_path_only(self):

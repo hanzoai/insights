@@ -1,13 +1,13 @@
 import pytest
 from freezegun import freeze_time
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.onesignal.template_onesignal import template as template_onesignal
 
 from common.hogvm.python.utils import UncaughtHogVMException
 
 
-class TestTemplateOneSignal(BaseCustomFunctionTemplateTest):
+class TestTemplateOneSignal(BaseInsightsFunctionTemplateTest):
     template = template_onesignal
 
     @freeze_time("2024-04-16T12:34:51Z")

@@ -12,7 +12,7 @@ from posthog.insightsql.parser import parse_program, parse_string_template
 from posthog.insightsql.visitor import TraversingVisitor
 
 from posthog.cdp.filters import compile_filters_bytecode, compile_filters_expr
-from posthog.models.custom_functions.custom_function import TYPES_WITH_JAVASCRIPT_SOURCE, TYPES_WITH_TRANSPILED_FILTERS
+from posthog.models.insights_functions.insights_function import TYPES_WITH_JAVASCRIPT_SOURCE, TYPES_WITH_TRANSPILED_FILTERS
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +159,7 @@ class InputsSchemaItemSerializer(serializers.Serializer):
     integration_field = serializers.CharField(required=False)
     requiredScopes = serializers.CharField(required=False)
     # Indicates if custom templating should be used for this input
-    templating = serializers.ChoiceField(choices=[True, False, "custom_script", "liquid"], required=False)
+    templating = serializers.ChoiceField(choices=[True, False, "fn", "liquid"], required=False)
 
     # TODO Validate choices if type=choice
 
@@ -174,7 +174,7 @@ class AnyInputField(serializers.Field):
 
 class InputsItemSerializer(serializers.Serializer):
     value = AnyInputField(required=False)
-    templating = serializers.ChoiceField(choices=["custom_script", "liquid"], required=False)
+    templating = serializers.ChoiceField(choices=["fn", "liquid"], required=False)
     bytecode = serializers.ListField(required=False, read_only=True)
     order = serializers.IntegerField(required=False, read_only=True)
     transpiled = serializers.JSONField(required=False, read_only=True)
@@ -287,7 +287,7 @@ class InputsSerializer(serializers.DictField):
                 templating_val = schema["templating"]
                 if isinstance(templating_val, bool):
                     if templating_val:
-                        value["templating = "custom_script"
+                        value["templating = "fn"
                     # If False, do not set templating field
                 else:
                     value["templating"] = templating_val
@@ -333,7 +333,7 @@ class InputsSerializer(serializers.DictField):
         # Unlike standard dict validation we are iterating the schema - not the inputs
 
 
-class CustomFunctionFiltersSerializer(serializers.Serializer):
+class InsightsFunctionFiltersSerializer(serializers.Serializer):
     source = serializers.ChoiceField(
         choices=["events", "person-updates", "data-warehouse-table"], required=False, default="events"
     )  # type: ignore
@@ -398,7 +398,7 @@ class MappingsSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
     inputs_schema = serializers.ListField(child=InputsSchemaItemSerializer(), required=False)
     inputs = InputsSerializer(required=False)
-    filters = CustomFunctionFiltersSerializer(required=False)
+    filters = InsightsFunctionFiltersSerializer(required=False)
 
     def to_internal_value(self, data):
         # Weirdly nested serializers don't get this set...
@@ -441,15 +441,15 @@ def topological_sort(nodes: list[str], edges: dict[str, list[str]]) -> list[str]
     return sorted_list
 
 
-def compile_script(custom_script: str, script_type: str, in_repl: Optional[bool] = False) -> list[Any]:
+def compile_script(fn: str, script_type: str, in_repl: Optional[bool] = False) -> list[Any]:
     # Attempt to compile the hog
     try:
-        program = parse_program(custom_script)
+        program = parse_program(fn)
 
         detector = HyphenatedPropertyDetector()
         detector.visit(program)
         if detector.errors:
-            raise serializers.ValidationError({"custom_script": detector.errors[0]})
+            raise serializers.ValidationError({"fn": detector.errors[0]})
 
         supported_functions = set()
 
@@ -461,4 +461,4 @@ def compile_script(custom_script: str, script_type: str, in_repl: Optional[bool]
         raise
     except Exception as e:
         logger.error(f"Failed to compile script {e}", exc_info=True)
-        raise serializers.ValidationError({"custom_script": "Custom code has errors."})
+        raise serializers.ValidationError({"fn": "Custom code has errors."})

@@ -1,7 +1,7 @@
-import { CustomFunctionInputSchemaType } from '~/cdp/types'
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionInputSchemaType } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-const build_inputs = (): CustomFunctionInputSchemaType[] => {
+const build_inputs = (): InsightsFunctionInputSchemaType[] => {
     return [
         {
             key: 'rdt_cid',
@@ -31,7 +31,7 @@ const build_inputs = (): CustomFunctionInputSchemaType[] => {
     ]
 }
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'destination',
@@ -40,7 +40,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Track how many Reddit users interact with your website.',
     icon_url: '/static/services/reddit.png',
     category: ['Advertisement'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 if (empty(inputs.accountId) or empty(inputs.conversionsAccessToken)) {
     throw Error('Account ID and access token are required')

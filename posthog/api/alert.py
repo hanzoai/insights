@@ -426,18 +426,18 @@ def handle_alert_subscription_change(before_update, after_update, activity, user
 
 
 @receiver(pre_delete, sender=AlertConfiguration)
-def cleanup_alert_custom_functions(sender, instance: AlertConfiguration, **kwargs):
-    from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionType
+def cleanup_alert_insights_functions(sender, instance: AlertConfiguration, **kwargs):
+    from posthog.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionType
 
-    for custom_function in CustomFunction.objects.filter(
+    for insights_function in InsightsFunction.objects.filter(
         team_id=instance.team_id,
-        type=CustomFunctionType.INTERNAL_DESTINATION,
+        type=InsightsFunctionType.INTERNAL_DESTINATION,
         deleted=False,
         filters__contains={"properties": [{"key": "alert_id", "value": str(instance.id)}]},
     ):
-        custom_function.enabled = False
-        custom_function.deleted = True
-        custom_function.save()
+        insights_function.enabled = False
+        insights_function.deleted = True
+        insights_function.save()
 
 
 @receiver(pre_delete, sender=AlertSubscription)

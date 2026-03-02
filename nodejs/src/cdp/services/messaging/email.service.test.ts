@@ -1,7 +1,7 @@
 import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { createExampleInvocation, insertIntegration } from '~/cdp/_tests/fixtures'
-import { CyclotronJobInvocationCustomFunction } from '~/cdp/types'
+import { CyclotronJobInvocationInsightsFunction } from '~/cdp/types'
 import { CyclotronInvocationQueueParametersEmailType } from '~/schema/cyclotron'
 import { waitForExpect } from '~/tests/helpers/expectations'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
@@ -65,7 +65,7 @@ describe('EmailService', () => {
     })
 
     describe('executeSendEmail', () => {
-        let invocation: CyclotronJobInvocationCustomFunction
+        let invocation: CyclotronJobInvocationInsightsFunction
         let sendEmailSpy: jest.SpyInstance
         beforeEach(async () => {
             await insertIntegration(hub.postgres, team.id, {
@@ -196,7 +196,7 @@ describe('EmailService', () => {
         })
     })
     describe('native email sending with maildev', () => {
-        let invocation: CyclotronJobInvocationCustomFunction
+        let invocation: CyclotronJobInvocationInsightsFunction
         const mailDevAPI = new MailDevAPI()
         beforeEach(async () => {
             const actualFetch = jest.requireActual('~/utils/request').fetch as jest.Mock
@@ -250,7 +250,7 @@ describe('EmailService', () => {
         })
     })
     describe('native email sending with ses', () => {
-        let invocation: CyclotronJobInvocationCustomFunction
+        let invocation: CyclotronJobInvocationInsightsFunction
         let sendEmailSpy: jest.SpyInstance
         beforeEach(async () => {
             const actualFetch = jest.requireActual('~/utils/request').fetch as jest.Mock
@@ -288,7 +288,7 @@ describe('EmailService', () => {
         })
 
         it('should send an email if verified', async () => {
-            invocation.customFunction.metadata = { message_category_type: 'transactional' }
+            invocation.insightsFunction.metadata = { message_category_type: 'transactional' }
             sendEmailSpy.mockResolvedValue({ MessageId: 'test-message-id' })
             const result = await service.executeSendEmail(invocation)
             expect(result.error).toBeUndefined()
@@ -400,7 +400,7 @@ describe('EmailService', () => {
 
         it('should include unsubscribe headers for non-transactional emails', async () => {
             sendEmailSpy.mockResolvedValue({ MessageId: 'test-message-id' })
-            invocation.customFunction.metadata = { message_category_type: 'marketing' }
+            invocation.insightsFunction.metadata = { message_category_type: 'marketing' }
             const result = await service.executeSendEmail(invocation)
             expect(result.error).toBeUndefined()
             const sentCommand = sendEmailSpy.mock.calls[0][0] as { input: any }
@@ -415,7 +415,7 @@ describe('EmailService', () => {
 
         it('should not include unsubscribe headers for transactional emails', async () => {
             sendEmailSpy.mockResolvedValue({ MessageId: 'test-message-id' })
-            invocation.customFunction.metadata = { message_category_type: 'transactional' }
+            invocation.insightsFunction.metadata = { message_category_type: 'transactional' }
             const result = await service.executeSendEmail(invocation)
             expect(result.error).toBeUndefined()
             const sentCommand = sendEmailSpy.mock.calls[0][0] as { input: any }

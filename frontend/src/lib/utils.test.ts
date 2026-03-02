@@ -104,7 +104,7 @@ describe('lib/utils', () => {
             expect(identifierToHuman('500')).toEqual('500')
             expect(identifierToHuman(404)).toEqual('404')
             expect(identifierToHuman('CreateProject')).toEqual('Create project')
-            expect(identifierToHuman('custom_function/transformation')).toEqual('Custom function transformation')
+            expect(identifierToHuman('insights_function/transformation')).toEqual('Custom function transformation')
         })
     })
 

@@ -36,13 +36,13 @@ function getDescription(resource: TerraformExportResource, result: TerraformExpo
 
     const getExportPrefix = (): string => {
         const hasRelatedResources =
-            result && (result.resourceCounts.alerts > 0 || result.resourceCounts.customFunctions > 0)
+            result && (result.resourceCounts.alerts > 0 || result.resourceCounts.insightsFunctions > 0)
 
         if (resource.type === 'dashboard' && result) {
-            return `Export this dashboard and all related resources (${result.resourceCounts.insights} insight(s), ${result.resourceCounts.alerts} alert(s), ${result.resourceCounts.customFunctions} destination(s)) to a Terraform configuration.`
+            return `Export this dashboard and all related resources (${result.resourceCounts.insights} insight(s), ${result.resourceCounts.alerts} alert(s), ${result.resourceCounts.insightsFunctions} destination(s)) to a Terraform configuration.`
         }
         if (resource.type === 'insight' && hasRelatedResources) {
-            return `Export this insight and related resources (${result.resourceCounts.alerts} alert(s), ${result.resourceCounts.customFunctions} destination(s)) to a Terraform configuration.`
+            return `Export this insight and related resources (${result.resourceCounts.alerts} alert(s), ${result.resourceCounts.insightsFunctions} destination(s)) to a Terraform configuration.`
         }
         return ''
     }

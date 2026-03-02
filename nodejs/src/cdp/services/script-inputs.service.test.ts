@@ -6,9 +6,9 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 
-import { createScriptExecutionGlobals, createCustomFunction, insertIntegration } from '../_tests/fixtures'
-import { compileScript } from '../templates/compiler'
-import { CustomFunctionInvocationGlobals, CustomFunctionType } from '../types'
+import { createScriptExecutionGlobals, createInsightsFunction, insertIntegration } from '../_tests/fixtures'
+import { compileFn } from '../templates/compiler'
+import { InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../types'
 import { ScriptInputsService, formatScriptInput } from './script-inputs.service'
 
 describe('Script Inputs', () => {
@@ -118,12 +118,12 @@ describe('Script Inputs', () => {
     })
 
     describe('buildInputs', () => {
-        let customFunction: CustomFunctionType
-        let globals: CustomFunctionInvocationGlobals
+        let insightsFunction: InsightsFunctionType
+        let globals: InsightsFunctionInvocationGlobals
 
         beforeEach(async () => {
-            customFunction = createCustomFunction({
-                id: 'custom-function-1',
+            insightsFunction = createInsightsFunction({
+                id: 'insights-function-1',
                 team_id: team.id,
                 name: 'Custom Function 1',
                 enabled: true,
@@ -131,8 +131,8 @@ describe('Script Inputs', () => {
                 inputs: {
                     hog_templated: {
                         value: 'event: "{event.event}"',
-                        templating: 'custom_script',
-                        bytecode: await compileScript('return f\'event: "{event.event}"\''),
+                        templating: 'fn',
+                        bytecode: await compileFn('return f\'event: "{event.event}"\''),
                     },
                     liquid_templated: {
                         value: 'event: "{{ event.event }}"',
@@ -150,17 +150,17 @@ describe('Script Inputs', () => {
         })
 
         it('should template out script inputs', async () => {
-            const inputs = await scriptInputsService.buildInputs(customFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.hog_templated).toMatchInlineSnapshot(`"event: "test""`)
         })
 
         it('should template out liquid inputs', async () => {
-            const inputs = await scriptInputsService.buildInputs(customFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.liquid_templated).toMatchInlineSnapshot(`"event: "test""`)
         })
 
         it('should loads inputs with integration inputs', async () => {
-            const inputs = await scriptInputsService.buildInputs(customFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
 
             expect(inputs.oauth).toMatchInlineSnapshot(`
                 {
@@ -173,8 +173,8 @@ describe('Script Inputs', () => {
         })
 
         it('access token should be replaced with placeholder', async () => {
-            customFunction = createCustomFunction({
-                id: 'custom-function-1',
+            insightsFunction = createInsightsFunction({
+                id: 'insights-function-1',
                 team_id: team.id,
                 name: 'Custom Function 1',
                 enabled: true,
@@ -182,8 +182,8 @@ describe('Script Inputs', () => {
                 inputs: {
                     hog_templated: {
                         value: 'event: "{event.event}"',
-                        templating: 'custom_script',
-                        bytecode: await compileScript('return f\'event: "{event.event}"\''),
+                        templating: 'fn',
+                        bytecode: await compileFn('return f\'event: "{event.event}"\''),
                     },
                     liquid_templated: {
                         value: 'event: "{{ event.event }}"',
@@ -197,7 +197,7 @@ describe('Script Inputs', () => {
                 ],
             })
 
-            const inputs = await scriptInputsService.buildInputs(customFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
 
             expect(inputs.auth).toMatchInlineSnapshot(`
                 {
@@ -210,15 +210,15 @@ describe('Script Inputs', () => {
         })
 
         it('should not load integrations from a different team', async () => {
-            customFunction.team_id = 100
+            insightsFunction.team_id = 100
 
-            const inputs = await scriptInputsService.buildInputs(customFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
 
             expect(inputs.oauth).toMatchInlineSnapshot(`null`)
         })
 
         it('should add unsubscribe url if email input is present', async () => {
-            customFunction.inputs = {
+            insightsFunction.inputs = {
                 email: {
                     templating: 'liquid',
                     value: {
@@ -228,9 +228,9 @@ describe('Script Inputs', () => {
                 },
             }
 
-            customFunction.inputs_schema = [{ key: 'email', type: 'native_email', required: true, templating: true }]
+            insightsFunction.inputs_schema = [{ key: 'email', type: 'native_email', required: true, templating: true }]
 
-            const inputs = await scriptInputsService.buildInputs(customFunction, globals)
+            const inputs = await scriptInputsService.buildInputs(insightsFunction, globals)
             expect(inputs.email.to.email).toEqual('test@hanzo.ai')
             expect(inputs.email.html).toEqual(
                 `<div>Manage subscription preferences here <a href="http://localhost:8000/messaging-preferences/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtX2lkIjoyLCJpZGVudGlmaWVyIjoidGVzdEBwb3N0aG9nLmNvbSIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM2Mjk0NDAwLCJhdWQiOiJwb3N0aG9nOm1lc3NhZ2luZzpzdWJzY3JpcHRpb25fcHJlZmVyZW5jZXMifQ.pBh-COzTEyApuxe8J5sViPanp1lV1IClepOTVFZNhIs/">here</a>Or, click <a href="http://localhost:8000/messaging-preferences/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZWFtX2lkIjoyLCJpZGVudGlmaWVyIjoidGVzdEBwb3N0aG9nLmNvbSIsImlhdCI6MTczNTY4OTYwMCwiZXhwIjoxNzM2Mjk0NDAwLCJhdWQiOiJwb3N0aG9nOm1lc3NhZ2luZzpzdWJzY3JpcHRpb25fcHJlZmVyZW5jZXMifQ.pBh-COzTEyApuxe8J5sViPanp1lV1IClepOTVFZNhIs/?one_click_unsubscribe=1">here</a> to immediately unsubscribe from all marketing emails</div>`

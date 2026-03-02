@@ -17,7 +17,7 @@ class EmailTemplateSerializer(serializers.Serializer):
 
 
 class MessageTemplateContentSerializer(serializers.Serializer):
-    templating = serializers.ChoiceField(choices=["custom_script", "liquid"], required=False)
+    templating = serializers.ChoiceField(choices=["fn", "liquid"], required=False)
     email = EmailTemplateSerializer(required=False, allow_null=True)
 
 

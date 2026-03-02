@@ -1,4 +1,4 @@
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.zendesk.template_zendesk import template as template_zendesk
 
 
@@ -16,7 +16,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateZendesk(BaseCustomFunctionTemplateTest):
+class TestTemplateZendesk(BaseInsightsFunctionTemplateTest):
     template = template_zendesk
 
     def test_function_works(self):

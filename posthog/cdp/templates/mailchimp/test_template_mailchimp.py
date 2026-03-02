@@ -1,4 +1,4 @@
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.mailchimp.template_mailchimp import template as template_mailchimp
 
 
@@ -17,7 +17,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateMailchimp(BaseCustomFunctionTemplateTest):
+class TestTemplateMailchimp(BaseInsightsFunctionTemplateTest):
     template = template_mailchimp
 
     def test_function_works(self):

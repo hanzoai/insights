@@ -1,11 +1,11 @@
-import { CustomFunctionInvocationGlobals } from '~/cdp/types'
+import { InsightsFunctionInvocationGlobals } from '~/cdp/types'
 
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './default.template'
 
 describe('default.template.ts', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: CustomFunctionInvocationGlobals
+    let mockGlobals: InsightsFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()

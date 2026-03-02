@@ -50,7 +50,7 @@ from posthog.models.team.team import Team
 from common.hogvm.python.stl import STL
 from common.hogvm.python.stl.bytecode import BYTECODE_STL
 
-ALL_CUSTOM_FUNCTIONS = sorted(list(STL.keys()) + list(BYTECODE_STL.keys()))
+ALL_INSIGHTS_FUNCTIONS = sorted(list(STL.keys()) + list(BYTECODE_STL.keys()))
 MATCH_ANY_CHARACTER = "$$_POSTHOG_ANY_$$"
 PROPERTY_DEFINITION_LIMIT = 220
 
@@ -307,7 +307,7 @@ def append_table_field_to_response(
     if language == HogLanguage.HOG_QL or language == HogLanguage.HOG_QL_EXPR:
         available_functions = ALL_EXPOSED_FUNCTION_NAMES
     else:
-        available_functions = ALL_CUSTOM_FUNCTIONS
+        available_functions = ALL_INSIGHTS_FUNCTIONS
     extend_responses(
         available_functions,
         suggestions,
@@ -489,7 +489,7 @@ def get_insightsql_autocomplete(
 
                 if query.language != HogLanguage.LIQUID:
                     extend_responses(
-                        ALL_CUSTOM_FUNCTIONS,
+                        ALL_INSIGHTS_FUNCTIONS,
                         response.suggestions,
                         AutocompleteCompletionItemKind.FUNCTION,
                         insert_text=lambda key: f"{key}()",

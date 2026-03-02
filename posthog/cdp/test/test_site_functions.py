@@ -12,7 +12,7 @@ from posthog.cdp.site_functions import get_transpiled_function
 from posthog.cdp.templates.helpers import mock_transpile
 from posthog.models.action.action import Action
 from posthog.models.cohort import Cohort
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.organization import Organization
 from posthog.models.plugin import TranspilerError
 from posthog.models.project import Project
@@ -34,17 +34,17 @@ class TestSiteFunctions(TestCase):
             name="Test project",
         )
 
-        self.custom_function = CustomFunction(
+        self.insights_function = InsightsFunction(
             id="123",
             team=self.team,
             name="Test Custom Function",
-            custom_script='export function onLoad() { console.log("Hello, World!"); }',
+            fn='export function onLoad() { console.log("Hello, World!"); }',
             filters={},
             inputs={},
         )
 
     def compile_and_run(self):
-        result = get_transpiled_function(self.custom_function)
+        result = get_transpiled_function(self.insights_function)
         with tempfile.NamedTemporaryFile(delete=False) as f:
             f.write(result.encode("utf-8"))
             f.flush()
@@ -72,46 +72,46 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_static_input(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.message); }"
-        self.custom_function.inputs = {"message": {"value": "Hello, Inputs!"}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.message); }"
+        self.insights_function.inputs = {"message": {"value": "Hello, Inputs!"}}
 
         result = self.compile_and_run()
         self.snapshot.assert_match(result)
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_template_input(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.greeting); }"
-        self.custom_function.inputs = {"greeting": {"value": "Hello, {person.properties.name}!"}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.greeting); }"
+        self.insights_function.inputs = {"greeting": {"value": "Hello, {person.properties.name}!"}}
         result = self.compile_and_run()
         self.snapshot.assert_match(result)
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_filters(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onEvent(globals) { console.log(globals); }"
-        self.custom_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
+        self.insights_function.hog = "export function onEvent(globals) { console.log(globals); }"
+        self.insights_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
 
         result = self.compile_and_run()
         self.snapshot.assert_match(result)
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_invalid_template_input(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.greeting); }"
-        self.custom_function.inputs = {"greeting": {"value": "Hello, {person.properties.nonexistent_property}!"}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.greeting); }"
+        self.insights_function.inputs = {"greeting": {"value": "Hello, {person.properties.nonexistent_property}!"}}
 
         result = self.compile_and_run()
 
         assert "console.log(inputs.greeting);" in result
 
     def test_get_transpiled_function_with_syntax_error_in_source(self):
-        self.custom_function.hog = 'export function onLoad() { console.log("Missing closing brace");'
+        self.insights_function.hog = 'export function onLoad() { console.log("Missing closing brace");'
 
         with pytest.raises(TranspilerError):
-            get_transpiled_function(self.custom_function)
+            get_transpiled_function(self.insights_function)
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_complex_inputs(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.complexInput); }"
-        self.custom_function.inputs = {
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.complexInput); }"
+        self.insights_function.inputs = {
             "complexInput": {
                 "value": {
                     "nested": "{event.properties.url}",
@@ -125,8 +125,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_empty_inputs(self, mock_transpile_fn):
-        self.custom_function.hog = 'export function onLoad() { console.log("No inputs"); }'
-        self.custom_function.inputs = {}
+        self.insights_function.hog = 'export function onLoad() { console.log("No inputs"); }'
+        self.insights_function.inputs = {}
 
         result = self.compile_and_run()
 
@@ -135,8 +135,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_non_template_string(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.staticMessage); }"
-        self.custom_function.inputs = {"staticMessage": {"value": "This is a static message."}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.staticMessage); }"
+        self.insights_function.inputs = {"staticMessage": {"value": "This is a static message."}}
 
         result = self.compile_and_run()
 
@@ -146,8 +146,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_list_inputs(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.messages); }"
-        self.custom_function.inputs = {"messages": {"value": ["Hello", "World", "{person.properties.name}"]}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.messages); }"
+        self.insights_function.inputs = {"messages": {"value": ["Hello", "World", "{person.properties.name}"]}}
 
         result = self.compile_and_run()
 
@@ -157,8 +157,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_event_filter(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onEvent(event) { console.log(event.properties.url); }"
-        self.custom_function.filters = {
+        self.insights_function.hog = "export function onEvent(event) { console.log(event.properties.url); }"
+        self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
             "filter_test_accounts": True,
         }
@@ -180,8 +180,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_groups(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.groupInfo); }"
-        self.custom_function.inputs = {"groupInfo": {"value": "{groups['company']}"}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.groupInfo); }"
+        self.insights_function.inputs = {"groupInfo": {"value": "{groups['company']}"}}
 
         create_group_type_mapping_without_created_at(
             team=self.team, group_type="company", group_type_index=0, project=self.project
@@ -195,8 +195,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_missing_group(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs.groupInfo); }"
-        self.custom_function.inputs = {"groupInfo": {"value": "{groups['nonexistent']}"}}
+        self.insights_function.hog = "export function onLoad() { console.log(inputs.groupInfo); }"
+        self.insights_function.inputs = {"groupInfo": {"value": "{groups['nonexistent']}"}}
 
         result = self.compile_and_run()
 
@@ -216,8 +216,8 @@ class TestSiteFunctions(TestCase):
         ]
         self.team.save()
 
-        self.custom_function.hog = "export function onEvent(globals) { console.log(globals); }"
-        self.custom_function.filters = {
+        self.insights_function.hog = "export function onEvent(globals) { console.log(globals); }"
+        self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
             "actions": [{"id": str(action.pk), "name": "Test Action", "type": "actions"}],
             "filter_test_accounts": True,
@@ -255,24 +255,24 @@ class TestSiteFunctions(TestCase):
         ]
         self.team.save()
 
-        self.custom_function.hog = "export function onEvent(globals) { console.log(globals); }"
-        self.custom_function.filters = {
+        self.insights_function.hog = "export function onEvent(globals) { console.log(globals); }"
+        self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
             "filter_test_accounts": True,
         }
 
         # Cohorts can't be used in real-time site functions
         with pytest.raises(Exception, match="cohort"):
-            get_transpiled_function(self.custom_function)
+            get_transpiled_function(self.insights_function)
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_mappings(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad({ inputs, posthog }) { console.log(inputs); }"
-        self.custom_function.inputs = {"greeting": {"value": "Hello, {person.properties.nonexistent_property}!"}}
-        self.custom_function.filters = {
+        self.insights_function.hog = "export function onLoad({ inputs, posthog }) { console.log(inputs); }"
+        self.insights_function.inputs = {"greeting": {"value": "Hello, {person.properties.nonexistent_property}!"}}
+        self.insights_function.filters = {
             "events": [{"id": "$pageview", "name": "$pageview", "type": "events"}],
         }
-        self.custom_function.mappings = [
+        self.insights_function.mappings = [
             {
                 "inputs": {"greeting": {"value": "Hallo, {person.properties.nonexistent_property}!"}},
                 "filters": {"events": [{"id": "$autocapture", "name": "$autocapture", "type": "events"}]},
@@ -284,9 +284,9 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_run_function_onload(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad({ inputs, posthog }) { console.log(inputs.message); }"
-        self.custom_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
-        self.custom_function.inputs = {"message": {"value": "Hello World {person.properties.name}"}}
+        self.insights_function.hog = "export function onLoad({ inputs, posthog }) { console.log(inputs.message); }"
+        self.insights_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
+        self.insights_function.inputs = {"message": {"value": "Hello World {person.properties.name}"}}
 
         result = self.compile_and_run()
         assert "Hello World" in result
@@ -299,10 +299,10 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_run_function_onevent(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onEvent({ inputs }) { console.log(inputs.message); }"
-        # self.custom_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
-        self.custom_function.inputs = {"message": {"value": "Hello World {event.properties.id}"}}
-        self.custom_function.mappings = [
+        self.insights_function.hog = "export function onEvent({ inputs }) { console.log(inputs.message); }"
+        # self.insights_function.filters = {"events": [{"id": "$pageview", "name": "$pageview", "type": "events", "order": 0}]}
+        self.insights_function.inputs = {"message": {"value": "Hello World {event.properties.id}"}}
+        self.insights_function.mappings = [
             {
                 "inputs": {"greeting": {"value": "Hallo, {person.properties.nonexistent_property}!"}},
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events"}]},
@@ -340,9 +340,9 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_run_function_skip_disabled_mapping(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onEvent({ inputs }) { console.log(inputs.message); }"
-        self.custom_function.inputs = {"message": {"value": "Hello World {event.properties.id}"}}
-        self.custom_function.mappings = [
+        self.insights_function.hog = "export function onEvent({ inputs }) { console.log(inputs.message); }"
+        self.insights_function.inputs = {"message": {"value": "Hello World {event.properties.id}"}}
+        self.insights_function.mappings = [
             {
                 "inputs": {"greeting": {"value": "Hallo!"}},
                 "filters": {"events": [{"id": "$pageview", "name": "$pageview", "type": "events"}]},
@@ -368,8 +368,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_ordered_inputs(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs); }"
-        self.custom_function.inputs = {
+        self.insights_function.hog = "export function onLoad() { console.log(inputs); }"
+        self.insights_function.inputs = {
             "first": {"value": "I am first", "order": 0},
             "second": {"value": "{person.properties.name}", "order": 1},
             "third": {"value": "{event.properties.url}", "order": 2},
@@ -386,8 +386,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_without_order(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs); }"
-        self.custom_function.inputs = {
+        self.insights_function.hog = "export function onLoad() { console.log(inputs); }"
+        self.insights_function.inputs = {
             "noOrder": {"value": "I have no order"},
             "alsoNoOrder": {"value": "{person.properties.name}"},
             "withOrder": {"value": "{event.properties.url}", "order": 10},
@@ -403,8 +403,8 @@ class TestSiteFunctions(TestCase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_get_transpiled_function_with_duplicate_orders(self, mock_transpile_fn):
-        self.custom_function.hog = "export function onLoad() { console.log(inputs); }"
-        self.custom_function.inputs = {
+        self.insights_function.hog = "export function onLoad() { console.log(inputs); }"
+        self.insights_function.inputs = {
             "alpha": {"value": "{person.properties.alpha}", "order": 1},
             "beta": {"value": "{person.properties.beta}", "order": 1},
             "gamma": {"value": "Just gamma", "order": 1},

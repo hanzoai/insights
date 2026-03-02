@@ -31,7 +31,7 @@ SCOPE_DISPLAY_NAMES: dict[str, str] = {
     "AlertConfiguration": "Alert",
     "BatchExport": "Destination",
     "ExternalDataSource": "Source",
-    "CustomFunction": "Data pipeline",
+    "InsightsFunction": "Data pipeline",
     "PersonalAPIKey": "Personal API key",
     "LLMTrace": "LLM trace",
 }

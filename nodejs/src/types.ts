@@ -157,7 +157,7 @@ export type CdpConfig = {
     DISABLE_OPENTELEMETRY_TRACING: boolean
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_KIND: CyclotronJobQueueKind
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: CyclotronJobQueueSource
-    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING: string // A comma-separated list of queue to mode like `custom_script:kafka,fetch:postgres,*:kafka` with * being the default
+    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING: string // A comma-separated list of queue to mode like `fn:kafka,fetch:postgres,*:kafka` with * being the default
     CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_TEAM_MAPPING: string // Like the above but with a team check too
     CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_FORCE_SCHEDULED_TO_POSTGRES: boolean // If true then scheduled jobs will be routed to postgres even if they are mapped to kafka
 
@@ -182,8 +182,8 @@ export type CdpConfig = {
     CDP_FETCH_BACKOFF_MAX_MS: number
     CDP_OVERFLOW_QUEUE_ENABLED: boolean
 
-    CUSTOM_FUNCTION_MONITORING_APP_METRICS_TOPIC: string
-    CUSTOM_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: string
+    INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC: string
+    INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC: string
 
     CDP_EMAIL_TRACKING_URL: string
 
@@ -573,9 +573,9 @@ export interface PluginServerCapabilities {
     cdpPersonUpdates?: boolean
     cdpInternalEvents?: boolean
     cdpLegacyOnEvent?: boolean
-    cdpBatchCustomFlow?: boolean
+    cdpBatchInsightsFlow?: boolean
     cdpCyclotronWorker?: boolean
-    cdpCyclotronWorkerCustomFlow?: boolean
+    cdpCyclotronWorkerInsightsFlow?: boolean
     cdpPrecalculatedFilters?: boolean
     cdpCohortMembership?: boolean
     cdpApi?: boolean

@@ -4,20 +4,20 @@ import { KafkaProducerWrapper } from '../../kafka/producer'
 import { HealthCheckResult, Hub, PluginServerService, TeamId } from '../../types'
 import { logger } from '../../utils/logger'
 import { CdpFetchConfig, ScriptExecutorService, ScriptExecutorServiceHub } from '../services/script-executor.service'
-import { CustomFlowExecutorService } from '../services/customflows/customflow-executor.service'
-import { CustomFlowFunctionsService } from '../services/customflows/customflow-functions.service'
-import { CustomFlowManagerService } from '../services/customflows/customflow-manager.service'
+import { InsightsFlowExecutorService } from '../services/insightsflows/customflow-executor.service'
+import { InsightsFlowFunctionsService } from '../services/insightsflows/customflow-functions.service'
+import { InsightsFlowManagerService } from '../services/insightsflows/customflow-manager.service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import { GroupsManagerService, GroupsManagerServiceHub } from '../services/managers/groups-manager.service'
-import { CustomFunctionManagerHub, CustomFunctionManagerService } from '../services/managers/custom-function-manager.service'
-import { CustomFunctionTemplateManagerService } from '../services/managers/custom-function-template-manager.service'
+import { InsightsFunctionManagerHub, InsightsFunctionManagerService } from '../services/managers/insights-function-manager.service'
+import { InsightsFunctionTemplateManagerService } from '../services/managers/insights-function-template-manager.service'
 import { PersonsManagerService } from '../services/managers/persons-manager.service'
 import { RecipientsManagerService } from '../services/managers/recipients-manager.service'
 import { RecipientPreferencesService } from '../services/messaging/recipient-preferences.service'
 import {
-    CustomFunctionMonitoringService,
-    CustomFunctionMonitoringServiceHub,
-} from '../services/monitoring/custom-function-monitoring.service'
+    InsightsFunctionMonitoringService,
+    InsightsFunctionMonitoringServiceHub,
+} from '../services/monitoring/insights-function-monitoring.service'
 import { ScriptMaskerService } from '../services/monitoring/script-masker.service'
 import { ScriptWatcherService, ScriptWatcherServiceHub } from '../services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from '../services/native-destination-executor.service'
@@ -28,9 +28,9 @@ import { SegmentDestinationExecutorService } from '../services/segment-destinati
  * This includes all fields needed by the base consumer and its services.
  */
 export type CdpConsumerBaseHub = CdpFetchConfig &
-    CustomFunctionManagerHub &
+    InsightsFunctionManagerHub &
     ScriptExecutorServiceHub &
-    CustomFunctionMonitoringServiceHub &
+    InsightsFunctionMonitoringServiceHub &
     ScriptWatcherServiceHub &
     GroupsManagerServiceHub &
     Pick<
@@ -53,7 +53,7 @@ export type CdpConsumerBaseHub = CdpFetchConfig &
         // LegacyPluginExecutorService
         | 'postgres'
         | 'geoipService'
-        // CustomFlowManagerService
+        // InsightsFlowManagerService
         | 'pubSub'
     >
 
@@ -67,19 +67,19 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
     isStopping = false
 
     scriptExecutor: ScriptExecutorService
-    customFlowExecutor: CustomFlowExecutorService
+    insightsFlowExecutor: InsightsFlowExecutorService
     scriptMasker: ScriptMaskerService
     scriptWatcher: ScriptWatcherService
 
     groupsManager: GroupsManagerService
-    customFlowManager: CustomFlowManagerService
-    customFunctionManager: CustomFunctionManagerService
-    customFunctionTemplateManager: CustomFunctionTemplateManagerService
-    customFlowFunctionsService: CustomFlowFunctionsService
+    insightsFlowManager: InsightsFlowManagerService
+    insightsFunctionManager: InsightsFunctionManagerService
+    insightsFunctionTemplateManager: InsightsFunctionTemplateManagerService
+    insightsFlowFunctionsService: InsightsFlowFunctionsService
     personsManager: PersonsManagerService
     recipientsManager: RecipientsManagerService
 
-    customFunctionMonitoringService: CustomFunctionMonitoringService
+    insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     nativeDestinationExecutorService: NativeDestinationExecutorService
     pluginDestinationExecutorService: LegacyPluginExecutorService
     recipientPreferencesService: RecipientPreferencesService
@@ -103,28 +103,28 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
             poolMinSize: hub.REDIS_POOL_MIN_SIZE,
             poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
         })
-        this.customFunctionManager = new CustomFunctionManagerService(hub)
-        this.customFlowManager = new CustomFlowManagerService(hub.postgres, hub.pubSub)
+        this.insightsFunctionManager = new InsightsFunctionManagerService(hub)
+        this.insightsFlowManager = new InsightsFlowManagerService(hub.postgres, hub.pubSub)
         this.scriptWatcher = new ScriptWatcherService(hub, this.redis)
         this.scriptMasker = new ScriptMaskerService(this.redis)
         this.scriptExecutor = new ScriptExecutorService(this.hub)
-        this.customFunctionTemplateManager = new CustomFunctionTemplateManagerService(this.hub.postgres)
-        this.customFlowFunctionsService = new CustomFlowFunctionsService(
+        this.insightsFunctionTemplateManager = new InsightsFunctionTemplateManagerService(this.hub.postgres)
+        this.insightsFlowFunctionsService = new InsightsFlowFunctionsService(
             this.hub.SITE_URL,
-            this.customFunctionTemplateManager,
+            this.insightsFunctionTemplateManager,
             this.scriptExecutor
         )
 
         this.recipientsManager = new RecipientsManagerService(this.hub.postgres)
         this.recipientPreferencesService = new RecipientPreferencesService(this.recipientsManager)
-        this.customFlowExecutor = new CustomFlowExecutorService(
-            this.customFlowFunctionsService,
+        this.insightsFlowExecutor = new InsightsFlowExecutorService(
+            this.insightsFlowFunctionsService,
             this.recipientPreferencesService
         )
 
         this.personsManager = new PersonsManagerService(this.hub.personRepository)
         this.groupsManager = new GroupsManagerService(this.hub)
-        this.customFunctionMonitoringService = new CustomFunctionMonitoringService(this.hub)
+        this.insightsFunctionMonitoringService = new InsightsFunctionMonitoringService(this.hub)
         this.pluginDestinationExecutorService = new LegacyPluginExecutorService(
             this.hub.postgres,
             this.hub.geoipService

@@ -621,8 +621,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                     "rows_synced_in_period": 0,
                     "exceptions_captured_in_period": 0,
                     "ai_event_count_in_period": 1,
-                    "custom_function_calls_in_period": 0,
-                    "custom_function_fetch_calls_in_period": 0,
+                    "insights_function_calls_in_period": 0,
+                    "insights_function_fetch_calls_in_period": 0,
                     "cdp_billable_invocations_in_period": 0,
                     "rows_exported_in_period": 0,
                     "date": "2022-01-09",
@@ -689,8 +689,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                             "event_explorer_api_duration_ms": 0,
                             "rows_synced_in_period": 0,
                             "exceptions_captured_in_period": 0,
-                            "custom_function_calls_in_period": 0,
-                            "custom_function_fetch_calls_in_period": 0,
+                            "insights_function_calls_in_period": 0,
+                            "insights_function_fetch_calls_in_period": 0,
                             "cdp_billable_invocations_in_period": 0,
                             "rows_exported_in_period": 0,
                             "ai_event_count_in_period": 1,
@@ -752,8 +752,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                             "event_explorer_api_duration_ms": 0,
                             "rows_synced_in_period": 0,
                             "exceptions_captured_in_period": 0,
-                            "custom_function_calls_in_period": 0,
-                            "custom_function_fetch_calls_in_period": 0,
+                            "insights_function_calls_in_period": 0,
+                            "insights_function_fetch_calls_in_period": 0,
                             "cdp_billable_invocations_in_period": 0,
                             "rows_exported_in_period": 0,
                             "ai_event_count_in_period": 0,
@@ -838,8 +838,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                     "event_explorer_api_duration_ms": 0,
                     "rows_synced_in_period": 0,
                     "exceptions_captured_in_period": 0,
-                    "custom_function_calls_in_period": 0,
-                    "custom_function_fetch_calls_in_period": 0,
+                    "insights_function_calls_in_period": 0,
+                    "insights_function_fetch_calls_in_period": 0,
                     "cdp_billable_invocations_in_period": 0,
                     "rows_exported_in_period": 0,
                     "ai_event_count_in_period": 0,
@@ -909,8 +909,8 @@ class TestUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDestroyTablesM
                             "active_external_data_schemas_in_period": 0,
                             "active_batch_exports_in_period": 0,
                             "exceptions_captured_in_period": 0,
-                            "custom_function_calls_in_period": 0,
-                            "custom_function_fetch_calls_in_period": 0,
+                            "insights_function_calls_in_period": 0,
+                            "insights_function_fetch_calls_in_period": 0,
                             "cdp_billable_invocations_in_period": 0,
                             "rows_exported_in_period": 0,
                             "ai_event_count_in_period": 0,
@@ -1373,65 +1373,65 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
     def test_active_hog_destinations_and_transformations_per_team(
         self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock
     ) -> None:
-        from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionType
+        from posthog.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionType
 
         self._setup_teams()
 
         # Team 1: 2 active destinations, 1 active transformation
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_1,
-            type=CustomFunctionType.DESTINATION,
+            type=InsightsFunctionType.DESTINATION,
             enabled=True,
             deleted=False,
             name="Dest 1",
         )
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_1,
-            type=CustomFunctionType.DESTINATION,
+            type=InsightsFunctionType.DESTINATION,
             enabled=True,
             deleted=False,
             name="Dest 2",
         )
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_1,
-            type=CustomFunctionType.TRANSFORMATION,
+            type=InsightsFunctionType.TRANSFORMATION,
             enabled=True,
             deleted=False,
             name="Trans 1",
         )
         # Team 2: 1 active destination, 2 active transformations
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_2,
-            type=CustomFunctionType.DESTINATION,
+            type=InsightsFunctionType.DESTINATION,
             enabled=True,
             deleted=False,
             name="Dest 3",
         )
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_2,
-            type=CustomFunctionType.TRANSFORMATION,
+            type=InsightsFunctionType.TRANSFORMATION,
             enabled=True,
             deleted=False,
             name="Trans 2",
         )
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_2,
-            type=CustomFunctionType.TRANSFORMATION,
+            type=InsightsFunctionType.TRANSFORMATION,
             enabled=True,
             deleted=False,
             name="Trans 3",
         )
         # Add some inactive/deleted ones (should not be counted)
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_1,
-            type=CustomFunctionType.DESTINATION,
+            type=InsightsFunctionType.DESTINATION,
             enabled=False,
             deleted=False,
             name="Inactive Dest",
         )
-        CustomFunction.objects.create(
+        InsightsFunction.objects.create(
             team=self.org_1_team_2,
-            type=CustomFunctionType.TRANSFORMATION,
+            type=InsightsFunctionType.TRANSFORMATION,
             enabled=True,
             deleted=True,
             name="Deleted Trans",
@@ -2379,7 +2379,7 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
 
 
 @freeze_time("2022-01-10T00:01:00Z")
-class TestCustomFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
+class TestInsightsFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, ClickhouseTestMixin):
     def setUp(self) -> None:
         Team.objects.all().delete()
         run_clickhouse_statement_in_parallel([TRUNCATE_APP_METRICS2_TABLE_SQL])
@@ -2393,42 +2393,42 @@ class TestCustomFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, Cli
 
     @patch("posthog.tasks.usage_report.get_ph_client")
     @patch("posthog.tasks.usage_report.send_report_to_billing_service")
-    def test_custom_function_usage_metrics(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
+    def test_insights_function_usage_metrics(self, billing_task_mock: MagicMock, posthog_capture_mock: MagicMock) -> None:
         self._setup_teams()
 
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_function",
+            app_source="insights_function",
             metric_name="succeeded",
             count=2,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_function",
+            app_source="insights_function",
             metric_name="failed",
             count=3,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_function",
+            app_source="insights_function",
             metric_name="fetch",
             count=1,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_function",
+            app_source="insights_function",
             metric_name="fetch",
             count=2,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_function",
+            app_source="insights_function",
             metric_name="billable_invocation",
             count=5,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_function",
+            app_source="insights_function",
             metric_name="billable_invocation",
             count=3,
         )
@@ -2442,14 +2442,14 @@ class TestCustomFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, Cli
         )
 
         assert org_1_report["organization_name"] == "Org 1"
-        assert org_1_report["custom_function_calls_in_period"] == 5
-        assert org_1_report["custom_function_fetch_calls_in_period"] == 3
+        assert org_1_report["insights_function_calls_in_period"] == 5
+        assert org_1_report["insights_function_fetch_calls_in_period"] == 3
         assert org_1_report["cdp_billable_invocations_in_period"] == 8
-        assert org_1_report["teams"]["3"]["custom_function_calls_in_period"] == 2
-        assert org_1_report["teams"]["3"]["custom_function_fetch_calls_in_period"] == 1
+        assert org_1_report["teams"]["3"]["insights_function_calls_in_period"] == 2
+        assert org_1_report["teams"]["3"]["insights_function_fetch_calls_in_period"] == 1
         assert org_1_report["teams"]["3"]["cdp_billable_invocations_in_period"] == 5
-        assert org_1_report["teams"]["4"]["custom_function_calls_in_period"] == 3
-        assert org_1_report["teams"]["4"]["custom_function_fetch_calls_in_period"] == 2
+        assert org_1_report["teams"]["4"]["insights_function_calls_in_period"] == 3
+        assert org_1_report["teams"]["4"]["insights_function_fetch_calls_in_period"] == 2
         assert org_1_report["teams"]["4"]["cdp_billable_invocations_in_period"] == 3
 
     @patch("posthog.tasks.usage_report.get_ph_client")
@@ -2460,28 +2460,28 @@ class TestCustomFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, Cli
         # Create workflow metrics for org 1 team 1
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="email",
             count=10,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="push",
             count=5,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="sms",
             count=3,
         )
         create_app_metric2(
             team_id=self.org_1_team_1.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="fetch",
             count=8,
@@ -2490,28 +2490,28 @@ class TestCustomFunctionUsageReports(ClickhouseDestroyTablesMixin, TestCase, Cli
         # Create workflow metrics for org 1 team 2
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="email",
             count=15,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="push",
             count=7,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="sms",
             count=2,
         )
         create_app_metric2(
             team_id=self.org_1_team_2.id,
-            app_source="custom_flow",
+            app_source="insights_flow",
             metric_name="billable_invocation",
             metric_kind="fetch",
             count=12,

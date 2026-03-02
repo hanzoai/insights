@@ -7,13 +7,13 @@ import { CyclotronInvocationQueueParametersFetchType } from '~/schema/cyclotron'
 import { logger } from '~/utils/logger'
 
 import { ScriptExecutorService } from '../../../src/cdp/services/script-executor.service'
-import { CyclotronJobInvocationCustomFunction, CustomFunctionType } from '../../../src/cdp/types'
+import { CyclotronJobInvocationInsightsFunction, InsightsFunctionType } from '../../../src/cdp/types'
 import { Hub } from '../../../src/types'
 import { createHub } from '../../../src/utils/db/hub'
 import { parseJSON } from '../../utils/json-parse'
 import { promisifyCallback } from '../../utils/utils'
-import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
-import { createExampleInvocation, createScriptExecutionGlobals, createCustomFunction } from '../_tests/fixtures'
+import { FN_EXAMPLES, FN_FILTERS_EXAMPLES, FN_INPUTS_EXAMPLES } from '../_tests/examples'
+import { createExampleInvocation, createScriptExecutionGlobals, createInsightsFunction } from '../_tests/fixtures'
 import { EXTEND_OBJECT_KEY, cdpTrackedFetch, shadowFetchContext } from './script-executor.service'
 
 // Mock before importing fetch
@@ -50,23 +50,23 @@ describe('Script Executor', () => {
     })
 
     afterEach(() => {
-        // Ensure any spies (e.g., execScript, Math.random, Date.now) are restored between tests
+        // Ensure any spies (e.g., execFn, Math.random, Date.now) are restored between tests
         jest.restoreAllMocks()
     })
 
     describe('general event processing', () => {
-        let customFunction: CustomFunctionType
+        let insightsFunction: InsightsFunctionType
         beforeEach(() => {
-            customFunction = createCustomFunction({
+            insightsFunction = createInsightsFunction({
                 name: 'Test custom function',
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
         })
 
         it('can execute an invocation', async () => {
-            const invocation = createExampleInvocation(customFunction)
+            const invocation = createExampleInvocation(insightsFunction)
 
             const result = await executor.execute(invocation)
             expect(result).toEqual({
@@ -76,7 +76,7 @@ describe('Script Executor', () => {
                         globals: invocation.state.globals,
                         timings: [
                             {
-                                kind: 'custom_script',
+                                kind: 'fn',
                                 duration_ms: expect.any(Number),
                             },
                         ],
@@ -85,9 +85,9 @@ describe('Script Executor', () => {
                     },
                     id: expect.any(String),
                     teamId: 1,
-                    customFunction: invocation.customFunction,
+                    insightsFunction: invocation.insightsFunction,
                     functionId: invocation.functionId,
-                    queue: 'custom_script',
+                    queue: 'fn',
                     queueMetadata: undefined,
                     queueScheduledAt: undefined,
                     queueSource: undefined,
@@ -101,8 +101,8 @@ describe('Script Executor', () => {
         })
 
         it('can handle null input values', async () => {
-            customFunction.inputs!.debug = null
-            const invocation = createExampleInvocation(customFunction)
+            insightsFunction.inputs!.debug = null
+            const invocation = createExampleInvocation(insightsFunction)
 
             const result = await executor.execute(invocation)
             expect(result.finished).toBe(false)
@@ -111,14 +111,14 @@ describe('Script Executor', () => {
 
         it('can handle selecting entire object', async () => {
             const invocation = createExampleInvocation({
-                ...customFunction,
+                ...insightsFunction,
                 inputs: {
-                    ...customFunction.inputs,
+                    ...insightsFunction.inputs,
                     headers: {
                         value: {
                             [EXTEND_OBJECT_KEY]: '{person.properties}',
                         },
-                        templating: 'custom_script',
+                        templating: 'fn',
                         bytecode: {
                             [EXTEND_OBJECT_KEY]: ['_H', 1, 32, 'properties', 32, 'person', 1, 2],
                         },
@@ -148,15 +148,15 @@ describe('Script Executor', () => {
 
         it('can handle selecting entire object with overrides', async () => {
             const invocation = createExampleInvocation({
-                ...customFunction,
+                ...insightsFunction,
                 inputs: {
-                    ...customFunction.inputs,
+                    ...insightsFunction.inputs,
                     headers: {
                         value: {
                             [EXTEND_OBJECT_KEY]: '{person.properties}',
                             email: 'email-is-hidden',
                         },
-                        templating: 'custom_script',
+                        templating: 'fn',
                         bytecode: {
                             [EXTEND_OBJECT_KEY]: ['_H', 1, 32, 'properties', 32, 'person', 1, 2],
                             email: ['_H', 1, 32, 'email-is-hidden'],
@@ -186,9 +186,9 @@ describe('Script Executor', () => {
         })
 
         it('collects and redacts secret values from the logs', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.input_printer,
+                ...FN_INPUTS_EXAMPLES.secret_inputs,
             })
             const invocation = createExampleInvocation(fn)
             const result = await executor.execute(invocation)
@@ -206,12 +206,12 @@ describe('Script Executor', () => {
         })
 
         it('queues up an async function call', async () => {
-            const invocation = createExampleInvocation(customFunction)
+            const invocation = createExampleInvocation(insightsFunction)
             invocation.state.globals.event.timestamp = '2024-06-07T12:00:00.000Z'
             const result = await executor.execute(invocation)
 
             expect(result.invocation).toMatchObject({
-                queue: 'custom_script',
+                queue: 'fn',
                 queueParameters: {
                     type: 'fetch',
                     url: 'https://example.com/insights-webhook',
@@ -244,7 +244,7 @@ describe('Script Executor', () => {
         })
 
         it('merges previousResult into execute() result', async () => {
-            const invocation = createExampleInvocation(customFunction)
+            const invocation = createExampleInvocation(insightsFunction)
 
             const previousResult = {
                 finished: false,
@@ -282,39 +282,39 @@ describe('Script Executor', () => {
 
     describe('filtering', () => {
         it('builds the correct globals object when filtering', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const inputGlobals = createScriptExecutionGlobals({ groups: {} })
             expect(inputGlobals.source).toBeUndefined()
-            const results = await executor.buildCustomFunctionInvocations([fn], inputGlobals)
+            const results = await executor.buildInsightsFunctionInvocations([fn], inputGlobals)
 
             expect(results.invocations).toHaveLength(1)
 
             expect(results.invocations[0].state.globals.source).toEqual({
                 name: 'Custom Function',
-                url: `http://localhost:8000/projects/1/pipeline/destinations/custom-function-${fn.id}/configuration/`,
+                url: `http://localhost:8000/projects/1/pipeline/destinations/insights-function-${fn.id}/configuration/`,
             })
         })
 
         it('can filters incoming messages correctly', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
             })
 
-            const resultsShouldntMatch = await executor.buildCustomFunctionInvocations(
+            const resultsShouldntMatch = await executor.buildInsightsFunctionInvocations(
                 [fn],
                 createScriptExecutionGlobals({ groups: {} })
             )
             expect(resultsShouldntMatch.invocations).toHaveLength(0)
             expect(resultsShouldntMatch.metrics).toHaveLength(1)
 
-            const resultsShouldMatch = await executor.buildCustomFunctionInvocations(
+            const resultsShouldMatch = await executor.buildInsightsFunctionInvocations(
                 [fn],
                 createScriptExecutionGlobals({
                     groups: {},
@@ -331,10 +331,10 @@ describe('Script Executor', () => {
         })
 
         it('can use elements_chain_texts', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.elements_text_filter,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.elements_text_filter,
             })
 
             const elementsChain = (buttonText: string) =>
@@ -355,7 +355,7 @@ describe('Script Executor', () => {
                 },
             })
 
-            const resultsShouldntMatch = await executor.buildCustomFunctionInvocations([fn], hogGlobals1)
+            const resultsShouldntMatch = await executor.buildInsightsFunctionInvocations([fn], hogGlobals1)
             expect(resultsShouldntMatch.invocations).toHaveLength(0)
             expect(resultsShouldntMatch.metrics).toHaveLength(1)
 
@@ -374,16 +374,16 @@ describe('Script Executor', () => {
                 },
             })
 
-            const resultsShouldMatch = await executor.buildCustomFunctionInvocations([fn], hogGlobals2)
+            const resultsShouldMatch = await executor.buildInsightsFunctionInvocations([fn], hogGlobals2)
             expect(resultsShouldMatch.invocations).toHaveLength(1)
             expect(resultsShouldMatch.metrics).toHaveLength(0)
         })
 
         it('can use elements_chain_href', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.elements_href_filter,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.elements_href_filter,
             })
 
             const elementsChain = (link: string) =>
@@ -404,7 +404,7 @@ describe('Script Executor', () => {
                 },
             })
 
-            const resultsShouldntMatch = await executor.buildCustomFunctionInvocations([fn], hogGlobals1)
+            const resultsShouldntMatch = await executor.buildInsightsFunctionInvocations([fn], hogGlobals1)
             expect(resultsShouldntMatch.invocations).toHaveLength(0)
             expect(resultsShouldntMatch.metrics).toHaveLength(1)
 
@@ -423,16 +423,16 @@ describe('Script Executor', () => {
                 },
             })
 
-            const resultsShouldMatch = await executor.buildCustomFunctionInvocations([fn], hogGlobals2)
+            const resultsShouldMatch = await executor.buildInsightsFunctionInvocations([fn], hogGlobals2)
             expect(resultsShouldMatch.invocations).toHaveLength(1)
             expect(resultsShouldMatch.metrics).toHaveLength(0)
         })
 
         it('can use elements_chain_tags and _ids', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.elements_tag_and_id_filter,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.elements_tag_and_id_filter,
             })
 
             const elementsChain = (id: string) =>
@@ -453,7 +453,7 @@ describe('Script Executor', () => {
                 },
             })
 
-            const resultsShouldntMatch = await executor.buildCustomFunctionInvocations([fn], hogGlobals1)
+            const resultsShouldntMatch = await executor.buildInsightsFunctionInvocations([fn], hogGlobals1)
             expect(resultsShouldntMatch.invocations).toHaveLength(0)
             expect(resultsShouldntMatch.metrics).toHaveLength(1)
 
@@ -472,23 +472,23 @@ describe('Script Executor', () => {
                 },
             })
 
-            const resultsShouldMatch = await executor.buildCustomFunctionInvocations([fn], hogGlobals2)
+            const resultsShouldMatch = await executor.buildInsightsFunctionInvocations([fn], hogGlobals2)
             expect(resultsShouldMatch.invocations).toHaveLength(1)
             expect(resultsShouldMatch.metrics).toHaveLength(0)
         })
     })
 
     describe('mappings', () => {
-        let fn: CustomFunctionType
+        let fn: InsightsFunctionType
         beforeEach(() => {
-            fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
                 mappings: [
                     {
                         // Filters for pageview or autocapture
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        ...FN_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         inputs: {
                             url: {
                                 order: 0,
@@ -513,12 +513,12 @@ describe('Script Executor', () => {
                     },
                     {
                         // No filters so should match all events
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                        ...FN_FILTERS_EXAMPLES.no_filters,
                     },
 
                     {
                         // Broken filters so shouldn't match
-                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.broken_filters,
+                        ...FN_FILTERS_EXAMPLES.broken_filters,
                     },
                 ],
             })
@@ -534,7 +534,7 @@ describe('Script Executor', () => {
                 } as any,
             })
 
-            const results1 = await executor.buildCustomFunctionInvocations([fn], pageviewGlobals)
+            const results1 = await executor.buildInsightsFunctionInvocations([fn], pageviewGlobals)
             expect(results1.invocations).toHaveLength(2)
             expect(results1.metrics).toHaveLength(1)
             expect(results1.logs).toHaveLength(1)
@@ -542,7 +542,7 @@ describe('Script Executor', () => {
                 `"Error filtering event uuid: Invalid InsightsQL bytecode, stack is empty, can not pop"`
             )
 
-            const results2 = await executor.buildCustomFunctionInvocations(
+            const results2 = await executor.buildInsightsFunctionInvocations(
                 [fn],
                 createScriptExecutionGlobals({
                     event: {
@@ -568,7 +568,7 @@ describe('Script Executor', () => {
                 } as any,
             })
 
-            const result = await executor.buildCustomFunctionInvocations([fn], pageviewGlobals)
+            const result = await executor.buildInsightsFunctionInvocations([fn], pageviewGlobals)
             // First mapping has input overrides that should be applied
             expect(result.invocations[0].state.globals.inputs.headers).toEqual({
                 version: 'v=',
@@ -590,10 +590,10 @@ describe('Script Executor', () => {
         it('limits the execution time and exits appropriately', async () => {
             jest.spyOn(Date, 'now').mockRestore()
 
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.malicious_function,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.malicious_function,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const result = await executor.execute(createExampleInvocation(fn))
@@ -634,14 +634,14 @@ describe('Script Executor', () => {
 
     describe('result handling', () => {
         it('does not set execResult when VM returns a falsy result', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const scriptExecModule = require('../utils/script-exec')
-            jest.spyOn(scriptExecModule, 'execScript').mockResolvedValue({
+            jest.spyOn(scriptExecModule, 'execFn').mockResolvedValue({
                 execResult: {
                     finished: true,
                     result: null, // falsy value
@@ -662,9 +662,9 @@ describe('Script Executor', () => {
 
         it('sets execResult when VM returns an object synchronously', async () => {
             // This tests a simple return statement without any async functions
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_return_object,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.simple_return_object,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const res = await executor.execute(createExampleInvocation(fn))
@@ -679,10 +679,10 @@ describe('Script Executor', () => {
 
     describe('insightsCaptue', () => {
         it('captures events', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.insights_capture,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.insights_capture,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const result = await executor.execute(createExampleInvocation(fn))
@@ -692,7 +692,7 @@ describe('Script Executor', () => {
                     "distinct_id": "distinct_id",
                     "event": "test (copy)",
                     "properties": {
-                      "$custom_function_execution_count": 1,
+                      "$insights_function_execution_count": 1,
                     },
                     "team_id": 1,
                     "timestamp": "2025-01-01T00:00:00.000Z",
@@ -702,17 +702,17 @@ describe('Script Executor', () => {
         })
 
         it('allows events that have already used their insightsCapture a maximum of 10 times', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.insights_capture,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.insights_capture,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const globals = createScriptExecutionGlobals({
                 groups: {},
                 event: {
                     properties: {
-                        $custom_function_execution_count: 9,
+                        $insights_function_execution_count: 9,
                     },
                 },
             } as any)
@@ -723,7 +723,7 @@ describe('Script Executor', () => {
                     "distinct_id": "distinct_id",
                     "event": "test (copy)",
                     "properties": {
-                      "$custom_function_execution_count": 10,
+                      "$insights_function_execution_count": 10,
                     },
                     "team_id": 1,
                     "timestamp": "2025-01-01T00:00:00.000Z",
@@ -733,17 +733,17 @@ describe('Script Executor', () => {
         })
 
         it('ignores events that have already used their insightsCapture 10 times', async () => {
-            const fn = createCustomFunction({
-                ...CUSTOM_SCRIPT_EXAMPLES.insights_capture,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+            const fn = createInsightsFunction({
+                ...FN_EXAMPLES.insights_capture,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
 
             const globals = createScriptExecutionGlobals({
                 groups: {},
                 event: {
                     properties: {
-                        $custom_function_execution_count: 10,
+                        $insights_function_execution_count: 10,
                     },
                 },
             } as any)
@@ -761,7 +761,7 @@ describe('Script Executor', () => {
     describe('insightsGetTicket and insightsUpdateTicket', () => {
         const mockExecScriptForAsyncFunction = (asyncFunctionName: string, asyncFunctionArgs: any[]) => {
             const scriptExecModule = require('../utils/script-exec')
-            jest.spyOn(scriptExecModule, 'execScript').mockResolvedValue({
+            jest.spyOn(scriptExecModule, 'execFn').mockResolvedValue({
                 execResult: {
                     finished: false,
                     asyncFunctionName,
@@ -777,10 +777,10 @@ describe('Script Executor', () => {
         // Provide pre-built inputs so buildInputsWithGlobals is skipped
         const createTicketInvocation = () =>
             createExampleInvocation(
-                createCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                createInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.no_filters,
                 }),
                 { inputs: {} }
             )
@@ -864,10 +864,10 @@ describe('Script Executor', () => {
     describe('fetch does not allow internal flag', () => {
         it('regular fetch call does not pass through internal flag', async () => {
             const invocation = createExampleInvocation(
-                createCustomFunction({
-                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                createInsightsFunction({
+                    ...FN_EXAMPLES.simple_fetch,
+                    ...FN_INPUTS_EXAMPLES.simple_fetch,
+                    ...FN_FILTERS_EXAMPLES.no_filters,
                 })
             )
 
@@ -886,7 +886,7 @@ describe('Script Executor', () => {
         let baseUrl: string
         const mockRequest = jest.fn()
         let timeoutHandle: NodeJS.Timeout | undefined
-        let customFunction: CustomFunctionType
+        let insightsFunction: InsightsFunctionType
 
         beforeAll(async () => {
             server = createServer((req, res) => {
@@ -902,11 +902,11 @@ describe('Script Executor', () => {
             const address = server.address() as AddressInfo
             baseUrl = `http://localhost:${address.port}`
 
-            customFunction = createCustomFunction({
+            insightsFunction = createInsightsFunction({
                 name: 'Test custom function',
-                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
-                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                ...FN_EXAMPLES.simple_fetch,
+                ...FN_INPUTS_EXAMPLES.simple_fetch,
+                ...FN_FILTERS_EXAMPLES.no_filters,
             })
         })
 
@@ -933,15 +933,15 @@ describe('Script Executor', () => {
 
         const createFetchInvocation = async (
             params: Omit<CyclotronInvocationQueueParametersFetchType, 'type'>
-        ): Promise<CyclotronJobInvocationCustomFunction> => {
-            const invocation = createExampleInvocation(customFunction)
+        ): Promise<CyclotronJobInvocationInsightsFunction> => {
+            const invocation = createExampleInvocation(insightsFunction)
 
             // Execute just to have an expecting stack
             const res = await executor.execute(invocation)
             expect(res.invocation.queueParameters?.type).toBe('fetch')
 
             // Simulate what the callback does
-            invocation.queue = 'custom_script'
+            invocation.queue = 'fn'
             invocation.queueParameters = {
                 type: 'fetch',
                 ...params,
@@ -969,7 +969,7 @@ describe('Script Executor', () => {
             // General check for clearance of the invocation
             expect(result.finished).toBe(false)
             expect(result.error).toBeUndefined()
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(result.invocation.queueParameters).toBeUndefined()
             expect(result.invocation.queueMetadata).toBeUndefined()
             expect(result.invocation.queuePriority).toEqual(0)
@@ -1047,7 +1047,7 @@ describe('Script Executor', () => {
                   "status": 500,
                 }
             `)
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
         })
 
         it('sets result.error after retries are exhausted', async () => {
@@ -1086,7 +1086,7 @@ describe('Script Executor', () => {
             const result = await executor.executeFetch(invocation)
 
             // Should be scheduled for retry
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(result.invocation.queueScheduledAt).toMatchInlineSnapshot(`"2025-01-01T00:00:01.500Z"`)
             expect(result.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                 [
@@ -1106,7 +1106,7 @@ describe('Script Executor', () => {
             const result = await executor.executeFetch(invocation)
 
             // Should be scheduled for retry
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(result.invocation.queueScheduledAt).toBeUndefined()
             expect(result.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                 [
@@ -1134,7 +1134,7 @@ describe('Script Executor', () => {
 
             const result = await executor.executeFetch(invocation)
 
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(result.invocation.queueScheduledAt).toMatchInlineSnapshot(`"2025-01-01T00:00:01.500Z"`)
             expect(result.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                 [
@@ -1157,7 +1157,7 @@ describe('Script Executor', () => {
 
             const result = await executor.executeFetch(invocation)
 
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(result.invocation.queueScheduledAt).toBeUndefined() // Should not retry
             expect(result.logs.map((log) => log.message)).toMatchInlineSnapshot(`
                 [
@@ -1187,7 +1187,7 @@ describe('Script Executor', () => {
             const result = await executor.executeFetch(invocation)
             const response = result.invocation.state.vmState!.stack.slice(-1)[0]
 
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(response).toMatchInlineSnapshot(`
                 {
                   "body": "Hello, world!",
@@ -1218,7 +1218,7 @@ describe('Script Executor', () => {
             const result = await executor.executeFetch(invocation)
             const response = result.invocation.state.vmState!.stack.slice(-1)[0]
 
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(response).toMatchInlineSnapshot(`
                 {
                   "body": "Hello, world!",
@@ -1242,7 +1242,7 @@ describe('Script Executor', () => {
             const result = await executor.executeFetch(invocation)
             const response = result.invocation.state.vmState!.stack.slice(-1)[0]
 
-            expect(result.invocation.queue).toBe('custom_script')
+            expect(result.invocation.queue).toBe('fn')
             expect(response).toMatchInlineSnapshot(`
                 {
                   "body": "Hello, world!",
@@ -1310,7 +1310,7 @@ describe('Script Executor', () => {
 
             const invocation = createExampleInvocation()
             invocation.state.globals.inputs = mockIntegrationInputs
-            invocation.customFunction.inputs = {
+            invocation.insightsFunction.inputs = {
                 oauth: { value: 123 },
             }
             invocation.state.vmState = { stack: [] } as any

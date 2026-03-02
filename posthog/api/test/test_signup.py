@@ -77,7 +77,6 @@ class TestSignupAPI(APIBaseTest):
                 "email": "mascot@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": False,
-                "mascot_config": None,
                 "role_at_organization": "product",
             },
         )
@@ -173,7 +172,6 @@ class TestSignupAPI(APIBaseTest):
                 "email": "mascot@posthog.com",
                 "redirect_url": f"/verify_email/{user.uuid}",
                 "is_email_verified": False,
-                "mascot_config": None,
                 "role_at_organization": "product",
             },
         )
@@ -224,7 +222,6 @@ class TestSignupAPI(APIBaseTest):
                 "email": "mascot@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": False,
-                "mascot_config": None,
                 "role_at_organization": "product",
             },
         )
@@ -421,7 +418,6 @@ class TestSignupAPI(APIBaseTest):
                 "email": "mascot2@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": False,
-                "mascot_config": None,
                 "role_at_organization": "product",
             },
         )
@@ -602,7 +598,6 @@ class TestSignupAPI(APIBaseTest):
                 "email": "mascot75@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": False,
-                "mascot_config": None,
                 "role_at_organization": "product",
             },
         )
@@ -1574,7 +1569,6 @@ class TestInviteSignupAPI(APIBaseTest):
                 "email": "test+99@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": False,
-                "mascot_config": None,
                 "role_at_organization": "Engineering",
             },
         )
@@ -1879,7 +1873,6 @@ class TestInviteSignupAPI(APIBaseTest):
                 "email": "test+159@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": None,
-                "mascot_config": None,
                 "role_at_organization": "product",
             },
         )
@@ -1958,7 +1951,6 @@ class TestInviteSignupAPI(APIBaseTest):
                 "email": "test+189@posthog.com",
                 "redirect_url": "/",
                 "is_email_verified": None,
-                "mascot_config": None,
                 "role_at_organization": None,
             },  # note the unchanged attributes
         )

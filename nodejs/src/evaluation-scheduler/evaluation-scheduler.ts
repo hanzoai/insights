@@ -9,7 +9,7 @@ import * as crypto from 'crypto'
 import { Message } from 'node-rdkafka'
 import { Counter } from 'prom-client'
 
-import { execScript } from '../cdp/utils/script-exec'
+import { execFn } from '../cdp/utils/script-exec'
 import { KAFKA_EVENTS_JSON, prefix as KAFKA_PREFIX } from '../config/kafka-topics'
 import { KafkaConsumer } from '../kafka/consumer'
 import { EvaluationManagerService } from '../llm-analytics/services/evaluation-manager.service'
@@ -144,7 +144,7 @@ export async function checkConditionMatch(event: RawKafkaEvent, condition: Evalu
     }
 
     try {
-        const execResult = await execScript(condition.bytecode, { globals: filterGlobals })
+        const execResult = await execFn(condition.bytecode, { globals: filterGlobals })
 
         if (execResult.error || execResult.execResult?.error) {
             logger.error('Error executing bytecode', {
