@@ -15,6 +15,16 @@ from insights.temporal.ai.session_summary.state import (
     get_data_class_from_redis,
     get_redis_state_client,
 )
+from insights.temporal.ai.session_summary.ee_stubs import (
+    SessionSummaryRunMeta,
+    SessionSummarySerializer,
+    SingleSessionSummary,
+    SingleSessionSummaryLlmInputs,
+    calculate_time_since_start,
+    get_column_index,
+    prepare_datetime,
+    unpack_full_event_id,
+)
 from insights.temporal.ai.session_summary.types.video import ConsolidatedVideoAnalysis, VideoSummarySingleSessionInputs
 from insights.temporal.ai.session_summary.utils import parse_str_timestamp_to_ms
 
