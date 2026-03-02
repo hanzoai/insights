@@ -27,12 +27,12 @@ jobs:
     posthog_llm_analytics_build:
         name: Build and push container image
         if: |
-            github.repository == 'Insights/posthog' && (
+            github.repository == 'hanzoai/insights' && (
                 github.event_name == 'push' ||
                 github.event_name == 'workflow_dispatch' ||
                 contains(github.event.pull_request.labels.*.name, 'build-llm-analytics-image')
             )
-        runs-on: depot-ubuntu-latest
+        runs-on: ubuntu-latest
         permissions:
             id-token: write
             contents: read

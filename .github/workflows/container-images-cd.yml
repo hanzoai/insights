@@ -21,8 +21,8 @@ on:
 jobs:
     posthog_build:
         name: Build and push Insights
-        if: github.repository == 'Insights/posthog'
-        runs-on: depot-ubuntu-latest
+        if: github.repository == 'hanzoai/insights'
+        runs-on: ubuntu-latest
         permissions:
             id-token: write # allow issuing OIDC tokens for this workflow run
             contents: read # allow at least reading the repo contents, add other permissions if necessary
@@ -73,7 +73,7 @@ jobs:
               with:
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ghcr.io/posthog/posthog:latest,ghcr.io/posthog/posthog:${{ github.sha }},posthog/posthog:${{ github.sha }},posthog/posthog:latest,${{ steps.aws-ecr.outputs.registry }}/posthog-cloud:master,${{ steps.aws-ecr.outputs.registry }}/posthog-cloud:${{ github.sha }}
+                  tags: ghcr.io/hanzoai/insights:latest,ghcr.io/hanzoai/insights:${{ github.sha }},hanzoai/insights:${{ github.sha }},hanzoai/insights:latest,${{ steps.aws-ecr.outputs.registry }}/posthog-cloud:master,${{ steps.aws-ecr.outputs.registry }}/posthog-cloud:${{ github.sha }}
                   platforms: linux/arm64,linux/amd64
                   build-args: |
                       COMMIT_HASH=${{ github.sha }}
@@ -83,11 +83,7 @@ jobs:
 
             - name: report failure
               if: failure()
-              uses: Insights/posthog-github-action@eea1405eeb2d1d2259f0ee0b44d7b152869e6840 # v1.1.1
-              with:
-                  posthog-token: ${{secrets.POSTHOG_API_TOKEN}}
-                  event: 'posthog-image-build'
-                  properties: '{"status": "failure", "commit_hash": "${{ github.sha }}"}'
+              run: echo "Telemetry capture disabled"
 
             - name: get deployer token
               id: deployer
