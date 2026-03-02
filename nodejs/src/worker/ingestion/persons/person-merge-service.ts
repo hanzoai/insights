@@ -218,7 +218,7 @@ export class PersonMergeService {
         //
         // Historically, we always INSERT-ed new `insights_persondistinctid` rows with `version=0`.
         // Overrides are only created when the version is > 0, see:
-        //   https://github.com/Insights/insights/blob/92e17ce307a577c4233d4ab252eebc6c2207a5ee/insights/models/person/sql.py#L269-L287
+        //   https://github.com/PostHog/insights/blob/92e17ce307a577c4233d4ab252eebc6c2207a5ee/insights/models/person/sql.py#L269-L287
         //
         // With the addition of optional person profile processing, we are no longer creating
         // `insights_persondistinctid` and `insights_person` rows when $process_person_profile=false.

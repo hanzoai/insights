@@ -12,7 +12,7 @@ export const brazePlugin: LegacyDestinationPlugin = {
         id: 'plugin-insights-braze-app',
         name: 'Braze',
         description: 'Import analytics from Braze and export Insights events to Braze.',
-        icon_url: 'https://raw.githubusercontent.com/Insights/insights-braze-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/PostHog/insights-braze-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',

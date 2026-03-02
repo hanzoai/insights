@@ -135,7 +135,7 @@ fetch('https://api.avo.app/inspector/posthog/v1/track', {
 
 
 class TemplateAvoMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Insights/posthog-avo-plugin"
+    plugin_url = "https://github.com/PostHog/posthog-avo-plugin"
 
     @classmethod
     def migrate(cls, obj):

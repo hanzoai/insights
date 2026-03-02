@@ -517,7 +517,7 @@ def get_teams_with_billable_event_count_in_period(
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
         # Uses the same expression as the one used to de-duplicate events on the merge tree:
-        # https://github.com/Insights/posthog/blob/master/posthog/models/event/sql.py#L92
+        # https://github.com/PostHog/posthog/blob/master/posthog/models/event/sql.py#L92
         distinct_expression = "distinct toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid)"
     else:
         distinct_expression = "1"
@@ -555,7 +555,7 @@ def get_teams_with_billable_enhanced_persons_event_count_in_period(
     # So, we count uniques in small time periods only, controlled by the count_distinct parameter.
     if count_distinct:
         # Uses the same expression as the one used to de-duplicate events on the merge tree:
-        # https://github.com/Insights/posthog/blob/master/posthog/models/event/sql.py#L92
+        # https://github.com/PostHog/posthog/blob/master/posthog/models/event/sql.py#L92
         distinct_expression = "distinct toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid)"
     else:
         distinct_expression = "1"

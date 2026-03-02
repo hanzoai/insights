@@ -76,7 +76,7 @@ if (res.status >= 200 and res.status < 300) {
 
 
 class TemplateGooglePubSubMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Insights/pubsub-plugin"
+    plugin_url = "https://github.com/PostHog/pubsub-plugin"
 
     @classmethod
     def migrate(cls, obj):

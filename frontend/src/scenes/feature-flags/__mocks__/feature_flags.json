@@ -194,7 +194,7 @@
         },
         {
             "id": 1498,
-            "name": "Feature https://github.com/Insights/posthog/issues/3636.",
+            "name": "Feature https://github.com/PostHog/posthog/issues/3636.",
             "key": "dashboard-permissions",
             "filters": {
                 "groups": [

@@ -8,7 +8,7 @@ This document outlines how to do large-scale data migrations on Insights Cloud w
 
 ## Background
 
-Start of 2022 we [wanted to change events table schema to better support our querying patterns](https://github.com/Insights/posthog/issues/5684).
+Start of 2022 we [wanted to change events table schema to better support our querying patterns](https://github.com/PostHog/posthog/issues/5684).
 
 Doing this migration on cloud took several months and several false starts.
 
@@ -201,7 +201,7 @@ In a tmux session on each of the nodes. Metabase isn't the ideal tool for this d
 
 ### Why copy this way?
 
-Some [benchmarking](https://github.com/Insights/posthog/issues/5684#issuecomment-1016413621) was done to find the most efficient copying data.
+Some [benchmarking](https://github.com/PostHog/posthog/issues/5684#issuecomment-1016413621) was done to find the most efficient copying data.
 
 Copying in medium-sized chunks, not touching the network and avoiding re-sorting won out at roughly 1M rows per second. Including materialized columns or immediately replicating also would have slowed the overall time down.
 
@@ -232,6 +232,6 @@ That said, learnings from here will help future async migrations.
 
 ### Relevant reading
 
-- https://github.com/Insights/posthog/issues/5684
+- https://github.com/PostHog/posthog/issues/5684
 - https://clickhouse.com/docs/en/operations/utilities/clickhouse-copier/
 - https://kb.altinity.com/altinity-kb-setup-and-maintenance/altinity-kb-data-migration/
