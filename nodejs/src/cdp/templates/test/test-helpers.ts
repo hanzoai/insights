@@ -189,7 +189,7 @@ export class TemplateTester {
 
     /*
     we need transformResult to be able to test the geoip template
-    the same way we did it here https://github.com/Insights/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
+    the same way we did it here https://github.com/PostHog/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
     */
     async beforeEach() {
         Settings.defaultZone = 'UTC'

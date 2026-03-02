@@ -114,7 +114,7 @@ if (res.status > 300) {
 
 
 class TemplateSendGridMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Insights/sendgrid-plugin"
+    plugin_url = "https://github.com/PostHog/sendgrid-plugin"
 
     @classmethod
     def migrate(cls, obj):

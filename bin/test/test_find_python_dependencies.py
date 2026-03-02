@@ -65,7 +65,7 @@ class TestFindPythonDependencies(unittest.TestCase):
             # Direct dependencies - should trigger rebuild
             ("entrypoint_init", "posthog/temporal/subscriptions/__init__.py", True),
             ("entrypoint_workflow", "posthog/temporal/subscriptions/subscription_scheduling_workflow.py", True),
-            # Transitive dependencies (the bug that caused issue https://github.com/Insights/posthog/pull/42307) - should trigger rebuild
+            # Transitive dependencies (the bug that caused issue https://github.com/PostHog/posthog/pull/42307) - should trigger rebuild
             ("transitive_utils", "posthog/utils.py", True),
             ("transitive_query_runner", "posthog/insightsql_queries/query_runner.py", True),
             # Export-related files - should trigger rebuild

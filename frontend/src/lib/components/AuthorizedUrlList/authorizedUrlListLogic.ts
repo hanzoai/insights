@@ -157,7 +157,7 @@ export function appEditorUrl(
     }
 ): string {
     const params = buildToolbarParams(options) as Record<string, unknown>
-    // See https://github.com/Insights/posthog-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
+    // See https://github.com/PostHog/posthog-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
     // are passed. `appUrl` is an extra `redirect_to_site` param.
     params['appUrl'] = appUrl
     params['generateOnly'] = options?.generateOnly

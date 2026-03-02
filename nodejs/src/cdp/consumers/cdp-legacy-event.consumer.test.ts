@@ -52,7 +52,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 'Customer.io',
                 'custom',
                 false,
-                'https://github.com/Insights/customerio-plugin',
+                'https://github.com/PostHog/customerio-plugin',
                 JSON.stringify({}),
                 false,
                 false,
@@ -180,7 +180,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/Insights/customerio-plugin',
+                    url: 'https://github.com/PostHog/customerio-plugin',
                 },
             }
 
@@ -212,7 +212,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/Insights/customerio-plugin',
+                    url: 'https://github.com/PostHog/customerio-plugin',
                 },
             }
 
@@ -252,7 +252,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/Insights/customerio-plugin',
+                    url: 'https://github.com/PostHog/customerio-plugin',
                 },
             }
 

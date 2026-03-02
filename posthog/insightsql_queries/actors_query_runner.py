@@ -438,7 +438,7 @@ class ActorsQueryRunner(AnalyticsQueryRunner[ActorsQueryResponse]):
                     alias=source_alias,
                 )
                 # If we're calculating, which involves hydrating for the actors modal, we include event_distinct_ids
-                # See https://github.com/Insights/posthog/pull/27131
+                # See https://github.com/PostHog/posthog/pull/27131
                 if (
                     self.calculating
                     and isinstance(self.query.source, InsightActorsQuery)

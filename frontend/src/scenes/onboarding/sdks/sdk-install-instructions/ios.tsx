@@ -18,7 +18,7 @@ function IOSInstallSPMSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Swift}>
             {`dependencies: [
-  .package(url: "https://github.com/Insights/posthog-ios.git", from: "3.0.0")
+  .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
 ]`}
         </CodeSnippet>
     )

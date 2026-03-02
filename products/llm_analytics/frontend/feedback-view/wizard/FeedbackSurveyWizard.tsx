@@ -302,7 +302,7 @@ function ImplementStep(): JSX.Element {
                     </LemonButton>
                     <LemonButton
                         type="secondary"
-                        to="https://github.com/Insights/posthog/blob/e332d656667b8906410e93591a0f16633079efbd/frontend/src/scenes/surveys/components/question-visualizations/OpenQuestionSummaryV2.tsx#L112"
+                        to="https://github.com/PostHog/posthog/blob/e332d656667b8906410e93591a0f16633079efbd/frontend/src/scenes/surveys/components/question-visualizations/OpenQuestionSummaryV2.tsx#L112"
                         targetBlank
                         sideIcon={<IconArrowRight />}
                     >

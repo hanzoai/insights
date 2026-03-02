@@ -203,7 +203,7 @@ if (res.status >= 400) {
 
 
 class TemplatSalesforceMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Insights/posthog-plugin-replicator"
+    plugin_url = "https://github.com/PostHog/posthog-plugin-replicator"
 
     @classmethod
     def migrate(cls, obj):

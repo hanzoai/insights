@@ -151,7 +151,7 @@ class HobbyTester:
 
         return [
             'echo "$LOG_PREFIX Downloading hobby installer from GitHub releases..."',
-            "curl -L https://github.com/Insights/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer",
+            "curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer",
             "chmod +x hobby-installer",
         ]
 
@@ -174,7 +174,7 @@ runcmd:
             'echo "$LOG_PREFIX Setting up needrestart config"',
             "sed -i \"s/#\\$nrconf{restart} = 'i';/\\$nrconf{restart} = 'a';/g\" /etc/needrestart/needrestart.conf",
             'echo "$LOG_PREFIX Cloning Insights repository"',
-            "git clone https://github.com/Insights/posthog.git",
+            "git clone https://github.com/PostHog/posthog.git",
             "cd posthog",
             f'echo "$LOG_PREFIX Fetching commit: {safe_sha}"',
             f"git fetch origin {safe_sha}",
@@ -1095,7 +1095,7 @@ def update_smoke_test_comment(
         "Authorization": f"token {ctx.gh_token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    repo = "Insights/posthog"
+    repo = "PostHog/posthog"
 
     # Find existing comment and parse failure count
     existing_comment = None

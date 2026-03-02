@@ -24,7 +24,7 @@ export interface LemonCheckboxProps {
     fullWidth?: boolean
     size?: 'xsmall' | 'small' | 'medium'
     bordered?: boolean
-    /** @deprecated See https://github.com/Insights/posthog/pull/9357#pullrequestreview-933783868. */
+    /** @deprecated See https://github.com/PostHog/posthog/pull/9357#pullrequestreview-933783868. */
     color?: string
     'data-attr'?: string
     /** Whether to stop propagation of events from the input */

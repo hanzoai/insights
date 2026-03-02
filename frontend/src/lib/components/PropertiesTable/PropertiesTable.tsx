@@ -196,7 +196,7 @@ interface PropertiesTableType extends BasePropertyType {
     embedded?: boolean
     onDelete?: (key: string) => void
     className?: string
-    /* only event types are detected and so describe-able. see https://github.com/Insights/posthog/issues/9245 */
+    /* only event types are detected and so describe-able. see https://github.com/PostHog/posthog/issues/9245 */
     useDetectedPropertyType?: boolean
     tableProps?: Partial<LemonTableProps<Record<string, any>>>
     highlightedKeys?: string[]

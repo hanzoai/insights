@@ -261,7 +261,7 @@ class LiveDebuggerBreakpointViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
             "results": [
                 {
                     "id": "uuid",
-                    "repository": "Insights/posthog",
+                    "repository": "PostHog/posthog",
                     "filename": "capture_event.py",
                     "line_number": 123,
                     "enabled": true,

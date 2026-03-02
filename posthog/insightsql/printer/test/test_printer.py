@@ -3702,7 +3702,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                             ),
                         ]
                     ),
-                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/Insights/posthog/pull/44346 but test for equivalence here
+                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/PostHog/posthog/pull/44346 but test for equivalence here
             ],
             select_from=ast.JoinExpr(table=ast.Field(chain=["events"])),
             where=ast.CompareOperation(

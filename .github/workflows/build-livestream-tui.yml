@@ -3,9 +3,9 @@
 # This workflow builds the posthog-live TUI binaries and publishes them as GitHub releases.
 #
 # Download the latest version:
-#   curl -L https://github.com/Insights/posthog/releases/download/posthog-live-latest/posthog-live-linux-amd64 -o posthog-live && chmod +x posthog-live
+#   curl -L https://github.com/PostHog/posthog/releases/download/posthog-live-latest/posthog-live-linux-amd64 -o posthog-live && chmod +x posthog-live
 #
-# Or browse all versions at: https://github.com/Insights/posthog/releases?q=posthog-live&expanded=true
+# Or browse all versions at: https://github.com/PostHog/posthog/releases?q=posthog-live&expanded=true
 
 name: Build Livestream TUI
 
@@ -63,8 +63,8 @@ jobs:
                       --title "Insights Live TUI (Latest)" \
                       --notes "Latest posthog-live build - same as $VERSION
 
-                  Download (Linux amd64): \`curl -L https://github.com/Insights/posthog/releases/download/posthog-live-latest/posthog-live-linux-amd64 -o posthog-live && chmod +x posthog-live\`
-                  Download (Linux arm64): \`curl -L https://github.com/Insights/posthog/releases/download/posthog-live-latest/posthog-live-linux-arm64 -o posthog-live && chmod +x posthog-live\`
-                  Download (macOS amd64): \`curl -L https://github.com/Insights/posthog/releases/download/posthog-live-latest/posthog-live-darwin-amd64 -o posthog-live && chmod +x posthog-live\`
-                  Download (macOS arm64): \`curl -L https://github.com/Insights/posthog/releases/download/posthog-live-latest/posthog-live-darwin-arm64 -o posthog-live && chmod +x posthog-live\`" \
+                  Download (Linux amd64): \`curl -L https://github.com/PostHog/posthog/releases/download/posthog-live-latest/posthog-live-linux-amd64 -o posthog-live && chmod +x posthog-live\`
+                  Download (Linux arm64): \`curl -L https://github.com/PostHog/posthog/releases/download/posthog-live-latest/posthog-live-linux-arm64 -o posthog-live && chmod +x posthog-live\`
+                  Download (macOS amd64): \`curl -L https://github.com/PostHog/posthog/releases/download/posthog-live-latest/posthog-live-darwin-amd64 -o posthog-live && chmod +x posthog-live\`
+                  Download (macOS arm64): \`curl -L https://github.com/PostHog/posthog/releases/download/posthog-live-latest/posthog-live-darwin-arm64 -o posthog-live && chmod +x posthog-live\`" \
                       --latest=false

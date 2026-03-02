@@ -1,6 +1,6 @@
 {
     "name": "GeoIP",
-    "url": "https://github.com/Insights/posthog-plugin-geoip",
+    "url": "https://github.com/PostHog/posthog-plugin-geoip",
     "description": "Enrich Insights events and persons with IP location data",
     "main": "index.ts",
     "posthogVersion": ">=1.24.0",
