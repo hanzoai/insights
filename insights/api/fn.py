@@ -2,7 +2,7 @@ import structlog
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
-from insights.schema import HogCompileResponse
+from insights.schema import InsightsQLCompileResponse
 
 from insights.insightsql.compiler.bytecode import Local, create_bytecode
 from insights.insightsql.errors import ExposedInsightsQLError
@@ -31,7 +31,7 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
             )
             cleaned_locals = [[local.name, local.depth, local.is_captured] for local in compiled.locals]
             return Response(
-                HogCompileResponse(
+                InsightsQLCompileResponse(
                     bytecode=compiled.bytecode,
                     locals=cleaned_locals,
                 ).model_dump(),
@@ -41,4 +41,4 @@ class HogViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet):
             return Response({"error": str(e.message)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Failed to compile script: {e}", exc_info=True, error=e)
-            return Response({"error": "Internal error when compiling hog"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Internal error when compiling script"}, status=status.HTTP_400_BAD_REQUEST)

@@ -5,16 +5,16 @@ This product is designed so other teams can add their own workflow trigger types
 At a high level:
 
 - **Frontend (workflows editor)** uses registries to discover which trigger types and action nodes to show.
-- **Backend (CDP Hog templates)** defines what a “function node” actually does via a Hog function template (`template_id`).
-- **Backend (async functions)** provides any custom runtime functionality used by Hog code (e.g. HTTP requests, enriched lookups, etc.).
+- **Backend (CDP templates)** defines what a "function node" actually does via an insights function template (`template_id`).
+- **Backend (async functions)** provides any custom runtime functionality used by script code (e.g. HTTP requests, enriched lookups, etc.).
 
 ## How the pieces connect
 
-When you add a new “hog function” action node, the wiring is:
+When you add a new "insights function" action node, the wiring is:
 
 1. Frontend action node sets `config.template_id`.
-2. Backend template with the same `id` contains the Hog code run for that node.
-3. Hog code may call async functions (e.g. `postHogGetTicket(...)`).
+2. Backend template with the same `id` contains the script code run for that node.
+3. Script code may call async functions (e.g. `postHogGetTicket(...)`).
 4. Async function implementation is registered in the Node service and executed at runtime.
 
 Concrete end-to-end example:
@@ -73,7 +73,7 @@ registerTriggerType({
 })
 ```
 
-### 2) Ensure it’s imported (registered)
+### 2) Ensure it's imported (registered)
 
 Registration is done via module side effects. Your trigger file must be imported by the workflows frontend bundle.
 
@@ -85,7 +85,7 @@ Add an import for your file there (pattern shown by `conversations`).
 
 ### 3) (Optional) Add a configuration UI
 
-If your trigger needs extra UI beyond the standard “Event” filters, provide a `ConfigComponent`.
+If your trigger needs extra UI beyond the standard "Event" filters, provide a `ConfigComponent`.
 
 Reference:
 
@@ -98,7 +98,7 @@ Notes:
 
 ## Frontend: adding an action node
 
-Action nodes shown in the “Build” toolbar come from:
+Action nodes shown in the "Build" toolbar come from:
 
 - Built-ins in products/workflows/frontend/Workflows/hogflows/panel/HogFlowEditorPanelBuild.tsx
 - Registered categories from products/workflows/frontend/Workflows/hogflows/registry/actions/actionNodeRegistry.ts
@@ -139,7 +139,7 @@ registerActionNodeCategory({
 })
 ```
 
-### 2) Ensure it’s imported (registered)
+### 2) Ensure it's imported (registered)
 
 As with triggers, registration is done via side-effect imports.
 
@@ -151,9 +151,9 @@ The editor imports the registry entrypoint here:
 
 - products/workflows/frontend/Workflows/hogflows/panel/HogFlowEditorPanelBuild.tsx
 
-## Backend: adding a Hog function template (`template_id`)
+## Backend: adding an insights function template (`template_id`)
 
-Workflow “function” nodes run Hog code via Hog function templates. For a new action node, you typically add a new destination template and reference it by `template_id`.
+Workflow "function" nodes run script code via insights function templates. For a new action node, you typically add a new destination template and reference it by `template_id`.
 
 ### 1) Create the template file
 
@@ -177,7 +177,7 @@ Examples:
 Guidelines:
 
 - Choose a stable, unique `id` (this is what the frontend uses as `template_id`).
-- For workflow-only templates, prefer `status: 'hidden'` so they don’t show up in generic template pickers.
+- For workflow-only templates, prefer `status: 'hidden'` so they don't show up in generic template pickers.
 - Keep `inputs_schema` accurate: it drives UI and validation.
 
 ### 2) Register it in the templates index
@@ -193,7 +193,7 @@ Reference for how existing workflows templates are added:
 
 ## Backend: adding an async function
 
-Async functions are Node-side functions callable from Hog code.
+Async functions are Node-side functions callable from script code.
 
 Example of a simple pattern and required `mock` implementation:
 
@@ -221,7 +221,7 @@ registerAsyncFunction('myAsyncFn', {
     // Write to result.invocation / result.logs / result.error
   },
   mock: (args, logs) => {
-    // Used in the workflows “Test” tooling when real requests are disabled
+    // Used in the workflows "Test" tooling when real requests are disabled
     return { status: 200, body: {} }
   },
 })
@@ -240,11 +240,11 @@ Async functions are registered via side-effect imports. Add your file to:
 
 - nodejs/src/cdp/async-functions/index.ts
 
-If you skip this step, your async function will never be available to Hog code.
+If you skip this step, your async function will never be available to script code.
 
 ## Common pitfalls
 
 - **Forgot the side-effect import**: triggers/actions must be imported by their `index.ts`, and async functions must be imported by nodejs/src/cdp/async-functions/index.ts.
 - **Template id mismatch**: `config.template_id` in the frontend must exactly match `template.id` in the backend.
-- **Mocks don’t match real behavior**: workflows test tooling relies on `mock` returning realistic structures.
-- **Feature flag gating**: if you add `featureFlag` to triggers or categories, make sure you’re using an existing flag from `lib/constants`.
+- **Mocks don't match real behavior**: workflows test tooling relies on `mock` returning realistic structures.
+- **Feature flag gating**: if you add `featureFlag` to triggers or categories, make sure you're using an existing flag from `lib/constants`.

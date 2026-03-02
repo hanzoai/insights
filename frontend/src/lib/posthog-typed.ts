@@ -7,8 +7,8 @@
  *
  * Provides capture() for type-safe events and captureRaw() for flexibility
  */
-import originalInsights from 'posthog-js'
-import type { CaptureOptions, CaptureResult, Insights as OriginalInsights, Properties } from 'posthog-js'
+import originalPostHog from 'posthog-js'
+import type { CaptureOptions, CaptureResult, PostHog as OriginalPostHog, Properties } from 'posthog-js'
 
 // Define event schemas with their required and optional fields
 interface EventSchemas {
@@ -3899,7 +3899,7 @@ type HasRequiredProperties<K extends EventName> = {} extends EventSchemas[K] ? f
 type IsExactlyString<T> = string extends T ? (T extends string ? true : false) : false
 
 // Enhanced Insights interface with typed capture
-interface TypedInsights extends Omit<OriginalInsights, 'capture'> {
+interface TypedInsights extends Omit<OriginalPostHog, 'capture'> {
     /**
      * Type-safe capture for defined events, or flexible capture for undefined events
      *
@@ -3954,7 +3954,7 @@ interface TypedInsights extends Omit<OriginalInsights, 'capture'> {
 }
 
 // Create the implementation
-const createTypedInsights = (original: OriginalInsights): TypedInsights => {
+const createTypedInsights = (original: OriginalPostHog): TypedInsights => {
     // Create the enhanced Insights object
     const enhanced: TypedInsights = Object.create(original)
 
@@ -3989,7 +3989,7 @@ const createTypedInsights = (original: OriginalInsights): TypedInsights => {
 }
 
 // Create and export the typed instance
-const posthog = createTypedInsights(originalInsights as OriginalInsights)
+const posthog = createTypedInsights(originalPostHog as OriginalPostHog)
 
 export default posthog
 export type { EventSchemas, TypedInsights }

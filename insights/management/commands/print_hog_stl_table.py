@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
-    help = "Print a Hog/InsightsQL STL compatibility table"
+    help = "Print a Script/InsightsQL STL compatibility table"
 
     def handle(self, *args, **options):
         from insights.insightsql.functions.mapping import INSIGHTSQL_CLICKHOUSE_FUNCTIONS, INSIGHTSQL_COMPARISON_MAPPING
@@ -29,5 +29,5 @@ class Command(BaseCommand):
             print(  # noqa: T201
                 fn.ljust(max_length),
                 "InsightsQL" if fn in insightsql_functions else "     ",
-                "Hog" if fn in insights_functions else "   ",
+                "Script" if fn in insights_functions else "      ",
             )

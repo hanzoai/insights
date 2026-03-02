@@ -10,7 +10,7 @@ import { routerPlugin } from 'kea-router'
 import { subscriptionsPlugin } from 'kea-subscriptions'
 import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
-import type { Insights } from 'posthog-js'
+import type { PostHog } from 'posthog-js'
 import { createRoot } from 'react-dom/client'
 
 import { disposablesPlugin } from '~/kea-disposables'
@@ -71,7 +71,7 @@ const initKeaInToolbar = ({ routerHistory, routerLocation, beforePlugins }: Init
 
 const win = window as any
 
-win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, posthog?: Insights) {
+win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, posthog?: PostHog) {
     // If posthog and toolbarFlagsKey is present, fetch the feature flags from the backend
     if (posthog && toolbarParams.toolbarFlagsKey) {
         const apiHost = posthog.config?.api_host || toolbarParams.apiURL || window.location.origin

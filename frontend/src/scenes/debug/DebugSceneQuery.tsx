@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { HogDebug } from 'scenes/debug/HogDebug'
+import { ScriptDebug } from 'scenes/debug/ScriptDebug'
 import { InsightsQLDebug } from 'scenes/debug/InsightsQLDebug'
 import { Modifiers } from 'scenes/debug/Modifiers'
 import { QueryTabs } from 'scenes/debug/QueryTabs'
@@ -39,7 +39,7 @@ export function DebugSceneQuery({ query, setQuery, queryKey }: DebugSceneQueryPr
     return (
         <>
             {isScriptQuery(parsed) ? (
-                <HogDebug
+                <ScriptDebug
                     queryKey={queryKey}
                     query={parsed}
                     setQuery={(query) => setQuery(JSON.stringify(query, null, 2))}

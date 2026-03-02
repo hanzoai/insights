@@ -21,7 +21,7 @@ import { initLiquidLanguage } from 'lib/monaco/languages/liquid'
 import { inStorybookTestRunner } from 'lib/utils'
 
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
-import { AnyDataNode, HogLanguage, InsightsQLMetadataResponse, NodeKind } from '~/queries/schema/schema-general'
+import { AnyDataNode, InsightsLanguage, InsightsQLMetadataResponse, NodeKind } from '~/queries/schema/schema-general'
 
 if (loader) {
     loader.config({ monaco: monacoModule })
@@ -64,16 +64,16 @@ function initEditor(
         initModel(model, builtCodeEditorLogic)
     }
 
-    if (editorProps?.language === 'fn') {
+    if (editorProps?.language === 'insightsScript') {
         initScriptLanguage(monaco)
     }
     if (editorProps?.language === 'insightsQL' || editorProps?.language === 'insightsQLExpr') {
-        initInsightsQLLanguage(monaco, editorProps.language as HogLanguage)
+        initInsightsQLLanguage(monaco, editorProps.language as InsightsLanguage)
     }
-    if (editorProps?.language === 'scriptTemplate') {
+    if (editorProps?.language === 'insightsTemplate') {
         initHogTemplateLanguage(monaco)
     }
-    if (editorProps?.language === 'hogJson') {
+    if (editorProps?.language === 'insightsJson') {
         initHogJsonLanguage(monaco)
     }
     if (editorProps?.language === 'liquid') {
