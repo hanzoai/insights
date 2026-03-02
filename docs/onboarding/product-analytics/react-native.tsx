@@ -52,7 +52,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             content: (
                 <>
                     <Markdown>
-                        Insights is most easily used via the `InsightsProvider` component. Wrap your app with the
+                        Insights is most easily used via the `PostHogProvider` component. Wrap your app with the
                         provider:
                     </Markdown>
                     <CodeBlock
@@ -61,18 +61,18 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'App.tsx',
                                 code: dedent`
-                                    import { InsightsProvider } from 'posthog-react-native'
+                                    import { PostHogProvider } from 'posthog-react-native'
 
                                     export function MyApp() {
                                         return (
-                                            <InsightsProvider
+                                            <PostHogProvider
                                                 apiKey="<ph_project_api_key>"
                                                 options={{
                                                     host: "<ph_client_api_host>",
                                                 }}
                                             >
                                                 <RestOfApp />
-                                            </InsightsProvider>
+                                            </PostHogProvider>
                                         )
                                     }
                                 `,

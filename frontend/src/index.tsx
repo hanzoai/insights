@@ -4,7 +4,7 @@ import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill'
 import { getContext } from 'kea'
 import posthog from 'posthog-js'
-import { InsightsProvider } from 'posthog-js/react'
+import { PostHogProvider } from 'posthog-js/react'
 import { createRoot } from 'react-dom/client'
 
 import { App } from 'scenes/App'
@@ -41,11 +41,11 @@ function renderApp(): void {
     if (root) {
         createRoot(root).render(
             <ErrorBoundary>
-                <InsightsProvider client={posthog}>
+                <PostHogProvider client={posthog}>
                     <BaseTooltip.Provider delay={500} closeDelay={0} timeout={400}>
                         <App />
                     </BaseTooltip.Provider>
-                </InsightsProvider>
+                </PostHogProvider>
             </ErrorBoundary>
         )
     } else {

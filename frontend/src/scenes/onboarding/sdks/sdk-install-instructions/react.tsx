@@ -28,7 +28,7 @@ function ReactSetupSnippet(): JSX.Element {
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { InsightsProvider } from 'posthog-js/react'
+import { PostHogProvider } from 'posthog-js/react'
 
 const options = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -37,9 +37,9 @@ const options = {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
       <App />
-    </InsightsProvider>
+    </PostHogProvider>
   </StrictMode>
 )`}
         </CodeSnippet>
