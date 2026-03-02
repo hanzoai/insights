@@ -6,15 +6,15 @@ import dagster
 from dagster import Backoff, Jitter, RetryPolicy
 from prometheus_client import Counter, Gauge
 
-from posthog.hogql.constants import LimitContext
+from posthog.insightsql.constants import LimitContext
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.query_tagging import Feature, tag_queries
 from posthog.dags.common import JobOwners
-from posthog.dags.common.resources import PostHogAnalyticsResource
+from posthog.dags.common.resources import InsightsAnalyticsResource
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_cache import DjangoCacheQueryCacheManager
-from posthog.hogql_queries.query_runner import get_query_runner
+from posthog.insightsql_queries.query_cache import DjangoCacheQueryCacheManager
+from posthog.insightsql_queries.query_runner import get_query_runner
 from posthog.models import Team
 from posthog.models.instance_setting import get_instance_setting
 
@@ -109,7 +109,7 @@ def queries_to_keep_fresh(
 
 @dagster.op()
 def get_teams_for_warming_op(
-    context: dagster.OpExecutionContext, posthoganalytics: PostHogAnalyticsResource
+    context: dagster.OpExecutionContext, posthoganalytics: InsightsAnalyticsResource
 ) -> list[int]:
     team_ids = get_teams_enabled_for_web_analytics_cache_warming()
 

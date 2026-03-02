@@ -139,7 +139,7 @@ test.describe('Insight creation', () => {
         })
     })
 
-    test('SQL / HogQL: write query, execute and verify results', async ({ page }) => {
+    test('SQL / InsightsQL: write query, execute and verify results', async ({ page }) => {
         const insight = new InsightPage(page)
 
         await test.step('navigate to SQL editor and verify it renders', async () => {
@@ -147,7 +147,7 @@ test.describe('Insight creation', () => {
             await insight.sql.waitForChart()
         })
 
-        await test.step('write and execute a HogQL query', async () => {
+        await test.step('write and execute a InsightsQL query', async () => {
             await insight.sql.writeQuery(
                 [
                     'SELECT',

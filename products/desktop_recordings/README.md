@@ -27,7 +27,7 @@ Content-Type: application/json
 Response:
 {
   "upload_token": "...",  # Pass to Recall SDK
-  "id": "..."   # PostHog recording ID
+  "id": "..."   # Insights recording ID
   ...additional fields...
 }
 ```
@@ -90,9 +90,9 @@ Users need to create a Personal API Key with these scopes:
 ### Data Flow
 
 1. Array desktop detects meeting → calls `create_upload`
-2. PostHog creates recording → returns Recall upload token
+2. Insights creates recording → returns Recall upload token
 3. Array uses Recall SDK to record → uploads to Recall
-4. Once upload is done, Array updates the desktop recording on PostHog
+4. Once upload is done, Array updates the desktop recording on Insights
 5. Recording status changes to "ready"
 
 ### Models
@@ -121,7 +121,7 @@ curl -X POST 'http://localhost:8010/api/environments/1/desktop_recordings/' \
 
 ## Next Steps (Phase 2)
 
-- Web UI to view recordings in PostHog
-- Integration with PostHog Tasks product
+- Web UI to view recordings in Insights
+- Integration with Insights Tasks product
 - Team permissions and sharing
 - Search across all transcripts

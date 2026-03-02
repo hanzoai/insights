@@ -10,7 +10,7 @@ import STPyV8
 
 from posthog.cdp.site_functions import get_transpiled_function
 from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, sync_template_to_db
-from posthog.cdp.validation import compile_hog
+from posthog.cdp.validation import compile_script
 from posthog.models import CustomFunction
 from posthog.models.utils import uuid7
 
@@ -68,7 +68,7 @@ class BaseCustomFunctionTemplateTest(BaseTest):
 
     def setUp(self):
         super().setUp()
-        self.compiled_hog = compile_hog(self.template.code, self.template.type)
+        self.compiled_hog = compile_script(self.template.code, self.template.type)
 
         self.mock_print = MagicMock(side_effect=lambda *args: print("[DEBUG CustomFunctionPrint]", *args))  # noqa: T201
         # Side effect - log the fetch call and return  with sensible output
@@ -76,7 +76,7 @@ class BaseCustomFunctionTemplateTest(BaseTest):
             side_effect=lambda *args: print("[DEBUG CustomFunctionFetch]", *args) or self.mock_fetch_response(*args)  # noqa: T201
         )
         self.mock_posthog_capture = MagicMock(
-            side_effect=lambda *args: print("[DEBUG CustomFunctionPostHogCapture]", *args)  # noqa: T201
+            side_effect=lambda *args: print("[DEBUG CustomFunctionInsightsCapture]", *args)  # noqa: T201
         )
 
     def mock_fetch_response(self, url, *args):

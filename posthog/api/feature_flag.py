@@ -2759,7 +2759,7 @@ class LegacyFeatureFlagViewSet(FeatureFlagViewSet):
 class CanEditFeatureFlag(BasePermission):
     """
     Permission class to check if a user can edit a specific feature flag.
-    This leverages PostHog's existing access control system for feature flags.
+    This leverages Insights's existing access control system for feature flags.
     """
 
     def has_object_permission(self, request, view, obj):

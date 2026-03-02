@@ -159,7 +159,7 @@ describe('useragent-plugin', () => {
             distinct_id: '91786645996505845983216505144491686624250709556909346823253562854100595129050',
             properties: {
                 $ip: '31.164.196.102',
-                $lib: 'posthog-python',
+                $lib: 'insights-python',
                 $lib_version: '1.4.4',
                 $plugins_deferred: [],
                 $plugins_failed: [],
@@ -195,7 +195,7 @@ describe('useragent-plugin', () => {
             distinct_id: '91786645996505845983216505144491686624250709556909346823253562854100595129050',
             properties: {
                 $ip: '31.164.196.102',
-                $lib: 'posthog-python',
+                $lib: 'insights-python',
                 $lib_version: '1.4.4',
                 $plugins_deferred: [],
                 $plugins_failed: [],

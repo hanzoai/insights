@@ -2,16 +2,16 @@
 import { UUIDT } from '../../utils/utils'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationHogFunction,
+    CyclotronJobInvocationCustomFunction,
     CyclotronJobInvocationResult,
-    HogFunctionInvocationGlobalsWithInputs,
+    CustomFunctionInvocationGlobalsWithInputs,
 } from '../types'
-import { HogFunctionType } from '../types'
+import { CustomFunctionType } from '../types'
 
 export function createInvocation(
-    globals: HogFunctionInvocationGlobalsWithInputs,
-    hogFunction: HogFunctionType
-): CyclotronJobInvocationHogFunction {
+    globals: CustomFunctionInvocationGlobalsWithInputs,
+    customFunction: CustomFunctionType
+): CyclotronJobInvocationCustomFunction {
     return {
         id: new UUIDT().toString(),
         state: {
@@ -19,10 +19,10 @@ export function createInvocation(
             timings: [],
             attempts: 0,
         },
-        teamId: hogFunction.team_id,
-        functionId: hogFunction.id,
-        hogFunction,
-        queue: 'hog',
+        teamId: customFunction.team_id,
+        functionId: customFunction.id,
+        customFunction,
+        queue: 'custom_script',
         queuePriority: 0,
     }
 }
@@ -66,13 +66,13 @@ export function createInvocationResult<T extends CyclotronJobInvocation>(
     > = {},
     resultParams: Pick<
         Partial<CyclotronJobInvocationResult>,
-        'finished' | 'capturedPostHogEvents' | 'logs' | 'metrics' | 'error' | 'execResult'
+        'finished' | 'capturedInsightsEvents' | 'logs' | 'metrics' | 'error' | 'execResult'
     > = {}
 ): CyclotronJobInvocationResult<T> {
     return {
         // Clone the invocation for the result cleaned
         finished: true,
-        capturedPostHogEvents: [],
+        capturedInsightsEvents: [],
         logs: [],
         metrics: [],
         ...resultParams,

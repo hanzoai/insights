@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.hogql.database.database import Database
+from posthog.insightsql.database.database import Database
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.utils import action
@@ -101,14 +101,14 @@ class ExternalDataSchemaSerializer(serializers.ModelSerializer):
     def get_table(self, schema: ExternalDataSchema) -> Optional[dict]:
         from products.data_warehouse.backend.api.table import SimpleTableSerializer
 
-        hogql_context = self.context.get("database", None)
-        if not hogql_context:
-            hogql_context = Database.create_for(team_id=self.context["team_id"])
+        insightsql_context = self.context.get("database", None)
+        if not insightsql_context:
+            insightsql_context = Database.create_for(team_id=self.context["team_id"])
 
         if schema.table and schema.table.deleted:
             return None
 
-        return SimpleTableSerializer(schema.table, context={"database": hogql_context}).data or None
+        return SimpleTableSerializer(schema.table, context={"database": insightsql_context}).data or None
 
     def get_sync_frequency(self, schema: ExternalDataSchema):
         return sync_frequency_interval_to_sync_frequency(schema.sync_frequency_interval)

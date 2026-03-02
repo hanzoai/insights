@@ -25,12 +25,12 @@
                             {
                                 "key": "email",
                                 "type": "person",
-                                "value": ["hedgehog@posthog.com"],
+                                "value": ["mascot@posthog.com"],
                                 "operator": "exact"
                             }
                         ],
                         "rollout_percentage": null,
-                        "description": "PostHog team member"
+                        "description": "Insights team member"
                     }
                 ],
                 "multivariate": null
@@ -194,7 +194,7 @@
         },
         {
             "id": 1498,
-            "name": "Feature https://github.com/PostHog/posthog/issues/3636.",
+            "name": "Feature https://github.com/Insights/posthog/issues/3636.",
             "key": "dashboard-permissions",
             "filters": {
                 "groups": [

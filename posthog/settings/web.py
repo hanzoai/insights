@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.postgres",
     "django.contrib.staticfiles",
-    "posthog.apps.PostHogConfig",
+    "posthog.apps.InsightsConfig",
     "rest_framework",
     "loginas",
     "corsheaders",
@@ -127,7 +127,7 @@ MIDDLEWARE = [
     "posthog.middleware.AutoProjectMiddleware",
     "posthog.middleware.CHQueries",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
-    "posthog.middleware.PostHogTokenCookieMiddleware",
+    "posthog.middleware.InsightsTokenCookieMiddleware",
     "posthoganalytics.integrations.django.PosthogContextMiddleware",
 ]
 
@@ -222,7 +222,7 @@ SOCIAL_AUTH_PIPELINE = (
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
-    # Hanzo IAM: map OIDC org claim -> PostHog Organization + Team + Membership
+    # Hanzo IAM: map OIDC org claim -> Insights Organization + Team + Membership
     "posthog.api.iam_org_pipeline.iam_org_assign",
     "posthog.api.authentication.social_login_notification",
 )

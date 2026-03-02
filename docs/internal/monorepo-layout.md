@@ -1,6 +1,6 @@
 # Monorepo Layout
 
-High-level structure of the PostHog monorepo. Some directories are aspirational (e.g., `platform/` doesn't exist yet - shared code currently lives in `common/`).
+High-level structure of the Insights monorepo. Some directories are aspirational (e.g., `platform/` doesn't exist yet - shared code currently lives in `common/`).
 
 ## Directory structure
 

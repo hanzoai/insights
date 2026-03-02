@@ -21,8 +21,8 @@ function copyFile(from: string, to: string): void {
     }
 }
 
-function copyPostHogJsFiles(): void {
-    const nodeModulesPostHogJs = resolve('.', 'node_modules/posthog-js/dist')
+function copyInsightsJsFiles(): void {
+    const nodeModulesInsightsJs = resolve('.', 'node_modules/posthog-js/dist')
     const distDir = resolve('.', 'dist')
 
     // Ensure dist directory exists
@@ -57,17 +57,17 @@ function copyPostHogJsFiles(): void {
     ]
 
     filesToCopy.forEach((file) => {
-        const from = join(nodeModulesPostHogJs, file)
+        const from = join(nodeModulesInsightsJs, file)
         const to = join(distDir, file)
         copyFile(from, to)
     })
 
     // Copy integration files (e.g., *integration.js*)
     try {
-        const files = readdirSync(nodeModulesPostHogJs)
+        const files = readdirSync(nodeModulesInsightsJs)
         files.forEach((file: string) => {
             if (file.includes('integration') && (file.endsWith('.js') || file.endsWith('.js.map'))) {
-                const from = join(nodeModulesPostHogJs, file)
+                const from = join(nodeModulesInsightsJs, file)
                 const to = join(distDir, file)
                 copyFile(from, to)
             }
@@ -78,10 +78,10 @@ function copyPostHogJsFiles(): void {
 
     // Copy recorder files (e.g., *recorder*.js*)
     try {
-        const files = readdirSync(nodeModulesPostHogJs)
+        const files = readdirSync(nodeModulesInsightsJs)
         files.forEach((file: string) => {
             if (file.includes('recorder') && (file.endsWith('.js') || file.endsWith('.js.map'))) {
-                const from = join(nodeModulesPostHogJs, file)
+                const from = join(nodeModulesInsightsJs, file)
                 const to = join(distDir, file)
                 copyFile(from, to)
             }
@@ -98,11 +98,11 @@ export function posthogJsPlugin(): Plugin {
         name: 'posthog-js-copy',
         configureServer() {
             // Copy posthog-js files when dev server starts
-            copyPostHogJsFiles()
+            copyInsightsJsFiles()
         },
         buildStart() {
             // Also copy when building
-            copyPostHogJsFiles()
+            copyInsightsJsFiles()
         },
     }
 }

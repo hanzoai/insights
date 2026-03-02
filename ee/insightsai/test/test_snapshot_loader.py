@@ -200,7 +200,7 @@ class TestSnapshotLoader(BaseTest):
 
     def test_restores_org_team_user(self):
         org, user, _dataset, team = self._load_with_mocks()
-        self.assertEqual(org.name, "PostHog")
+        self.assertEqual(org.name, "Insights")
         self.assertEqual(team.organization_id, org.id)
         self.assertEqual(team.id, 9990)
         self.assertEqual(team.api_token, "team_9990")

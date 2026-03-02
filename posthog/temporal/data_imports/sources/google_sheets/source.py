@@ -90,7 +90,7 @@ class GoogleSheetsSource(SimpleSource[GoogleSheetsSourceConfig]):
         return SourceConfig(
             name=SchemaExternalDataSourceType.GOOGLE_SHEETS,
             label="Google Sheets",
-            caption="Ensure you have granted PostHog access to your Google Sheet as instructed in the [documentation](https://posthog.com/docs/cdp/sources/google-sheets)",
+            caption="Ensure you have granted Insights access to your Google Sheet as instructed in the [documentation](https://posthog.com/docs/cdp/sources/google-sheets)",
             betaSource=True,
             iconPath="/static/services/Google_Sheets.svg",
             docsUrl="https://posthog.com/docs/cdp/sources/google-sheets",

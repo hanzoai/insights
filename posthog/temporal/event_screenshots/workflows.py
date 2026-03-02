@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from temporalio import common, workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.event_screenshots.activities import (
     load_event_sessions,
     load_event_types,
@@ -13,7 +13,7 @@ from posthog.temporal.event_screenshots.types import GenerateEventScreenshotsInp
 
 
 @workflow.defn(name="generate-event-screenshots")
-class GenerateEventScreenshotsWorkflow(PostHogWorkflow):
+class GenerateEventScreenshotsWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> GenerateEventScreenshotsInput:
         """Parse input from the management command CLI."""

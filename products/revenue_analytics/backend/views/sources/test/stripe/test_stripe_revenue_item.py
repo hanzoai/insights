@@ -4,8 +4,8 @@ from posthog.test.base import snapshot_clickhouse_queries
 
 from parameterized import parameterized
 
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.temporal.data_imports.sources.stripe.constants import (
     CHARGE_RESOURCE_NAME,
@@ -47,8 +47,8 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
         self.assertQueryContainsFields(query.query, REVENUE_ITEM_SCHEMA)
         self.assertBuiltQueryStructure(query, str(revenue_table.id), f"stripe.{self.external_data_source.prefix}")
 
-        # Print and snapshot the generated HogQL query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_revenue_item_query_with_minimal_schemas(self):
@@ -60,7 +60,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
         query = build(self.stripe_handle)
 
         # Print and snapshot for minimal case
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_subscription_schemas_only(self):
@@ -74,7 +74,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
 
         # Print and snapshot for subscription case
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_no_relevant_schemas(self):
@@ -91,8 +91,8 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
             f"stripe.{self.external_data_source.prefix}",
             expected_test_comments="no_schema",
         )
-        # Print and snapshot the generated HogQL query
-        self.assertQueryMatchesSnapshot(query.query.to_hogql(), replace_all_numbers=True)
+        # Print and snapshot the generated InsightsQL query
+        self.assertQueryMatchesSnapshot(query.query.to_insightsql(), replace_all_numbers=True)
 
     def test_build_with_no_source(self):
         """Test that build returns none when source is None."""
@@ -113,7 +113,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
         self.setup_stripe_external_data_source(schemas=schemas)
 
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Check for specific fields in the query based on the revenue item schema
         self.assertIn("id", query_sql)
@@ -132,7 +132,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
         self.setup_stripe_external_data_source(schemas=schemas)
 
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Check for currency-related fields/functions
         # The specific implementation may vary
@@ -177,7 +177,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
         ]
     )
     def test_calculate_months_for_period_parameterized(self, start_date, end_date, expected_months):
-        response: list[list[Any]] = execute_hogql_query(
+        response: list[list[Any]] = execute_insightsql_query(
             ast.SelectQuery(
                 select=[
                     calculate_months_for_period(
@@ -193,7 +193,7 @@ class TestRevenueItemStripeBuilder(StripeSourceBaseTest):
 
     @snapshot_clickhouse_queries
     def test_calculate_months_query_snapshot(self):
-        response: list[list[Any]] = execute_hogql_query(
+        response: list[list[Any]] = execute_insightsql_query(
             ast.SelectQuery(
                 select=[
                     calculate_months_for_period(

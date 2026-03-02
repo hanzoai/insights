@@ -12,7 +12,7 @@ export function SqlEditorTabPreference(): JSX.Element {
         <div>
             <p>
                 By default, clicking "New tab" while in the SQL editor opens another SQL editor tab. If you prefer,
-                clicking "New tab" can open the PostHog search command (which has access to other apps, recent tabs,
+                clicking "New tab" can open the Insights search command (which has access to other apps, recent tabs,
                 etc.) instead.
             </p>
             <LemonSelect

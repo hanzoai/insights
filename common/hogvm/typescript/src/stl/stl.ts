@@ -20,7 +20,7 @@ import {
 import { printHogStringOutput } from './print'
 import { isIPAddressInRange } from './ip'
 
-// TODO: this file should be generated from or mergred with posthog/hogql/compiler/javascript_stl.py
+// TODO: this file should be generated from or mergred with posthog/insightsql/compiler/javascript_stl.py
 
 function STLToString(args: any[]): string {
     if (isHogDate(args[0])) {
@@ -1338,7 +1338,7 @@ export const STL: Record<string, STLFunction> = {
     },
     HogError: {
         fn: (args) => newHogError(args[0], args[1], args[2]),
-        description: 'Creates a Hog error',
+        description: 'Creates a Script error',
         example: 'HogError($1, $2, $3)',
         minArgs: 1,
         maxArgs: 3,

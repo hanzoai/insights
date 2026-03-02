@@ -880,7 +880,7 @@ class TestRootNodeTools(BaseTest):
     @patch("ee.hogai.core.agent_modes.executables.posthoganalytics.capture")
     @patch("ee.hogai.tools.read_taxonomy.tool.ReadTaxonomyTool._run_impl")
     async def test_max_tool_fatal_error_emits_analytics_event(self, read_taxonomy_mock, capture_mock):
-        """Test that MaxToolFatalError emits a PostHog analytics event."""
+        """Test that MaxToolFatalError emits a Insights analytics event."""
         error_message = "Configuration error: INKEEP_API_KEY environment variable is not set"
         read_taxonomy_mock.side_effect = MaxToolFatalError(error_message)
 

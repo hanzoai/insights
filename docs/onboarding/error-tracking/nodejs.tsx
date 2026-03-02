@@ -15,7 +15,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        You can enable exception autocapture when initializing the PostHog client to automatically capture uncaught exceptions and unhandled rejections in your Node app.
+                        You can enable exception autocapture when initializing the Insights client to automatically capture uncaught exceptions and unhandled rejections in your Node app.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -24,8 +24,8 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             language: 'javascript',
                             file: 'Node.js',
                             code: dedent`
-                                import { PostHog } from 'posthog-node'
-                                const client = new PostHog(
+                                import { Insights } from 'posthog-node'
+                                const client = new Insights(
                                     '<ph_project_api_key>',
                                     { host: 'https://us.i.posthog.com', enableExceptionAutocapture: true }
                                 )
@@ -35,7 +35,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        If you are using the Express framework, you will need to import and call \`setupExpressErrorHandler\` with your PostHog client and Express app. This is because Express handles uncaught exceptions internally meaning exception autocapture will not work by default.
+                        If you are using the Express framework, you will need to import and call \`setupExpressErrorHandler\` with your Insights client and Express app. This is because Express handles uncaught exceptions internally meaning exception autocapture will not work by default.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -45,9 +45,9 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             file: 'server.ts',
                             code: dedent`
                                 import express from 'express'
-                                import { PostHog, setupExpressErrorHandler } from 'posthog-node'
+                                import { Insights, setupExpressErrorHandler } from 'posthog-node'
                                 const app = express()
-                                const posthog = new PostHog(PH_API_KEY)
+                                const posthog = new Insights(PH_API_KEY)
                                 setupExpressErrorHandler(posthog, app)
                             `,
                         },
@@ -101,9 +101,9 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
         content: (
             <Markdown>
                 {dedent`
-                    Confirm exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),

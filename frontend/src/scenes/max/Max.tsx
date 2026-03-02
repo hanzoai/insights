@@ -206,7 +206,7 @@ export const MaxInstance = React.memo(function MaxInstance({
                                 'ml-2': isRemovingSidePanelFlag,
                             })}
                         >
-                            {chatTitle || 'PostHog AI'}
+                            {chatTitle || 'Insights AI'}
                         </h3>
                     </Tooltip>
                 </div>

@@ -8,7 +8,7 @@ from posthog.settings.ee import EE_AVAILABLE
 
 def migrate_hooks(hook_ids: list[str], team_ids: list[int], dry_run: bool = False):
     if not EE_AVAILABLE:
-        print("This command is only available in PostHog EE")  # noqa: T201
+        print("This command is only available in Insights EE")  # noqa: T201
         return
 
     from ee.api.hooks import create_zapier_custom_function

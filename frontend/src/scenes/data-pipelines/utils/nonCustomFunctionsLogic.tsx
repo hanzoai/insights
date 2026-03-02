@@ -34,7 +34,7 @@ export const nonCustomFunctionsLogic = kea<nonCustomFunctionsLogicType>([
 
                     const pluginsById = Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]))
 
-                    const hogfunctions: CustomFunctionType[] = []
+                    const customfunctions: CustomFunctionType[] = []
 
                     for (const pluginConfig of pluginConfigs) {
                         const plugin = pluginsById[pluginConfig.plugin]
@@ -48,7 +48,7 @@ export const nonCustomFunctionsLogic = kea<nonCustomFunctionsLogicType>([
                             // Do nothing
                         }
 
-                        hogfunctions.push({
+                        customfunctions.push({
                             id: `plugin-${pluginConfig.id}`,
                             name: pluginConfig.name || plugin?.name || 'Unknown app',
                             description: pluginConfig.description || plugin?.description || '',
@@ -63,7 +63,7 @@ export const nonCustomFunctionsLogic = kea<nonCustomFunctionsLogicType>([
                         })
                     }
 
-                    return hogfunctions
+                    return customfunctions
                 },
             },
         ],
@@ -82,7 +82,7 @@ export const nonCustomFunctionsLogic = kea<nonCustomFunctionsLogicType>([
 
                     const pluginsById = Object.fromEntries(plugins.map((plugin) => [plugin.id, plugin]))
 
-                    const hogfunctions: CustomFunctionType[] = []
+                    const customfunctions: CustomFunctionType[] = []
 
                     for (const pluginConfig of pluginConfigs) {
                         const plugin = pluginsById[pluginConfig.plugin]
@@ -96,7 +96,7 @@ export const nonCustomFunctionsLogic = kea<nonCustomFunctionsLogicType>([
                             // Do nothing
                         }
 
-                        hogfunctions.push({
+                        customfunctions.push({
                             id: `plugin-${pluginConfig.id}`,
                             name: pluginConfig.name || plugin?.name || 'Unknown app',
                             description: pluginConfig.description || plugin?.description || '',
@@ -111,7 +111,7 @@ export const nonCustomFunctionsLogic = kea<nonCustomFunctionsLogicType>([
                         })
                     }
 
-                    return hogfunctions
+                    return customfunctions
                 },
             },
         ],

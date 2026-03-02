@@ -47,7 +47,7 @@ const isDataWarehouseTable = (
     return 'type' in table && table.type === 'data_warehouse'
 }
 
-const isPostHogTable = (
+const isInsightsTable = (
     table: DatabaseSchemaDataWarehouseTable | DatabaseSchemaTable | DataWarehouseSavedQuery
 ): table is DatabaseSchemaTable => {
     return 'type' in table && table.type === 'posthog'
@@ -927,8 +927,8 @@ const createSourceFolderNode = (
     }
 
     const sourceFolderId = isSearch
-        ? `search-${sourceType === 'PostHog' ? 'posthog' : sourceType}`
-        : `source-${sourceType === 'PostHog' ? 'posthog' : sourceType}`
+        ? `search-${sourceType === 'Insights' ? 'posthog' : sourceType}`
+        : `source-${sourceType === 'Insights' ? 'posthog' : sourceType}`
 
     return {
         id: sourceFolderId,
@@ -1355,12 +1355,12 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 const expandedIds: string[] = []
                 const tableNodeOptions = { expandedLazyNodeIds }
 
-                // Add PostHog tables
+                // Add Insights tables
                 if (relevantPosthogTables.length > 0) {
                     expandedIds.push('search-posthog')
                     sourcesChildren.push(
                         createSourceFolderNode(
-                            'PostHog',
+                            'Insights',
                             [],
                             relevantPosthogTables,
                             true,
@@ -1537,10 +1537,10 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                         type: 'loading-indicator',
                     })
                 } else {
-                    // Add PostHog tables
+                    // Add Insights tables
                     if (posthogTables.length > 0) {
                         sourcesChildren.push(
-                            createSourceFolderNode('PostHog', posthogTables, [], false, tableLookup, tableNodeOptions)
+                            createSourceFolderNode('Insights', posthogTables, [], false, tableLookup, tableNodeOptions)
                         )
                     }
 
@@ -1768,7 +1768,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 }
                 let table: DatabaseSchemaDataWarehouseTable | DatabaseSchemaTable | DataWarehouseSavedQuery | null =
                     null
-                if (isPostHogTable(selectedSchema)) {
+                if (isInsightsTable(selectedSchema)) {
                     table = posthogTablesMap[selectedSchema.name]
                 } else if (isSystemTable(selectedSchema)) {
                     table = systemTablesMap[selectedSchema.name]

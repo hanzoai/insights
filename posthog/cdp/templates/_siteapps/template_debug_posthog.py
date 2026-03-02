@@ -5,15 +5,15 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     free=True,
     type="site_app",
     id="template-debug-posthog-js",
-    name="PostHog JS debugger",
+    name="Insights JS debugger",
     description="Enable extra debugging tools on your posthog-js",
-    icon_url="/static/hedgehog/builder-hog-01.png",
+    icon_url="/static/mascot/builder-icon-01.png",
     category=["Custom"],
     code_language="javascript",
     code="""
 export function onLoad({ inputs, posthog }) {
     if (inputs.enable_debugging) {
-        console.log("[PostHog JS debugger site app] Enabling PostHog.js debugging", posthog)
+        console.log("[Insights JS debugger site app] Enabling Insights.js debugging", posthog)
         posthog.debug(true)
     }
 

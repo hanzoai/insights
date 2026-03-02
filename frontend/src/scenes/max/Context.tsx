@@ -313,7 +313,7 @@ export function ContextDisplay({ size = 'default' }: ContextDisplayProps): JSX.E
         <div className="px-2 w-full">
             <div className="flex flex-wrap items-start gap-1 w-full">
                 <ModeSelector />
-                <Tooltip title={contextDisabledReason ?? 'Add context to help PostHog AI answer your question'}>
+                <Tooltip title={contextDisabledReason ?? 'Add context to help Insights AI answer your question'}>
                     <TaxonomicPopover
                         size="xxsmall"
                         type="tertiary"

@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: HogFunctionTemplate = {
     name: 'Remove Null Properties',
     description:
         'This transformation removes null properties from the event properties object. If the object nesting exceeds 3 levels, deeper levels will be returned unchanged.',
-    icon_url: '/static/hedgehog/builder-hog-01.png',
+    icon_url: '/static/mascot/builder-mascot-01.png',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 // Check if the event has properties
 if (empty(event.properties)) {

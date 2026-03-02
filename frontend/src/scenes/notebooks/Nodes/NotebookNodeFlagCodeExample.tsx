@@ -5,7 +5,7 @@ import { NotFound } from 'lib/components/NotFound'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { FeatureFlagCodeExample } from 'scenes/feature-flags/FeatureFlagCodeExample'
 import { FeatureFlagLogicProps, featureFlagLogic } from 'scenes/feature-flags/featureFlagLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
@@ -35,7 +35,7 @@ type NotebookNodeFlagCodeExampleAttributes = {
     id: FeatureFlagLogicProps['id']
 }
 
-export const NotebookNodeFlagCodeExample = createPostHogWidgetNode<NotebookNodeFlagCodeExampleAttributes>({
+export const NotebookNodeFlagCodeExample = createInsightsWidgetNode<NotebookNodeFlagCodeExampleAttributes>({
     nodeType: NotebookNodeType.FeatureFlagCodeExample,
     titlePlaceholder: 'Feature flag code example',
     Component,

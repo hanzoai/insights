@@ -136,7 +136,7 @@ def github_pr_webhook(request: HttpRequest) -> HttpResponse:
         run_id=str(task_run.id),
     )
 
-    # Emit PostHog analytics event
+    # Emit Insights analytics event
     try:
         # should probably not use a distinct id and send an anon id with person processing off in fail case...
         distinct_id = (

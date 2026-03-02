@@ -94,7 +94,7 @@ export default function SignupReferralSource({ disabled }: { disabled: boolean }
             <AnimatedCollapsible collapsed={!showAIPrompt}>
                 <LemonField
                     name="referral_source_ai_prompt"
-                    label="What prompt or search led you to PostHog?"
+                    label="What prompt or search led you to Insights?"
                     help="Paste the prompt or search queries if you remember, even roughly"
                     showOptional
                 >

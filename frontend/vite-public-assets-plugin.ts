@@ -104,14 +104,14 @@ function copyPublicAssets(): void {
         console.warn('⚠️ Public directory does not exist')
     }
 
-    // Copy hedgehog-mode assets to dist
-    const hedgehogModeSrc = resolve('.', 'node_modules', '@posthog', 'hedgehog-mode', 'assets')
-    const hedgehogModeDest = resolve('.', 'dist', 'hedgehog-mode')
-    if (existsSync(hedgehogModeSrc)) {
-        copyDirectory(hedgehogModeSrc, hedgehogModeDest)
-        console.info('✅ Copied hedgehog-mode assets to dist/hedgehog-mode')
+    // Copy mascot-mode assets to dist
+    const mascotModeSrc = resolve('.', 'node_modules', '@posthog', 'mascot-mode', 'assets')
+    const mascotModeDest = resolve('.', 'dist', 'mascot-mode')
+    if (existsSync(mascotModeSrc)) {
+        copyDirectory(mascotModeSrc, mascotModeDest)
+        console.info('✅ Copied mascot-mode assets to dist/mascot-mode')
     } else {
-        console.warn('⚠️ Hedgehog-mode assets directory does not exist')
+        console.warn('⚠️ Mascot-mode assets directory does not exist')
     }
 }
 

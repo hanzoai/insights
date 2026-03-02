@@ -15,7 +15,7 @@ from posthog.schema import (
     DatabaseSchemaEndpointTable,
     DatabaseSchemaField,
     DatabaseSchemaManagedViewTable,
-    DatabaseSchemaPostHogTable,
+    DatabaseSchemaInsightsTable,
     DatabaseSchemaSchema,
     DatabaseSchemaSource,
     DatabaseSchemaSystemTable,
@@ -148,7 +148,7 @@ class SerializedField:
 
 
 type DatabaseSchemaTable = (
-    DatabaseSchemaPostHogTable
+    DatabaseSchemaInsightsTable
     | DatabaseSchemaSystemTable
     | DatabaseSchemaDataWarehouseTable
     | DatabaseSchemaViewTable
@@ -357,7 +357,7 @@ class Database(BaseModel):
         if context.team_id is None:
             raise ResolutionError("Must provide team_id to serialize database")
 
-        # PostHog tables
+        # Insights tables
         posthog_table_names = self.get_posthog_table_names(include_hidden=include_hidden_posthog_tables)
         for table_name in posthog_table_names:
             if include_only and table_name not in include_only:
@@ -372,7 +372,7 @@ class Database(BaseModel):
 
             fields = serialize_fields(field_input, context, table_name.split("."), table_type="posthog")
             fields_dict = {field.name: field for field in fields}
-            tables[table_name] = DatabaseSchemaPostHogTable(fields=fields_dict, id=table_name, name=table_name)
+            tables[table_name] = DatabaseSchemaInsightsTable(fields=fields_dict, id=table_name, name=table_name)
 
         # System tables
         system_tables = self.get_system_table_names()

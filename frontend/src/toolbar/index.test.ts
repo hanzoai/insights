@@ -21,7 +21,7 @@ describe('Toolbar flag loading', () => {
         // Import the module to register ph_load_toolbar
         await import('./index')
 
-        const mockPostHog = {
+        const mockInsights = {
             featureFlags: {
                 overrideFeatureFlags: jest.fn(),
                 reloadFeatureFlags: jest.fn(),
@@ -46,7 +46,7 @@ describe('Toolbar flag loading', () => {
         })
 
         // Call ph_load_toolbar
-        await (window as any).ph_load_toolbar(toolbarParams, mockPostHog)
+        await (window as any).ph_load_toolbar(toolbarParams, mockInsights)
 
         // Verify fetch was called with correct URL
         expect(mockFetch).toHaveBeenCalledWith(
@@ -57,7 +57,7 @@ describe('Toolbar flag loading', () => {
         )
 
         // Verify flags were applied to posthog instance with correct format
-        expect(mockPostHog.featureFlags.overrideFeatureFlags).toHaveBeenCalledWith({ flags: mockFlags })
+        expect(mockInsights.featureFlags.overrideFeatureFlags).toHaveBeenCalledWith({ flags: mockFlags })
     })
 
     it('should handle fetch errors gracefully', async () => {
@@ -65,7 +65,7 @@ describe('Toolbar flag loading', () => {
 
         await import('./index')
 
-        const mockPostHog = {
+        const mockInsights = {
             featureFlags: {
                 overrideFeatureFlags: jest.fn(),
             },
@@ -80,7 +80,7 @@ describe('Toolbar flag loading', () => {
         mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
         // Should not throw
-        await (window as any).ph_load_toolbar(toolbarParams, mockPostHog)
+        await (window as any).ph_load_toolbar(toolbarParams, mockInsights)
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             '[Toolbar Flags] Error fetching toolbar feature flags:',
@@ -88,7 +88,7 @@ describe('Toolbar flag loading', () => {
         )
 
         // Should not have called overrideFeatureFlags
-        expect(mockPostHog.featureFlags.overrideFeatureFlags).not.toHaveBeenCalled()
+        expect(mockInsights.featureFlags.overrideFeatureFlags).not.toHaveBeenCalled()
 
         consoleErrorSpy.mockRestore()
     })
@@ -98,7 +98,7 @@ describe('Toolbar flag loading', () => {
 
         await import('./index')
 
-        const mockPostHog = {
+        const mockInsights = {
             featureFlags: {
                 overrideFeatureFlags: jest.fn(),
             },
@@ -117,11 +117,11 @@ describe('Toolbar flag loading', () => {
             },
         })
 
-        await (window as any).ph_load_toolbar(toolbarParams, mockPostHog)
+        await (window as any).ph_load_toolbar(toolbarParams, mockInsights)
 
         expect(consoleErrorSpy).toHaveBeenCalledWith('[Toolbar Flags] Feature flags not found:', JSON.stringify(error))
 
-        expect(mockPostHog.featureFlags.overrideFeatureFlags).not.toHaveBeenCalled()
+        expect(mockInsights.featureFlags.overrideFeatureFlags).not.toHaveBeenCalled()
 
         consoleErrorSpy.mockRestore()
     })
@@ -129,7 +129,7 @@ describe('Toolbar flag loading', () => {
     it('should not fetch flags when toolbarFlagsKey is not present', async () => {
         await import('./index')
 
-        const mockPostHog = {
+        const mockInsights = {
             featureFlags: {
                 overrideFeatureFlags: jest.fn(),
             },
@@ -141,17 +141,17 @@ describe('Toolbar flag loading', () => {
             // No toolbarFlagsKey
         }
 
-        await (window as any).ph_load_toolbar(toolbarParams, mockPostHog)
+        await (window as any).ph_load_toolbar(toolbarParams, mockInsights)
 
         // Should not have fetched flags
         expect(mockFetch).not.toHaveBeenCalled()
-        expect(mockPostHog.featureFlags.overrideFeatureFlags).not.toHaveBeenCalled()
+        expect(mockInsights.featureFlags.overrideFeatureFlags).not.toHaveBeenCalled()
     })
 
     it('should still load toolbar even if flag fetching fails', async () => {
         await import('./index')
 
-        const mockPostHog = {
+        const mockInsights = {
             featureFlags: {
                 overrideFeatureFlags: jest.fn(),
             },
@@ -166,7 +166,7 @@ describe('Toolbar flag loading', () => {
         mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
         // Should not throw - toolbar should still load
-        await expect((window as any).ph_load_toolbar(toolbarParams, mockPostHog)).resolves.not.toThrow()
+        await expect((window as any).ph_load_toolbar(toolbarParams, mockInsights)).resolves.not.toThrow()
 
         // Verify toolbar container was created
         const container = document.querySelector('div')

@@ -15,7 +15,7 @@ import { OnboardingStepKey } from '~/types'
 
 import { availableOnboardingProducts } from '../utils'
 import {
-    getBrowsingHistoryFromPostHog,
+    getBrowsingHistoryFromInsights,
     getBrowsingHistoryLabels,
     mapAIProductsToProductKeys,
     mapBrowsingHistoryToProducts,
@@ -360,7 +360,7 @@ export const productSelectionLogic = kea<productSelectionLogicType>([
     })),
 
     afterMount(({ actions }) => {
-        const browsingHistory = getBrowsingHistoryFromPostHog()
+        const browsingHistory = getBrowsingHistoryFromInsights()
         if (browsingHistory.length > 0) {
             actions.setBrowsingHistory(browsingHistory)
 

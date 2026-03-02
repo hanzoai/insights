@@ -14,8 +14,8 @@ import type { ProductSetupConfig, SetupTask } from './types'
 export const INGEST_FIRST_EVENT = (productKey: ProductKey): SetupTask => ({
     id: SetupTaskId.IngestFirstEvent,
     title: 'Ingest your first event',
-    description: 'Get data flowing into PostHog by installing our SDK or connecting a data source.',
-    skipWarning: "Without events, your dashboards will be empty and you won't be able to explore PostHog.",
+    description: 'Get data flowing into Insights by installing our SDK or connecting a data source.',
+    skipWarning: "Without events, your dashboards will be empty and you won't be able to explore Insights.",
     taskType: 'setup',
     requiresManualCompletion: true,
     getUrl: () => urls.onboarding({ productKey, stepKey: OnboardingStepKey.INSTALL }),
@@ -26,7 +26,7 @@ export const INGEST_FIRST_EVENT = (productKey: ProductKey): SetupTask => ({
 export const SET_UP_REVERSE_PROXY: SetupTask = {
     id: SetupTaskId.SetUpReverseProxy,
     title: 'Set up a reverse proxy',
-    description: 'Improve data accuracy by routing PostHog through your own domain.',
+    description: 'Improve data accuracy by routing Insights through your own domain.',
     skipWarning: 'Without a reverse proxy, you might experience data loss from adblockers.',
     taskType: 'setup',
     getUrl: () => urls.settings('organization-proxy'),
@@ -408,7 +408,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
             {
                 id: SetupTaskId.JoinExternalData,
                 title: 'Join external data with events',
-                description: 'Combine PostHog events with external data.',
+                description: 'Combine Insights events with external data.',
                 taskType: 'explore',
                 dependsOn: [SetupTaskId.RunFirstQuery],
                 getUrl: () => urls.sqlEditor(),
@@ -481,7 +481,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
             {
                 id: SetupTaskId.IngestFirstLlmEvent,
                 title: 'Send your first LLM event',
-                description: 'Install the PostHog LLM SDK to start tracking AI usage.',
+                description: 'Install the Insights LLM SDK to start tracking AI usage.',
                 skipWarning: "Without LLM events, you can't track AI model usage.",
                 taskType: 'setup',
                 getUrl: () =>
@@ -564,7 +564,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
             {
                 id: SetupTaskId.EnableLogCapture,
                 title: 'Enable log capture',
-                description: 'Start sending logs from your application to PostHog.',
+                description: 'Start sending logs from your application to Insights.',
                 taskType: 'setup',
                 requiresManualCompletion: true,
                 docsUrl: 'https://posthog.com/docs/logs',
@@ -636,7 +636,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
             {
                 id: SetupTaskId.CreateFirstEndpoint,
                 title: 'Create your first endpoint',
-                description: 'Build an API endpoint to expose PostHog data.',
+                description: 'Build an API endpoint to expose Insights data.',
                 taskType: 'onboarding',
                 getUrl: () => urls.endpoints(),
                 targetSelector: '[data-attr="new-endpoint-button"]',

@@ -29,7 +29,7 @@ const HOG_TEMPLATE: CustomFunctionTemplateType = {
     name: 'HTTP Webhook',
     description: 'Sends a webhook templated by the incoming event data',
     code: "let res := fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.body,\n  'method': inputs.method\n});\n\nif (inputs.debug) {\n  print('Response', res.status, res.body);\n}",
-    code_language: 'hog',
+    code_language: 'custom_script',
     inputs_schema: [
         {
             key: 'url',

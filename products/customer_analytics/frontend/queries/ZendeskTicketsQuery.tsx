@@ -2,7 +2,7 @@ import { Link } from '@posthog/lemon-ui'
 
 import { DataTableNode, NodeKind } from '~/queries/schema/schema-general'
 import { QueryContext, QueryContextColumn } from '~/queries/types'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import { CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS } from '../constants'
 
@@ -37,9 +37,9 @@ export const zendeskPersonTicketsQuery = ({
     return {
         kind: NodeKind.DataTableNode,
         source: {
-            kind: NodeKind.HogQLQuery,
+            kind: NodeKind.InsightsQLQuery,
             tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
-            query: hogql`
+            query: insightsql`
               with
                 person as (
                     select properties.email as email
@@ -60,7 +60,7 @@ export const zendeskPersonTicketsQuery = ({
             select tickets.id, url, subject, status, priority, created_at, updated_at
             from tickets
             inner join zendesk_user on zendesk_user.id = tickets.requester_id
-            order by tickets.${hogql.identifier(orderBy || 'updated_at')} ${hogql.identifier(orderDirection || 'asc')}
+            order by tickets.${insightsql.identifier(orderBy || 'updated_at')} ${insightsql.identifier(orderDirection || 'asc')}
             limit 500
             `,
         },
@@ -88,16 +88,16 @@ export const zendeskGroupTicketsQuery = ({
     return {
         kind: NodeKind.DataTableNode,
         source: {
-            kind: NodeKind.HogQLQuery,
+            kind: NodeKind.InsightsQLQuery,
             tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
-            query: hogql`
+            query: insightsql`
             select t.id, t.url, t.subject, t.status, t.priority, t.created_at as created_at, t.updated_at as updated_at
             from zendesk_organizations o
             inner join zendesk_tickets t on o.id = t.organization_id
             where o.external_id = ${groupKey}
               AND (${statusFilter} = 'all' OR t.status = ${statusFilter})
               AND (${priorityFilter} = 'all' OR t.priority = ${priorityFilter})
-            order by t.${hogql.identifier(orderBy || 'updated_at')} ${hogql.identifier(orderDirection || 'asc')}
+            order by t.${insightsql.identifier(orderBy || 'updated_at')} ${insightsql.identifier(orderDirection || 'asc')}
             limit 500
             `,
         },

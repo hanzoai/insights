@@ -12,14 +12,14 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add PostHog to your Podfile:</Markdown>
+                    <Markdown>Add Insights to your Podfile:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'ruby',
                                 file: 'Podfile',
                                 code: dedent`
-                                    pod "PostHog", "~> 3.0"
+                                    pod "Insights", "~> 3.0"
                                 `,
                             },
                         ]}
@@ -32,7 +32,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'Package.swift',
                                 code: dedent`
                                     dependencies: [
-                                      .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
+                                      .package(url: "https://github.com/Insights/posthog-ios.git", from: "3.0.0")
                                     ]
                                 `,
                             },
@@ -40,7 +40,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     />
                     <CalloutBox type="fyi" title="SDK version">
                         <Markdown>
-                            Session replay requires PostHog iOS SDK version 3.6.0 or higher. We recommend always using
+                            Session replay requires Insights iOS SDK version 3.6.0 or higher. We recommend always using
                             the latest version.
                         </Markdown>
                     </CalloutBox>
@@ -53,19 +53,19 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        Go to your PostHog [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
             ),
         },
         {
-            title: 'Configure PostHog with session replay',
+            title: 'Configure Insights with session replay',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Add `sessionReplay = true` to your PostHog configuration. Here are all the available options:
+                        Add `sessionReplay = true` to your Insights configuration. Here are all the available options:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -74,7 +74,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'AppDelegate.swift',
                                 code: dedent`
                                     import Foundation
-                                    import PostHog
+                                    import Insights
                                     import UIKit
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
@@ -82,7 +82,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                             let POSTHOG_API_KEY = "<ph_project_api_key>"
                                             let POSTHOG_HOST = "<ph_client_api_host>"
 
-                                            let config = PostHogConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+                                            let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
 
                                             // Enable session recording. Requires enabling in your project settings as well.
                                             // Default is false.
@@ -106,7 +106,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                             // The screenshot may contain sensitive information, so use with caution
                                             config.sessionReplayConfig.screenshotMode = true
 
-                                            PostHogSDK.shared.setup(config)
+                                            InsightsSDK.shared.setup(config)
 
                                             return true
                                         }

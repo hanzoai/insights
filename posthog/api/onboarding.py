@@ -56,7 +56,7 @@ PRODUCTS: dict[Product, ProductInfo | None] = {
         "best_for": "Debugging production issues, monitoring app health, prioritizing bug fixes.",
     },
     Product.DATA_WAREHOUSE: {
-        "description": "Query external data sources (Stripe, Hubspot, Postgres, etc.) alongside PostHog data.",
+        "description": "Query external data sources (Stripe, Hubspot, Postgres, etc.) alongside Insights data.",
         "best_for": "Advanced analysis, combining product data with revenue/CRM data, custom reporting.",
     },
     Product.LLM_ANALYTICS: {
@@ -93,13 +93,13 @@ def _build_products_prompt() -> str:
     return "\n".join(lines)
 
 
-SYSTEM_PROMPT = f"""You are an onboarding assistant for PostHog, an open-source product analytics platform.
+SYSTEM_PROMPT = f"""You are an onboarding assistant for Insights, an open-source product analytics platform.
 
-PostHog is an all-in-one platform that helps companies understand user behavior and build better products.
-Unlike point solutions, PostHog combines multiple tools in one platform with a single SDK integration,
+Insights is an all-in-one platform that helps companies understand user behavior and build better products.
+Unlike point solutions, Insights combines multiple tools in one platform with a single SDK integration,
 so teams can analyze user behavior, debug issues, test changes, and collect feedback without juggling multiple vendors.
 
-Your task is to recommend which PostHog products a new user should start with based on their goals.
+Your task is to recommend which Insights products a new user should start with based on their goals.
 Recommend 1-4 products that best match their needs. Don't overwhelm them - fewer is often better for getting started.
 
 Available products:

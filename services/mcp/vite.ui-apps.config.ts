@@ -3,7 +3,7 @@ import { existsSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync 
 import { resolve } from 'path'
 import { type Plugin, defineConfig } from 'vite'
 
-// PostHog configuration - injected at build time
+// Insights configuration - injected at build time
 // Set POSTHOG_UI_APPS_TOKEN to enable analytics in UI apps
 const POSTHOG_UI_APPS_TOKEN = process.env.POSTHOG_UI_APPS_TOKEN || ''
 
@@ -116,13 +116,13 @@ function inlineAllAssets(): Plugin {
  * This ensures each app is completely self-contained with no shared chunks.
  *
  * Environment variables:
- * - POSTHOG_UI_APPS_TOKEN: PostHog API token for analytics (optional)
- * - POSTHOG_MCP_APPS_ANALYTICS_BASE_URL: PostHog base URL for analytics
+ * - POSTHOG_UI_APPS_TOKEN: Insights API token for analytics (optional)
+ * - POSTHOG_MCP_APPS_ANALYTICS_BASE_URL: Insights base URL for analytics
  */
 export default defineConfig({
     plugins: [react(), inlineAllAssets()],
     define: {
-        // Inject PostHog configuration at build time
+        // Inject Insights configuration at build time
         __POSTHOG_UI_APPS_TOKEN__: JSON.stringify(POSTHOG_UI_APPS_TOKEN),
         __POSTHOG_MCP_APPS_ANALYTICS_BASE_URL__: JSON.stringify(POSTHOG_MCP_APPS_ANALYTICS_BASE_URL),
     },

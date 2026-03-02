@@ -562,7 +562,7 @@ def remove_person_from_static_cohort(person_uuid: uuid.UUID, cohort_id: int, *, 
 
     Uses DELETE FROM with mutations_sync=0 and lightweight_deletes_sync=0 to avoid replica
     synchronization issues when some replicas are inactive. In tests, uses synchronous mutations
-    for deterministic behavior. This is an exception to PostHog's usual pattern due to the table
+    for deterministic behavior. This is an exception to Insights's usual pattern due to the table
     lacking an is_deleted and version columns.
     """
     tag_queries(cohort_id=cohort_id, team_id=team_id, name="remove_person_from_static_cohort", feature=Feature.COHORT)

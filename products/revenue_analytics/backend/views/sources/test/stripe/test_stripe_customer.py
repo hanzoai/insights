@@ -22,8 +22,8 @@ class TestCustomerStripeBuilder(StripeSourceBaseTest):
         self.assertQueryContainsFields(query.query, CUSTOMER_SCHEMA)
         self.assertBuiltQueryStructure(query, str(customer_table.id), f"stripe.{self.external_data_source.prefix}")
 
-        # Print and snapshot the generated HogQL query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_customer_query_with_customer_and_invoice_schemas(self):
@@ -38,8 +38,8 @@ class TestCustomerStripeBuilder(StripeSourceBaseTest):
         self.assertQueryContainsFields(query.query, CUSTOMER_SCHEMA)
         self.assertBuiltQueryStructure(query, str(customer_table.id), f"stripe.{self.external_data_source.prefix}")
 
-        # Print and snapshot the generated HogQL query (should be different from customer-only)
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query (should be different from customer-only)
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_no_customer_schema(self):
@@ -57,8 +57,8 @@ class TestCustomerStripeBuilder(StripeSourceBaseTest):
             expected_test_comments="no_schema",
         )
 
-        # Print and snapshot the generated HogQL query
-        self.assertQueryMatchesSnapshot(query.query.to_hogql(), replace_all_numbers=True)
+        # Print and snapshot the generated InsightsQL query
+        self.assertQueryMatchesSnapshot(query.query.to_insightsql(), replace_all_numbers=True)
 
     def test_build_with_customer_schema_but_no_table(self):
         """Test that build returns view even when customer schema exists but has no table."""
@@ -82,8 +82,8 @@ class TestCustomerStripeBuilder(StripeSourceBaseTest):
             expected_test_comments="no_table",
         )
 
-        # Print and snapshot the generated HogQL query
-        query_sql = query.query.to_hogql()
+        # Print and snapshot the generated InsightsQL query
+        query_sql = query.query.to_insightsql()
         self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_build_with_no_source(self):
@@ -98,7 +98,7 @@ class TestCustomerStripeBuilder(StripeSourceBaseTest):
         self.setup_stripe_external_data_source(schemas=[CUSTOMER_RESOURCE_NAME])
 
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Check for specific fields in the query based on the customer schema
         self.assertIn("id", query_sql)

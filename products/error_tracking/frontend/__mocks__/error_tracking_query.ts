@@ -83,8 +83,8 @@ const eventProperties = JSON.stringify({
     $sentry_exception__values__0__stacktrace__frames__2__colno: 117937,
     $sentry_exception__values__0__mechanism__type: 'onerror',
     $sentry_exception__values__0__mechanism__handled: false,
-    '$sentry_tags__PostHog Person URL': 'https://us.posthog.com/project/:project_id/person/:person_id',
-    '$sentry_tags__PostHog Recording URL': 'https://us.posthog.com/project/:project_id/replay/:recording_id',
+    '$sentry_tags__Insights Person URL': 'https://us.posthog.com/project/:project_id/person/:person_id',
+    '$sentry_tags__Insights Recording URL': 'https://us.posthog.com/project/:project_id/replay/:recording_id',
 })
 
 const errorTrackingTypeIssue: ErrorTrackingRelationalIssue = {

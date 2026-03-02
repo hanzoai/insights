@@ -16,7 +16,7 @@ import { newDashboardLogic } from 'scenes/dashboard/newDashboardLogic'
 
 import { DashboardTemplateType, TemplateAvailabilityContext } from '~/types'
 
-import BlankDashboardHog from 'public/blank-dashboard-hog.png'
+import BlankDashboardHog from 'public/blank-dashboard.png'
 
 export function DashboardTemplateChooser({
     scope = 'default',

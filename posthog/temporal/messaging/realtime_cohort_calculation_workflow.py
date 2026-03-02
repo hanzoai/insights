@@ -18,7 +18,7 @@ from posthog.kafka_client.client import KafkaProducer
 from posthog.kafka_client.topics import KAFKA_COHORT_MEMBERSHIP_CHANGED
 from posthog.models.cohort.cohort import Cohort, CohortType
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger
@@ -361,7 +361,7 @@ async def process_realtime_cohort_calculation_activity(inputs: RealtimeCohortCal
 
 
 @temporalio.workflow.defn(name="realtime-cohort-calculation")
-class RealtimeCohortCalculationWorkflow(PostHogWorkflow):
+class RealtimeCohortCalculationWorkflow(InsightsWorkflow):
     """Child workflow that processes realtime cohort calculations."""
 
     @staticmethod

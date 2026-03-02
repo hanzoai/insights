@@ -11,7 +11,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog Node.js library using your package manager:</Markdown>
+                    <Markdown>Install the Insights Node.js library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -41,20 +41,20 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize the PostHog client with your project API key:</Markdown>
+                    <Markdown>Initialize the Insights client with your project API key:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'javascript',
                                 file: 'Node.js',
                                 code: dedent`
-                                import { PostHog } from 'posthog-node'
+                                import { Insights } from 'posthog-node'
 
-                                const client = new PostHog(
+                                const client = new Insights(
                                     '<ph_project_api_key>',
                                     {
                                         host: '<ph_client_api_host>'

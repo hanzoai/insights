@@ -50,14 +50,14 @@ export const OnboardingReverseProxy: OnboardingStepComponentType = () => {
     return (
         <OnboardingStep title="Reverse proxy (optional)" stepKey={OnboardingStepKey.REVERSE_PROXY} showSkip>
             <div className="mb-6 mt-6">
-                <p>A reverse proxy allows you to send events to PostHog Cloud using your own domain.</p>
+                <p>A reverse proxy allows you to send events to Insights Cloud using your own domain.</p>
                 <p>
                     This means that events are sent from your own domain and are less likely to be intercepted by
-                    tracking blockers. You'll be able to capture more usage data without having to self-host PostHog.
+                    tracking blockers. You'll be able to capture more usage data without having to self-host Insights.
                 </p>
                 <p>
                     Setting up a reverse proxy means setting up a service to redirect requests from a subdomain you
-                    choose (like <span className="font-mono break-keep">e.yourdomain.com</span>) to PostHog. It is best
+                    choose (like <span className="font-mono break-keep">e.yourdomain.com</span>) to Insights. It is best
                     practice to use a subdomain that does not include posthog, analytics, tracking, or other similar
                     words.
                 </p>

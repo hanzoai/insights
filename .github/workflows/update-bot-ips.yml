@@ -65,5 +65,5 @@ jobs:
                       bot-ips
                       dependencies
                   reviewers: |
-                      PostHog/team-workflows
-                      PostHog/team-ingestion
+                      Insights/team-workflows
+                      Insights/team-ingestion

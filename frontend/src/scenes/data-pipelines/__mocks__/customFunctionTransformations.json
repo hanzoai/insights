@@ -63,7 +63,7 @@
                 "last_name": "",
                 "email": "ben@posthog.com",
                 "is_email_verified": true,
-                "hedgehog_config": null,
+                "mascot_config": null,
                 "role_at_organization": "engineering"
             },
             "updated_at": "2025-05-27T14:49:22.078803Z",
@@ -86,7 +86,7 @@
             },
             "masking": null,
             "mappings": null,
-            "icon_url": "/static/hedgehog/builder-hog-01.png",
+            "icon_url": "/static/mascot/builder-hog-01.png",
             "template": {
                 "mapping_templates": null,
                 "mappings": null,
@@ -110,7 +110,7 @@
                     ]
                 },
                 "masking": null,
-                "icon_url": "/static/hedgehog/builder-hog-01.png",
+                "icon_url": "/static/mascot/builder-hog-01.png",
                 "kind": null
             },
             "status": {

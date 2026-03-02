@@ -8,9 +8,9 @@ import supertest from 'supertest'
 import express from 'ultimate-express'
 
 import { setupExpressApp } from '~/api/router'
-import { insertHogFunction, insertHogFunctionTemplate } from '~/cdp/_tests/fixtures'
+import { insertCustomFunction, insertCustomFunctionTemplate } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
-import { HogFunctionType } from '~/cdp/types'
+import { CustomFunctionType } from '~/cdp/types'
 import { KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
@@ -132,7 +132,7 @@ describe('DWH source webhooks', () => {
         let api: CdpApi
         let app: express.Application
         let server: Server
-        let hogFunction: HogFunctionType
+        let customFunction: CustomFunctionType
 
         const schemaId = 'test-schema-id-123'
         const signingSecret = 'whsec_testsecret'
@@ -148,7 +148,7 @@ describe('DWH source webhooks', () => {
             jest.spyOn(Date, 'now').mockReturnValue(fixedTime.toMillis())
 
             // Insert the warehouse source templates into the DB
-            await insertHogFunctionTemplate(hub.postgres, {
+            await insertCustomFunctionTemplate(hub.postgres, {
                 id: STRIPE_TEMPLATE_ID,
                 name: 'Stripe warehouse source webhook',
                 type: 'warehouse_source_webhook',
@@ -156,7 +156,7 @@ describe('DWH source webhooks', () => {
                 inputs_schema: STRIPE_INPUTS_SCHEMA,
             })
 
-            await insertHogFunctionTemplate(hub.postgres, {
+            await insertCustomFunctionTemplate(hub.postgres, {
                 id: 'template-warehouse-source-default',
                 name: 'Default warehouse source webhook',
                 type: 'warehouse_source_webhook',
@@ -164,7 +164,7 @@ describe('DWH source webhooks', () => {
                 inputs_schema: [],
             })
 
-            hogFunction = await insertHogFunction(hub.postgres, team.id, {
+            customFunction = await insertCustomFunction(hub.postgres, team.id, {
                 type: 'warehouse_source_webhook',
                 template_id: STRIPE_TEMPLATE_ID,
                 bytecode: [],
@@ -207,7 +207,7 @@ describe('DWH source webhooks', () => {
             body?: Record<string, any>
         }) => {
             return supertest(app)
-                .post(`/public/webhooks/dwh/${options.webhookId ?? hogFunction.id}`)
+                .post(`/public/webhooks/dwh/${options.webhookId ?? customFunction.id}`)
                 .set('Content-Type', 'application/json')
                 .set(options.headers ?? {})
                 .send(options.body)
@@ -273,7 +273,7 @@ describe('DWH source webhooks', () => {
         })
 
         it('should bypass signature check when configured', async () => {
-            const bypassFunction = await insertHogFunction(hub.postgres, team.id, {
+            const bypassFunction = await insertCustomFunction(hub.postgres, team.id, {
                 type: 'warehouse_source_webhook',
                 template_id: STRIPE_TEMPLATE_ID,
                 bytecode: [],
@@ -302,8 +302,8 @@ describe('DWH source webhooks', () => {
             expect(kafkaMessages[0].key).toEqual(`${team.id}:${schemaId}`)
         })
 
-        it('should return 500 when schema_id is missing from hog function inputs', async () => {
-            const noSchemaFunction = await insertHogFunction(hub.postgres, team.id, {
+        it('should return 500 when schema_id is missing from custom function inputs', async () => {
+            const noSchemaFunction = await insertCustomFunction(hub.postgres, team.id, {
                 type: 'warehouse_source_webhook',
                 template_id: STRIPE_TEMPLATE_ID,
                 bytecode: [],
@@ -322,7 +322,7 @@ describe('DWH source webhooks', () => {
             })
 
             expect(res.status).toEqual(500)
-            expect(res.body).toEqual({ error: 'Missing schema_id on hog function' })
+            expect(res.body).toEqual({ error: 'Missing schema_id on custom function' })
         })
 
         it('should include the full webhook body in the Kafka payload', async () => {

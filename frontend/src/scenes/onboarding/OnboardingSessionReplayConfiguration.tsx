@@ -2,7 +2,7 @@ import { useActions } from 'kea'
 
 import { LemonButton } from '@posthog/lemon-ui'
 
-import { FilmCameraHog } from 'lib/components/hedgehogs'
+import { FilmCameraHog } from 'lib/components/mascots'
 
 import { OnboardingStepKey } from '~/types'
 

@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from temporalio import workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.llm_analytics.trace_clustering.activities import (
     emit_cluster_events_activity,
     generate_cluster_labels_activity,
@@ -116,7 +116,7 @@ def _compute_item_labeling_metadata(
 
 
 @workflow.defn(name=WORKFLOW_NAME)
-class DailyTraceClusteringWorkflow(PostHogWorkflow):
+class DailyTraceClusteringWorkflow(InsightsWorkflow):
     """
     Daily workflow to cluster LLM traces based on their embeddings.
 

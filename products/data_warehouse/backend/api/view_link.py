@@ -3,15 +3,15 @@ from typing import Optional
 from clickhouse_driver.errors import ServerException
 from rest_framework import filters, response, serializers, status, viewsets
 
-from posthog.hogql import ast
-from posthog.hogql.ast import Call, Field
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database
-from posthog.hogql.database.models import LazyJoin
-from posthog.hogql.database.utils import get_join_field_chain
-from posthog.hogql.errors import QueryError, SyntaxError
-from posthog.hogql.parser import parse_expr, parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.ast import Call, Field
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.database.models import LazyJoin
+from posthog.insightsql.database.utils import get_join_field_chain
+from posthog.insightsql.errors import QueryError, SyntaxError
+from posthog.insightsql.parser import parse_expr, parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.shared import UserBasicSerializer
@@ -37,7 +37,7 @@ class ViewLinkValidationMixin:
             return table_name
 
         table = database.get_table(table_name)
-        return table.to_printed_hogql().replace("`", "")
+        return table.to_printed_insightsql().replace("`", "")
 
     def _validate_key_uniqueness(self, field_name: str, table_name: str, team_id: int) -> None:
         if field_name is None:
@@ -194,7 +194,7 @@ class ViewLinkViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         response_data: dict[str, Optional[bool | str | list]] = {
             "is_valid": False,
             "msg": None,
-            "hogql": None,
+            "insightsql": None,
             "results": [],
         }
         status_code = status.HTTP_200_OK
@@ -229,12 +229,12 @@ class ViewLinkViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         )
 
         try:
-            query_response = execute_hogql_query(
+            query_response = execute_insightsql_query(
                 query=validation_query,
                 team=self.team,
-                context=HogQLContext(database=database),
+                context=InsightsQLContext(database=database),
             )
-            response_data["hogql"] = query_response.hogql
+            response_data["insightsql"] = query_response.insightsql
             response_data["results"] = query_response.results
             response_data["is_valid"] = True
             if len(query_response.results) == 0:
@@ -246,7 +246,7 @@ class ViewLinkViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
                 "code": e.__class__.__name__,
                 "detail": "An internal error occurred while validating.",
                 "type": "query_error",
-                "hogql": validation_query.to_hogql(),
+                "insightsql": validation_query.to_insightsql(),
             }
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR  # type: ignore[assignment]
             response_data["is_valid"] = False
@@ -259,9 +259,9 @@ class ViewLinkViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             response_data = {
                 "attr": None,
                 "code": e.__class__.__name__,
-                "detail": str(e),  # QueryError inherits from ExposedHogQLError, so it is safe to show the message
+                "detail": str(e),  # QueryError inherits from ExposedInsightsQLError, so it is safe to show the message
                 "type": "query_error",
-                "hogql": validation_query.to_hogql(),
+                "insightsql": validation_query.to_insightsql(),
             }
             status_code = status.HTTP_400_BAD_REQUEST  # type: ignore[assignment]
 

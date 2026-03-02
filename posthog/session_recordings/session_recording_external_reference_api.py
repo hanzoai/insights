@@ -152,14 +152,14 @@ class SessionRecordingExternalReferenceSerializer(serializers.ModelSerializer):
 
         if integration.kind == Integration.IntegrationKind.LINEAR:
             title = config.get("title", "")
-            config["description"] = f"{config.get('description', '')}\n\nPostHog recording: {recording_url}"
+            config["description"] = f"{config.get('description', '')}\n\nInsights recording: {recording_url}"
             external_context = LinearIntegration(integration).create_issue(
                 team.pk, session_recording.session_id, config
             )
             external_context["title"] = title
         elif integration.kind == Integration.IntegrationKind.GITHUB:
             title = config.get("title", "")
-            config["body"] = f"{config.get('body', '')}\n\n**PostHog recording:** {recording_url}"
+            config["body"] = f"{config.get('body', '')}\n\n**Insights recording:** {recording_url}"
             response = GitHubIntegration(integration).create_issue(config)
             external_context = {
                 "id": f"#{response.get('number', '')}",
@@ -168,7 +168,7 @@ class SessionRecordingExternalReferenceSerializer(serializers.ModelSerializer):
             }
         elif integration.kind == Integration.IntegrationKind.GITLAB:
             title = config.get("title", "")
-            config["body"] = f"{config.get('body', '')}\n\n**PostHog recording:** {recording_url}"
+            config["body"] = f"{config.get('body', '')}\n\n**Insights recording:** {recording_url}"
             response = GitLabIntegration(integration).create_issue(config)
             if not response.get("issue_id"):
                 raise ValidationError("Failed to create GitLab issue")
@@ -180,7 +180,7 @@ class SessionRecordingExternalReferenceSerializer(serializers.ModelSerializer):
         elif integration.kind == Integration.IntegrationKind.JIRA:
             title = config.get("title", "")
             project_key = config.get("project_key", "")
-            config["description"] = f"{config.get('description', '')}\n\nPostHog recording: {recording_url}"
+            config["description"] = f"{config.get('description', '')}\n\nInsights recording: {recording_url}"
             response = JiraIntegration(integration).create_issue(config)
             external_context = {
                 "id": response.get("key", ""),

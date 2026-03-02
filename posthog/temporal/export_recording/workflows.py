@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from temporalio import common, workflow
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.export_recording.activities import (
     build_recording_export_context,
     cleanup_export_data,
@@ -18,7 +18,7 @@ from posthog.temporal.export_recording.types import ExportRecordingInput
 
 
 @workflow.defn(name="export-recording")
-class ExportRecordingWorkflow(PostHogWorkflow):
+class ExportRecordingWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(input: list[str]) -> ExportRecordingInput:
         return ExportRecordingInput(**json.loads(input[0]))

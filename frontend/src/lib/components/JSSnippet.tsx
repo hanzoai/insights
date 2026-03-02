@@ -8,7 +8,7 @@ import { apiHostOrigin } from 'lib/utils/apiHost'
 import { domainFor, proxyLogic } from 'scenes/settings/environment/proxyLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from '~/loadPostHogJS'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
 function snippetFunctions(arrayJs = '/static/array.js'): string {
     const methods: string[] = []
@@ -50,7 +50,7 @@ export function useJsSnippet(indent = 0, arrayJs?: string, scriptAttributes?: st
         },
         ui_host: {
             content: apiHostOrigin(),
-            comment: "necessary because you're using a proxy, this way links will point back to PostHog properly",
+            comment: "necessary because you're using a proxy, this way links will point back to Insights properly",
             enabled: !!proxyRecord,
         },
         defaults: {

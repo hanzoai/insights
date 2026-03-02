@@ -12,7 +12,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/",
             {
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as event from events LIMIT 100",
                 },
             },
@@ -22,7 +22,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         self.assertEqual(
             draft["query"],
             {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
         )
@@ -34,7 +34,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             team=self.team,
             created_by=self.user,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
         )
@@ -43,7 +43,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/{draft.id}/",
             {
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as updated from events LIMIT 100",
                 },
             },
@@ -54,7 +54,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         self.assertEqual(
             draft.query,
             {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as updated from events LIMIT 100",
             },
         )
@@ -66,7 +66,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             team=self.team,
             created_by=self.user,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
             name="test_draft",
@@ -86,7 +86,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             team=self.team,
             created_by=self.user,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
             name="test_draft",
@@ -95,7 +95,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
         DataWarehouseSavedQueryDraft.objects.create(
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
             name="test_draft_2",
@@ -104,7 +104,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             team=team2,
             created_by=self.user,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event as event from events LIMIT 100",
             },
             name="test_draft_2",
@@ -134,7 +134,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             name="test_query",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "select event from events LIMIT 50",
             },
         )
@@ -143,7 +143,7 @@ class TestDataWarehouseSavedQueryDraft(APIBaseTest):
             f"/api/environments/{self.team.pk}/warehouse_saved_query_drafts/",
             {
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select event as updated_event from events LIMIT 100",
                 },
                 "saved_query_id": str(saved_query.id),

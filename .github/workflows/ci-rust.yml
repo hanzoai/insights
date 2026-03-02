@@ -16,7 +16,7 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        if: github.repository == 'PostHog/posthog'
+        if: github.repository == 'Insights/posthog'
         name: Determine need to run Rust checks
         permissions:
             contents: read

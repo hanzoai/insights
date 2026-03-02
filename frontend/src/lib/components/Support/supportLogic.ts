@@ -243,7 +243,7 @@ export const TARGET_AREA_TO_NAME = [
             {
                 value: 'max-ai',
                 'data-attr': `support-form-target-area-max-ai`,
-                label: 'PostHog AI',
+                label: 'Insights AI',
             },
             {
                 value: 'mcp-server',
@@ -390,7 +390,7 @@ export const SUPPORT_TICKET_TEMPLATES = {
 export function getURLPathToTargetArea(pathname: string): SupportTicketTargetArea | null {
     const pathParts = pathname.split('/')
 
-    if (pathname.includes('pipeline/destinations/') && !pathname.includes('/hog-')) {
+    if (pathname.includes('pipeline/destinations/') && !pathname.includes('/script-')) {
         return 'batch_exports'
     }
 
@@ -508,7 +508,7 @@ export const supportLogic = kea<supportLogicType>([
             (sendSupportRequest) =>
                 sendSupportRequest.kind
                     ? SUPPORT_TICKET_KIND_TO_TITLE[sendSupportRequest.kind]
-                    : 'Leave a message with PostHog',
+                    : 'Leave a message with Insights',
         ],
         targetArea: [
             (s) => [s.sendSupportRequest],

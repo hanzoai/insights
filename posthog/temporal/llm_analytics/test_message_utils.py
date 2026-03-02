@@ -54,7 +54,7 @@ class TestExtractTextFromMessages:
         assert result == "user: First part Second part"
 
     def test_output_choices_format(self):
-        """Test extraction from $ai_output_choices format (real PostHog events)"""
+        """Test extraction from $ai_output_choices format (real Insights events)"""
         messages = [
             {
                 "content": "Looks like today weather decided to audition for a soap opera",

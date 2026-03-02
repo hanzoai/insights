@@ -32,7 +32,7 @@ class SnapchatAdsSource(SimpleSource[SnapchatAdsSourceConfig], OAuthMixin):
         return SourceConfig(
             name=SchemaExternalDataSourceType.SNAPCHAT_ADS,
             label="Snapchat Ads",
-            caption="Collect campaign data, ad performance, and advertising metrics from Snapchat Ads. Ensure you have granted PostHog access to your Snapchat Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/snapchat-ads).",
+            caption="Collect campaign data, ad performance, and advertising metrics from Snapchat Ads. Ensure you have granted Insights access to your Snapchat Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/snapchat-ads).",
             betaSource=True,
             unreleasedSource=True,
             featureFlag="snapchat-ads-source",

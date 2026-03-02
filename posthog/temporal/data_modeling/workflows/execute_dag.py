@@ -8,7 +8,7 @@ import temporalio.workflow
 import temporalio.exceptions
 
 from posthog.exceptions_capture import capture_exception
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.data_modeling.activities import GetDAGStructureInputs, get_dag_structure_activity
 from posthog.temporal.data_modeling.workflows.materialize_view import (
     MaterializeViewWorkflow,
@@ -158,7 +158,7 @@ def _dag_execution_levels(
 
 
 @temporalio.workflow.defn(name="data-modeling-execute-dag")
-class ExecuteDAGWorkflow(PostHogWorkflow):
+class ExecuteDAGWorkflow(InsightsWorkflow):
     """Temporal workflow to orchestrate materialization of all nodes in a DAG.
 
     This workflow:

@@ -2,33 +2,33 @@ import Chance from 'chance'
 import { merge as mergeDeep } from 'lodash'
 import { Settings } from 'luxon'
 
-import { getTransformationFunctions } from '~/cdp/hog-transformations/transformation-functions'
-import { formatLiquidInput } from '~/cdp/services/hog-inputs.service'
+import { getTransformationFunctions } from '~/cdp/script-transformations/transformation-functions'
+import { formatLiquidInput } from '~/cdp/services/script-inputs.service'
 import { NativeDestinationExecutorService } from '~/cdp/services/native-destination-executor.service'
-import { isNativeHogFunction } from '~/cdp/utils'
+import { isNativeCustomFunction } from '~/cdp/utils'
 import { defaultConfig } from '~/config/config'
 import { CyclotronInputType } from '~/schema/cyclotron'
 import { GeoIPService, GeoIp } from '~/utils/geoip'
 
 import { Hub } from '../../../types'
-import { HogExecutorService } from '../../services/hog-executor.service'
+import { ScriptExecutorService } from '../../services/script-executor.service'
 import {
-    CyclotronJobInvocationHogFunction,
+    CyclotronJobInvocationCustomFunction,
     CyclotronJobInvocationResult,
-    HogFunctionInputSchemaType,
-    HogFunctionInvocationGlobals,
-    HogFunctionInvocationGlobalsWithInputs,
-    HogFunctionTemplate,
-    HogFunctionTemplateCompiled,
-    HogFunctionType,
+    CustomFunctionInputSchemaType,
+    CustomFunctionInvocationGlobals,
+    CustomFunctionInvocationGlobalsWithInputs,
+    CustomFunctionTemplate,
+    CustomFunctionTemplateCompiled,
+    CustomFunctionType,
     MinimalLogEntry,
     NativeTemplate,
 } from '../../types'
 import { cloneInvocation, createInvocation } from '../../utils/invocation-utils'
-import { compileHog } from '../compiler'
+import { compileScript } from '../compiler'
 
 /**
- * Sets templating value of 'hog' or 'liquid' on hog inputs based on the template used.
+ * Sets templating value of 'custom_script' or 'liquid' on hog inputs based on the template used.
  */
 export function propagateTemplatingFromSchema(template: any, input: any): any {
     const templatedInputs = { ...input }
@@ -41,7 +41,7 @@ export function propagateTemplatingFromSchema(template: any, input: any): any {
                     if (!templatedInputs[field.key] || typeof templatedInputs[field.key] !== 'object') {
                         templatedInputs[field.key] = { value: templatedInputs[field.key] }
                     }
-                    templatedInputs[field.key]['templating'] = 'hog'
+                    templatedInputs[field.key]['templating'] = 'custom_script'
                 }
                 // If False, do not set templating field
             } else {
@@ -56,17 +56,17 @@ export function propagateTemplatingFromSchema(template: any, input: any): any {
     return templatedInputs
 }
 
-export type DeepPartialHogFunctionInvocationGlobals = {
-    event?: Partial<HogFunctionInvocationGlobals['event']>
-    person?: Partial<HogFunctionInvocationGlobals['person']>
-    source?: Partial<HogFunctionInvocationGlobals['source']>
-    request?: HogFunctionInvocationGlobals['request']
+export type DeepPartialCustomFunctionInvocationGlobals = {
+    event?: Partial<CustomFunctionInvocationGlobals['event']>
+    person?: Partial<CustomFunctionInvocationGlobals['person']>
+    source?: Partial<CustomFunctionInvocationGlobals['source']>
+    request?: CustomFunctionInvocationGlobals['request']
 }
 
 const compileObject = async (
     obj: any,
     globals?: any,
-    templating_engine: boolean | 'hog' | 'liquid' = 'hog'
+    templating_engine: boolean | 'custom_script' | 'liquid' = 'custom_script'
 ): Promise<any> => {
     if (Array.isArray(obj)) {
         return Promise.all(obj.map((item) => compileObject(item, globals, templating_engine)))
@@ -80,16 +80,16 @@ const compileObject = async (
         // If the string looks like a Liquid template, render it first
         if (templating_engine === 'liquid') {
             const rendered = formatLiquidInput(obj, globals || createGlobals())
-            return await compileHog(`return f'${rendered}'`)
+            return await compileScript(`return f'${rendered}'`)
         }
-        return await compileHog(`return f'${obj}'`)
+        return await compileScript(`return f'${obj}'`)
     } else {
         return obj
     }
 }
 
 export const compileInputs = async (
-    template: HogFunctionTemplate | NativeTemplate,
+    template: CustomFunctionTemplate | NativeTemplate,
     _inputs: Record<string, any>,
     globals?: any
 ): Promise<Record<string, CyclotronInputType>> => {
@@ -112,7 +112,7 @@ export const compileInputs = async (
             if (schema?.templating === false) {
                 return [key, value]
             }
-            return [key, await compileObject(value, globals, schema?.templating || 'hog')]
+            return [key, await compileObject(value, globals, schema?.templating || 'custom_script')]
         })
     )
 
@@ -129,12 +129,12 @@ export const compileInputs = async (
 }
 
 const createGlobals = (
-    globals: DeepPartialHogFunctionInvocationGlobals = {}
-): HogFunctionInvocationGlobalsWithInputs => {
+    globals: DeepPartialCustomFunctionInvocationGlobals = {}
+): CustomFunctionInvocationGlobalsWithInputs => {
     return {
         ...globals,
         inputs: {},
-        project: { id: 1, name: 'project-name', url: 'https://us.posthog.com/projects/1' },
+        project: { id: 1, name: 'project-name', url: 'https://us.hanzo.ai/projects/1' },
         event: {
             uuid: 'event-id',
             event: 'event-name',
@@ -142,27 +142,27 @@ const createGlobals = (
             properties: { $current_url: 'https://example.com', ...globals.event?.properties },
             timestamp: '2024-01-01T00:00:00Z',
             elements_chain: '',
-            url: 'https://us.posthog.com/projects/1/events/1234',
+            url: 'https://us.hanzo.ai/projects/1/events/1234',
             ...globals.event,
         },
         person: {
             id: 'person-id',
             name: 'person-name',
-            properties: { email: 'example@posthog.com', ...globals.person?.properties },
-            url: 'https://us.posthog.com/projects/1/persons/1234',
+            properties: { email: 'example@hanzo.ai', ...globals.person?.properties },
+            url: 'https://us.hanzo.ai/projects/1/persons/1234',
             ...globals.person,
         },
         source: {
-            url: 'https://us.posthog.com/hog_functions/1234',
-            name: 'hog-function-name',
+            url: 'https://us.hanzo.ai/custom_functions/1234',
+            name: 'custom-function-name',
             ...globals.source,
         },
     }
 }
 
 export class TemplateTester {
-    public template: HogFunctionTemplateCompiled
-    private hogExecutor: HogExecutorService
+    public template: CustomFunctionTemplateCompiled
+    private scriptExecutor: ScriptExecutorService
     private nativeExecutor: NativeDestinationExecutorService
     private mockHub: Hub
 
@@ -171,7 +171,7 @@ export class TemplateTester {
 
     public mockFetch = jest.fn()
     public mockPrint = jest.fn()
-    constructor(private _template: HogFunctionTemplate) {
+    constructor(private _template: CustomFunctionTemplate) {
         this.template = {
             ..._template,
             bytecode: [],
@@ -179,17 +179,17 @@ export class TemplateTester {
 
         this.mockHub = { ...defaultConfig } as any
 
-        this.hogExecutor = new HogExecutorService(this.mockHub)
+        this.scriptExecutor = new ScriptExecutorService(this.mockHub)
         this.nativeExecutor = new NativeDestinationExecutorService(defaultConfig)
     }
 
-    private getExecutor(): HogExecutorService | NativeDestinationExecutorService {
-        return isNativeHogFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.hogExecutor
+    private getExecutor(): ScriptExecutorService | NativeDestinationExecutorService {
+        return isNativeCustomFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.scriptExecutor
     }
 
     /*
     we need transformResult to be able to test the geoip template
-    the same way we did it here https://github.com/PostHog/posthog-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
+    the same way we did it here https://github.com/Insights/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
     */
     async beforeEach() {
         Settings.defaultZone = 'UTC'
@@ -203,10 +203,10 @@ export class TemplateTester {
 
         this.template = {
             ...this._template,
-            bytecode: await compileHog(this._template.code),
+            bytecode: await compileScript(this._template.code),
         }
 
-        this.hogExecutor = new HogExecutorService(this.mockHub)
+        this.scriptExecutor = new ScriptExecutorService(this.mockHub)
         this.nativeExecutor = new NativeDestinationExecutorService(this.mockHub)
     }
 
@@ -214,26 +214,26 @@ export class TemplateTester {
         Settings.defaultZone = 'system'
     }
 
-    createGlobals(globals: DeepPartialHogFunctionInvocationGlobals = {}): HogFunctionInvocationGlobalsWithInputs {
+    createGlobals(globals: DeepPartialCustomFunctionInvocationGlobals = {}): CustomFunctionInvocationGlobalsWithInputs {
         return createGlobals(globals)
     }
 
     async invoke(
         _inputs: Record<string, any>,
-        _globals?: DeepPartialHogFunctionInvocationGlobals
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationHogFunction>> {
+        _globals?: DeepPartialCustomFunctionInvocationGlobals
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
         if (this.template.mapping_templates) {
             throw new Error('Mapping templates found. Use invokeMapping instead.')
         }
 
         const globals = this.createGlobals(_globals)
-        // Pass globals to compileInputs so Liquid templates are rendered before hog compilation
+        // Pass globals to compileInputs so Liquid templates are rendered before script compilation
         const compiledInputs = await compileInputs(this.template, _inputs, globals)
 
         const { code, ...partialTemplate } = this.template
-        const hogFunction: HogFunctionType = {
+        const customFunction: CustomFunctionType = {
             ...partialTemplate,
-            hog: code,
+            script: code,
             inputs: compiledInputs,
             bytecode: this.template.bytecode,
             team_id: 1,
@@ -245,10 +245,10 @@ export class TemplateTester {
             template_id: this.template.id,
         }
 
-        const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(hogFunction, globals)
-        const invocation = createInvocation(globalsWithInputs, hogFunction)
+        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(customFunction, globals)
+        const invocation = createInvocation(globalsWithInputs, customFunction)
         const transformationFunctions = getTransformationFunctions(this.geoIp!)
-        const extraFunctions = invocation.hogFunction.type === 'transformation' ? transformationFunctions : {}
+        const extraFunctions = invocation.customFunction.type === 'transformation' ? transformationFunctions : {}
 
         return this.getExecutor().execute(invocation, { functions: extraFunctions })
     }
@@ -256,9 +256,9 @@ export class TemplateTester {
     async invokeMapping(
         mapping_name: string,
         _inputs: Record<string, any>,
-        _globals?: DeepPartialHogFunctionInvocationGlobals,
+        _globals?: DeepPartialCustomFunctionInvocationGlobals,
         mapping_inputs?: Record<string, any>
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationHogFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
         if (!this.template.mapping_templates) {
             throw new Error('No mapping templates found')
         }
@@ -301,9 +301,9 @@ export class TemplateTester {
         compiledMappingInputs.inputs = inputsObj
 
         const { code, ...partialTemplate } = this.template
-        const hogFunction: HogFunctionType = {
+        const customFunction: CustomFunctionType = {
             ...partialTemplate,
-            hog: code,
+            script: code,
             team_id: 1,
             enabled: true,
             created_at: '2024-01-01T00:00:00Z',
@@ -313,21 +313,21 @@ export class TemplateTester {
             mappings: [compiledMappingInputs],
         }
 
-        const globalsWithInputs = await this.hogExecutor.buildInputsWithGlobals(
-            hogFunction,
+        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(
+            customFunction,
             this.createGlobals(_globals),
             compiledMappingInputs.inputs
         )
 
-        const invocation = createInvocation(globalsWithInputs, hogFunction)
+        const invocation = createInvocation(globalsWithInputs, customFunction)
 
         return this.getExecutor().execute(invocation)
     }
 
     async invokeFetchResponse(
-        invocation: CyclotronJobInvocationHogFunction,
+        invocation: CyclotronJobInvocationCustomFunction,
         response: { status: number; body: Record<string, any> }
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationHogFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
         const modifiedInvocation = cloneInvocation(invocation)
 
         modifiedInvocation.state.vmState!.stack.push({
@@ -335,7 +335,7 @@ export class TemplateTester {
             body: response.body,
         })
 
-        const result = await this.hogExecutor.execute(modifiedInvocation)
+        const result = await this.scriptExecutor.execute(modifiedInvocation)
         result.logs = this.logsForSnapshot(result.logs)
 
         return result
@@ -352,8 +352,8 @@ export class TemplateTester {
 }
 
 export const createAdDestinationPayload = (
-    globals?: DeepPartialHogFunctionInvocationGlobals
-): DeepPartialHogFunctionInvocationGlobals => {
+    globals?: DeepPartialCustomFunctionInvocationGlobals
+): DeepPartialCustomFunctionInvocationGlobals => {
     let defaultPayload = {
         event: {
             properties: {},
@@ -362,12 +362,12 @@ export const createAdDestinationPayload = (
             timestamp: '2025-01-01T00:00:00Z',
             distinct_id: 'distinct-id',
             elements_chain: '',
-            url: 'https://us.posthog.com/projects/1/events/1234',
+            url: 'https://us.hanzo.ai/projects/1/events/1234',
         },
         person: {
             id: 'person-id',
             properties: {
-                email: 'example@posthog.com',
+                email: 'example@hanzo.ai',
                 ttclid: 'tiktok-id',
                 gclid: 'google-id',
                 sccid: 'snapchat-id',
@@ -377,7 +377,7 @@ export const createAdDestinationPayload = (
                 first_name: 'Max',
                 last_name: 'AI',
             },
-            url: 'https://us.posthog.com/projects/1/persons/1234',
+            url: 'https://us.hanzo.ai/projects/1/persons/1234',
         },
     }
 
@@ -388,10 +388,10 @@ export const createAdDestinationPayload = (
 
 export const generateTestData = (
     seedName: string,
-    input_schema: HogFunctionInputSchemaType[],
+    input_schema: CustomFunctionInputSchemaType[],
     requiredFieldsOnly: boolean = false
 ): Record<string, any> => {
-    const generateValue = (input: HogFunctionInputSchemaType): any => {
+    const generateValue = (input: CustomFunctionInputSchemaType): any => {
         const chance = new Chance(seedName)
 
         if (Array.isArray(input.choices)) {
@@ -399,7 +399,7 @@ export const generateTestData = (
             return choice.value
         }
 
-        const getFormat = (input: HogFunctionInputSchemaType): string => {
+        const getFormat = (input: CustomFunctionInputSchemaType): string => {
             if (input.key === 'url') {
                 return 'uri'
             } else if (input.key === 'email') {

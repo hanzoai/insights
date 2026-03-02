@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { registerAsyncFunction } from '../async-function-registry'
 
 /**
- * Example of a simple async function that writes arguments to the invocation logs. Once an async function has been registered, it can be called from a HogFunction.
+ * Example of a simple async function that writes arguments to the invocation logs. Once an async function has been registered, it can be called from a CustomFunction.
  *
  * If you're trying to add a new realtime destination or workflow action that will use your async function, these are defined in nodejs/src/cdp/templates/_destinations.
  *
@@ -12,9 +12,9 @@ import { registerAsyncFunction } from '../async-function-registry'
 registerAsyncFunction('foobar', {
     /**
      *
-     * @param args the arguments passed from the Hog code, for example `foobar('i am foo', {'key': 200}, 'i am baz')`
+     * @param args the arguments passed from the Script code, for example `foobar('i am foo', {'key': 200}, 'i am baz')`
      * @param _context includes the invocation details, any global variables attached to the invocation, and a reference to
-     *   the HogExecutorServiceHub which provides access to other services and data (e.g. teamManager, featureFlagManager, etc.)
+     *   the ScriptExecutorServiceHub which provides access to other services and data (e.g. teamManager, featureFlagManager, etc.)
      * @param _result the current state of the invocation result, which can be modified by the async function and serves as a place to store
      *   its return value and/or modify the invocation.
      *   For example, you can set a value for a key on result.invocation, and that value would then be accessible in subsequent async functions.

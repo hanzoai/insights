@@ -62,11 +62,11 @@ def route_slack_event_to_relevant_region(request: HttpRequest, event: dict, slac
         if event.get("type") == "app_mention":
             handle_app_mention(event, integration)
     elif request.get_host() == SLACK_PRIMARY_REGION_DOMAIN:
-        # We aren't in the right region OR the Slack workspace is not connected to any PostHog project in ANY region
+        # We aren't in the right region OR the Slack workspace is not connected to any Insights project in ANY region
         # OR we're in dev and the request hasn't been proxied once yet
         proxy_slack_event_to_secondary_region(request)
     else:
-        # The Slack workspace definitively is not connected to any PostHog project in ANY region
+        # The Slack workspace definitively is not connected to any Insights project in ANY region
         logger.warning("slack_app_no_integration_found", slack_team_id=slack_team_id)
         return
 
@@ -132,11 +132,11 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                 channel=channel,
                 user=slack_user_id,
                 thread_ts=thread_ts,
-                text="Hold your hedgehogs! Looks like this PostHog AI is already in flight in this Slack thread – wait for the answer first.",
+                text="Hold your mascots! Looks like this Insights AI is already in flight in this Slack thread – wait for the answer first.",
             )
             return
 
-        # Look up Slack user's email and match to PostHog user
+        # Look up Slack user's email and match to Insights user
         try:
             slack_user_info = slack.client.users_info(user=slack_user_id)
             empty: dict[str, Any] = {}
@@ -153,7 +153,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
             if get_instance_region() == "DEV" and not slack_email.endswith("@posthog.com"):
                 # In dev deployment, always go to the test account - this is to let the Slack folks test on the test account
                 slack_email = "twixes3d+slacktest@gmail.com"
-            # Find PostHog user by email
+            # Find Insights user by email
             membership = (
                 OrganizationMembership.objects.filter(
                     organization_id=integration.team.organization_id, user__email=slack_email
@@ -169,7 +169,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                     thread_ts=thread_ts,
                     text=(
                         f"Sorry, I couldn't find {slack_email} in the {organization_name} organization. "
-                        f"Please make sure you're a member of that PostHog organization."
+                        f"Please make sure you're a member of that Insights organization."
                     ),
                 )
                 return
@@ -190,8 +190,8 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                     user=slack_user_id,
                     thread_ts=thread_ts,
                     text=(
-                        f"Sorry, you don't have access to the PostHog project connected to this Slack workspace. "
-                        f"Please ask an admin of your PostHog organization to grant you access."
+                        f"Sorry, you don't have access to the Insights project connected to this Slack workspace. "
+                        f"Please ask an admin of your Insights organization to grant you access."
                     ),
                 )
                 return
@@ -288,7 +288,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
 
         thinking_message = f"I'm {random.choice(THINKING_MESSAGES).lower()}..."
 
-        # Build blocks for the initial message - only include "View chat in PostHog" if we have an existing conversation
+        # Build blocks for the initial message - only include "View chat in Insights" if we have an existing conversation
         initial_blocks: list[dict] = [
             {
                 "type": "section",
@@ -303,7 +303,7 @@ def handle_app_mention(event: dict, integration: Integration) -> None:
                     "elements": [
                         {
                             "type": "button",
-                            "text": {"type": "plain_text", "text": "View chat in PostHog", "emoji": True},
+                            "text": {"type": "plain_text", "text": "View chat in Insights", "emoji": True},
                             "url": conversation_url,
                         }
                     ],

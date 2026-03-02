@@ -2,7 +2,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import {
     type CreatedResources,
-    SAMPLE_HOGQL_QUERIES,
+    SAMPLE_INSIGHTSQL_QUERIES,
     TEST_ORG_ID,
     TEST_PROJECT_ID,
     cleanupResources,
@@ -253,7 +253,7 @@ describe('Dashboards', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Insight 1'),
                     description: 'First insight',
-                    query: SAMPLE_HOGQL_QUERIES.pageviews,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.pageviews,
                     favorited: false,
                 },
             })
@@ -264,7 +264,7 @@ describe('Dashboards', { concurrent: false }, () => {
                 data: {
                     name: generateUniqueKey('Insight 2'),
                     description: 'Second insight',
-                    query: SAMPLE_HOGQL_QUERIES.topEvents,
+                    query: SAMPLE_INSIGHTSQL_QUERIES.topEvents,
                     favorited: false,
                 },
             })

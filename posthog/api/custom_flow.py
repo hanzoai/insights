@@ -380,7 +380,7 @@ class CustomFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetricsMixin, 
 
         log_activity_from_viewset(self, serializer.instance, name=serializer.instance.name, previous=before_update)
 
-        # PostHog capture for custom_flow activated (draft -> active)
+        # Insights capture for custom_flow activated (draft -> active)
         if (
             before_update
             and before_update.status == CustomFlow.State.DRAFT

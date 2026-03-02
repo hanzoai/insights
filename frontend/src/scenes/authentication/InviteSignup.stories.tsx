@@ -27,7 +27,7 @@ const meta: Meta = {
                         id: '1234',
                         target_email: 'b*@posthog.com',
                         first_name: 'Jane Doe',
-                        organization_name: 'PostHog',
+                        organization_name: 'Insights',
                     },
                 ],
             },

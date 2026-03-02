@@ -44,7 +44,7 @@ import {
     isDataVisualizationNode,
     isEndpointsUsageQuery,
     isFunnelsQuery,
-    isHogQuery,
+    isScriptQuery,
     isInsightQueryWithBreakdown,
     isInsightQueryWithSeries,
     isInsightVizNode,
@@ -164,7 +164,7 @@ export const insightNavLogic = kea<insightNavLogicType>([
                     return InsightType.JSON
                 } else if (containsInsightsQLQuery(query)) {
                     return InsightType.SQL
-                } else if (isHogQuery(query)) {
+                } else if (isScriptQuery(query)) {
                     return InsightType.HOG
                 } else if (isInsightVizNode(query)) {
                     // Check for Web Analytics queries first before using the mapping
@@ -214,9 +214,9 @@ export const insightNavLogic = kea<insightNavLogicType>([
 
                 if (featureFlags[FEATURE_FLAGS.HOG] || activeView === InsightType.HOG) {
                     tabs.push({
-                        label: <>Hog 🦔</>,
+                        label: <>SQL</>,
                         type: InsightType.HOG,
-                        dataAttr: 'insight-hog-tab',
+                        dataAttr: 'insight-sql-tab',
                     })
                 }
 

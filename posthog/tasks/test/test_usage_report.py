@@ -1196,7 +1196,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
         return super().setUp()
 
     def _setup_teams(self) -> None:
-        self.analytics_org = Organization.objects.create(name="PostHog")
+        self.analytics_org = Organization.objects.create(name="Insights")
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_2 = Organization.objects.create(name="Org 2")
 
@@ -1457,7 +1457,7 @@ class TestSurveysUsageReport(ClickhouseDestroyTablesMixin, TestCase, ClickhouseT
         return super().setUp()
 
     def _setup_teams(self) -> None:
-        self.analytics_org = Organization.objects.create(name="PostHog")
+        self.analytics_org = Organization.objects.create(name="Insights")
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_2 = Organization.objects.create(name="Org 2")
 
@@ -1593,7 +1593,7 @@ class TestExternalDataSyncUsageReport(ClickhouseDestroyTablesMixin, TestCase, Cl
         return super().setUp()
 
     def _setup_teams(self) -> None:
-        self.analytics_org = Organization.objects.create(name="PostHog")
+        self.analytics_org = Organization.objects.create(name="Insights")
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_2 = Organization.objects.create(name="Org 2")
 
@@ -2190,7 +2190,7 @@ class TestDWHStorageUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhou
         return super().setUp()
 
     def _setup_teams(self) -> None:
-        self.analytics_org = Organization.objects.create(name="PostHog")
+        self.analytics_org = Organization.objects.create(name="Insights")
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_2 = Organization.objects.create(name="Org 2")
 
@@ -2611,7 +2611,7 @@ class TestErrorTrackingUsageReport(ClickhouseDestroyTablesMixin, TestCase, Click
         return super().setUp()
 
     def _setup_teams(self) -> None:
-        self.analytics_org = Organization.objects.create(name="PostHog")
+        self.analytics_org = Organization.objects.create(name="Insights")
         self.org_1 = Organization.objects.create(name="Org 1")
         self.org_2 = Organization.objects.create(name="Org 2")
 
@@ -2802,7 +2802,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         mock_region.return_value = "US"
         self._setup_teams()
         # Create analytics team (team_id=2 for billing)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -2862,7 +2862,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         mock_region.return_value = "US"
         self._setup_teams()
         # Create analytics team (team_id=2 for billing)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -2919,7 +2919,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
 
         mock_region.return_value = "US"
         self._setup_teams()
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -2978,7 +2978,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
 
         mock_region.return_value = "US"
         self._setup_teams()
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3037,7 +3037,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
 
         mock_region.return_value = "US"
         self._setup_teams()
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3103,7 +3103,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         mock_region.return_value = "US"
         self._setup_teams()
         # Create analytics team (team_id=2 for billing)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3168,7 +3168,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         mock_region.return_value = "US"
         self._setup_teams()
         # Create analytics team (team_id=2 for billing)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3241,7 +3241,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         mock_region.return_value = "US"
         self._setup_teams()
         # Create analytics team (team_id=2 for billing)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3337,7 +3337,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
         mock_region.return_value = "US"
         self._setup_teams()
         # Create analytics team (team_id=2 for billing)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3400,7 +3400,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
 
         self._setup_teams()
         # Create analytics team for US (team_id=2)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         analytics_team_us = Team.objects.create(pk=2, organization=analytics_org, name="Analytics US")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -3485,7 +3485,7 @@ class TestAIEventsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickhouse
 
         self._setup_teams()
         # Create analytics team for EU (team_id=1)
-        analytics_org = Organization.objects.create(name="PostHog Analytics EU")
+        analytics_org = Organization.objects.create(name="Insights Analytics EU")
         analytics_team_eu = Team.objects.create(pk=1, organization=analytics_org, name="Analytics EU")
 
         period = get_previous_day(at=now() + relativedelta(days=1))
@@ -4088,7 +4088,7 @@ class TestQuerySplitting(ClickhouseDestroyTablesMixin, ClickhouseTestMixin, Test
         self.team = Team.objects.create(organization=Organization.objects.create(name="test"))
 
         # Create analytics team for AI credits tests (team 2 for US region)
-        analytics_org = Organization.objects.create(name="PostHog Analytics")
+        analytics_org = Organization.objects.create(name="Insights Analytics")
         self.analytics_team = Team.objects.create(pk=2, organization=analytics_org, name="Analytics")
 
         # Create test events across a time period

@@ -150,7 +150,7 @@ def get_scoped_models() -> tuple[dict[str, set[str]], set[str]]:
         "ErrorTrackingIssueFingerprint",
         "ExperimentTimeseriesRecalculation",
         "GroupUsageMetric",
-        "HogFunctionInvocationLog",
+        "CustomFunctionInvocationLog",
         "HostDefinition",
         "MaterializedColumnSlot",
         "MessagingRecord",

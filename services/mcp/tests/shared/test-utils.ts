@@ -121,13 +121,13 @@ export function generateUniqueKey(prefix: string): string {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(7)}`
 }
 
-type SampleHogQLQuery = 'pageviews' | 'topEvents'
+type SampleInsightsQLQuery = 'pageviews' | 'topEvents'
 
-export const SAMPLE_HOGQL_QUERIES: Record<SampleHogQLQuery, InsightQuery> = {
+export const SAMPLE_INSIGHTSQL_QUERIES: Record<SampleInsightsQLQuery, InsightQuery> = {
     pageviews: {
         kind: 'DataVisualizationNode',
         source: {
-            kind: 'HogQLQuery',
+            kind: 'InsightsQLQuery',
             query: "SELECT event, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY AND event = '$pageview' GROUP BY event ORDER BY event_count DESC LIMIT 10",
             filters: {
                 dateRange: {
@@ -140,7 +140,7 @@ export const SAMPLE_HOGQL_QUERIES: Record<SampleHogQLQuery, InsightQuery> = {
     topEvents: {
         kind: 'DataVisualizationNode',
         source: {
-            kind: 'HogQLQuery',
+            kind: 'InsightsQLQuery',
             query: 'SELECT event, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY event ORDER BY event_count DESC LIMIT 10',
             filters: {
                 dateRange: {

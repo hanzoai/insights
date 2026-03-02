@@ -20,15 +20,15 @@ export function NuxtSourceMapsInstructions(): JSX.Element {
                 generation and upload.
             </p>
 
-            <h3>Install the PostHog Nuxt module</h3>
-            <p>Install the PostHog Nuxt module using your package manager:</p>
+            <h3>Install the Insights Nuxt module</h3>
+            <p>Install the Insights Nuxt module using your package manager:</p>
             <CodeSnippet language={Language.Bash}>
                 {['npm install @posthog/nuxt', '# OR', 'yarn add @posthog/nuxt', '# OR', 'pnpm add @posthog/nuxt'].join(
                     '\n'
                 )}
             </CodeSnippet>
 
-            <h3>Add PostHog config to your Nuxt app</h3>
+            <h3>Add Insights config to your Nuxt app</h3>
             <p>
                 Add the module to your <code>nuxt.config.ts</code> file:
             </p>
@@ -42,8 +42,8 @@ export function NuxtSourceMapsInstructions(): JSX.Element {
 
             <h3>Build your project for production</h3>
             <p>
-                Build your project for production. The PostHog module will automatically generate and upload source maps
-                to PostHog during the build process.
+                Build your project for production. The Insights module will automatically generate and upload source maps
+                to Insights during the build process.
             </p>
 
             <VerifySourceMaps />
@@ -68,7 +68,7 @@ const nuxtModuleConfig = (apiKey: string, host: string, teamId: string): string 
 
   posthogConfig: {
     publicKey: '${apiKey}',
-    host: '${host}', // Optional: Your PostHog instance URL, defaults to https://us.posthog.com
+    host: '${host}', // Optional: Your Insights instance URL, defaults to https://us.posthog.com
     clientConfig: {
       capture_exceptions: true, // Enables automatic exception capture on the client side (Vue)
     },
@@ -78,7 +78,7 @@ const nuxtModuleConfig = (apiKey: string, host: string, teamId: string): string 
     sourcemaps: {
       enabled: true,
       envId: '${teamId}', // Your environment ID (project ID)
-      personalApiKey: '<ph_personal_api_key>', // Your personal API key from PostHog settings
+      personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings
       project: 'my-application', // Optional: Project name, defaults to git repository name
       version: '1.0.0', // Optional: Release version, defaults to current git commit
     },

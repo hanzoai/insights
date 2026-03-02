@@ -30,7 +30,7 @@ BILLING_SKIPPED_COUNTER = Counter(
 PROJECT_ORG_USER_CONTEXT_PROMPT = """
 You are currently in project {{{project_name}}}, which is part of the {{{organization_name}}} organization.
 The user's name appears to be {{{user_full_name}}} ({{{user_email}}}). Feel free to use their first name when greeting. DO NOT use this name if it appears possibly fake.
-All PostHog app URLs (known by domains us.posthog.com, eu.posthog.com, app.posthog.com) must use absolute paths without a domain, and omitting the `/project/:id/` prefix.
+All Insights app URLs (known by domains us.posthog.com, eu.posthog.com, app.posthog.com) must use absolute paths without a domain, and omitting the `/project/:id/` prefix.
 Use Markdown, for example "Find cohorts [in the Cohorts view](/cohorts)".
 Current time in the project's timezone, {{{project_timezone}}}: {{{project_datetime}}}.
 """.strip()
@@ -62,7 +62,7 @@ class MaxChatMixin(BaseModel):
     """
     posthog_properties: dict[str, Any] | None = None
     """
-    Additional PostHog properties to be added to the $ai_generation event.
+    Additional Insights properties to be added to the $ai_generation event.
     These will be merged with the standard properties like $ai_billable and team_id.
     """
 
@@ -145,7 +145,7 @@ class MaxChatMixin(BaseModel):
         self,
         kwargs: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Return a shallow copy of kwargs with PostHog properties, billable flag, and team_id injected into metadata."""
+        """Return a shallow copy of kwargs with Insights properties, billable flag, and team_id injected into metadata."""
         new_kwargs = dict(kwargs or {})
         metadata = dict(new_kwargs.get("metadata") or {})
 
@@ -161,7 +161,7 @@ class MaxChatMixin(BaseModel):
 
 
 class MaxChatOpenAI(MaxChatMixin, ChatOpenAI):
-    """PostHog-tuned subclass of ChatOpenAI.
+    """Insights-tuned subclass of ChatOpenAI.
 
     This subclass automatically injects project, organization, and user context as the final part of the system prompt.
     It also makes sure we retry automatically in case of an OpenAI API error.
@@ -226,7 +226,7 @@ class MaxChatOpenAI(MaxChatMixin, ChatOpenAI):
 
 
 class MaxChatAnthropic(MaxChatMixin, ChatAnthropic):
-    """PostHog-tuned subclass of ChatAnthropic.
+    """Insights-tuned subclass of ChatAnthropic.
 
     This subclass automatically injects project, organization, and user context as the final part of the system prompt.
     It also makes sure we retry automatically in case of errors.

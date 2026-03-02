@@ -1,6 +1,6 @@
 import { Counter } from 'prom-client'
 
-import { shadowFetchContext } from '../services/hog-executor.service'
+import { shadowFetchContext } from '../services/script-executor.service'
 import { CyclotronJobInvocation, CyclotronJobInvocationResult } from '../types'
 import { CdpCyclotronWorker, CdpCyclotronWorkerHub } from './cdp-cyclotron-worker.consumer'
 

@@ -29,14 +29,14 @@ logger = structlog.get_logger(__name__)
 def _get_default_posthog_client() -> Client:
     """Return the default analytics client after validating the environment."""
     if not settings.DEBUG and not is_cloud():
-        raise exceptions.ValidationError("AI features are only available in PostHog Cloud")
+        raise exceptions.ValidationError("AI features are only available in Insights Cloud")
 
     if not os.environ.get("OPENAI_API_KEY"):
         raise exceptions.ValidationError("OpenAI API key is not configured")
 
     client = posthoganalytics.default_client
     if not client:
-        raise exceptions.ValidationError("PostHog analytics client is not configured")
+        raise exceptions.ValidationError("Insights analytics client is not configured")
 
     return client
 

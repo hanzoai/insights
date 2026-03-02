@@ -146,7 +146,7 @@ Errors follow OpenAI's format:
 
 ## Internal Django integration
 
-For calling from PostHog Django:
+For calling from Insights Django:
 
 ```python
 from posthog.llm.gateway_client import get_llm_client

@@ -10,7 +10,7 @@ import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
 
 import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { Breadcrumb } from '~/types'
 
 import type { clusterDetailLogicType } from './clusterDetailLogicType'
@@ -116,8 +116,8 @@ export const clusterDetailLogic = kea<clusterDetailLogicType>([
                     const { dayStart, dayEnd } = getTimestampBoundsFromRunId(props.runId)
 
                     // Query both trace and generation cluster events
-                    const response = await api.queryHogQL(
-                        hogql`
+                    const response = await api.queryInsightsQL(
+                        insightsql`
                             SELECT
                                 JSONExtractString(properties, '$ai_clustering_run_id') as run_id,
                                 JSONExtractString(properties, '$ai_window_start') as window_start,

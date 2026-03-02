@@ -1,5 +1,5 @@
 // Assuming this path is correct from your initial file
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
 interface DestinationConfig {
     name: string
@@ -1042,9 +1042,9 @@ const destinationDefinitions: DestinationConfig[] = [
     },
 ]
 
-// Use .map() to generate the full HogFunctionTemplate objects
+// Use .map() to generate the full CustomFunctionTemplate objects
 // The common properties are now defined directly within the map.
-export const allComingSoonTemplates: HogFunctionTemplate[] = destinationDefinitions.map((def) => ({
+export const allComingSoonTemplates: CustomFunctionTemplate[] = destinationDefinitions.map((def) => ({
     ...def,
     description: `Send events to ${def.name}.`,
     free: true,

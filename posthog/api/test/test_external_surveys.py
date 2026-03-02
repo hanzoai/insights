@@ -174,7 +174,7 @@ class TestExternalSurveys(APIBaseTest):
         assert str(survey.id) in content
         assert "posthog-survey-container" in content
 
-        # Check PostHog configuration is injected
+        # Check Insights configuration is injected
         assert "projectConfig" in content
         assert survey.team.api_token in content
 

@@ -11,15 +11,15 @@ from django.utils import timezone as django_timezone
 from clickhouse_driver.errors import ServerException
 from parameterized import parameterized
 
-from posthog.schema import BaseMathType, DateRange, EventsNode, HogQLQueryModifiers, TrendsQuery
+from posthog.schema import BaseMathType, DateRange, EventsNode, InsightsQLQueryModifiers, TrendsQuery
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
-from posthog.hogql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
+from posthog.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
 
 from products.analytics_platform.backend.lazy_computation.computation_notifications import (
     job_channel,
@@ -612,8 +612,8 @@ class TestExecuteComputationJobs(ClickhouseTestMixin, BaseTest):
         assert ch_results[2][4] == 1  # Jan 3: user3
 
 
-class TestHogQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
-    """Test execute_hogql_query with usePreaggregatedIntermediateResults modifier (lazy computation)."""
+class TestInsightsQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
+    """Test execute_insightsql_query with usePreaggregatedIntermediateResults modifier (lazy computation)."""
 
     def _create_pageview_events(self):
         """Create pageview events for Jan 1-2, 2025."""
@@ -648,16 +648,16 @@ class TestHogQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
         """
 
         # Run without lazy computation modifier
-        result_without = execute_hogql_query(
+        result_without = execute_insightsql_query(
             parse_select(query),
             team=self.team,
         )
 
         # Run with lazy computation modifier
-        result_with = execute_hogql_query(
+        result_with = execute_insightsql_query(
             parse_select(query),
             team=self.team,
-            modifiers=HogQLQueryModifiers(usePreaggregatedIntermediateResults=True),
+            modifiers=InsightsQLQueryModifiers(usePreaggregatedIntermediateResults=True),
         )
 
         # Both should return the same results (order may differ, so compare sorted)
@@ -701,7 +701,7 @@ class TestHogQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
         query_with = TrendsQuery(
             series=[EventsNode(name="$pageview", event="$pageview", math=BaseMathType.DAU)],
             dateRange=DateRange(date_from="2025-01-01", date_to="2025-01-02"),
-            modifiers=HogQLQueryModifiers(usePreaggregatedIntermediateResults=True),
+            modifiers=InsightsQLQueryModifiers(usePreaggregatedIntermediateResults=True),
         )
         runner_with = TrendsQueryRunner(team=self.team, query=query_with)
         response_with = runner_with.calculate()
@@ -719,9 +719,9 @@ class TestHogQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
         assert series_with["days"] == ["2025-01-01", "2025-01-02"]
         assert series_with["data"] == [2, 2]
 
-        # Note: TrendsQueryResponse only has `hogql` (not `clickhouse`), and `hogql` is generated
-        # before execute_hogql_query runs, so it shows the original AST. The transformation happens
-        # inside execute_hogql_query. To verify the transformation worked, we check that
+        # Note: TrendsQueryResponse only has `insightsql` (not `clickhouse`), and `insightsql` is generated
+        # before execute_insightsql_query runs, so it shows the original AST. The transformation happens
+        # inside execute_insightsql_query. To verify the transformation worked, we check that
         # lazy-computed rows were created in the table.
         lazy_results = sync_execute(
             f"""
@@ -763,16 +763,16 @@ class TestHogQLQueryWithPrecomputation(ClickhouseTestMixin, BaseTest):
         """
 
         # Run without lazy computation modifier
-        result_without = execute_hogql_query(
+        result_without = execute_insightsql_query(
             parse_select(query),
             team=self.team,
         )
 
         # Run with lazy computation modifier
-        result_with = execute_hogql_query(
+        result_with = execute_insightsql_query(
             parse_select(query),
             team=self.team,
-            modifiers=HogQLQueryModifiers(usePreaggregatedIntermediateResults=True),
+            modifiers=InsightsQLQueryModifiers(usePreaggregatedIntermediateResults=True),
         )
 
         # Both should return the same results

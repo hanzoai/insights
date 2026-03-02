@@ -13,7 +13,7 @@ const esmModules = [
     '@react-hook',
     '@medv',
     'monaco-editor',
-    '@posthog/hedgehog-mode',
+    '@posthog/mascot-mode',
     'mdast-util-find-and-replace',
     'escape-string-regexp',
     'unist-util-visit-parents',
@@ -33,7 +33,7 @@ const esmModules = [
     'space-separated-tokens',
     'comma-separated-tokens',
     'zwitch',
-    '@posthog/hogql-parser',
+    '@posthog/insightsql-parser',
 ]
 function rootDirectories(): string[] {
     return ['<rootDir>/src', '<rootDir>/../products']

@@ -7,10 +7,10 @@ import express from 'ultimate-express'
 import { setupCommonRoutes, setupExpressApp } from './api/router'
 import { getPluginServerCapabilities } from './capabilities'
 import { CdpApi } from './cdp/cdp-api'
-import { CdpBatchHogFlowRequestsConsumer } from './cdp/consumers/cdp-batch-hogflow.consumer'
+import { CdpBatchCustomFlowRequestsConsumer } from './cdp/consumers/cdp-batch-customflow.consumer'
 import { CdpCohortMembershipConsumer } from './cdp/consumers/cdp-cohort-membership.consumer'
 import { CdpCyclotronShadowWorker } from './cdp/consumers/cdp-cyclotron-shadow-worker.consumer'
-import { CdpCyclotronWorkerHogFlow } from './cdp/consumers/cdp-cyclotron-worker-hogflow.consumer'
+import { CdpCyclotronWorkerCustomFlow } from './cdp/consumers/cdp-cyclotron-worker-customflow.consumer'
 import { CdpCyclotronWorker } from './cdp/consumers/cdp-cyclotron-worker.consumer'
 import { CdpDatawarehouseEventsConsumer } from './cdp/consumers/cdp-data-warehouse-events.consumer'
 import { CdpEventsConsumer } from './cdp/consumers/cdp-events.consumer'
@@ -37,7 +37,7 @@ import { closeHub, createHub } from './utils/db/hub'
 import { isTestEnv } from './utils/env-utils'
 import { logger } from './utils/logger'
 import { NodeInstrumentation } from './utils/node-instrumentation'
-import { captureException, shutdown as posthogShutdown } from './utils/posthog'
+import { captureException, shutdown as insightsShutdown } from './utils/insights'
 import { PubSub } from './utils/pubsub'
 import { delay } from './utils/utils'
 
@@ -259,9 +259,9 @@ export class PluginServer {
                 }
             }
 
-            if (capabilities.cdpCyclotronWorkerHogFlow) {
+            if (capabilities.cdpCyclotronWorkerCustomFlow) {
                 serviceLoaders.push(async () => {
-                    const worker = new CdpCyclotronWorkerHogFlow(hub)
+                    const worker = new CdpCyclotronWorkerCustomFlow(hub)
                     await worker.start()
                     return worker.service
                 })
@@ -298,9 +298,9 @@ export class PluginServer {
                 })
             }
 
-            if (capabilities.cdpBatchHogFlow) {
+            if (capabilities.cdpBatchCustomFlow) {
                 serviceLoaders.push(async () => {
-                    const consumer = new CdpBatchHogFlowRequestsConsumer(hub)
+                    const consumer = new CdpBatchCustomFlowRequestsConsumer(hub)
                     await consumer.start()
                     return consumer.service
                 })
@@ -396,7 +396,7 @@ export class PluginServer {
         await Promise.allSettled([
             this.pubsub?.stop(),
             ...this.services.map((s) => s.onShutdown()),
-            posthogShutdown(),
+            insightsShutdown(),
             onShutdown(),
         ])
 

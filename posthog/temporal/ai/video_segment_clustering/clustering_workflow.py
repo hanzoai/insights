@@ -9,7 +9,7 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import ApplicationError
 
 from posthog.temporal.ai.video_segment_clustering.models import GetSessionsToPrimeResult
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 with workflow.unsafe.imports_passed_through():
     from posthog.temporal.ai.session_summary.types.single import SingleSessionSummaryInputs
@@ -37,7 +37,7 @@ with workflow.unsafe.imports_passed_through():
 
 
 @workflow.defn(name="video-segment-clustering")
-class VideoSegmentClusteringWorkflow(PostHogWorkflow):
+class VideoSegmentClusteringWorkflow(InsightsWorkflow):
     """Per-team workflow to cluster video segments and create SignalReports.
 
     This workflow orchestrates 6 activities:

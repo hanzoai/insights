@@ -13,13 +13,13 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.batch_exports.models import BatchExportRun
 from posthog.cloud_utils import get_cached_instance_license
-from posthog.models.hog_functions.hog_function import HogFunction, HogFunctionState, HogFunctionType
+from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionState, CustomFunctionType
 from posthog.utils import convert_property_value, flatten
 
 from products.data_warehouse.backend.models import ExternalDataJob, ExternalDataSchema, ExternalDataSource
@@ -94,7 +94,7 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
             limit=ast.Constant(value=10),
         )
 
-        result = execute_hogql_query(query, team=self.team)
+        result = execute_insightsql_query(query, team=self.team)
 
         values = [row[0] for row in result.results]
         response = Response([{"name": convert_property_value(value)} for value in flatten(values)])
@@ -644,10 +644,10 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                 )
 
             # Get transformations with issues
-            transformations = HogFunction.objects.filter(
+            transformations = CustomFunction.objects.filter(
                 team_id=self.team_id,
                 deleted=False,
-                type=HogFunctionType.TRANSFORMATION,
+                type=CustomFunctionType.TRANSFORMATION,
                 enabled=True,
             )
 
@@ -656,17 +656,17 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                     status_data = transformation.status
                     state = status_data.get("state", 0)
                     if state in [
-                        HogFunctionState.DISABLED.value,
-                        HogFunctionState.DEGRADED.value,
-                        HogFunctionState.FORCEFULLY_DISABLED.value,
-                        HogFunctionState.FORCEFULLY_DEGRADED.value,
+                        CustomFunctionState.DISABLED.value,
+                        CustomFunctionState.DEGRADED.value,
+                        CustomFunctionState.FORCEFULLY_DISABLED.value,
+                        CustomFunctionState.FORCEFULLY_DEGRADED.value,
                     ]:
                         status_label = (
                             "disabled"
                             if state
                             in [
-                                HogFunctionState.DISABLED.value,
-                                HogFunctionState.FORCEFULLY_DISABLED.value,
+                                CustomFunctionState.DISABLED.value,
+                                CustomFunctionState.FORCEFULLY_DISABLED.value,
                             ]
                             else "degraded"
                         )
@@ -681,17 +681,17 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                                 "failed_at": transformation.updated_at.isoformat()
                                 if transformation.updated_at
                                 else None,
-                                "url": f"/pipeline/transformations/hog-{transformation.id}/configuration",
+                                "url": f"/pipeline/transformations/script-{transformation.id}/configuration",
                             }
                         )
                 except Exception as e:
                     logger.warning(f"Error processing transformation {transformation.id}", exc_info=e)
 
             # Get destinations with issues
-            hog_destinations = HogFunction.objects.filter(
+            hog_destinations = CustomFunction.objects.filter(
                 team_id=self.team_id,
                 deleted=False,
-                type__in=[HogFunctionType.DESTINATION, HogFunctionType.SITE_DESTINATION],
+                type__in=[CustomFunctionType.DESTINATION, CustomFunctionType.SITE_DESTINATION],
                 enabled=True,
             )
 
@@ -700,17 +700,17 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                     status_data = destination.status
                     state = status_data.get("state", 0)
                     if state in [
-                        HogFunctionState.DISABLED.value,
-                        HogFunctionState.DEGRADED.value,
-                        HogFunctionState.FORCEFULLY_DISABLED.value,
-                        HogFunctionState.FORCEFULLY_DEGRADED.value,
+                        CustomFunctionState.DISABLED.value,
+                        CustomFunctionState.DEGRADED.value,
+                        CustomFunctionState.FORCEFULLY_DISABLED.value,
+                        CustomFunctionState.FORCEFULLY_DEGRADED.value,
                     ]:
                         status_label = (
                             "disabled"
                             if state
                             in [
-                                HogFunctionState.DISABLED.value,
-                                HogFunctionState.FORCEFULLY_DISABLED.value,
+                                CustomFunctionState.DISABLED.value,
+                                CustomFunctionState.FORCEFULLY_DISABLED.value,
                             ]
                             else "degraded"
                         )
@@ -723,7 +723,7 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                                 "status": status_label,
                                 "error": error_msg,
                                 "failed_at": destination.updated_at.isoformat() if destination.updated_at else None,
-                                "url": f"/pipeline/destinations/hog-{destination.id}/configuration",
+                                "url": f"/pipeline/destinations/script-{destination.id}/configuration",
                             }
                         )
                 except Exception as e:

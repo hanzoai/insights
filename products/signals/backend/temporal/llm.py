@@ -31,10 +31,10 @@ TIMEOUT = 100.0
 
 
 def get_async_anthropic_client() -> AsyncAnthropic:
-    """Get configured AsyncAnthropic client with PostHog analytics."""
+    """Get configured AsyncAnthropic client with Insights analytics."""
     posthog_client = posthoganalytics.default_client
     if not posthog_client:
-        raise ValueError("PostHog analytics client not configured")
+        raise ValueError("Insights analytics client not configured")
 
     api_key = settings.ANTHROPIC_API_KEY
     if not api_key:

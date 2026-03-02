@@ -13,14 +13,14 @@
 
 ## How to test changes
 
-### PostHog App Changes (Backend/Frontend)
+### Insights App Changes (Backend/Frontend)
 
 - Run the app locally following the [local development guide](https://posthog.com/handbook/engineering/developing-locally)
 - Write tests for logic changes, especially in `surveyLogic.tsx` or `surveysLogic.tsx`
 
 ### JS SDK Changes
 
-Most survey logic lives in the [PostHog JS SDK](https://github.com/PostHog/posthog-js/). To test changes:
+Most survey logic lives in the [Insights JS SDK](https://github.com/Insights/posthog-js/). To test changes:
 
 First, build the package with hot-reload:
 
@@ -44,7 +44,7 @@ import 'posthog-js/dist/surveys'
 2. (Optional) Disable consent checks to simplify testing:
 
 ```typescript
-export const configForConsent = (): Partial<PostHogConfig> => {
+export const configForConsent = (): Partial<InsightsConfig> => {
   const consentGiven = cookieConsentGiven()
   return {
     disable_surveys: false, // force surveys on
@@ -82,7 +82,7 @@ rm -rf node_modules .next && pnpm install && pnpm dev
 
 Changes are picked up automatically via `package:watch`.
 
-#### Option 2: Main PostHog repo
+#### Option 2: Main Insights repo
 
 1. Update `frontend/package.json` to use your local build:
 
@@ -131,7 +131,7 @@ cp /path/to/posthog-js/packages/browser/dist/array.full.js /path/to/posthog/fron
 
 ```html
 <!-- keep this project config script as-is -->
-<!-- PostHog JavaScript -->
+<!-- Insights JavaScript -->
 <script nonce="{{ request.csp_nonce }}">
   // Project config from Django and helper functions
   const survey = {{ survey_data | safe }};
@@ -143,7 +143,7 @@ cp /path/to/posthog-js/packages/browser/dist/array.full.js /path/to/posthog/fron
 <script src="/static/array.full.js" nonce="{{ request.csp_nonce }}"></script>
 
 <script nonce="{{ request.csp_nonce }}">
-  // Load PostHog from CDN
+  // Load Insights from CDN
   !function (t, e) ...; // remove/comment this line!
 </script>
 ```
@@ -213,7 +213,7 @@ One caveat: **reserved ngrok domains are only available for paid ngrok users.**
 
 ### Testing survey usage_report
 
-The function [get_teams_with_survey_responses_count_in_period](https://github.com/PostHog/posthog/blob/master/posthog/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
+The function [get_teams_with_survey_responses_count_in_period](https://github.com/Insights/posthog/blob/master/posthog/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
 
 Here's how to run it in the Django shell:
 
@@ -235,7 +235,7 @@ print(results)
 
 ### posthog-js logs
 
-We [added some logging on the JS SDK](https://github.com/PostHog/posthog-js/pull/1663) to help debug issues with surveys.
+We [added some logging on the JS SDK](https://github.com/Insights/posthog-js/pull/1663) to help debug issues with surveys.
 
 However, those logs are only enabled when posthog-js (v1.117.0 and higher) is set with debug=true.
 
@@ -306,4 +306,4 @@ select * from posthog_survey
  where id = '{survey_id}'
 ```
 
-Access postgres directly, check the [runbook](http://runbooks/postgres#accessing-postgres) (internal PostHog link).
+Access postgres directly, check the [runbook](http://runbooks/postgres#accessing-postgres) (internal Insights link).

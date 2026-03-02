@@ -23,7 +23,7 @@ const meta: Meta<typeof ActivityLog> = {
                     200,
                     {
                         email: 'test@posthog.com',
-                        first_name: 'Test Hedgehog',
+                        first_name: 'Test Mascot',
                         organization: {
                             ...organizationCurrent,
                             available_product_features: [
@@ -111,7 +111,7 @@ export function WithoutAuditLogsFeaure(): JSX.Element {
                 200,
                 {
                     email: 'test@posthog.com',
-                    first_name: 'Test Hedgehog',
+                    first_name: 'Test Mascot',
                     organization: {
                         ...organizationCurrent,
                         available_product_features: [],

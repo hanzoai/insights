@@ -23,7 +23,7 @@ pnpm run schema:build
 For comprehensive documentation on how web analytics queries work, see [insightsql_queries.md](./docs/insightsql_queries.md). This guide covers:
 
 - How to view generated InsightsQL queries via snapshot tests
-- Testing queries directly using the PostHog API
+- Testing queries directly using the Insights API
 - Query structure patterns for all web analytics query types (overview, trends, breakdowns)
 - All breakdown types with their corresponding InsightsQL fields
 - Event vs session property usage patterns
@@ -68,7 +68,7 @@ Session properties enable fast, attribution-focused analysis:
 
 ### Sessions definition
 
-Sessions follow the [PostHog session definition](https://posthog.com/docs/data/sessions): a session groups events with the same session ID, which is automatically managed by PostHog client libraries based on inactivity timeouts and session resets.
+Sessions follow the [Insights session definition](https://posthog.com/docs/data/sessions): a session groups events with the same session ID, which is automatically managed by Insights client libraries based on inactivity timeouts and session resets.
 
 ### Event capture in posthog-js
 
@@ -113,7 +113,7 @@ Captured at session start and persisted for the session lifetime:
 - Session docs: <https://posthog.com/docs/data/sessions>
 - Web analytics FAQ: <https://posthog.com/docs/web-analytics/faq>
 - SPA pageview tutorial: <https://posthog.com/tutorials/single-page-app-pageviews>
-- Source code: [session-props.ts](https://github.com/PostHog/posthog-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/PostHog/posthog-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/PostHog/posthog-js/blob/main/packages/browser/src/page-view.ts)
+- Source code: [session-props.ts](https://github.com/Insights/posthog-js/blob/main/packages/browser/src/session-props.ts), [sessionid.ts](https://github.com/Insights/posthog-js/blob/main/packages/browser/src/sessionid.ts), [page-view.ts](https://github.com/Insights/posthog-js/blob/main/packages/browser/src/page-view.ts)
 
 ### Implementation details
 
@@ -125,7 +125,7 @@ The table definitions and materialized view logic are in:
 
 ## What is InsightsQL?
 
-Web analytics queries are written in InsightsQL (sometimes referred to as Hog SQL or PostHog SQL). Here's some links to learn more about it:
+Web analytics queries are written in InsightsQL (sometimes referred to as Hog SQL or Insights SQL). Here's some links to learn more about it:
 
 - <https://posthog.com/blog/introducing-insightsql>
 - <https://posthog.com/handbook/engineering/databases/insightsql-python>
@@ -145,7 +145,7 @@ Some web analytics features are present in the [toolbar](https://posthog.com/doc
 ## More resources
 
 - Clickhouse
-  - PostHog maintains a [Clickhouse manual](https://posthog.com/handbook/engineering/clickhouse)
+  - Insights maintains a [Clickhouse manual](https://posthog.com/handbook/engineering/clickhouse)
   - Clickhouse has a [video course](https://learn.clickhouse.com/visitor_class_catalog/category/116050), which has been recommended by some team members
     - You can skip the videos that are about e.g. migrating from another tool to Clickhouse
   - [Designing Data-Intensive Applications](https://dataintensive.net/) is a great book about distributed systems, and chapter 3 introduces OLAP / columnar databases.

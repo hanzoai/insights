@@ -1,13 +1,13 @@
 import { PostHog } from 'posthog-node'
 
-let _client: PostHog | undefined
+let _client: Insights | undefined
 
 export enum AnalyticsEvent {
     MCP_TOOL_CALL = 'mcp tool call',
     MCP_TOOL_RESPONSE = 'mcp tool response',
 }
 
-export const getPostHogClient = (): PostHog => {
+export const getPostHogClient = (): Insights => {
     if (!_client) {
         _client = new PostHog('sTMFPsFhdP1Ssg', {
             host: 'https://us.i.posthog.com',

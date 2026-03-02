@@ -2,7 +2,7 @@ import { useValues } from 'kea'
 
 import { LemonCard } from '@posthog/lemon-ui'
 
-import { StopSignHog } from 'lib/components/hedgehogs'
+import { StopSignHog } from 'lib/components/mascots'
 import { SupportModalButton } from 'scenes/authentication/SupportModalButton'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { SceneExport } from 'scenes/sceneTypes'

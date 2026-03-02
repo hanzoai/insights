@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from posthog.test.base import APIBaseTest
 
-from posthog.hogql import ast
+from posthog.insightsql import ast
 
 from products.endpoints.backend.materialization import (
     analyze_variables_for_materialization,
@@ -18,7 +18,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_simple_variable_detection(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             "variables": {
                 "var-123": {
@@ -40,7 +40,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_nested_property_variable(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE properties.os = {variables.os_name}",
             "variables": {
                 "var-456": {
@@ -62,7 +62,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_person_nested_property_variable(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE person.properties.city = {variables.city}",
             "variables": {
                 "var-789": {
@@ -83,7 +83,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_multiple_equality_variables(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.os = {variables.os}",
             "variables": {
                 "var-1": {"code_name": "event_name", "value": "$pageview"},
@@ -101,7 +101,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_duplicate_placeholder_deduplicated(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND event = {variables.event_name}",
             "variables": {
                 "var-1": {"code_name": "event_name", "value": "$pageview"},
@@ -115,7 +115,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_multiple_variables_rejects_unsupported_operator(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.os IN {variables.os}",
             "variables": {
                 "var-1": {"code_name": "event_name", "value": "$pageview"},
@@ -131,7 +131,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_in_select_blocked(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count(), {variables.metric_name} as metric_name FROM events",
             "variables": {"var-1": {"code_name": "metric_name", "value": "total"}},
         }
@@ -143,7 +143,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_no_variables(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = '$pageview'",
         }
 
@@ -154,7 +154,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_like_operator_supported(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event LIKE {variables.pattern}",
             "variables": {"var-1": {"code_name": "pattern", "value": "%page%"}},
         }
@@ -167,7 +167,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_on_right_side_of_comparison(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             "variables": {"var-1": {"code_name": "event_name", "value": "$pageview"}},
         }
@@ -181,7 +181,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_on_left_side_of_comparison(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE {variables.event_name} = event",
             "variables": {"var-1": {"code_name": "event_name", "value": "$pageview"}},
         }
@@ -195,7 +195,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_constant_compared_to_variable_blocked(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE '$pageview' = {variables.event_name}",
             "variables": {"var-1": {"code_name": "event_name", "value": "$pageview"}},
         }
@@ -207,7 +207,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_with_complex_and_conditions(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE timestamp > '2024-01-01' AND event = {variables.event_name} AND properties.os = 'Mac'",
             "variables": {"var-1": {"code_name": "event_name", "value": "$pageview"}},
         }
@@ -221,7 +221,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_in_or_condition_blocked(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} OR event = '$pageview'",
             "variables": {"var-1": {"code_name": "event_name", "value": "$identify"}},
         }
@@ -234,7 +234,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_with_parentheses(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE (event = {variables.event_name})",
             "variables": {"var-1": {"code_name": "event_name", "value": "$pageview"}},
         }
@@ -247,7 +247,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_malformed_variable_placeholder(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables}",
             "variables": {"var-1": {"code_name": "event_name", "value": "$pageview"}},
         }
@@ -259,7 +259,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_missing_variable_metadata(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             "variables": {},
         }
@@ -272,7 +272,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_on_uuid_field(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE distinct_id = {variables.user_id}",
             "variables": {"var-1": {"code_name": "user_id", "value": "user123"}},
         }
@@ -285,7 +285,7 @@ class TestVariableAnalysis(APIBaseTest):
         assert var_infos[0].column_chain == ["distinct_id"]
 
     def test_empty_query_string(self):
-        query = {"kind": "HogQLQuery", "query": "", "variables": {}}
+        query = {"kind": "InsightsQLQuery", "query": "", "variables": {}}
 
         can_materialize, reason, var_infos = analyze_variables_for_materialization(query)
 
@@ -293,7 +293,7 @@ class TestVariableAnalysis(APIBaseTest):
         assert var_infos == []
 
     def test_missing_query_field(self):
-        query = {"kind": "HogQLQuery", "variables": {"var-1": {"code_name": "foo", "value": "bar"}}}
+        query = {"kind": "InsightsQLQuery", "variables": {"var-1": {"code_name": "foo", "value": "bar"}}}
 
         can_materialize, reason, var_infos = analyze_variables_for_materialization(query)
 
@@ -303,7 +303,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_invalid_query_string_parsing(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT INVALID SYNTAX {variables.foo}",
             "variables": {"var-1": {"code_name": "foo", "value": "bar"}},
         }
@@ -316,7 +316,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_in_having_clause_blocked(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT event, count() as c FROM events GROUP BY event HAVING c > {variables.threshold}",
             "variables": {"var-1": {"code_name": "threshold", "value": "100"}},
         }
@@ -329,7 +329,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_wrapped_in_function_call(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count(*) FROM events WHERE event = {variables.event_name} AND toDate(timestamp) >= toDate({variables.from_date})",
             "variables": {
                 "var-1": {"code_name": "event_name", "value": "$pageview"},
@@ -349,7 +349,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_wrapped_in_lower(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE lower(event) = lower({variables.event_name})",
             "variables": {"var-1": {"code_name": "event_name", "value": "$PageView"}},
         }
@@ -363,7 +363,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_variable_wrapped_in_toStartOfMonth(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE toStartOfMonth(timestamp) >= toStartOfMonth({variables.from_date}) AND toStartOfMonth(timestamp) < toStartOfMonth({variables.to_date})",
             "variables": {
                 "var-1": {"code_name": "from_date", "value": "2024-01-15"},
@@ -381,7 +381,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_nested_wrapper_functions(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE toDate(timestamp) >= toDate(toStartOfMonth({variables.from_date}))",
             "variables": {"var-1": {"code_name": "from_date", "value": "2024-01-15"}},
         }
@@ -394,7 +394,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_range_operator_gte(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE hour >= {variables.start}",
             "variables": {"var-1": {"code_name": "start", "value": "10"}},
         }
@@ -407,7 +407,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_range_operator_lt(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE hour < {variables.end}",
             "variables": {"var-1": {"code_name": "end", "value": "20"}},
         }
@@ -420,7 +420,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_same_column_range_variables(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE hour >= {variables.start} AND hour < {variables.end}",
             "variables": {
                 "var-1": {"code_name": "start", "value": "10"},
@@ -440,7 +440,7 @@ class TestVariableAnalysis(APIBaseTest):
 
     def test_mixed_equality_and_range(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.name} AND hour >= {variables.start}",
             "variables": {
                 "var-1": {"code_name": "name", "value": "$pageview"},
@@ -462,7 +462,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_simple_field(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT toStartOfDay(timestamp) as date, count() as events FROM events WHERE event = {variables.event_name} GROUP BY date",
             "variables": {
                 "var-123": {
@@ -490,7 +490,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_nested_property(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE properties.os = {variables.os_name}",
             "variables": {
                 "var-456": {
@@ -513,7 +513,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_removes_where_clause(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             "variables": {
                 "var-123": {
@@ -534,7 +534,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_preserves_other_where_conditions(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND timestamp > '2024-01-01'",
             "variables": {
                 "var-123": {
@@ -558,7 +558,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_adds_to_group_by(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT toStartOfDay(timestamp) as date, count() FROM events WHERE event = {variables.event_name} GROUP BY date",
             "variables": {
                 "var-123": {
@@ -581,7 +581,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_query_without_initial_group_by(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             "variables": {
                 "var-123": {
@@ -603,7 +603,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_preserves_order_by(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() as c FROM events WHERE event = {variables.event_name} GROUP BY timestamp ORDER BY c DESC",
             "variables": {
                 "var-123": {
@@ -624,7 +624,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_preserves_limit(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} LIMIT 100",
             "variables": {
                 "var-123": {
@@ -645,7 +645,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_variable_in_middle_of_and_chain(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE timestamp > '2024-01-01' AND event = {variables.event_name} AND properties.os = 'Mac'",
             "variables": {
                 "var-123": {
@@ -671,7 +671,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_with_having_clause(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() as c FROM events WHERE event = {variables.event_name} GROUP BY timestamp HAVING c > 100",
             "variables": {
                 "var-123": {
@@ -692,7 +692,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_person_properties_column(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE person.properties.city = {variables.city}",
             "variables": {
                 "var-123": {
@@ -714,7 +714,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_variable_first_in_and_chain(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND timestamp > '2024-01-01'",
             "variables": {
                 "var-123": {
@@ -738,7 +738,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_variable_last_in_and_chain(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE timestamp > '2024-01-01' AND properties.os = 'Mac' AND event = {variables.event_name}",
             "variables": {
                 "var-123": {
@@ -762,7 +762,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_preserves_select_expressions(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT toStartOfDay(timestamp) as date, count() as total, avg(properties.duration) as avg_duration FROM events WHERE event = {variables.event_name} GROUP BY date",
             "variables": {
                 "var-123": {
@@ -786,7 +786,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_with_or_raises_error(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} OR timestamp > '2024-01-01'",
             "variables": {
                 "var-123": {
@@ -805,7 +805,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_preserves_specific_columns_in_select(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() as total, toStartOfDay(timestamp) as day FROM events WHERE event = {variables.event_name} GROUP BY day",
             "variables": {
                 "var-123": {
@@ -829,7 +829,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_multiple_equality_variables(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.os = {variables.os}",
             "variables": {
                 "var-1": {"variableId": "var-1", "code_name": "event_name", "value": "$pageview"},
@@ -851,7 +851,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_range_variables_same_column(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE hour >= {variables.start} AND hour < {variables.end}",
             "variables": {
                 "var-1": {"variableId": "var-1", "code_name": "start", "value": "10"},
@@ -874,7 +874,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_mixed_equality_and_range(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count() FROM events WHERE event = {variables.name} AND hour >= {variables.start} AND timestamp > '2024-01-01'",
             "variables": {
                 "var-1": {"variableId": "var-1", "code_name": "name", "value": "$pageview"},
@@ -896,7 +896,7 @@ class TestQueryTransformation(APIBaseTest):
 
     def test_transform_function_call_column(self):
         query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT count(*) FROM events WHERE event = {variables.event_name} AND toDate(timestamp) >= {variables.from_date}",
             "variables": {
                 "var-1": {"variableId": "var-1", "code_name": "event_name", "value": "$pageview"},
@@ -955,7 +955,7 @@ class TestMaterializedQueryExecution(APIBaseTest):
         assert True  # See _transform_select_for_materialized_table implementation
 
     def test_select_transformation_with_alias(self):
-        from posthog.hogql.parser import parse_select
+        from posthog.insightsql.parser import parse_select
 
         from products.endpoints.backend.materialization import transform_select_for_materialized_table
 
@@ -978,7 +978,7 @@ class TestMaterializedQueryExecution(APIBaseTest):
         assert transformed[1].chain == ["date"]
 
     def test_select_transformation_without_alias(self):
-        from posthog.hogql.parser import parse_select
+        from posthog.insightsql.parser import parse_select
 
         from products.endpoints.backend.materialization import transform_select_for_materialized_table
 
@@ -1001,17 +1001,17 @@ class TestMaterializedQueryExecution(APIBaseTest):
 class TestTransformQuerySnapshots(APIBaseTest):
     """Snapshot tests for multi-variable materialization query transforms.
 
-    Each test asserts the exact transformed HogQL output against a stored snapshot.
+    Each test asserts the exact transformed InsightsQL output against a stored snapshot.
     Run `pytest --snapshot-update` to regenerate after intentional changes.
     """
 
     snapshot: Any
 
     def _transform(self, query_str: str, variables: dict) -> str:
-        hogql_query = {"kind": "HogQLQuery", "query": query_str, "variables": variables}
-        can_materialize, reason, var_infos = analyze_variables_for_materialization(hogql_query)
+        insightsql_query = {"kind": "InsightsQLQuery", "query": query_str, "variables": variables}
+        can_materialize, reason, var_infos = analyze_variables_for_materialization(insightsql_query)
         assert can_materialize, f"Expected materializable, got: {reason}"
-        transformed = transform_query_for_materialization(hogql_query, var_infos, self.team)
+        transformed = transform_query_for_materialization(insightsql_query, var_infos, self.team)
         assert transformed["variables"] == {}
         assert "{variables" not in transformed["query"]
         return transformed["query"]
@@ -1224,15 +1224,15 @@ class TestTransformQuerySnapshots(APIBaseTest):
         assert group_by_columns.count("event") == 1, f"GROUP BY has duplicate 'event': {group_by_columns}"
 
     def test_ast_node_not_shared_between_select_and_group_by(self):
-        from posthog.hogql.parser import parse_select
+        from posthog.insightsql.parser import parse_select
 
         from products.endpoints.backend.materialization import MaterializationTransformer
 
         query_str = "SELECT count() FROM events WHERE toDate(timestamp) >= {variables.from_date}"
         variables = {"var-1": {"code_name": "from_date", "value": "2024-01-01"}}
-        hogql_query = {"kind": "HogQLQuery", "query": query_str, "variables": variables}
+        insightsql_query = {"kind": "InsightsQLQuery", "query": query_str, "variables": variables}
 
-        _, _, var_infos = analyze_variables_for_materialization(hogql_query)
+        _, _, var_infos = analyze_variables_for_materialization(insightsql_query)
 
         parsed_ast = parse_select(query_str)
         transformer = MaterializationTransformer(var_infos)
@@ -1265,8 +1265,8 @@ class TestMaterializedReadPath(APIBaseTest):
         """Simulate the materialized read path: analyze variables, then build a SELECT with filters."""
         from products.endpoints.backend.api import EndpointViewSet
 
-        hogql_query = {"kind": "HogQLQuery", "query": query_str, "variables": variables_meta}
-        _, _, var_infos = analyze_variables_for_materialization(hogql_query)
+        insightsql_query = {"kind": "InsightsQLQuery", "query": query_str, "variables": variables_meta}
+        _, _, var_infos = analyze_variables_for_materialization(insightsql_query)
 
         select_query = ast.SelectQuery(
             select=[ast.Field(chain=["*"])],
@@ -1285,7 +1285,7 @@ class TestMaterializedReadPath(APIBaseTest):
                     value_wrapper_fns=mat_var.value_wrapper_fns,
                 )
 
-        return select_query.to_hogql()
+        return select_query.to_insightsql()
 
     def test_bare_variable_no_wrapper(self):
         result = self._build_read_query(

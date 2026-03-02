@@ -9,7 +9,7 @@ from posthog.cdp.validation import (
     CustomFunctionFiltersSerializer,
     InputsSchemaItemSerializer,
     MappingsSerializer,
-    compile_hog,
+    compile_script,
 )
 
 from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
@@ -507,9 +507,9 @@ class TestCustomFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatchi
     def test_hyphenated_property_detection_in_hog(self, _name, hog_code, should_error):
         if should_error:
             with self.assertRaises(ValidationError) as ctx:
-                compile_hog(hog_code, "destination")
+                compile_script(hog_code, "destination")
             error_msg = str(ctx.exception)
             assert "Hyphens are not supported" in error_msg
             assert "bracket notation" in error_msg
         else:
-            compile_hog(hog_code, "destination")
+            compile_script(hog_code, "destination")

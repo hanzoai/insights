@@ -17,9 +17,9 @@ class SCIMUserConflict(Exception):
     """User is already SCIM-provisioned for this organization domain."""
 
 
-class PostHogSCIMUser(SCIMUser):
+class InsightsSCIMUser(SCIMUser):
     """
-    Adapter to map SCIM User schema to PostHog User model.
+    Adapter to map SCIM User schema to Insights User model.
     Handles user provisioning scoped to a specific OrganizationDomain.
     """
 
@@ -144,7 +144,7 @@ class PostHogSCIMUser(SCIMUser):
         data: dict,
         organization_domain: OrganizationDomain,
         identity_provider: SCIMProvisionedUser.IdentityProvider = SCIMProvisionedUser.IdentityProvider.OTHER,
-    ) -> "PostHogSCIMUser":
+    ) -> "InsightsSCIMUser":
         """
         Create or update a User from SCIM data.
         """
@@ -427,7 +427,7 @@ class PostHogSCIMUser(SCIMUser):
                 raise ValueError("Email is required and cannot be removed")
 
     @classmethod
-    def get_for_organization(cls, organization_domain: OrganizationDomain) -> list["PostHogSCIMUser"]:
+    def get_for_organization(cls, organization_domain: OrganizationDomain) -> list["InsightsSCIMUser"]:
         """
         Get all users for a specific organization domain.
         """

@@ -20,7 +20,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                     <>
                         {MobileFinalSteps && <MobileFinalSteps />}
                         <Markdown>
-                            To automatically capture screen views with React Navigation, use the `usePostHogCapture`
+                            To automatically capture screen views with React Navigation, use the `useInsightsCapture`
                             hook:
                         </Markdown>
                         <CodeBlock
@@ -29,13 +29,13 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                     language: 'tsx',
                                     file: 'App.tsx',
                                     code: dedent`
-                                        import { usePostHogCapture } from 'posthog-react-native'
+                                        import { useInsightsCapture } from 'posthog-react-native'
                                         import { NavigationContainer } from '@react-navigation/native'
 
                                         function App() {
                                             const routeNameRef = useRef<string>()
                                             const navigationRef = useRef<NavigationContainerRef<any>>()
-                                            const captureEvent = usePostHogCapture()
+                                            const captureEvent = useInsightsCapture()
 
                                             return (
                                                 <NavigationContainer

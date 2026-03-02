@@ -22,7 +22,7 @@ import {
     isDataTableNode,
     isDataVisualizationNode,
     isInsightsQLQuery,
-    isHogQuery,
+    isScriptQuery,
     isInsightVizNode,
     isWebAnalyticsInsightQuery,
 } from '~/queries/utils'
@@ -190,7 +190,7 @@ export const insightDataLogic = kea<insightDataLogicType>([
                     savedOrDefaultQuery = getDefaultQuery(InsightType.SQL, filterTestAccountsDefault)
                 } else if (isDataTableNode(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.JSON, filterTestAccountsDefault)
-                } else if (isHogQuery(query)) {
+                } else if (isScriptQuery(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.HOG, filterTestAccountsDefault)
                 } else {
                     return false

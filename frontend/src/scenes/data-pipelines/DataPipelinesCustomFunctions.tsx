@@ -34,7 +34,7 @@ export const MAPPING: Partial<Record<CustomFunctionTypeType, { key: ProductKey; 
     },
     site_app: {
         key: ProductKey.SITE_APPS,
-        description: 'Site apps allow you to add custom functionality to your website using PostHog.',
+        description: 'Site apps allow you to add custom functionality to your website using Insights.',
     },
 }
 

@@ -35,7 +35,7 @@ export const customFunctionRequestModalLogic = kea<customFunctionRequestModalLog
                 content: (
                     <div className="deprecated-space-y-2">
                         <LemonField name="name" label={`Name of the ${humanizedType}`}>
-                            <LemonInput placeholder="e.g. PostHog" autoFocus />
+                            <LemonInput placeholder="e.g. Insights" autoFocus />
                         </LemonField>
                         <LemonField name="details" label="Additional information" showOptional>
                             <LemonTextArea

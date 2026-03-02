@@ -1,6 +1,6 @@
 ---
 name: Performance issue report
-about: Long response times, high resource usage? Ensuring PostHog's scalable is our top priority
+about: Long response times, high resource usage? Ensuring Insights's scalable is our top priority
 labels: performance
 ---
 
@@ -16,9 +16,9 @@ _Please describe._
 
 ## Environment
 
-- [ ] PostHog Cloud
-- [ ] PostHog self-hosted with Kubernetes (deprecated, see ["Sunsetting Kubernetes support"](https://posthog.com/blog/sunsetting-helm-support-posthog)), version/commit: [please provide]
+- [ ] Insights Cloud
+- [ ] Insights self-hosted with Kubernetes (deprecated, see ["Sunsetting Kubernetes support"](https://posthog.com/blog/sunsetting-helm-support-posthog)), version/commit: [please provide]
 
 ## Additional context
 
-#### _Thank you_ for your performance issue report – we want PostHog to go supersonic!
+#### _Thank you_ for your performance issue report – we want Insights to go supersonic!

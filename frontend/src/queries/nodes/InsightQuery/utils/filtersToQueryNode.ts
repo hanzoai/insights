@@ -73,7 +73,7 @@ import {
 import { cleanEntityProperties, cleanGlobalProperties } from './cleanProperties'
 
 const insightTypeToNodeKind: Record<
-    Exclude<InsightType, InsightType.JSON | InsightType.SQL | InsightType.HOG | InsightType.WEB_ANALYTICS>,
+    Exclude<InsightType, InsightType.JSON | InsightType.SQL | InsightType.SCRIPT | InsightType.WEB_ANALYTICS>,
     ProductAnalyticsInsightNodeKind
 > = {
     [InsightType.TRENDS]: NodeKind.TrendsQuery,

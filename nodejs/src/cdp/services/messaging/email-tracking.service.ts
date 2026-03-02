@@ -2,15 +2,15 @@ import { Counter } from 'prom-client'
 import express from 'ultimate-express'
 
 import { ModifiedRequest } from '~/api/router'
-import { CyclotronJobInvocationHogFunction, MinimalAppMetric } from '~/cdp/types'
+import { CyclotronJobInvocationCustomFunction, MinimalAppMetric } from '~/cdp/types'
 import { defaultConfig } from '~/config/config'
 import { parseJSON } from '~/utils/json-parse'
-import { captureException } from '~/utils/posthog'
+import { captureException } from '~/utils/insights'
 
 import { logger } from '../../../utils/logger'
-import { HogFlowManagerService } from '../hogflows/hogflow-manager.service'
-import { HogFunctionManagerService } from '../managers/hog-function-manager.service'
-import { HogFunctionMonitoringService } from '../monitoring/hog-function-monitoring.service'
+import { CustomFlowManagerService } from '../customflows/customflow-manager.service'
+import { CustomFunctionManagerService } from '../managers/custom-function-manager.service'
+import { CustomFunctionMonitoringService } from '../monitoring/custom-function-monitoring.service'
 import { SesWebhookHandler } from './helpers/ses'
 import { generateEmailTrackingCode, generateEmailTrackingPixelUrl } from './helpers/tracking-code'
 
@@ -31,13 +31,13 @@ const emailTrackingErrorsCounter = new Counter({
 })
 
 export const generateTrackingRedirectUrl = (
-    invocation: Pick<CyclotronJobInvocationHogFunction, 'functionId' | 'id'>,
+    invocation: Pick<CyclotronJobInvocationCustomFunction, 'functionId' | 'id'>,
     targetUrl: string
 ): string => {
     return `${defaultConfig.CDP_EMAIL_TRACKING_URL}/public/m/redirect?ph_id=${generateEmailTrackingCode(invocation)}&target=${encodeURIComponent(targetUrl)}`
 }
 
-export const addTrackingToEmail = (html: string, invocation: CyclotronJobInvocationHogFunction): string => {
+export const addTrackingToEmail = (html: string, invocation: CyclotronJobInvocationCustomFunction): string => {
     const trackingUrl = generateEmailTrackingPixelUrl(invocation)
 
     html = html.replace(LINK_REGEX, (m, d, s, u) => {
@@ -57,9 +57,9 @@ export class EmailTrackingService {
     private sesWebhookHandler: SesWebhookHandler
 
     constructor(
-        private hogFunctionManager: HogFunctionManagerService,
-        private hogFlowManager: HogFlowManagerService,
-        private hogFunctionMonitoringService: HogFunctionMonitoringService
+        private customFunctionManager: CustomFunctionManagerService,
+        private customFlowManager: CustomFlowManagerService,
+        private customFunctionMonitoringService: CustomFunctionMonitoringService
     ) {
         this.sesWebhookHandler = new SesWebhookHandler()
     }
@@ -86,25 +86,25 @@ export class EmailTrackingService {
         }
 
         // The function ID could be one or the other so we load both
-        const [hogFunction, hogFlow] = await Promise.all([
-            this.hogFunctionManager.getHogFunction(functionId).catch(() => null),
-            this.hogFlowManager.getHogFlow(functionId).catch(() => null),
+        const [customFunction, customFlow] = await Promise.all([
+            this.customFunctionManager.getCustomFunction(functionId).catch(() => null),
+            this.customFlowManager.getCustomFlow(functionId).catch(() => null),
         ])
 
-        const teamId = hogFunction?.team_id ?? hogFlow?.team_id
-        const appSourceId = hogFunction?.id ?? hogFlow?.id
+        const teamId = customFunction?.team_id ?? customFlow?.team_id
+        const appSourceId = customFunction?.id ?? customFlow?.id
 
         if (!teamId || !appSourceId) {
-            logger.error('[EmailTrackingService] trackMetric: Hog function or flow not found', {
+            logger.error('[EmailTrackingService] trackMetric: Custom function or flow not found', {
                 functionId,
                 invocationId,
                 source,
             })
-            emailTrackingErrorsCounter.inc({ error_type: 'hog_function_or_flow_not_found', source })
+            emailTrackingErrorsCounter.inc({ error_type: 'custom_function_or_flow_not_found', source })
             return
         }
 
-        this.hogFunctionMonitoringService.queueAppMetric(
+        this.customFunctionMonitoringService.queueAppMetric(
             {
                 team_id: teamId,
                 app_source_id: appSourceId,
@@ -113,10 +113,10 @@ export class EmailTrackingService {
                 metric_kind: 'email',
                 count: 1,
             },
-            hogFlow ? 'hog_flow' : 'hog_function'
+            customFlow ? 'custom_flow' : 'custom_function'
         )
 
-        await this.hogFunctionMonitoringService.flush()
+        await this.customFunctionMonitoringService.flush()
 
         trackingEventsCounter.inc({ event_type: metricName, source })
         logger.debug('[EmailTrackingService] trackMetric: Email tracking event', {

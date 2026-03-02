@@ -13,7 +13,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
         (step: StepDefinition) =>
             step.title === 'Install the package' ||
             step.title === 'Add environment variables' ||
-            step.title === 'Initialize PostHog'
+            step.title === 'Initialize Insights'
     )
 
     // Add experiments-specific steps
@@ -38,7 +38,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             <Tab.Panel>
                                 <Markdown>
                                     {dedent`
-                                        For client-side experiments in React components, you can use the \`useFeatureFlagVariantKey\` hook or the \`PostHogFeature\` component:
+                                        For client-side experiments in React components, you can use the \`useFeatureFlagVariantKey\` hook or the \`InsightsFeature\` component:
                                     `}
                                 </Markdown>
                                 {ExperimentImplementation && <ExperimentImplementation language="react" />}
@@ -62,7 +62,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <Markdown>
                     {dedent`
-                        Once you've implemented the feature flag in your code, you'll enable it for a target audience by creating a new experiment in the PostHog dashboard.
+                        Once you've implemented the feature flag in your code, you'll enable it for a target audience by creating a new experiment in the Insights dashboard.
                     `}
                 </Markdown>
             ),

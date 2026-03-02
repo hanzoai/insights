@@ -5,28 +5,28 @@ from typing import Optional
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
-from posthog.hogql import errors as hogql_errors
-from posthog.hogql.ai import (
+from posthog.insightsql import errors as insightsql_errors
+from posthog.insightsql.ai import (
     DESTINATION_LIMITATIONS_MESSAGE,
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
     HOG_EXAMPLE_MESSAGE,
-    HOG_FUNCTION_FILTERS_SYSTEM_PROMPT,
-    HOG_FUNCTION_INPUTS_SYSTEM_PROMPT,
+    CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT,
+    CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT,
     HOG_GRAMMAR_MESSAGE,
     IDENTITY_MESSAGE_HOG,
     INPUT_SCHEMA_TYPES_MESSAGE,
     PERSON_TAXONOMY_MESSAGE,
     TRANSFORMATION_LIMITATIONS_MESSAGE,
 )
-from posthog.hogql.parser import parse_program
+from posthog.insightsql.parser import parse_program
 
 from posthog.cdp.validation import compile_hog
 
 from products.cdp.backend.prompts import (
-    HOG_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
-    HOG_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    CUSTOM_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    CUSTOM_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
     HOG_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
 )
 
@@ -40,20 +40,20 @@ class CreateHogTransformationFunctionArgs(BaseModel):
 
 
 class HogTransformationOutput(BaseModel):
-    hog_code: str
+    script_code: str
 
 
-class CreateHogFunctionFiltersArgs(BaseModel):
+class CreateCustomFunctionFiltersArgs(BaseModel):
     instructions: str = Field(description="The instructions for what filters to create.")
 
 
-class HogFunctionFiltersOutput(BaseModel):
+class CustomFunctionFiltersOutput(BaseModel):
     filters: dict
 
 
 class CreateHogTransformationFunctionTool(MaxTool):
     name: str = "create_hog_transformation_function"  # Must match a value in AssistantTool enum
-    description: str = "Write or edit the hog code to create your desired function and apply it to the current editor"
+    description: str = "Write or edit the script code to create your desired function and apply it to the current editor"
     args_schema: type[BaseModel] = CreateHogTransformationFunctionArgs
     context_prompt_template: str = (
         HOG_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT
@@ -64,23 +64,23 @@ class CreateHogTransformationFunctionTool(MaxTool):
     )
 
     def _run_impl(self, instructions: str) -> tuple[str, str]:
-        current_hog_code = self.context.get("current_hog_code", "")
+        current_script_code = self.context.get("current_script_code", "")
 
         system_content = (
             IDENTITY_MESSAGE_HOG
-            + "\n\n<example_hog_code>\n"
+            + "\n\n<example_script_code>\n"
             + HOG_EXAMPLE_MESSAGE
-            + "\n</example_hog_code>\n\n"
+            + "\n</example_script_code>\n\n"
             + "\n\n<hog_grammar>\n"
             + HOG_GRAMMAR_MESSAGE
             + "\n</hog_grammar>\n\n"
-            + "\n\n<current_hog_code>\n"
-            + current_hog_code
-            + "\n</current_hog_code>"
-            + "\n\nReturn ONLY the hog code inside <hog_code> tags. Do not add any other text or explanation."
+            + "\n\n<current_script_code>\n"
+            + current_script_code
+            + "\n</current_script_code>"
+            + "\n\nReturn ONLY the script code inside <script_code> tags. Do not add any other text or explanation."
         )
 
-        user_content = "Write a Hog transformation or tweak the current one to satisfy this request: " + instructions
+        user_content = "Write a Script transformation or tweak the current one to satisfy this request: " + instructions
 
         messages = [SystemMessage(content=system_content), HumanMessage(content=user_content)]
 
@@ -98,7 +98,7 @@ class CreateHogTransformationFunctionTool(MaxTool):
         else:
             raise final_error
 
-        return "```hog\n" + parsed_result.hog_code + "\n```", parsed_result.hog_code
+        return "```script\n" + parsed_result.script_code + "\n```", parsed_result.script_code
 
     @property
     def _model(self):
@@ -113,53 +113,53 @@ class CreateHogTransformationFunctionTool(MaxTool):
         )
 
     def _parse_output(self, output: str) -> HogTransformationOutput:
-        match = re.search(r"<hog_code>(.*?)</hog_code>", output, re.DOTALL)
+        match = re.search(r"<script_code>(.*?)</script_code>", output, re.DOTALL)
         if not match:
             # The model may have returned the code without tags, or with markdown
-            hog_code = re.sub(
-                r"^\s*```hog\s*\n(.*?)\n\s*```\s*$", r"\1", output, flags=re.DOTALL | re.MULTILINE
+            script_code = re.sub(
+                r"^\s*```script\s*\n(.*?)\n\s*```\s*$", r"\1", output, flags=re.DOTALL | re.MULTILINE
             ).strip()
         else:
-            hog_code = match.group(1).strip()
+            script_code = match.group(1).strip()
 
-        if not hog_code:
+        if not script_code:
             raise PydanticOutputParserException(
-                llm_output=output, validation_message="The model returned an empty hog code response."
+                llm_output=output, validation_message="The model returned an empty script code response."
             )
 
         try:
-            compile_hog(hog_code, "transformation")
+            compile_hog(script_code, "transformation")
         except Exception:
             # Try to get a more specific error by parsing directly
             try:
-                parse_program(hog_code)
-            except hogql_errors.SyntaxError as parse_err:
+                parse_program(script_code)
+            except insightsql_errors.SyntaxError as parse_err:
                 raise PydanticOutputParserException(
-                    llm_output=hog_code,
-                    validation_message=f"The Hog code failed to compile: {parse_err}",
+                    llm_output=script_code,
+                    validation_message=f"The Script code failed to compile: {parse_err}",
                 )
             raise PydanticOutputParserException(
-                llm_output=hog_code,
-                validation_message="The Hog code failed to compile.",
+                llm_output=script_code,
+                validation_message="The Script code failed to compile.",
             )
 
-        return HogTransformationOutput(hog_code=hog_code)
+        return HogTransformationOutput(script_code=script_code)
 
 
-class CreateHogFunctionFiltersTool(MaxTool):
-    name: str = "create_hog_function_filters"  # Must match a value in AssistantTool enum
+class CreateCustomFunctionFiltersTool(MaxTool):
+    name: str = "create_custom_function_filters"  # Must match a value in AssistantTool enum
     description: str = (
-        "Create or edit filters for hog functions to specify which events and properties trigger the function"
+        "Create or edit filters for script functions to specify which events and properties trigger the function"
     )
-    args_schema: type[BaseModel] = CreateHogFunctionFiltersArgs
-    context_prompt_template: str = HOG_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT
+    args_schema: type[BaseModel] = CreateCustomFunctionFiltersArgs
+    context_prompt_template: str = CUSTOM_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT
 
     def _run_impl(self, instructions: str) -> tuple[str, str]:
         current_filters = self.context.get("current_filters", "{}")
         function_type = self.context.get("function_type", "destination")
 
         system_content = (
-            HOG_FUNCTION_FILTERS_SYSTEM_PROMPT
+            CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT
             + f"\n\nCurrent filters: {current_filters}"
             + f"\nFunction type: {function_type}"
             + "\n\n<event_taxonomy>\n"
@@ -176,7 +176,7 @@ class CreateHogFunctionFiltersTool(MaxTool):
             + "\n</filter_taxonomy>"
         )
 
-        user_content = f"Create filters for this hog function: {instructions}"
+        user_content = f"Create filters for this script function: {instructions}"
 
         messages = [SystemMessage(content=system_content), HumanMessage(content=user_content)]
 
@@ -202,7 +202,7 @@ class CreateHogFunctionFiltersTool(MaxTool):
             model="gpt-4.1", temperature=0.3, disable_streaming=True, user=self._user, team=self._team, billable=True
         )
 
-    def _parse_output(self, output: str) -> HogFunctionFiltersOutput:
+    def _parse_output(self, output: str) -> CustomFunctionFiltersOutput:
         match = re.search(r"<filters>(.*?)</filters>", output, re.DOTALL)
         if not match:
             # The model may have returned the JSON without tags, or with markdown
@@ -224,30 +224,30 @@ class CreateHogFunctionFiltersTool(MaxTool):
                 llm_output=json_str, validation_message=f"The filters JSON failed to parse: {str(e)}"
             )
 
-        return HogFunctionFiltersOutput(filters=filters)
+        return CustomFunctionFiltersOutput(filters=filters)
 
 
-class CreateHogFunctionInputsArgs(BaseModel):
+class CreateCustomFunctionInputsArgs(BaseModel):
     instructions: str = Field(description="The instructions for what inputs to generate or modify.")
 
 
-class HogFunctionInputsOutput(BaseModel):
-    inputs_schema: list = Field(description="The generated inputs schema for the hog function")
+class CustomFunctionInputsOutput(BaseModel):
+    inputs_schema: list = Field(description="The generated inputs schema for the script function")
 
 
-class CreateHogFunctionInputsTool(MaxTool):
-    name: str = "create_hog_function_inputs"
-    description: str = "Generate or modify input variables for hog functions based on the current code and requirements"
-    args_schema: type[BaseModel] = CreateHogFunctionInputsArgs
-    context_prompt_template: str = HOG_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
+class CreateCustomFunctionInputsTool(MaxTool):
+    name: str = "create_custom_function_inputs"
+    description: str = "Generate or modify input variables for script functions based on the current code and requirements"
+    args_schema: type[BaseModel] = CreateCustomFunctionInputsArgs
+    context_prompt_template: str = CUSTOM_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
 
     def _run_impl(self, instructions: str) -> tuple[str, list]:
         current_inputs_schema = self.context.get("current_inputs_schema", [])
-        hog_code = self.context.get("hog_code", "")
+        script_code = self.context.get("script_code", "")
 
         system_content = (
-            HOG_FUNCTION_INPUTS_SYSTEM_PROMPT
-            + f"\n\nCurrent hog code:\n{hog_code}"
+            CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT
+            + f"\n\nCurrent script code:\n{script_code}"
             + f"\nCurrent inputs schema:\n{current_inputs_schema}"
             + "\n\n<input_schema_types>\n"
             + INPUT_SCHEMA_TYPES_MESSAGE
@@ -283,7 +283,7 @@ class CreateHogFunctionInputsTool(MaxTool):
             model="gpt-4.1", temperature=0.3, disable_streaming=True, user=self._user, team=self._team, billable=True
         )
 
-    def _parse_output(self, output: str) -> HogFunctionInputsOutput:
+    def _parse_output(self, output: str) -> CustomFunctionInputsOutput:
         import json
 
         match = re.search(r"<inputs_schema>(.*?)</inputs_schema>", output, re.DOTALL)
@@ -310,4 +310,4 @@ class CreateHogFunctionInputsTool(MaxTool):
                 llm_output=output, validation_message=f"Invalid JSON in inputs schema: {str(e)}"
             )
 
-        return HogFunctionInputsOutput(inputs_schema=inputs_schema)
+        return CustomFunctionInputsOutput(inputs_schema=inputs_schema)

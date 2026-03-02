@@ -1,4 +1,4 @@
-type QueryKind = 'TrendsQuery' | 'FunnelsQuery' | 'HogQLQuery' | 'InsightVizNode' | 'DataVisualizationNode' | string
+type QueryKind = 'TrendsQuery' | 'FunnelsQuery' | 'InsightsQLQuery' | 'InsightVizNode' | 'DataVisualizationNode' | string
 
 interface QueryInfo {
     visualization: 'trends' | 'funnel' | 'table'
@@ -25,8 +25,8 @@ export function analyzeQuery(query: unknown): QueryInfo {
     if (q.kind === 'FunnelsQuery') {
         return { visualization: 'funnel', innerKind: 'FunnelsQuery', innerQuery: q }
     }
-    if (q.kind === 'HogQLQuery') {
-        return { visualization: 'table', innerKind: 'HogQLQuery' }
+    if (q.kind === 'InsightsQLQuery') {
+        return { visualization: 'table', innerKind: 'InsightsQLQuery' }
     }
 
     // InsightVizNode wraps insight queries
@@ -40,9 +40,9 @@ export function analyzeQuery(query: unknown): QueryInfo {
         }
     }
 
-    // DataVisualizationNode wraps HogQL queries for custom visualizations
+    // DataVisualizationNode wraps InsightsQL queries for custom visualizations
     if (q.kind === 'DataVisualizationNode' && q.source && typeof q.source === 'object') {
-        return { visualization: 'table', innerKind: 'HogQLQuery' }
+        return { visualization: 'table', innerKind: 'InsightsQLQuery' }
     }
 
     return { visualization: 'table', innerKind: String(q.kind || 'unknown') }

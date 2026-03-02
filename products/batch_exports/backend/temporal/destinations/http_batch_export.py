@@ -14,7 +14,7 @@ from temporalio.common import RetryPolicy
 from posthog.batch_exports.service import BatchExportField, BatchExportInsertInputs, HttpBatchExportInputs
 from posthog.models import BatchExportRun
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.logger import get_logger
 
@@ -250,11 +250,11 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
         rows_exported = get_rows_exported_metric(model="events")
         bytes_exported = get_bytes_exported_metric(model="events")
 
-        # The HTTP destination currently only supports the PostHog batch capture endpoint. In the
+        # The HTTP destination currently only supports the Insights batch capture endpoint. In the
         # future we may support other endpoints, but we'll need a way to template the request body,
         # headers, etc.
         #
-        # For now, we write the batch out in PostHog capture format, which means each Batch Export
+        # For now, we write the batch out in Insights capture format, which means each Batch Export
         # temporary file starts with a header and ends with a footer.
         #
         # For example:
@@ -297,7 +297,7 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
             async with aiohttp.ClientSession() as session:
                 for record_batch in record_iterator:
                     for row in record_batch.select(columns).to_pylist():
-                        # Format result row as PostHog event, write JSON to the batch file.
+                        # Format result row as Insights event, write JSON to the batch file.
 
                         properties = row["properties"]
                         properties = json.loads(properties) if properties else {}
@@ -334,7 +334,7 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
 
 
 @workflow.defn(name="http-export")
-class HttpBatchExportWorkflow(PostHogWorkflow):
+class HttpBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data to an HTTP endpoint.
 
     This Workflow is intended to be executed both manually and by a Temporal

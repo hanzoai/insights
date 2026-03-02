@@ -417,7 +417,7 @@ def custom_postprocessing_hook(result, generator, request, public):
 
     return {
         **result,
-        "info": {"title": "PostHog API", "version": "1.0.0", "description": ""},
+        "info": {"title": "Insights API", "version": "1.0.0", "description": ""},
         "paths": paths,
         "x-tagGroups": [{"name": "All endpoints", "tags": sorted(set(all_tags))}],
     }

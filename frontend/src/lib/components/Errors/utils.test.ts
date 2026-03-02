@@ -15,8 +15,8 @@ describe('Error Display', () => {
             $sentry_exception_message: 'There was an error creating the support ticket with zendesk.',
             $exception_message: 'There was an error creating the support ticket with zendesk.',
             $sentry_tags: {
-                'PostHog Person URL': 'https://app.posthog.com/person/f6kW3HXaha6dAvHZiOmgrcAXK09682P6nNPxvfjqM9c',
-                'PostHog Recording URL': 'https://app.posthog.com/replay/018dc30d-a8a5-7257-9faf-dcd97c0e19cf?t=2294',
+                'Insights Person URL': 'https://app.posthog.com/person/f6kW3HXaha6dAvHZiOmgrcAXK09682P6nNPxvfjqM9c',
+                'Insights Recording URL': 'https://app.posthog.com/replay/018dc30d-a8a5-7257-9faf-dcd97c0e19cf?t=2294',
             },
             $sentry_exception: {
                 values: [
@@ -83,8 +83,8 @@ describe('Error Display', () => {
             $os: 'Windows',
             $os_version: '10',
             $sentry_tags: {
-                'PostHog Person URL': 'https://app.posthog.com/person/f6kW3HXaha6dAvHZiOmgrcAXK09682P6nNPxvfjqM9c',
-                'PostHog Recording URL': 'https://app.posthog.com/replay/018dc30d-a8a5-7257-9faf-dcd97c0e19cf?t=2294',
+                'Insights Person URL': 'https://app.posthog.com/person/f6kW3HXaha6dAvHZiOmgrcAXK09682P6nNPxvfjqM9c',
+                'Insights Recording URL': 'https://app.posthog.com/replay/018dc30d-a8a5-7257-9faf-dcd97c0e19cf?t=2294',
             },
             $sentry_exception: undefined,
             $sentry_url:

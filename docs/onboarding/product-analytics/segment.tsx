@@ -7,13 +7,13 @@ export const getSegmentSteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
     return [
         {
-            title: 'Add PostHog destination',
+            title: 'Add Insights destination',
             badge: 'required',
             content: (
                 <Markdown>
-                    Segment is a customer data platform that can route your analytics data to PostHog and other
+                    Segment is a customer data platform that can route your analytics data to Insights and other
                     destinations. In your Segment workspace, go to **Connections** &gt; **Catalog** and search for
-                    **PostHog**. Click **Add Destination** and select the source you want to connect.
+                    **Insights**. Click **Add Destination** and select the source you want to connect.
                 </Markdown>
             ),
         },
@@ -22,7 +22,7 @@ export const getSegmentSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Enter your PostHog project API key:</Markdown>
+                    <Markdown>Enter your Insights project API key:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -34,7 +34,7 @@ export const getSegmentSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             },
                         ]}
                     />
-                    <Markdown>Enter your PostHog host:</Markdown>
+                    <Markdown>Enter your Insights host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -55,7 +55,7 @@ export const getSegmentSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Segment will now forward `track`, `identify`, `page`, and `group` calls to PostHog.
+                        Segment will now forward `track`, `identify`, `page`, and `group` calls to Insights.
                     </Markdown>
                     <CalloutBox type="fyi" title="Learn more">
                         <Markdown>

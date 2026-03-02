@@ -345,7 +345,7 @@ class PublicCustomFlowTemplateViewSet(
     viewsets.GenericViewSet,
 ):
     """
-    Public endpoint for global hogflow templates that doesn't require authentication.
+    Public endpoint for global custom flow templates that doesn't require authentication.
     Global templates are now loaded from code files instead of the database.
     """
 

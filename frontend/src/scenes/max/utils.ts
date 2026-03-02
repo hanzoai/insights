@@ -236,7 +236,7 @@ export const errorTrackingIssueToMaxContextPayload = (issue: {
 }
 
 /**
- * Generic context that can be passed when opening PostHog AI.
+ * Generic context that can be passed when opening Insights AI.
  */
 export interface MaxOpenContext {
     /** Error tracking issue context */

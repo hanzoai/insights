@@ -27,7 +27,7 @@ CLOUD_DEPLOYMENT: str | None = get_from_env(
 """Deployment environment identifier.
 
 Possible values:
-- `US` or `EU` for PostHog **Cloud US** and PostHog **Cloud EU**.
+- `US` or `EU` for Insights **Cloud US** and Insights **Cloud EU**.
 - `DEV` for the hosted **dev/staging** environment.
 - `LOCAL` or unset for the **local dev** environment.
 - `E2E` for **e2e tests**.
@@ -56,7 +56,7 @@ DISABLE_BULK_DELETES: bool = get_from_env("DISABLE_BULK_DELETES", False, type_ca
 if DEBUG and not TEST:
     logger.warning(
         [
-            "Environment variable DEBUG is set - PostHog is running in DEVELOPMENT MODE!",
+            "Environment variable DEBUG is set - Insights is running in DEVELOPMENT MODE!",
             "Be sure to unset DEBUG if this is supposed to be a PRODUCTION ENVIRONMENT!",
         ]
     )

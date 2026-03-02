@@ -305,9 +305,9 @@ async def test_iter_records_uses_extra_query_parameters(clickhouse_client):
             data_interval_start.isoformat(),
             data_interval_end.isoformat(),
             fields=[
-                {"expression": "JSONExtractInt(properties, %(hogql_val_0)s)", "alias": "custom_prop"},
+                {"expression": "JSONExtractInt(properties, %(insightsql_val_0)s)", "alias": "custom_prop"},
             ],
-            extra_query_parameters={"hogql_val_0": "custom"},
+            extra_query_parameters={"insightsql_val_0": "custom"},
         )
         for record in record_batch.to_pylist()
     ]

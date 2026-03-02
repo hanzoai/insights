@@ -108,7 +108,7 @@ These events are lightweight and processed through the regular pipeline:
 
 Properties that can contain large payloads (marked as "can be stored as blob" above) should be sent as separate multipart parts with names like `event.properties.$ai_input` or `event.properties.$ai_output_choices`. This keeps the event JSON small while allowing arbitrarily large context data to be stored efficiently in S3.
 
-**Reference:** [PostHog LLM Analytics Manual Capture Documentation](https://posthog.com/docs/llm-analytics/manual-capture)
+**Reference:** [Insights LLM Analytics Manual Capture Documentation](https://posthog.com/docs/llm-analytics/manual-capture)
 
 ## General Architecture
 
@@ -117,7 +117,7 @@ The LLM Analytics capture system implements a specialized data flow that efficie
 ### Data Flow
 
 1. **Event Ingestion**
-   - Events are transmitted using server-side PostHog SDKs via HTTP to a dedicated `/i/v0/ai` endpoint
+   - Events are transmitted using server-side Insights SDKs via HTTP to a dedicated `/i/v0/ai` endpoint
    - Requests utilize multipart payloads containing:
      - Event payload (metadata and standard properties)
      - Binary blobs containing LLM context (e.g., input state, output state property values)
@@ -151,14 +151,14 @@ The `/i/v0/ai` endpoint accepts multipart POST requests with the following struc
 **Headers:**
 
 - `Content-Type: multipart/form-data; boundary=<boundary>`
-- Standard PostHog authentication headers
+- Standard Insights authentication headers
 
 **Multipart Parts:**
 
 1. **Event Part** (required)
    - `Content-Disposition: form-data; name="event"` (required)
    - `Content-Type: application/json` (required)
-   - Body: Standard PostHog event JSON payload (without properties, or with properties that will be rejected if `event.properties` part is also present)
+   - Body: Standard Insights event JSON payload (without properties, or with properties that will be rejected if `event.properties` part is also present)
 
 2. **Event Properties Part** (optional)
    - `Content-Disposition: form-data; name="event.properties"` (required)
@@ -434,7 +434,7 @@ For data received from SDKs (after request decompression, if any):
 
 - All requests to the `/i/v0/ai` endpoint must be authenticated using the project's private API key
 - The capture service validates the API key before processing any multipart data
-- This prevents unauthorized uploads and ensures blob storage is only used by legitimate PostHog projects
+- This prevents unauthorized uploads and ensures blob storage is only used by legitimate Insights projects
 
 ### Payload Authentication Implementation
 
@@ -509,7 +509,7 @@ The capture service enforces strict validation on incoming events:
    - This ensures the endpoint is only used for its intended purpose
 
 2. **Required Fields**
-   - Event must contain standard PostHog event fields (event, properties, timestamp)
+   - Event must contain standard Insights event fields (event, properties, timestamp)
    - Properties object must be present, even if empty
 
 3. **Blob Property Validation**

@@ -12,13 +12,13 @@ import { sceneLogic } from 'scenes/sceneLogic'
 import { urls } from 'scenes/urls'
 
 import { Query } from '~/queries/Query/Query'
-import { HogQLQuery, HogQLVariable, Node } from '~/queries/schema/schema-general'
-import { isHogQLQuery } from '~/queries/utils'
+import { InsightsQLQuery, InsightsQLVariable, Node } from '~/queries/schema/schema-general'
+import { isInsightsQLQuery } from '~/queries/utils'
 
 import { endpointLogic } from '../endpointLogic'
 import { endpointSceneLogic } from '../endpointSceneLogic'
 
-function formatVariableValue(variable: HogQLVariable): { text: string; isPlaceholder: boolean } {
+function formatVariableValue(variable: InsightsQLVariable): { text: string; isPlaceholder: boolean } {
     if (variable.value === undefined || variable.value === null || variable.value === '') {
         return { text: 'null', isPlaceholder: true }
     }
@@ -57,21 +57,21 @@ export function EndpointQuery({ tabId }: EndpointQueryProps): JSX.Element {
         setLocalQuery(query)
     }
 
-    // If it's a HogQL query, show the code editor
-    if (effectiveQuery && isHogQLQuery(effectiveQuery)) {
-        const hogqlQuery = effectiveQuery as HogQLQuery
-        const variables = hogqlQuery.variables || {}
+    // If it's a InsightsQL query, show the code editor
+    if (effectiveQuery && isInsightsQLQuery(effectiveQuery)) {
+        const insightsqlQuery = effectiveQuery as InsightsQLQuery
+        const variables = insightsqlQuery.variables || {}
 
         const handleEditQuery = (): void => {
             newTab(
-                urls.sqlEditor({ query: hogqlQuery.query, outputTab: OutputTab.Endpoint, endpointName: endpoint.name })
+                urls.sqlEditor({ query: insightsqlQuery.query, outputTab: OutputTab.Endpoint, endpointName: endpoint.name })
             )
         }
 
         return (
             <div className="flex gap-4">
                 <div className="flex-1 flex flex-col gap-2">
-                    <CodeEditor value={hogqlQuery.query} language="hogQL" height="300px" options={{ readOnly: true }} />
+                    <CodeEditor value={insightsqlQuery.query} language="insightsQL" height="300px" options={{ readOnly: true }} />
                     <div>
                         <LemonButton type="secondary" onClick={handleEditQuery} sideIcon={<IconOpenInNew />}>
                             Edit query in SQL Editor

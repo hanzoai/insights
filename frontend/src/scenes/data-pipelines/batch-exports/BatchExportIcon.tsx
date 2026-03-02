@@ -2,8 +2,8 @@ import { Link, Tooltip } from '@posthog/lemon-ui'
 
 import { BatchExportService } from '~/types'
 
-import IconWorkflows from 'public/hedgehog/mail-hog.png'
-import IconHTTP from 'public/hedgehog/running-hog.png'
+import IconWorkflows from 'public/mascot/mail-hog.png'
+import IconHTTP from 'public/mascot/running-hog.png'
 import IconS3 from 'public/services/aws-s3.png'
 import IconAzureBlob from 'public/services/azure-blob-storage.png'
 import IconBigQuery from 'public/services/bigquery.png'

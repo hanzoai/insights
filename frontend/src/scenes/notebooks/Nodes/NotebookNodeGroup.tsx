@@ -13,7 +13,7 @@ import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { formatCurrency } from 'lib/utils/geography/currency'
 import stringWithWBR from 'lib/utils/stringWithWBR'
 import { groupLogic } from 'scenes/groups/groupLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { groupDisplayId } from 'scenes/persons/GroupActorDisplay'
 import { teamLogic } from 'scenes/teamLogic'
 import { urls } from 'scenes/urls'
@@ -276,7 +276,7 @@ type NotebookNodeGroupAttributes = {
     placement?: string
 }
 
-export const NotebookNodeGroup = createPostHogWidgetNode<NotebookNodeGroupAttributes>({
+export const NotebookNodeGroup = createInsightsWidgetNode<NotebookNodeGroupAttributes>({
     nodeType: NotebookNodeType.Group,
     titlePlaceholder: 'Group',
     Component,

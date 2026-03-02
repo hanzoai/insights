@@ -151,7 +151,7 @@ class HobbyTester:
 
         return [
             'echo "$LOG_PREFIX Downloading hobby installer from GitHub releases..."',
-            "curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer",
+            "curl -L https://github.com/Insights/posthog/releases/download/hobby-latest/hobby-installer -o hobby-installer",
             "chmod +x hobby-installer",
         ]
 
@@ -173,8 +173,8 @@ runcmd:
             "cd hobby",
             'echo "$LOG_PREFIX Setting up needrestart config"',
             "sed -i \"s/#\\$nrconf{restart} = 'i';/\\$nrconf{restart} = 'a';/g\" /etc/needrestart/needrestart.conf",
-            'echo "$LOG_PREFIX Cloning PostHog repository"',
-            "git clone https://github.com/PostHog/posthog.git",
+            'echo "$LOG_PREFIX Cloning Insights repository"',
+            "git clone https://github.com/Insights/posthog.git",
             "cd posthog",
             f'echo "$LOG_PREFIX Fetching commit: {safe_sha}"',
             f"git fetch origin {safe_sha}",
@@ -1095,7 +1095,7 @@ def update_smoke_test_comment(
         "Authorization": f"token {ctx.gh_token}",
         "Accept": "application/vnd.github.v3+json",
     }
-    repo = "PostHog/posthog"
+    repo = "Insights/posthog"
 
     # Find existing comment and parse failure count
     existing_comment = None
@@ -1293,7 +1293,7 @@ def main():
                 )
                 ht.ensure_droplet(ssh_enabled=True)
                 print(
-                    "Preview instance has started. You will be able to access it here after PostHog boots (~15 minutes):",
+                    "Preview instance has started. You will be able to access it here after Insights boots (~15 minutes):",
                     flush=True,
                 )
                 print(f"🌐 URL: https://{ht.hostname}", flush=True)
@@ -1327,7 +1327,7 @@ def main():
             )
             ht.ensure_droplet(ssh_enabled=True)
             print(
-                "Instance has started. You will be able to access it here after PostHog boots (~15 minutes):",
+                "Instance has started. You will be able to access it here after Insights boots (~15 minutes):",
                 flush=True,
             )
             print(f"https://{ht.hostname}", flush=True)
@@ -1465,7 +1465,7 @@ def main():
                 try:
                     headers = {"Authorization": f"token {gh_token}", "Accept": "application/vnd.github.v3+json"}
                     resp = requests.get(
-                        f"https://api.github.com/repos/PostHog/posthog/pulls/{pr_number}",
+                        f"https://api.github.com/repos/Insights/posthog/pulls/{pr_number}",
                         headers=headers,
                         timeout=10,
                     )

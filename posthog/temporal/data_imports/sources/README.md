@@ -153,7 +153,7 @@ If your source uses OAuth (SourceFieldOauthConfig):
 
 ## Testing Your Source Locally
 
-1. **Start PostHog**: `DEBUG=1 ./bin/start`
+1. **Start Insights**: `DEBUG=1 ./bin/start`
 2. **Navigate to**: Data Warehouse → New Source
 3. **Test OAuth flow**: Click "Connect with [Your Service]"
 4. **Test form**: Verify all fields render correctly

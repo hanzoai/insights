@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { LemonBanner, LemonButton, LemonSkeleton } from '@posthog/lemon-ui'
 
-import { DetectiveHog } from 'lib/components/hedgehogs'
+import { DetectiveHog } from 'lib/components/mascots'
 import { heatmapLogic } from 'scenes/heatmaps/scenes/heatmap/heatmapLogic'
 
 import { heatmapsBrowserLogic } from './heatmapsBrowserLogic'
@@ -22,7 +22,7 @@ export function HeatmapsInfoBanner(): JSX.Element {
                 </p>
                 <p>
                     You can also view heatmaps for any page on your website by entering the URL above. As long as the
-                    page has the PostHog Toolbar installed, and can be loaded in an iframe, you can view heatmaps for
+                    page has the Insights Toolbar installed, and can be loaded in an iframe, you can view heatmaps for
                     it.
                 </p>
             </div>

@@ -35,7 +35,7 @@ delete CORE_FILTER_DEFINITIONS_BY_GROUP.events['All Events']
 export const PROPERTY_KEYS = Object.keys(CORE_FILTER_DEFINITIONS_BY_GROUP.event_properties)
 
 /**
- * these are properties that PostHog add to events they track for their own purposes
+ * these are properties that Insights add to events they track for their own purposes
  * not part of the general taxonomy
  * but often more numerous than actual properties set on events and useful to hide
  * to make those properties discoverable
@@ -126,10 +126,10 @@ export const POSTHOG_EVENT_PROMOTED_PROPERTIES = {
 }
 export type KNOWN_PROMOTED_PROPERTY_PARENTS = keyof typeof POSTHOG_EVENT_PROMOTED_PROPERTIES
 
-export function isPostHogProperty(propertyKey: string, isCloudOrDev: boolean | undefined = false): boolean {
-    const isPostHogProperty = propertyKey.startsWith('$') || PROPERTY_KEYS.includes(propertyKey)
-    const isNonDollarPostHogProperty = isCloudOrDev && CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(propertyKey)
-    return isPostHogProperty || isNonDollarPostHogProperty
+export function isInsightsProperty(propertyKey: string, isCloudOrDev: boolean | undefined = false): boolean {
+    const isInsightsProperty = propertyKey.startsWith('$') || PROPERTY_KEYS.includes(propertyKey)
+    const isNonDollarInsightsProperty = isCloudOrDev && CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(propertyKey)
+    return isInsightsProperty || isNonDollarInsightsProperty
 }
 
 export const conversionGoalPopoverFields: DataWarehousePopoverField[] = [

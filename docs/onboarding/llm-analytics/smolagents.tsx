@@ -9,13 +9,13 @@ export const getSmolagentsSteps = (ctx: OnboardingComponentsContext): StepDefini
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The smolagents integration uses
-                        PostHog's OpenAI wrapper.
+                        Setting up analytics starts with installing the Insights SDK. The smolagents integration uses
+                        Insights's OpenAI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getSmolagentsSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Install smolagents and the OpenAI SDK. PostHog instruments your LLM calls by wrapping the OpenAI
+                        Install smolagents and the OpenAI SDK. Insights instruments your LLM calls by wrapping the OpenAI
                         client, which you can pass to smolagents' `OpenAIServerModel`.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getSmolagentsSteps = (ctx: OnboardingComponentsContext): StepDefini
             ),
         },
         {
-            title: 'Initialize PostHog and smolagents',
+            title: 'Initialize Insights and smolagents',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog OpenAI wrapper and
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
                         pass it to smolagents' `OpenAIServerModel`.
                     </Markdown>
 
@@ -83,7 +83,7 @@ export const getSmolagentsSteps = (ctx: OnboardingComponentsContext): StepDefini
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            PostHog's `OpenAI` wrapper is a drop-in replacement for `openai.OpenAI`. By passing it as
+                            Insights's `OpenAI` wrapper is a drop-in replacement for `openai.OpenAI`. By passing it as
                             the `client` to `OpenAIServerModel`, all LLM calls made by smolagents are automatically
                             captured as `$ai_generation` events.
                         </Markdown>
@@ -97,7 +97,7 @@ export const getSmolagentsSteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Use smolagents as normal. PostHog automatically captures an `$ai_generation` event for each LLM
+                        Use smolagents as normal. Insights automatically captures an `$ai_generation` event for each LLM
                         call made through the wrapped OpenAI client.
                     </Markdown>
 
@@ -110,7 +110,7 @@ export const getSmolagentsSteps = (ctx: OnboardingComponentsContext): StepDefini
                             )
 
                             result = agent.run(
-                                "What is a fun fact about hedgehogs?"
+                                "What is a fun fact about mascots?"
                             )
 
                             print(result)

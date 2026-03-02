@@ -1,6 +1,6 @@
 ---
 name: implementing-agent-modes
-description: Guidelines to create/update a new mode for PostHog AI agent. Modes are a way to limit what tools, prompts, and prompt injections are applied and under what conditions. Achieve better results using your plan mode.
+description: Guidelines to create/update a new mode for Insights AI agent. Modes are a way to limit what tools, prompts, and prompt injections are applied and under what conditions. Achieve better results using your plan mode.
 ---
 
 # Agent modes
@@ -9,7 +9,7 @@ Use the steps below to plan or implement a new mode. A mode is a way to manage t
 
 ## Determine mode name
 
-Explore the `ee/hogai/core/agent_modes/presets` directory and check if there are already modes that match the user's intent. If you want to create a new mode, you should scope it by a PostHog product (Product analytics), product area (SQL), or agent (Instrumentation agent).
+Explore the `ee/hogai/core/agent_modes/presets` directory and check if there are already modes that match the user's intent. If you want to create a new mode, you should scope it by a Insights product (Product analytics), product area (SQL), or agent (Instrumentation agent).
 
 ## (optionally) Create a new mode in schema
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the Python acceptance test suite for the LLM Analytics pipeline. These tests validate **end-to-end functionality** that requires real PostHog infrastructure: database, S3 storage, Kafka, authentication services, and the full ingestion pipeline.
+This document describes the Python acceptance test suite for the LLM Analytics pipeline. These tests validate **end-to-end functionality** that requires real Insights infrastructure: database, S3 storage, Kafka, authentication services, and the full ingestion pipeline.
 
 **Implementation Requirement**: Each phase in the implementation plan must pass its corresponding acceptance tests before proceeding to the next phase. This ensures incremental validation and prevents regression as new features are added.
 
@@ -10,9 +10,9 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 
 ### Test Environment
 
-- **Local PostHog Deployment**: Complete local PostHog setup including capture service with `/i/v0/ai` endpoint
+- **Local Insights Deployment**: Complete local Insights setup including capture service with `/i/v0/ai` endpoint
 - **S3-Compatible Storage**: Local S3-compatible storage for blob storage with direct access for verification
-- **PostHog Query API**: Used to fetch processed events from the ingestion pipeline for validation
+- **Insights Query API**: Used to fetch processed events from the ingestion pipeline for validation
 - **Direct S3 Access**: Test suite has direct S3 client access to verify blob storage and retrieval
 - **Database**: PostgreSQL for team/token storage and event metadata
 - **Kafka**: Event streaming for ingestion pipeline
@@ -21,7 +21,7 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 ### Test Framework
 
 - **Acceptance Tests**: Full pipeline tests from HTTP request through ingestion to event storage
-- **PostHog API Client**: Direct integration with PostHog query API to verify event processing
+- **Insights API Client**: Direct integration with Insights query API to verify event processing
 - **S3 Client**: Direct access to verify S3 blob storage, metadata, and retrieval
 - **Parameterized Tests**: Test variations across different event types, blob sizes, and configurations
 - **Async Testing**: Support for testing concurrent requests and large payload processing
@@ -43,8 +43,8 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 
 #### Scenario 1.1: Event Processing Verification
 
-- **Test**: Send multipart request and verify event reaches PostHog query API
-- **Validation**: Use PostHog query API to fetch processed event, verify blob placeholders correctly inserted
+- **Test**: Send multipart request and verify event reaches Insights query API
+- **Validation**: Use Insights query API to fetch processed event, verify blob placeholders correctly inserted
 - **Tests Implemented**:
   - `test_basic_ai_generation_event`: Full end-to-end event processing
   - `test_all_accepted_ai_event_types`: Verify all six supported AI event types are accepted and stored
@@ -59,8 +59,8 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 
 #### Scenario 2.2: S3 URL Generation and Access
 
-- **Test**: Verify generated S3 URLs in PostHog events point to accessible objects
-- **Validation**: Query PostHog API for events, extract S3 URLs, verify blobs retrievable from S3
+- **Test**: Verify generated S3 URLs in Insights events point to accessible objects
+- **Validation**: Query Insights API for events, extract S3 URLs, verify blobs retrievable from S3
 
 #### Scenario 2.3: Blob Metadata Storage
 
@@ -82,8 +82,8 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 
 #### Scenario 4.2: Byte Range URLs and Access
 
-- **Test**: Verify S3 URLs in PostHog events include correct byte range parameters
-- **Validation**: Query PostHog API for events, verify URLs contain range parameters, use S3 client to test range requests
+- **Test**: Verify S3 URLs in Insights events include correct byte range parameters
+- **Validation**: Query Insights API for events, verify URLs contain range parameters, use S3 client to test range requests
 
 #### Scenario 4.3: Content Type Handling
 
@@ -130,7 +130,7 @@ This document describes the Python acceptance test suite for the LLM Analytics p
 
 ### Test Implementation
 
-The acceptance test suite is implemented in Python using pytest to test against full PostHog infrastructure.
+The acceptance test suite is implemented in Python using pytest to test against full Insights infrastructure.
 
 #### Test Structure
 
@@ -139,21 +139,21 @@ The acceptance test suite is implemented in Python using pytest to test against 
 - **Dependencies**:
   - `requests` for HTTP client operations
   - `boto3` for S3 client operations (when needed)
-  - PostHog SDK or API for event querying
+  - Insights SDK or API for event querying
   - Django test utilities for setup
 
 ### Local Test Environment Setup
 
 #### Prerequisites
 
-- **Local PostHog Instance**: Full PostHog deployment running locally with all services (Django, capture, Kafka, ClickHouse, PostgreSQL)
+- **Local Insights Instance**: Full Insights deployment running locally with all services (Django, capture, Kafka, ClickHouse, PostgreSQL)
 - **Capture Service**: Running with `/i/v0/ai` endpoint enabled
-- **Personal API Key**: PostHog personal API key for creating test organizations/projects
+- **Personal API Key**: Insights personal API key for creating test organizations/projects
 
 #### Environment Configuration
 
 ```bash
-# PostHog Instance (defaults to http://localhost:8010 if not set)
+# Insights Instance (defaults to http://localhost:8010 if not set)
 export POSTHOG_TEST_BASE_URL="http://localhost:8010"
 
 # Personal API Key (required - no default)
@@ -162,7 +162,7 @@ export POSTHOG_PERSONAL_API_KEY="your_personal_api_key_here"
 
 **Creating a Personal API Key:**
 
-1. Navigate to your PostHog instance (e.g., `http://localhost:8010`)
+1. Navigate to your Insights instance (e.g., `http://localhost:8010`)
 2. Go to **Settings** (sidebar) → **Account** → **Personal API Keys**
 3. Click **Create personal API key**
 4. Configure the key:
@@ -170,7 +170,7 @@ export POSTHOG_PERSONAL_API_KEY="your_personal_api_key_here"
    - **Scopes**: Set to **All access** (required for creating/deleting test organizations and projects)
 5. Copy the generated key and set it as `POSTHOG_PERSONAL_API_KEY`
 
-**Note**: The test suite automatically creates temporary organizations and projects for each test class and cleans them up after tests complete. S3 configuration is handled by the PostHog instance itself.
+**Note**: The test suite automatically creates temporary organizations and projects for each test class and cleans them up after tests complete. S3 configuration is handled by the Insights instance itself.
 
 ### Test Execution
 
@@ -200,14 +200,14 @@ Each test phase will include common utilities for:
 
 - **Multipart Request Builder**: Construct multipart/form-data requests with event JSON and blob parts
 - **S3 Client Wrapper**: Direct S3 operations for validation and cleanup
-- **PostHog API Client**: Query PostHog API to verify event processing
+- **Insights API Client**: Query Insights API to verify event processing
 - **Test Data Generators**: Create various blob sizes, content types, and event payloads
-- **Cleanup Helpers**: Remove test data from S3 and PostHog between test runs
+- **Cleanup Helpers**: Remove test data from S3 and Insights between test runs
 
 #### Test Data Management
 
 - **Isolated Test Teams**: Each test uses unique team IDs to prevent interference
-- **Cleanup Between Tests**: Automatic cleanup of S3 objects and PostHog test data
+- **Cleanup Between Tests**: Automatic cleanup of S3 objects and Insights test data
 - **Fixture Data**: Predefined multipart requests and blob data for consistent testing
 - **Random Data Generation**: Configurable blob sizes and content for stress testing
 

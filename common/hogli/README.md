@@ -1,6 +1,6 @@
 # hogli Developer CLI
 
-`hogli` is the unified command-line interface for common PostHog developer workflows. It wraps the existing scripts and tooling in this monorepo to provide a single entry point for spinning up services, running checks, and working on products. These commands mirror the recommendations in the [Developing Locally handbook guide](https://posthog.com/handbook/engineering/developing-locally), so new contributors can rely on a single interface instead of memorising individual scripts.
+`hogli` is the unified command-line interface for common Insights developer workflows. It wraps the existing scripts and tooling in this monorepo to provide a single entry point for spinning up services, running checks, and working on products. These commands mirror the recommendations in the [Developing Locally handbook guide](https://posthog.com/handbook/engineering/developing-locally), so new contributors can rely on a single interface instead of memorising individual scripts.
 
 ---
 
@@ -30,7 +30,7 @@ The Flox environment adds `hogli` to your PATH via a symlink. Without Flox, use 
 
 ### Getting started
 
-New to PostHog development? Run `hogli quickstart` to see the essential commands for getting up and running. It shows:
+New to Insights development? Run `hogli quickstart` to see the essential commands for getting up and running. It shows:
 
 1. How to start the full dev stack
 2. Daily workflows (format code, run checks, etc.)

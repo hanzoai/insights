@@ -153,7 +153,7 @@ class Command(BaseCommand):
             raise ValueError(f"No workflow with name '{workflow_name}'")
         except AttributeError:
             raise TypeError(
-                f"Workflow '{workflow_name}' is not a `PostHogWorkflow` that can invoked by `start_temporal_workflow`."
+                f"Workflow '{workflow_name}' is not a `InsightsWorkflow` that can invoked by `start_temporal_workflow`."
             )
 
         logging.info("Starting Temporal Workflow %s with ID %s", workflow_name, workflow_id)

@@ -32,10 +32,10 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
             label="Test API Key",
             secure_value=hash_key_value(self.api_key),
         )
-        self.sample_hogql_query = {
+        self.sample_insightsql_query = {
             "explain": None,
             "filters": None,
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "modifiers": None,
             "name": None,
             "query": "SELECT count(1) FROM query_log",
@@ -50,12 +50,12 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
             "series": [{"kind": "EventsNode"}],
         }
 
-    def test_create_hogql_endpoint(self):
+    def test_create_insightsql_endpoint(self):
         """Test creating a endpoint successfully."""
         data = {
             "name": "test_query",
             "description": "Test query description",
-            "query": self.sample_hogql_query,
+            "query": self.sample_insightsql_query,
         }
 
         response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
@@ -64,7 +64,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         response_data = response.json()
 
         self.assertEqual("test_query", response_data["name"])
-        self.assertEqual(self.sample_hogql_query, response_data["query"])
+        self.assertEqual(self.sample_insightsql_query, response_data["query"])
         self.assertEqual("Test query description", response_data["description"])
         self.assertTrue(response_data["is_active"])
         self.assertIn("id", response_data)
@@ -79,7 +79,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         # Query is stored on the version, not the endpoint
         version = endpoint.get_version()
         assert version is not None
-        self.assertEqual(version.query, self.sample_hogql_query)
+        self.assertEqual(version.query, self.sample_insightsql_query)
         self.assertEqual(endpoint.created_by, self.user)
         self.assertIsNone(endpoint.derived_from_insight)
 
@@ -92,11 +92,11 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(log.detail.get("name"), "test_query")
 
     def test_cannot_create_endpoint_with_invalid_sql(self):
-        """Test creating an endpoint with invalid HogQL fails."""
+        """Test creating an endpoint with invalid InsightsQL fails."""
         data = {
             "name": "test_query",
             "description": "Test query description",
-            "query": {"kind": "HogQLQuery", "query": "selet 100"},  # intentionally wrong spelling
+            "query": {"kind": "InsightsQLQuery", "query": "selet 100"},  # intentionally wrong spelling
         }
 
         response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
@@ -109,7 +109,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         data = {
             "name": "test_query",
             "query": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             },
         }
@@ -129,7 +129,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         data = {
             "name": "test_query",
             "query": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     variable_id: {
@@ -155,7 +155,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         data = {
             "name": "test_query",
             "query": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name} AND properties.os = {variables.os}",
                 "variables": {
                     variable_id: {
@@ -176,13 +176,13 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
     def test_cannot_update_endpoint_with_undefined_variable_placeholders(self):
         create_data = {
             "name": "test_query",
-            "query": {"kind": "HogQLQuery", "query": "SELECT count() FROM events"},
+            "query": {"kind": "InsightsQLQuery", "query": "SELECT count() FROM events"},
         }
         self.client.post(f"/api/environments/{self.team.id}/endpoints/", create_data, format="json")
 
         update_data = {
             "query": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
             },
         }
@@ -197,7 +197,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_data = {
             "name": "non-existent-variable",
             "query": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     "var-1": {
@@ -217,7 +217,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_data = {
             "name": "non-existent-variable",
             "query": {
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT count() FROM events WHERE event = {variables.event_name}",
                 "variables": {
                     fake_uuid: {
@@ -248,7 +248,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="update_test",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             description="Original description",
             created_by=self.user,
         )
@@ -256,7 +256,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         updated_data = {
             "description": "Updated description",
             "is_active": False,
-            "query": {"kind": "HogQLQuery", "query": "SELECT 1"},
+            "query": {"kind": "InsightsQLQuery", "query": "SELECT 1"},
         }
 
         response = self.client.put(
@@ -272,7 +272,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         want_query = {
             "explain": None,
             "filters": None,
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "modifiers": None,
             "name": None,
             "query": "SELECT 1",
@@ -313,7 +313,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="delete_test",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
 
@@ -331,7 +331,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         """Test validation of invalid query names."""
         data = {
             "name": "invalid@name!",
-            "query": self.sample_hogql_query,
+            "query": self.sample_insightsql_query,
         }
 
         response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
@@ -340,7 +340,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
 
     def test_missing_required_fields(self):
         """Test validation when required fields are missing."""
-        data: dict[str, Any] = {"query": self.sample_hogql_query}
+        data: dict[str, Any] = {"query": self.sample_insightsql_query}
 
         response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
 
@@ -357,13 +357,13 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="duplicate_test",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
 
         data = {
             "name": "duplicate_test",
-            "query": {"kind": "HogQLQuery", "query": "SELECT 2"},
+            "query": {"kind": "InsightsQLQuery", "query": "SELECT 2"},
         }
 
         response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
@@ -378,7 +378,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="other_team_query",
             team=other_team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=other_user,
         )
 
@@ -391,14 +391,14 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="active_query",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
         create_endpoint_with_version(
             name="inactive_query",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=False,
         )
@@ -424,13 +424,13 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="query_by_user1",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
         create_endpoint_with_version(
             name="query_by_user2",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=other_user,
         )
 
@@ -455,21 +455,21 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="active_query_user1",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
         create_endpoint_with_version(
             name="inactive_query_user1",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=False,
         )
         create_endpoint_with_version(
             name="active_query_user2",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=other_user,
             is_active=True,
         )
@@ -488,14 +488,14 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="query1",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
         create_endpoint_with_version(
             name="query2",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=False,
         )
@@ -657,14 +657,14 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="test_query_1",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             is_active=True,
         )
         create_endpoint_with_version(
             name="test_query_2",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 2"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 2"},
             created_by=self.user,
             is_active=True,
         )
@@ -736,7 +736,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="test_query_1",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             is_active=True,
         )
@@ -770,7 +770,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         """Test validation of cache_age_seconds field with various inputs."""
         data = {
             "name": f"cache_test_{name}",
-            "query": self.sample_hogql_query,
+            "query": self.sample_insightsql_query,
             "cache_age_seconds": cache_age_seconds,
         }
         response = self.client.post(f"/api/environments/{self.team.id}/endpoints/", data, format="json")
@@ -784,8 +784,8 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
     @parameterized.expand(
         [
             (
-                "hogql_5min",
-                {"kind": "HogQLQuery", "query": "SELECT 1 as result"},
+                "insightsql_5min",
+                {"kind": "InsightsQLQuery", "query": "SELECT 1 as result"},
                 300,  # 5 minute cache age
                 4,  # Time within cache (minutes)
                 6,  # Time past cache (minutes)
@@ -862,7 +862,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="default_cache_age",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 2 as result"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 2 as result"},
             created_by=self.user,
             is_active=True,
             cache_age_seconds=None,  # Use defaults
@@ -887,7 +887,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="update_cache_test",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             cache_age_seconds=300,
         )
@@ -924,7 +924,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         data = {
             "name": "test_with_insight",
             "description": "Endpoint created from insight",
-            "query": self.sample_hogql_query,
+            "query": self.sample_insightsql_query,
             "derived_from_insight": "abc123xyz",
         }
 
@@ -944,12 +944,12 @@ class TestExtractColumns(ClickhouseTestMixin, APIBaseTest):
         [
             (
                 "simple_select_with_alias",
-                {"kind": "HogQLQuery", "query": "SELECT event AS ev FROM events"},
+                {"kind": "InsightsQLQuery", "query": "SELECT event AS ev FROM events"},
                 [{"name": "ev", "type": "string"}],
             ),
             (
                 "multiple_columns",
-                {"kind": "HogQLQuery", "query": "SELECT event, distinct_id, timestamp FROM events"},
+                {"kind": "InsightsQLQuery", "query": "SELECT event, distinct_id, timestamp FROM events"},
                 [
                     {"name": "event", "type": "string"},
                     {"name": "distinct_id", "type": "string"},
@@ -957,18 +957,18 @@ class TestExtractColumns(ClickhouseTestMixin, APIBaseTest):
                 ],
             ),
             (
-                "non_hogql_query",
+                "non_insightsql_query",
                 {"kind": "TrendsQuery", "series": [{"kind": "EventsNode"}]},
                 [],
             ),
             (
                 "empty_query",
-                {"kind": "HogQLQuery", "query": ""},
+                {"kind": "InsightsQLQuery", "query": ""},
                 [],
             ),
             (
                 "literal_expressions",
-                {"kind": "HogQLQuery", "query": "SELECT 100 AS total, 'hello' AS greeting"},
+                {"kind": "InsightsQLQuery", "query": "SELECT 100 AS total, 'hello' AS greeting"},
                 [
                     {"name": "total", "type": "integer"},
                     {"name": "greeting", "type": "string"},
@@ -976,7 +976,7 @@ class TestExtractColumns(ClickhouseTestMixin, APIBaseTest):
             ),
             (
                 "aggregate_functions",
-                {"kind": "HogQLQuery", "query": "SELECT count() AS cnt, min(timestamp) AS first_seen FROM events"},
+                {"kind": "InsightsQLQuery", "query": "SELECT count() AS cnt, min(timestamp) AS first_seen FROM events"},
                 [
                     {"name": "cnt", "type": "integer"},
                     {"name": "first_seen", "type": "datetime"},
@@ -984,13 +984,13 @@ class TestExtractColumns(ClickhouseTestMixin, APIBaseTest):
             ),
             (
                 "nullable_result",
-                {"kind": "HogQLQuery", "query": "SELECT nullIf(event, '') AS maybe_event FROM events"},
+                {"kind": "InsightsQLQuery", "query": "SELECT nullIf(event, '') AS maybe_event FROM events"},
                 [{"name": "maybe_event", "type": "string"}],
             ),
             (
                 "query_with_variable_placeholders",
                 {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT event, count() AS cnt FROM events WHERE event = {variables.event_name} GROUP BY event",
                 },
                 [

@@ -18,7 +18,7 @@ import {
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 import { supportLogic } from 'lib/components/Support/supportLogic'
-import { HeartHog } from 'lib/components/hedgehogs'
+import { HeartHog } from 'lib/components/mascots'
 
 import { BillingProductV2AddonType, BillingProductV2Type } from '~/types'
 
@@ -47,8 +47,8 @@ export const UnsubscribeSurveyModal = ({
         reportSurveyDismissed,
         setUnsubscribeModalStep,
         resetUnsubscribeModalStep,
-        setHedgehogSatisfied,
-        triggerMoreHedgehogs,
+        setMascotSatisfied,
+        triggerMoreMascots,
     } = useActions(billingProductLogic({ product }))
     const { deactivateProduct, resetUnsubscribeError } = useActions(billingLogic)
     const { unsubscribeError, billingLoading, billing } = useValues(billingLogic)
@@ -69,13 +69,13 @@ export const UnsubscribeSurveyModal = ({
     const handleUnsubscribe = (): void => {
         if (surveyResponse['$survey_response_2'].includes('Missing features')) {
             setUnsubscribeModalStep(2)
-            triggerMoreHedgehogs()
+            triggerMoreMascots()
         } else {
             deactivateProduct(billing?.subscription_level === 'paid' && !isAddonProduct ? 'all_products' : product.type)
         }
     }
 
-    const renderHedgehogStep = (): JSX.Element => (
+    const renderMascotStep = (): JSX.Element => (
         <div className="flex flex-col gap-4">
             <div className="text-center">
                 <h3 className="text-lg mb-2">Are you sure you want to leave?</h3>
@@ -85,7 +85,7 @@ export const UnsubscribeSurveyModal = ({
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
-                <Link onClick={triggerMoreHedgehogs} disabled={billingLoading}>
+                <Link onClick={triggerMoreMascots} disabled={billingLoading}>
                     I still want to leave
                 </Link>
             </div>
@@ -95,7 +95,7 @@ export const UnsubscribeSurveyModal = ({
                     type="primary"
                     loading={billingLoading}
                     onClick={() => {
-                        setHedgehogSatisfied(true)
+                        setMascotSatisfied(true)
                         deactivateProduct(
                             billing?.subscription_level === 'paid' && !isAddonProduct ? 'all_products' : product.type
                         )
@@ -268,7 +268,7 @@ export const UnsubscribeSurveyModal = ({
                         </LemonBanner>
                     </div>
                 ) : (
-                    renderHedgehogStep()
+                    renderMascotStep()
                 )}
             </LemonModal>
         </>

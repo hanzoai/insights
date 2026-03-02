@@ -7,7 +7,7 @@ import { Element, Person, PersonMode, PreIngestionEvent, RawKafkaEvent, Timestam
 import { safeClickhouseString } from '../../utils/db/utils'
 import { elementsToString, extractElements } from '../../utils/elements-chain'
 import { logger } from '../../utils/logger'
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { castTimestampOrNow, castTimestampToClickhouseFormat } from '../../utils/utils'
 import { MAX_GROUP_TYPES_PER_TEAM } from './group-type-manager'
 

@@ -46,7 +46,7 @@ export const OverridePropertiesSnippet = memo(({ language = 'javascript' }: { la
             )
         `,
         php: dedent`
-            PostHog::getFeatureFlag(
+            Insights::getFeatureFlag(
                 'flag-key',
                 'distinct_id_of_the_user',
                 [

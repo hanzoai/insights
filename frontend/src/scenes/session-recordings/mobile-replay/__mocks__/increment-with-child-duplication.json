@@ -22,7 +22,7 @@
                                         "paddingTop": 0,
                                         "verticalAlign": "top"
                                     },
-                                    "text": "PostHog/posthog-ios",
+                                    "text": "Insights/posthog-ios",
                                     "type": "text",
                                     "width": 368,
                                     "x": 66,
@@ -43,7 +43,7 @@
                                         "paddingTop": 0,
                                         "verticalAlign": "top"
                                     },
-                                    "text": "PostHog iOS integration",
+                                    "text": "Insights iOS integration",
                                     "type": "text",
                                     "width": 150,
                                     "x": 10,
@@ -110,7 +110,7 @@
                                 "paddingTop": 0,
                                 "verticalAlign": "top"
                             },
-                            "text": "PostHog/posthog-ios",
+                            "text": "Insights/posthog-ios",
                             "type": "text",
                             "width": 368,
                             "x": 66,
@@ -131,7 +131,7 @@
                                 "paddingTop": 0,
                                 "verticalAlign": "top"
                             },
-                            "text": "PostHog iOS integration",
+                            "text": "Insights iOS integration",
                             "type": "text",
                             "width": 150,
                             "x": 10,
@@ -185,7 +185,7 @@
                         "paddingTop": 0,
                         "verticalAlign": "top"
                     },
-                    "text": "PostHog/posthog-ios",
+                    "text": "Insights/posthog-ios",
                     "type": "text",
                     "width": 368,
                     "x": 66,

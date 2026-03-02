@@ -148,7 +148,7 @@ class ActivityLogTestHelper(APILicensedTest):
             "name": name,
             "plugin_type": "local",
             "description": "Test plugin",
-            "url": "https://github.com/PostHog/posthog-plugin-test",
+            "url": "https://github.com/Insights/posthog-plugin-test",
             **kwargs,
         }
         response = self.client.post("/api/organizations/@current/plugins/", data, format="json")

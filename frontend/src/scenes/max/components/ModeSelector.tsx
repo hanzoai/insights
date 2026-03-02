@@ -298,7 +298,7 @@ export function ModeSelector(): JSX.Element | null {
                     : contextDisabledReason
             }
             tooltip={buildGeneralTooltip(
-                'Select a mode to focus PostHog AI on a specific product or task. Each mode unlocks specialized capabilities, tools, and expertise.',
+                'Select a mode to focus Insights AI on a specific product or task. Each mode unlocks specialized capabilities, tools, and expertise.',
                 getDefaultTools({ webSearchEnabled })
             )}
             dropdownPlacement="top-start"

@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'alpha',
     type: 'site_destination',
@@ -16,16 +16,16 @@ function initSnippet(containerId) {
     (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=!0;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)})(window,document,'script','dataLayer',containerId)
 }
 
-export async function onLoad({ inputs, posthog }) {
+export async function onLoad({ inputs, insights }) {
     initSnippet(inputs.containerId);
     
-    if (posthog.config.debug) {
-        console.log('[PostHog] Google Tag Manager init', inputs.containerId);
+    if (insights.config.debug) {
+        console.log('[Insights] Google Tag Manager init', inputs.containerId);
     }
 }
-export function onEvent({ inputs, posthog }) {
-    if (posthog.config.debug) {
-        console.log('[PostHog] Google Tag Manager track', inputs.containerId, inputs.payload);
+export function onEvent({ inputs, insights }) {
+    if (insights.config.debug) {
+        console.log('[Insights] Google Tag Manager track', inputs.containerId, inputs.payload);
     }
     dataLayer.push(inputs.payload);
 }

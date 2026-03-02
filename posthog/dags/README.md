@@ -1,6 +1,6 @@
 # Posthog DAGs
 
-This directory contains [Dagster](https://dagster.io/) data pipelines (DAGs) for PostHog. Dagster is a data orchestration framework that allows us to define, schedule, and monitor data workflows.
+This directory contains [Dagster](https://dagster.io/) data pipelines (DAGs) for Insights. Dagster is a data orchestration framework that allows us to define, schedule, and monitor data workflows.
 
 ## What is Dagster?
 
@@ -71,9 +71,9 @@ To set up a new team with their own Dagster definitions and Slack alerts, follow
 
 3. **Configure production deployment**:
 
-   For PostHog employees, add the new location to the Dagster configuration in the [charts repository](https://github.com/PostHog/charts) (see `argocd/dagster/`).
+   For Insights employees, add the new location to the Dagster configuration in the [charts repository](https://github.com/Insights/charts) (see `argocd/dagster/`).
 
-   Sample PR: https://github.com/PostHog/charts/pull/6366
+   Sample PR: https://github.com/Insights/charts/pull/6366
 
 4. **Add team to the `JobOwners` enum** in `common/common.py`:
 
@@ -251,9 +251,9 @@ export DAGSTER_HOME=$(pwd)/.dagster_home && DAGSTER_WEB_PREAGGREGATED_MAX_PARTIT
 #### Production Configuration
 
 For production deployments, configure similar concurrency settings in your `dagster.yaml`.
-For PostHog employees, it is on our charts repo: https://github.com/PostHog/charts/tree/master/argocd/dagster
+For Insights employees, it is on our charts repo: https://github.com/Insights/charts/tree/master/argocd/dagster
 
 ## Additional Resources
 
 - [Dagster Documentation](https://docs.dagster.io/)
-- [PostHog Documentation](https://posthog.com/docs)
+- [Insights Documentation](https://posthog.com/docs)

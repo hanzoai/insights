@@ -978,7 +978,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
             self.assertEqual(response.status_code, 401)
             self.assertEqual(
                 response.json()["detail"],
-                "Project API key invalid. You can find your project API key in PostHog project settings.",
+                "Project API key invalid. You can find your project API key in Insights project settings.",
             )
 
     def test_early_access_features_errors_out_on_no_token(self):
@@ -989,7 +989,7 @@ class TestPreviewList(BaseTest, QueryMatchingTest):
             self.assertEqual(response.status_code, 401)
             self.assertEqual(
                 response.json()["detail"],
-                "API key not provided. You can find your project API key in PostHog project settings.",
+                "API key not provided. You can find your project API key in Insights project settings.",
             )
 
     @snapshot_postgres_queries

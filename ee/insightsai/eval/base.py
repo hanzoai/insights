@@ -58,7 +58,7 @@ async def BaseMaxEval(
 ):
     if is_public and not no_send_logs:
         # We need to specify a separate project for each MaxEval() suite for comparison to baseline to work
-        # That's the way Braintrust folks recommended - Braintrust projects are much more lightweight than PostHog ones
+        # That's the way Braintrust folks recommended - Braintrust projects are much more lightweight than Insights ones
         project_name = f"max-ai-{experiment_name}"
         init_logger(project_name)
     else:

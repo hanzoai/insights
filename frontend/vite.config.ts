@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
             alias: {
                 '~': fileURLToPath(new URL('./src', import.meta.url)),
                 '@': fileURLToPath(new URL('./src', import.meta.url)),
-                // Add direct mappings for PostHog's import structure from tsconfig.json
+                // Add direct mappings for Insights's import structure from tsconfig.json
                 lib: resolve(__dirname, 'src/lib'),
                 scenes: resolve(__dirname, 'src/scenes'),
                 queries: resolve(__dirname, 'src/queries'),

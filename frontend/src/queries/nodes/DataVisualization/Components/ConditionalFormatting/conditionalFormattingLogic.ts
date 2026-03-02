@@ -66,19 +66,19 @@ export const conditionalFormattingLogic = kea<conditionalFormattingLogicType>([
         ],
     }),
     loaders({
-        hog: [
+        custom_script: [
             null as null | any[],
             {
-                compileHog: async ({ hog }) => {
-                    const res = await api.hog.create(hog)
+                compileScript: async ({ custom_script }) => {
+                    const res = await api.custom_script.create(custom_script)
                     return res.bytecode
                 },
             },
         ],
     }),
     listeners(({ actions, values }) => ({
-        compileHogSuccess: ({ hog }) => {
-            actions.updateBytecode(hog)
+        compileScriptSuccess: ({ custom_script }) => {
+            actions.updateBytecode(custom_script)
         },
         deleteRule: () => {
             actions.updateConditionalFormattingRule(values.rule, true)
@@ -86,7 +86,7 @@ export const conditionalFormattingLogic = kea<conditionalFormattingLogicType>([
     })),
     subscriptions(({ actions }) => ({
         template: (template: FormattingTemplate, oldTemplate: FormattingTemplate | undefined) => {
-            actions.compileHog({ hog: template.hog })
+            actions.compileHog({ custom_script: template.hog })
 
             // If we've changed to a template with a disabled `input` field, then clear the input
             if (!oldTemplate?.hideInput && template.hideInput) {

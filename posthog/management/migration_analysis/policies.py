@@ -1,4 +1,4 @@
-"""PostHog-specific migration policies.
+"""Insights-specific migration policies.
 
 These are team coding guidelines, not database safety issues.
 Policies enforce architectural decisions and coding standards.
@@ -6,12 +6,12 @@ Policies enforce architectural decisions and coding standards.
 
 from abc import ABC, abstractmethod
 
-# Apps owned by PostHog where policies are enforced
+# Apps owned by Insights where policies are enforced
 POSTHOG_OWNED_APPS = ["posthog", "ee"]
 
 
 def is_posthog_app(app_label: str, migration=None) -> bool:
-    """Check if app is owned by PostHog (vs third-party dependency).
+    """Check if app is owned by Insights (vs third-party dependency).
 
     Args:
         app_label: The Django app label (e.g., 'posthog', 'endpoints')
@@ -31,7 +31,7 @@ def is_posthog_app(app_label: str, migration=None) -> bool:
 
 
 class MigrationPolicy(ABC):
-    """Base class for PostHog migration policies."""
+    """Base class for Insights migration policies."""
 
     @abstractmethod
     def check_operation(self, op) -> list[str]:
@@ -56,7 +56,7 @@ class MigrationPolicy(ABC):
 
 class UUIDPrimaryKeyPolicy(MigrationPolicy):
     """
-    PostHog policy: All new models must use UUID primary keys.
+    Insights policy: All new models must use UUID primary keys.
 
     Rationale:
     - Better for distributed systems (no coordination needed)
@@ -77,14 +77,14 @@ class UUIDPrimaryKeyPolicy(MigrationPolicy):
             if field_type in ["AutoField", "BigAutoField"]:
                 return [
                     f"Model '{op.name}' uses integer ID ({field_type}). "
-                    "PostHog requires UUID primary keys. "
+                    "Insights requires UUID primary keys. "
                     "Use `from posthog.models.utils import UUIDModel` and inherit from UUIDModel."
                 ]
 
         return []
 
     def check_migration(self, migration) -> list[str]:
-        """Only enforce on PostHog-owned apps."""
+        """Only enforce on Insights-owned apps."""
         if not is_posthog_app(migration.app_label, migration):
             return []
 
@@ -242,7 +242,7 @@ class AtomicFalsePolicy(MigrationPolicy):
         return False
 
 
-# Registry of all PostHog policies
+# Registry of all Insights policies
 POSTHOG_POLICIES = [
     UUIDPrimaryKeyPolicy(),
     AtomicFalsePolicy(),

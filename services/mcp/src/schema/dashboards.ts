@@ -26,7 +26,7 @@ export const DashboardTileSchema = z.object({
     is_cached: z.boolean().nullish(),
 })
 
-// Base dashboard schema from PostHog API
+// Base dashboard schema from Insights API
 export const DashboardSchema = z.object({
     id: z.number().int().positive(),
     name: z.string(),
@@ -94,7 +94,7 @@ export const ReorderDashboardTilesSchema = z.object({
 })
 
 // Type exports
-export type PostHogDashboard = z.infer<typeof DashboardSchema>
+export type InsightsDashboard = z.infer<typeof DashboardSchema>
 export type CreateDashboardInput = z.infer<typeof CreateDashboardInputSchema>
 export type UpdateDashboardInput = z.infer<typeof UpdateDashboardInputSchema>
 export type ListDashboardsData = z.infer<typeof ListDashboardsSchema>

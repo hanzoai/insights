@@ -34,7 +34,7 @@ class ShopifySource(SimpleSource[ShopifySourceConfig]):
         return SourceConfig(
             name=SchemaExternalDataSourceType.SHOPIFY,
             iconPath="/static/services/shopify.png",
-            caption="""Enter your Shopify credentials to automatically pull your Shopify data into the PostHog Data warehouse.""",
+            caption="""Enter your Shopify credentials to automatically pull your Shopify data into the Insights Data warehouse.""",
             docsUrl="https://posthog.com/docs/data-warehouse/sources/shopify",
             fields=cast(
                 list[FieldType],

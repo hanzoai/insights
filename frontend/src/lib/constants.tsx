@@ -176,7 +176,7 @@ export const FEATURE_FLAGS = {
     AUDIT_LOGS_ACCESS: 'audit-logs-access', // owner: #team-platform-features, used to control access to audit logs
     CUSTOM_CSS_THEMES: 'custom-css-themes', // owner: #team-growth, used to enable custom CSS for teams who want to have fun
     GAME_CENTER: 'game-center', // owner: everybody, this is just internal for now
-    HEDGEHOG_SKIN_SPIDERHOG: 'hedgehog-skin-spiderhog', // owner: #team-web-analytics, used to reward beta users for web analytics
+    MASCOT_SKIN_SPIDERHOG: 'mascot-skin-spiderhog', // owner: #team-web-analytics, used to reward beta users for web analytics
     HIGH_FREQUENCY_BATCH_EXPORTS: 'high-frequency-batch-exports', // owner: #team-batch-exports, allow batch exports to be run every 5min
     BATCH_EXPORT_EARLIEST_BACKFILL: 'batch-export-earliest-backfill', // owner: #team-batch-exports, allow backfilling from beginning of time
     METALYTICS: 'metalytics', // owner: #team-platform-features, used to allow companies to see (meta) analytics on access to a specific page
@@ -237,7 +237,7 @@ export const FEATURE_FLAGS = {
     BACKFILL_WORKFLOWS_DESTINATION: 'backfill-workflows-destination', // owner: #team-batch-exports
     BING_ADS_SOURCE: 'bing-ads-source', // owner: @jabahamondes #team-web-analytics
     CDP_ACTIVITY_LOG_NOTIFICATIONS: 'cdp-activity-log-notifications', // owner: #team-workflows-cdp
-    CDP_HOG_SOURCES: 'cdp-hog-sources', // owner #team-workflows-cdp
+    CDP_SCRIPT_SOURCES: 'cdp-script-sources', // owner #team-workflows-cdp
     CDP_VERCEL_LOG_DRAIN: 'cdp-vercel-log-drain', // owner: #team-workflows-cdp
     CDP_NEW_PRICING: 'cdp-new-pricing', // owner: #team-workflows
     CDP_PERSON_UPDATES: 'cdp-person-updates', // owner: #team-workflows-cdp
@@ -436,7 +436,7 @@ export const INSIGHT_VISUAL_ORDER = {
     lifecycle: 60,
     calendarHeatmap: 70,
     sql: 80,
-    hog: 90,
+    script: 90,
 }
 
 export const ENTITY_MATCH_TYPE = 'entities'

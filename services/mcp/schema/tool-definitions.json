@@ -105,10 +105,10 @@
         }
     },
     "docs-search": {
-        "description": "Use this tool to search the PostHog documentation for information that can help the user with their request. Use it as a fallback when you cannot answer the user's request using other tools in this MCP. Only use this tool for PostHog related questions.",
+        "description": "Use this tool to search the Insights documentation for information that can help the user with their request. Use it as a fallback when you cannot answer the user's request using other tools in this MCP. Only use this tool for Insights related questions.",
         "category": "Documentation",
         "feature": "docs",
-        "summary": "Search the PostHog documentation for information.",
+        "summary": "Search the Insights documentation for information.",
         "title": "Search docs",
         "required_scopes": [],
         "new_mcp": true,
@@ -420,9 +420,9 @@
         }
     },
     "query-generate-hogql-from-question": {
-        "description": "This is a slow tool, and you should only use it once you have tried to create a query using the 'query-run' tool, or the query is too complicated to create a trend / funnel. Queries project's PostHog data based on a provided natural language question - don't provide SQL query as input but describe the output you want. When giving the results back to the user, first show the SQL query that was used, then provide results in easily readable format. You should also offer to save the query as an insight if the user wants to.",
+        "description": "This is a slow tool, and you should only use it once you have tried to create a query using the 'query-run' tool, or the query is too complicated to create a trend / funnel. Queries project's Insights data based on a provided natural language question - don't provide SQL query as input but describe the output you want. When giving the results back to the user, first show the SQL query that was used, then provide results in easily readable format. You should also offer to save the query as an insight if the user wants to.",
         "category": "Insights & analytics",
-        "summary": "Queries project's PostHog data based on a provided natural language question.",
+        "summary": "Queries project's Insights data based on a provided natural language question.",
         "feature": "insights",
         "title": "Generate SQL",
         "required_scopes": ["query:read"],
@@ -809,7 +809,7 @@
         }
     },
     "entity-search": {
-        "description": "Search for PostHog entities by name or description. Can search across multiple entity types including insights, dashboards, experiments, feature flags, notebooks, actions, cohorts, event definitions, and surveys. Use this to find entities when you know part of their name. Returns matching entities with their IDs and URLs.",
+        "description": "Search for Insights entities by name or description. Can search across multiple entity types including insights, dashboards, experiments, feature flags, notebooks, actions, cohorts, event definitions, and surveys. Use this to find entities when you know part of their name. Returns matching entities with their IDs and URLs.",
         "category": "Search",
         "feature": "search",
         "summary": "Search for entities by name or description.",

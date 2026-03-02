@@ -6,7 +6,7 @@
     "posthogVersion": ">= 1.25.0",
     "config": [
         {
-            "markdown": "Process and modify specific event properties as they are ingested by PostHog"
+            "markdown": "Process and modify specific event properties as they are ingested by Insights"
         }
     ]
 }

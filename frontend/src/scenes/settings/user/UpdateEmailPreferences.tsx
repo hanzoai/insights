@@ -64,7 +64,7 @@ export function UpdateEmailPreferences(): JSX.Element {
                 <SimpleSwitch
                     setting="all_weekly_digest_disabled"
                     label="Weekly digest"
-                    description="The weekly digest keeps you up to date with everything that's happening in your PostHog organizations"
+                    description="The weekly digest keeps you up to date with everything that's happening in your Insights organizations"
                     dataAttr="weekly_digest_enabled"
                     inverse={true}
                 />

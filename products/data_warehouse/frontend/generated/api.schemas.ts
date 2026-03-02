@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 export interface DataWarehouseSavedQueryDraftApi {
@@ -12,7 +12,7 @@ export interface DataWarehouseSavedQueryDraftApi {
     readonly created_at: string
     /** @nullable */
     readonly updated_at: string | null
-    /** HogQL query draft */
+    /** InsightsQL query draft */
     query?: unknown
     /** @nullable */
     saved_query_id?: string | null
@@ -40,7 +40,7 @@ export interface PatchedDataWarehouseSavedQueryDraftApi {
     readonly created_at?: string
     /** @nullable */
     readonly updated_at?: string | null
-    /** HogQL query draft */
+    /** InsightsQL query draft */
     query?: unknown
     /** @nullable */
     saved_query_id?: string | null
@@ -576,7 +576,7 @@ export const NullEnumApi = {} as const
 /**
  * @nullable
  */
-export type UserBasicApiHedgehogConfig = { [key: string]: unknown } | null | null
+export type UserBasicApiMascotConfig = { [key: string]: unknown } | null | null
 
 export interface UserBasicApi {
     readonly id: number
@@ -595,7 +595,7 @@ export interface UserBasicApi {
     /** @nullable */
     is_email_verified?: boolean | null
     /** @nullable */
-    readonly hedgehog_config: UserBasicApiHedgehogConfig
+    readonly mascot_config: UserBasicApiMascotConfig
     role_at_organization?: RoleAtOrganizationEnumApi | BlankEnumApi | NullEnumApi | null
 }
 
@@ -707,7 +707,7 @@ export interface DataWarehouseSavedQueryApi {
     deleted?: boolean | null
     /** @maxLength 128 */
     name: string
-    /** HogQL query */
+    /** InsightsQL query */
     query?: unknown | null
     readonly created_by: UserBasicApi
     readonly created_at: string
@@ -752,7 +752,7 @@ export interface PatchedDataWarehouseSavedQueryApi {
     deleted?: boolean | null
     /** @maxLength 128 */
     name?: string
-    /** HogQL query */
+    /** InsightsQL query */
     query?: unknown | null
     readonly created_by?: UserBasicApi
     readonly created_at?: string

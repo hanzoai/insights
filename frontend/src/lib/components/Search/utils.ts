@@ -15,7 +15,7 @@ export const getCategoryDisplayName = (category: string): string => {
         groups: 'Groups',
         eventDefinitions: 'Events',
         propertyDefinitions: 'Properties',
-        ai: 'PostHog AI',
+        ai: 'Insights AI',
         askAI: 'Posthog AI',
         insight: 'Insights',
         dashboard: 'Dashboards',
@@ -28,7 +28,7 @@ export const getCategoryDisplayName = (category: string): string => {
         event_definition: 'Event definitions',
         property_definition: 'Property definitions',
         session_recording_playlist: 'Session recording filter',
-        hog_flow: 'Workflows',
+        custom_flow: 'Workflows',
         health: 'Health',
         misc: 'Misc',
     }

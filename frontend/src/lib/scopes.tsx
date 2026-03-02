@@ -166,7 +166,7 @@ export const APIScopeActionLabels: Record<APIScopeAction, string> = {
 
 export const DEFAULT_OAUTH_SCOPES = ['openid', 'email', 'profile']
 
-// Scopes required by the PostHog MCP server (https://mcp.posthog.com)
+// Scopes required by the Insights MCP server (https://mcp.posthog.com)
 // These match the scopes_supported in the MCP server's OAuth protected resource metadata
 export const MCP_SERVER_OAUTH_SCOPES = [
     'openid',
@@ -195,7 +195,7 @@ export const MCP_SERVER_OAUTH_SCOPES = [
 
 export const getScopeDescription = (scope: string): string | undefined => {
     if (scope === '*') {
-        return 'Read and write access to all PostHog data'
+        return 'Read and write access to all Insights data'
     }
 
     if (scope === 'openid') {

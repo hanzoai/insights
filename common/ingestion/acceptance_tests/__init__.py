@@ -1,1 +1,1 @@
-# PostHog Ingestion Acceptance Tests
+# Insights Ingestion Acceptance Tests

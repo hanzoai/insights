@@ -26,7 +26,7 @@ export const customFunctionSourceWebhookTestLogic = kea<customFunctionSourceWebh
         return id ?? templateId ?? 'new'
     }),
 
-    path((id) => ['scenes', 'pipeline', 'hogfunctions', 'customFunctionSourceWebhookTestLogic', id]),
+    path((id) => ['scenes', 'pipeline', 'customfunctions', 'customFunctionSourceWebhookTestLogic', id]),
     connect((props: CustomFunctionConfigurationLogicProps) => ({
         values: [customFunctionConfigurationLogic(props), ['configuration', 'templateId']],
     })),

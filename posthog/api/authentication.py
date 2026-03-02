@@ -204,7 +204,7 @@ class LoginSerializer(serializers.Serializer):
                             return False
                     except BadSignature:
                         # Workaround for signature mismatches due to Django upgrades.
-                        # See https://github.com/PostHog/posthog/issues/19350
+                        # See https://github.com/Insights/posthog/issues/19350
                         pass
 
         # Has passkeys enabled for 2FA but no TOTP - 2FA still required (passkey will be used)

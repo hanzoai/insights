@@ -246,7 +246,7 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
                 if (!values.automaticActionCreationEnabled) {
                     lemonToast.success('Action saved', {
                         button: {
-                            label: 'Open in PostHog',
+                            label: 'Open in Insights',
                             action: () =>
                                 window.open(joinWithUiHost(values.uiHost, urls.action(response.id)), '_blank'),
                         },

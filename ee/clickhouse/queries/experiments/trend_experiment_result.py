@@ -46,7 +46,7 @@ class Variant:
 
 
 def uses_math_aggregation_by_user_or_property_value(filter: Filter):
-    # sync with frontend: https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/experiments/experimentLogic.tsx#L662
+    # sync with frontend: https://github.com/Insights/posthog/blob/master/frontend/src/scenes/experiments/experimentLogic.tsx#L662
     # the selector experimentCountPerUserMath
 
     entities = filter.entities
@@ -100,7 +100,7 @@ class ClickhouseTrendExperimentResult:
 
         uses_math_aggregation = uses_math_aggregation_by_user_or_property_value(filter)
 
-        # Keep in sync with https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/experiments/ExperimentView/components.tsx#L91
+        # Keep in sync with https://github.com/Insights/posthog/blob/master/frontend/src/scenes/experiments/ExperimentView/components.tsx#L91
         query_filter = filter.shallow_clone(
             {
                 "display": TRENDS_CUMULATIVE if not uses_math_aggregation else TRENDS_LINEAR,
