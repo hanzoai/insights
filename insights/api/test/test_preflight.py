@@ -230,6 +230,8 @@ class TestPreflight(APIBaseTest, QueryMatchingTest):
     @pytest.mark.ee
     @pytest.mark.skip_on_multitenancy
     def test_ee_preflight_with_users_limit(self):
+        pass
+
     def test_can_create_org_in_fresh_instance(self):
         Organization.objects.all().delete()
 

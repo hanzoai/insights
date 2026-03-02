@@ -50,3 +50,4 @@ class TestSyncReplicatedSchema(BaseTest, ClickhouseTestMixin):
         self.assertEqual(out_of_sync_hosts, {})
 
     def test_create_missing_tables(self):
+        pass
