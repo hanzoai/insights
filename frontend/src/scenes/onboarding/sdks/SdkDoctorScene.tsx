@@ -51,7 +51,7 @@ export function SdkDoctorScene(): JSX.Element {
         <SceneContent>
             <SceneTitleSection
                 name="SDK Doctor"
-                description="Monitor and maintain your Hanzo Insights SDK integrations by automatically detecting version issues, configuration problems, and implementation patterns across your applications."
+                description="Monitor and maintain your Insights SDK integrations by automatically detecting version issues, configuration problems, and implementation patterns across your applications."
                 resourceType={{
                     to: undefined,
                     type: 'sdk_doctor',
