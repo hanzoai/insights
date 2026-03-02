@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             name="is_publicly_shareable",
             field=models.BooleanField(
                 blank=True,
-                help_text="Allow this survey to be accessed via public URL (https://app.posthog.com/surveys/[survey_id]) without authentication",
+                help_text="Allow this survey to be accessed via public URL (https://app.insights.com/surveys/[survey_id]) without authentication",
                 null=True,
             ),
         ),

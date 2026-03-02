@@ -16,12 +16,12 @@ class Migration(migrations.Migration):
             model_name="team",
             name="data_attributes",
             field=django.contrib.postgres.fields.jsonb.JSONField(
-                default=posthog.models.team.get_default_data_attributes
+                default=insights.models.team.get_default_data_attributes
             ),
         ),
         migrations.AlterField(
             model_name="team",
             name="timezone",
-            field=models.CharField(choices=posthog.models.team.TIMEZONES, default="UTC", max_length=240),
+            field=models.CharField(choices=insights.models.team.TIMEZONES, default="UTC", max_length=240),
         ),
     ]

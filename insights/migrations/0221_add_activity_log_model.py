@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT,
+                        default=insights.models.utils.UUIDT,
                         editable=False,
                         primary_key=True,
                         serialize=False,
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 (
                     "detail",
                     models.JSONField(
-                        encoder=posthog.models.utils.ActivityDetailEncoder,
+                        encoder=insights.models.utils.ActivityDetailEncoder,
                         null=True,
                     ),
                 ),

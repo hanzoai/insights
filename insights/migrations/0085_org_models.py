@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT,
+                        default=insights.models.utils.UUIDT,
                         editable=False,
                         primary_key=True,
                         serialize=False,
@@ -129,7 +129,7 @@ class Migration(migrations.Migration):
             model_name="team",
             name="api_token",
             field=models.CharField(
-                default=posthog.models.utils.generate_random_token,
+                default=insights.models.utils.generate_random_token,
                 max_length=200,
                 null=True,
             ),
@@ -142,7 +142,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="team",
             name="uuid",
-            field=models.UUIDField(default=posthog.models.utils.UUIDT, editable=False, unique=True),
+            field=models.UUIDField(default=insights.models.utils.UUIDT, editable=False, unique=True),
         ),
         migrations.AlterField(
             model_name="user",
@@ -160,7 +160,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT,
+                        default=insights.models.utils.UUIDT,
                         editable=False,
                         primary_key=True,
                         serialize=False,
@@ -198,7 +198,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT,
+                        default=insights.models.utils.UUIDT,
                         editable=False,
                         primary_key=True,
                         serialize=False,

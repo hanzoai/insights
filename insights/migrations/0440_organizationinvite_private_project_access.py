@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 default=list,
                 help_text="List of team IDs and corresponding access levels to private projects.",
                 null=True,
-                validators=[posthog.models.organization_invite.validate_private_project_access],
+                validators=[insights.models.organization_invite.validate_private_project_access],
             ),
         ),
     ]
