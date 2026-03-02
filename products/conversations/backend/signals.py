@@ -6,8 +6,8 @@ from django.dispatch import receiver
 
 import structlog
 
-from posthog.exceptions_capture import capture_exception
-from posthog.models.comment import Comment
+from insights.exceptions_capture import capture_exception
+from insights.models.comment import Comment
 
 from .cache import invalidate_tickets_cache
 from .events import capture_message_received, capture_message_sent

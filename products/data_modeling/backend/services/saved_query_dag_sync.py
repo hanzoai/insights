@@ -5,12 +5,12 @@ from django.utils import timezone
 
 import structlog
 
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.database.models import SavedQuery as InsightsQLSavedQuery
-from posthog.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
-from posthog.insightsql.errors import QueryError
+from insights.insightsql.database.database import Database
+from insights.insightsql.database.models import SavedQuery as InsightsQLSavedQuery
+from insights.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+from insights.insightsql.errors import QueryError
 
-from posthog.exceptions_capture import capture_exception
+from insights.exceptions_capture import capture_exception
 
 from products.data_modeling.backend.models.edge import CycleDetectionError, Edge
 from products.data_modeling.backend.models.node import Node, NodeType
@@ -18,7 +18,7 @@ from products.data_warehouse.backend.models.modeling import UnknownParentError, 
 from products.data_warehouse.backend.models.table import DataWarehouseTable
 
 if TYPE_CHECKING:
-    from posthog.models import Team
+    from insights.models import Team
 
     from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 

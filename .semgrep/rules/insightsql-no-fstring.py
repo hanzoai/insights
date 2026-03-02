@@ -1,5 +1,5 @@
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_expr, parse_order_expr, parse_select
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_expr, parse_order_expr, parse_select
 
 
 # ============================================================================

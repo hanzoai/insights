@@ -208,7 +208,7 @@ def _get_previous_migration(app: str, migration_name: str) -> str:
 def _get_subprocess_env() -> dict[str, str]:
     """Get environment for subprocess calls that need hogli module access."""
     env = dict(os.environ)
-    env["DJANGO_SETTINGS_MODULE"] = "posthog.settings"
+    env["DJANGO_SETTINGS_MODULE"] = "insights.settings"
     # Ensure common/ is in PYTHONPATH so hogli module is importable
     common_path = str(REPO_ROOT / "common")
     existing_path = env.get("PYTHONPATH", "")

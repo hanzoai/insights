@@ -5,8 +5,8 @@ from typing import Optional
 import s3fs
 import pandas as pd
 
-from posthog.models.team import Team
-from posthog.settings import (
+from insights.models.team import Team
+from insights.settings import (
     OBJECT_STORAGE_ACCESS_KEY_ID,
     OBJECT_STORAGE_BUCKET,
     OBJECT_STORAGE_ENDPOINT,

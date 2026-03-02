@@ -1,6 +1,6 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
-from posthog.schema import (
+from insights.schema import (
     CompareFilter,
     EventPropertyFilter,
     PropertyOperator,

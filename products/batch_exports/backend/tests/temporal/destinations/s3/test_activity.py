@@ -6,8 +6,8 @@ from django.conf import settings
 
 from temporalio.testing._activity import ActivityEnvironment
 
-from posthog.batch_exports.service import BatchExportModel, BatchExportSchema
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.batch_exports.service import BatchExportModel, BatchExportSchema
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
 
 from products.batch_exports.backend.temporal.destinations.s3_batch_export import (
     COMPRESSION_EXTENSIONS,

@@ -59,7 +59,7 @@ def table_name(ateam, interval):
 
 @pytest_asyncio.fixture
 async def postgres_batch_export(ateam, table_name, postgres_config, interval, exclude_events, temporal_client):
-    from posthog.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export
+    from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export
 
     destination_data = {
         "type": "Postgres",

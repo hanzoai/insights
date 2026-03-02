@@ -11,7 +11,7 @@
 # - frontend-build: build the frontend (static assets)
 # - sourcemap-upload: upload sourcemaps to PostHog (isolated, no artifacts)
 # - node-scripts-build: build standalone Node.js scripts and their dependencies
-# - posthog-build: fetch PostHog (Django app) dependencies & build Django collectstatic
+# - insights-build: fetch PostHog (Django app) dependencies & build Django collectstatic
 # - fetch-geoip-db: fetch the GeoIP database
 #
 # Node.js services are built separately using Dockerfile.node.
@@ -112,7 +112,7 @@ RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
 FROM ghcr.io/astral-sh/uv:0.10.2 AS uv
 
 # Same as pyproject.toml so that uv can pick it up and doesn't need to download a different Python version.
-FROM python:3.12.12-slim-bookworm@sha256:78e702aee4d693e769430f0d7b4f4858d8ea3f1118dc3f57fee3f757d0ca64b1 AS posthog-build
+FROM python:3.12.12-slim-bookworm@sha256:78e702aee4d693e769430f0d7b4f4858d8ea3f1118dc3f57fee3f757d0ca64b1 AS insights-build
 COPY --from=uv /uv /uvx /bin/
 WORKDIR /code
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
@@ -168,9 +168,8 @@ COPY manage.py manage.py
 COPY common/esbuilder common/esbuilder
 COPY common/hogvm common/hogvm/
 COPY common/migration_utils common/migration_utils/
-COPY posthog posthog/
+COPY insights insights/
 COPY products/ products/
-COPY ee ee/
 
 # Copy the built frontend assets and also the products.json file
 COPY --from=frontend-build /code/frontend/dist /code/frontend/dist
@@ -287,9 +286,9 @@ USER posthog
 ARG COMMIT_HASH
 RUN echo $COMMIT_HASH > /code/commit.txt
 
-# Copy the Python dependencies and Django staticfiles from the posthog-build stage.
-COPY --from=posthog-build --chown=posthog:posthog /code/staticfiles /code/staticfiles
-COPY --from=posthog-build --chown=posthog:posthog /python-runtime /python-runtime
+# Copy the Python dependencies and Django staticfiles from the insights-build stage.
+COPY --from=insights-build --chown=posthog:posthog /code/staticfiles /code/staticfiles
+COPY --from=insights-build --chown=posthog:posthog /python-runtime /python-runtime
 ENV PATH=/python-runtime/bin:$PATH \
     PYTHONPATH=/python-runtime
 
@@ -333,8 +332,7 @@ COPY --chown=posthog:posthog ./bin ./bin/
 # Persons SQL migration files (read by apply_persons_migrations management command for hobby deploys)
 COPY --chown=posthog:posthog ./rust/persons_migrations ./rust/persons_migrations/
 COPY --chown=posthog:posthog manage.py manage.py
-COPY --chown=posthog:posthog posthog posthog/
-COPY --chown=posthog:posthog ee ee/
+COPY --chown=posthog:posthog insights insights/
 COPY --chown=posthog:posthog common/hogvm common/hogvm/
 COPY --chown=posthog:posthog common/migration_utils common/migration_utils/
 COPY --chown=posthog:posthog products products/

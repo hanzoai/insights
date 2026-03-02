@@ -1,7 +1,7 @@
 from django.db import models
 
-from posthog.models import Team
-from posthog.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDModel
+from insights.models import Team
+from insights.models.utils import CreatedMetaFields, UpdatedMetaFields, UUIDModel
 
 
 class DAG(UUIDModel, CreatedMetaFields, UpdatedMetaFields):

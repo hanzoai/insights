@@ -2,21 +2,21 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 from unittest.mock import MagicMock, patch
 
 from django.test import override_settings
 from django.utils import timezone
 
-from posthog.schema import (
+from insights.schema import (
     ExperimentVariantResultBayesian,
     ExperimentVariantResultFrequentist,
     MaxExperimentVariantResultBayesian,
     MaxExperimentVariantResultFrequentist,
 )
 
-from posthog.models.experiment import Experiment
-from posthog.models.feature_flag.feature_flag import FeatureFlag
+from insights.models.experiment import Experiment
+from insights.models.feature_flag.feature_flag import FeatureFlag
 
 from products.experiments.backend.experiment_summary_data_service import (
     ExperimentSummaryDataService,

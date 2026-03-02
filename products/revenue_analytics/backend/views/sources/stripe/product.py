@@ -1,8 +1,8 @@
 from typing import cast
 
-from posthog.insightsql import ast
+from insights.insightsql import ast
 
-from posthog.temporal.data_imports.sources.stripe.constants import PRODUCT_RESOURCE_NAME as STRIPE_PRODUCT_RESOURCE_NAME
+from insights.temporal.data_imports.sources.stripe.constants import PRODUCT_RESOURCE_NAME as STRIPE_PRODUCT_RESOURCE_NAME
 
 from products.data_warehouse.backend.models.external_data_schema import ExternalDataSchema
 from products.data_warehouse.backend.models.table import DataWarehouseTable

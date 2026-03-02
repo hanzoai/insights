@@ -9,7 +9,7 @@ import structlog
 from posthoganalytics import capture_exception
 from pydantic import BaseModel, Field
 
-from posthog.schema import (
+from insights.schema import (
     ErrorTrackingIssue,
     ErrorTrackingIssueStatus,
     ErrorTrackingQuery,
@@ -20,9 +20,6 @@ from posthog.schema import (
     PropertyGroupFilterValue,
 )
 
-from ee.hogai.context.insight.query_executor import AssistantQueryExecutor
-from ee.hogai.tool import MaxTool
-from ee.hogai.tool_errors import MaxToolRetryableError
 
 logger = structlog.get_logger(__name__)
 

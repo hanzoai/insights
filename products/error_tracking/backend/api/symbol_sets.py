@@ -13,15 +13,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FileUploadParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.event_usage import groups
-from posthog.models.team.team import Team
-from posthog.models.utils import uuid7
-from posthog.rate_limit import SymbolSetUploadBurstRateThrottle, SymbolSetUploadSustainedRateThrottle
-from posthog.storage import object_storage
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.event_usage import groups
+from insights.models.team.team import Team
+from insights.models.utils import uuid7
+from insights.rate_limit import SymbolSetUploadBurstRateThrottle, SymbolSetUploadSustainedRateThrottle
+from insights.storage import object_storage
 
 from products.error_tracking.backend.models import ErrorTrackingRelease, ErrorTrackingStackFrame, ErrorTrackingSymbolSet
 

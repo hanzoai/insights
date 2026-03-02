@@ -13,14 +13,14 @@ from rest_framework.exceptions import ParseError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.schema import DateRange, LogAttributesQuery, LogsQuery, LogValuesQuery, OrderBy3, PropertyGroupFilter
+from insights.schema import DateRange, LogAttributesQuery, LogsQuery, LogValuesQuery, OrderBy3, PropertyGroupFilter
 
-from posthog.api.mixins import PydanticModelMixin
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.insightsql_queries.query_runner import ExecutionMode
-from posthog.models import User
-from posthog.models.exported_asset import ExportedAsset
-from posthog.tasks.exporter import export_asset
+from insights.api.mixins import PydanticModelMixin
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.insightsql_queries.query_runner import ExecutionMode
+from insights.models import User
+from insights.models.exported_asset import ExportedAsset
+from insights.tasks.exporter import export_asset
 
 from products.logs.backend.explain import LogExplainViewSet
 from products.logs.backend.has_logs_query_runner import HasLogsQueryRunner

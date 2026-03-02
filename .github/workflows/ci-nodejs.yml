@@ -47,11 +47,10 @@ jobs:
                       nodejs:
                         - .github/workflows/ci-nodejs.yml
                         - 'nodejs/**'
-                        - 'posthog/clickhouse/**'
-                        - 'ee/migrations/**'
-                        - 'posthog/management/commands/setup_test_environment.py'
-                        - 'posthog/migrations/**'
-                        - 'posthog/plugins/**'
+                        - 'insights/clickhouse/**'
+                        - 'insights/management/commands/setup_test_environment.py'
+                        - 'insights/migrations/**'
+                        - 'insights/plugins/**'
                         - 'docker*.yml'
                         - '*Dockerfile'
 

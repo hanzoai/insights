@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from posthog.schema import CachedUsageMetricsQueryResponse, UsageMetric, UsageMetricsQuery, UsageMetricsQueryResponse
+from insights.schema import CachedUsageMetricsQueryResponse, UsageMetric, UsageMetricsQuery, UsageMetricsQueryResponse
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.models import UnknownDatabaseField
-from posthog.insightsql.parser import parse_select
+from insights.insightsql import ast
+from insights.insightsql.database.models import UnknownDatabaseField
+from insights.insightsql.parser import parse_select
 
-from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner
-from posthog.models.group_usage_metric import GroupUsageMetric
+from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
+from insights.models.group_usage_metric import GroupUsageMetric
 
 
 class UsageMetricsQueryRunner(AnalyticsQueryRunner[UsageMetricsQueryResponse]):
@@ -32,7 +32,7 @@ class UsageMetricsQueryRunner(AnalyticsQueryRunner[UsageMetricsQueryResponse]):
         return bool(self.query.person_id)
 
     def _calculate(self):
-        from posthog.insightsql.query import execute_insightsql_query
+        from insights.insightsql.query import execute_insightsql_query
 
         with self.timings.measure("usage_metrics_query_insightsql_execute"):
             response = execute_insightsql_query(

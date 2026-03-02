@@ -9,15 +9,15 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.insightsql.database.database import Database
+from insights.insightsql.database.database import Database
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
-from posthog.exceptions_capture import capture_exception
-from posthog.models.activity_logging.activity_log import ActivityContextBase, Detail, changes_between, log_activity
-from posthog.models.signals import model_activity_signal, mutable_receiver
-from posthog.temporal.data_imports.sources import SourceRegistry
-from posthog.temporal.data_imports.sources.common.schema import SourceSchema
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
+from insights.exceptions_capture import capture_exception
+from insights.models.activity_logging.activity_log import ActivityContextBase, Detail, changes_between, log_activity
+from insights.models.signals import model_activity_signal, mutable_receiver
+from insights.temporal.data_imports.sources import SourceRegistry
+from insights.temporal.data_imports.sources.common.schema import SourceSchema
 
 from products.data_warehouse.backend.data_load.service import (
     cancel_external_data_workflow,

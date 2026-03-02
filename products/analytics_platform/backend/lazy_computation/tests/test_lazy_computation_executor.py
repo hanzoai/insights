@@ -2,7 +2,7 @@ import time as time_mod
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from posthog.test.base import BaseTest, ClickhouseTestMixin, _create_event
+from insights.test.base import BaseTest, ClickhouseTestMixin, _create_event
 from unittest.mock import patch
 
 from django.db import IntegrityError
@@ -11,15 +11,15 @@ from django.utils import timezone as django_timezone
 from clickhouse_driver.errors import ServerException
 from parameterized import parameterized
 
-from posthog.schema import BaseMathType, DateRange, EventsNode, InsightsQLQueryModifiers, TrendsQuery
+from insights.schema import BaseMathType, DateRange, EventsNode, InsightsQLQueryModifiers, TrendsQuery
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_select
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_select
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
-from posthog.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.insightsql_queries.insights.trends.trends_query_runner import TrendsQueryRunner
 
 from products.analytics_platform.backend.lazy_computation.computation_notifications import (
     job_channel,

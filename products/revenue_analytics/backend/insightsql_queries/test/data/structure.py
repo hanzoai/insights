@@ -1,4 +1,4 @@
-from posthog.schema import RevenueAnalyticsEventItem, RevenueCurrencyPropertyConfig
+from insights.schema import RevenueAnalyticsEventItem, RevenueCurrencyPropertyConfig
 
 from products.data_warehouse.backend.models import CLICKHOUSE_INSIGHTSQL_MAPPING
 

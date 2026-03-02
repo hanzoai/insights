@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 import structlog
 import posthoganalytics
 
-from posthog.models.instance_setting import get_instance_setting
+from insights.models.instance_setting import get_instance_setting
 
 from products.tasks.backend.models import TaskRun
 

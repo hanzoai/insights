@@ -1,18 +1,18 @@
 import os
 
 import pytest
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import Mock, patch
 
 import dagster
 
-from posthog.models.team.team import Team
-from posthog.models.web_preaggregated.team_selection import (
+from insights.models.team.team import Team
+from insights.models.web_preaggregated.team_selection import (
     DEFAULT_ENABLED_TEAM_IDS,
     DEFAULT_WEEKLY_PAGEVIEWS_THRESHOLD,
     get_teams_by_weekly_pageviews_sql,
 )
-from posthog.models.web_preaggregated.team_selection_strategies import (
+from insights.models.web_preaggregated.team_selection_strategies import (
     EnvironmentVariableStrategy,
     HighPageviewsStrategy,
     ProjectSettingsStrategy,
@@ -56,7 +56,7 @@ class TestGetTeamIdsFromSources:
         for default_team in DEFAULT_ENABLED_TEAM_IDS:
             assert default_team in result
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.HighPageviewsStrategy.get_teams")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.HighPageviewsStrategy.get_teams")
     def test_includes_pageview_teams_when_pageviews_strategy_enabled(self, mock_pageviews):
         mock_pageviews.return_value = {999, 888}
 
@@ -93,7 +93,7 @@ class TestGetTeamIdsFromSources:
         assert isinstance(result, list)
         assert result == sorted(result)
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.ProjectSettingsStrategy.get_teams")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.ProjectSettingsStrategy.get_teams")
     def test_includes_project_settings_teams_when_strategy_enabled(self, mock_project_settings):
         mock_project_settings.return_value = {888, 999}
 
@@ -109,8 +109,8 @@ class TestGetTeamIdsFromSources:
         assert 999 in result
         mock_project_settings.assert_called_once_with(self.mock_context)
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.HighPageviewsStrategy.get_teams")
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.ProjectSettingsStrategy.get_teams")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.HighPageviewsStrategy.get_teams")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.ProjectSettingsStrategy.get_teams")
     def test_combines_multiple_strategies(self, mock_project_settings, mock_pageviews):
         mock_project_settings.return_value = {111, 222}
         mock_pageviews.return_value = {333, 444}
@@ -155,7 +155,7 @@ class TestValidation:
         self.mock_context = Mock()
         self.mock_context.log = Mock()
 
-    @patch("posthog.models.team.team.Team.objects")
+    @patch("insights.models.team.team.Team.objects")
     def test_validate_team_ids_filters_invalid_teams(self, mock_team_objects):
         mock_team_objects.filter.return_value.values_list.return_value = [1, 2, 3]
 
@@ -165,7 +165,7 @@ class TestValidation:
         self.mock_context.log.warning.assert_called_once()
         self.mock_context.log.info.assert_called_once()
 
-    @patch("posthog.models.team.team.Team.objects")
+    @patch("insights.models.team.team.Team.objects")
     def test_validate_team_ids_handles_db_errors(self, mock_team_objects):
         mock_team_objects.filter.side_effect = Exception("DB error")
 
@@ -204,7 +204,7 @@ class TestStrategyClasses:
         assert result == {123, 456}  # Should include valid ones only
         self.mock_context.log.warning.assert_called_once()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.sync_execute")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
     def test_high_pageviews_strategy_returns_teams(self, mock_execute):
         strategy = HighPageviewsStrategy()
         mock_execute.return_value = [(123,), (456,)]
@@ -214,7 +214,7 @@ class TestStrategyClasses:
         assert result == {123, 456}
         mock_execute.assert_called_once()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.sync_execute")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
     def test_high_pageviews_strategy_handles_errors(self, mock_execute):
         strategy = HighPageviewsStrategy()
         mock_execute.side_effect = Exception("DB error")
@@ -224,7 +224,7 @@ class TestStrategyClasses:
         assert result == set()
         self.mock_context.log.warning.assert_called_once()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.Team.objects")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.Team.objects")
     def test_project_settings_strategy_returns_teams(self, mock_team_objects):
         strategy = ProjectSettingsStrategy()
         mock_team_objects.filter.return_value.values_list.return_value = [123, 456]
@@ -235,7 +235,7 @@ class TestStrategyClasses:
         mock_team_objects.filter.assert_called_once_with(web_analytics_pre_aggregated_tables_enabled=True)
         mock_team_objects.filter.return_value.values_list.assert_called_once_with("id", flat=True)
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.Team.objects")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.Team.objects")
     def test_project_settings_strategy_handles_database_errors(self, mock_team_objects):
         strategy = ProjectSettingsStrategy()
         mock_team_objects.filter.side_effect = Exception("Database error")
@@ -244,7 +244,7 @@ class TestStrategyClasses:
 
         assert result == set()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.Team.objects")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.Team.objects")
     def test_project_settings_strategy_handles_empty_results(self, mock_team_objects):
         strategy = ProjectSettingsStrategy()
         mock_team_objects.filter.return_value.values_list.return_value = []
@@ -539,7 +539,7 @@ class TestWeeklyHighVolumeStrategy:
         self.mock_context = Mock()
         self.mock_context.log = Mock()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.sync_execute")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
     def test_returns_teams_above_threshold(self, mock_execute):
         strategy = WeeklyHighVolumeStrategy()
         mock_execute.return_value = [
@@ -552,7 +552,7 @@ class TestWeeklyHighVolumeStrategy:
         assert result == {100, 200}
         mock_execute.assert_called_once()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.sync_execute")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
     def test_returns_empty_when_no_teams_qualify(self, mock_execute):
         strategy = WeeklyHighVolumeStrategy()
         mock_execute.return_value = []
@@ -561,7 +561,7 @@ class TestWeeklyHighVolumeStrategy:
 
         assert result == set()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.sync_execute")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
     def test_handles_clickhouse_errors(self, mock_execute):
         strategy = WeeklyHighVolumeStrategy()
         mock_execute.side_effect = Exception("ClickHouse timeout")
@@ -571,7 +571,7 @@ class TestWeeklyHighVolumeStrategy:
         assert result == set()
         self.mock_context.log.warning.assert_called_once()
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.sync_execute")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.sync_execute")
     def test_respects_custom_threshold_env_var(self, mock_execute):
         strategy = WeeklyHighVolumeStrategy()
         mock_execute.return_value = [(100, 1_500_000, 1_200_000, 1_800_000)]
@@ -596,7 +596,7 @@ class TestWeeklyHighVolumeStrategy:
         strategy = WeeklyHighVolumeStrategy()
         assert strategy.get_name() == "weekly_high_volume"
 
-    @patch("posthog.models.web_preaggregated.team_selection_strategies.WeeklyHighVolumeStrategy.get_teams")
+    @patch("insights.models.web_preaggregated.team_selection_strategies.WeeklyHighVolumeStrategy.get_teams")
     def test_included_in_sources_when_strategy_enabled(self, mock_weekly):
         mock_context = Mock(spec=dagster.OpExecutionContext)
         mock_context.log = Mock()

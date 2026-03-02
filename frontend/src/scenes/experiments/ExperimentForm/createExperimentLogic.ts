@@ -32,8 +32,7 @@ import { validateVariants } from './variantsPanelValidation'
 /**
  * Fields that can be updated on an existing experiment.
  *
- * This list must match the backend's `expected_keys` in:
- * ee/clickhouse/views/experiments.py::ExperimentSerializer.update() (lines 373-392)
+ * This list must match the backend's `expected_keys` in the ExperimentSerializer.update().
  *
  * The backend will reject any fields not in this list with a ValidationError.
  *

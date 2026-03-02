@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0979_survey_enable_iframe_embedding"),
+        ("insights", "0979_survey_enable_iframe_embedding"),
         ("product_tours", "0003_producttour_linked_surveys"),
     ]
 
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="product_tours_linked_flag",
                 related_query_name="product_tour_linked_flag",
-                to="posthog.featureflag",
+                to="insights.featureflag",
             ),
         ),
     ]

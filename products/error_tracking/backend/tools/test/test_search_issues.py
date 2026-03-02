@@ -1,5 +1,5 @@
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     ClickhouseTestMixin,
     NonAtomicBaseTest,
     _create_event,
@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 from langchain_core.runnables import RunnableConfig
 from parameterized import parameterized
 
-from posthog.schema import (
+from insights.schema import (
     DateRange,
     ErrorTrackingIssue as ErrorTrackingIssueSchema,
     ErrorTrackingQuery,
@@ -25,9 +25,6 @@ from posthog.schema import (
 from products.error_tracking.backend.models import ErrorTrackingIssue, ErrorTrackingIssueFingerprintV2
 from products.error_tracking.backend.tools.search_issues import SearchErrorTrackingIssuesTool
 
-from ee.hogai.context.context import AssistantContextManager
-from ee.hogai.utils.types import AssistantState
-from ee.hogai.utils.types.base import NodePath
 
 
 @freeze_time("2025-01-15T12:00:00Z")

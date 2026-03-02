@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from temporalio.exceptions import ApplicationError
 
-from posthog.exceptions_capture import capture_exception
+from insights.exceptions_capture import capture_exception
 
 
 class ProcessTaskError(ApplicationError):

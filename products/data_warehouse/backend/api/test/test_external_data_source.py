@@ -2,7 +2,7 @@ import uuid
 import typing as t
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
 from django.conf import settings
@@ -11,10 +11,10 @@ from django.test import override_settings
 import psycopg
 from rest_framework import status
 
-from posthog.models import Team
-from posthog.models.project import Project
-from posthog.temporal.data_imports.sources.bigquery.bigquery import BigQuerySourceConfig
-from posthog.temporal.data_imports.sources.stripe.constants import (
+from insights.models import Team
+from insights.models.project import Project
+from insights.temporal.data_imports.sources.bigquery.bigquery import BigQuerySourceConfig
+from insights.temporal.data_imports.sources.stripe.constants import (
     BALANCE_TRANSACTION_RESOURCE_NAME as STRIPE_BALANCE_TRANSACTION_RESOURCE_NAME,
     CHARGE_RESOURCE_NAME as STRIPE_CHARGE_RESOURCE_NAME,
     CREDIT_NOTE_RESOURCE_NAME as STRIPE_CREDIT_NOTE_RESOURCE_NAME,
@@ -30,7 +30,7 @@ from posthog.temporal.data_imports.sources.stripe.constants import (
     REFUND_RESOURCE_NAME as STRIPE_REFUND_RESOURCE_NAME,
     SUBSCRIPTION_RESOURCE_NAME as STRIPE_SUBSCRIPTION_RESOURCE_NAME,
 )
-from posthog.temporal.data_imports.sources.stripe.settings import ENDPOINTS as STRIPE_ENDPOINTS
+from insights.temporal.data_imports.sources.stripe.settings import ENDPOINTS as STRIPE_ENDPOINTS
 
 from products.data_warehouse.backend.models import ExternalDataSchema, ExternalDataSource
 from products.data_warehouse.backend.models.external_data_job import ExternalDataJob
@@ -448,7 +448,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_create_external_data_source_bigquery_removes_project_id_prefix(self):
         """Test we remove the `project_id` prefix of a `dataset_id`."""
         with patch(
-            "posthog.temporal.data_imports.sources.bigquery.source.get_bigquery_schemas"
+            "insights.temporal.data_imports.sources.bigquery.source.get_bigquery_schemas"
         ) as mocked_get_bigquery_schemas:
             mocked_get_bigquery_schemas.return_value = {"my_table": [("something", "DATE")]}
 
@@ -685,7 +685,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_stripe_credentials(self):
         with patch(
-            "posthog.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
+            "insights.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
         ) as validate_credentials_mock:
             validate_credentials_mock.return_value = True
 
@@ -702,7 +702,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_stripe_credentials_sad_path(self):
         with patch(
-            "posthog.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
+            "insights.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
         ) as validate_credentials_mock:
             validate_credentials_mock.side_effect = Exception("Invalid API key")
 
@@ -719,9 +719,9 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_stripe_permissions_error(self):
         with patch(
-            "posthog.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
+            "insights.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
         ) as validate_credentials_mock:
-            from posthog.temporal.data_imports.sources.stripe.stripe import StripePermissionError
+            from insights.temporal.data_imports.sources.stripe.stripe import StripePermissionError
 
             missing_permissions = {"Account": "Error message for Account", "Invoice": "Error message for Invoice"}
             validate_credentials_mock.side_effect = StripePermissionError(missing_permissions)
@@ -739,7 +739,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_zendesk_credentials(self):
         with patch(
-            "posthog.temporal.data_imports.sources.zendesk.source.validate_credentials"
+            "insights.temporal.data_imports.sources.zendesk.source.validate_credentials"
         ) as validate_credentials_mock:
             validate_credentials_mock.return_value = True
 
@@ -757,7 +757,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_zendesk_credentials_sad_path(self):
         with patch(
-            "posthog.temporal.data_imports.sources.zendesk.source.validate_credentials"
+            "insights.temporal.data_imports.sources.zendesk.source.validate_credentials"
         ) as validate_credentials_mock:
             validate_credentials_mock.return_value = False
 
@@ -775,7 +775,7 @@ class TestExternalDataSource(APIBaseTest):
 
     def test_database_schema_non_postgres_source(self):
         with patch(
-            "posthog.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
+            "insights.temporal.data_imports.sources.stripe.source.validate_stripe_credentials"
         ) as validate_credentials_mock:
             validate_credentials_mock.return_value = True
             response = self.client.post(
@@ -795,11 +795,11 @@ class TestExternalDataSource(APIBaseTest):
                 assert table in table_names
 
     @patch(
-        "posthog.temporal.data_imports.sources.postgres.source.get_postgres_schemas",
+        "insights.temporal.data_imports.sources.postgres.source.get_postgres_schemas",
         return_value={"table_1": [("id", "integer")]},
     )
     @patch(
-        "posthog.temporal.data_imports.sources.postgres.source.get_postgres_row_count",
+        "insights.temporal.data_imports.sources.postgres.source.get_postgres_row_count",
         return_value={"table_1": 42},
     )
     def test_internal_postgres(self, patch_get_sql_schemas_for_source_type, patch_get_postgres_row_count):
@@ -1518,7 +1518,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_snowflake_auth_type_create_and_update(self):
         """Test that we can create and update the auth type for a Snowflake source"""
         with patch(
-            "posthog.temporal.data_imports.sources.snowflake.source.get_snowflake_schemas"
+            "insights.temporal.data_imports.sources.snowflake.source.get_snowflake_schemas"
         ) as mocked_get_snowflake_schemas:
             mocked_get_snowflake_schemas.return_value = {"my_table": [("something", "DATE")]}
 
@@ -1613,7 +1613,7 @@ class TestExternalDataSource(APIBaseTest):
     def test_bigquery_create_and_update(self):
         """Test that we can create and update the config for a BigQuery source"""
         with patch(
-            "posthog.temporal.data_imports.sources.bigquery.source.get_bigquery_schemas"
+            "insights.temporal.data_imports.sources.bigquery.source.get_bigquery_schemas"
         ) as mocked_get_bigquery_schemas:
             mocked_get_bigquery_schemas.return_value = {"my_table": [("something", "DATE")]}
 

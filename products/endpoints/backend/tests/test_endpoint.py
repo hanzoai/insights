@@ -3,19 +3,19 @@ from time import sleep
 from typing import Any
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 from unittest import TestCase
 
 from parameterized import parameterized
 from rest_framework import status
 
-from posthog.schema import EndpointLastExecutionTimesRequest
+from insights.schema import EndpointLastExecutionTimesRequest
 
-from posthog.models.activity_logging.activity_log import ActivityLog
-from posthog.models.personal_api_key import PersonalAPIKey, hash_key_value
-from posthog.models.team import Team
-from posthog.models.user import User
-from posthog.models.utils import generate_random_token_personal
+from insights.models.activity_logging.activity_log import ActivityLog
+from insights.models.personal_api_key import PersonalAPIKey, hash_key_value
+from insights.models.team import Team
+from insights.models.user import User
+from insights.models.utils import generate_random_token_personal
 
 from products.endpoints.backend.models import Endpoint
 from products.endpoints.backend.tests.conftest import create_endpoint_with_version
@@ -120,7 +120,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         self.assertIn("event_name", response.json()["detail"])
 
     def test_create_endpoint_with_defined_variable_placeholders(self):
-        from posthog.models.insight_variable import InsightVariable
+        from insights.models.insight_variable import InsightVariable
 
         variable = InsightVariable.objects.create(
             team=self.team, name="Event Name", code_name="event_name", type="String"
@@ -146,7 +146,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.json())
 
     def test_cannot_create_endpoint_with_partially_defined_variables(self):
-        from posthog.models.insight_variable import InsightVariable
+        from insights.models.insight_variable import InsightVariable
 
         variable = InsightVariable.objects.create(
             team=self.team, name="Event Name", code_name="event_name", type="String"
@@ -519,7 +519,7 @@ class TestEndpoint(ClickhouseTestMixin, APIBaseTest):
                     "custom_name": "Page Views",
                     "math": "total",
                     "fixedProperties": [
-                        {"key": "$current_url", "operator": "icontains", "type": "event", "value": "posthog.com"}
+                        {"key": "$current_url", "operator": "icontains", "type": "event", "value": "insights.com"}
                     ],
                 },
                 {"kind": "EventsNode", "event": "$autocapture", "custom_name": "Autocapture Events", "math": "dau"},

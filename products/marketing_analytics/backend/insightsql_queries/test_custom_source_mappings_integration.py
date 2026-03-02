@@ -1,6 +1,6 @@
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
-from posthog.schema import BaseMathType, ConversionGoalFilter1, NodeKind
+from insights.schema import BaseMathType, ConversionGoalFilter1, NodeKind
 
 from products.marketing_analytics.backend.insightsql_queries.adapters.factory import MarketingSourceFactory
 from products.marketing_analytics.backend.insightsql_queries.conversion_goal_processor import ConversionGoalProcessor

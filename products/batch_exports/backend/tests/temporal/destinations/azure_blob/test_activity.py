@@ -4,8 +4,8 @@ import pytest
 
 from temporalio.testing import ActivityEnvironment
 
-from posthog.batch_exports.service import BatchExportModel
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.batch_exports.service import BatchExportModel
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
 
 from products.batch_exports.backend.temporal.destinations.azure_blob_batch_export import (
     SUPPORTED_COMPRESSIONS,

@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 
 from products.desktop_recordings.backend.models import DesktopRecording
 

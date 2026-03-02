@@ -1,6 +1,6 @@
 from typing import Optional
 
-from posthog.models.integration import GitHubIntegration, Integration
+from insights.models.integration import GitHubIntegration, Integration
 
 
 def get_github_token(github_integration_id: int) -> Optional[str]:

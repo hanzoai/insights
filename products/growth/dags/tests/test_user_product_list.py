@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 import dagster
 from dagster import build_op_context
 
-from posthog.models import Organization, Team, User
-from posthog.models.file_system.user_product_list import UserProductList
+from insights.models import Organization, Team, User
+from insights.models.file_system.user_product_list import UserProductList
 
 from products.growth.dags.user_product_list import populate_user_product_list, populate_user_product_list_job
 

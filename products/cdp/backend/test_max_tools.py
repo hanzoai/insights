@@ -4,7 +4,6 @@ from parameterized import parameterized
 
 from products.cdp.backend.max_tools import CreateHogTransformationFunctionTool
 
-from ee.hogai.chat_agent.schema_generator.parsers import PydanticOutputParserException
 
 
 class TestParseOutput:

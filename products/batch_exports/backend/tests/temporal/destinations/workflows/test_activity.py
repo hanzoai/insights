@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from posthog.batch_exports.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
+from insights.batch_exports.service import BatchExportInsertInputs, BatchExportModel, BatchExportSchema
 
 from products.batch_exports.backend.temporal.destinations.workflows_batch_export import (
     WorkflowsInsertInputs,

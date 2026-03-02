@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, Union
 
-from posthog.schema import (
+from insights.schema import (
     BaseMathType,
     ConversionGoalFilter1,
     ConversionGoalFilter2,
@@ -9,10 +9,10 @@ from posthog.schema import (
     PropertyMathType,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.property import action_to_expr, property_to_expr
+from insights.insightsql import ast
+from insights.insightsql.property import action_to_expr, property_to_expr
 
-from posthog.models import Action, Team
+from insights.models import Action, Team
 
 from .adapters.factory import MarketingSourceFactory
 from .marketing_analytics_config import MarketingAnalyticsConfig

@@ -27,7 +27,7 @@ fi
 
 python ${DEBUG:+ -m debugpy --listen 127.0.0.1:5678} -m granian \
     --interface asgi \
-    posthog.asgi:application \
+    insights.asgi:application \
     --reload \
     --reload-paths ./posthog \
     --reload-paths ./ee \

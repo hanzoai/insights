@@ -1,14 +1,14 @@
 import os
 import json
 
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 from unittest.mock import patch
 
 from django.core.cache import cache
 
 from rest_framework import status
 
-from posthog.clickhouse.client import sync_execute
+from insights.clickhouse.client import sync_execute
 
 from products.logs.backend.has_logs_query_runner import HasLogsQueryRunner
 

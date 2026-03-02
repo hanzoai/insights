@@ -1,4 +1,4 @@
-from posthog.test.base import BaseTest
+from insights.test.base import BaseTest
 from unittest.mock import patch
 
 from products.llm_analytics.backend.models.evaluations import Evaluation
@@ -40,7 +40,7 @@ class TestEvaluationModel(BaseTest):
         """
         If bytecode compilation fails, the bytecode_error field should be set
         """
-        with patch("posthog.cdp.filters.compile_filters_bytecode") as mock_compile:
+        with patch("insights.cdp.filters.compile_filters_bytecode") as mock_compile:
             mock_compile.return_value = {"bytecode": None, "bytecode_error": "Invalid property filter"}
 
             evaluation = Evaluation.objects.create(
@@ -132,7 +132,7 @@ class TestEvaluationModel(BaseTest):
         self.assertIsNotNone(evaluation.conditions[0]["bytecode"])
         self.assertIsNotNone(evaluation.conditions[1]["bytecode"])
 
-    @patch("posthog.plugins.plugin_server_api.reload_evaluations_on_workers")
+    @patch("insights.plugins.plugin_server_api.reload_evaluations_on_workers")
     def test_sends_reload_signal_on_save(self, mock_reload):
         """
         Django signal should trigger reload on workers when evaluation is saved
@@ -151,7 +151,7 @@ class TestEvaluationModel(BaseTest):
 
         mock_reload.assert_called_once_with(team_id=self.team.id, evaluation_ids=[str(evaluation.id)])
 
-    @patch("posthog.plugins.plugin_server_api.reload_evaluations_on_workers")
+    @patch("insights.plugins.plugin_server_api.reload_evaluations_on_workers")
     def test_sends_reload_signal_on_update(self, mock_reload):
         """
         Django signal should trigger reload on workers when evaluation is updated

@@ -9,7 +9,7 @@ from psycopg import sql
 from temporalio.client import Client as TemporalClient
 from temporalio.service import RPCError
 
-from posthog.temporal.common.client import sync_connect
+from insights.temporal.common.client import sync_connect
 
 from products.data_warehouse.backend.models import ExternalDataSchema
 

@@ -28,47 +28,47 @@ frontend/src/scenes/trends/ @PostHog/team-product-analytics
 frontend/src/scenes/dataThemeLogic.tsx @PostHog/team-product-analytics
 funnel-udf/ @PostHog/team-product-analytics
 playwright/e2e/product-analytics/ @PostHog/team-product-analytics
-posthog/admin/admins/dashboard_admin.py @PostHog/team-product-analytics
-posthog/admin/admins/dashboard_template_admin.py @PostHog/team-product-analytics
-posthog/admin/admins/data_color_theme_admin.py @PostHog/team-product-analytics
-posthog/admin/admins/insight_admin.py @PostHog/team-product-analytics
-posthog/api/dashboards/ @PostHog/team-product-analytics
-posthog/api/annotation.py @PostHog/team-product-analytics
-posthog/api/data_color_theme.py @PostHog/team-product-analytics
-posthog/api/insight_serializers.py @PostHog/team-product-analytics
-posthog/api/insight_variable.py @PostHog/team-product-analytics
-posthog/api/insight.py @PostHog/team-product-analytics
-posthog/hogql_queries/insights/ @PostHog/team-product-analytics
-posthog/hogql_queries/legacy_compatibility/ @PostHog/team-product-analytics
-posthog/hogql_queries/test/test_actors_query_runner.py @PostHog/team-product-analytics
-posthog/hogql_queries/test/test_events_dashboard_filters.py @PostHog/team-product-analytics
-posthog/hogql_queries/test/test_events_query_runner.py @PostHog/team-product-analytics
-posthog/hogql_queries/test/test_events_query_runner.py @PostHog/team-product-analytics
-posthog/hogql_queries/utils/formula_ast.py @PostHog/team-product-analytics
-posthog/hogql_queries/utils/query_compare_to_date_range.py @PostHog/team-product-analytics
-posthog/hogql_queries/utils/query_date_range.py @PostHog/team-product-analytics
-posthog/hogql_queries/utils/query_previous_period_date_range.py @PostHog/team-product-analytics
-posthog/hogql_queries/utils/timestamp_utils.py @PostHog/team-product-analytics
-posthog/hogql_queries/actor_strategies.py @PostHog/team-product-analytics
-posthog/hogql_queries/actors_query_runner.py @PostHog/team-product-analytics
-posthog/hogql_queries/events_query_runner.py @PostHog/team-product-analytics
-posthog/hogql_queries/actor_strategies.py @PostHog/team-product-analytics
-posthog/hogql_queries/actors_query_runner.py @PostHog/team-product-analytics
-posthog/hogql_queries/apply_dashboard_filters.py @PostHog/team-product-analytics
-posthog/hogql_queries/events_query_runner.py @PostHog/team-product-analytics
-posthog/models/filters/ @PostHog/team-product-analytics
-posthog/models/annotation.py @PostHog/team-product-analytics
-posthog/models/dashboard_templates.py @PostHog/team-product-analytics
-posthog/models/dashboard_tile.py @PostHog/team-product-analytics
-posthog/models/dashboard.py @PostHog/team-product-analytics
-posthog/models/data_color_theme.py @PostHog/team-product-analytics
-posthog/models/insight_variable.py @PostHog/team-product-analytics
-posthog/models/insight.py @PostHog/team-product-analytics
-posthog/queries/ @PostHog/team-product-analytics
-posthog/schema_migrations/ @PostHog/team-product-analytics
-posthog/schema_helpers.py @PostHog/team-product-analytics
-posthog/udf_versioner.py @PostHog/team-product-analytics
-posthog/user_scripts/ @PostHog/team-product-analytics
+insights/admin/admins/dashboard_admin.py @PostHog/team-product-analytics
+insights/admin/admins/dashboard_template_admin.py @PostHog/team-product-analytics
+insights/admin/admins/data_color_theme_admin.py @PostHog/team-product-analytics
+insights/admin/admins/insight_admin.py @PostHog/team-product-analytics
+insights/api/dashboards/ @PostHog/team-product-analytics
+insights/api/annotation.py @PostHog/team-product-analytics
+insights/api/data_color_theme.py @PostHog/team-product-analytics
+insights/api/insight_serializers.py @PostHog/team-product-analytics
+insights/api/insight_variable.py @PostHog/team-product-analytics
+insights/api/insight.py @PostHog/team-product-analytics
+insights/hogql_queries/insights/ @PostHog/team-product-analytics
+insights/hogql_queries/legacy_compatibility/ @PostHog/team-product-analytics
+insights/hogql_queries/test/test_actors_query_runner.py @PostHog/team-product-analytics
+insights/hogql_queries/test/test_events_dashboard_filters.py @PostHog/team-product-analytics
+insights/hogql_queries/test/test_events_query_runner.py @PostHog/team-product-analytics
+insights/hogql_queries/test/test_events_query_runner.py @PostHog/team-product-analytics
+insights/hogql_queries/utils/formula_ast.py @PostHog/team-product-analytics
+insights/hogql_queries/utils/query_compare_to_date_range.py @PostHog/team-product-analytics
+insights/hogql_queries/utils/query_date_range.py @PostHog/team-product-analytics
+insights/hogql_queries/utils/query_previous_period_date_range.py @PostHog/team-product-analytics
+insights/hogql_queries/utils/timestamp_utils.py @PostHog/team-product-analytics
+insights/hogql_queries/actor_strategies.py @PostHog/team-product-analytics
+insights/hogql_queries/actors_query_runner.py @PostHog/team-product-analytics
+insights/hogql_queries/events_query_runner.py @PostHog/team-product-analytics
+insights/hogql_queries/actor_strategies.py @PostHog/team-product-analytics
+insights/hogql_queries/actors_query_runner.py @PostHog/team-product-analytics
+insights/hogql_queries/apply_dashboard_filters.py @PostHog/team-product-analytics
+insights/hogql_queries/events_query_runner.py @PostHog/team-product-analytics
+insights/models/filters/ @PostHog/team-product-analytics
+insights/models/annotation.py @PostHog/team-product-analytics
+insights/models/dashboard_templates.py @PostHog/team-product-analytics
+insights/models/dashboard_tile.py @PostHog/team-product-analytics
+insights/models/dashboard.py @PostHog/team-product-analytics
+insights/models/data_color_theme.py @PostHog/team-product-analytics
+insights/models/insight_variable.py @PostHog/team-product-analytics
+insights/models/insight.py @PostHog/team-product-analytics
+insights/queries/ @PostHog/team-product-analytics
+insights/schema_migrations/ @PostHog/team-product-analytics
+insights/schema_helpers.py @PostHog/team-product-analytics
+insights/udf_versioner.py @PostHog/team-product-analytics
+insights/user_scripts/ @PostHog/team-product-analytics
 products/product_analytics/ @PostHog/team-product-analytics
 products/dashboards/ @PostHog/team-product-analytics
 
@@ -76,26 +76,25 @@ products/dashboards/ @PostHog/team-product-analytics
 frontend/src/scenes/settings/environment/SurveySettings.tsx @PostHog/team-surveys
 frontend/src/scenes/surveys/ @PostHog/team-surveys
 frontend/src/scenes/onboarding/sdks/surveys @PostHog/team-surveys
-ee/surveys @PostHog/team-surveys
-posthog/admin/admins/survey_admin.py @PostHog/team-surveys
-posthog/api/survey.py @PostHog/team-surveys
-posthog/api/test/test_survey.py @PostHog/team-surveys
-posthog/models/surveys/survey.py @PostHog/team-surveys
-posthog/tasks/stop_surveys_reached_target.py @PostHog/team-surveys
-posthog/tasks/update_survey_adaptive_sampling @PostHog/team-surveys
-posthog/tasks/update_survey_iteration @PostHog/team-surveys
-posthog/tasks/test/test_stop_surveys_reached_target.py @PostHog/team-surveys
-posthog/templates/surveys @PostHog/team-surveys
+insights/admin/admins/survey_admin.py @PostHog/team-surveys
+insights/api/survey.py @PostHog/team-surveys
+insights/api/test/test_survey.py @PostHog/team-surveys
+insights/models/surveys/survey.py @PostHog/team-surveys
+insights/tasks/stop_surveys_reached_target.py @PostHog/team-surveys
+insights/tasks/update_survey_adaptive_sampling @PostHog/team-surveys
+insights/tasks/update_survey_iteration @PostHog/team-surveys
+insights/tasks/test/test_stop_surveys_reached_target.py @PostHog/team-surveys
+insights/templates/surveys @PostHog/team-surveys
 
 # Product Tours - owned by @PostHog/team-surveys
 products/product_tours/** @PostHog/team-surveys
 frontend/src/toolbar/product-tours/** @PostHog/team-surveys
-posthog/api/product_tour.py @PostHog/team-surveys
-posthog/models/product_tour.py @PostHog/team-surveys
-posthog/tasks/product_tour.py @PostHog/team-surveys
-posthog/templates/product_tour.py @PostHog/team-surveys
-posthog/tests/test_product_tour.py @PostHog/team-surveys
-posthog/tests/test_product_tour.py @PostHog/team-surveys
+insights/api/product_tour.py @PostHog/team-surveys
+insights/models/product_tour.py @PostHog/team-surveys
+insights/tasks/product_tour.py @PostHog/team-surveys
+insights/templates/product_tour.py @PostHog/team-surveys
+insights/tests/test_product_tour.py @PostHog/team-surveys
+insights/tests/test_product_tour.py @PostHog/team-surveys
 
 # Nodejs Services - ownership is split between ingestion and workflows teams
 nodejs/src/ @PostHog/team-ingestion @PostHog/team-workflows
@@ -109,77 +108,72 @@ nodejs/src/session-replay/shared/ @PostHog/team-replay @PostHog/team-ingestion
 # Web Analytics - owned by @PostHog/team-web-analytics
 products/web_analytics/** @PostHog/team-web-analytics
 frontend/src/scenes/web-analytics/** @PostHog/team-web-analytics
-posthog/hogql_queries/web_analytics/** @PostHog/team-web-analytics
+insights/hogql_queries/web_analytics/** @PostHog/team-web-analytics
 frontend/src/toolbar/web-vitals/** @PostHog/team-web-analytics
 rust/common/cookieless/** @PostHog/team-web-analytics
 nodejs/src/ingestion/cookieless/** @PostHog/team-web-analytics
 
 # Analytics Platform - owned by @PostHog/team-analytics-platform
-posthog/dags/locations/analytics*platform.py @PostHog/team-analytics-platform
-ee/tasks/subscriptions/** @PostHog/team-analytics-platform
+insights/dags/locations/analytics*platform.py @PostHog/team-analytics-platform
 frontend/src/scenes/data-management/schema/** @PostHog/team-analytics-platform
-posthog/api/schema_property_group.py @PostHog/team-analytics-platform
-posthog/hogql/database/schema/sessions*\*.py @PostHog/team-analytics-platform
-posthog/models/raw_sessions/** @PostHog/team-analytics-platform
-posthog/models/schema.py @PostHog/team-analytics-platform
-posthog/models/sessions/** @PostHog/team-analytics-platform
-posthog/tasks/alerts/** @PostHog/team-analytics-platform
-posthog/tasks/exports/** @PostHog/team-analytics-platform
+insights/api/schema_property_group.py @PostHog/team-analytics-platform
+insights/hogql/database/schema/sessions*\*.py @PostHog/team-analytics-platform
+insights/models/raw_sessions/** @PostHog/team-analytics-platform
+insights/models/schema.py @PostHog/team-analytics-platform
+insights/models/sessions/** @PostHog/team-analytics-platform
+insights/tasks/alerts/** @PostHog/team-analytics-platform
+insights/tasks/exports/** @PostHog/team-analytics-platform
 
 # Revenue Analytics - owned by @rafaeelaudibert and @PostHog/team-customer-analytics
 products/revenue_analytics/\*\* @rafaeelaudibert @PostHog/team-customer-analytics
 
 # Feature Flags platform (the `/flags` and `/decide` endpoints + associated utils) - owned by @PostHog/team-feature-flags
 rust/feature-flags/ @PostHog/team-feature-flags
-posthog/api/decide.py @PostHog/team-feature-flags
-posthog/models/flag_matching.py @PostHog/team-feature-flags
+insights/api/decide.py @PostHog/team-feature-flags
+insights/models/flag_matching.py @PostHog/team-feature-flags
 
 # Feature Flags CRUD operations - owned by @PostHog/team-feature-flags
-posthog/models/feature_flag/ @PostHog/team-feature-flags
-posthog/api/feature_flag.py @PostHog/team-feature-flags
-posthog/api/test/test_feature_flag_dependency_deletion.py @PostHog/team-feature-flags
-posthog/api/test/test_feature_flag_utils.py @PostHog/team-feature-flags
-posthog/api/test/test_feature_flag.py @PostHog/team-feature-flags
-posthog/test/test_feature_flag_analytics.py @PostHog/team-feature-flags
-posthog/test/test_feature_flag.py @PostHog/team-feature-flags
+insights/models/feature_flag/ @PostHog/team-feature-flags
+insights/api/feature_flag.py @PostHog/team-feature-flags
+insights/api/test/test_feature_flag_dependency_deletion.py @PostHog/team-feature-flags
+insights/api/test/test_feature_flag_utils.py @PostHog/team-feature-flags
+insights/api/test/test_feature_flag.py @PostHog/team-feature-flags
+insights/test/test_feature_flag_analytics.py @PostHog/team-feature-flags
+insights/test/test_feature_flag.py @PostHog/team-feature-flags
 
 # Cohorts - owned by @PostHog/team-feature-flags
-posthog/api/cohort.py @PostHog/team-feature-flags
-posthog/models/cohort/ @PostHog/team-feature-flags
+insights/api/cohort.py @PostHog/team-feature-flags
+insights/models/cohort/ @PostHog/team-feature-flags
 frontend/src/scenes/cohorts/ @PostHog/team-feature-flags
 
 # Feature Flags frontend - owned by @PostHog/team-feature-flags
 frontend/src/scenes/feature-flags/ @PostHog/team-feature-flags
 
 # Data warehouse - owned by @PostHog/team-data-stack
-posthog/temporal/data_imports/** @PostHog/team-warehouse-sources
-posthog/temporal/data_modeling/** @PostHog/team-data-tools
-posthog/warehouse/** @PostHog/team-data-stack
+insights/temporal/data_imports/** @PostHog/team-warehouse-sources
+insights/temporal/data_modeling/** @PostHog/team-data-tools
+insights/warehouse/** @PostHog/team-data-stack
 products/data_warehouse/** @PostHog/team-data-stack
 frontend/src/scenes/data-warehouse/\*\* @PostHog/team-data-stack
-posthog/management/commands/generate_source_configs.py @PostHog/team-warehouse-sources
-posthog/settings/data_warehouse.py @PostHog/team-data-stack
+insights/management/commands/generate_source_configs.py @PostHog/team-warehouse-sources
+insights/settings/data_warehouse.py @PostHog/team-data-stack
 
 # HogQL - owned by @PostHog/team-data-tools
 # and also hard owned by the @PostHog/hogql on `CODEOWNERS` file
-posthog/hogql/\*\* @PostHog/team-data-tools
+insights/hogql/\*\* @PostHog/team-data-tools
 
 # Error Tracking - owned by @PostHog/team-error-tracking
 products/error_tracking/backend/** @PostHog/team-error-tracking
 products/error_tracking/frontend/** @PostHog/team-error-tracking
-posthog/hogql_queries/error_tracking/error_tracking_query_runner.py @PostHog/team-error-tracking
-posthog/hogql_queries/error_tracking/error_tracking_issue_correlation_query_runner.py @PostHog/team-error-tracking
+insights/hogql_queries/error_tracking/error_tracking_query_runner.py @PostHog/team-error-tracking
+insights/hogql_queries/error_tracking/error_tracking_issue_correlation_query_runner.py @PostHog/team-error-tracking
 
 # Notebooks - owned by @PostHog/team-platform-features
 frontend/src/scenes/notebooks/ @PostHog/team-platform-features
 frontend/src/lib/components/RichContentEditor/ @PostHog/team-platform-features
 
 # Session Replay python files - owned by @PostHog/team-replay
-posthog/session_recordings/**/\*.py @PostHog/team-replay
-ee/session_recordings/**/\*.py @PostHog/team-replay
-
-# Mobile Session Replay - owned by @PostHog/team-replay
-ee/frontend/mobile-replay @PostHog/team-replay
+insights/session_recordings/**/\*.py @PostHog/team-replay
 
 # Product onboarding - owned by @PostHog/team-growth
 frontend/src/scenes/onboarding/ @PostHog/team-growth
@@ -188,7 +182,7 @@ frontend/src/scenes/onboarding/ @PostHog/team-growth
 frontend/src/layout/navigation-3000/sidepanel/panels/SdkDoctor @PostHog/team-growth
 
 # Weekly digest - owned by @PostHog/team-growth
-posthog/temporal/weekly-digest @PostHog/team-growth
+insights/temporal/weekly-digest @PostHog/team-growth
 
 # DevEx-adjacent files - owned by @PostHog/team-devex
 .github/workflows/** @PostHog/team-devex
@@ -202,7 +196,7 @@ package.json @PostHog/team-devex
 package-lock.json @PostHog/team-devex
 .prettierrc @PostHog/team-devex
 mypy.ini @PostHog/team-devex
-posthog/management/migration_analysis/ @PostHog/team-devex
+insights/management/migration_analysis/ @PostHog/team-devex
 common/hogli/ @PostHog/team-devex
 bin/ @PostHog/team-devex
 CODEOWNERS-soft @PostHog/team-devex

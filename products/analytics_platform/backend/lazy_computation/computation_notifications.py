@@ -3,9 +3,9 @@ import logging
 
 import redis as redis_lib
 
-from posthog import redis
-from posthog.clickhouse.client.execute_async import QueryStatusManager
-from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
+from insights import redis
+from insights.clickhouse.client.execute_async import QueryStatusManager
+from insights.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
 
 logger = logging.getLogger(__name__)
 
