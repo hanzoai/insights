@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="team",
             name="data_attributes",
-            field=models.JSONField(default=posthog.models.team.get_default_data_attributes),
+            field=models.JSONField(default=insights.models.team.get_default_data_attributes),
         ),
         migrations.AlterField(
             model_name="team",

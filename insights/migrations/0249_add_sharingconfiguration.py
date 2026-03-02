@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                     "access_token",
                     models.CharField(
                         blank=True,
-                        default=posthog.models.sharing_configuration.get_default_access_token,
+                        default=insights.models.sharing_configuration.get_default_access_token,
                         max_length=400,
                         null=True,
                         unique=True,

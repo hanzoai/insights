@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("status", models.CharField(max_length=400)),
@@ -61,6 +61,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="team",
             name="timezone",
-            field=models.CharField(choices=posthog.models.team.TIMEZONES, default="UTC", max_length=240),
+            field=models.CharField(choices=insights.models.team.TIMEZONES, default="UTC", max_length=240),
         ),
     ]

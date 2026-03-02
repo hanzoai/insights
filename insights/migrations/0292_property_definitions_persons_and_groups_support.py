@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="propertydefinition",
-            constraint=posthog.models.utils.UniqueConstraintByExpression(
+            constraint=insights.models.utils.UniqueConstraintByExpression(
                 concurrently=True,
                 expression="(team_id, name, type, coalesce(group_type_index, -1))",
                 name="posthog_propertydefinition_uniq",

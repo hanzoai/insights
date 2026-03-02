@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),

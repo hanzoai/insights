@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 help_text="Custom rate limit for InsightsQL API queries in #requests/{sec,min,hour,day}",
                 max_length=32,
                 null=True,
-                validators=[posthog.models.utils.validate_rate_limit],
+                validators=[insights.models.utils.validate_rate_limit],
             ),
         ),
     ]

@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             model_name="personalapikey",
             name="value",
             field=models.CharField(
-                default=posthog.models.utils.generate_random_token_personal,
+                default=insights.models.utils.generate_random_token_personal,
                 editable=False,
                 max_length=50,
                 unique=True,
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             model_name="team",
             name="api_token",
             field=models.CharField(
-                default=posthog.models.utils.generate_random_token_project,
+                default=insights.models.utils.generate_random_token_project,
                 max_length=200,
                 unique=True,
                 validators=[

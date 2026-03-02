@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterModelManagers(
             name="user",
             managers=[
-                ("objects", posthog.models.UserManager()),
+                ("objects", insights.models.UserManager()),
             ],
         ),
         migrations.RemoveField(

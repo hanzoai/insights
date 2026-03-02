@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                 ("status_message", models.TextField(blank=True, null=True)),
                 ("state", models.JSONField(blank=True, null=True)),
                 ("import_config", models.JSONField()),
-                ("secrets", posthog.helpers.encrypted_fields.EncryptedJSONStringField()),
+                ("secrets", insights.helpers.encrypted_fields.EncryptedJSONStringField()),
                 ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
