@@ -6,6 +6,11 @@ from temporalio.exceptions import ApplicationError
 
 from insights.models.user import User
 from insights.sync import database_sync_to_async
+from insights.temporal.ai.session_summary.ee_stubs import (
+    SessionSummarySerializer,
+    SessionSummaryVideoValidator,
+    SingleSessionSummary,
+)
 from insights.temporal.ai.session_summary.types.single import SingleSessionSummaryInputs
 
 
