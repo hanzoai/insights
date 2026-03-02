@@ -899,7 +899,7 @@ describe('processEvent', () => {
     describe('when handling $identify', () => {
         test('we do not alias users if distinct id changes but we are already identified', async () => {
             // This test is in reference to
-            // https://github.com/Insights/insights/issues/5527 , where we were
+            // https://github.com/PostHog/insights/issues/5527 , where we were
             // correctly identifying that an anonymous user before login should be
             // aliased to the user they subsequently login as, but incorrectly
             // aliasing on subsequent $identify events. The anonymous case is
@@ -949,7 +949,7 @@ describe('processEvent', () => {
 
         test('we do not alias users if distinct id changes but we are already identified, with no anonymous event', async () => {
             // This test is in reference to
-            // https://github.com/Insights/insights/issues/5527 , where we were
+            // https://github.com/PostHog/insights/issues/5527 , where we were
             // correctly identifying that an anonymous user before login should be
             // aliased to the user they subsequently login as, but incorrectly
             // aliasing on subsequent $identify events. The anonymous case is

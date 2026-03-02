@@ -137,7 +137,7 @@ describe('hogvm execute', () => {
         // This test documents the current typescript hogvm behavior where null is coerced to 0 in ordering comparisons.
         // HogVM in python/rust does not share this behavior.
         // It is preserved for backward compatibility - users depend on it.
-        // See: https://github.com/Insights/posthog/pull/45328
+        // See: https://github.com/PostHog/posthog/pull/45328
         const options = {}
 
         // null is coerced to 0 in JavaScript comparisons

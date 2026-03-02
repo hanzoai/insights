@@ -15,7 +15,7 @@ logger = structlog.get_logger(__name__)
 # to know this file exists and we havent figured out why it cant find models
 # inside our `products` folder
 #
-# See https://github.com/Insights/posthog/pull/32364
+# See https://github.com/PostHog/posthog/pull/32364
 class Link(FileSystemSyncMixin, CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
     """
     Links that redirect to a specified destination URL.

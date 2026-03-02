@@ -13,7 +13,7 @@ export const gcsPlugin: LegacyDestinationPlugin = {
         id: 'plugin-insights-gcs-plugin',
         name: 'GCS Export',
         description: 'Sends events to GCS on ingestion.',
-        icon_url: 'https://raw.githubusercontent.com/Insights/insights-gcs-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/PostHog/insights-gcs-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',

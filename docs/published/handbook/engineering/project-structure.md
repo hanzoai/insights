@@ -4,7 +4,7 @@ sidebar: Docs
 showTitle: true
 ---
 
-> **Note:** This page refers to our [main product repository](https://github.com/Insights/posthog), not our website.
+> **Note:** This page refers to our [main product repository](https://github.com/PostHog/posthog), not our website.
 
 ## Directory tree
 
@@ -60,7 +60,7 @@ The Django backend application. Key subdirectories:
 
 Product-specific code organized as **vertical slices**. Each product folder contains its own backend (Django app), frontend (React), and optionally shared code. This structure allows features to evolve independently.
 
-See the [products README](https://github.com/Insights/posthog/blob/master/products/README.md) for detailed conventions.
+See the [products README](https://github.com/PostHog/posthog/blob/master/products/README.md) for detailed conventions.
 
 ### `nodejs`
 
@@ -90,7 +90,7 @@ Shared code used across the codebase:
 
 ### `ee`
 
-Enterprise edition licensed features. This directory has a [separate license](https://github.com/Insights/posthog/blob/master/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/posthog-foss](https://github.com/Insights/posthog-foss).
+Enterprise edition licensed features. This directory has a [separate license](https://github.com/PostHog/posthog/blob/master/ee/LICENSE) - not MIT. For 100% FOSS code, see [Insights/posthog-foss](https://github.com/PostHog/posthog-foss).
 
 ### `playwright`
 

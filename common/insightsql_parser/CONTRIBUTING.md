@@ -73,7 +73,7 @@ Key takeaways:
 
 Antlr runtime provided in Ubuntu packages might be of an older version, which results in compilation errors.
 
-In that case run commands from [this step](https://github.com/Insights/posthog/blob/4fba6a63e351131fdb27b85e7ba436446fdb3093/.github/actions/run-backend-tests/action.yml#L100).
+In that case run commands from [this step](https://github.com/PostHog/posthog/blob/4fba6a63e351131fdb27b85e7ba436446fdb3093/.github/actions/run-backend-tests/action.yml#L100).
 
 ## WebAssembly (JavaScript/TypeScript) build
 

@@ -221,7 +221,7 @@ if (res.status >= 400) {
 
 
 class TemplateCustomerioMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/Insights/customerio-plugin"
+    plugin_url = "https://github.com/PostHog/customerio-plugin"
 
     @classmethod
     def migrate(cls, obj):

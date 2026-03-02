@@ -112,7 +112,7 @@ export function processEvent(event: PluginEvent, { global, logger }: UserAgentMe
     }
 
     // The special Insights property names are retrieved from:
-    // https://github.com/Insights/insights/blob/master/frontend/src/lib/components/PropertyKeyInfo.tsx
+    // https://github.com/PostHog/insights/blob/master/frontend/src/lib/components/PropertyKeyInfo.tsx
     properties['$device'] = device
     properties['$device_type'] = deviceType
 
@@ -129,7 +129,7 @@ export function processEvent(event: PluginEvent, { global, logger }: UserAgentMe
     return event
 }
 
-// detectDevice and detectDeviceType from https://github.com/Insights/insights-js/blob/9abedce5ac877caeb09205c4b693988fc09a63ca/src/utils.js#L808-L837
+// detectDevice and detectDeviceType from https://github.com/PostHog/insights-js/blob/9abedce5ac877caeb09205c4b693988fc09a63ca/src/utils.js#L808-L837
 function detectDevice(userAgent: string) {
     if (/Windows Phone/i.test(userAgent) || /WPDesktop/.test(userAgent)) {
         return 'Windows Phone'
