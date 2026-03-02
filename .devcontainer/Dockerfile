@@ -67,6 +67,15 @@ WORKDIR /workspace
 #
 # - we need few additional OS packages for this. Let's install
 #   and then uninstall them when the compilation is completed.
+RUN apt-get update && apt-get install -y --no-install-recommends cmake build-essential g++ curl unzip uuid-dev \
+    && curl -L https://www.antlr.org/download/antlr4-cpp-runtime-4.13.1-source.zip -o /tmp/antlr4-source.zip \
+    && cd /tmp && unzip antlr4-source.zip -d antlr4-source && cd antlr4-source \
+    && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTING=OFF -DANTLR4_BUILD_TESTS=OFF \
+    && make -j$(nproc) && make install && ldconfig \
+    && rm -rf /tmp/antlr4-source /tmp/antlr4-source.zip \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY pyproject.toml uv.lock ./
+COPY common/insightsql_parser common/insightsql_parser/
 RUN --mount=from=ghcr.io/astral-sh/uv,source=/uv,target=/bin/uv \
     uv sync
