@@ -189,7 +189,7 @@ export function PersonScene(): JSX.Element | null {
         throw new Error(personError)
     }
     if (!person) {
-        return personLoading ? <SpinnerOverlay sceneLevel /> : <NotFound object="person" meta={{ urlId }} />
+        return personLoading ? <SpinnerOverlay sceneLevel /> : <NotFound object="user" meta={{ urlId }} />
     }
 
     return (
@@ -225,7 +225,7 @@ export function PersonScene(): JSX.Element | null {
                             size="small"
                             icon={isMobile() ? <IconTrash /> : null}
                         >
-                            {isMobile() ? null : 'Delete person'}
+                            {isMobile() ? null : 'Delete user'}
                         </LemonButton>
 
                         {person.distinct_ids.length > 1 && (
@@ -339,7 +339,7 @@ export function PersonScene(): JSX.Element | null {
                               label: (
                                   <span className="flex items-center" data-attr="persons-related-tab">
                                       Related groups
-                                      <Tooltip title="People and groups that have shared events with this person in the last 90 days.">
+                                      <Tooltip title="People and groups that have shared events with this user in the last 90 days.">
                                           <IconInfo className="ml-1 text-base shrink-0" />
                                       </Tooltip>
                                   </span>
@@ -350,7 +350,7 @@ export function PersonScene(): JSX.Element | null {
                     person.uuid
                         ? {
                               key: PersonsTabType.FEATURE_FLAGS,
-                              tooltip: `Only shows feature flags with targeting conditions based on person properties.`,
+                              tooltip: `Only shows feature flags with targeting conditions based on user properties.`,
                               label: <span data-attr="persons-related-flags-tab">Feature flags</span>,
                               content: (() => {
                                   const selectedDistinctId = distinctId || primaryDistinctId
@@ -363,7 +363,7 @@ export function PersonScene(): JSX.Element | null {
                                                       title={
                                                           <div className="deprecated-space-y-2">
                                                               <div>
-                                                                  Feature flags values can depend on a person's distinct
+                                                                  Feature flags values can depend on a user's distinct
                                                                   ID.
                                                               </div>
                                                               <div>
@@ -430,7 +430,7 @@ export function PersonScene(): JSX.Element | null {
 
 function OpenInAdminPanelButton({ size = 'small' }: { size?: LemonButtonProps['size'] }): JSX.Element {
     const { person } = useValues(personsLogic)
-    const disabledReason = !person?.properties.email ? 'Person has no email' : undefined
+    const disabledReason = !person?.properties.email ? 'User has no email' : undefined
 
     return (
         <LemonButton

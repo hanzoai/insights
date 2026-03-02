@@ -429,7 +429,7 @@ export function InsightLoadingState({
                 personsOnEventsMode === 'person_id_override_properties_joined' ? (
                     <div className="text-xs">
                         You can speed this query up by changing the{' '}
-                        <Link to="/settings/project#persons-on-events">person properties mode</Link> setting.
+                        <Link to="/settings/project#persons-on-events">user properties mode</Link> setting.
                     </div>
                 ) : (
                     <SlowQuerySuggestions insightProps={insightProps} loadingTimeSeconds={insightLoadingTimeSeconds} />

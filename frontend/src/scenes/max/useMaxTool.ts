@@ -14,24 +14,24 @@ import { createSuggestionGroup } from './utils'
 export interface UseMaxToolOptions extends Omit<ToolRegistration, 'name' | 'description'> {
     /** Whether MaxTool functionality is active. When false, tool is not registered. */
     active?: boolean
-    /** Initial prompt to pass to Max when opened */
+    /** Initial prompt to pass to the AI assistant when opened */
     initialMaxPrompt?: string
-    /** Callback when Max panel opens */
+    /** Callback when the AI panel opens */
     onMaxOpen?: () => void
     /** Optional: Describes what kind of context information is being provided */
     contextDescription?: ToolRegistration['contextDescription']
 }
 
 export interface UseMaxToolReturn {
-    /** Tool definition - null if the tool is inactive (i.e. `active` is false or Max is not available) */
+    /** Tool definition - null if the tool is inactive (i.e. `active` is false or the AI assistant is not available) */
     definition: ToolDefinition | null
-    /** Whether the Max side panel is currently open */
+    /** Whether the AI side panel is currently open */
     isMaxOpen: boolean
-    /** Function to open Max with the optional initialMaxPrompt and suggestions - null if the tool is inactive */
+    /** Function to open the AI assistant with the optional initialMaxPrompt and suggestions - null if the tool is inactive */
     openMax: (() => void) | null
 }
 
-/** Hook for registering a MaxTool and handling Max interactions programmatically, without the full MaxTool wrapper. */
+/** Hook for registering a MaxTool and handling AI assistant interactions programmatically, without the full MaxTool wrapper. */
 export function useMaxTool({
     identifier,
     context,

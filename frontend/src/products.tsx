@@ -300,14 +300,14 @@ export const productConfiguration: Record<string, any> = {
     EndpointScene: { projectBased: true, name: 'Endpoint', activityScope: 'Endpoint' },
     ErrorTracking: {
         projectBased: true,
-        name: 'Error tracking',
+        name: 'Error Tracking',
         defaultDocsPath: '/docs/error-tracking',
         iconType: 'error_tracking',
         description: 'Track and analyze your error tracking data to understand and fix issues.',
     },
-    ErrorTrackingIssue: { projectBased: true, name: 'Error tracking issue', layout: 'app-raw' },
-    ErrorTrackingIssueFingerprints: { projectBased: true, name: 'Error tracking issue fingerprints' },
-    ErrorTrackingConfiguration: { projectBased: true, name: 'Error tracking configuration' },
+    ErrorTrackingIssue: { projectBased: true, name: 'Error Tracking issue', layout: 'app-raw' },
+    ErrorTrackingIssueFingerprints: { projectBased: true, name: 'Error Tracking issue fingerprints' },
+    ErrorTrackingConfiguration: { projectBased: true, name: 'Error Tracking configuration' },
     FeatureFlagTemplates: {
         projectBased: true,
         name: 'Feature flag templates',
@@ -326,7 +326,7 @@ export const productConfiguration: Record<string, any> = {
     LiveDebugger: { name: 'Live Debugger', projectBased: true },
     LLMAnalytics: {
         projectBased: true,
-        name: 'LLM analytics',
+        name: 'LLM Analytics',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
         description: 'Analyze and understand your LLM usage and performance.',
@@ -334,19 +334,19 @@ export const productConfiguration: Record<string, any> = {
     },
     LLMAnalyticsTrace: {
         projectBased: true,
-        name: 'LLM analytics trace',
+        name: 'Trace',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/traces',
     },
     LLMAnalyticsSession: {
         projectBased: true,
-        name: 'LLM analytics session',
+        name: 'Session',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/sessions',
     },
     LLMAnalyticsUsers: {
         projectBased: true,
-        name: 'LLM analytics users',
+        name: 'Users',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
     },
@@ -366,7 +366,7 @@ export const productConfiguration: Record<string, any> = {
     },
     LLMAnalyticsDataset: {
         projectBased: true,
-        name: 'LLM analytics dataset',
+        name: 'Dataset',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
         iconType: 'llm_datasets',
@@ -382,7 +382,7 @@ export const productConfiguration: Record<string, any> = {
     },
     LLMAnalyticsEvaluation: {
         projectBased: true,
-        name: 'LLM analytics evaluation',
+        name: 'Evaluation',
         activityScope: 'LLMAnalytics',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
@@ -390,7 +390,7 @@ export const productConfiguration: Record<string, any> = {
     },
     LLMAnalyticsEvaluationTemplates: {
         projectBased: true,
-        name: 'LLM analytics evaluation templates',
+        name: 'Evaluation templates',
         activityScope: 'LLMAnalytics',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
@@ -406,7 +406,7 @@ export const productConfiguration: Record<string, any> = {
     },
     LLMAnalyticsPrompt: {
         projectBased: true,
-        name: 'LLM analytics prompt',
+        name: 'Prompt',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
         iconType: 'llm_prompts',
@@ -421,7 +421,7 @@ export const productConfiguration: Record<string, any> = {
     },
     LLMAnalyticsCluster: {
         projectBased: true,
-        name: 'LLM analytics cluster',
+        name: 'Cluster',
         layout: 'app-container',
         defaultDocsPath: '/docs/llm-analytics/installation',
         iconType: 'llm_clusters',
@@ -468,9 +468,9 @@ export const productConfiguration: Record<string, any> = {
     },
     TaskDetail: { name: 'Task', projectBased: true, activityScope: 'TaskDetail' },
     Toolbar: {
-        name: 'Toolbar',
+        name: 'Site Inspector',
         projectBased: true,
-        description: 'Hanzo toolbar launches Insights right in your app or website.',
+        description: 'Site Inspector launches Insights right in your app or website.',
         iconType: 'toolbar',
     },
     UserInterviews: {
@@ -904,7 +904,7 @@ export const fileSystemTypes = {
         filterKey: 'revenue',
     },
     session_recording_playlist: {
-        name: 'Replay playlist',
+        name: 'Session Replay playlist',
         iconType: 'session_replay',
         href: (ref: string) => urls.replayPlaylist(ref),
         iconColor: ['var(--color-product-session-replay-light)', 'var(--color-product-session-replay-dark)'],
@@ -1153,7 +1153,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['Dashboard', 'Dashboards'],
     },
     {
-        path: `Data pipelines`,
+        path: `Data Pipelines`,
         intents: [
             ProductKey.PIPELINE_BATCH_EXPORTS,
             ProductKey.PIPELINE_DESTINATIONS,
@@ -1234,7 +1234,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['EndpointsScene', 'EndpointScene'],
     },
     {
-        path: 'Error tracking',
+        path: 'Error Tracking',
         intents: [ProductKey.ERROR_TRACKING],
         category: 'Behavior',
         type: 'error_tracking',
@@ -1312,7 +1312,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['Heatmaps'],
     },
     {
-        path: 'LLM analytics',
+        path: 'LLM Analytics',
         intents: [
             ProductKey.LLM_ANALYTICS,
             ProductKey.LLM_EVALUATIONS,
@@ -1473,7 +1473,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['SQLEditor'],
     },
     {
-        path: 'Session replay',
+        path: 'Session Replay',
         intents: [ProductKey.SESSION_REPLAY, ProductKey.MOBILE_REPLAY],
         category: 'Behavior',
         href: urls.replay(ReplayTabs.Home),
@@ -1532,7 +1532,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['TaskTracker', 'TaskDetail'],
     },
     {
-        path: 'Toolbar',
+        path: 'Site Inspector',
         intents: [ProductKey.TOOLBAR],
         href: urls.toolbarLaunch(),
         type: 'toolbar',
@@ -1555,7 +1555,7 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
         sceneKeys: ['UserInterviews', 'UserInterview'],
     },
     {
-        path: 'Web analytics',
+        path: 'Web Analytics',
         intents: [ProductKey.WEB_ANALYTICS],
         category: 'Analytics',
         iconType: 'web_analytics',
@@ -1618,7 +1618,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     },
     {
         path: `Destinations`,
-        category: 'Pipeline',
+        category: 'Data Pipeline',
         type: 'insights_function/destination',
         iconType: 'data_pipeline_metadata',
         href: urls.destinations(),
@@ -1646,7 +1646,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     },
     {
         path: 'Event ingestion warnings',
-        category: 'Pipeline',
+        category: 'Data Pipeline',
         iconType: 'ingestion_warning',
         href: urls.ingestionWarnings(),
         sceneKey: 'IngestionWarnings',
@@ -1706,7 +1706,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     { path: 'SQL variables', category: 'Schema', href: urls.variables(), sceneKeys: ['SqlVariableEdit'] },
     {
         path: `Sources`,
-        category: 'Pipeline',
+        category: 'Data Pipeline',
         type: 'insights_function/source',
         iconType: 'data_pipeline_metadata',
         href: urls.sources(),
@@ -1726,7 +1726,7 @@ export const getTreeItemsMetadata = (): FileSystemImport[] => [
     },
     {
         path: `Transformations`,
-        category: 'Pipeline',
+        category: 'Data Pipeline',
         type: 'insights_function/transformation',
         iconType: 'data_pipeline_metadata',
         href: urls.transformations(),

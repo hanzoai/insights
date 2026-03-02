@@ -145,20 +145,20 @@ export const storiesMap: storyGroup[] = [
     },
     {
         id: 'max-ai',
-        title: 'Max AI',
+        title: 'AI Assistant',
         stories: [
             {
                 id: 'meet-max-ai-overview',
-                title: 'Max AI',
-                description: 'Say hi to Max!',
+                title: 'AI Assistant',
+                description: 'Say hi to the AI Assistant!',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/max_ai_f8c9cdf4e8.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/video/upload/meet_max_ai_overview_778f4acffb.mp4',
                 type: StoryType.Video,
             },
             {
                 id: 'max-ai-cta',
-                title: 'Max AI',
-                description: 'Try talking to Max',
+                title: 'AI Assistant',
+                description: 'Try talking to the AI Assistant',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/max_ai_f8c9cdf4e8.png',
                 mediaUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/max_cta_frame_06906e3804.png',
                 type: StoryType.Image,

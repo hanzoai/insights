@@ -222,7 +222,7 @@ describe('llmAnalyticsSessionLogic', () => {
             expect(breadcrumbs).toHaveLength(3)
             expect(breadcrumbs[0]).toEqual({
                 key: 'LLMAnalytics',
-                name: 'LLM analytics',
+                name: 'LLM Analytics',
                 path: urls.llmAnalyticsDashboard(),
                 iconType: 'llm_analytics',
             })

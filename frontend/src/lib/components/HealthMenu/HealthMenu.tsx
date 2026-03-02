@@ -132,7 +132,7 @@ const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Ele
                             >
                                 <IconDatabase className="size-5" />
                             </IconWithBadge>
-                            Pipeline status
+                            Data Pipeline status
                         </Link>
                     )}
                 />
@@ -247,7 +247,7 @@ const UnifiedHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.El
                             data-attr="health-menu-pipeline-status-button"
                         >
                             <IconDatabase className="size-5" />
-                            Pipeline status
+                            Data Pipeline status
                         </Link>
                     )}
                 />

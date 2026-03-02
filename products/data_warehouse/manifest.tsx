@@ -68,7 +68,7 @@ export const manifest: ProductManifest = {
     treeItemsMetadata: [
         {
             path: `Sources`,
-            category: 'Pipeline',
+            category: 'Data Pipeline',
             type: 'insights_function/source',
             iconType: 'data_pipeline_metadata',
             href: urls.sources(),
