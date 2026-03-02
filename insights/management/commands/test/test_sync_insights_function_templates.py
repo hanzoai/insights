@@ -84,7 +84,7 @@ class TestSyncInsightsFunctionTemplates:
         mock_invalid_template = {
             "id": "invalid_template",
             "type": "destination",  # Valid type but missing other required fields
-            # Missing required fields like name, hog, etc.
+            # Missing required fields like name, code, etc.
         }
 
         # Mock the Node.js API response with an invalid template

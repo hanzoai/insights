@@ -11,11 +11,11 @@ from insights.insightsql.ai import (
     EVENT_PROPERTY_TAXONOMY_MESSAGE,
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
-    HOG_EXAMPLE_MESSAGE,
+    SCRIPT_EXAMPLE_MESSAGE,
     INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT,
     INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT,
-    HOG_GRAMMAR_MESSAGE,
-    IDENTITY_MESSAGE_HOG,
+    SCRIPT_GRAMMAR_MESSAGE,
+    IDENTITY_MESSAGE_SCRIPT,
     INPUT_SCHEMA_TYPES_MESSAGE,
     PERSON_TAXONOMY_MESSAGE,
     TRANSFORMATION_LIMITATIONS_MESSAGE,
@@ -64,13 +64,13 @@ class CreateHogTransformationFunctionTool(MaxTool):
         current_script_code = self.context.get("current_script_code", "")
 
         system_content = (
-            IDENTITY_MESSAGE_HOG
+            IDENTITY_MESSAGE_SCRIPT
             + "\n\n<example_script_code>\n"
-            + HOG_EXAMPLE_MESSAGE
+            + SCRIPT_EXAMPLE_MESSAGE
             + "\n</example_script_code>\n\n"
-            + "\n\n<hog_grammar>\n"
-            + HOG_GRAMMAR_MESSAGE
-            + "\n</hog_grammar>\n\n"
+            + "\n\n<script_grammar>\n"
+            + SCRIPT_GRAMMAR_MESSAGE
+            + "\n</script_grammar>\n\n"
             + "\n\n<current_script_code>\n"
             + current_script_code
             + "\n</current_script_code>"

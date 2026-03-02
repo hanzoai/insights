@@ -661,19 +661,19 @@ export interface InsightsQLAutocompleteResponse {
     query_status?: never
 }
 
-export enum HogLanguage {
-    script = 'fn',
-    hogJson = 'hogJson',
+export enum InsightsLanguage {
+    insightsScript = 'insightsScript',
+    insightsJson = 'insightsJson',
     insightsQL = 'insightsQL',
     insightsQLExpr = 'insightsQLExpr',
-    scriptTemplate = 'scriptTemplate',
+    insightsTemplate = 'insightsTemplate',
     liquid = 'liquid',
 }
 
 export interface InsightsQLMetadata extends DataNode<InsightsQLMetadataResponse> {
     kind: NodeKind.InsightsQLMetadata
     /** Language to validate */
-    language: HogLanguage
+    language: InsightsLanguage
     /** Query to validate */
     query: string
     /** Query within which "expr" and "template" are validated. Defaults to "select * from events" */
@@ -691,7 +691,7 @@ export interface InsightsQLMetadata extends DataNode<InsightsQLMetadataResponse>
 export interface InsightsQLAutocomplete extends DataNode<InsightsQLAutocompleteResponse> {
     kind: NodeKind.InsightsQLAutocomplete
     /** Language to validate */
-    language: HogLanguage
+    language: InsightsLanguage
     /** Query to validate */
     query: string
     /** Query in whose context to validate. */
@@ -3823,7 +3823,7 @@ export interface TrendsAlertConfig {
     check_ongoing_interval?: boolean
 }
 
-export interface HogCompileResponse {
+export interface InsightsQLCompileResponse {
     bytecode: any[]
     locals: any[]
 }

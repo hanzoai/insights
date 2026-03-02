@@ -125,7 +125,7 @@ The table definitions and materialized view logic are in:
 
 ## What is InsightsQL?
 
-Web analytics queries are written in InsightsQL (sometimes referred to as Hog SQL or Insights SQL). Here's some links to learn more about it:
+Web analytics queries are written in InsightsQL. Here's some links to learn more about it:
 
 - <https://posthog.com/blog/introducing-insightsql>
 - <https://posthog.com/handbook/engineering/databases/insightsql-python>

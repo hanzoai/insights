@@ -318,7 +318,7 @@ class _InsightQuerySchema(RootModel):
     - `InsightVizNode` — product analytics (trends, funnels, retention, paths, stickiness, lifecycle)
     - `DataVisualizationNode` — SQL insights using InsightsQL
     - `DataTableNode` — raw data tables
-    - `HogQuery` — Hog language queries
+    - `HogQuery` — Script language queries
     """
 
     root: schema.InsightVizNode | schema.DataTableNode | schema.DataVisualizationNode | schema.HogQuery = PydanticField(

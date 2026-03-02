@@ -16,7 +16,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { performQuery } from '~/queries/query'
 import {
     AnyDataNode,
-    HogLanguage,
+    InsightsLanguage,
     InsightsQLFilters,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
@@ -27,7 +27,7 @@ import { setLatestVersionsOnQuery } from '~/queries/utils'
 
 import type { codeEditorLogicType } from './codeEditorLogicType'
 
-const METADATA_LANGUAGES = [HogLanguage.hog, HogLanguage.insightsQL, HogLanguage.insightsQLExpr, HogLanguage.scriptTemplate]
+const METADATA_LANGUAGES = [InsightsLanguage.insightsScript, InsightsLanguage.insightsQL, InsightsLanguage.insightsQLExpr, InsightsLanguage.insightsTemplate]
 
 export interface ModelMarker extends editor.IMarkerData {
     insightsQLFix?: string
@@ -65,7 +65,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
             {
                 reloadMetadata: async (_, breakpoint) => {
                     const model = props.editor?.getModel()
-                    if (!model || !props.monaco || !METADATA_LANGUAGES.includes(props.language as HogLanguage)) {
+                    if (!model || !props.monaco || !METADATA_LANGUAGES.includes(props.language as InsightsLanguage)) {
                         props.onMetadata?.(null)
                         return null
                     }
@@ -85,7 +85,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                         setLatestVersionsOnQuery(
                             {
                                 kind: NodeKind.InsightsQLMetadata,
-                                language: props.language as HogLanguage,
+                                language: props.language as InsightsLanguage,
                                 query: query,
                                 filters: props.metadataFilters,
                                 globals: props.globals,

@@ -29,8 +29,8 @@ class TypeScriptGenerator(EventDefinitionGenerator):
  *
  * Provides capture() for type-safe events and captureRaw() for flexibility
  */
-import originalInsights from 'posthog-js'
-import type {{ CaptureOptions, CaptureResult, Insights as OriginalInsights, Properties }} from 'posthog-js'
+import originalPostHog from 'posthog-js'
+import type {{ CaptureOptions, CaptureResult, PostHog as OriginalPostHog, Properties }} from 'posthog-js'
 """
 
         # Generate event schemas interface
@@ -77,7 +77,7 @@ type IsExactlyString<T> = string extends T ? (T extends string ? true : false) :
         # Generate TypedInsights interface
         typed_posthog_interface = """
 // Enhanced Insights interface with typed capture
-interface TypedInsights extends Omit<OriginalInsights, 'capture'> {
+interface TypedInsights extends Omit<OriginalPostHog, 'capture'> {
     /**
      * Type-safe capture for defined events, or flexible capture for undefined events
      *
@@ -135,7 +135,7 @@ interface TypedInsights extends Omit<OriginalInsights, 'capture'> {
         # Generate implementation
         implementation = """
 // Create the implementation
-const createTypedInsights = (original: OriginalInsights): TypedInsights => {
+const createTypedInsights = (original: OriginalPostHog): TypedInsights => {
     // Create the enhanced Insights object
     const enhanced: TypedInsights = Object.create(original)
 
@@ -173,7 +173,7 @@ const createTypedInsights = (original: OriginalInsights): TypedInsights => {
         # Generate exports
         exports = """
 // Create and export the typed instance
-const posthog = createTypedInsights(originalInsights as OriginalInsights)
+const posthog = createTypedInsights(originalPostHog as OriginalPostHog)
 
 export default posthog
 export type { EventSchemas, TypedInsights }

@@ -4825,7 +4825,7 @@ export namespace Schemas {
         status: (InsightsFunctionStatus & (unknown | null)) | null
         execution_order: number | null
     }
-    export type HogLanguage = 'hog' | 'hogJson' | 'insightsQL' | 'insightsQLExpr' | 'hogTemplate'
+    export type InsightsLanguage = 'insightsScript' | 'insightsJson' | 'insightsQL' | 'insightsQLExpr' | 'insightsTemplate'
     export type InsightsQLASTQuery = {
         explain?: (boolean | null) | undefined
         filters?: (InsightsQLFilters | null) | undefined
@@ -5187,7 +5187,7 @@ export namespace Schemas {
         filters?: (InsightsQLFilters | null) | undefined
         globals?: (Record<string, unknown> | null) | undefined
         kind?: string | undefined
-        language: HogLanguage
+        language: InsightsLanguage
         modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query: string
         response?: (InsightsQLMetadataResponse | null) | undefined
@@ -5245,7 +5245,7 @@ export namespace Schemas {
         filters?: (InsightsQLFilters | null) | undefined
         globals?: (Record<string, unknown> | null) | undefined
         kind?: string | undefined
-        language: HogLanguage
+        language: InsightsLanguage
         modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query: string
         response?: (InsightsQLAutocompleteResponse | null) | undefined

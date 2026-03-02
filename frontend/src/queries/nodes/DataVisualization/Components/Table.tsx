@@ -112,14 +112,14 @@ export const Table = (props: TableProps): JSX.Element => {
                     const cf = conditionalFormattingRules
                         .filter((n) => n.columnName === column.name)
                         .filter((n) => {
-                            const isValidHog = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
-                            if (!isValidHog) {
-                                posthog.captureException(new Error('Invalid hog bytecode for conditional formatting'), {
+                            const isValidBytecode = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
+                            if (!isValidBytecode) {
+                                posthog.captureException(new Error('Invalid bytecode for conditional formatting'), {
                                     formatRule: n,
                                 })
                             }
 
-                            return isValidHog
+                            return isValidBytecode
                         })
                         .map((n) => {
                             const res = execHog(n.bytecode, {

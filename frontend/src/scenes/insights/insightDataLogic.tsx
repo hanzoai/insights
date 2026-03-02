@@ -191,7 +191,7 @@ export const insightDataLogic = kea<insightDataLogicType>([
                 } else if (isDataTableNode(query)) {
                     savedOrDefaultQuery = getDefaultQuery(InsightType.JSON, filterTestAccountsDefault)
                 } else if (isScriptQuery(query)) {
-                    savedOrDefaultQuery = getDefaultQuery(InsightType.HOG, filterTestAccountsDefault)
+                    savedOrDefaultQuery = getDefaultQuery(InsightType.SCRIPT, filterTestAccountsDefault)
                 } else {
                     return false
                 }
