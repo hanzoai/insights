@@ -371,7 +371,7 @@ export const QUERY_TYPES_METADATA: Record<NodeKind, InsightTypeMetadata> = {
         inMenu: true,
     },
     [NodeKind.ScriptQuery]: {
-        name: 'Hog',
+        name: 'Script',
         description: 'Custom query.',
         icon: IconHogQL,
         inMenu: true,
@@ -596,9 +596,9 @@ export const INSIGHT_TYPES_METADATA: Record<InsightType, InsightTypeMetadata> = 
         icon: IconBrackets,
         inMenu: true,
     },
-    [InsightType.HOG]: {
-        name: 'Hog',
-        description: 'Use Hog to query your data.',
+    [InsightType.SCRIPT]: {
+        name: 'Script',
+        description: 'Use scripts to query your data.',
         icon: IconHogQL,
         inMenu: true,
     },

@@ -3,7 +3,7 @@ import { Monaco } from '@monaco-editor/react'
 import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
 import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
 
-import { HogLanguage } from '~/queries/schema/schema-general'
+import { InsightsLanguage } from '~/queries/schema/schema-general'
 
 export function initLiquidLanguage(monaco: Monaco): void {
     /**
@@ -16,7 +16,7 @@ export function initLiquidLanguage(monaco: Monaco): void {
         monaco.languages.register({ id: 'hogLiquid' })
         // Liquid is a pre-registered language in Monaco, so we only need to register completion and code action providers.
 
-        monaco.languages.registerCompletionItemProvider('liquid', insightsQLAutocompleteProvider(HogLanguage.liquid))
+        monaco.languages.registerCompletionItemProvider('liquid', insightsQLAutocompleteProvider(InsightsLanguage.liquid))
 
         monaco.languages.registerCodeActionProvider('liquid', insightsQLMetadataProvider())
     }

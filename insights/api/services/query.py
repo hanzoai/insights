@@ -144,7 +144,7 @@ def process_query_model(
             result = CacheMissResponse(cache_key=None)
         elif isinstance(query, HogQuery):
             if is_cloud() and (user is None or not user.is_staff):
-                return {"results": "Hog queries currently require staff user privileges."}
+                return {"results": "Script queries currently require staff user privileges."}
 
             try:
                 hog_result = execute_hog(query.code or "", team=team)

@@ -91,9 +91,9 @@ class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
 
     icon_url = models.TextField(null=True, blank=True)
 
-    # Hog source, except for the "site_*" types, when it contains TypeScript Source
+    # Script source, except for the "site_*" types, when it contains TypeScript Source
     hog = models.TextField()
-    # Used when the source language is Hog (everything except the "site_*" types)
+    # Used when the source language is a script (everything except the "site_*" types)
     bytecode = models.JSONField(null=True, blank=True)
     # Transpiled JavasScript. Used with the "site_*" types
     transpiled = models.TextField(null=True, blank=True)

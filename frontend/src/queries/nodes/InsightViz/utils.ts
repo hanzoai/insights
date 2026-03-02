@@ -143,7 +143,7 @@ export const getDefaultQuery = (
         } else if (insightType === InsightType.SQL) {
             return examples.DataVisualization as DataVisualizationNode
         } else if (insightType === InsightType.SCRIPT) {
-            return examples.Hoggonacci as ScriptQuery
+            return examples.FibonacciScript as ScriptQuery
         }
     }
 
