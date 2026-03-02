@@ -8,7 +8,7 @@ from products.live_debugger.backend.models import LiveDebuggerBreakpoint
 class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_create_breakpoint(self):
         data = {
-            "repository": "Insights/posthog",
+            "repository": "PostHog/posthog",
             "filename": "capture_event.py",
             "line_number": 123,
             "enabled": True,
@@ -27,7 +27,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
     def test_create_breakpoint_without_condition(self):
         data = {
-            "repository": "Insights/posthog",
+            "repository": "PostHog/posthog",
             "filename": "capture_event.py",
             "line_number": 456,
             "enabled": True,
@@ -46,7 +46,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         from django.db import transaction
 
         data = {
-            "repository": "Insights/posthog",
+            "repository": "PostHog/posthog",
             "filename": "test.py",
             "line_number": 100,
             "enabled": True,
@@ -77,7 +77,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_create_breakpoint_same_file_different_repo_succeeds(self):
         """Test that same filename/line can exist in different repositories"""
         data1 = {
-            "repository": "Insights/posthog",
+            "repository": "PostHog/posthog",
             "filename": "test.py",
             "line_number": 100,
             "enabled": True,
@@ -107,14 +107,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_list_breakpoints(self):
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file1.py",
             line_number=100,
             enabled=True,
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file2.py",
             line_number=200,
             enabled=False,
@@ -128,7 +128,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test filtering breakpoints by repository"""
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file1.py",
             line_number=100,
             enabled=True,
@@ -142,7 +142,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file3.py",
             line_number=300,
             enabled=True,
@@ -154,13 +154,13 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 2)
-        self.assertTrue(all(bp["repository"] == "Insights/posthog" for bp in results))
+        self.assertTrue(all(bp["repository"] == "PostHog/posthog" for bp in results))
 
     def test_list_breakpoints_filter_by_filename(self):
         """Test filtering breakpoints by filename"""
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file1.py",
             line_number=100,
             enabled=True,
@@ -174,7 +174,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file2.py",
             line_number=300,
             enabled=True,
@@ -190,7 +190,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test filtering breakpoints by both repository and filename"""
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file1.py",
             line_number=100,
             enabled=True,
@@ -204,7 +204,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file2.py",
             line_number=300,
             enabled=True,
@@ -216,14 +216,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         results = response.json()["results"]
         self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["repository"], "Insights/posthog")
+        self.assertEqual(results[0]["repository"], "PostHog/posthog")
         self.assertEqual(results[0]["filename"], "file1.py")
         self.assertEqual(results[0]["line_number"], 100)
 
     def test_retrieve_breakpoint(self):
         breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="test.py",
             line_number=50,
             enabled=True,
@@ -239,7 +239,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_update_breakpoint(self):
         breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="test.py",
             line_number=50,
             enabled=True,
@@ -264,7 +264,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_delete_breakpoint(self):
         breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="test.py",
             line_number=50,
             enabled=True,
@@ -278,14 +278,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_active_breakpoints_endpoint(self):
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="enabled.py",
             line_number=100,
             enabled=True,
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="disabled.py",
             line_number=200,
             enabled=False,
@@ -305,14 +305,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
     def test_active_breakpoints_filter_by_filename(self):
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file1.py",
             line_number=100,
             enabled=True,
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file2.py",
             line_number=200,
             enabled=True,
@@ -335,7 +335,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test filtering active breakpoints by repository"""
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="file1.py",
             line_number=100,
             enabled=True,
@@ -350,7 +350,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
         response = self.client.get(
             f"/api/projects/{self.team.id}/live_debugger_breakpoints/active/",
-            {"repository": "Insights/posthog"},
+            {"repository": "PostHog/posthog"},
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -359,20 +359,20 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         self.assertEqual(data["has_more"], False)
         breakpoints = data["results"]
         self.assertEqual(len(breakpoints), 1)
-        self.assertEqual(breakpoints[0]["repository"], "Insights/posthog")
+        self.assertEqual(breakpoints[0]["repository"], "PostHog/posthog")
         self.assertEqual(breakpoints[0]["filename"], "file1.py")
 
     def test_active_breakpoints_include_disabled(self):
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="enabled.py",
             line_number=100,
             enabled=True,
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="disabled.py",
             line_number=200,
             enabled=False,
@@ -396,7 +396,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = self.organization.teams.create(name="Other Team")
         other_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="secret.py",
             line_number=999,
             enabled=True,
@@ -410,7 +410,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         # Create breakpoints for current team
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="my_file.py",
             line_number=100,
             enabled=True,
@@ -420,7 +420,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = self.organization.teams.create(name="Other Team")
         LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="their_file.py",
             line_number=200,
             enabled=True,
@@ -453,7 +453,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test breakpoint_hits endpoint with valid breakpoint_ids"""
         breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="test.py",
             line_number=50,
             enabled=True,
@@ -467,21 +467,21 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test breakpoint_hits endpoint with multiple breakpoint_ids"""
         breakpoint1 = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="test.py",
             line_number=50,
             enabled=True,
         )
         breakpoint2 = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="test.py",
             line_number=100,
             enabled=True,
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="other.py",
             line_number=200,
             enabled=True,
@@ -576,7 +576,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test active_breakpoints with boolean enabled=true"""
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="enabled.py",
             line_number=100,
             enabled=True,
@@ -595,14 +595,14 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         """Test active_breakpoints with boolean enabled=false"""
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="enabled.py",
             line_number=100,
             enabled=True,
         )
         LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="disabled.py",
             line_number=200,
             enabled=False,
@@ -628,7 +628,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = self.organization.teams.create(name="Other Team")
         other_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="confidential.py",
             line_number=123,
             enabled=True,
@@ -663,7 +663,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         # Create breakpoints for our team
         our_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=self.team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="our_file.py",
             line_number=100,
             enabled=True,
@@ -673,7 +673,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = self.organization.teams.create(name="Other Team")
         other_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="their_secret_file.py",
             line_number=200,
             enabled=True,
@@ -708,7 +708,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         # Create breakpoint in the other organization
         other_org_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="other_org_secret.py",
             line_number=999,
             enabled=True,
@@ -735,7 +735,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = other_org.teams.create(name="Other Org Team")
         LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="sensitive.py",
             line_number=500,
             enabled=True,
@@ -756,7 +756,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = other_org.teams.create(name="Other Org Team")
         LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="confidential.py",
             line_number=999,
             enabled=True,
@@ -777,7 +777,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = other_org.teams.create(name="Other Org Team")
         LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="private.py",
             line_number=100,
             enabled=True,
@@ -795,7 +795,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
         other_team = self.organization.teams.create(name="Other Team in Same Org")
         other_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="shared_file.py",
             line_number=100,
             enabled=True,
@@ -834,7 +834,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
         private_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="private_file.py",
             line_number=200,
             enabled=True,
@@ -887,7 +887,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
         private_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="accessible_private_file.py",
             line_number=300,
             enabled=True,
@@ -928,7 +928,7 @@ class TestLiveDebuggerBreakpointAPI(APIBaseTest):
 
         admin_accessible_breakpoint = LiveDebuggerBreakpoint.objects.create(
             team=other_team,
-            repository="Insights/posthog",
+            repository="PostHog/posthog",
             filename="admin_accessible_file.py",
             line_number=400,
             enabled=True,

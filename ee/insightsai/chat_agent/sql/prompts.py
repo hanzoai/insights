@@ -812,7 +812,7 @@ You can find their full definitions in the [ClickHouse documentation](https://cl
 
 # Copied from https://posthog.com/docs/insightsql/aggregations.md
 SQL_SUPPORTED_AGGREGATIONS_DOCS = r"""
-This is an [ever-expanding](https://github.com/Insights/posthog/blob/dfce91d924fe038568c626416fa23e67d0f0906f/posthog/insightsql/constants.py#L489) list of enabled aggregations.
+This is an [ever-expanding](https://github.com/PostHog/posthog/blob/dfce91d924fe038568c626416fa23e67d0f0906f/posthog/insightsql/constants.py#L489) list of enabled aggregations.
 
 You can find their full definitions in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference). Additionally, we include a list of popular ones and their uses in the [InsightsQL expressions](/docs/insightsql/expressions#functions-and-aggregations.md) and [SQL insight](/docs/product-analytics/sql#useful-functions.md) documentation.
 

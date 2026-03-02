@@ -99,8 +99,8 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         },
         unsupportedSdks: [
             { sdk: 'posthog-android', issue: false }, // delegate pattern - no built-in UI
-            { sdk: 'posthog-react-native', issue: 'https://github.com/Insights/posthog-js/issues/2959' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/258' },
+            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2959' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/258' },
         ],
         check: (s) => s.appearance?.fontFamily !== undefined && s.appearance?.fontFamily !== 'inherit',
     },
@@ -111,9 +111,9 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'posthog-react-native': '4.27.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/446' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/389' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/260' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/446' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/389' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/260' },
         ],
         check: (s) => s.schedule === SurveySchedule.Always,
     },
@@ -134,10 +134,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         feature: 'Partial response collection',
         sdkVersions: { 'posthog-js': '1.240.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: 'https://github.com/Insights/posthog-js/issues/2962' },
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/447' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/390' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/261' },
+            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2962' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/447' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/390' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/261' },
         ],
         check: (s) => s.enable_partial_responses === true,
     },
@@ -148,9 +148,9 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'posthog-react-native': '4.26.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/448' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/391' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/262' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/448' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/391' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/262' },
         ],
         check: (s) =>
             s.questions.some(
@@ -168,9 +168,9 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
             'posthog-react-native': '4.4.0',
         },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/445' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/388' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/259' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/445' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/388' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/259' },
         ],
         check: (s) => !!s.conditions?.linkedFlagVariant,
     },
@@ -178,9 +178,9 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         feature: 'Event trigger property filters',
         sdkVersions: { 'posthog-js': '1.268.0', 'posthog-react-native': '4.16.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/449' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/392' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/263' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/449' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/392' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/263' },
         ],
         check: (s) =>
             (s.conditions?.events?.values?.length ?? 0) > 0 &&
@@ -190,10 +190,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         feature: 'Cancellation events',
         sdkVersions: { 'posthog-js': '1.299.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: 'https://github.com/Insights/posthog-js/issues/2964' },
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/450' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/393' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/264' },
+            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2964' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/450' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/393' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/264' },
         ],
         check: (s) => (s.conditions?.cancelEvents?.values?.length ?? 0) > 0,
     },
@@ -201,10 +201,10 @@ export const SURVEY_SDK_REQUIREMENTS: SurveyFeatureRequirement[] = [
         feature: 'Targeting with actions',
         sdkVersions: { 'posthog-js': '1.301.0' },
         unsupportedSdks: [
-            { sdk: 'posthog-react-native', issue: 'https://github.com/Insights/posthog-js/issues/2965' },
-            { sdk: 'posthog-ios', issue: 'https://github.com/Insights/posthog-ios/issues/451' },
-            { sdk: 'posthog-android', issue: 'https://github.com/Insights/posthog-android/issues/394' },
-            { sdk: 'posthog_flutter', issue: 'https://github.com/Insights/posthog-flutter/issues/265' },
+            { sdk: 'posthog-react-native', issue: 'https://github.com/PostHog/posthog-js/issues/2965' },
+            { sdk: 'posthog-ios', issue: 'https://github.com/PostHog/posthog-ios/issues/451' },
+            { sdk: 'posthog-android', issue: 'https://github.com/PostHog/posthog-android/issues/394' },
+            { sdk: 'posthog_flutter', issue: 'https://github.com/PostHog/posthog-flutter/issues/265' },
         ],
         check: (s) => (s.conditions?.actions?.values?.length ?? 0) > 0,
     },

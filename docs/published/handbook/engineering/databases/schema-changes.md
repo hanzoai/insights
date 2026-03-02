@@ -30,7 +30,7 @@ To avoid this pain, **AVOID deleting/renaming models and fields**. Instead:
 
 - if the name is no longer relevant, keep it the same in the database – feel free to change the naming in Python/JS code, but make sure the change ISN'T reflected in the database,
 - if the field itself is no longer relevant, just clearly mark it with a `# DEPRECATED` comment in code
-- make the field not be queried by overriding `get_queryset` in a Manager object. See [this PR](https://github.com/Insights/posthog/pull/13512) for an example.
+- make the field not be queried by overriding `get_queryset` in a Manager object. See [this PR](https://github.com/PostHog/posthog/pull/13512) for an example.
 
 ## Design for scale
 

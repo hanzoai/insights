@@ -712,7 +712,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_insightsql_groupby_unnecessary_ifnull(self):
-        # https://github.com/Insights/posthog/issues/23077
+        # https://github.com/PostHog/posthog/issues/23077
         query = """
             select toDate(timestamp) as timestamp, count() as cnt
             from events
@@ -728,7 +728,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
 
     @pytest.mark.usefixtures("unittest_snapshot")
     def test_insightsql_unnecessary_ifnull(self):
-        # https://github.com/Insights/posthog/issues/23077
+        # https://github.com/PostHog/posthog/issues/23077
         query = """
             select
                 toDate(timestamp) as timestamp,
@@ -1468,7 +1468,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             execute_insightsql_query(query, team=self.team)
         self.assertEqual(str(e.exception), "Table function 'numbers' requires at most 2 arguments")
 
-        # Complex subqueries are not supported with `enable_analyzer=0` (see: https://github.com/Insights/posthog/pull/45000)
+        # Complex subqueries are not supported with `enable_analyzer=0` (see: https://github.com/PostHog/posthog/pull/45000)
         query = "SELECT number from numbers(2 + ifNull((select 2), 1000))"
         with self.assertRaises(InternalCHQueryError):
             execute_insightsql_query(query, team=self.team)

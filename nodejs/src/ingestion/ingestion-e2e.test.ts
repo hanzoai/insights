@@ -2492,7 +2492,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     {},
         //     async (ingester, hub, team) => {
         //         // This test is in reference to
-        //         // https://github.com/Insights/insights/issues/5527 , where we were
+        //         // https://github.com/PostHog/insights/issues/5527 , where we were
         //         // correctly identifying that an anonymous user before login should be
         //         // aliased to the user they subsequently login as, but incorrectly
         //         // aliasing on subsequent $identify events. The anonymous case is

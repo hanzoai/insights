@@ -139,7 +139,7 @@ export const sessionReplayTemplatesLogic = kea<sessionReplayTemplatesLogicType>(
                             },
                         ],
                     },
-                    // TODO this should set order on the filter group after https://github.com/Insights/posthog/pull/25701
+                    // TODO this should set order on the filter group after https://github.com/PostHog/posthog/pull/25701
                 }
                 return filterGroup
             },
