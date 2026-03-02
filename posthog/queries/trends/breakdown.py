@@ -138,7 +138,7 @@ class TrendsBreakdown:
             table_name=self.EVENT_TABLE_ALIAS,
             person_properties_mode=get_person_properties_mode(self.team),
             person_id_joined_alias=self._person_id_alias,
-            hogql_context=self.filter.hogql_context,
+            insightsql_context=self.filter.insightsql_context,
         )
 
     def get_query(self) -> tuple[str, dict, Callable]:
@@ -177,7 +177,7 @@ class TrendsBreakdown:
                 table_name=self.EVENT_TABLE_ALIAS,
                 person_properties_mode=get_person_properties_mode(self.team),
                 person_id_joined_alias=self._person_id_alias,
-                hogql_context=self.filter.hogql_context,
+                insightsql_context=self.filter.insightsql_context,
             )
 
         self.params = {
@@ -512,10 +512,10 @@ class TrendsBreakdown:
         )
 
     def _get_breakdown_value(self, breakdown: str) -> str:
-        if self.filter.breakdown_type == "hogql":
-            from posthog.hogql.hogql import translate_hogql
+        if self.filter.breakdown_type == "insightsql":
+            from posthog.insightsql.insightsql import translate_insightsql
 
-            breakdown_value = translate_hogql(breakdown, self.filter.hogql_context)
+            breakdown_value = translate_insightsql(breakdown, self.filter.insightsql_context)
         elif self.filter.breakdown_type == "session":
             if breakdown == "$session_duration":
                 # Return the session duration expression right away because it's already an number,

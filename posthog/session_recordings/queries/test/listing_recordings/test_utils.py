@@ -37,7 +37,7 @@ def filter_recordings_by(
     session_recording_list_instance = SessionRecordingListFromQuery(
         query=the_query,
         team=team,
-        hogql_query_modifiers=None,
+        insightsql_query_modifiers=None,
         allow_event_property_expansion=allow_event_property_expansion,
     )
     return session_recording_list_instance.run()

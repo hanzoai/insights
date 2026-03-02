@@ -73,7 +73,7 @@ const meta: Meta<typeof PlayerInspector> = {
                 '/api/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
 
-                    if (body.query.kind === 'HogQLQuery') {
+                    if (body.query.kind === 'InsightsQLQuery') {
                         if (body.query.query.includes("event in ['$web_vitals']")) {
                             return res(ctx.json(largeRecordingWebVitalsEventsPropertiesJson))
                         }

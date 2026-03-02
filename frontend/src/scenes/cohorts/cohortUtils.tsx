@@ -334,7 +334,7 @@ export function validateGroup(
             const eventFilterError =
                 c?.event_filters &&
                 c.event_filters.length > 0 &&
-                c.event_filters.some((prop) => prop?.type !== PropertyFilterType.HogQL && isEmptyProperty(prop))
+                c.event_filters.some((prop) => prop?.type !== PropertyFilterType.InsightsQL && isEmptyProperty(prop))
                     ? CohortClientErrors.EmptyEventFilters
                     : undefined
 

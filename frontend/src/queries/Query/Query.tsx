@@ -17,7 +17,7 @@ import {
     DashboardFilter,
     DataTableNode,
     DataVisualizationNode,
-    HogQLVariable,
+    InsightsQLVariable,
     InsightVizNode,
     Node,
 } from '~/queries/schema/schema-general'
@@ -78,7 +78,7 @@ export interface QueryProps<Q extends Node> {
     /** Dashboard filters to override the ones in the query */
     filtersOverride?: DashboardFilter | null
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     /** Passed down if implemented by the query type to e.g. set data attr on a LemonTable in a data table */
     dataAttr?: string
     /** Attach ourselves to another logic, such as the scene logic */

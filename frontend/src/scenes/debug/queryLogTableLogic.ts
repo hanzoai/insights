@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import api from 'lib/api'
 import { userLogic } from 'scenes/userLogic'
 
-import { HogQLQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryResponse } from '~/queries/schema/schema-general'
 
 import type { queryLogTableLogicType } from './queryLogTableLogicType'
 
@@ -45,7 +45,7 @@ export const queryLogTableLogic = kea<queryLogTableLogicType>([
                         }
                         // Query the query_log_archive for the current user's queries
                         const response = (await api.query({
-                            kind: 'HogQLQuery',
+                            kind: 'InsightsQLQuery',
                             query: `
                                 SELECT
                                     query_id,
@@ -69,7 +69,7 @@ export const queryLogTableLogic = kea<queryLogTableLogicType>([
                                 user_id: values.user.id,
                                 limit: values.limit,
                             },
-                        })) as HogQLQueryResponse
+                        })) as InsightsQLQueryResponse
 
                         // Convert array of arrays to array of objects
                         if (!response.results || !response.columns) {
@@ -100,7 +100,7 @@ export const queryLogTableLogic = kea<queryLogTableLogicType>([
                         }
                         // Load more query logs with offset
                         const response = (await api.query({
-                            kind: 'HogQLQuery',
+                            kind: 'InsightsQLQuery',
                             query: `
                                 SELECT
                                     query_id,
@@ -125,7 +125,7 @@ export const queryLogTableLogic = kea<queryLogTableLogicType>([
                                 limit: values.limit,
                                 offset: values.queryLogs.length,
                             },
-                        })) as HogQLQueryResponse
+                        })) as InsightsQLQueryResponse
 
                         // Convert array of arrays to array of objects
                         if (!response.results || !response.columns) {

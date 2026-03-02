@@ -11,7 +11,7 @@ import { urls } from 'scenes/urls'
 
 import { Survey, SurveyEventName, SurveyEventProperties, SurveyQuestion } from '~/types'
 
-import { buildPartialResponsesFilter, createAnswerFilterHogQLExpression } from './utils'
+import { buildPartialResponsesFilter, createAnswerFilterInsightsQLExpression } from './utils'
 
 function escapeSqlIdentifier(value: string): string {
     return value.replace(/"/g, '""')
@@ -25,7 +25,7 @@ interface SurveySQLHelperProps {
 export function SurveySQLHelper({ isOpen, onClose }: SurveySQLHelperProps): JSX.Element {
     const { survey, answerFilters } = useValues(surveyLogic)
 
-    const filterConditions = createAnswerFilterHogQLExpression(answerFilters, survey as Survey)
+    const filterConditions = createAnswerFilterInsightsQLExpression(answerFilters, survey as Survey)
 
     const generateSingleQuestionQuery = (question: SurveyQuestion, index: number): string => {
         return `SELECT

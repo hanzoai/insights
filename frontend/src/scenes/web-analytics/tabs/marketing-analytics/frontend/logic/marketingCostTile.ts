@@ -1,5 +1,5 @@
 import { DataWarehouseNode, MarketingAnalyticsConstants, NodeKind } from '~/queries/schema/schema-general'
-import { HogQLMathType } from '~/types'
+import { InsightsQLMathType } from '~/types'
 
 import { ExternalTable } from './marketingAnalyticsLogic'
 import { safeFloat, sumSafeFloat, validColumnsForTiles } from './utils'
@@ -17,7 +17,7 @@ function sanitizeCurrencyCode(value: string): string | null {
     return /^[A-Z]{3}$/.test(value) ? value : null
 }
 
-/** Build a HogQL expression for the currency value (constant string or column reference) */
+/** Build a InsightsQL expression for the currency value (constant string or column reference) */
 function buildCurrencyExpr(currencyField: string | undefined, baseCurrency: string): string {
     const safeFallback = `'${sanitizeCurrencyCode(baseCurrency) ?? 'USD'}'`
     if (!currencyField) {
@@ -36,7 +36,7 @@ function buildCurrencyExpr(currencyField: string | undefined, baseCurrency: stri
     return sanitizeColumnName(currencyField) ?? safeFallback
 }
 
-/** Build a HogQL date expression for currency conversion lookup */
+/** Build a InsightsQL date expression for currency conversion lookup */
 function buildDateExpr(table: ExternalTable): string {
     if (table.dw_source_type === 'self-managed') {
         return 'today()'
@@ -57,7 +57,7 @@ export const externalAdsCostTile = (
         return null
     }
 
-    let mathHogql: string
+    let mathInsightsql: string
 
     if (tileColumnSelection === 'roas') {
         const costColumn = sanitizeColumnName(table.source_map.cost)
@@ -67,7 +67,7 @@ export const externalAdsCostTile = (
         if (!costColumn || !conversionValueColumn) {
             return null
         }
-        mathHogql = `${sumSafeFloat(conversionValueColumn)} / nullIf(SUM(toFloat(${costColumn})), 0)`
+        mathInsightsql = `${sumSafeFloat(conversionValueColumn)} / nullIf(SUM(toFloat(${costColumn})), 0)`
     } else {
         const rawColumn = table.source_map[tileColumnSelection]
         const column = rawColumn ? sanitizeColumnName(rawColumn) : null
@@ -77,7 +77,7 @@ export const externalAdsCostTile = (
         const currencyExpr = buildCurrencyExpr(table.source_map.currency, baseCurrency)
         const dateExpr = buildDateExpr(table)
         const safeCurrency = sanitizeCurrencyCode(baseCurrency) ?? 'USD'
-        mathHogql = `SUM(convertCurrency(${currencyExpr}, '${safeCurrency}', ${safeFloat(column)}, _toDate(${dateExpr})))`
+        mathInsightsql = `SUM(convertCurrency(${currencyExpr}, '${safeCurrency}', ${safeFloat(column)}, _toDate(${dateExpr})))`
     }
 
     const dateField = sanitizeColumnName(table.source_map.date)
@@ -95,7 +95,7 @@ export const externalAdsCostTile = (
         timestamp_field: dateField,
         table_name: table.name,
         dw_source_type: table.dw_source_type,
-        math: HogQLMathType.HogQL,
-        math_hogql: mathHogql,
+        math: InsightsQLMathType.InsightsQL,
+        math_insightsql: mathInsightsql,
     }
 }

@@ -65,7 +65,7 @@ function getResolvedTourDateRange(
     return { fromDate, toDate }
 }
 
-function buildHogQLDateFilter(
+function buildInsightsQLDateFilter(
     tour: Pick<ProductTour, 'start_date' | 'created_at' | 'end_date'>,
     dateRange: DateRange | null,
     timestampColumn = 'timestamp'
@@ -211,7 +211,7 @@ export const productTourLogic = kea<productTourLogicType>([
                     return null
                 }
 
-                const dateFilter = buildHogQLDateFilter(values.productTour, values.dateRange)
+                const dateFilter = buildInsightsQLDateFilter(values.productTour, values.dateRange)
                 const escapedTourId = escapeSqlString(props.id)
 
                 // Query for overall tour stats with unique and total counts
@@ -244,8 +244,8 @@ export const productTourLogic = kea<productTourLogicType>([
 
                 try {
                     const [tourStatsResponse, stepStatsResponse] = await Promise.all([
-                        api.query({ kind: 'HogQLQuery', query: tourStatsQuery }),
-                        api.query({ kind: 'HogQLQuery', query: stepStatsQuery }),
+                        api.query({ kind: 'InsightsQLQuery', query: tourStatsQuery }),
+                        api.query({ kind: 'InsightsQLQuery', query: stepStatsQuery }),
                     ])
 
                     const tourResults = (tourStatsResponse as any)?.results || []

@@ -30,13 +30,13 @@ export type NotebookNodePythonAttributes = {
 const VariableUsageOverlay = ({
     name,
     type,
-    hogqlQuery,
+    insightsqlQuery,
     usages,
     onNavigateToNode,
 }: {
     name: string
     type: string
-    hogqlQuery?: string
+    insightsqlQuery?: string
     usages: NotebookDependencyUsage[]
     onNavigateToNode?: (nodeId: string) => void
 }): JSX.Element => {
@@ -59,11 +59,11 @@ const VariableUsageOverlay = ({
                 <span className="font-semibold text-default font-mono">{name}</span>
                 <span className="text-muted">Type: {type || 'unknown'}</span>
             </div>
-            {hogqlQuery ? (
+            {insightsqlQuery ? (
                 <div className="mt-2">
-                    <div className="text-muted text-[10px] uppercase tracking-wide">HogQL query</div>
+                    <div className="text-muted text-[10px] uppercase tracking-wide">InsightsQL query</div>
                     <pre className="mt-1 text-xs font-mono text-default whitespace-pre-wrap break-words max-h-24 overflow-y-auto">
-                        {hogqlQuery}
+                        {insightsqlQuery}
                     </pre>
                 </div>
             ) : null}
@@ -98,13 +98,13 @@ const VariableUsageOverlay = ({
 const VariableDependencyBadge = ({
     name,
     type,
-    hogqlQuery,
+    insightsqlQuery,
     usages,
     onNavigateToNode,
 }: {
     name: string
     type: string
-    hogqlQuery?: string
+    insightsqlQuery?: string
     usages: NotebookDependencyUsage[]
     onNavigateToNode?: (nodeId: string) => void
 }): JSX.Element => {
@@ -120,7 +120,7 @@ const VariableDependencyBadge = ({
                 <VariableUsageOverlay
                     name={name}
                     type={type}
-                    hogqlQuery={hogqlQuery}
+                    insightsqlQuery={insightsqlQuery}
                     usages={usages}
                     onNavigateToNode={(nodeId) => {
                         onNavigateToNode?.(nodeId)
@@ -312,12 +312,12 @@ const Component = ({
                         <IconCornerDownRight />
                     </span>
                     <div className="flex flex-wrap gap-1">
-                        {displayedGlobals.map(({ name, type, hogqlQuery }) => (
+                        {displayedGlobals.map(({ name, type, insightsqlQuery }) => (
                             <VariableDependencyBadge
                                 key={name}
                                 name={name}
                                 type={type}
-                                hogqlQuery={hogqlQuery}
+                                insightsqlQuery={insightsqlQuery}
                                 usages={usageByVariable[name] ?? []}
                                 onNavigateToNode={navigateToNode}
                             />

@@ -13,7 +13,7 @@ from parameterized import parameterized
 from posthog.cdp.templates.helpers import mock_transpile
 from posthog.models.action.action import Action
 from posthog.models.feature_flag.feature_flag import FeatureFlag
-from posthog.models.hog_functions.hog_function import HogFunction, HogFunctionType
+from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionType
 from posthog.models.plugin import Plugin, PluginConfig, PluginSourceFile
 from posthog.models.project import Project
 from posthog.models.remote_config import RemoteConfig
@@ -634,9 +634,9 @@ class TestRemoteConfigJS(_RemoteConfigBase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_renders_js_including_site_functions(self, mock_transpile_fn):
-        non_site_app = HogFunction.objects.create(
+        non_site_app = CustomFunction.objects.create(
             name="Non site app",
-            type=HogFunctionType.DESTINATION,
+            type=CustomFunctionType.DESTINATION,
             team=self.team,
             enabled=True,
             filters={
@@ -645,9 +645,9 @@ class TestRemoteConfigJS(_RemoteConfigBase):
             },
         )
 
-        site_destination = HogFunction.objects.create(
+        site_destination = CustomFunction.objects.create(
             name="Site destination",
-            type=HogFunctionType.SITE_DESTINATION,
+            type=CustomFunctionType.SITE_DESTINATION,
             team=self.team,
             enabled=True,
             filters={
@@ -656,14 +656,14 @@ class TestRemoteConfigJS(_RemoteConfigBase):
             },
         )
 
-        site_app = HogFunction.objects.create(
+        site_app = CustomFunction.objects.create(
             name="Site app",
-            type=HogFunctionType.SITE_APP,
+            type=CustomFunctionType.SITE_APP,
             team=self.team,
             enabled=True,
         )
 
-        # Force RemoteConfig sync after creating HogFunctions
+        # Force RemoteConfig sync after creating CustomFunctions
         self.sync_remote_config()
 
         js = self.remote_config.get_config_js_via_token(self.team.api_token)
@@ -681,9 +681,9 @@ class TestRemoteConfigJS(_RemoteConfigBase):
 
     @patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile)
     def test_removes_deleted_site_functions(self, mock_transpile_fn):
-        site_destination = HogFunction.objects.create(
+        site_destination = CustomFunction.objects.create(
             name="Site destination",
-            type=HogFunctionType.SITE_DESTINATION,
+            type=CustomFunctionType.SITE_DESTINATION,
             team=self.team,
             enabled=True,
             filters={
@@ -692,7 +692,7 @@ class TestRemoteConfigJS(_RemoteConfigBase):
             },
         )
 
-        # Force RemoteConfig sync after creating HogFunction
+        # Force RemoteConfig sync after creating CustomFunction
         self.sync_remote_config()
 
         js = self.remote_config.get_config_js_via_token(self.team.api_token)
@@ -702,7 +702,7 @@ class TestRemoteConfigJS(_RemoteConfigBase):
         site_destination.deleted = True
         site_destination.save()
 
-        # Force RemoteConfig sync after deleting HogFunction
+        # Force RemoteConfig sync after deleting CustomFunction
         self.sync_remote_config()
 
         js = self.remote_config.get_config_js_via_token(self.team.api_token)

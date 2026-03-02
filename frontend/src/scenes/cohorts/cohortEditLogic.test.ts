@@ -882,7 +882,7 @@ describe('cohortEditLogic', () => {
                 is_static: true,
                 name: 'Static Cohort (static copy)',
                 query: {
-                    kind: NodeKind.HogQLQuery,
+                    kind: NodeKind.InsightsQLQuery,
                     query: 'SELECT person_id FROM static_cohort_people WHERE cohort_id = 1',
                 },
             })
@@ -916,7 +916,7 @@ describe('cohortEditLogic', () => {
                 is_static: true,
                 name: 'Dynamic Cohort (static copy)',
                 query: {
-                    kind: NodeKind.HogQLQuery,
+                    kind: NodeKind.InsightsQLQuery,
                     query: 'SELECT person_id FROM cohort_people WHERE cohort_id = 1',
                 },
             })

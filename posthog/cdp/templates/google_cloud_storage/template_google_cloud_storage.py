@@ -2,12 +2,12 @@ import json
 import dataclasses
 from copy import deepcopy
 
-from posthog.hogql.escape_sql import escape_hogql_string
+from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 from posthog.models.integration import GoogleCloudIntegration
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -16,7 +16,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send data to GCS. This creates a file per event.",
     icon_url="/static/services/google-cloud-storage.png",
     category=["Custom"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let res := fetch(f'https://storage.googleapis.com/upload/storage/v1/b/{encodeURLComponent(inputs.bucketName)}/o?uploadType=media&name={encodeURLComponent(inputs.filename)}', {
   'method': 'POST',
@@ -69,7 +69,7 @@ if (res.status >= 200 and res.status < 300) {
 )
 
 
-class TemplateGoogleCloudStorageMigrator(HogFunctionTemplateMigrator):
+class TemplateGoogleCloudStorageMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/posthog-gcs-plugin"
 
     @classmethod
@@ -94,7 +94,7 @@ class TemplateGoogleCloudStorageMigrator(HogFunctionTemplateMigrator):
 
         hf["filters"] = {}
         if exportEventsToIgnore:
-            event_names = ", ".join([escape_hogql_string(event) for event in exportEventsToIgnore])
+            event_names = ", ".join([escape_insightsql_string(event) for event in exportEventsToIgnore])
             query = f"event not in ({event_names})"
             hf["filters"]["events"] = [
                 {
@@ -102,7 +102,7 @@ class TemplateGoogleCloudStorageMigrator(HogFunctionTemplateMigrator):
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"key": query, "type": "hogql"}],
+                    "properties": [{"key": query, "type": "insightsql"}],
                 }
             ]
 

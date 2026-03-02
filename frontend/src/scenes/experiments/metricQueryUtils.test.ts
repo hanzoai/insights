@@ -37,7 +37,7 @@ describe('getFilter', () => {
                 name: '$pageview',
                 math: ExperimentMetricMathType.TotalCount,
                 math_property: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: [{ key: '$browser', value: ['Chrome'], operator: 'exact', type: 'event' }],
             } as EventsNode,
         }
@@ -51,7 +51,7 @@ describe('getFilter', () => {
                     type: 'events',
                     math: ExperimentMetricMathType.TotalCount,
                     math_property: undefined,
-                    math_hogql: undefined,
+                    math_insightsql: undefined,
                     properties: [{ key: '$browser', value: ['Chrome'], operator: 'exact', type: 'event' }],
                     kind: NodeKind.EventsNode,
                 },
@@ -70,7 +70,7 @@ describe('getFilter', () => {
                 name: 'jan-16-running payment action',
                 math: ExperimentMetricMathType.TotalCount,
                 math_property: undefined,
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: [{ key: '$lib', type: 'event', value: ['python'], operator: 'exact' }],
             } as ActionsNode,
         }
@@ -84,7 +84,7 @@ describe('getFilter', () => {
                     type: 'actions',
                     math: ExperimentMetricMathType.TotalCount,
                     math_property: undefined,
-                    math_hogql: undefined,
+                    math_insightsql: undefined,
                     properties: [{ key: '$lib', type: 'event', value: ['python'], operator: 'exact' }],
                     kind: NodeKind.ActionsNode,
                 },
@@ -102,7 +102,7 @@ describe('filterToMetricSource', () => {
                 name: '$pageview',
                 math: ExperimentMetricMathType.TotalCount,
                 math_property: 'revenue',
-                math_hogql: 'sum(revenue)',
+                math_insightsql: 'sum(revenue)',
                 properties: [],
             },
         ]
@@ -115,7 +115,7 @@ describe('filterToMetricSource', () => {
             name: '$pageview',
             math: ExperimentMetricMathType.TotalCount,
             math_property: 'revenue',
-            math_hogql: 'sum(revenue)',
+            math_insightsql: 'sum(revenue)',
             properties: [],
         })
     })
@@ -139,7 +139,7 @@ describe('filterToMetricSource', () => {
             name: 'signup_action',
             math: ExperimentMetricMathType.Sum,
             math_property: 'value',
-            math_hogql: undefined,
+            math_insightsql: undefined,
             properties: [],
         })
     })
@@ -169,7 +169,7 @@ describe('filterToMetricSource', () => {
             data_warehouse_join_key: 'customer_id',
             math: ExperimentMetricMathType.Avg,
             math_property: 'session_duration',
-            math_hogql: undefined,
+            math_insightsql: undefined,
             properties: [],
         })
     })
@@ -234,7 +234,7 @@ describe('filterToMetricConfig', () => {
                 name: 'Purchase Event',
                 math: ExperimentMetricMathType.Sum,
                 math_property: 'revenue',
-                math_hogql: undefined,
+                math_insightsql: undefined,
                 properties: undefined,
             },
         })
@@ -844,7 +844,7 @@ describe('Data Warehouse Support', () => {
                     ],
                     math: ExperimentMetricMathType.TotalCount,
                     math_property: 'conversion_value',
-                    math_hogql: 'sum(conversion_value)',
+                    math_insightsql: 'sum(conversion_value)',
                 } as ExperimentDataWarehouseNode,
             }
             const filter = getFilter(metric)
@@ -873,7 +873,7 @@ describe('Data Warehouse Support', () => {
                 ],
                 math: ExperimentMetricMathType.TotalCount,
                 math_property: 'conversion_value',
-                math_hogql: 'sum(conversion_value)',
+                math_insightsql: 'sum(conversion_value)',
                 kind: NodeKind.ExperimentDataWarehouseNode,
             })
         })

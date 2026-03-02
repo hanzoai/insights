@@ -12,11 +12,11 @@ from rest_framework import exceptions
 
 from posthog.schema import PropertyOperator
 
-from posthog.hogql import ast
-from posthog.hogql.database.s3_table import S3Table
-from posthog.hogql.hogql import HogQLContext
-from posthog.hogql.parser import parse_expr
-from posthog.hogql.visitor import TraversingVisitor
+from posthog.insightsql import ast
+from posthog.insightsql.database.s3_table import S3Table
+from posthog.insightsql.insightsql import InsightsQLContext
+from posthog.insightsql.parser import parse_expr
+from posthog.insightsql.visitor import TraversingVisitor
 
 from posthog.clickhouse.kafka_engine import trim_quotes_expr
 from posthog.clickhouse.materialized_columns import TableWithProperties, get_materialized_column_for_property
@@ -71,7 +71,7 @@ def parse_prop_grouped_clauses(
     team_id: int,
     property_group: Optional[PropertyGroup],
     *,
-    hogql_context: HogQLContext,
+    insightsql_context: InsightsQLContext,
     prepend: str = "global",
     table_name: str = "",
     allow_denormalized_props: bool = True,
@@ -100,7 +100,7 @@ def parse_prop_grouped_clauses(
                     person_properties_mode=person_properties_mode,
                     person_id_joined_alias=person_id_joined_alias,
                     group_properties_joined=group_properties_joined,
-                    hogql_context=hogql_context,
+                    insightsql_context=insightsql_context,
                     _top_level=False,
                 )
                 group_clauses.append(clause)
@@ -121,7 +121,7 @@ def parse_prop_grouped_clauses(
             group_properties_joined=group_properties_joined,
             property_operator=property_group.type,
             team_id=team_id,
-            hogql_context=hogql_context,
+            insightsql_context=insightsql_context,
         )
 
     if not _final:
@@ -145,7 +145,7 @@ def parse_prop_clauses(
     team_id: int,
     filters: list[Property],
     *,
-    hogql_context: Optional[HogQLContext],
+    insightsql_context: Optional[InsightsQLContext],
     prepend: str = "global",
     table_name: str = "",
     allow_denormalized_props: bool = True,
@@ -184,7 +184,7 @@ def parse_prop_clauses(
                     person_id_query, cohort_filter_params = format_filter_query(
                         cohort,
                         idx,
-                        hogql_context,
+                        insightsql_context,
                         custom_match_field=person_id_joined_alias,
                     )
                     params = {**params, **cohort_filter_params}
@@ -193,7 +193,7 @@ def parse_prop_clauses(
                     person_id_query, cohort_filter_params = format_cohort_subquery(
                         cohort,
                         idx,
-                        hogql_context,
+                        insightsql_context,
                         custom_match_field=f"{person_id_joined_alias}",
                     )
                     params = {**params, **cohort_filter_params}
@@ -351,12 +351,12 @@ def parse_prop_clauses(
             filter_query, filter_params = get_session_property_filter_statement(prop, idx, prepend)
             final.append(f"{property_operator} {filter_query}")
             params.update(filter_params)
-        elif prop.type == "hogql":
-            if hogql_context is None:
-                raise ValueError("HogQL is not supported here")
-            from posthog.hogql.hogql import translate_hogql
+        elif prop.type == "insightsql":
+            if insightsql_context is None:
+                raise ValueError("InsightsQL is not supported here")
+            from posthog.insightsql.insightsql import translate_insightsql
 
-            filter_query = translate_hogql(prop.key, hogql_context)
+            filter_query = translate_insightsql(prop.key, insightsql_context)
             final.append(f"{property_operator} {filter_query}")
 
     if final:
@@ -896,7 +896,7 @@ def build_selector_regex(selector: Selector) -> str:
         return r""
 
 
-class HogQLPropertyChecker(TraversingVisitor):
+class InsightsQLPropertyChecker(TraversingVisitor):
     def __init__(self):
         self.event_properties: list[str] = []
         self.person_properties: list[str] = []
@@ -920,8 +920,8 @@ class HogQLPropertyChecker(TraversingVisitor):
 def extract_tables_and_properties(props: list[Property], team_id: int) -> TCounter[PropertyIdentifier]:
     counters: list[tuple] = []
     for prop in props:
-        if prop.type == "hogql":
-            counters.extend(count_hogql_properties(prop.key))
+        if prop.type == "insightsql":
+            counters.extend(count_insightsql_properties(prop.key))
         elif prop.type == "behavioral" and prop.event_type == "actions":
             action = Action.objects.get(pk=prop.key, team_id=team_id)
             action_counter = get_action_tables_and_properties(action)
@@ -931,13 +931,13 @@ def extract_tables_and_properties(props: list[Property], team_id: int) -> TCount
     return Counter(cast(Iterable, counters))
 
 
-def count_hogql_properties(
+def count_insightsql_properties(
     expr: str, counter: Optional[TCounter[PropertyIdentifier]] = None
 ) -> TCounter[PropertyIdentifier]:
     if not counter:
         counter = Counter()
     node = parse_expr(expr)
-    property_checker = HogQLPropertyChecker()
+    property_checker = InsightsQLPropertyChecker()
     property_checker.visit(node)
     for field in property_checker.event_properties:
         counter[(field, "event", None)] += 1
@@ -961,7 +961,7 @@ def get_session_property_filter_statement(prop: Property, idx: int, prepend: str
         )
 
     else:
-        raise exceptions.ValidationError(f"Session property '{prop.key}' is only valid in HogQL queries.")
+        raise exceptions.ValidationError(f"Session property '{prop.key}' is only valid in InsightsQL queries.")
 
 
 def clear_excess_levels(prop: Union["PropertyGroup", "Property"], skip=False):

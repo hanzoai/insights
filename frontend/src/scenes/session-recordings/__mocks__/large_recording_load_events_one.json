@@ -13,7 +13,7 @@
     ],
     "error": null,
     "hasMore": false,
-    "hogql": "SELECT\n    uuid,\n    event,\n    timestamp,\n    elements_chain,\n    properties.$window_id,\n    properties.$current_url,\n    properties.$event_type\nFROM\n    events\nWHERE\n    and(equals(properties.$session_id, '01932f1e-cf6a-7e77-8837-23366207a24b'), less(timestamp, toDateTime('2024-11-15 09:26:01.000000')), greater(timestamp, toDateTime('2024-11-15 09:18:28.000000')))\nORDER BY\n    timestamp ASC\nLIMIT 50000\nOFFSET 0",
+    "insightsql": "SELECT\n    uuid,\n    event,\n    timestamp,\n    elements_chain,\n    properties.$window_id,\n    properties.$current_url,\n    properties.$event_type\nFROM\n    events\nWHERE\n    and(equals(properties.$session_id, '01932f1e-cf6a-7e77-8837-23366207a24b'), less(timestamp, toDateTime('2024-11-15 09:26:01.000000')), greater(timestamp, toDateTime('2024-11-15 09:18:28.000000')))\nORDER BY\n    timestamp ASC\nLIMIT 50000\nOFFSET 0",
     "is_cached": false,
     "last_refresh": "2024-11-18T15:55:05.644358Z",
     "limit": 50000,
@@ -410,35 +410,35 @@
             "t": 0.00007029200060060248
         },
         {
-            "k": "./hogql/prepare_ast/clone",
+            "k": "./insightsql/prepare_ast/clone",
             "t": 0.000481041002785787
         },
         {
-            "k": "./hogql/prepare_ast/create_hogql_database",
+            "k": "./insightsql/prepare_ast/create_insightsql_database",
             "t": 0.14176429100189125
         },
         {
-            "k": "./hogql/prepare_ast/resolve_types",
+            "k": "./insightsql/prepare_ast/resolve_types",
             "t": 0.0010933330049738288
         },
         {
-            "k": "./hogql/prepare_ast",
+            "k": "./insightsql/prepare_ast",
             "t": 0.14348054199945182
         },
         {
-            "k": "./hogql/print_ast/printer",
+            "k": "./insightsql/print_ast/printer",
             "t": 0.0016133750032167882
         },
         {
-            "k": "./hogql/print_ast",
+            "k": "./insightsql/print_ast",
             "t": 0.0016721670035622083
         },
         {
-            "k": "./hogql",
+            "k": "./insightsql",
             "t": 0.2308277080010157
         },
         {
-            "k": "./print_ast/create_hogql_database",
+            "k": "./print_ast/create_insightsql_database",
             "t": 0.2334512080051354
         },
         {

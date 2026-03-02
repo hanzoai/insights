@@ -8,7 +8,7 @@ from posthog.models.filters.properties_timeline_filter import PropertiesTimeline
 from posthog.models.filters.stickiness_filter import StickinessFilter
 from posthog.models.filters.utils import GroupTypeIndex
 from posthog.models.property import PropertyIdentifier
-from posthog.models.property.util import box_value, count_hogql_properties, extract_tables_and_properties
+from posthog.models.property.util import box_value, count_insightsql_properties, extract_tables_and_properties
 from posthog.queries.column_optimizer.foss_column_optimizer import FOSSColumnOptimizer
 from posthog.queries.trends.util import is_series_group_based
 
@@ -52,18 +52,18 @@ class EnterpriseColumnOptimizer(FOSSColumnOptimizer):
                         self.filter.breakdown_group_type_index,
                     )
                 ] += 1
-            elif self.filter.breakdown_type == "hogql":
+            elif self.filter.breakdown_type == "insightsql":
                 if isinstance(self.filter.breakdown, list):
                     expr = str(self.filter.breakdown[0])
                 else:
                     expr = str(self.filter.breakdown)
-                counter = count_hogql_properties(expr, counter)
+                counter = count_insightsql_properties(expr, counter)
 
             # If we have a breakdowns attribute then make sure we pull in everything we
             # need to calculate it
             for breakdown in self.filter.breakdowns or []:
-                if breakdown["type"] == "hogql":
-                    counter = count_hogql_properties(breakdown["property"], counter)
+                if breakdown["type"] == "insightsql":
+                    counter = count_insightsql_properties(breakdown["property"], counter)
                 else:
                     counter[
                         (

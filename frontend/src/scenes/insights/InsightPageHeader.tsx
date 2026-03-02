@@ -69,8 +69,8 @@ import {
 } from '~/layout/scenes/SceneLayout'
 import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { tagsModel } from '~/models/tagsModel'
-import { HogQLQuery, InsightQueryNode, NodeKind } from '~/queries/schema/schema-general'
-import { isDataTableNode, isDataVisualizationNode, isEventsQuery, isHogQLQuery } from '~/queries/utils'
+import { InsightsQLQuery, InsightQueryNode, NodeKind } from '~/queries/schema/schema-general'
+import { isDataTableNode, isDataVisualizationNode, isEventsQuery, isInsightsQLQuery } from '~/queries/utils'
 import {
     AccessControlLevel,
     AccessControlResourceType,
@@ -116,9 +116,9 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
         queryChanged,
         showQueryEditor,
         showDebugPanel,
-        hogQL,
+        insightsQL,
         exportContext,
-        hogQLVariables,
+        insightsQLVariables,
         insightQuery,
         insightData,
         generatedInsightNameLoading,
@@ -187,7 +187,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
     }, [previewColumns, previewTable?.name, selectedPreviewColumn])
 
     const showCohortButton =
-        isDataTableNode(query) || isDataVisualizationNode(query) || isHogQLQuery(query) || isEventsQuery(query)
+        isDataTableNode(query) || isDataVisualizationNode(query) || isInsightsQLQuery(query) || isEventsQuery(query)
 
     const siteUrl = preflight?.site_url || window.location.origin
 
@@ -261,7 +261,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                     <NewDashboardModal />
                     <EndpointFromInsightModal
                         tabId={insightProps.tabId || ''}
-                        insightQuery={insightQuery as HogQLQuery | InsightQueryNode}
+                        insightQuery={insightQuery as InsightsQLQuery | InsightQueryNode}
                         insightShortId={insight.short_id}
                     />
                 </>
@@ -461,11 +461,11 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                             Preview table data
                         </ButtonPrimitive>
 
-                        {hogQL &&
-                            !isHogQLQuery(query) &&
-                            !(isDataVisualizationNode(query) && isHogQLQuery(query.source)) && (
+                        {insightsQL &&
+                            !isInsightsQLQuery(query) &&
+                            !(isDataVisualizationNode(query) && isInsightsQLQuery(query.source)) && (
                                 <Link
-                                    to={urls.sqlEditor({ query: hogQL })}
+                                    to={urls.sqlEditor({ query: insightsQL })}
                                     buttonProps={{
                                         'data-attr': `${RESOURCE_TYPE}-edit-sql`,
                                         menuItem: true,
@@ -476,7 +476,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                                 </Link>
                             )}
 
-                        {hogQL && showCohortButton && (
+                        {insightsQL && showCohortButton && (
                             <ButtonPrimitive
                                 data-attr={`${RESOURCE_TYPE}-save-as-cohort`}
                                 onClick={() => {
@@ -511,9 +511,9 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
                                         },
                                         onSubmit: async ({ name }) => {
                                             createStaticCohort(name, {
-                                                kind: NodeKind.HogQLQuery,
-                                                query: hogQL,
-                                                variables: hogQLVariables,
+                                                kind: NodeKind.InsightsQLQuery,
+                                                query: insightsQL,
+                                                variables: insightsQLVariables,
                                             })
                                         },
                                     })

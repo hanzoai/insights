@@ -1,9 +1,9 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Creates a new contact in Hubspot whenever an event is triggered.",
     icon_url="/static/services/hubspot.png",
     category=["CRM", "Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let properties := {
     'email': inputs.email
@@ -98,7 +98,7 @@ if (res.status == 200) {
     },
 )
 
-template_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     id="template-hubspot-event",
@@ -107,7 +107,7 @@ template_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Hubspot.",
     icon_url="/static/services/hubspot.png",
     category=["CRM", "Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email)) {
     print('`email` input is empty. Not sending event.')
@@ -364,7 +364,7 @@ if (res.status >= 400) {
 )
 
 
-class TemplateHubspotMigrator(HogFunctionTemplateMigrator):
+class TemplateHubspotMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/hubspot-plugin"
 
     @classmethod

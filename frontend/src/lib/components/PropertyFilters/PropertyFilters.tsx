@@ -54,7 +54,7 @@ export interface PropertyFiltersProps {
     hideBehavioralCohorts?: boolean
     addFilterDocLink?: string
     operatorAllowlist?: OperatorValueSelectProps['operatorAllowlist']
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
 }
 
 export function PropertyFilters({
@@ -90,7 +90,7 @@ export function PropertyFilters({
     hideBehavioralCohorts,
     addFilterDocLink,
     operatorAllowlist,
-    hogQLGlobals,
+    insightsQLGlobals,
 }: PropertyFiltersProps): JSX.Element {
     const logicProps = { propertyFilters, onChange, pageKey, sendAllKeyUpdates }
     const { filters, filtersWithNew, filterIds, filterIdsWithNew } = useValues(propertyFilterLogic(logicProps))
@@ -162,7 +162,7 @@ export function PropertyFilters({
                                             addFilterDocLink={addFilterDocLink}
                                             editable={editable}
                                             operatorAllowlist={operatorAllowlist}
-                                            hogQLGlobals={hogQLGlobals}
+                                            insightsQLGlobals={insightsQLGlobals}
                                         />
                                     )}
                                     errorMessage={errorMessages && errorMessages[index]}

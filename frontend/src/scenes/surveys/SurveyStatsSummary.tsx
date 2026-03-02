@@ -54,8 +54,8 @@ function StatRow({ items, isLoading }: { items: StatRowItem[]; isLoading?: boole
 function UsersCount({ stats, rates }: { stats: SurveyStats; rates: SurveyRates }): JSX.Element {
     const uniqueUsersShown = stats[SurveyEventName.SHOWN].unique_persons
     const uniqueUsersSent = stats[SurveyEventName.SENT].unique_persons
-    const { answerFilterHogQLExpression } = useValues(surveyLogic)
-    const filterNote = answerFilterHogQLExpression ? ' · filtered' : ''
+    const { answerFilterInsightsQLExpression } = useValues(surveyLogic)
+    const filterNote = answerFilterInsightsQLExpression ? ' · filtered' : ''
     return (
         <StatRow
             items={[
@@ -85,8 +85,8 @@ function UsersCount({ stats, rates }: { stats: SurveyStats; rates: SurveyRates }
 function ResponsesCount({ stats, rates }: { stats: SurveyStats; rates: SurveyRates }): JSX.Element {
     const impressions = stats[SurveyEventName.SHOWN].total_count
     const sent = stats[SurveyEventName.SENT].total_count
-    const { answerFilterHogQLExpression } = useValues(surveyLogic)
-    const filterNote = answerFilterHogQLExpression ? ' · filtered' : ''
+    const { answerFilterInsightsQLExpression } = useValues(surveyLogic)
+    const filterNote = answerFilterInsightsQLExpression ? ' · filtered' : ''
 
     return (
         <StatRow

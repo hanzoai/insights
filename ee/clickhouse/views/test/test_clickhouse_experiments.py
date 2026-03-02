@@ -3364,7 +3364,7 @@ class TestExperimentAuxiliaryEndpoints(ClickhouseTestMixin, APILicensedTest):
                             "properties": [
                                 {"key": "bonk", "value": "bonk"},
                                 {"key": "id", "value": cohort_extra.id, "type": "cohort"},
-                                {"key": "properties.$current_url in ('x', 'y')", "type": "hogql"},
+                                {"key": "properties.$current_url in ('x', 'y')", "type": "insightsql"},
                                 {"key": "bonk-person", "value": "bonk", "type": "person"},
                             ],
                         }
@@ -3490,7 +3490,7 @@ class TestExperimentAuxiliaryEndpoints(ClickhouseTestMixin, APILicensedTest):
                                     "conditionHash": "605645c960b2c67c",
                                     "event_filters": [
                                         {"key": "bonk", "type": "event", "value": "bonk"},
-                                        {"key": "properties.$current_url in ('x', 'y')", "type": "hogql"},
+                                        {"key": "properties.$current_url in ('x', 'y')", "type": "insightsql"},
                                     ],
                                     "event_type": "events",
                                     "explicit_datetime": "2024-01-01T10:23:00+00:00",
@@ -3588,7 +3588,7 @@ class TestExperimentAuxiliaryEndpoints(ClickhouseTestMixin, APILicensedTest):
                             "properties": [
                                 {"key": "bonk", "value": "bonk"},
                                 {"key": "id", "value": cohort_extra.id, "type": "cohort"},
-                                {"key": "properties.$current_url in ('x', 'y')", "type": "hogql"},
+                                {"key": "properties.$current_url in ('x', 'y')", "type": "insightsql"},
                                 {"key": "bonk-person", "value": "bonk", "type": "person"},
                             ],
                         }
@@ -3684,7 +3684,7 @@ class TestExperimentAuxiliaryEndpoints(ClickhouseTestMixin, APILicensedTest):
             target_filter["event_filters"],
             [
                 {"key": "bonk", "type": "event", "value": "bonk"},
-                {"key": "properties.$current_url in ('x', 'y')", "type": "hogql"},
+                {"key": "properties.$current_url in ('x', 'y')", "type": "insightsql"},
             ],
             cohort["filters"],
         )
@@ -3733,7 +3733,7 @@ class TestExperimentAuxiliaryEndpoints(ClickhouseTestMixin, APILicensedTest):
                             "entity_type": "actions",
                             "properties": [
                                 {"key": "bonk", "value": "bonk"},
-                                {"key": "properties.$current_url in ('x', 'y')", "type": "hogql"},
+                                {"key": "properties.$current_url in ('x', 'y')", "type": "insightsql"},
                                 {"key": "bonk-person", "value": "bonk", "type": "person"},
                             ],
                         }

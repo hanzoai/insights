@@ -5,14 +5,14 @@ import { router } from 'kea-router'
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
-import { HogFunctionConfigurationType } from '~/types'
+import { CustomFunctionConfigurationType } from '~/types'
 
 import { onboardingLogic } from '../onboardingLogic'
 import type { onboardingErrorTrackingAlertsLogicType } from './onboardingErrorTrackingAlertsLogicType'
 
 export type ErrorTrackingAlertIntegrationType = 'slack' | 'microsoft-teams' | 'discord'
 
-const DEFAULT_HOG_FUNCTION_CONFIGURATION: Partial<HogFunctionConfigurationType> = {
+const DEFAULT_CUSTOM_FUNCTION_CONFIGURATION: Partial<CustomFunctionConfigurationType> = {
     type: 'internal_destination',
     filters: { events: [{ id: '$error_tracking_issue_created', type: 'events' }] },
     enabled: true,
@@ -20,7 +20,7 @@ const DEFAULT_HOG_FUNCTION_CONFIGURATION: Partial<HogFunctionConfigurationType> 
 }
 
 const DEFAULT_SLACK_INPUTS: Record<string, any> = {
-    icon_emoji: { value: ':hedgehog:' },
+    icon_emoji: { value: ':robot_face:' },
     username: { value: 'PostHog' },
     blocks: {
         value: [
@@ -100,7 +100,7 @@ export const onboardingErrorTrackingAlertsLogic = kea<onboardingErrorTrackingAle
 
             submit: async (formValues) => {
                 const configuration = {
-                    ...DEFAULT_HOG_FUNCTION_CONFIGURATION,
+                    ...DEFAULT_CUSTOM_FUNCTION_CONFIGURATION,
                     template_id: `template-${values.integration}-error-tracking-issue-created`,
                 }
 
@@ -122,7 +122,7 @@ export const onboardingErrorTrackingAlertsLogic = kea<onboardingErrorTrackingAle
                     }
                 }
 
-                await api.hogFunctions.create(configuration)
+                await api.customFunctions.create(configuration)
                 actions.goToNextStep()
             },
         },

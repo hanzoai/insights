@@ -31,7 +31,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { transformDataTableToDataTableRows } from 'lib/utils/dataTableTransformations'
 import { InsightErrorState, StatelessInsightLoadingState } from 'scenes/insights/EmptyStates'
-import { HogQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
+import { InsightsQLBoldNumber } from 'scenes/insights/views/BoldNumber/BoldNumber'
 
 import { KeyboardShortcut } from '~/layout/navigation-3000/components/KeyboardShortcut'
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
@@ -49,9 +49,9 @@ import { seriesBreakdownLogic } from '~/queries/nodes/DataVisualization/Componen
 import { DataTableVisualizationProps } from '~/queries/nodes/DataVisualization/DataVisualization'
 import { dataVisualizationLogic } from '~/queries/nodes/DataVisualization/dataVisualizationLogic'
 import { displayLogic } from '~/queries/nodes/DataVisualization/displayLogic'
-import { renderHogQLX } from '~/queries/nodes/HogQLX/render'
+import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
 import { type DataTableNode, NodeKind } from '~/queries/schema/schema-general'
-import { HogQLQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryResponse } from '~/queries/schema/schema-general'
 import { ChartDisplayType, ExporterFormat } from '~/types'
 
 import { copyTableToCsv, copyTableToExcel, copyTableToJson } from '../../../queries/nodes/DataTable/clipboardUtils'
@@ -117,7 +117,7 @@ const copyMap = {
 const createDataTableQuery = (): DataTableNode => ({
     kind: NodeKind.DataTableNode,
     source: {
-        kind: NodeKind.HogQLQuery,
+        kind: NodeKind.InsightsQLQuery,
         query: '',
     },
 })
@@ -313,7 +313,7 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
     const { queryCancelled } = useValues(dataVisualizationLogic)
     const { toggleChartSettingsPanel } = useActions(dataVisualizationLogic)
 
-    const response = dataNodeResponse as HogQLQueryResponse | undefined
+    const response = dataNodeResponse as InsightsQLQueryResponse | undefined
 
     const [progressCache, setProgressCache] = useState<Record<string, number>>({})
 
@@ -422,10 +422,10 @@ export function OutputPane({ tabId }: { tabId: string }): JSX.Element {
                         const value = props.row[columnKey]
                         if (typeof value === 'string' && value.startsWith('["__hx_tag",') && value.endsWith(']')) {
                             try {
-                                const parsedHogQLX = JSON.parse(value)
-                                return renderHogQLX(parsedHogQLX)
+                                const parsedInsightsQLX = JSON.parse(value)
+                                return renderInsightsQLX(parsedInsightsQLX)
                             } catch (e) {
-                                console.error('Error parsing HogQLX value:', e)
+                                console.error('Error parsing InsightsQLX value:', e)
                                 return <span className="text-red">Error parsing value</span>
                             }
                         }
@@ -735,7 +735,7 @@ function InternalDataTableVisualization(
                 uniqueKey={props.uniqueKey}
                 query={query}
                 context={props.context}
-                cachedResults={props.cachedResults as HogQLQueryResponse | undefined}
+                cachedResults={props.cachedResults as InsightsQLQueryResponse | undefined}
                 embedded
             />
         )
@@ -762,7 +762,7 @@ function InternalDataTableVisualization(
     } else if (visualizationType === ChartDisplayType.TwoDimensionalHeatmap) {
         component = <TwoDimensionalHeatmap />
     } else if (visualizationType === ChartDisplayType.BoldNumber) {
-        component = <HogQLBoldNumber />
+        component = <InsightsQLBoldNumber />
     }
 
     return (

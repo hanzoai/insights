@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Optional, cast
 
 if TYPE_CHECKING:
-    from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+    from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
 from posthog.schema import (
     ExternalDataSourceType as SchemaExternalDataSourceType,
@@ -67,7 +67,7 @@ class StripeSource(ResumableSource[StripeSourceConfig, StripeResumeConfig], Webh
         return ExternalDataSourceType.STRIPE
 
     @property
-    def webhook_template(self) -> Optional["HogFunctionTemplateDC"]:
+    def webhook_template(self) -> Optional["CustomFunctionTemplateDC"]:
         from posthog.temporal.data_imports.sources.stripe.webhook_template import template
 
         return template

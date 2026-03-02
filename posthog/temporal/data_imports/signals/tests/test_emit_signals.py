@@ -12,7 +12,7 @@ from temporalio import activity
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 
-from posthog.hogql import ast
+from posthog.insightsql import ast
 
 from posthog.temporal.data_imports.signals.registry import SignalEmitterOutput, SignalSourceTableConfig
 from posthog.temporal.data_imports.workflow_activities.emit_signals import (
@@ -87,7 +87,7 @@ class TestQueryNewRecords:
         mock_result.columns = ["id", "name"]
         mock_result.results = [(1, "alice")]
 
-        with patch(f"{MODULE_PATH}.execute_hogql_query", return_value=mock_result):
+        with patch(f"{MODULE_PATH}.execute_insightsql_query", return_value=mock_result):
             with patch(f"{MODULE_PATH}.parse_select", return_value="parsed") as mock_parse:
                 records = _query_new_records(
                     team=MagicMock(),
@@ -111,7 +111,7 @@ class TestQueryNewRecords:
         mock_result.columns = ["id", "name"]
         mock_result.results = [(1, "alice")]
 
-        with patch(f"{MODULE_PATH}.execute_hogql_query", return_value=mock_result):
+        with patch(f"{MODULE_PATH}.execute_insightsql_query", return_value=mock_result):
             with patch(f"{MODULE_PATH}.parse_select", return_value="parsed") as mock_parse:
                 _query_new_records(
                     team=MagicMock(),
@@ -130,7 +130,7 @@ class TestQueryNewRecords:
         mock_result.results = []
         mock_result.columns = []
 
-        with patch(f"{MODULE_PATH}.execute_hogql_query", return_value=mock_result):
+        with patch(f"{MODULE_PATH}.execute_insightsql_query", return_value=mock_result):
             with patch(f"{MODULE_PATH}.parse_select", return_value="parsed") as mock_parse:
                 _query_new_records(
                     team=MagicMock(),
@@ -153,7 +153,7 @@ class TestQueryNewRecords:
         mock_result.results = []
         mock_result.columns = []
 
-        with patch(f"{MODULE_PATH}.execute_hogql_query", return_value=mock_result):
+        with patch(f"{MODULE_PATH}.execute_insightsql_query", return_value=mock_result):
             with patch(f"{MODULE_PATH}.parse_select", return_value="parsed") as mock_parse:
                 _query_new_records(
                     team=MagicMock(),
@@ -170,7 +170,7 @@ class TestQueryNewRecords:
         config = _make_config()
 
         with (
-            patch(f"{MODULE_PATH}.execute_hogql_query", side_effect=Exception("query failed")),
+            patch(f"{MODULE_PATH}.execute_insightsql_query", side_effect=Exception("query failed")),
             patch(f"{MODULE_PATH}.parse_select", return_value="parsed"),
             patch(f"{MODULE_PATH}.activity"),
         ):

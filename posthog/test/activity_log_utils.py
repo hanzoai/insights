@@ -177,25 +177,25 @@ class ActivityLogTestHelper(APILicensedTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()
 
-    # HogFunction (using Plugin as base)
-    def create_hog_function(self, name: str = "Test Hog Function", **kwargs) -> dict[str, Any]:
-        """Create a hog function via API."""
+    # CustomFunction (using Plugin as base)
+    def create_custom_function(self, name: str = "Test Custom Function", **kwargs) -> dict[str, Any]:
+        """Create a custom function via API."""
         data = {
             "name": name,
-            "description": "Test hog function",
+            "description": "Test custom function",
             "enabled": True,
             "inputs": {},
-            "hog": "export function onEvent(event, { inputs }) { console.log(event) }",
+            "custom_script": "export function onEvent(event, { inputs }) { console.log(event) }",
             **kwargs,
         }
-        response = self.client.post(f"/api/projects/{self.team.id}/hog_functions/", data, format="json")
+        response = self.client.post(f"/api/projects/{self.team.id}/custom_functions/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()
 
-    def update_hog_function(self, function_id: str, updates: dict[str, Any]) -> dict[str, Any]:
-        """Update a hog function via API."""
+    def update_custom_function(self, function_id: str, updates: dict[str, Any]) -> dict[str, Any]:
+        """Update a custom function via API."""
         response = self.client.patch(
-            f"/api/projects/{self.team.id}/hog_functions/{function_id}/", updates, format="json"
+            f"/api/projects/{self.team.id}/custom_functions/{function_id}/", updates, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.json()
@@ -705,7 +705,7 @@ class ActivityLogTestHelper(APILicensedTest):
     # DataWarehouseSavedQuery
     def create_data_warehouse_saved_query(self, name: str = "Test Query", **kwargs) -> dict[str, Any]:
         """Create a data warehouse saved query via API."""
-        data = {"name": name, "query": {"kind": "HogQLQuery", "query": "SELECT event FROM events LIMIT 10"}, **kwargs}
+        data = {"name": name, "query": {"kind": "InsightsQLQuery", "query": "SELECT event FROM events LIMIT 10"}, **kwargs}
         response = self.client.post(f"/api/projects/{self.team.id}/warehouse_saved_queries/", data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         return response.json()

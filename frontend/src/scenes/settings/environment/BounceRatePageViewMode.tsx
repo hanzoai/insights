@@ -7,10 +7,10 @@ import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 import { AccessControlLevel, AccessControlResourceType } from '~/types'
 
-type BounceRatePageViewMode = NonNullable<HogQLQueryModifiers['bounceRatePageViewMode']>
+type BounceRatePageViewMode = NonNullable<InsightsQLQueryModifiers['bounceRatePageViewMode']>
 
 const bounceRatePageViewModeOptions: LemonRadioOption<BounceRatePageViewMode>[] = [
     {

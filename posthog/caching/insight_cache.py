@@ -11,7 +11,7 @@ from prometheus_client import Counter, Gauge
 from posthog.api.services.query import process_query_dict
 from posthog.clickhouse.query_tagging import tag_queries
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.models import Dashboard, Insight, InsightCachingState
 from posthog.schema_migrations.upgrade_manager import upgrade_query
 from posthog.tasks.tasks import update_cache_task
@@ -124,7 +124,7 @@ def update_cached_state(
     result: Any,
     ttl: Optional[int] = None,
 ):
-    if result is not None:  # This is particularly the case for HogQL-based queries, which cache.set() on their own
+    if result is not None:  # This is particularly the case for InsightsQL-based queries, which cache.set() on their own
         from posthog.caching.query_cache_routing import get_query_cache
 
         query_cache = get_query_cache(team_id)

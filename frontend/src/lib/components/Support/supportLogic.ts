@@ -69,7 +69,7 @@ function getErrorTrackingLink(uuid?: string): string {
 
     if (uuid) {
         values.push({
-            type: 'hogql',
+            type: 'insightsql',
             key: `uuid = '${uuid}'`,
             value: null,
         } as any)

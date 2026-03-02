@@ -17,7 +17,7 @@ def _make_sentiment_result(label: str = "positive", score: float = 0.9) -> Senti
     return SentimentResult(label=label, score=score, scores=scores)
 
 
-def _mock_hogql_result(rows: list[tuple]) -> MagicMock:
+def _mock_insightsql_result(rows: list[tuple]) -> MagicMock:
     result = MagicMock()
     result.results = rows
     return result
@@ -27,7 +27,7 @@ def _single_input(trace_id: str = "trace-1", **kwargs) -> ClassifySentimentInput
     return ClassifySentimentInput(team_id=1, trace_ids=[trace_id], **kwargs)
 
 
-_PATCH_HOGQL = "posthog.hogql.query.execute_hogql_query"
+_PATCH_INSIGHTSQL = "posthog.insightsql.query.execute_insightsql_query"
 _PATCH_TEAM = "posthog.models.team.Team.objects"
 _PATCH_CLASSIFY = "posthog.temporal.llm_analytics.sentiment.model.classify"
 _PATCH_CAP = "posthog.temporal.llm_analytics.sentiment.constants.MAX_CLASSIFICATIONS_PER_TRACE"
@@ -42,9 +42,9 @@ def _mock_team():
 
 class TestClassifySentimentSingleTrace:
     @pytest.mark.asyncio
-    @patch(_PATCH_HOGQL)
-    async def test_empty_query_returns_neutral(self, mock_hogql: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result([])
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_empty_query_returns_neutral(self, mock_insightsql: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result([])
 
         result = await classify_sentiment_activity(_single_input())
 
@@ -54,9 +54,9 @@ class TestClassifySentimentSingleTrace:
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_single_generation_single_message(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_single_generation_single_message(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": "I love this product"}]),
             ]
@@ -72,9 +72,9 @@ class TestClassifySentimentSingleTrace:
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_multiple_generations_batched(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_multiple_generations_batched(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": "msg-a"}]),
                 _make_row(
@@ -105,9 +105,9 @@ class TestClassifySentimentSingleTrace:
     @pytest.mark.asyncio
     @patch(_PATCH_CAP, 3)
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_cap_limits_total_classifications(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_cap_limits_total_classifications(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": f"msg-{i}"} for i in range(5)]),
                 _make_row(
@@ -134,9 +134,9 @@ class TestClassifySentimentSingleTrace:
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_skips_generations_without_user_messages(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_skips_generations_without_user_messages(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "assistant", "content": "no user msgs"}]),
                 _make_row("gen-2", [{"role": "user", "content": "a real message"}]),
@@ -154,9 +154,9 @@ class TestClassifySentimentSingleTrace:
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_passes_absolute_date_range_to_query(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_passes_absolute_date_range_to_query(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": "hello"}]),
             ]
@@ -165,16 +165,16 @@ class TestClassifySentimentSingleTrace:
 
         await classify_sentiment_activity(_single_input(date_from="2025-01-01", date_to="2025-01-31"))
 
-        call_kwargs = mock_hogql.call_args.kwargs
+        call_kwargs = mock_insightsql.call_args.kwargs
         placeholders = call_kwargs["placeholders"]
         assert placeholders["date_from"].value == "2025-01-01 00:00:00"
         assert placeholders["date_to"].value == "2025-01-31 00:00:00"
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_resolves_relative_date_range(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_resolves_relative_date_range(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": "hello"}]),
             ]
@@ -183,7 +183,7 @@ class TestClassifySentimentSingleTrace:
 
         await classify_sentiment_activity(_single_input(date_from="-1h", date_to=None))
 
-        call_kwargs = mock_hogql.call_args.kwargs
+        call_kwargs = mock_insightsql.call_args.kwargs
         placeholders = call_kwargs["placeholders"]
         # relative date should be resolved to an absolute timestamp
         assert "20" in placeholders["date_from"].value  # starts with year
@@ -193,9 +193,9 @@ class TestClassifySentimentSingleTrace:
 
 class TestClassifySentimentBatch:
     @pytest.mark.asyncio
-    @patch(_PATCH_HOGQL)
-    async def test_empty_query_returns_neutral_for_all(self, mock_hogql: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result([])
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_empty_query_returns_neutral_for_all(self, mock_insightsql: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result([])
 
         result = await classify_sentiment_activity(ClassifySentimentInput(team_id=1, trace_ids=["t1", "t2"]))
 
@@ -204,9 +204,9 @@ class TestClassifySentimentBatch:
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_multiple_traces_single_query(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_multiple_traces_single_query(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": "hello from t1"}], "t1"),
                 _make_row("gen-2", [{"role": "user", "content": "hello from t2"}], "t2"),
@@ -221,8 +221,8 @@ class TestClassifySentimentBatch:
 
         # One classify call with all texts
         mock_classify.assert_called_once_with(["hello from t1", "hello from t2"])
-        # One execute_hogql_query call (single ClickHouse query)
-        mock_hogql.assert_called_once()
+        # One execute_insightsql_query call (single ClickHouse query)
+        mock_insightsql.assert_called_once()
 
         assert result["t1"]["label"] == "positive"
         assert result["t1"]["generation_count"] == 1
@@ -231,9 +231,9 @@ class TestClassifySentimentBatch:
 
     @pytest.mark.asyncio
     @patch(_PATCH_CLASSIFY)
-    @patch(_PATCH_HOGQL)
-    async def test_trace_with_no_rows_gets_neutral(self, mock_hogql: MagicMock, mock_classify: MagicMock):
-        mock_hogql.return_value = _mock_hogql_result(
+    @patch(_PATCH_INSIGHTSQL)
+    async def test_trace_with_no_rows_gets_neutral(self, mock_insightsql: MagicMock, mock_classify: MagicMock):
+        mock_insightsql.return_value = _mock_insightsql_result(
             [
                 _make_row("gen-1", [{"role": "user", "content": "msg"}], "t1"),
             ]

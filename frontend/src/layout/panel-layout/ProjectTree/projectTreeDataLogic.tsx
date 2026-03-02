@@ -123,8 +123,8 @@ const humanizeFileSystemEntryType = (type?: string): string => {
 
     const humanizedType = identifierToHuman(type).toLowerCase()
 
-    if (humanizedType.startsWith('hog function ')) {
-        return humanizedType.replace('hog function ', '')
+    if (humanizedType.startsWith('custom function ')) {
+        return humanizedType.replace('custom function ', '')
     }
 
     return humanizedType

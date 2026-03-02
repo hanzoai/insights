@@ -90,7 +90,7 @@ export function FunnelsQuerySteps({ insightProps }: EditorFilterProps): JSX.Elem
                         TaxonomicFilterGroupType.Cohorts,
                         TaxonomicFilterGroupType.Elements,
                         TaxonomicFilterGroupType.SessionProperties,
-                        TaxonomicFilterGroupType.HogQLExpression,
+                        TaxonomicFilterGroupType.InsightsQLExpression,
                     ]}
                     addFilterDocLink="https://posthog.com/docs/product-analytics/trends/filters"
                     actionsTaxonomicGroupTypes={[
@@ -107,7 +107,7 @@ export function FunnelsQuerySteps({ insightProps }: EditorFilterProps): JSX.Elem
                 {showGroupsOptions && (
                     <div className="flex items-center w-full gap-2">
                         <span>Aggregating by</span>
-                        <AggregationSelect insightProps={insightProps} hogqlAvailable />
+                        <AggregationSelect insightProps={insightProps} insightsqlAvailable />
                     </div>
                 )}
 

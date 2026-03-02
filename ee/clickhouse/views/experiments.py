@@ -22,8 +22,8 @@ from posthog.api.forbid_destroy_model import ForbidDestroyModel
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.shared import UserBasicSerializer
 from posthog.api.utils import action
-from posthog.hogql_queries.experiments.experiment_metric_fingerprint import compute_metric_fingerprint
-from posthog.hogql_queries.experiments.utils import get_experiment_stats_method
+from posthog.insightsql_queries.experiments.experiment_metric_fingerprint import compute_metric_fingerprint
+from posthog.insightsql_queries.experiments.utils import get_experiment_stats_method
 from posthog.models import Survey
 from posthog.models.activity_logging.activity_log import Detail, changes_between, log_activity
 from posthog.models.cohort import Cohort
@@ -1085,7 +1085,7 @@ class EnterpriseExperimentsViewSet(
                 target_filters = [
                     prop.to_dict()
                     for prop in entity.property_groups.flat
-                    if prop.type in ("event", "feature", "element", "hogql")
+                    if prop.type in ("event", "feature", "element", "insightsql")
                 ]
 
         cohort_serializer = CohortSerializer(

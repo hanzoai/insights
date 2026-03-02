@@ -17,7 +17,7 @@ from prometheus_client import Counter
 from posthog.database_healthcheck import DATABASE_FOR_FLAG_MATCHING
 from posthog.exceptions_capture import capture_exception
 from posthog.models.feature_flag.feature_flag import FeatureFlag
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.organization import OrganizationMembership
 from posthog.models.personal_api_key import PersonalAPIKey
 from posthog.models.plugin import PluginConfig
@@ -333,7 +333,7 @@ class RemoteConfig(UUIDTModel):
         # NOTE: This is the web focused config for the frontend that includes site apps
 
         from posthog.cdp.site_functions import get_transpiled_function
-        from posthog.models import HogFunction
+        from posthog.models import CustomFunction
         from posthog.plugins.site import get_site_apps_for_team, get_site_config_from_schema
 
         # Add in the site apps as an array of objects
@@ -346,7 +346,7 @@ class RemoteConfig(UUIDTModel):
                 )
             )
         site_functions = (
-            HogFunction.objects.select_related("team")
+            CustomFunction.objects.select_related("team")
             .filter(team=self.team, enabled=True, deleted=False, type__in=("site_destination", "site_app"))
             .all()
         )
@@ -546,8 +546,8 @@ def site_app_saved(sender, instance: "PluginConfig", created, **kwargs):
         transaction.on_commit(lambda: _update_team_remote_config(instance_team_id))
 
 
-@receiver(post_save, sender=HogFunction)
-def site_function_saved(sender, instance: "HogFunction", created, **kwargs):
+@receiver(post_save, sender=CustomFunction)
+def site_function_saved(sender, instance: "CustomFunction", created, **kwargs):
     if instance.enabled and instance.type in ("site_destination", "site_app"):
         transaction.on_commit(lambda: _update_team_remote_config(instance.team_id))
 

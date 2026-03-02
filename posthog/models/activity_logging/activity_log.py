@@ -32,8 +32,8 @@ ActivityScope = Literal[
     "Insight",
     "Plugin",
     "PluginConfig",
-    "HogFunction",
-    "HogFlow",
+    "CustomFunction",
+    "CustomFlow",
     "DataManagement",
     "EventDefinition",
     "PropertyDefinition",
@@ -211,7 +211,7 @@ common_field_exclusions = [
 
 
 field_with_masked_contents: dict[ActivityScope, list[str]] = {
-    "HogFunction": [
+    "CustomFunction": [
         "encrypted_inputs",
     ],
     "Integration": [
@@ -241,7 +241,7 @@ field_with_masked_contents: dict[ActivityScope, list[str]] = {
 }
 
 field_name_overrides: dict[ActivityScope, dict[str, str]] = {
-    "HogFunction": {
+    "CustomFunction": {
         "execution_order": "priority",
     },
     "Organization": {
@@ -331,7 +331,7 @@ field_exclusions: dict[ActivityScope, list[str]] = {
         "last_error_at",
         "errors_calculating",
     ],
-    "HogFunction": [
+    "CustomFunction": [
         "bytecode",
         "icon_url",
     ],

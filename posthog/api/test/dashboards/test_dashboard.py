@@ -17,7 +17,7 @@ from posthog.api.dashboards.dashboard import DashboardSerializer
 from posthog.api.test.dashboards import DashboardAPI
 from posthog.constants import AvailableFeature
 from posthog.helpers.dashboard_templates import create_group_type_mapping_detail_dashboard
-from posthog.hogql_queries.legacy_compatibility.filter_to_query import filter_to_query
+from posthog.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
 from posthog.models import Dashboard, DashboardTile, Filter, Insight, Team, User
 from posthog.models.activity_logging.activity_log import ActivityLog
 from posthog.models.dashboard_tile import Text
@@ -1699,7 +1699,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
                     "timezone": None,
                     "updated_at": ANY,
                     "user_access_level": "manager",
-                    "hogql": ANY,
+                    "insightsql": ANY,
                     "types": ANY,
                 },
                 "is_cached": False,
@@ -1778,7 +1778,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select {variables.test_1}",
                     "variables": {
                         str(variable.id): {
@@ -1829,7 +1829,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select {variables.test_1}",
                     "variables": {
                         str(variable.id): {
@@ -1987,7 +1987,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_1}",
                     "variables": {
                         str(var1.id): {
@@ -2006,7 +2006,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_2}",
                     "variables": {
                         str(var2.id): {
@@ -2025,7 +2025,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_3}",
                     "variables": {
                         str(var3.id): {
@@ -2045,7 +2045,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT {variables.variable_4}",
                     "variables": {
                         str(var4.id): {
@@ -2065,7 +2065,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
         #     query={
         #         "kind": "DataVisualizationNode",
         #         "source": {
-        #             "kind": "HogQLQuery",
+        #             "kind": "InsightsQLQuery",
         #             "query": "SELECT {variables.var_missing}",
         #             "variables": {
         #                 "missing_variable_id": {
@@ -2150,7 +2150,7 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select {variables.test_var}",
                     "variables": {
                         str(variable.id): {

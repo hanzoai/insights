@@ -1,6 +1,6 @@
 import pytest
 
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.klaviyo.template_klaviyo import (
     template_event as klaviyo_event,
     template_user as klaviyo_user,
@@ -9,7 +9,7 @@ from posthog.cdp.templates.klaviyo.template_klaviyo import (
 from common.hogvm.python.utils import UncaughtHogVMException
 
 
-class TestTemplateKlaviyoUser(BaseHogFunctionTemplateTest):
+class TestTemplateKlaviyoUser(BaseCustomFunctionTemplateTest):
     template = klaviyo_user
 
     def create_inputs(self, **kwargs):
@@ -107,7 +107,7 @@ class TestTemplateKlaviyoUser(BaseHogFunctionTemplateTest):
         assert e.value.message == "Error from a.klaviyo.com api: 400"
 
 
-class TestTemplateKlaviyoEvent(BaseHogFunctionTemplateTest):
+class TestTemplateKlaviyoEvent(BaseCustomFunctionTemplateTest):
     def create_inputs(self, **kwargs):
         inputs = {
             "apiKey": "API_KEY",

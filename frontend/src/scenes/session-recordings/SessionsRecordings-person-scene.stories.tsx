@@ -131,7 +131,7 @@ const meta: Meta = {
             post: {
                 '/api/environments/:team_id/query/': (req) => {
                     const query = (req.body as any)?.query
-                    if (query?.kind === 'HogQLQuery' && query?.values?.id === personUUID) {
+                    if (query?.kind === 'InsightsQLQuery' && query?.values?.id === personUUID) {
                         return [200, personQueryResponse]
                     }
                     return [200, { results: [] }]
@@ -150,7 +150,7 @@ export const PersonRecordingTabEmpty: StoryFn = () => {
         post: {
             '/api/environments/:team_id/query/': (req) => {
                 const query = (req.body as any)?.query
-                if (query?.kind === 'HogQLQuery' && query?.values?.id === personUUID) {
+                if (query?.kind === 'InsightsQLQuery' && query?.values?.id === personUUID) {
                     return [200, personQueryResponse]
                 }
                 return [200, { results: [] }]

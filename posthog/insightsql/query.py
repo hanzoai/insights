@@ -1,0 +1,361 @@
+import dataclasses
+from typing import ClassVar, Optional, Union, cast
+
+from opentelemetry import trace
+
+from posthog.schema import (
+    HogLanguage,
+    InsightsQLFilters,
+    InsightsQLMetadata,
+    InsightsQLMetadataResponse,
+    InsightsQLQueryModifiers,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
+)
+
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLGlobalSettings, LimitContext, get_default_limit_for_context
+from posthog.insightsql.database.schema.logs import INSIGHTSQL_MAX_BYTES_TO_READ_FOR_LOGS_USER_QUERIES
+from posthog.insightsql.errors import ExposedInsightsQLError
+from posthog.insightsql.filters import replace_filters
+from posthog.insightsql.insightsql import InsightsQLContext
+from posthog.insightsql.modifiers import create_default_modifiers_for_team
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.placeholders import find_placeholders, replace_placeholders
+from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from posthog.insightsql.resolver_utils import extract_select_queries
+from posthog.insightsql.timings import InsightsQLTimings
+from posthog.insightsql.transforms.preaggregated_table_transformation import do_preaggregated_table_transforms
+from posthog.insightsql.variables import replace_variables
+from posthog.insightsql.visitor import clone_expr
+
+from posthog.clickhouse.client import sync_execute
+from posthog.clickhouse.client.connection import Workload
+from posthog.clickhouse.query_tagging import tag_queries
+from posthog.errors import ExposedCHQueryError
+from posthog.models.team import Team
+from posthog.settings import INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
+
+tracer = trace.get_tracer(__name__)
+
+
+@dataclasses.dataclass
+class InsightsQLQueryExecutor:
+    query: Union[str, ast.SelectQuery, ast.SelectSetQuery]
+    team: Team
+    _: dataclasses.KW_ONLY
+    query_type: str = "insightsql_query"
+    filters: Optional[InsightsQLFilters] = None
+    placeholders: Optional[dict[str, ast.Expr]] = None
+    variables: Optional[dict[str, InsightsQLVariable]] = None
+    workload: Workload = Workload.DEFAULT
+    settings: Optional[InsightsQLGlobalSettings] = None
+    modifiers: Optional[InsightsQLQueryModifiers] = None
+    limit_context: Optional[LimitContext] = LimitContext.QUERY
+    timings: InsightsQLTimings = dataclasses.field(default_factory=InsightsQLTimings)
+    pretty: Optional[bool] = True
+    context: InsightsQLContext = dataclasses.field(default_factory=lambda: InsightsQLQueryExecutor.__uninitialized_context)
+    insightsql_context: Optional[InsightsQLContext] = None
+    clickhouse_prepared_ast: Optional[ast.AST] = None
+    clickhouse_sql: Optional[str] = None
+
+    __uninitialized_context: ClassVar[InsightsQLContext] = InsightsQLContext()
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor.__post_init__")
+    def __post_init__(self):
+        if self.context is self.__uninitialized_context:
+            self.context = InsightsQLContext(team_id=self.team.pk)
+
+        self.query_modifiers = create_default_modifiers_for_team(self.team, self.modifiers)
+        self.debug = self.modifiers is not None and self.modifiers.debug
+        self.error: Optional[str] = None
+        self.explain: Optional[list[str]] = None
+        self.results = None
+        self.types = None
+        self.metadata: Optional[InsightsQLMetadataResponse] = None
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._parse_query")
+    def _parse_query(self):
+        with self.timings.measure("query"):
+            if isinstance(self.query, ast.SelectQuery) or isinstance(self.query, ast.SelectSetQuery):
+                self.select_query = self.query
+                self.query = None
+            else:
+                self.select_query = parse_select(str(self.query), timings=self.timings)
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._process_variables")
+    def _process_variables(self):
+        with self.timings.measure("variables"):
+            if self.variables and len(self.variables.keys()) > 0:
+                self.select_query = replace_variables(
+                    node=self.select_query, variables=list(self.variables.values()), team=self.team
+                )
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._process_placeholders")
+    def _process_placeholders(self):
+        with self.timings.measure("replace_placeholders"):
+            if not self.placeholders:
+                self.placeholders = {}
+            finder = find_placeholders(self.select_query)
+
+            # Need to use the "filters" system to replace a few special placeholders
+            if finder.has_filters:
+                if "filters" in self.placeholders and self.filters is not None:
+                    raise ValueError(f"Query contains 'filters' both as placeholder and as a query parameter.")
+                self.select_query = replace_filters(self.select_query, self.filters, self.team)
+
+            # If there are placeholders remaining
+            if finder.placeholder_fields or finder.placeholder_expressions:
+                self.select_query = cast(ast.SelectQuery, replace_placeholders(self.select_query, self.placeholders))
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._apply_limit")
+    def _apply_limit(self):
+        if self.limit_context in (LimitContext.COHORT_CALCULATION, LimitContext.SAVED_QUERY):
+            self.context.limit_top_select = False
+
+        with self.timings.measure("max_limit"):
+            for one_query in extract_select_queries(self.select_query):
+                if one_query.limit is None:
+                    one_query.limit = ast.Constant(
+                        value=get_default_limit_for_context(self.limit_context or LimitContext.QUERY)
+                    )
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._apply_optimizers")
+    def _apply_optimizers(self):
+        if self.query_modifiers.usePreaggregatedTableTransforms:
+            with self.timings.measure("preaggregated_table_transforms"):
+                assert self.insightsql_context is not None
+                assert self.insightsql_context.team is not None
+                transformed_node = do_preaggregated_table_transforms(self.select_query, self.insightsql_context)
+                if isinstance(transformed_node, ast.SelectQuery) or isinstance(transformed_node, ast.SelectSetQuery):
+                    self.select_query = transformed_node
+
+        if self.query_modifiers.usePreaggregatedIntermediateResults:
+            with self.timings.measure("daily_unique_persons_pageviews_transform"):
+                assert self.insightsql_context is not None
+                from products.analytics_platform.backend.lazy_computation.lazy_computation_transformer import (
+                    Transformer as DailyUniquePersonsPageviewsTransformer,
+                )
+
+                transformer = DailyUniquePersonsPageviewsTransformer(self.insightsql_context)
+                transformed_node = transformer.visit(self.select_query)
+                if isinstance(transformed_node, ast.SelectQuery) or isinstance(transformed_node, ast.SelectSetQuery):
+                    self.select_query = transformed_node
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._generate_insightsql")
+    def _generate_insightsql(self):
+        self.insightsql_context = dataclasses.replace(
+            self.context,
+            team_id=self.team.pk,
+            team=self.team,
+            enable_select_queries=True,
+            timings=self.timings,
+            modifiers=self.query_modifiers,
+            limit_context=self.limit_context,
+        )
+
+        self._apply_optimizers()
+
+        with self.timings.measure("clone"):
+            cloned_query = clone_expr(self.select_query, True)
+
+        with self.timings.measure("prepare_ast_for_printing"):
+            select_query_insightsql = cast(
+                ast.SelectQuery,
+                prepare_ast_for_printing(node=cloned_query, context=self.insightsql_context, dialect="insightsql"),
+            )
+
+        with self.timings.measure("print_prepared_ast"):
+            self.insightsql = print_prepared_ast(
+                select_query_insightsql,
+                self.insightsql_context,
+                "insightsql",
+                pretty=self.pretty if self.pretty is not None else True,
+            )
+            self.print_columns = []
+            columns_query = (
+                next(extract_select_queries(select_query_insightsql))
+                if isinstance(select_query_insightsql, ast.SelectSetQuery)
+                else select_query_insightsql
+            )
+            for node in columns_query.select:
+                if isinstance(node, ast.Alias):
+                    self.print_columns.append(node.alias)
+                else:
+                    self.print_columns.append(
+                        print_prepared_ast(
+                            node=node,
+                            context=self.insightsql_context,
+                            dialect="insightsql",
+                            stack=[select_query_insightsql],
+                        )
+                    )
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._generate_clickhouse_sql")
+    def _generate_clickhouse_sql(self):
+        settings = self.settings or InsightsQLGlobalSettings()
+        if self.limit_context in (
+            LimitContext.EXPORT,
+            LimitContext.COHORT_CALCULATION,
+            LimitContext.QUERY_ASYNC,
+            LimitContext.SAVED_QUERY,
+            LimitContext.RETENTION,
+            LimitContext.POSTHOG_AI,
+        ):
+            settings.max_execution_time = max(settings.max_execution_time or 0, INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME)
+
+        if self.query_modifiers.formatCsvAllowDoubleQuotes is not None:
+            settings.format_csv_allow_double_quotes = self.query_modifiers.formatCsvAllowDoubleQuotes
+        if self.query_modifiers.forceClickhouseDataSkippingIndexes:
+            settings.force_data_skipping_indices = self.query_modifiers.forceClickhouseDataSkippingIndexes
+
+        try:
+            self.clickhouse_context = dataclasses.replace(
+                self.context,
+                team_id=self.team.pk,
+                team=self.team,
+                enable_select_queries=True,
+                timings=self.timings,
+                modifiers=self.query_modifiers,
+                limit_context=self.limit_context,
+                # it's valid to reuse the insightsql DB because the modifiers are the same,
+                # and if we don't we end up creating the virtual DB twice per query
+                database=self.insightsql_context.database if self.insightsql_context else None,
+            )
+            with self.timings.measure("prepare_ast_for_printing"):
+                self.clickhouse_prepared_ast = prepare_ast_for_printing(
+                    node=self.select_query,
+                    context=self.clickhouse_context,
+                    dialect="clickhouse",
+                    settings=settings,
+                )
+
+            # Apply log-specific byte limits for user InsightsQL queries to prevent expensive full scans.
+            # Internal runners (LogsQueryRunner, etc.) use different query_types and set their own limits.
+            if self.clickhouse_context.workload == Workload.LOGS and self.query_type == "InsightsQLQuery":
+                if settings.max_bytes_to_read is None:
+                    settings.max_bytes_to_read = INSIGHTSQL_MAX_BYTES_TO_READ_FOR_LOGS_USER_QUERIES
+                if settings.read_overflow_mode is None:
+                    settings.read_overflow_mode = "throw"
+
+            with self.timings.measure("print_prepared_ast"):
+                if self.clickhouse_prepared_ast is None:
+                    self.clickhouse_sql = ""
+                else:
+                    self.clickhouse_sql = print_prepared_ast(
+                        node=self.clickhouse_prepared_ast,
+                        context=self.clickhouse_context,
+                        dialect="clickhouse",
+                        settings=settings,
+                        pretty=self.pretty if self.pretty is not None else True,
+                    )
+        except Exception as e:
+            if self.debug:
+                self.clickhouse_sql = ""
+                if isinstance(e, ExposedCHQueryError | ExposedInsightsQLError):
+                    self.error = str(e)
+                else:
+                    self.error = "Unknown error"
+            else:
+                raise
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor._execute_clickhouse_query")
+    def _execute_clickhouse_query(self):
+        assert self.clickhouse_sql
+        timings_dict = self.timings.to_dict()
+        with self.timings.measure("clickhouse_execute"):
+            tag_queries(
+                team_id=self.team.pk,
+                query_type=self.query_type,
+                has_joins="JOIN" in self.clickhouse_sql,
+                has_json_operations="JSONExtract" in self.clickhouse_sql or "JSONHas" in self.clickhouse_sql,
+                timings=timings_dict,
+                modifiers=(
+                    {k: v for k, v in self.modifiers.model_dump().items() if v is not None} if self.modifiers else {}
+                ),
+            )
+
+            # Use workload detected during AST resolution, falling back to explicitly set workload
+            workload = self.workload
+            if workload == Workload.DEFAULT and self.clickhouse_context.workload is not None:
+                workload = self.clickhouse_context.workload
+
+            try:
+                self.results, self.types = sync_execute(
+                    self.clickhouse_sql,
+                    self.clickhouse_context.values,
+                    with_column_types=True,
+                    workload=workload,
+                    team_id=self.team.pk,
+                    readonly=True,
+                )
+            except Exception as e:
+                if self.debug:
+                    self.results = []
+                    if isinstance(e, ExposedCHQueryError | ExposedInsightsQLError):
+                        self.error = str(e)
+                    else:
+                        self.error = "Unknown error"
+                else:
+                    raise
+
+        if self.debug and self.error is None:  # If the query errored, explain will fail as well.
+            with self.timings.measure("explain"):
+                # nosemgrep: clickhouse-injection-taint - InsightsQL-compiled SQL, values in context
+                explain_results = sync_execute(
+                    f"EXPLAIN {self.clickhouse_sql}",
+                    self.clickhouse_context.values,
+                    with_column_types=True,
+                    workload=workload,
+                    team_id=self.team.pk,
+                    readonly=True,
+                )
+                self.explain = [str(r[0]) for r in explain_results[0]]
+            with self.timings.measure("metadata"):
+                from posthog.insightsql.metadata import get_insightsql_metadata
+
+                self.metadata = get_insightsql_metadata(
+                    InsightsQLMetadata(language=HogLanguage.HOG_QL, query=self.insightsql, debug=True),
+                    self.team,
+                    self.select_query,
+                    self.clickhouse_prepared_ast,
+                    self.clickhouse_sql,
+                )
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor.generate_clickhouse_sql")
+    def generate_clickhouse_sql(self) -> tuple[str, InsightsQLContext]:
+        self._parse_query()
+        self._process_variables()
+        self._process_placeholders()
+        self._apply_limit()
+        with self.timings.measure("_generate_insightsql"):
+            self._generate_insightsql()
+        with self.timings.measure("_generate_clickhouse_sql"):
+            self._generate_clickhouse_sql()
+        assert self.clickhouse_sql
+        return self.clickhouse_sql, self.clickhouse_context
+
+    @tracer.start_as_current_span("InsightsQLQueryExecutor.execute")
+    def execute(self) -> InsightsQLQueryResponse:
+        self.generate_clickhouse_sql()
+
+        if self.clickhouse_sql is not None:
+            self._execute_clickhouse_query()
+
+        return InsightsQLQueryResponse(
+            query=self.query,
+            insightsql=self.insightsql,
+            clickhouse=self.clickhouse_sql,
+            error=self.error,
+            timings=self.timings.to_list(),
+            results=self.results,
+            columns=self.print_columns,
+            types=self.types,
+            modifiers=self.query_modifiers,
+            explain=self.explain,
+            metadata=self.metadata,
+        )
+
+
+def execute_insightsql_query(*args, **kwargs) -> InsightsQLQueryResponse:
+    return InsightsQLQueryExecutor(*args, **kwargs).execute()

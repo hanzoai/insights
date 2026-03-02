@@ -7,7 +7,7 @@
 - The list of tiles is created in the [webAnalyticsLogic](./webAnalyticsLogic.tsx) selector called `tiles`, it's quite a large function, and it returns the data for every tile on the page. See also the `<WebAnalyticsTile/>` type
 - Different types of tiles have different components to render them, I'll just focus on `<QueryTileItem/>` and `<TabsTileItem/>`. They call `<WebQuery/>`, which adds some UI for different kinds of queries, but they all eventually include a `<Query/>`
 - The `<Query/>` component is the front-end component that handles everything related to actually running and visualizing one query, so it'll handle the network request, caching, rendering a table, etc.
-- Jumping to the back end, when we make a query via the API it'll go through some django stuff, and then `get_query_runner` will try to find a query runner to run the specific query. One example is the [WebOverviewQueryRunner](../../../../posthog/hogql_queries/web_analytics/web_overview.py). These query runners have a `to_query` method which is responsible for generating SQL based on their inputs, and a `calculate` method which is responsible for running the query on clickhouse and returning a response.
+- Jumping to the back end, when we make a query via the API it'll go through some django stuff, and then `get_query_runner` will try to find a query runner to run the specific query. One example is the [WebOverviewQueryRunner](../../../../posthog/insightsql_queries/web_analytics/web_overview.py). These query runners have a `to_query` method which is responsible for generating SQL based on their inputs, and a `calculate` method which is responsible for running the query on clickhouse and returning a response.
 - The query input and output types are defined in typescript, and we have a script which converts them to pydantic models for type hinting in the back end. See [schema-general.ts](../../queries/schema/schema-general.ts) and [schema.py](../../../../posthog/schema.py)
 
 ## How to regenerate the schema
@@ -18,19 +18,19 @@ In the project root
 pnpm run schema:build
 ```
 
-## HogQL query examples and testing
+## InsightsQL query examples and testing
 
-For comprehensive documentation on how web analytics queries work, see [hogql_queries.md](./docs/hogql_queries.md). This guide covers:
+For comprehensive documentation on how web analytics queries work, see [insightsql_queries.md](./docs/insightsql_queries.md). This guide covers:
 
-- How to view generated HogQL queries via snapshot tests
+- How to view generated InsightsQL queries via snapshot tests
 - Testing queries directly using the PostHog API
 - Query structure patterns for all web analytics query types (overview, trends, breakdowns)
-- All breakdown types with their corresponding HogQL fields
+- All breakdown types with their corresponding InsightsQL fields
 - Event vs session property usage patterns
 - Period comparison and bounce rate calculation details
 - Tips for modifying and customizing queries
 
-The snapshot tests in `posthog/hogql_queries/web_analytics/test/test_sample_web_analytics_queries.py` serve as the source of truth for query generation and are automatically kept up to date
+The snapshot tests in `posthog/insightsql_queries/web_analytics/test/test_sample_web_analytics_queries.py` serve as the source of truth for query generation and are automatically kept up to date
 
 ## Sessions table
 
@@ -120,17 +120,17 @@ Captured at session start and persisted for the session lifetime:
 The table definitions and materialized view logic are in:
 
 - [posthog/models/raw_sessions/sessions_v3.py](../../../../posthog/models/raw_sessions/sessions_v3.py) - SQL table definitions and materialized view queries
-- [posthog/hogql/database/schema/sessions_v3.py](../../../../posthog/hogql/database/schema/sessions_v3.py) - HogQL schema that exposes sessions table to queries
+- [posthog/insightsql/database/schema/sessions_v3.py](../../../../posthog/insightsql/database/schema/sessions_v3.py) - InsightsQL schema that exposes sessions table to queries
 - [posthog/clickhouse/migrations/](../../../../posthog/clickhouse/migrations/) - Search for `sessions_v3` to find related migrations
 
-## What is HogQL?
+## What is InsightsQL?
 
-Web analytics queries are written in HogQL (sometimes referred to as Hog SQL or PostHog SQL). Here's some links to learn more about it:
+Web analytics queries are written in InsightsQL (sometimes referred to as Hog SQL or PostHog SQL). Here's some links to learn more about it:
 
-- <https://posthog.com/blog/introducing-hogql>
-- <https://posthog.com/handbook/engineering/databases/hogql-python>
+- <https://posthog.com/blog/introducing-insightsql>
+- <https://posthog.com/handbook/engineering/databases/insightsql-python>
 
-The TLDR is that you can construct HogQL queries by either parsing a string or by creating the ast nodes in python, and these are converted into Clickhouse SQL queries. There are lazy joins to make property access easier, so e.g. you can write `SELECT person.properties from events` instead of having to write the join between `events` and `persons` yourself, but the join will only be added to query if it's actually needed.
+The TLDR is that you can construct InsightsQL queries by either parsing a string or by creating the ast nodes in python, and these are converted into Clickhouse SQL queries. There are lazy joins to make property access easier, so e.g. you can write `SELECT person.properties from events` instead of having to write the join between `events` and `persons` yourself, but the join will only be added to query if it's actually needed.
 
 ## Where do events come from?
 

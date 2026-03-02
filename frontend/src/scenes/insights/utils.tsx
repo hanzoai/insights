@@ -24,8 +24,8 @@ import {
     EventsNode,
     FileSystemIconType,
     GroupNode,
-    HogQLQuery,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLVariable,
     InsightVizNode,
     Node,
     NodeKind,
@@ -36,7 +36,7 @@ import {
     ResultCustomizationByValue,
 } from '~/queries/schema/schema-general'
 import {
-    containsHogQLQuery,
+    containsInsightsQLQuery,
     isDataTableNode,
     isDataWarehouseNode,
     isEventsNode,
@@ -210,12 +210,12 @@ export function humanizePathsEventTypes(includeEventTypes: PathsFilter['includeE
             humanEventTypes.push('custom events')
         }
         if (
-            (humanEventTypes.length === 0 && !includeEventTypes.includes(PathType.HogQL)) ||
+            (humanEventTypes.length === 0 && !includeEventTypes.includes(PathType.InsightsQL)) ||
             humanEventTypes.length === 3
         ) {
             humanEventTypes = ['all events']
         }
-        if (includeEventTypes.includes(PathType.HogQL)) {
+        if (includeEventTypes.includes(PathType.InsightsQL)) {
             humanEventTypes.push('SQL expression')
         }
     }
@@ -468,7 +468,7 @@ export const INSIGHT_TYPE_URLS: Record<InsightType | string, string> = {
     [InsightType.WEB_ANALYTICS]: urls.insightNew({ type: InsightType.WEB_ANALYTICS }),
     JSON: urls.insightNew({ query: examples.EventsTableFull }),
     HOG: urls.insightNew({ query: examples.Hoggonacci }),
-    SQL: urls.sqlEditor({ query: (examples.HogQLForDataVisualization as HogQLQuery)['query'] }),
+    SQL: urls.sqlEditor({ query: (examples.InsightsQLForDataVisualization as InsightsQLQuery)['query'] }),
 }
 
 /** Combines a list of words, separating with the correct punctuation. For example: [a, b, c, d] -> "a, b, c, and d"  */
@@ -765,7 +765,7 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
     }
 
     let nodeKind: NodeKind
-    if ((isDataTableNode(query) && containsHogQLQuery(query)) || isInsightVizNode(query)) {
+    if ((isDataTableNode(query) && containsInsightsQLQuery(query)) || isInsightVizNode(query)) {
         nodeKind = query.source.kind
     } else {
         nodeKind = query.kind
@@ -780,7 +780,7 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
         [NodeKind.StickinessQuery]: 'insight/stickiness',
         [NodeKind.LifecycleQuery]: 'insight/lifecycle',
         [NodeKind.HogQuery]: 'insight/hog',
-        [NodeKind.HogQLQuery]: 'insight/hog',
+        [NodeKind.InsightsQLQuery]: 'insight/hog',
         [NodeKind.DataVisualizationNode]: 'insight/hog',
         [NodeKind.DataTableNode]: 'insight/hog',
     }
@@ -792,7 +792,7 @@ export function getInsightIconTypeFromQuery(query: any): FileSystemIconType {
 
 export const getOverrideWarningPropsForButton = (
     filtersOverride: DashboardFilter | null | undefined,
-    variablesOverride: Record<string, HogQLVariable> | null | undefined
+    variablesOverride: Record<string, InsightsQLVariable> | null | undefined
 ): Pick<LemonButtonProps, 'icon' | 'tooltip'> => {
     const filterOverridesExist =
         isObject(filtersOverride) &&

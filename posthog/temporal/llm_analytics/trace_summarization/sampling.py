@@ -1,6 +1,6 @@
 """Activity for sampling traces/generations from a time window.
 
-Uses lightweight HogQL queries to sample trace IDs and timestamps.
+Uses lightweight InsightsQL queries to sample trace IDs and timestamps.
 The full trace data is fetched later by the summarization activity using
 TraceQueryRunner per-item, so sampling only needs IDs and timestamps.
 """
@@ -10,11 +10,11 @@ from typing import Any
 import structlog
 import temporalio
 
-from posthog.hogql import ast
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.parser import parse_select
-from posthog.hogql.property import property_to_expr
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.property import property_to_expr
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models.team import Team
 from posthog.sync import database_sync_to_async
@@ -100,7 +100,7 @@ async def sample_items_in_window_activity(inputs: BatchSummarizationInputs) -> l
                 """
             )
 
-            result = execute_hogql_query(
+            result = execute_insightsql_query(
                 query_type="GenerationsForSampling",
                 query=generations_query,
                 placeholders={
@@ -166,7 +166,7 @@ async def sample_items_in_window_activity(inputs: BatchSummarizationInputs) -> l
                 """
             )
 
-            result = execute_hogql_query(
+            result = execute_insightsql_query(
                 query_type="TracesForSampling",
                 query=traces_query,
                 placeholders={

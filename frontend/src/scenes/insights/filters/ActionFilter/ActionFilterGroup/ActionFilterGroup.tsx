@@ -7,7 +7,7 @@ import posthog from 'posthog-js'
 import { IconPlusSmall, IconTrash, IconUndo } from '@posthog/icons'
 import { LemonButton, Tooltip } from '@posthog/lemon-ui'
 
-import { HogQLEditor } from 'lib/components/HogQLEditor/HogQLEditor'
+import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SeriesGlyph, SeriesLetter } from 'lib/components/SeriesGlyph'
 import {
@@ -93,14 +93,14 @@ export function ActionFilterGroup({
     const { setNodeRef, attributes, transform, transition, listeners, isDragging } = useSortable({ id: filter.uuid })
 
     const groupLogic = actionFilterGroupLogic({ filterUuid: filter.uuid, typeKey, groupIndex: index })
-    const { nestedFilters, operator, isHogQLDropdownVisible } = useValues(groupLogic)
+    const { nestedFilters, operator, isInsightsQLDropdownVisible } = useValues(groupLogic)
     const {
         addNestedFilter,
         updateNestedFilterProperties,
         setMath,
         setMathProperty,
-        setMathHogQL,
-        setHogQLDropdownVisible,
+        setMathInsightsQL,
+        setInsightsQLDropdownVisible,
     } = useActions(groupLogic)
 
     return (
@@ -221,21 +221,21 @@ export function ActionFilterGroup({
                                             )}
                                         />
                                     )}
-                                    {/* HogQL expression selector */}
+                                    {/* InsightsQL expression selector */}
                                     {(mathDefinitions as Record<string, any>)[filter.math || BaseMathType.TotalCount]
-                                        ?.category === MathCategory.HogQLExpression && (
+                                        ?.category === MathCategory.InsightsQLExpression && (
                                         <LemonDropdown
-                                            visible={isHogQLDropdownVisible}
+                                            visible={isInsightsQLDropdownVisible}
                                             closeOnClickInside={false}
-                                            onClickOutside={() => setHogQLDropdownVisible(false)}
+                                            onClickOutside={() => setInsightsQLDropdownVisible(false)}
                                             overlay={
                                                 // eslint-disable-next-line react/forbid-dom-props
                                                 <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
-                                                    <HogQLEditor
-                                                        value={filter.math_hogql || 'count()'}
+                                                    <InsightsQLEditor
+                                                        value={filter.math_insightsql || 'count()'}
                                                         onChange={(currentValue) => {
-                                                            setMathHogQL(currentValue)
-                                                            setHogQLDropdownVisible(false)
+                                                            setMathInsightsQL(currentValue)
+                                                            setInsightsQLDropdownVisible(false)
                                                         }}
                                                     />
                                                 </div>
@@ -245,10 +245,10 @@ export function ActionFilterGroup({
                                                 fullWidth
                                                 type="secondary"
                                                 size="small"
-                                                data-attr={`math-hogql-select-${index}`}
-                                                onClick={() => setHogQLDropdownVisible(!isHogQLDropdownVisible)}
+                                                data-attr={`math-insightsql-select-${index}`}
+                                                onClick={() => setInsightsQLDropdownVisible(!isInsightsQLDropdownVisible)}
                                             >
-                                                <code>{filter.math_hogql || 'count()'}</code>
+                                                <code>{filter.math_insightsql || 'count()'}</code>
                                             </LemonButton>
                                         </LemonDropdown>
                                     )}

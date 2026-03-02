@@ -11,8 +11,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 
 from posthog.schema import (
-    HogQLQuery,
-    HogQLQueryModifiers,
+    InsightsQLQuery,
+    InsightsQLQueryModifiers,
     LimitContext as SchemaLimitContext,
     QueryRequest,
     QueryResponseAlternative,
@@ -21,9 +21,9 @@ from posthog.schema import (
     QueryUpgradeResponse,
 )
 
-from posthog.hogql.ai import PromptUnclear, write_sql_from_prompt
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.errors import ExposedHogQLError, ResolutionError
+from posthog.insightsql.ai import PromptUnclear, write_sql_from_prompt
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.errors import ExposedInsightsQLError, ResolutionError
 
 from posthog import settings
 from posthog.api.documentation import extend_schema
@@ -38,9 +38,9 @@ from posthog.clickhouse.query_tagging import get_query_tag_value, get_query_tags
 from posthog.constants import AvailableFeature
 from posthog.errors import ExposedCHQueryError, InternalCHQueryError
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.apply_dashboard_filters import apply_dashboard_filters, apply_dashboard_variables
-from posthog.hogql_queries.hogql_query_runner import HogQLQueryRunner
-from posthog.hogql_queries.query_runner import ExecutionMode, execution_mode_from_refresh
+from posthog.insightsql_queries.apply_dashboard_filters import apply_dashboard_filters, apply_dashboard_variables
+from posthog.insightsql_queries.insightsql_query_runner import InsightsQLQueryRunner
+from posthog.insightsql_queries.query_runner import ExecutionMode, execution_mode_from_refresh
 from posthog.models.user import User
 from posthog.models.utils import uuid7
 from posthog.rate_limit import (
@@ -50,7 +50,7 @@ from posthog.rate_limit import (
     APIQueriesSustainedThrottle,
     ClickHouseBurstRateThrottle,
     ClickHouseSustainedRateThrottle,
-    HogQLQueryThrottle,
+    InsightsQLQueryThrottle,
 )
 from posthog.rbac.user_access_control import UserAccessControlError
 from posthog.schema_migrations.upgrade import upgrade
@@ -110,8 +110,8 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
         ):
             return [APIQueriesBurstThrottle(), APIQueriesSustainedThrottle()]
         if query := self.request.data.get("query"):
-            if isinstance(query, dict) and query.get("kind") == "HogQLQuery":
-                return [HogQLQueryThrottle()]
+            if isinstance(query, dict) and query.get("kind") == "InsightsQLQuery":
+                return [InsightsQLQueryThrottle()]
         return [ClickHouseBurstRateThrottle(), ClickHouseSustainedRateThrottle()]
 
     def check_team_api_queries_concurrency(self):
@@ -171,7 +171,7 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
                 else status.HTTP_200_OK
             )
             return Response(result, status=response_status)
-        except (ExposedHogQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
         except InternalCHQueryError as e:
             self.handle_column_ch_error(e)
@@ -263,20 +263,20 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
     @action(methods=["GET"], detail=True, url_path="log")
     def get_query_log(self, request: Request, pk: str, *args, **kwargs) -> Response:
         try:
-            query = HogQLQuery(
+            query = InsightsQLQuery(
                 query="select * from query_log where query_id = {client_query_id} and event_date >= yesterday()",
                 values={
                     "client_query_id": pk,
                 },
                 name="get_query_log",
             )
-            hogql_runner = HogQLQueryRunner(
+            insightsql_runner = InsightsQLQueryRunner(
                 query=query,
                 team=self.team,
-                modifiers=HogQLQueryModifiers(),
+                modifiers=InsightsQLQueryModifiers(),
                 limit_context=LimitContext.QUERY,
             )
-            result = hogql_runner.calculate()
+            result = insightsql_runner.calculate()
             return Response(result.model_dump(), status=200)
         except ConcurrencyLimitExceeded as c:
             raise Throttled(detail=str(c))

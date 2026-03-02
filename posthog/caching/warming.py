@@ -11,15 +11,15 @@ from celery import shared_task
 from celery.canvas import chain
 from prometheus_client import Counter, Gauge
 
-from posthog.hogql.constants import LimitContext
+from posthog.insightsql.constants import LimitContext
 
 from posthog.api.services.query import process_query_dict
 from posthog.caching.utils import largest_teams
 from posthog.clickhouse.query_tagging import Feature, tag_queries
 from posthog.errors import CHQueryErrorTooManySimultaneousQueries
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_cache_base import QueryCacheManagerBase
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.query_cache_base import QueryCacheManagerBase
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.models import DashboardTile, Insight, Team
 from posthog.ph_client import ph_scoped_capture
 from posthog.schema_migrations.upgrade_manager import upgrade_query

@@ -8,12 +8,12 @@ import temporalio.activity
 import temporalio.workflow
 from structlog.contextvars import bind_contextvars
 
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.printer import prepare_and_print_ast
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.printer import prepare_and_print_ast
 
 from posthog.clickhouse.query_tagging import Feature, Product, tags_context
-from posthog.hogql_queries.hogql_cohort_query import HogQLRealtimeCohortQuery
+from posthog.insightsql_queries.insightsql_cohort_query import InsightsQLRealtimeCohortQuery
 from posthog.kafka_client.client import KafkaProducer
 from posthog.kafka_client.topics import KAFKA_COHORT_MEMBERSHIP_CHANGED
 from posthog.models.cohort.cohort import Cohort, CohortType
@@ -143,7 +143,7 @@ async def flush_kafka_batch(
 
 @temporalio.activity.defn
 async def process_realtime_cohort_calculation_activity(inputs: RealtimeCohortCalculationWorkflowInputs) -> None:
-    """Process a batch of realtime cohorts using HogQLRealtimeCohortQuery."""
+    """Process a batch of realtime cohorts using InsightsQLRealtimeCohortQuery."""
     bind_contextvars()
     logger = LOGGER.bind()
 
@@ -192,15 +192,15 @@ async def process_realtime_cohort_calculation_activity(inputs: RealtimeCohortCal
 
         @database_sync_to_async
         def build_query(cohort_obj):
-            realtime_query = HogQLRealtimeCohortQuery(cohort=cohort_obj, team=cohort_obj.team)
+            realtime_query = InsightsQLRealtimeCohortQuery(cohort=cohort_obj, team=cohort_obj.team)
             current_members_query = realtime_query.get_query()
-            hogql_context = HogQLContext(
+            insightsql_context = InsightsQLContext(
                 team_id=cohort_obj.team_id,
                 enable_select_queries=True,
                 limit_context=LimitContext.COHORT_CALCULATION,
             )
-            current_members_sql, _ = prepare_and_print_ast(current_members_query, hogql_context, "clickhouse")
-            return current_members_sql, hogql_context.values
+            current_members_sql, _ = prepare_and_print_ast(current_members_query, insightsql_context, "clickhouse")
+            return current_members_sql, insightsql_context.values
 
         for idx, cohort in enumerate(cohorts, 1):
             heartbeater.details = (f"Processing cohort {idx}/{len(cohorts)} (cohort_id={cohort.id})",)

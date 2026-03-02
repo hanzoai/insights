@@ -11,7 +11,7 @@ import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import {
     formatPropertyLabel,
     isAnyPropertyfilter,
-    isHogQLPropertyFilter,
+    isInsightsQLPropertyFilter,
     normalizePropertyFilterValue,
 } from 'lib/components/PropertyFilters/utils'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -323,7 +323,7 @@ export function convertUniversalFiltersToRecordingsQuery(universalFilters: Recor
             actions.push(normalizeFilterWithNestedProperties(f))
         } else if (isLogEntryPropertyFilter(f)) {
             console_log_filters.push(f)
-        } else if (isHogQLPropertyFilter(f)) {
+        } else if (isInsightsQLPropertyFilter(f)) {
             properties.push(f)
         } else if (isAnyPropertyfilter(f)) {
             if (isRecordingPropertyFilter(f)) {
@@ -1427,14 +1427,14 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
             },
         ],
 
-        allowHogQLFilters: [
+        allowInsightsQLFilters: [
             (s) => [s.featureFlags],
-            (featureFlags): boolean => !!featureFlags[FEATURE_FLAGS.REPLAY_HOGQL_FILTERS],
+            (featureFlags): boolean => !!featureFlags[FEATURE_FLAGS.REPLAY_INSIGHTSQL_FILTERS],
         ],
 
         taxonomicGroupTypes: [
-            (s) => [s.allowHogQLFilters, s.groupsTaxonomicTypes],
-            (allowHogQLFilters, groupsTaxonomicTypes) => {
+            (s) => [s.allowInsightsQLFilters, s.groupsTaxonomicTypes],
+            (allowInsightsQLFilters, groupsTaxonomicTypes) => {
                 const taxonomicGroupTypes = [
                     TaxonomicFilterGroupType.Replay,
                     TaxonomicFilterGroupType.Events,
@@ -1446,8 +1446,8 @@ export const sessionRecordingsPlaylistLogic = kea<sessionRecordingsPlaylistLogic
                     ...groupsTaxonomicTypes,
                 ]
 
-                if (allowHogQLFilters) {
-                    taxonomicGroupTypes.push(TaxonomicFilterGroupType.HogQLExpression)
+                if (allowInsightsQLFilters) {
+                    taxonomicGroupTypes.push(TaxonomicFilterGroupType.InsightsQLExpression)
                 }
 
                 return taxonomicGroupTypes

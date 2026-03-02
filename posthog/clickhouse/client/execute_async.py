@@ -11,8 +11,8 @@ from rest_framework.exceptions import APIException, NotFound
 
 from posthog.schema import ClickhouseQueryProgress, QueryStatus
 
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.errors import ExposedHogQLError
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.errors import ExposedInsightsQLError
 
 from posthog import celery, redis
 from posthog.clickhouse.client.async_task_chain import add_task_to_on_commit
@@ -242,7 +242,7 @@ def execute_process_query(
 
         query_status.results = None  # Clear results in case they are faulty
         if (
-            isinstance(err, APIException | ExposedHogQLError | ExposedCHQueryError | UserAccessControlError)
+            isinstance(err, APIException | ExposedInsightsQLError | ExposedCHQueryError | UserAccessControlError)
             or is_staff_user
         ):
             # We can only expose the error message if it's a known safe error OR if the user is PostHog staff

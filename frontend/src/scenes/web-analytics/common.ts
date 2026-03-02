@@ -3,7 +3,7 @@ import { BreakPointFunction } from 'kea'
 import { PostHogComDocsURL } from 'lib/lemon-ui/Link/Link'
 import { UnexpectedNeverError, getDefaultInterval } from 'lib/utils'
 
-import { hogqlQuery } from '~/queries/query'
+import { insightsqlQuery } from '~/queries/query'
 import {
     BreakdownFilter,
     ProductKey,
@@ -13,7 +13,7 @@ import {
     WebAnalyticsPropertyFilters,
     WebStatsBreakdown,
 } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { InsightLogicProps, PropertyFilterType, PropertyMathType } from '~/types'
 
 export interface WebTileLayout {
@@ -447,8 +447,8 @@ export const checkCustomEventConversionGoalHasSessionIdsHelper = async (
     const { customEventName } = conversionGoal
     // check if we have any conversion events from the last week without sessions ids
 
-    const response = await hogqlQuery(
-        hogql`select count() from events where timestamp >= (now() - toIntervalHour(24)) AND ($session_id IS NULL OR $session_id = '') AND event = {event}`,
+    const response = await insightsqlQuery(
+        insightsql`select count() from events where timestamp >= (now() - toIntervalHour(24)) AND ($session_id IS NULL OR $session_id = '') AND event = {event}`,
         { event: customEventName }
     )
     breakpoint?.()

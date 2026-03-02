@@ -61,7 +61,7 @@ class TestCaptureEvent:
 
 
 class TestFetchEventByUuid:
-    def test_sends_correct_hogql_query(self, client: PostHogClient) -> None:
+    def test_sends_correct_insightsql_query(self, client: PostHogClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -75,7 +75,7 @@ class TestFetchEventByUuid:
             assert call_kwargs["timeout"] == PostHogClient.HTTP_TIMEOUT_SECONDS
 
             request_body = call_kwargs["json"]
-            assert request_body["query"]["kind"] == "HogQLQuery"
+            assert request_body["query"]["kind"] == "InsightsQLQuery"
             assert "WHERE uuid = {event_uuid}" in request_body["query"]["query"]
             assert "timestamp >= {min_timestamp}" in request_body["query"]["query"]
             assert request_body["query"]["values"]["event_uuid"] == "test-uuid-123"
@@ -121,7 +121,7 @@ class TestFetchEventByUuid:
 
 
 class TestFetchPersonByDistinctId:
-    def test_sends_correct_hogql_query_with_join(self, client: PostHogClient) -> None:
+    def test_sends_correct_insightsql_query_with_join(self, client: PostHogClient) -> None:
         with patch.object(client._session, "post") as mock_post:
             mock_post.return_value.status_code = 200
             mock_post.return_value.json.return_value = {"results": [], "columns": []}
@@ -233,7 +233,7 @@ class TestHttpRetryBehavior:
         ]
 
         client = PostHogClient(config, mock_posthog_sdk)
-        result = client._execute_hogql_query_all("SELECT 1", {})
+        result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert result == []
@@ -258,7 +258,7 @@ class TestHttpRetryBehavior:
         ]
 
         client = PostHogClient(config, mock_posthog_sdk)
-        result = client._execute_hogql_query_all("SELECT 1", {})
+        result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert result == []
@@ -279,7 +279,7 @@ class TestHttpRetryBehavior:
 
         client = PostHogClient(config, mock_posthog_sdk)
         with pytest.raises(Exception):
-            client._execute_hogql_query_all("SELECT 1", {})
+            client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert MockHttpHandler.call_count == 1
@@ -299,7 +299,7 @@ class TestHttpRetryBehavior:
 
         client = PostHogClient(config, mock_posthog_sdk)
         with pytest.raises(Exception):
-            client._execute_hogql_query_all("SELECT 1", {})
+            client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert MockHttpHandler.call_count == 1
@@ -318,7 +318,7 @@ class TestHttpRetryBehavior:
         MockHttpHandler.queued_responses = [{"status_code": 404}]
 
         client = PostHogClient(config, mock_posthog_sdk)
-        result = client._execute_hogql_query_all("SELECT 1", {})
+        result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert result == []
@@ -340,7 +340,7 @@ class TestHttpRetryBehavior:
         MockHttpHandler.queued_responses = [{"json": {"results": [["value"]], "columns": ["col"]}, "status_code": 200}]
 
         client = PostHogClient(config, mock_posthog_sdk)
-        result = client._execute_hogql_query_all("SELECT 1", {})
+        result = client._execute_insightsql_query_all("SELECT 1", {})
         client.shutdown()
 
         assert result == [{"col": "value"}]

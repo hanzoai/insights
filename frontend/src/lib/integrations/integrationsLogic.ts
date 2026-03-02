@@ -81,7 +81,7 @@ export const integrationsLogic = kea<integrationsLogicType>([
                     return res.results.map((integration) => {
                         return {
                             ...integration,
-                            // TODO: Make the icons endpoint independent of hog functions
+                            // TODO: Make the icons endpoint independent of custom functions
                             icon_url: ICONS[integration.kind],
                         }
                     })

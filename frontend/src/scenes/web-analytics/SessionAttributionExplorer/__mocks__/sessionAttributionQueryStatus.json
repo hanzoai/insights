@@ -24,7 +24,7 @@
             ],
             "error": null,
             "hasMore": false,
-            "hogql": "SELECT\n    count() AS `context.columns.count`,\n    $channel_type AS `context.columns.channel_type`,\n    $entry_referring_domain AS `context.columns.referring_domain`,\n    $entry_utm_source AS `context.columns.utm_source`,\n    $entry_utm_medium AS `context.columns.utm_medium`,\n    topK(10)($entry_utm_campaign) AS `context.columns.utm_campaign`,\n    topK(10)(nullIf(arrayStringConcat([if(isNotNull($entry_gclid), 'glcid', NULL), if(isNotNull($entry_gad_source), 'gad_source', NULL)], ','), '')) AS `context.columns.ad_ids`,\n    topK(10)($entry_current_url) AS `context.columns.example_entry_urls`\nFROM\n    sessions\nWHERE\n    and(1, 1, less($start_timestamp, toDateTime('2024-07-10 10:06:19.898500')), greaterOrEquals($start_timestamp, toDateTime('2024-07-03 10:06:19.898633')))\nGROUP BY\n    `context.columns.channel_type`,\n    `context.columns.referring_domain`,\n    `context.columns.utm_source`,\n    `context.columns.utm_medium`\nORDER BY\n    `context.columns.count` DESC\nLIMIT 101\nOFFSET 0",
+            "insightsql": "SELECT\n    count() AS `context.columns.count`,\n    $channel_type AS `context.columns.channel_type`,\n    $entry_referring_domain AS `context.columns.referring_domain`,\n    $entry_utm_source AS `context.columns.utm_source`,\n    $entry_utm_medium AS `context.columns.utm_medium`,\n    topK(10)($entry_utm_campaign) AS `context.columns.utm_campaign`,\n    topK(10)(nullIf(arrayStringConcat([if(isNotNull($entry_gclid), 'glcid', NULL), if(isNotNull($entry_gad_source), 'gad_source', NULL)], ','), '')) AS `context.columns.ad_ids`,\n    topK(10)($entry_current_url) AS `context.columns.example_entry_urls`\nFROM\n    sessions\nWHERE\n    and(1, 1, less($start_timestamp, toDateTime('2024-07-10 10:06:19.898500')), greaterOrEquals($start_timestamp, toDateTime('2024-07-03 10:06:19.898633')))\nGROUP BY\n    `context.columns.channel_type`,\n    `context.columns.referring_domain`,\n    `context.columns.utm_source`,\n    `context.columns.utm_medium`\nORDER BY\n    `context.columns.count` DESC\nLIMIT 101\nOFFSET 0",
             "is_cached": false,
             "last_refresh": "2024-07-10T10:06:20.115209Z",
             "limit": 100,
@@ -101,35 +101,35 @@
                     "t": 1.8708000425249338e-5
                 },
                 {
-                    "k": "./hogql/prepare_ast/clone",
+                    "k": "./insightsql/prepare_ast/clone",
                     "t": 0.00010145900887437165
                 },
                 {
-                    "k": "./hogql/prepare_ast/create_hogql_database",
+                    "k": "./insightsql/prepare_ast/create_insightsql_database",
                     "t": 0.033654708007816225
                 },
                 {
-                    "k": "./hogql/prepare_ast/resolve_types",
+                    "k": "./insightsql/prepare_ast/resolve_types",
                     "t": 0.0007856669981265441
                 },
                 {
-                    "k": "./hogql/prepare_ast",
+                    "k": "./insightsql/prepare_ast",
                     "t": 0.034647958003915846
                 },
                 {
-                    "k": "./hogql/print_ast/printer",
+                    "k": "./insightsql/print_ast/printer",
                     "t": 0.0004404580104164779
                 },
                 {
-                    "k": "./hogql/print_ast",
+                    "k": "./insightsql/print_ast",
                     "t": 0.0004706659965449944
                 },
                 {
-                    "k": "./hogql",
+                    "k": "./insightsql",
                     "t": 0.035132000004523434
                 },
                 {
-                    "k": "./print_ast/create_hogql_database",
+                    "k": "./print_ast/create_insightsql_database",
                     "t": 0.03552412499266211
                 },
                 {

@@ -4891,7 +4891,7 @@
   ORDER BY breakdown_value
   '''
 # ---
-# name: TestTrends.test_trends_with_hogql_math
+# name: TestTrends.test_trends_with_insightsql_math
   '''
   
   SELECT groupArray(day_start) as date,

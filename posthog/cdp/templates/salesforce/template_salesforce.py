@@ -1,7 +1,7 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
 common_filters = {
     "events": [{"id": "$identify", "name": "$identify", "type": "events", "order": 0}],
@@ -21,7 +21,7 @@ common_inputs = {
     }
 }
 
-template_create: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_create: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -30,7 +30,7 @@ template_create: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Create objects in Salesforce",
     icon_url="/static/services/salesforce.png",
     category=["CRM", "Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let getPayload := () -> {
   let properties := {}
@@ -112,7 +112,7 @@ if (res.status >= 400) {
     filters=common_filters,
 )
 
-template_update: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_update: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -121,7 +121,7 @@ template_update: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Update objects in Salesforce",
     icon_url="/static/services/salesforce.png",
     category=["CRM", "Customer Success"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let getPayload := () -> {
   let properties := {}
@@ -202,7 +202,7 @@ if (res.status >= 400) {
 )
 
 
-class TemplatSalesforceMigrator(HogFunctionTemplateMigrator):
+class TemplatSalesforceMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/posthog-plugin-replicator"
 
     @classmethod

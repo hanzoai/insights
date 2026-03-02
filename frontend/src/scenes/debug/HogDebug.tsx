@@ -13,7 +13,7 @@ import { CodeEditor } from 'lib/monaco/CodeEditor'
 import { ElapsedTime } from '~/queries/nodes/DataNode/ElapsedTime'
 import { Reload } from '~/queries/nodes/DataNode/Reload'
 import { DataNodeLogicProps, dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { HogQLQueryModifiers, HogQuery, HogQueryResponse } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers, HogQuery, HogQueryResponse } from '~/queries/schema/schema-general'
 
 export interface HogQueryEditorProps {
     query: HogQuery
@@ -48,7 +48,7 @@ export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
     return (
         <div className="deprecated-space-y-2">
             <div
-                data-attr="hogql-query-editor"
+                data-attr="insightsql-query-editor"
                 className={clsx('flex flex-col rounded deprecated-space-y-2 w-full p-2 border')}
             >
                 <div className="relative flex-1 overflow-hidden">
@@ -94,7 +94,7 @@ export function HogQueryEditor(props: HogQueryEditorProps): JSX.Element {
                             disabledReason={!props.setQuery ? 'No permission to update' : undefined}
                             center
                             fullWidth
-                            data-attr="hogql-query-editor-save"
+                            data-attr="insightsql-query-editor-save"
                         >
                             {!props.setQuery ? 'No permission to update' : 'Update and run'}
                         </LemonButton>
@@ -110,7 +110,7 @@ interface HogDebugProps {
     query: HogQuery
     setQuery: (query: HogQuery) => void
     debug?: boolean
-    modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
     attachTo?: LogicWrapper | BuiltLogic
 }
 

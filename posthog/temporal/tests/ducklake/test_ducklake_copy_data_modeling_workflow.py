@@ -56,7 +56,7 @@ async def test_prepare_data_modeling_ducklake_metadata_activity_returns_models(
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="ducklake_model",
-        query={"query": "SELECT 1", "kind": "HogQLQuery"},
+        query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
     )
     job_id = uuid.uuid4().hex
     table_uri = f"s3://source/team_{ateam.pk}_model_{saved_query.id.hex}/modeling/{saved_query.normalized_name}"
@@ -137,12 +137,12 @@ async def test_prepare_data_modeling_ducklake_metadata_activity_applies_yaml_ove
     override_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="override_model",
-        query={"query": "SELECT 1", "kind": "HogQLQuery"},
+        query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
     )
     inherit_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="inherit_model",
-        query={"query": "SELECT 1", "kind": "HogQLQuery"},
+        query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
     )
 
     def _table_uri(saved_query):

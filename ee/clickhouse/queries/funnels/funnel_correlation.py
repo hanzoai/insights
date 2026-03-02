@@ -121,7 +121,7 @@ class FunnelCorrelation:
         # NOTE: we always use the final matching event for the recording because this
         # is the the right event for both drop off and successful funnels
         filter_data.update({"include_final_matching_events": self._filter.include_recordings})
-        filter = Filter(data=filter_data, hogql_context=self._filter.hogql_context)
+        filter = Filter(data=filter_data, insightsql_context=self._filter.insightsql_context)
 
         funnel_order_actor_class = get_funnel_order_actor_class(filter)
 
@@ -833,7 +833,7 @@ class FunnelCorrelation:
         query, params = self.get_contingency_table_query()
         results_with_total = insight_sync_execute(
             query,
-            {**params, **self._filter.hogql_context.values},
+            {**params, **self._filter.insightsql_context.values},
             query_type="funnel_correlation",
             filter=self._filter,
             team_id=self._team.pk,

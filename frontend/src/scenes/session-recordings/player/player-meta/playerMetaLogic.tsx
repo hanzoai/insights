@@ -81,7 +81,7 @@ export function getPropertyDisplayInfo(
     propertyFilterType?: PropertyFilterType
 } {
     const propertyType = recordingProperties?.[property]
-        ? // HogQL query can return multiple types, so we need to check
+        ? // InsightsQL query can return multiple types, so we need to check
           // but if it doesn't match a core definition it must be an event property
           getFirstFilterTypeFor(property) || TaxonomicFilterGroupType.EventProperties
         : TaxonomicFilterGroupType.PersonProperties

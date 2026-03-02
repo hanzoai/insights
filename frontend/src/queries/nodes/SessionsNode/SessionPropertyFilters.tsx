@@ -31,12 +31,12 @@ export function SessionPropertyFilters({ query, setQuery }: SessionPropertyFilte
               TaxonomicFilterGroupType.PersonProperties,
               TaxonomicFilterGroupType.EventFeatureFlags,
               TaxonomicFilterGroupType.Cohorts,
-              TaxonomicFilterGroupType.HogQLExpression,
+              TaxonomicFilterGroupType.InsightsQLExpression,
           ]
         : [
               // Only session properties when no event selected
               TaxonomicFilterGroupType.SessionProperties,
-              TaxonomicFilterGroupType.HogQLExpression,
+              TaxonomicFilterGroupType.InsightsQLExpression,
           ]
 
     return !query.properties || Array.isArray(query.properties) ? (

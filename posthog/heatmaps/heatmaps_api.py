@@ -8,16 +8,16 @@ from django.http import HttpResponse
 
 from rest_framework import request, response, serializers, status, viewsets
 
-from posthog.schema import DateRange, HogQLFilters, HogQLQueryResponse
+from posthog.schema import DateRange, InsightsQLFilters, InsightsQLQueryResponse
 
-from posthog.hogql import ast
-from posthog.hogql.ast import Constant
-from posthog.hogql.base import Expr
-from posthog.hogql.constants import LimitContext
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.filters import replace_filters
-from posthog.hogql.parser import parse_expr, parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.ast import Constant
+from posthog.insightsql.base import Expr
+from posthog.insightsql.constants import LimitContext
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.filters import replace_filters
+from posthog.insightsql.parser import parse_expr, parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.forbid_destroy_model import ForbidDestroyModel
 from posthog.api.routing import TeamAndOrgViewSetMixin
@@ -249,8 +249,8 @@ class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             exprs.append(self._build_test_accounts_filter(date_from, date_to))
 
         stmt = parse_select(raw_query, {"aggregation_count": aggregation_count, "predicates": ast.And(exprs=exprs)})
-        context = HogQLContext(team_id=self.team.pk, limit_top_select=False)
-        results = execute_hogql_query(query=stmt, team=self.team, limit_context=LimitContext.HEATMAPS, context=context)
+        context = InsightsQLContext(team_id=self.team.pk, limit_top_select=False)
+        results = execute_insightsql_query(query=stmt, team=self.team, limit_context=LimitContext.HEATMAPS, context=context)
 
         if is_scrolldepth_query:
             return self._return_scroll_depth_response(results)
@@ -269,7 +269,7 @@ class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             parse_select(
                 "SELECT distinct $session_id FROM events where notEmpty($session_id) AND {filters}", placeholders={}
             ),
-            HogQLFilters(
+            InsightsQLFilters(
                 filterTestAccounts=True,
                 dateRange=DateRange(
                     date_from=date_from.strftime("%Y-%m-%d"),
@@ -313,7 +313,7 @@ class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
         return predicate_expressions
 
     @staticmethod
-    def _return_heatmap_coordinates_response(query_response: HogQLQueryResponse) -> response.Response:
+    def _return_heatmap_coordinates_response(query_response: InsightsQLQueryResponse) -> response.Response:
         data = [
             {
                 "pointer_target_fixed": item[0],
@@ -333,7 +333,7 @@ class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
         return resp
 
     @staticmethod
-    def _return_scroll_depth_response(query_response: HogQLQueryResponse) -> response.Response:
+    def _return_scroll_depth_response(query_response: InsightsQLQueryResponse) -> response.Response:
         data = [
             {
                 "scroll_depth_bucket": item[0],
@@ -399,8 +399,8 @@ class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             "SELECT count() FROM heatmaps WHERE {predicates}",
             {"predicates": ast.And(exprs=exprs)},
         )
-        context = HogQLContext(team_id=self.team.pk, limit_top_select=False)
-        count_result = execute_hogql_query(
+        context = InsightsQLContext(team_id=self.team.pk, limit_top_select=False)
+        count_result = execute_insightsql_query(
             query=count_stmt, team=self.team, limit_context=LimitContext.HEATMAPS, context=context
         )
         total_count = count_result.results[0][0] if count_result.results else 0
@@ -410,7 +410,7 @@ class HeatmapViewSet(TeamAndOrgViewSetMixin, viewsets.GenericViewSet):
             EVENTS_QUERY,
             {"predicates": ast.And(exprs=exprs), "limit": Constant(value=limit), "offset": Constant(value=offset)},
         )
-        results = execute_hogql_query(query=stmt, team=self.team, limit_context=LimitContext.HEATMAPS, context=context)
+        results = execute_insightsql_query(query=stmt, team=self.team, limit_context=LimitContext.HEATMAPS, context=context)
 
         data = [
             {

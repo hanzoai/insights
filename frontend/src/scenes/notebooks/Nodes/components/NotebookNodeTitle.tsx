@@ -6,7 +6,7 @@ import { LemonInput, LemonTag, Tooltip } from '@posthog/lemon-ui'
 
 import { notebookLogic } from 'scenes/notebooks/Notebook/notebookLogic'
 
-import { isHogQLQuery } from '~/queries/utils'
+import { isInsightsQLQuery } from '~/queries/utils'
 
 import { NotebookNodeType } from '../../types'
 import { notebookNodeLogic } from '../notebookNodeLogic'
@@ -14,22 +14,22 @@ import { notebookNodeLogic } from '../notebookNodeLogic'
 const getNodeIndex = ({
     isPythonNode,
     isDuckSqlNode,
-    isHogqlSqlNode,
+    isInsightsqlSqlNode,
     isSqlNode,
     nodeId,
     pythonNodeIndices,
     duckSqlNodeIndices,
-    hogqlSqlNodeIndices,
+    insightsqlSqlNodeIndices,
     sqlNodeIndices,
 }: {
     isPythonNode: boolean
     isDuckSqlNode: boolean
-    isHogqlSqlNode: boolean
+    isInsightsqlSqlNode: boolean
     isSqlNode: boolean
     nodeId: string
     pythonNodeIndices: Map<string, number>
     duckSqlNodeIndices: Map<string, number>
-    hogqlSqlNodeIndices: Map<string, number>
+    insightsqlSqlNodeIndices: Map<string, number>
     sqlNodeIndices: Map<string, number>
 }): number | undefined => {
     if (isPythonNode) {
@@ -38,8 +38,8 @@ const getNodeIndex = ({
     if (isDuckSqlNode) {
         return duckSqlNodeIndices.get(nodeId)
     }
-    if (isHogqlSqlNode) {
-        return hogqlSqlNodeIndices.get(nodeId)
+    if (isInsightsqlSqlNode) {
+        return insightsqlSqlNodeIndices.get(nodeId)
     }
     if (isSqlNode) {
         return sqlNodeIndices.get(nodeId)
@@ -58,14 +58,14 @@ export const getCellLabel = (nodeIndex: number | undefined, nodeType: NotebookNo
     if (nodeType === NotebookNodeType.DuckSQL) {
         return `SQL (DuckDB) ${nodeIndex}`
     }
-    if (nodeType === NotebookNodeType.HogQLSQL) {
-        return `SQL (HogQL) ${nodeIndex}`
+    if (nodeType === NotebookNodeType.InsightsQLSQL) {
+        return `SQL (InsightsQL) ${nodeIndex}`
     }
     return `SQL ${nodeIndex}`
 }
 
 export function NotebookNodeTitle(): JSX.Element {
-    const { isEditable, pythonNodeIndices, sqlNodeIndices, duckSqlNodeIndices, hogqlSqlNodeIndices } =
+    const { isEditable, pythonNodeIndices, sqlNodeIndices, duckSqlNodeIndices, insightsqlSqlNodeIndices } =
         useValues(notebookLogic)
     const { nodeAttributes, title, titlePlaceholder, isEditingTitle, nodeType } = useValues(notebookNodeLogic)
     const { updateAttributes, toggleEditingTitle } = useActions(notebookNodeLogic)
@@ -73,21 +73,21 @@ export function NotebookNodeTitle(): JSX.Element {
 
     const isPythonNode = nodeType === NotebookNodeType.Python
     const isDuckSqlNode = nodeType === NotebookNodeType.DuckSQL
-    const isHogqlSqlNode = nodeType === NotebookNodeType.HogQLSQL
+    const isInsightsqlSqlNode = nodeType === NotebookNodeType.InsightsQLSQL
     const isSqlNode =
         nodeType === NotebookNodeType.Query &&
-        (isHogQLQuery(nodeAttributes.query) ||
-            (nodeAttributes.query.source && isHogQLQuery(nodeAttributes.query.source)))
+        (isInsightsQLQuery(nodeAttributes.query) ||
+            (nodeAttributes.query.source && isInsightsQLQuery(nodeAttributes.query.source)))
 
     const nodeIndex = getNodeIndex({
         isPythonNode,
         isDuckSqlNode,
-        isHogqlSqlNode,
+        isInsightsqlSqlNode,
         isSqlNode,
         nodeId: nodeAttributes.nodeId,
         pythonNodeIndices,
         duckSqlNodeIndices,
-        hogqlSqlNodeIndices,
+        insightsqlSqlNodeIndices,
         sqlNodeIndices,
     })
     const cellLabel = getCellLabel(nodeIndex, nodeType)

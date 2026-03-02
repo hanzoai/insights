@@ -2,7 +2,7 @@ from typing import Any
 
 from posthog.test.base import APIBaseTest
 
-from common.hogvm.python.operation import HOGQL_BYTECODE_VERSION
+from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 class TestCohortBytecodeScenarios(APIBaseTest):
@@ -70,20 +70,20 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         # behavioral[0]
         self.assertEqual(and_group[0]["type"], "behavioral")
         self.assertEqual(
-            and_group[0]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            and_group[0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
         self.assertEqual(and_group[0]["conditionHash"], "f9c616030a87e68f")
         # behavioral[1]
         self.assertEqual(and_group[1]["type"], "behavioral")
         self.assertEqual(
-            and_group[1]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            and_group[1]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
         self.assertEqual(and_group[1]["conditionHash"], "f9c616030a87e68f")
         # person
         self.assertEqual(and_group[2]["type"], "person")
         self.assertEqual(
             and_group[2]["bytecode"],
-            ["_H", HOGQL_BYTECODE_VERSION, 31, 32, "$browser", 32, "properties", 32, "person", 1, 3, 12],
+            ["_H", INSIGHTSQL_BYTECODE_VERSION, 31, 32, "$browser", 32, "properties", 32, "person", 1, 3, 12],
         )
         self.assertEqual(and_group[2]["conditionHash"], "623236814d537b73")
 
@@ -92,7 +92,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         self.assertEqual(cohort2.cohort_type, "realtime")
         and_group2 = cohort2.filters["properties"]["values"][0]["values"]
         self.assertEqual(
-            and_group2[0]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            and_group2[0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
         self.assertEqual(and_group2[0]["conditionHash"], "f9c616030a87e68f")
 
@@ -134,16 +134,16 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         self.assertEqual(cohort.cohort_type, "realtime")
         or_group = cohort.filters["properties"]["values"][0]["values"]
         self.assertEqual(
-            or_group[0]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            or_group[0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
         self.assertEqual(or_group[0]["conditionHash"], "f9c616030a87e68f")
         self.assertEqual(
-            or_group[1]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            or_group[1]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
         self.assertEqual(or_group[1]["conditionHash"], "f9c616030a87e68f")
         self.assertEqual(
             or_group[2]["bytecode"],
-            ["_H", HOGQL_BYTECODE_VERSION, 31, 32, "$browser", 32, "properties", 32, "person", 1, 3, 12],
+            ["_H", INSIGHTSQL_BYTECODE_VERSION, 31, 32, "$browser", 32, "properties", 32, "person", 1, 3, 12],
         )
         self.assertEqual(or_group[2]["conditionHash"], "623236814d537b73")
 
@@ -151,7 +151,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         self.assertEqual(cohort2.cohort_type, "realtime")
         or_group2 = cohort2.filters["properties"]["values"][0]["values"]
         self.assertEqual(
-            or_group2[0]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            or_group2[0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
 
     def test_or_not_realtime(self):
@@ -214,14 +214,14 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         values = cohort.filters["properties"]["values"]
         # first OR group's first behavioral bytecode
         self.assertEqual(
-            values[0]["values"][0]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            values[0]["values"][0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
         # person property bytecode
         self.assertEqual(
             values[2]["values"][0]["bytecode"],
             [
                 "_H",
-                HOGQL_BYTECODE_VERSION,
+                INSIGHTSQL_BYTECODE_VERSION,
                 32,
                 "Chrome",
                 32,
@@ -240,7 +240,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
         self.assertIsNone(cohort2.cohort_type)
         values2 = cohort2.filters["properties"]["values"]
         self.assertEqual(
-            values2[0]["values"][0]["bytecode"], ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
+            values2[0]["values"][0]["bytecode"], ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11]
         )
 
     def test_event_properties_realtime(self):
@@ -291,7 +291,7 @@ class TestCohortBytecodeScenarios(APIBaseTest):
             node["bytecode"],
             [
                 "_H",
-                HOGQL_BYTECODE_VERSION,
+                INSIGHTSQL_BYTECODE_VERSION,
                 32,
                 "$pageview",
                 32,

@@ -1,6 +1,6 @@
 """Data access for sentiment classification.
 
-Fetches $ai_generation events from ClickHouse via HogQL and groups
+Fetches $ai_generation events from ClickHouse via InsightsQL and groups
 results by trace_id for downstream processing.
 """
 
@@ -20,16 +20,16 @@ def fetch_generations(
     Returns {trace_id: [(event_uuid, parsed_props), ...]} with at most
     MAX_GENERATIONS rows per trace.
     """
-    from posthog.hogql import ast
-    from posthog.hogql.constants import LimitContext
-    from posthog.hogql.parser import parse_select
-    from posthog.hogql.query import execute_hogql_query
+    from posthog.insightsql import ast
+    from posthog.insightsql.constants import LimitContext
+    from posthog.insightsql.parser import parse_select
+    from posthog.insightsql.query import execute_insightsql_query
 
     from posthog.models.team import Team
 
     team = Team.objects.get(id=team_id)
     query = parse_select(GENERATIONS_QUERY)
-    result = execute_hogql_query(
+    result = execute_insightsql_query(
         query_type="SentimentOnDemand",
         query=query,
         placeholders={

@@ -24,15 +24,15 @@ from posthog.schema import QuerySchemaRoot
 
 from posthog.api.services.query import process_query_dict
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.jwt import PosthogJwtAudience, encode_jwt
 from posthog.models.exported_asset import ExportedAsset, save_content_from_file
 from posthog.utils import absolute_uri
 
 from ...exceptions import ClickHouseQuerySizeExceeded
-from ...hogql.constants import CSV_EXPORT_BREAKDOWN_LIMIT_INITIAL, CSV_EXPORT_BREAKDOWN_LIMIT_LOW, CSV_EXPORT_LIMIT
-from ...hogql.query import LimitContext
-from ...hogql_queries.insights.trends.breakdown import (
+from ...insightsql.constants import CSV_EXPORT_BREAKDOWN_LIMIT_INITIAL, CSV_EXPORT_BREAKDOWN_LIMIT_LOW, CSV_EXPORT_LIMIT
+from ...insightsql.query import LimitContext
+from ...insightsql_queries.insights.trends.breakdown import (
     BREAKDOWN_NULL_DISPLAY,
     BREAKDOWN_NULL_STRING_LABEL,
     BREAKDOWN_OTHER_DISPLAY,
@@ -348,7 +348,7 @@ def _convert_response_to_csv_data(data: Any, breakdown_filter: Optional[dict] = 
                     prop_name = breakdowns[idx].get("property") if idx < len(breakdowns) else None
                     if not prop_name:
                         continue
-                    # Convert list property names to string (e.g., HogQL expressions)
+                    # Convert list property names to string (e.g., InsightsQL expressions)
                     if isinstance(prop_name, list):
                         prop_name = ", ".join(str(p) for p in prop_name)
                     formatted_val = str(val) if val is not None else ""
@@ -524,7 +524,7 @@ def _iter_rows(exported_asset: ExportedAsset, limit: int) -> Generator[Any, None
     if resource.get("source"):
         yield from get_from_query(exported_asset, limit, resource)
     else:
-        # Legacy path for PersonsNode exports (uses API path instead of HogQL source).
+        # Legacy path for PersonsNode exports (uses API path instead of InsightsQL source).
         # PersonsNode was migrated to ActorsQuery in migration 0459, so this path
         # should rarely be hit in practice.
         yield from get_from_insights_api(exported_asset, CSV_EXPORT_BREAKDOWN_LIMIT_INITIAL, resource)

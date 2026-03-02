@@ -5,7 +5,7 @@ import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { sceneLogic } from 'scenes/sceneLogic'
 
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 
 import type { reverseProxyCheckerLogicType } from './reverseProxyCheckerLogicType'
 
@@ -24,7 +24,7 @@ export const reverseProxyCheckerLogic = kea<reverseProxyCheckerLogicType>([
 
                     cache.lastCheckedTimestamp = Date.now()
 
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT DISTINCT properties.$lib_custom_api_host AS lib_custom_api_host
                         FROM events
                         WHERE timestamp >= now() - INTERVAL 1 DAY
@@ -34,7 +34,7 @@ export const reverseProxyCheckerLogic = kea<reverseProxyCheckerLogicType>([
                         LIMIT 10`
 
                     const currentScene = sceneLogic.findMounted()?.values.activeSceneId ?? 'Onboarding'
-                    const res = await api.queryHogQL(query, {
+                    const res = await api.queryInsightsQL(query, {
                         scene: currentScene,
                         productKey: 'platform_and_support',
                     })

@@ -17,7 +17,7 @@ import { sidePanelStateLogic } from '~/layout/navigation-3000/sidepanel/sidePane
 import { refreshTreeItem } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
 import { SCRATCHPAD_NOTEBOOK, notebooksModel, openNotebook } from '~/models/notebooksModel'
 import { NodeKind } from '~/queries/schema/schema-general'
-import { isHogQLQuery, isSavedInsightNode } from '~/queries/utils'
+import { isInsightsQLQuery, isSavedInsightNode } from '~/queries/utils'
 import {
     AccessControlLevel,
     AccessControlResourceType,
@@ -31,7 +31,7 @@ import {
 import {
     buildNotebookDependencyGraph,
     collectDuckSqlNodes,
-    collectHogqlSqlNodes,
+    collectInsightsqlSqlNodes,
     collectNodeIndices,
     collectPythonNodes,
 } from '../Nodes/notebookNodeContent'
@@ -543,7 +543,7 @@ export const notebookLogic = kea<notebookLogicType>([
 
         pythonNodeSummaries: [(s) => [s.content], (content) => collectPythonNodes(content)],
         duckSqlNodeSummaries: [(s) => [s.content], (content) => collectDuckSqlNodes(content)],
-        hogqlSqlNodeSummaries: [(s) => [s.content], (content) => collectHogqlSqlNodes(content)],
+        insightsqlSqlNodeSummaries: [(s) => [s.content], (content) => collectInsightsqlSqlNodes(content)],
         dependencyGraph: [(s) => [s.content], (content) => buildNotebookDependencyGraph(content)],
 
         pythonNodeIndices: [
@@ -558,17 +558,17 @@ export const notebookLogic = kea<notebookLogicType>([
                     content,
                     (node) =>
                         node.type === NotebookNodeType.Query &&
-                        (isHogQLQuery(node.attrs?.query) ||
-                            (node.attrs?.query?.source && isHogQLQuery(node.attrs.query.source)))
+                        (isInsightsQLQuery(node.attrs?.query) ||
+                            (node.attrs?.query?.source && isInsightsQLQuery(node.attrs.query.source)))
                 ),
         ],
         duckSqlNodeIndices: [
             (s) => [s.content],
             (content) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.DuckSQL),
         ],
-        hogqlSqlNodeIndices: [
+        insightsqlSqlNodeIndices: [
             (s) => [s.content],
-            (content) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.HogQLSQL),
+            (content) => collectNodeIndices(content, (node) => node.type === NotebookNodeType.InsightsQLSQL),
         ],
 
         isShowingLeftColumn: [

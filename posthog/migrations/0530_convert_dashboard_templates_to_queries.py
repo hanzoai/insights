@@ -4,7 +4,7 @@ from django.db import migrations
 
 from posthog.schema import InsightVizNode
 
-from posthog.hogql_queries.legacy_compatibility.filter_to_query import filter_to_query
+from posthog.insightsql_queries.legacy_compatibility.filter_to_query import filter_to_query
 
 
 def update_filters_to_queries(apps, schema_editor):
@@ -25,7 +25,7 @@ def revert_queries_to_filters(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0529_hog_function_mappings")]
+    dependencies = [("posthog", "0529_custom_function_mappings")]
 
     operations = [
         migrations.RunPython(update_filters_to_queries, revert_queries_to_filters),

@@ -133,7 +133,7 @@ class Trends(TrendsTotalVolume, Lifecycle):
             query_type, sql, params, parse_function = self._get_sql_for_entity(adjusted_filter, team, entity)
             posthoganalytics.tag("filter", filter.to_dict())
             posthoganalytics.tag("team_id", str(team.pk))
-            query_params = {**params, **adjusted_filter.hogql_context.values}
+            query_params = {**params, **adjusted_filter.insightsql_context.values}
             posthoganalytics.tag("query", {"sql": sql, "params": query_params})
             result = insight_sync_execute(
                 sql,
@@ -186,7 +186,7 @@ class Trends(TrendsTotalVolume, Lifecycle):
             adjusted_filter, cached_result = self.adjusted_filter(filter, team)
             query_type, sql, params, parse_function = self._get_sql_for_entity(adjusted_filter, team, entity)
             parse_functions[entity.index] = parse_function
-            query_params = {**params, **adjusted_filter.hogql_context.values}
+            query_params = {**params, **adjusted_filter.insightsql_context.values}
             sql_statements_with_params[entity.index] = (sql, query_params)
             thread = threading.Thread(
                 target=self._run_query_for_threading,

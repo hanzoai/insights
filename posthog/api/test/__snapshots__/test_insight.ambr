@@ -1,5 +1,5 @@
 # serializer version: 1
-# name: TestInsight.test_insight_funnels_hogql_breakdown
+# name: TestInsight.test_insight_funnels_insightsql_breakdown
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT sum(step_1) AS step_1,
@@ -80,7 +80,7 @@
                      use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_funnels_hogql_global_filters
+# name: TestInsight.test_insight_funnels_insightsql_global_filters
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT sum(step_1) AS step_1,
@@ -159,7 +159,7 @@
                      use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_funnels_hogql_local_filters
+# name: TestInsight.test_insight_funnels_insightsql_local_filters
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT sum(step_1) AS step_1,
@@ -238,7 +238,7 @@
                      use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_breakdown
+# name: TestInsight.test_insight_trend_insightsql_breakdown
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT groupArray(1)(date)[1] AS date,
@@ -284,7 +284,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_breakdown_materialized
+# name: TestInsight.test_insight_trend_insightsql_breakdown_materialized
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT groupArray(1)(date)[1] AS date,
@@ -330,7 +330,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_global_filters
+# name: TestInsight.test_insight_trend_insightsql_global_filters
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2012-01-15 23:59:59', 'UTC')), toIntervalDay(1)))), 1))) AS date,
@@ -361,7 +361,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_global_filters.1
+# name: TestInsight.test_insight_trend_insightsql_global_filters.1
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2012-01-15 23:59:59', 'UTC')), toIntervalDay(1)))), 1))) AS date,
@@ -409,7 +409,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_global_filters_materialized
+# name: TestInsight.test_insight_trend_insightsql_global_filters_materialized
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2012-01-15 23:59:59', 'UTC')), toIntervalDay(1)))), 1))) AS date,
@@ -440,7 +440,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_global_filters_materialized.1
+# name: TestInsight.test_insight_trend_insightsql_global_filters_materialized.1
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2012-01-15 23:59:59', 'UTC')), toIntervalDay(1)))), 1))) AS date,
@@ -488,7 +488,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_local_filters
+# name: TestInsight.test_insight_trend_insightsql_local_filters
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2012-01-15 23:59:59', 'UTC')), toIntervalDay(1)))), 1))) AS date,
@@ -536,7 +536,7 @@
                        use_hive_partitioning=0
   '''
 # ---
-# name: TestInsight.test_insight_trend_hogql_local_filters_materialized
+# name: TestInsight.test_insight_trend_insightsql_local_filters_materialized
   '''
   /* user_id:0 request:_snapshot_ */
   SELECT arrayMap(number -> plus(toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toIntervalDay(number)), range(0, plus(coalesce(dateDiff('day', toStartOfInterval(assumeNotNull(toDateTime('2012-01-08 00:00:00', 'UTC')), toIntervalDay(1)), toStartOfInterval(assumeNotNull(toDateTime('2012-01-15 23:59:59', 'UTC')), toIntervalDay(1)))), 1))) AS date,

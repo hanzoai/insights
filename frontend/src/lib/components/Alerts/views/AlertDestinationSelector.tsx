@@ -1,6 +1,6 @@
 import { INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID } from 'lib/constants'
 import { buildAlertFilterConfig } from 'lib/utils/alertUtils'
-import { LinkedHogFunctions } from 'scenes/hog-functions/list/LinkedHogFunctions'
+import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
 import { urls } from 'scenes/urls'
 
 import { InsightShortId } from '~/types'
@@ -14,7 +14,7 @@ export function AlertDestinationSelector({ alertId, insightShortId }: AlertDesti
     const returnTo = `${urls.insightAlerts(insightShortId)}?alert_id=${alertId}`
 
     return (
-        <LinkedHogFunctions
+        <LinkedCustomFunctions
             type="internal_destination"
             subTemplateIds={[INSIGHT_ALERT_FIRING_SUB_TEMPLATE_ID]}
             hideFeedback={true}

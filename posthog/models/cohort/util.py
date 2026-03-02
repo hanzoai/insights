@@ -12,12 +12,12 @@ from dateutil import parser
 from pydantic import ValidationError as PydanticValidationError
 from rest_framework.exceptions import ValidationError
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLGlobalSettings, LimitContext
-from posthog.hogql.hogql import HogQLContext
-from posthog.hogql.modifiers import create_default_modifiers_for_team
-from posthog.hogql.printer import prepare_and_print_ast
-from posthog.hogql.resolver_utils import extract_select_queries
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLGlobalSettings, LimitContext
+from posthog.insightsql.insightsql import InsightsQLContext
+from posthog.insightsql.modifiers import create_default_modifiers_for_team
+from posthog.insightsql.printer import prepare_and_print_ast
+from posthog.insightsql.resolver_utils import extract_select_queries
 
 from posthog.clickhouse.client import sync_execute
 from posthog.clickhouse.client.connection import ClickHouseUser, Workload
@@ -265,7 +265,7 @@ def get_clickhouse_query_stats(tag_matcher: str, cohort_id: int, start_time: dat
     return None
 
 
-def format_person_query(cohort: Cohort, index: int, hogql_context: HogQLContext) -> tuple[str, dict[str, Any]]:
+def format_person_query(cohort: Cohort, index: int, insightsql_context: InsightsQLContext) -> tuple[str, dict[str, Any]]:
     if cohort.is_static:
         return format_static_cohort_query(cohort, index, prepend="")
 
@@ -279,7 +279,7 @@ def format_person_query(cohort: Cohort, index: int, hogql_context: HogQLContext)
         Filter(
             data={"properties": cohort.properties},
             team=cohort.team,
-            hogql_context=hogql_context,
+            insightsql_context=insightsql_context,
         ),
         cohort.team,
         cohort_pk=cohort.pk,
@@ -291,8 +291,8 @@ def format_person_query(cohort: Cohort, index: int, hogql_context: HogQLContext)
     return query, params
 
 
-def print_cohort_hogql_query(cohort: Cohort, hogql_context: HogQLContext, *, team: Team) -> str:
-    from posthog.hogql_queries.query_runner import get_query_runner
+def print_cohort_insightsql_query(cohort: Cohort, insightsql_context: InsightsQLContext, *, team: Team) -> str:
+    from posthog.insightsql_queries.query_runner import get_query_runner
 
     if not cohort.query:
         raise ValueError("Cohort has no query")
@@ -346,17 +346,17 @@ def print_cohort_hogql_query(cohort: Cohort, hogql_context: HogQLContext, *, tea
             "All SELECT queries in the UNION must use the same ID type (either person_id/actor_id or distinct_id)."
         )
 
-    hogql_context.enable_select_queries = True
-    hogql_context.limit_top_select = False
-    create_default_modifiers_for_team(team, hogql_context.modifiers)
+    insightsql_context.enable_select_queries = True
+    insightsql_context.limit_top_select = False
+    create_default_modifiers_for_team(team, insightsql_context.modifiers)
 
-    # Apply HogQL global settings to ensure consistency with regular queries
-    settings = HogQLGlobalSettings()
+    # Apply InsightsQL global settings to ensure consistency with regular queries
+    settings = InsightsQLGlobalSettings()
 
     # If we're using distinct_id, wrap the query to resolve to person_id
     if uses_distinct_id:
         # Print the inner query without settings - we'll add them to the wrapper
-        base_query = prepare_and_print_ast(query, context=hogql_context, dialect="clickhouse")[0]
+        base_query = prepare_and_print_ast(query, context=insightsql_context, dialect="clickhouse")[0]
 
         # Format settings as key=value pairs
         settings_pairs = {k: str(v) for k, v in settings.model_dump().items() if v is not None}
@@ -365,7 +365,7 @@ def print_cohort_hogql_query(cohort: Cohort, hogql_context: HogQLContext, *, tea
             settings_str = ", ".join([f"{key}={value}" for key, value in settings_pairs.items()])
             settings_clause = f" SETTINGS {settings_str}"
 
-        # Wrap with person_distinct_id2 lookup using raw SQL since it's not a HogQL table
+        # Wrap with person_distinct_id2 lookup using raw SQL since it's not a InsightsQL table
         wrapped_query = f"""
         SELECT DISTINCT argMax(person_id, version) as actor_id
         FROM person_distinct_id2
@@ -378,7 +378,7 @@ def print_cohort_hogql_query(cohort: Cohort, hogql_context: HogQLContext, *, tea
 
         return f"{wrapped_query}{settings_clause}"
 
-    return prepare_and_print_ast(query, context=hogql_context, dialect="clickhouse", settings=settings)[0]
+    return prepare_and_print_ast(query, context=insightsql_context, dialect="clickhouse", settings=settings)[0]
 
 
 def format_static_cohort_query(cohort: Cohort, index: int, prepend: str) -> tuple[str, dict[str, Any]]:
@@ -435,7 +435,7 @@ def get_entity_query(
     action_id: Optional[int],
     team_id: int,
     group_idx: Union[int, str],
-    hogql_context: HogQLContext,
+    insightsql_context: InsightsQLContext,
     person_properties_mode: Optional[PersonPropertiesMode] = None,
 ) -> tuple[str, dict[str, str]]:
     if event_id:
@@ -446,7 +446,7 @@ def get_entity_query(
             team_id=team_id,
             action=action,
             prepend="_{}_action".format(group_idx),
-            hogql_context=hogql_context,
+            insightsql_context=insightsql_context,
             person_properties_mode=(
                 person_properties_mode if person_properties_mode else PersonPropertiesMode.USING_SUBQUERY
             ),
@@ -515,11 +515,11 @@ def is_precalculated_query(cohort: Cohort) -> bool:
 def format_filter_query(
     cohort: Cohort,
     index: int,
-    hogql_context: HogQLContext,
+    insightsql_context: InsightsQLContext,
     id_column: str = "distinct_id",
     custom_match_field="person_id",
 ) -> tuple[str, dict[str, Any]]:
-    person_query, params = format_cohort_subquery(cohort, index, hogql_context, custom_match_field=custom_match_field)
+    person_query, params = format_cohort_subquery(cohort, index, insightsql_context, custom_match_field=custom_match_field)
 
     person_id_query = CALCULATE_COHORT_PEOPLE_SQL.format(
         query=person_query,
@@ -530,13 +530,13 @@ def format_filter_query(
 
 
 def format_cohort_subquery(
-    cohort: Cohort, index: int, hogql_context: HogQLContext, custom_match_field="person_id"
+    cohort: Cohort, index: int, insightsql_context: InsightsQLContext, custom_match_field="person_id"
 ) -> tuple[str, dict[str, Any]]:
     is_precalculated = is_precalculated_query(cohort)
     if is_precalculated:
         query, params = format_precalculated_cohort_query(cohort, index)
     else:
-        query, params = format_person_query(cohort, index, hogql_context)
+        query, params = format_person_query(cohort, index, insightsql_context)
 
     person_query = f"{custom_match_field} IN ({query})"
     return person_query, params
@@ -624,14 +624,14 @@ def recalculate_cohortpeople(
 
 
 def _recalculate_cohortpeople_for_team(cohort: Cohort, pending_version: int, team: Team) -> int:
-    tag_queries(name="recalculate_cohortpeople_for_team_hogql")
+    tag_queries(name="recalculate_cohortpeople_for_team_insightsql")
 
     history = CohortCalculationHistory.objects.create(
         team=team, cohort=cohort, filters=cohort.properties.to_dict() if cohort.properties.values else {}
     )
 
     try:
-        result = _recalculate_cohortpeople_for_team_hogql(cohort, pending_version, team, history)
+        result = _recalculate_cohortpeople_for_team_insightsql(cohort, pending_version, team, history)
         return result
 
     except Exception as e:
@@ -642,7 +642,7 @@ def _recalculate_cohortpeople_for_team(cohort: Cohort, pending_version: int, tea
         raise
 
 
-def _recalculate_cohortpeople_for_team_hogql(
+def _recalculate_cohortpeople_for_team_insightsql(
     cohort: Cohort, pending_version: int, team: Team, history: CohortCalculationHistory
 ) -> int:
     cohort_params: dict[str, Any]
@@ -656,12 +656,12 @@ def _recalculate_cohortpeople_for_team_hogql(
         history.save(update_fields=["finished_at", "count", "error", "error_code"])
         return 0
     else:
-        from posthog.hogql_queries.hogql_cohort_query import HogQLCohortQuery
+        from posthog.insightsql_queries.insightsql_cohort_query import InsightsQLCohortQuery
 
-        cohort_query, hogql_context = (
-            HogQLCohortQuery(cohort=cohort, team=team).get_query_executor().generate_clickhouse_sql()
+        cohort_query, insightsql_context = (
+            InsightsQLCohortQuery(cohort=cohort, team=team).get_query_executor().generate_clickhouse_sql()
         )
-        cohort_params = hogql_context.values
+        cohort_params = insightsql_context.values
 
         # Hacky: Clickhouse doesn't like there being a top level "SETTINGS" clause in a SelectSet statement when that SelectSet
         # statement is used in a subquery. We remove it here.
@@ -672,12 +672,12 @@ def _recalculate_cohortpeople_for_team_hogql(
     def execute_query():
         tag_queries(
             kind="cohort_calculation",
-            query_type="CohortsQueryHogQL",
+            query_type="CohortsQueryInsightsQL",
             feature=Feature.COHORT,
             cohort_id=cohort.pk,
             team_id=team.id,
         )
-        hogql_global_settings = HogQLGlobalSettings()
+        insightsql_global_settings = InsightsQLGlobalSettings()
 
         return sync_execute(
             recalculate_cohortpeople_sql,
@@ -692,8 +692,8 @@ def _recalculate_cohortpeople_for_team_hogql(
                 "send_timeout": COHORT_QUERY_TIMEOUT_SECONDS,
                 "receive_timeout": COHORT_QUERY_TIMEOUT_SECONDS,
                 "optimize_on_insert": 0,
-                "max_ast_elements": hogql_global_settings.max_ast_elements,
-                "max_expanded_ast_elements": hogql_global_settings.max_expanded_ast_elements,
+                "max_ast_elements": insightsql_global_settings.max_ast_elements,
+                "max_expanded_ast_elements": insightsql_global_settings.max_expanded_ast_elements,
                 "max_bytes_ratio_before_external_group_by": 0.5,
                 "max_bytes_ratio_before_external_sort": 0.5,
             },

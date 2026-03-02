@@ -2,7 +2,7 @@
 import { AnyAssistantGeneratedQuery } from './schema-assistant-messages'
 import {
     FunnelsQuery,
-    HogQLQuery,
+    InsightsQLQuery,
     RetentionQuery,
     RevenueAnalyticsGrossRevenueQuery,
     RevenueAnalyticsMRRQuery,
@@ -24,7 +24,7 @@ export interface VisualizationBlock {
         | TrendsQuery
         | FunnelsQuery
         | RetentionQuery
-        | HogQLQuery
+        | InsightsQLQuery
         | RevenueAnalyticsGrossRevenueQuery
         | RevenueAnalyticsMetricsQuery
         | RevenueAnalyticsMRRQuery

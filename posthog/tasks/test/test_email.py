@@ -13,7 +13,7 @@ from posthog.api.email_verification import email_verification_token_generator
 from posthog.batch_exports.models import BatchExport, BatchExportDestination, BatchExportRun
 from posthog.models import Organization, Team, User
 from posthog.models.app_metrics2.sql import TRUNCATE_APP_METRICS2_TABLE_SQL
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.instance_setting import set_instance_setting
 from posthog.models.organization import OrganizationMembership
 from posthog.models.organization_invite import OrganizationInvite
@@ -28,8 +28,8 @@ from posthog.tasks.email import (
     send_discussions_mentioned,
     send_email_verification,
     send_fatal_plugin_error,
-    send_hog_functions_daily_digest,
-    send_hog_functions_digest_email,
+    send_custom_functions_daily_digest,
+    send_custom_functions_digest_email,
     send_invite,
     send_member_join,
     send_new_ticket_notification,
@@ -393,7 +393,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         assert mocked_email_messages[0].send.call_count == 1
         assert mocked_email_messages[0].html_body
 
-    def test_send_hog_functions_digest_email(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_digest_email(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         digest_data = {
@@ -426,13 +426,13 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             ],
         }
 
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
         assert mocked_email_messages[0].html_body
 
-    def test_send_hog_functions_digest_email_with_settings(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_digest_email_with_settings(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         user2 = self._create_user("test2@posthog.com")
@@ -505,7 +505,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             ],
         }
 
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         # Should only be sent to user2 (user1 has notifications disabled)
         # Each user gets their own email now
@@ -516,7 +516,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         self.user.partial_notification_settings = {"plugin_disabled": True}
         self.user.save()
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         # Should now be sent to both users (2 separate emails, one per user)
         assert len(mocked_email_messages) == 3  # 1 from first call + 2 from second call
@@ -524,7 +524,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         second_call_recipients = {msg.to[0]["raw_email"] for msg in mocked_email_messages[1:]}
         assert second_call_recipients == {"user1@posthog.com", "test2@posthog.com"}
 
-    def test_send_hog_functions_digest_email_team_not_found(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_digest_email_team_not_found(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         digest_data = {
@@ -541,12 +541,12 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             ],
         }
 
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         # Should not send any emails
         assert len(mocked_email_messages) == 0
 
-    def test_send_hog_functions_digest_email_comma_formatting(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_digest_email_comma_formatting(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         digest_data = {
@@ -579,7 +579,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             ],
         }
 
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
@@ -591,7 +591,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         assert "1,500,000" in html_body  # succeeded count for second function
         assert "25,000" in html_body  # failed count for second function
 
-    def test_send_hog_functions_daily_digest(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_daily_digest(self, MockEmailMessage: MagicMock) -> None:
         from posthog.test.fixtures import create_app_metric2
 
         # Clean up app_metrics2 table before test
@@ -603,8 +603,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         creator_user = self._create_user("creator@posthog.com")
         editor_user = self._create_user("editor@posthog.com")
 
-        # Create a HogFunction for testing with real creator
-        hog_function = HogFunction.objects.create(
+        # Create a CustomFunction for testing with real creator
+        custom_function = CustomFunction.objects.create(
             team=self.team,
             name="Test Destination Function",
             type="destination",
@@ -622,17 +622,17 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             team_id=self.team.id,
             user=editor_user,
             activity="updated",
-            scope="HogFunction",
-            item_id=str(hog_function.id),
-            detail=Detail(name=hog_function.name, type="destination"),
+            scope="CustomFunction",
+            item_id=str(custom_function.id),
+            detail=Detail(name=custom_function.name, type="destination"),
             created_at=edit_date,
         )
 
         # Create test data in app_metrics2 table with all metric types
         create_app_metric2(
             team_id=self.team.id,
-            app_source="hog_function",
-            app_source_id=str(hog_function.id),
+            app_source="custom_function",
+            app_source_id=str(custom_function.id),
             timestamp=timezone.now() - dt.timedelta(hours=1),  # Within last 24h
             metric_kind="failure",
             metric_name="failed",
@@ -640,8 +640,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         )
         create_app_metric2(
             team_id=self.team.id,
-            app_source="hog_function",
-            app_source_id=str(hog_function.id),
+            app_source="custom_function",
+            app_source_id=str(custom_function.id),
             timestamp=timezone.now() - dt.timedelta(hours=1),
             metric_kind="success",
             metric_name="succeeded",
@@ -649,8 +649,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         )
         create_app_metric2(
             team_id=self.team.id,
-            app_source="hog_function",
-            app_source_id=str(hog_function.id),
+            app_source="custom_function",
+            app_source_id=str(custom_function.id),
             timestamp=timezone.now() - dt.timedelta(hours=1),
             metric_kind="filter",
             metric_name="filtered",
@@ -659,8 +659,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         # Test 1: Enable digest for this team - should send email since there are failures
         # There are 3 users at this point (self.user, creator_user, editor_user)
-        with self.settings(HOG_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
-            send_hog_functions_daily_digest()
+        with self.settings(CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
+            send_custom_functions_daily_digest()
 
         # Each user gets their own email (3 users = 3 emails)
         assert len(mocked_email_messages) == 3
@@ -678,14 +678,14 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages.clear()
 
         # Test 2: Team not in allowlist - should not send email
-        with self.settings(HOG_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["999"]):
-            send_hog_functions_daily_digest()
+        with self.settings(CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["999"]):
+            send_custom_functions_daily_digest()
 
         assert len(mocked_email_messages) == 0
 
         # Test 3: Empty allowlist (default behavior) - should send email since there are failures
-        with self.settings(HOG_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[]):
-            send_hog_functions_daily_digest()
+        with self.settings(CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[]):
+            send_custom_functions_daily_digest()
 
         # Each user gets their own email (3 users = 3 emails)
         assert len(mocked_email_messages) == 3
@@ -697,8 +697,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages.clear()
 
         # Test 4: Using '*' in allowlist - should send email to all teams with failures
-        with self.settings(HOG_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["*"]):
-            send_hog_functions_daily_digest()
+        with self.settings(CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=["*"]):
+            send_custom_functions_daily_digest()
 
         # Each user gets their own email (3 users = 3 emails)
         assert len(mocked_email_messages) == 3
@@ -714,7 +714,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         self.user.partial_notification_settings = {"plugin_disabled": False}
         self.user.save()
 
-        send_hog_functions_daily_digest()
+        send_custom_functions_daily_digest()
         # Should be sent to users with notifications enabled (creator, editor, test2) - 3 separate emails
         recipients = {msg.to[0]["raw_email"] for msg in mocked_email_messages}
         expected_recipients = {"creator@posthog.com", "editor@posthog.com", "test2@posthog.com"}
@@ -727,11 +727,11 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         self.user.partial_notification_settings = {"plugin_disabled": True}
         self.user.save()
 
-        send_hog_functions_daily_digest()
+        send_custom_functions_daily_digest()
         # Should now be sent to all users (creator, editor, original user, test2) - 4 separate emails
         assert len(mocked_email_messages) == 4
 
-    def test_send_hog_functions_digest_email_with_test_email_override(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_digest_email_with_test_email_override(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         # Create users for testing
@@ -761,7 +761,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         }
 
         # Test with valid email override (user is member of org) - should send only to override email
-        send_hog_functions_digest_email(digest_data, test_email_override="override@posthog.com")
+        send_custom_functions_digest_email(digest_data, test_email_override="override@posthog.com")
 
         assert len(mocked_email_messages) == 1
         assert mocked_email_messages[0].send.call_count == 1
@@ -774,13 +774,13 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         mocked_email_messages.clear()
 
         # Test with invalid email override (user not member of org) - should not send email
-        send_hog_functions_digest_email(digest_data, test_email_override="invalid@example.com")
+        send_custom_functions_digest_email(digest_data, test_email_override="invalid@example.com")
 
         # No email should be sent since invalid@example.com is not a member of the organization
         assert len(mocked_email_messages) == 0
 
         # Test without email override - should follow normal notification settings
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         # Should be sent to test2 and override user (both have notifications enabled), but not to main user
         # Each user now gets their own email
@@ -789,7 +789,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         assert "test2@posthog.com" in sent_emails
         assert "override@posthog.com" in sent_emails
 
-    def test_send_hog_functions_digest_email_with_error_rate_threshold(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_digest_email_with_error_rate_threshold(self, MockEmailMessage: MagicMock) -> None:
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
         # Create users with different error rate thresholds
@@ -857,7 +857,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             ],
         }
 
-        send_hog_functions_digest_email(digest_data)
+        send_custom_functions_digest_email(digest_data)
 
         # Each user gets their own email (3 emails total - user_100_threshold gets none)
         assert len(mocked_email_messages) == 3
@@ -893,7 +893,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         # Verify user_100_threshold did not receive any email
         assert "threshold_100@posthog.com" not in emails_by_recipient
 
-    def test_send_hog_functions_daily_digest_no_eligible_functions(self, MockEmailMessage: MagicMock) -> None:
+    def test_send_custom_functions_daily_digest_no_eligible_functions(self, MockEmailMessage: MagicMock) -> None:
         from posthog.test.fixtures import create_app_metric2
 
         # Clean up app_metrics2 table before test
@@ -901,12 +901,12 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
 
         mocked_email_messages = mock_email_messages(MockEmailMessage)
 
-        # Test 1: No HogFunctions created - should not send email
-        send_hog_functions_daily_digest()
+        # Test 1: No CustomFunctions created - should not send email
+        send_custom_functions_daily_digest()
         assert len(mocked_email_messages) == 0
 
-        # Test 2: HogFunction with no failures - should not send email
-        hog_function = HogFunction.objects.create(
+        # Test 2: CustomFunction with no failures - should not send email
+        custom_function = CustomFunction.objects.create(
             team=self.team,
             name="Working Function",
             type="destination",
@@ -919,20 +919,20 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         # Only create successful metrics, no failures
         create_app_metric2(
             team_id=self.team.id,
-            app_source="hog_function",
-            app_source_id=str(hog_function.id),
+            app_source="custom_function",
+            app_source_id=str(custom_function.id),
             timestamp=timezone.now() - dt.timedelta(hours=1),  # Within last 24h
             metric_kind="success",
             metric_name="succeeded",
             count=100,
         )
 
-        send_hog_functions_daily_digest()
+        send_custom_functions_daily_digest()
         assert len(mocked_email_messages) == 0
 
-        # Test 3: Disabled HogFunction with failures - should not send email
-        HogFunction.objects.all().delete()  # Clear previous functions
-        disabled_function = HogFunction.objects.create(
+        # Test 3: Disabled CustomFunction with failures - should not send email
+        CustomFunction.objects.all().delete()  # Clear previous functions
+        disabled_function = CustomFunction.objects.create(
             team=self.team,
             name="Disabled Function",
             type="destination",
@@ -945,7 +945,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         # Create failure metrics for disabled function
         create_app_metric2(
             team_id=self.team.id,
-            app_source="hog_function",
+            app_source="custom_function",
             app_source_id=str(disabled_function.id),
             timestamp=timezone.now() - dt.timedelta(hours=1),  # Within last 24h
             metric_kind="failure",
@@ -953,12 +953,12 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             count=5,
         )
 
-        send_hog_functions_daily_digest()
+        send_custom_functions_daily_digest()
         assert len(mocked_email_messages) == 0
 
-        # Test 4: Deleted HogFunction with failures - should not send email
-        HogFunction.objects.all().delete()  # Clear previous functions
-        deleted_function = HogFunction.objects.create(
+        # Test 4: Deleted CustomFunction with failures - should not send email
+        CustomFunction.objects.all().delete()  # Clear previous functions
+        deleted_function = CustomFunction.objects.create(
             team=self.team,
             name="Deleted Function",
             type="destination",
@@ -971,7 +971,7 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
         # Create failure metrics for deleted function
         create_app_metric2(
             team_id=self.team.id,
-            app_source="hog_function",
+            app_source="custom_function",
             app_source_id=str(deleted_function.id),
             timestamp=timezone.now() - dt.timedelta(hours=1),  # Within last 24h
             metric_kind="failure",
@@ -979,8 +979,8 @@ class TestEmail(APIBaseTest, ClickhouseTestMixin):
             count=5,
         )
 
-        with self.settings(HOG_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
-            send_hog_functions_daily_digest()
+        with self.settings(CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS=[str(self.team.id)]):
+            send_custom_functions_daily_digest()
 
         assert len(mocked_email_messages) == 0
 

@@ -10,7 +10,7 @@ from django.test import SimpleTestCase, TestCase
 
 from posthog.schema import ClickhouseQueryProgress, QueryStatus
 
-from posthog.hogql.constants import DEFAULT_POSTHOG_AI_RETURNED_ROWS
+from posthog.insightsql.constants import DEFAULT_POSTHOG_AI_RETURNED_ROWS
 
 from posthog.clickhouse.client import (
     execute_async as client,
@@ -27,7 +27,7 @@ from posthog.redis import get_client
 
 def build_query(sql):
     return {
-        "kind": "HogQLQuery",
+        "kind": "InsightsQLQuery",
         "query": sql,
     }
 

@@ -51,7 +51,7 @@ class TestLifecycleFilter(BaseTest):
                         "math": "total",
                         "math_property": None,
                         "math_property_revenue_currency": None,
-                        "math_hogql": None,
+                        "math_insightsql": None,
                         "math_group_type_index": None,
                         "properties": {},
                         "timestamp_field": None,

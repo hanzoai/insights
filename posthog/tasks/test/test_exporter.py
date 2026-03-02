@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
-from posthog.hogql.errors import QueryError
+from posthog.insightsql.errors import QueryError
 
 from posthog.errors import CHQueryErrorTooManySimultaneousQueries
 from posthog.models.dashboard import Dashboard

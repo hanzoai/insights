@@ -129,7 +129,7 @@ class PropertiesTimeline:
         }
         raw_query_result = insight_sync_execute(
             formatted_sql,
-            {**params, **filter.hogql_context.values},
+            {**params, **filter.insightsql_context.values},
             query_type="properties_timeline",
             team_id=team.pk,
         )

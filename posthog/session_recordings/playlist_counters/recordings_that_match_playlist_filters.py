@@ -201,8 +201,8 @@ def convert_playlist_to_recordings_query(playlist: SessionRecordingPlaylist) -> 
 
     # we used to send `version` and it's not part of query, so we pop to make sure
     filters.pop("version", None)
-    # we used to send `hogql_filtering` and it's not part of query, so we pop to make sure
-    filters.pop("hogql_filtering", None)
+    # we used to send `insightsql_filtering` and it's not part of query, so we pop to make sure
+    filters.pop("insightsql_filtering", None)
 
     # Check if we have legacy filters (they don't have filter_group)
     if "filter_group" not in filters:
@@ -255,7 +255,7 @@ def convert_filters_to_recordings_query(filters: dict[str, Any]) -> RecordingsQu
             actions.append(f)
         elif filter_type == "log_entry":
             console_log_filters.append(f)
-        elif filter_type == "hogql":
+        elif filter_type == "insightsql":
             properties.append(f)
         elif filter_type == "recording":
             if f.get("key") == "visited_page":

@@ -2,12 +2,12 @@ from posthog.test.base import _create_event, _create_person, flush_persons_and_e
 
 from parameterized import parameterized
 
-from posthog.schema import DateRange, HogQLQueryModifiers, WebStatsBreakdown, WebStatsTableQuery
+from posthog.schema import DateRange, InsightsQLQueryModifiers, WebStatsBreakdown, WebStatsTableQuery
 
 from posthog.clickhouse.client.execute import sync_execute
-from posthog.hogql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
-from posthog.hogql_queries.web_analytics.test.test_web_stats_table import FloatAwareTestCase
-from posthog.hogql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
+from posthog.insightsql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
+from posthog.insightsql_queries.web_analytics.test.test_web_stats_table import FloatAwareTestCase
+from posthog.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from posthog.models import Person, Team
 from posthog.models.utils import uuid7
 from posthog.models.web_preaggregated.sql import WEB_BOUNCES_INSERT_SQL, WEB_STATS_INSERT_SQL
@@ -100,8 +100,8 @@ class TestTimezonePreAggregatedIntegration(WebAnalyticsPreAggregatedTestBase, Fl
         )
 
         # Run both pre-aggregated and raw queries for comparison
-        preagg_modifiers = HogQLQueryModifiers(useWebAnalyticsPreAggregatedTables=True)
-        raw_modifiers = HogQLQueryModifiers(useWebAnalyticsPreAggregatedTables=False)
+        preagg_modifiers = InsightsQLQueryModifiers(useWebAnalyticsPreAggregatedTables=True)
+        raw_modifiers = InsightsQLQueryModifiers(useWebAnalyticsPreAggregatedTables=False)
 
         preagg_runner = WebStatsTableQueryRunner(query=query, team=team, modifiers=preagg_modifiers)
         raw_runner = WebStatsTableQueryRunner(query=query, team=team, modifiers=raw_modifiers)

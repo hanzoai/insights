@@ -154,7 +154,7 @@ export function BreakdownTag({
             title={String(propertyName)}
             onClick={onClick}
         >
-            {breakdownType === 'hogql' ? (
+            {breakdownType === 'insightsql' ? (
                 <HoqQLPropertyInfo value={propertyName as string} />
             ) : (
                 <PropertyKeyInfo

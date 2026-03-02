@@ -15,7 +15,7 @@ const testUniqueKey = 'testUniqueKey'
 const initialQuery: DataVisualizationNode = {
     kind: NodeKind.DataVisualizationNode,
     source: {
-        kind: NodeKind.HogQLQuery,
+        kind: NodeKind.InsightsQLQuery,
         query: `select event, properties.$browser as browser, count() as total_count from events group by 1, 2`,
     },
     tableSettings: {

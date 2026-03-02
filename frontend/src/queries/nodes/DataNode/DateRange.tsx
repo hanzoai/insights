@@ -2,27 +2,27 @@ import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 
 import {
     EventsQuery,
-    HogQLQuery,
+    InsightsQLQuery,
     SessionAttributionExplorerQuery,
     SessionsQuery,
     TracesQuery,
 } from '~/queries/schema/schema-general'
 import {
     isEventsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isSessionAttributionExplorerQuery,
     isSessionsQuery,
     isTracesQuery,
 } from '~/queries/utils'
 
 interface DateRangeProps<
-    Q extends EventsQuery | HogQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
+    Q extends EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
 > {
     query: Q
     setQuery?: (query: Q) => void
 }
 export function DateRange<
-    Q extends EventsQuery | HogQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
+    Q extends EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
 >({ query, setQuery }: DateRangeProps<Q>): JSX.Element | null {
     if (isEventsQuery(query) || isSessionsQuery(query)) {
         return (
@@ -43,7 +43,7 @@ export function DateRange<
         )
     }
 
-    if (isHogQLQuery(query) || isSessionAttributionExplorerQuery(query)) {
+    if (isInsightsQLQuery(query) || isSessionAttributionExplorerQuery(query)) {
         return (
             <DateFilter
                 dateFrom={query.filters?.dateRange?.date_from ?? undefined}

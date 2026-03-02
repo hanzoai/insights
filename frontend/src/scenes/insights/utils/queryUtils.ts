@@ -8,7 +8,7 @@ import {
     getMathTypeWarning,
     isEventsNode,
     isFunnelsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightQueryNode,
     isInsightQueryWithDisplay,
     isInsightQueryWithSeries,
@@ -59,7 +59,7 @@ export const compareQuery = (a: Node, b: Node, opts?: CompareQueryOpts): boolean
 }
 
 export const haveVariablesOrFiltersChanged = (a: Node, b: Node): boolean => {
-    if (!isHogQLQuery(a) || !isHogQLQuery(b)) {
+    if (!isInsightsQLQuery(a) || !isInsightsQLQuery(b)) {
         return false
     }
 

@@ -1,15 +1,15 @@
 import { LemonLabel } from 'lib/lemon-ui/LemonLabel'
 import { LemonSelect } from 'lib/lemon-ui/LemonSelect'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
-export interface ModifiersProps<Q extends { response?: Record<string, any>; modifiers?: HogQLQueryModifiers }> {
+export interface ModifiersProps<Q extends { response?: Record<string, any>; modifiers?: InsightsQLQueryModifiers }> {
     setQuery: (query: Q) => void
     query: Q | null
     response: Required<Q>['response'] | null
 }
 
-export function Modifiers<Q extends { response?: Record<string, any>; modifiers?: HogQLQueryModifiers }>({
+export function Modifiers<Q extends { response?: Record<string, any>; modifiers?: InsightsQLQueryModifiers }>({
     setQuery,
     query,
     response = null,
@@ -190,7 +190,7 @@ export function Modifiers<Q extends { response?: Record<string, any>; modifiers?
 
             <LemonLabel className={labelClassName}>
                 <div>Session table version:</div>
-                <LemonSelect<Exclude<HogQLQueryModifiers['sessionTableVersion'], undefined>>
+                <LemonSelect<Exclude<InsightsQLQueryModifiers['sessionTableVersion'], undefined>>
                     options={[
                         { value: 'auto', label: 'auto' },
                         { value: 'v1', label: 'v1' },

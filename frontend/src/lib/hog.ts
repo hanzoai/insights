@@ -4,7 +4,7 @@ import { RE2JS } from 're2js'
 import { ExecOptions, ExecResult, VMState, exec as hogExec, execAsync as hogExecAsync } from '@posthog/hogvm'
 
 import { performQuery } from '~/queries/query'
-import { HogQLASTQuery, HogQLQuery, NodeKind } from '~/queries/schema/schema-general'
+import { InsightsQLASTQuery, InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
 import { setLatestVersionsOnQuery } from '~/queries/utils'
 
 const external = {
@@ -37,17 +37,17 @@ export function execHogAsync(code: any[] | VMState, options?: ExecOptions): Prom
                 return new Promise((resolve) => setTimeout(resolve, seconds * 1000))
             },
             run: async (queryInput: string | Record<string, any>) => {
-                const queryNode: HogQLQuery | HogQLASTQuery =
+                const queryNode: InsightsQLQuery | InsightsQLASTQuery =
                     typeof queryInput === 'object'
                         ? setLatestVersionsOnQuery(
                               {
-                                  kind: NodeKind.HogQLASTQuery,
+                                  kind: NodeKind.InsightsQLASTQuery,
                                   query: queryInput,
                               },
                               { recursion: false }
                           )
                         : setLatestVersionsOnQuery(
-                              { kind: NodeKind.HogQLQuery, query: queryInput },
+                              { kind: NodeKind.InsightsQLQuery, query: queryInput },
                               { recursion: false }
                           )
                 const response = await performQuery(queryNode)

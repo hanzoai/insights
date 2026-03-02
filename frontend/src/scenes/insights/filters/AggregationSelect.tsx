@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { LemonSelect, LemonSelectSection } from '@posthog/lemon-ui'
 
-import { HogQLEditor } from 'lib/components/HogQLEditor/HogQLEditor'
+import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { GroupIntroductionFooter } from 'scenes/groups/GroupsIntroduction'
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
@@ -12,7 +12,7 @@ import { FunnelsQuery } from '~/queries/schema/schema-general'
 import { isFunnelsQuery, isInsightQueryNode, isStickinessQuery } from '~/queries/utils'
 import { InsightLogicProps } from '~/types'
 
-export function getHogQLValue(groupIndex?: number | null, aggregationQuery?: string | null): string {
+export function getInsightsQLValue(groupIndex?: number | null, aggregationQuery?: string | null): string {
     if (groupIndex != undefined) {
         return `$group_${groupIndex}`
     } else if (aggregationQuery) {
@@ -21,7 +21,7 @@ export function getHogQLValue(groupIndex?: number | null, aggregationQuery?: str
     return UNIQUE_USERS
 }
 
-export function hogQLToFilterValue(value?: string): { groupIndex?: number; aggregationQuery?: string } {
+export function insightsQLToFilterValue(value?: string): { groupIndex?: number; aggregationQuery?: string } {
     if (value?.match(/^\$group_[0-9]+$/)) {
         return { groupIndex: parseInt(value.replace('$group_', '')) }
     } else if (value === 'person_id') {
@@ -35,14 +35,14 @@ const UNIQUE_USERS = 'person_id'
 type AggregationSelectProps = {
     insightProps: InsightLogicProps
     className?: string
-    hogqlAvailable?: boolean
+    insightsqlAvailable?: boolean
     value?: string
 }
 
 export function AggregationSelect({
     insightProps,
     className,
-    hogqlAvailable,
+    insightsqlAvailable,
 }: AggregationSelectProps): JSX.Element | null {
     const { querySource } = useValues(insightVizDataLogic(insightProps))
     const { updateQuerySource } = useActions(insightVizDataLogic(insightProps))
@@ -54,16 +54,16 @@ export function AggregationSelect({
         return null
     }
 
-    const value = getHogQLValue(
+    const value = getInsightsQLValue(
         isStickinessQuery(querySource) ? undefined : querySource.aggregation_group_type_index,
-        isFunnelsQuery(querySource) ? querySource.funnelsFilter?.funnelAggregateByHogQL : undefined
+        isFunnelsQuery(querySource) ? querySource.funnelsFilter?.funnelAggregateByInsightsQL : undefined
     )
     const onChange = (value: string): void => {
-        const { aggregationQuery, groupIndex } = hogQLToFilterValue(value)
+        const { aggregationQuery, groupIndex } = insightsQLToFilterValue(value)
         if (isFunnelsQuery(querySource)) {
             updateQuerySource({
                 aggregation_group_type_index: groupIndex,
-                funnelsFilter: { ...querySource.funnelsFilter, funnelAggregateByHogQL: aggregationQuery },
+                funnelsFilter: { ...querySource.funnelsFilter, funnelAggregateByInsightsQL: aggregationQuery },
             } as FunnelsQuery)
         } else {
             updateQuerySource({ aggregation_group_type_index: groupIndex } as FunnelsQuery)
@@ -95,7 +95,7 @@ export function AggregationSelect({
         })
     }
 
-    if (hogqlAvailable) {
+    if (insightsqlAvailable) {
         baseValues.push(`properties.$session_id`)
         optionSections[0].options.push({
             value: 'properties.$session_id',
@@ -105,15 +105,15 @@ export function AggregationSelect({
             label: 'Custom SQL expression',
             options: [
                 {
-                    // This is a bit of a hack so that the HogQL option is only highlighted as active when the user has
-                    // set a custom value (because actually _all_ the options are HogQL)
+                    // This is a bit of a hack so that the InsightsQL option is only highlighted as active when the user has
+                    // set a custom value (because actually _all_ the options are InsightsQL)
                     value: !value || baseValues.includes(value) ? '' : value,
                     label: <span className="font-mono">{value}</span>,
-                    labelInMenu: function CustomHogQLOptionWrapped({ onSelect }) {
+                    labelInMenu: function CustomInsightsQLOptionWrapped({ onSelect }) {
                         return (
                             // eslint-disable-next-line react/forbid-dom-props
                             <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
-                                <HogQLEditor
+                                <InsightsQLEditor
                                     onChange={onSelect}
                                     value={value}
                                     placeholder={

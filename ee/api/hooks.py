@@ -7,21 +7,21 @@ from django.http import Http404
 from rest_framework import exceptions, mixins, serializers, status, viewsets
 from rest_framework.response import Response
 
-from posthog.api.hog_function import HogFunctionSerializer
+from posthog.api.custom_function import CustomFunctionSerializer
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.cdp.templates.zapier.template_zapier import template as template_zapier
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 from posthog.models.user import User
 
 from ee.models.hook import HOOK_EVENTS, Hook
 
 
-def create_zapier_hog_function(hook: Hook, serializer_context: dict, from_migration: bool = False) -> HogFunction:
+def create_zapier_custom_function(hook: Hook, serializer_context: dict, from_migration: bool = False) -> CustomFunction:
     description = template_zapier.description
     if from_migration:
         description = f"{description} Migrated from legacy hook {hook.id}."
 
-    serializer = HogFunctionSerializer(
+    serializer = CustomFunctionSerializer(
         data={
             "template_id": template_zapier.id,
             "type": "destination",
@@ -58,7 +58,7 @@ def create_zapier_hog_function(hook: Hook, serializer_context: dict, from_migrat
         context=serializer_context,
     )
     serializer.is_valid(raise_exception=True)
-    return HogFunction(**serializer.validated_data)
+    return CustomFunction(**serializer.validated_data)
 
 
 class HookSerializer(serializers.ModelSerializer):
@@ -78,7 +78,7 @@ class HookSerializer(serializers.ModelSerializer):
         return target
 
 
-# NOTE: This is a special API used by zapier. It will soon be deprecated completely in favour of hog functions
+# NOTE: This is a special API used by zapier. It will soon be deprecated completely in favour of custom functions
 class HookViewSet(
     TeamAndOrgViewSetMixin,
     mixins.ListModelMixin,
@@ -103,12 +103,12 @@ class HookViewSet(
         serializer.is_valid(raise_exception=True)
         hook = Hook(**serializer.validated_data)
 
-        hog_function = create_zapier_hog_function(hook, serializer_context=self.get_serializer_context())
-        hog_function.save()
+        custom_function = create_zapier_custom_function(hook, serializer_context=self.get_serializer_context())
+        custom_function.save()
 
         response_serializer = self.get_serializer(
             data={
-                "id": hog_function.id,
+                "id": custom_function.id,
                 "event": serializer.validated_data["event"],
                 "target": serializer.validated_data["target"],
                 "resource_id": serializer.validated_data.get("resource_id"),
@@ -130,7 +130,7 @@ class HookViewSet(
             found = True
 
             # We do this by finding one where the description contains the hook id
-            fns = HogFunction.objects.filter(
+            fns = CustomFunction.objects.filter(
                 team_id=self.team_id,
                 template_id=template_zapier.id,
                 description__icontains=f"{instance.id}",
@@ -147,16 +147,16 @@ class HookViewSet(
             pass
 
         if not found:
-            # Otherwise we try and delete the hog function by id
+            # Otherwise we try and delete the custom function by id
             try:
-                hog_function = HogFunction.objects.get(
+                custom_function = CustomFunction.objects.get(
                     team_id=self.team_id, template_id=template_zapier.id, id=kwargs["pk"]
                 )
-                hog_function.enabled = False
-                hog_function.deleted = True
-                hog_function.save()
+                custom_function.enabled = False
+                custom_function.deleted = True
+                custom_function.save()
                 found = True
-            except (HogFunction.DoesNotExist, ValidationError):
+            except (CustomFunction.DoesNotExist, ValidationError):
                 pass
 
         if found:

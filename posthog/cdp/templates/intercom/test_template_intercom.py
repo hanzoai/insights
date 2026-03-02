@@ -1,6 +1,6 @@
 import pytest
 
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.intercom.template_intercom import (
     template as template_intercom,
     template_send_event as template_intercom_event,
@@ -9,7 +9,7 @@ from posthog.cdp.templates.intercom.template_intercom import (
 from common.hogvm.python.utils import UncaughtHogVMException
 
 
-class TestTemplateIntercom(BaseHogFunctionTemplateTest):
+class TestTemplateIntercom(BaseCustomFunctionTemplateTest):
     template = template_intercom
 
     def create_inputs(self, **kwargs):
@@ -194,7 +194,7 @@ class TestTemplateIntercom(BaseHogFunctionTemplateTest):
         assert e.value.message == "Found multiple contacts with the same email address. Skipping..."
 
 
-class TestTemplateIntercomEvent(BaseHogFunctionTemplateTest):
+class TestTemplateIntercomEvent(BaseCustomFunctionTemplateTest):
     template = template_intercom_event
 
     def create_inputs(self, **kwargs):

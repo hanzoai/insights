@@ -10,7 +10,7 @@ describe('getQueryFeatures', () => {
             [NodeKind.TracesQuery, { kind: NodeKind.TracesQuery }],
             [NodeKind.EventsQuery, { kind: NodeKind.EventsQuery, select: ['*'] }],
             [NodeKind.SessionsQuery, { kind: NodeKind.SessionsQuery }],
-            [NodeKind.HogQLQuery, { kind: NodeKind.HogQLQuery, query: 'SELECT 1' }],
+            [NodeKind.InsightsQLQuery, { kind: NodeKind.InsightsQLQuery, query: 'SELECT 1' }],
         ])('%s should have displayResponseError enabled', (_, query) => {
             const features = getQueryFeatures(query)
             expect(features.has(QueryFeature.displayResponseError)).toBe(true)

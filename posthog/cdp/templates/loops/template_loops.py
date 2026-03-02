@@ -1,9 +1,9 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Update contacts in Loops.so",
     icon_url="/static/services/loops.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -102,7 +102,7 @@ if (res.status >= 400) {
     },
 )
 
-template_send_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_send_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -111,7 +111,7 @@ template_send_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Loops.so",
     icon_url="/static/services/loops.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -202,7 +202,7 @@ if (res.status >= 400) {
 )
 
 
-class TemplateLoopsMigrator(HogFunctionTemplateMigrator):
+class TemplateLoopsMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/posthog-loops-plugin"
 
     @classmethod

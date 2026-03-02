@@ -180,7 +180,7 @@ export const SurveyResponseFilters = React.memo(function SurveyResponseFilters()
                             TaxonomicFilterGroupType.PersonProperties,
                             TaxonomicFilterGroupType.EventFeatureFlags,
                             TaxonomicFilterGroupType.Cohorts,
-                            TaxonomicFilterGroupType.HogQLExpression,
+                            TaxonomicFilterGroupType.InsightsQLExpression,
                             ...groupsTaxonomicTypes,
                         ]}
                     />

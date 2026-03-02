@@ -64,7 +64,7 @@ class TestGetMismatchedDistinctIds(ClickhouseTestMixin, BaseTest):
         )
         flush_persons_and_events()
 
-        # The HogQL query should find the distinct_id with a mismatch
+        # The InsightsQL query should find the distinct_id with a mismatch
         result = get_mismatched_distinct_ids(self.team)
 
         assert len(result) == 1

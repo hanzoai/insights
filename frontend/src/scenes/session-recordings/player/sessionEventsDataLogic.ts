@@ -9,7 +9,7 @@ import { Dayjs, dayjs } from 'lib/dayjs'
 import { chainToElements } from 'lib/utils/elements-chain'
 import { TimeTree } from 'lib/utils/time-tree'
 
-import { HogQLQueryString, hogql } from '~/queries/utils'
+import { InsightsQLQueryString, insightsql } from '~/queries/utils'
 import { RecordingEventType } from '~/types'
 
 import type { sessionEventsDataLogicType } from './sessionEventsDataLogicType'
@@ -53,7 +53,7 @@ export const sessionEventsDataLogic = kea<sessionEventsDataLogicType>([
                         return null
                     }
 
-                    const sessionEventsQuery = hogql`
+                    const sessionEventsQuery = insightsql`
 SELECT uuid, event, timestamp, elements_chain, properties.$window_id, properties.$current_url, properties.$event_type, properties.$viewport_width, properties.$viewport_height, properties.$screen_name, distinct_id
 FROM events
 WHERE timestamp > ${start.subtract(TWENTY_FOUR_HOURS_IN_MS, 'ms')}
@@ -62,7 +62,7 @@ AND $session_id = ${props.sessionRecordingId}
 ORDER BY timestamp ASC
 LIMIT 1000000`
 
-                    let relatedEventsQuery = hogql`
+                    let relatedEventsQuery = insightsql`
 SELECT uuid, event, timestamp, elements_chain, properties.$window_id, properties.$current_url, properties.$event_type, distinct_id
 FROM events
 WHERE timestamp > ${start.subtract(FIVE_MINUTES_IN_MS, 'ms')}
@@ -72,20 +72,20 @@ AND properties.$lib != 'web'`
 
                     if (person?.uuid) {
                         relatedEventsQuery = (relatedEventsQuery +
-                            hogql`\nAND person_id = ${person.uuid}`) as HogQLQueryString
+                            insightsql`\nAND person_id = ${person.uuid}`) as InsightsQLQueryString
                     }
                     if (!person?.uuid && values.sessionPlayerMetaData?.distinct_id) {
                         relatedEventsQuery = (relatedEventsQuery +
-                            hogql`\nAND distinct_id = ${values.sessionPlayerMetaData.distinct_id}`) as HogQLQueryString
+                            insightsql`\nAND distinct_id = ${values.sessionPlayerMetaData.distinct_id}`) as InsightsQLQueryString
                     }
 
                     relatedEventsQuery = (relatedEventsQuery +
-                        hogql`\nORDER BY timestamp ASC\nLIMIT 1000000`) as HogQLQueryString
+                        insightsql`\nORDER BY timestamp ASC\nLIMIT 1000000`) as InsightsQLQueryString
 
                     const tags = { scene: 'ReplaySingle', productKey: 'session_replay' }
                     const [sessionEvents, relatedEvents]: any[] = await Promise.all([
                         // make one query for all events that are part of the session
-                        api.queryHogQL(sessionEventsQuery, tags),
+                        api.queryInsightsQL(sessionEventsQuery, tags),
                         // make a second for all events from that person,
                         // not marked as part of the session
                         // but in the same time range
@@ -93,7 +93,7 @@ AND properties.$lib != 'web'`
                         // but with no session id
                         // since posthog-js must always add session id we can also
                         // take advantage of lib being materialized and further filter
-                        api.queryHogQL(relatedEventsQuery, tags),
+                        api.queryInsightsQL(relatedEventsQuery, tags),
                     ])
 
                     return [...sessionEvents.results, ...relatedEvents.results].map(
@@ -152,7 +152,7 @@ AND properties.$lib != 'web'`
                     const latestTimestamp = timestamps.reduce((a, b) => Math.max(a, b))
 
                     try {
-                        const query = hogql`
+                        const query = insightsql`
                             SELECT properties, uuid
                             FROM events
                             -- the timestamp range here is only to avoid querying too much of the events table
@@ -164,7 +164,7 @@ AND properties.$lib != 'web'`
                             AND event in ${eventNames}
                             AND uuid in ${eventIds}`
 
-                        const response = await api.queryHogQL(query, {
+                        const response = await api.queryInsightsQL(query, {
                             scene: 'ReplaySingle',
                             productKey: 'session_replay',
                         })

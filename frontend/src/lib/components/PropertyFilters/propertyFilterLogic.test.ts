@@ -102,16 +102,16 @@ describe('propertyFilterLogic', () => {
             expect(cb).toHaveBeenCalledTimes(1)
         })
 
-        it('calls onChange for a HogQL filter with only a key', async () => {
+        it('calls onChange for a InsightsQL filter with only a key', async () => {
             const filter = {
                 key: "properties.$browser = 'Chrome'",
-                type: PropertyFilterType.HogQL,
+                type: PropertyFilterType.InsightsQL,
             } as AnyPropertyFilter
             const cb = await setFilterAndCheck(filter, false)
             expect(cb).toHaveBeenCalledTimes(1)
         })
 
-        it('does not call onChange for a non-HogQL filter with only a key and no operator', async () => {
+        it('does not call onChange for a non-InsightsQL filter with only a key and no operator', async () => {
             const filter = { key: '$browser', type: PropertyFilterType.Event } as AnyPropertyFilter
             const cb = await setFilterAndCheck(filter, false)
             expect(cb).not.toHaveBeenCalled()

@@ -50,8 +50,8 @@ class ClickHouseUser(StrEnum):
     BATCH_EXPORT = "batch_export"
     COHORTS = "cohorts"
     CACHE_WARMUP = "cache_warmup"
-    # Whenever the HogQL needs to query CH to get some metadata
-    HOGQL = "hogql"  # deprecated, use META
+    # Whenever the InsightsQL needs to query CH to get some metadata
+    INSIGHTSQL = "insightsql"  # deprecated, use META
     META = "meta"
     MESSAGING = "messaging"  # a.k.a. behavioral cohorts
     MAX_AI = "max_ai"  # llm/a
