@@ -8,6 +8,8 @@ import structlog
 from redis import asyncio as aioredis
 
 from insights.redis import get_async_client
+from insights.temporal.ai.session_summary.constants import SESSION_SUMMARIES_DB_DATA_REDIS_TTL
+from insights.temporal.ai.session_summary.ee_stubs import SingleSessionSummary
 from insights.temporal.ai.session_summary.types.video import ExtraSummaryContext
 
 
