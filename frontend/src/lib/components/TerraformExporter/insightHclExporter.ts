@@ -7,7 +7,7 @@ import {
 } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
 import { AlertType } from '~/lib/components/Alerts/types'
-import { CustomFunctionType, InsightModel } from '~/types'
+import { InsightsFunctionType, InsightModel } from '~/types'
 
 import { generateAlertHCL } from './alertHclExporter'
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
@@ -18,7 +18,7 @@ export interface InsightHclExportOptions extends HclExportOptions {
     /** Child alerts to include in export */
     alerts?: AlertType[]
     /** Custom functions grouped by alert ID */
-    customFunctionsByAlertId?: Map<string, CustomFunctionType[]>
+    insightsFunctionsByAlertId?: Map<string, InsightsFunctionType[]>
 }
 
 export interface InsightExportResult extends HclExportResult {
@@ -26,7 +26,7 @@ export interface InsightExportResult extends HclExportResult {
         dashboards: number
         insights: number
         alerts: number
-        customFunctions: number
+        insightsFunctions: number
     }
 }
 
@@ -117,8 +117,8 @@ export function generateInsightHCL(
     const hclSections: string[] = []
 
     const alertCount = options.alerts?.length || 0
-    const customFunctionCount = options.customFunctionsByAlertId
-        ? Array.from(options.customFunctionsByAlertId.values()).flat().length
+    const insightsFunctionCount = options.insightsFunctionsByAlertId
+        ? Array.from(options.insightsFunctionsByAlertId.values()).flat().length
         : 0
 
     const result = generateHCL(insight, INSIGHT_EXPORTER, options)
@@ -133,11 +133,11 @@ export function generateInsightHCL(
         const insightTfReference = `${INSIGHT_EXPORTER.resourceType}.${insightTfName}.id`
 
         for (const alert of options.alerts) {
-            const customFunctions = options.customFunctionsByAlertId?.get(alert.id) || []
+            const insightsFunctions = options.insightsFunctionsByAlertId?.get(alert.id) || []
 
             const alertResult = generateAlertHCL(alert, {
                 insightTfReference,
-                customFunctions,
+                insightsFunctions,
             })
             hclSections.push('')
             hclSections.push(alertResult.hcl)
@@ -152,7 +152,7 @@ export function generateInsightHCL(
             dashboards: 0,
             insights: 1,
             alerts: alertCount,
-            customFunctions: customFunctionCount,
+            insightsFunctions: insightsFunctionCount,
         },
     }
 }

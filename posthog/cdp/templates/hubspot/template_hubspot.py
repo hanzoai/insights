@@ -1,9 +1,9 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -12,7 +12,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Creates a new contact in Hubspot whenever an event is triggered.",
     icon_url="/static/services/hubspot.png",
     category=["CRM", "Customer Success"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 let properties := {
     'email': inputs.email
@@ -98,7 +98,7 @@ if (res.status == 200) {
     },
 )
 
-template_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     id="template-hubspot-event",
@@ -107,7 +107,7 @@ template_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send events to Hubspot.",
     icon_url="/static/services/hubspot.png",
     category=["CRM", "Customer Success"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.email)) {
     print('`email` input is empty. Not sending event.')
@@ -364,13 +364,13 @@ if (res.status >= 400) {
 )
 
 
-class TemplateHubspotMigrator(CustomFunctionTemplateMigrator):
+class TemplateHubspotMigrator(InsightsFunctionTemplateMigrator):
     plugin_url = "https://github.com/Insights/hubspot-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["custom_script"] = hf["code"]
+        hf["fn"] = hf["code"]
         del hf["code"]
 
         # Must reauthenticate with HubSpot
@@ -388,7 +388,7 @@ class TemplateHubspotMigrator(CustomFunctionTemplateMigrator):
             "secret": True,
             "required": True,
         }
-        hf["custom_script"] = hf["custom_script"].replace("inputs.oauth.access_token", "inputs.access_token")
+        hf["fn"] = hf["fn"].replace("inputs.oauth.access_token", "inputs.access_token")
 
         hf["inputs"] = {
             "access_token": {"value": hubspotAccessToken},

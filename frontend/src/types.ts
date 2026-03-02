@@ -11,7 +11,6 @@ import { eventWithTime } from '@posthog/rrweb-types'
 import { ChartDataset, ChartType, InteractionItem } from 'lib/Chart'
 import { PaginatedResponse } from 'lib/api'
 import { AlertType } from 'lib/components/Alerts/types'
-import { MascotActorOptions } from 'lib/components/MascotMode/types'
 import { UrlTriggerConfig } from 'lib/components/IngestionControls/types'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { DashboardCompatibleScenes } from 'lib/components/SceneDashboardChoice/sceneDashboardChoiceModalLogic'
@@ -78,8 +77,8 @@ import type {
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 
-import { CyclotronInputType } from 'products/workflows/frontend/Workflows/customflows/steps/types'
-import { CustomFlow } from 'products/workflows/frontend/Workflows/customflows/types'
+import { CyclotronInputType } from 'products/workflows/frontend/Workflows/insightsflows/steps/types'
+import { InsightsFlow } from 'products/workflows/frontend/Workflows/insightsflows/types'
 
 import { InferredSelector } from './toolbar/product-tours/elementInference'
 
@@ -308,7 +307,6 @@ interface UserBaseType {
 export interface UserBasicType extends UserBaseType {
     is_email_verified?: any
     id: number
-    mascot_config?: MinimalMascotConfig
     role_at_organization?: string | null
 }
 
@@ -360,38 +358,15 @@ export interface UserType extends UserBaseType {
     has_seen_product_intro_for?: Record<string, boolean>
     scene_personalisation?: SceneDashboardChoice[]
     theme_mode?: UserTheme | null
-    mascot_config?: MascotConfig
     allow_sidebar_suggestions?: boolean
     role_at_organization?: UserRole | null
     passkeys_enabled_for_2fa?: boolean
 }
 
-export type MascotColorOptions =
-    | 'green'
-    | 'red'
-    | 'blue'
-    | 'purple'
-    | 'dark'
-    | 'light'
-    | 'sepia'
-    | 'invert'
-    | 'invert-hue'
-    | 'greyscale'
-
-export type MinimalMascotConfig = {
-    use_as_profile: boolean
-    color: MascotActorOptions['color']
-    skin: MascotActorOptions['skin']
-    accessories: MascotActorOptions['accessories']
-}
-
-export type MascotConfig = {
-    version: 2
-    use_as_profile: boolean
-    party_mode_enabled: boolean
-    enabled: boolean
-    actor_options: MascotActorOptions
-}
+// Mascot types removed
+export type MascotColorOptions = never
+export type MinimalMascotConfig = Record<string, never>
+export type MascotConfig = Record<string, never>
 
 export interface NotificationSettings {
     plugin_disabled: boolean
@@ -1415,7 +1390,7 @@ export type SearchableEntity =
     | 'event_definition'
     | 'experiment'
     | 'feature_flag'
-    | 'custom_flow'
+    | 'insights_flow'
     | 'notebook'
     | 'property_definition'
     | 'survey'
@@ -2407,7 +2382,7 @@ export interface PluginType {
     metrics?: Record<string, StoredMetricMathOperations>
     capabilities?: Record<'jobs' | 'methods' | 'scheduled_tasks', string[] | undefined>
     public_jobs?: Record<string, JobSpec>
-    custom_function_migration_available?: boolean
+    insights_function_migration_available?: boolean
 }
 
 export type AppType = PluginType
@@ -4997,7 +4972,7 @@ export type APIScopeObject =
     | 'feature_flag'
     | 'group'
     | 'health_issue'
-    | 'custom_function'
+    | 'insights_function'
     | 'insight'
     | 'insight_variable'
     | 'integration'
@@ -5132,8 +5107,8 @@ export enum ActivityScope {
     INSIGHT = 'Insight',
     PLUGIN = 'Plugin',
     PLUGIN_CONFIG = 'PluginConfig',
-    CUSTOM_FUNCTION = 'CustomFunction',
-    CUSTOM_FLOW = 'CustomFlow',
+    INSIGHTS_FUNCTION = 'InsightsFunction',
+    INSIGHTS_FLOW = 'InsightsFlow',
     DATA_MANAGEMENT = 'DataManagement',
     EVENT_DEFINITION = 'EventDefinition',
     PROPERTY_DEFINITION = 'PropertyDefinition',
@@ -6032,19 +6007,19 @@ export interface CyclotronJobFiltersType {
 
 export type CyclotronJobInputType = CyclotronInputType
 
-export interface CustomFunctionMappingType {
+export interface InsightsFunctionMappingType {
     name: string
     disabled?: boolean
     inputs_schema?: CyclotronJobInputSchemaType[]
     inputs?: Record<string, CyclotronInputType> | null
     filters?: CyclotronJobFiltersType | null
 }
-export interface CustomFunctionMappingTemplateType extends CustomFunctionMappingType {
+export interface InsightsFunctionMappingTemplateType extends InsightsFunctionMappingType {
     name: string
     include_by_default?: boolean
 }
 
-export type CustomFunctionTypeType =
+export type InsightsFunctionTypeType =
     | 'destination'
     | 'internal_destination'
     | 'source'
@@ -6053,9 +6028,9 @@ export type CustomFunctionTypeType =
     | 'site_app'
     | 'transformation'
 
-export type CustomFunctionType = {
+export type InsightsFunctionType = {
     id: string
-    type: CustomFunctionTypeType
+    type: InsightsFunctionTypeType
     icon_url?: string
     icon_class_name?: string // allow for overriding css styling on the icon case by case
     name: string
@@ -6064,31 +6039,31 @@ export type CustomFunctionType = {
     created_at: string
     updated_at: string
     enabled: boolean
-    custom_script: string
+    fn: string
     execution_order?: number
     inputs_schema?: CyclotronJobInputSchemaType[]
     inputs?: Record<string, CyclotronInputType> | null
-    mappings?: CustomFunctionMappingType[] | null
+    mappings?: InsightsFunctionMappingType[] | null
     masking?: CyclotronJobMasking | null
     filters?: CyclotronJobFiltersType | null
-    template?: CustomFunctionTemplateType
-    status?: CustomFunctionStatus
+    template?: InsightsFunctionTemplateType
+    status?: InsightsFunctionStatus
     batch_export_id?: string | null
     template_id?: string
     deleted?: boolean
 }
 
-export type CustomFunctionTemplateStatus = 'stable' | 'alpha' | 'beta' | 'deprecated' | 'coming_soon' | 'hidden'
+export type InsightsFunctionTemplateStatus = 'stable' | 'alpha' | 'beta' | 'deprecated' | 'coming_soon' | 'hidden'
 
 // Contexts change the way the UI is rendered allowing different teams to customize the UI for their use case
-export type CustomFunctionConfigurationContextId =
+export type InsightsFunctionConfigurationContextId =
     | 'standard'
     | 'error-tracking'
     | 'activity-log'
     | 'discussion-mention'
     | 'insight-alerts'
 
-export type CustomFunctionSubTemplateIdType =
+export type InsightsFunctionSubTemplateIdType =
     | 'early-access-feature-enrollment'
     | 'survey-response'
     | 'activity-log'
@@ -6098,35 +6073,35 @@ export type CustomFunctionSubTemplateIdType =
     | 'discussion-mention'
     | 'insight-alert-firing'
 
-export type CustomFunctionConfigurationType = Omit<
-    CustomFunctionType,
-    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status' | 'custom_script'
+export type InsightsFunctionConfigurationType = Omit<
+    InsightsFunctionType,
+    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status' | 'fn'
 > & {
-    hog?: CustomFunctionType['hog'] // In the config it can be empty if using a template
+    hog?: InsightsFunctionType['hog'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
-export type CustomFlowConfigurationType = Omit<CustomFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
-export type CyclotronJobConfigurationType = CustomFunctionConfigurationType | CustomFlowConfigurationType
+export type InsightsFlowConfigurationType = Omit<InsightsFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
+export type CyclotronJobConfigurationType = InsightsFunctionConfigurationType | InsightsFlowConfigurationType
 
-export type CustomFunctionSubTemplateType = Pick<
-    CustomFunctionType,
+export type InsightsFunctionSubTemplateType = Pick<
+    InsightsFunctionType,
     'filters' | 'inputs' | 'masking' | 'mappings' | 'type'
 > & {
-    template_id: CustomFunctionTemplateType['id']
-    context_id: CustomFunctionConfigurationContextId
-    sub_template_id: CustomFunctionSubTemplateIdType
+    template_id: InsightsFunctionTemplateType['id']
+    context_id: InsightsFunctionConfigurationContextId
+    sub_template_id: InsightsFunctionSubTemplateIdType
     name?: string
     description?: string
     flag?: string
 }
 
-export type CustomFunctionTemplateType = Pick<
-    CustomFunctionType,
+export type InsightsFunctionTemplateType = Pick<
+    InsightsFunctionType,
     'id' | 'type' | 'name' | 'inputs_schema' | 'filters' | 'icon_url' | 'icon_class_name' | 'masking' | 'mappings'
 > & {
-    status: CustomFunctionTemplateStatus
+    status: InsightsFunctionTemplateStatus
     free: boolean
-    mapping_templates?: CustomFunctionMappingTemplateType[]
+    mapping_templates?: InsightsFunctionMappingTemplateType[]
     description?: string | JSX.Element
     code: string
     code_language: 'javascript' | 'hog'
@@ -6136,11 +6111,11 @@ export type CustomFunctionTemplateType = Pick<
     featured?: boolean
 }
 
-export type CustomFunctionTemplateWithSubTemplateType = CustomFunctionTemplateType & {
-    sub_template_id?: CustomFunctionSubTemplateIdType
+export type InsightsFunctionTemplateWithSubTemplateType = InsightsFunctionTemplateType & {
+    sub_template_id?: InsightsFunctionSubTemplateIdType
 }
 
-export type CustomFunctionIconResponse = {
+export type InsightsFunctionIconResponse = {
     id: string
     name: string
     url: string
@@ -6154,7 +6129,7 @@ export enum HogWatcherState {
     forcefully_disabled = 12,
 }
 
-export type CustomFunctionStatus = {
+export type InsightsFunctionStatus = {
     state: HogWatcherState
     tokens: number
 }
@@ -6200,7 +6175,7 @@ export type CyclotronJobInvocationGlobals = {
         headers: Record<string, string>
         ip?: string
     }
-    // For CustomFlows, workflow-level variables
+    // For InsightsFlows, workflow-level variables
     variables?: Record<string, any>
 }
 

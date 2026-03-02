@@ -129,11 +129,11 @@ import {
     HeatmapScreenshotType,
     HeatmapStatus,
     HeatmapType,
-    CustomFunctionIconResponse,
-    CustomFunctionStatus,
-    CustomFunctionTemplateType,
-    CustomFunctionType,
-    CustomFunctionTypeType,
+    InsightsFunctionIconResponse,
+    InsightsFunctionStatus,
+    InsightsFunctionTemplateType,
+    InsightsFunctionType,
+    InsightsFunctionTypeType,
     InsightModel,
     IntegrationType,
     JiraProjectType,
@@ -218,13 +218,13 @@ import type {
 import { Task, TaskRun, TaskUpsertProps } from 'products/tasks/frontend/types'
 import { OptOutEntry } from 'products/workflows/frontend/OptOuts/optOutListLogic'
 import { MessageTemplate } from 'products/workflows/frontend/TemplateLibrary/messageTemplatesLogic'
-import { CustomFlowTestResult } from 'products/workflows/frontend/Workflows/customflows/steps/types'
+import { InsightsFlowTestResult } from 'products/workflows/frontend/Workflows/insightsflows/steps/types'
 import {
-    CustomFlow,
-    CustomFlowAction,
-    CustomFlowBatchJob,
-    CustomFlowTemplate,
-} from 'products/workflows/frontend/Workflows/customflows/types'
+    InsightsFlow,
+    InsightsFlowAction,
+    InsightsFlowBatchJob,
+    InsightsFlowTemplate,
+} from 'products/workflows/frontend/Workflows/insightsflows/types'
 
 import { AgentMode } from '../queries/schema'
 import { MaxUIContext } from '../scenes/max/maxTypes'
@@ -638,24 +638,24 @@ export class ApiRequest {
         return this.pluginConfigs(teamId).addPathComponent(id)
     }
 
-    public customScript(teamId?: TeamType['id']): ApiRequest {
-        return this.projectsDetail(teamId).addPathComponent('custom_script')
+    public fn(teamId?: TeamType['id']): ApiRequest {
+        return this.projectsDetail(teamId).addPathComponent('fn')
     }
 
-    public customFunctions(teamId?: TeamType['id']): ApiRequest {
-        return this.environmentsDetail(teamId).addPathComponent('custom_functions')
+    public insightsFunctions(teamId?: TeamType['id']): ApiRequest {
+        return this.environmentsDetail(teamId).addPathComponent('insights_functions')
     }
 
-    public customFunction(id: CustomFunctionType['id'], teamId?: TeamType['id']): ApiRequest {
-        return this.customFunctions(teamId).addPathComponent(id)
+    public insightsFunction(id: InsightsFunctionType['id'], teamId?: TeamType['id']): ApiRequest {
+        return this.insightsFunctions(teamId).addPathComponent(id)
     }
 
-    public customFunctionTemplates(teamId?: TeamType['id']): ApiRequest {
-        return this.projectsDetail(teamId).addPathComponent('custom_function_templates')
+    public insightsFunctionTemplates(teamId?: TeamType['id']): ApiRequest {
+        return this.projectsDetail(teamId).addPathComponent('insights_function_templates')
     }
 
-    public customFunctionTemplate(id: CustomFunctionTemplateType['id'], teamId?: TeamType['id']): ApiRequest {
-        return this.customFunctionTemplates(teamId).addPathComponent(id)
+    public insightsFunctionTemplate(id: InsightsFunctionTemplateType['id'], teamId?: TeamType['id']): ApiRequest {
+        return this.insightsFunctionTemplates(teamId).addPathComponent(id)
     }
 
     // # Links
@@ -1794,20 +1794,20 @@ export class ApiRequest {
         return this.addPathComponent('oauth_application').addPathComponent('metadata').addPathComponent(clientId)
     }
 
-    public customFlows(): ApiRequest {
-        return this.environments().current().addPathComponent('custom_flows')
+    public insightsFlows(): ApiRequest {
+        return this.environments().current().addPathComponent('insights_flows')
     }
 
-    public customFlow(customFlowId: CustomFlow['id']): ApiRequest {
-        return this.customFlows().addPathComponent(customFlowId)
+    public insightsFlow(insightsFlowId: InsightsFlow['id']): ApiRequest {
+        return this.insightsFlows().addPathComponent(insightsFlowId)
     }
 
-    public customFlowTemplates(): ApiRequest {
-        return this.environments().current().addPathComponent('custom_flow_templates')
+    public insightsFlowTemplates(): ApiRequest {
+        return this.environments().current().addPathComponent('insights_flow_templates')
     }
 
-    public customFlowTemplate(customFlowTemplateId: CustomFlowTemplate['id']): ApiRequest {
-        return this.customFlowTemplates().addPathComponent(customFlowTemplateId)
+    public insightsFlowTemplate(insightsFlowTemplateId: InsightsFlowTemplate['id']): ApiRequest {
+        return this.insightsFlowTemplates().addPathComponent(insightsFlowTemplateId)
     }
 
     public wizard(): ApiRequest {
@@ -2308,7 +2308,7 @@ const api = {
                 .withQueryString(temporaryToken ? `temporary_token=${temporaryToken}` : '')
                 .update({ data: actionData })
         },
-        async migrate(id: ActionType['id']): Promise<CustomFunctionType> {
+        async migrate(id: ActionType['id']): Promise<InsightsFunctionType> {
             return await new ApiRequest().actionsDetail(id).withAction('migrate').create()
         },
         async list(params?: string): Promise<PaginatedResponse<ActionType>> {
@@ -2367,8 +2367,8 @@ const api = {
             if (
                 [
                     ActivityScope.PLUGIN,
-                    ActivityScope.CUSTOM_FUNCTION,
-                    ActivityScope.CUSTOM_FLOW,
+                    ActivityScope.INSIGHTS_FUNCTION,
+                    ActivityScope.INSIGHTS_FLOW,
                     ActivityScope.EXPERIMENT,
                     ActivityScope.TAG,
                     ActivityScope.ENDPOINT,
@@ -3297,7 +3297,7 @@ const api = {
         async list(): Promise<PaginatedResponse<PluginConfigTypeNew>> {
             return await new ApiRequest().pluginConfigs().get()
         },
-        async migrate(id: PluginConfigTypeNew['id']): Promise<CustomFunctionType> {
+        async migrate(id: PluginConfigTypeNew['id']): Promise<InsightsFunctionType> {
             return await new ApiRequest().pluginConfig(id).withAction('migrate').create()
         },
         async logs(pluginConfigId: number, params: LogEntryRequestParams): Promise<LogEntry[]> {
@@ -3330,12 +3330,12 @@ const api = {
             return results
         },
     },
-    customScript: {
+    fn: {
         async create(code: string, locals?: any[], inRepl?: boolean): Promise<HogCompileResponse> {
-            return await new ApiRequest().customScript().create({ data: { code, locals, in_repl: inRepl || false } })
+            return await new ApiRequest().fn().create({ data: { code, locals, in_repl: inRepl || false } })
         },
     },
-    customFunctions: {
+    insightsFunctions: {
         async list({
             filter_groups,
             search,
@@ -3345,12 +3345,12 @@ const api = {
         }: {
             filter_groups?: CyclotronJobFiltersType[]
             search?: string
-            types?: CustomFunctionTypeType[]
+            types?: InsightsFunctionTypeType[]
             limit?: number
             full?: boolean
-        }): Promise<CountedPaginatedResponse<CustomFunctionType>> {
+        }): Promise<CountedPaginatedResponse<InsightsFunctionType>> {
             return await new ApiRequest()
-                .customFunctions()
+                .insightsFunctions()
                 .withQueryString({
                     filter_groups,
                     // NOTE: The API expects "type" as thats the DB level name
@@ -3361,54 +3361,54 @@ const api = {
                 })
                 .get()
         },
-        async get(id: CustomFunctionType['id']): Promise<CustomFunctionType> {
-            return await new ApiRequest().customFunction(id).get()
+        async get(id: InsightsFunctionType['id']): Promise<InsightsFunctionType> {
+            return await new ApiRequest().insightsFunction(id).get()
         },
-        async create(data: Partial<CustomFunctionType>): Promise<CustomFunctionType> {
-            return await new ApiRequest().customFunctions().create({ data })
+        async create(data: Partial<InsightsFunctionType>): Promise<InsightsFunctionType> {
+            return await new ApiRequest().insightsFunctions().create({ data })
         },
-        async update(id: CustomFunctionType['id'], data: Partial<CustomFunctionType>): Promise<CustomFunctionType> {
-            return await new ApiRequest().customFunction(id).update({ data })
+        async update(id: InsightsFunctionType['id'], data: Partial<InsightsFunctionType>): Promise<InsightsFunctionType> {
+            return await new ApiRequest().insightsFunction(id).update({ data })
         },
         async logs(
-            id: CustomFunctionType['id'],
+            id: InsightsFunctionType['id'],
             params: LogEntryRequestParams = {}
         ): Promise<PaginatedResponse<LogEntry>> {
-            return await new ApiRequest().customFunction(id).withAction('logs').withQueryString(params).get()
+            return await new ApiRequest().insightsFunction(id).withAction('logs').withQueryString(params).get()
         },
         async metrics(
-            id: CustomFunctionType['id'],
+            id: InsightsFunctionType['id'],
             params: AppMetricsV2RequestParams = {}
         ): Promise<AppMetricsV2Response> {
-            return await new ApiRequest().customFunction(id).withAction('metrics').withQueryString(params).get()
+            return await new ApiRequest().insightsFunction(id).withAction('metrics').withQueryString(params).get()
         },
         async metricsTotals(
-            id: CustomFunctionType['id'],
+            id: InsightsFunctionType['id'],
             params: Partial<AppMetricsV2RequestParams> = {}
         ): Promise<AppMetricsTotalsV2Response> {
-            return await new ApiRequest().customFunction(id).withAction('metrics/totals').withQueryString(params).get()
+            return await new ApiRequest().insightsFunction(id).withAction('metrics/totals').withQueryString(params).get()
         },
         async listTemplates(params: {
-            types: CustomFunctionTypeType[]
-        }): Promise<PaginatedResponse<CustomFunctionTemplateType>> {
+            types: InsightsFunctionTypeType[]
+        }): Promise<PaginatedResponse<InsightsFunctionTemplateType>> {
             const finalParams = {
                 ...params,
                 limit: 500,
                 types: params.types.join(','),
             }
 
-            return new ApiRequest().customFunctionTemplates().withQueryString(finalParams).get()
+            return new ApiRequest().insightsFunctionTemplates().withQueryString(finalParams).get()
         },
-        async getTemplate(id: CustomFunctionTemplateType['id']): Promise<CustomFunctionTemplateType> {
-            return await new ApiRequest().customFunctionTemplate(id).get()
+        async getTemplate(id: InsightsFunctionTemplateType['id']): Promise<InsightsFunctionTemplateType> {
+            return await new ApiRequest().insightsFunctionTemplate(id).get()
         },
 
-        async listIcons(params: { query?: string } = {}): Promise<CustomFunctionIconResponse[]> {
-            return await new ApiRequest().customFunctions().withAction('icons').withQueryString(params).get()
+        async listIcons(params: { query?: string } = {}): Promise<InsightsFunctionIconResponse[]> {
+            return await new ApiRequest().insightsFunctions().withAction('icons').withQueryString(params).get()
         },
 
         async createTestInvocation(
-            id: CustomFunctionType['id'],
+            id: InsightsFunctionType['id'],
             data: {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
@@ -3417,17 +3417,17 @@ const api = {
                 invocation_id?: string
             }
         ): Promise<CyclotronJobTestInvocationResult> {
-            return await new ApiRequest().customFunction(id).withAction('invocations').create({ data })
+            return await new ApiRequest().insightsFunction(id).withAction('invocations').create({ data })
         },
 
-        async getStatus(id: CustomFunctionType['id']): Promise<CustomFunctionStatus> {
-            return await new ApiRequest().customFunction(id).withAction('status').get()
+        async getStatus(id: InsightsFunctionType['id']): Promise<InsightsFunctionStatus> {
+            return await new ApiRequest().insightsFunction(id).withAction('status').get()
         },
-        async rearrange(orders: Record<string, number>): Promise<CustomFunctionType[]> {
-            return await new ApiRequest().customFunctions().withAction('rearrange').update({ data: { orders } })
+        async rearrange(orders: Record<string, number>): Promise<InsightsFunctionType[]> {
+            return await new ApiRequest().insightsFunctions().withAction('rearrange').update({ data: { orders } })
         },
-        async enableBackfills(id: CustomFunctionType['id']): Promise<{ batch_export_id: string }> {
-            return await new ApiRequest().customFunction(id).withAction('enable_backfills').create()
+        async enableBackfills(id: InsightsFunctionType['id']): Promise<{ batch_export_id: string }> {
+            return await new ApiRequest().insightsFunction(id).withAction('enable_backfills').create()
         },
     },
 
@@ -5147,24 +5147,24 @@ const api = {
             return await new ApiRequest().oauthApplicationPublicMetadata(clientId).get()
         },
     },
-    customFlows: {
-        async getCustomFlows(): Promise<PaginatedResponse<CustomFlow>> {
-            return await new ApiRequest().customFlows().get()
+    insightsFlows: {
+        async getInsightsFlows(): Promise<PaginatedResponse<InsightsFlow>> {
+            return await new ApiRequest().insightsFlows().get()
         },
-        async getCustomFlow(customFlowId: CustomFlow['id']): Promise<CustomFlow> {
-            return await new ApiRequest().customFlow(customFlowId).get()
+        async getInsightsFlow(insightsFlowId: InsightsFlow['id']): Promise<InsightsFlow> {
+            return await new ApiRequest().insightsFlow(insightsFlowId).get()
         },
-        async createCustomFlow(data: Partial<CustomFlow>): Promise<CustomFlow> {
-            return await new ApiRequest().customFlows().create({ data })
+        async createInsightsFlow(data: Partial<InsightsFlow>): Promise<InsightsFlow> {
+            return await new ApiRequest().insightsFlows().create({ data })
         },
-        async updateCustomFlow(customFlowId: CustomFlow['id'], data: Partial<CustomFlow>): Promise<CustomFlow> {
-            return await new ApiRequest().customFlow(customFlowId).update({ data })
+        async updateInsightsFlow(insightsFlowId: InsightsFlow['id'], data: Partial<InsightsFlow>): Promise<InsightsFlow> {
+            return await new ApiRequest().insightsFlow(insightsFlowId).update({ data })
         },
-        async deleteCustomFlow(customFlowId: CustomFlow['id']): Promise<void> {
-            return await new ApiRequest().customFlow(customFlowId).delete()
+        async deleteInsightsFlow(insightsFlowId: InsightsFlow['id']): Promise<void> {
+            return await new ApiRequest().insightsFlow(insightsFlowId).delete()
         },
         async createTestInvocation(
-            customFlowId: CustomFlow['id'],
+            insightsFlowId: InsightsFlow['id'],
             data: {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
@@ -5173,49 +5173,49 @@ const api = {
                 invocation_id?: string
                 current_action_id?: string
             }
-        ): Promise<CustomFlowTestResult> {
-            return await new ApiRequest().customFlow(customFlowId).withAction('invocations').create({ data })
+        ): Promise<InsightsFlowTestResult> {
+            return await new ApiRequest().insightsFlow(insightsFlowId).withAction('invocations').create({ data })
         },
         async getBatchTriggerBlastRadius(
-            filters: Extract<CustomFlowAction['config'], { type: 'batch' }>['filters']
+            filters: Extract<InsightsFlowAction['config'], { type: 'batch' }>['filters']
         ): Promise<{
             users_affected: number
             total_users: number
         }> {
-            return await new ApiRequest().customFlows().withAction('user_blast_radius').create({ data: { filters } })
+            return await new ApiRequest().insightsFlows().withAction('user_blast_radius').create({ data: { filters } })
         },
-        async createCustomFlowBatchJob(
-            customFlowId: CustomFlow['id'],
+        async createInsightsFlowBatchJob(
+            insightsFlowId: InsightsFlow['id'],
             data: {
                 variables: Record<string, InsightsQLVariable>
-                filters: Extract<CustomFlowAction['config'], { type: 'batch' }>['filters']
+                filters: Extract<InsightsFlowAction['config'], { type: 'batch' }>['filters']
                 scheduled_at?: string | null
             }
         ): Promise<void> {
-            return await new ApiRequest().customFlow(customFlowId).withAction('batch_jobs').create({ data })
+            return await new ApiRequest().insightsFlow(insightsFlowId).withAction('batch_jobs').create({ data })
         },
-        async getCustomFlowBatchJobs(customFlowId: CustomFlow['id']): Promise<CustomFlowBatchJob[]> {
-            return await new ApiRequest().customFlow(customFlowId).withAction('batch_jobs').get()
+        async getInsightsFlowBatchJobs(insightsFlowId: InsightsFlow['id']): Promise<InsightsFlowBatchJob[]> {
+            return await new ApiRequest().insightsFlow(insightsFlowId).withAction('batch_jobs').get()
         },
     },
-    customFlowTemplates: {
-        async getCustomFlowTemplates(): Promise<PaginatedResponse<CustomFlowTemplate>> {
-            return await new ApiRequest().customFlowTemplates().get()
+    insightsFlowTemplates: {
+        async getInsightsFlowTemplates(): Promise<PaginatedResponse<InsightsFlowTemplate>> {
+            return await new ApiRequest().insightsFlowTemplates().get()
         },
-        async getCustomFlowTemplate(customFlowTemplateId: CustomFlowTemplate['id']): Promise<CustomFlowTemplate> {
-            return await new ApiRequest().customFlowTemplate(customFlowTemplateId).get()
+        async getInsightsFlowTemplate(insightsFlowTemplateId: InsightsFlowTemplate['id']): Promise<InsightsFlowTemplate> {
+            return await new ApiRequest().insightsFlowTemplate(insightsFlowTemplateId).get()
         },
-        async createCustomFlowTemplate(data: Partial<CustomFlowTemplate>): Promise<CustomFlowTemplate> {
-            return await new ApiRequest().customFlowTemplates().create({ data })
+        async createInsightsFlowTemplate(data: Partial<InsightsFlowTemplate>): Promise<InsightsFlowTemplate> {
+            return await new ApiRequest().insightsFlowTemplates().create({ data })
         },
-        async updateCustomFlowTemplate(
-            customFlowTemplateId: CustomFlowTemplate['id'],
-            data: Partial<CustomFlowTemplate>
-        ): Promise<CustomFlowTemplate> {
-            return await new ApiRequest().customFlowTemplate(customFlowTemplateId).update({ data })
+        async updateInsightsFlowTemplate(
+            insightsFlowTemplateId: InsightsFlowTemplate['id'],
+            data: Partial<InsightsFlowTemplate>
+        ): Promise<InsightsFlowTemplate> {
+            return await new ApiRequest().insightsFlowTemplate(insightsFlowTemplateId).update({ data })
         },
-        async deleteCustomFlowTemplate(customFlowTemplateId: CustomFlowTemplate['id']): Promise<void> {
-            return await new ApiRequest().customFlowTemplate(customFlowTemplateId).delete()
+        async deleteInsightsFlowTemplate(insightsFlowTemplateId: InsightsFlowTemplate['id']): Promise<void> {
+            return await new ApiRequest().insightsFlowTemplate(insightsFlowTemplateId).delete()
         },
     },
 

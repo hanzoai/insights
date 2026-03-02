@@ -35,9 +35,9 @@ TEMPLATE_MAPPING = {sub: next(prefix for prefix in PARENT_PREFIXES if sub.starts
 
 
 def forwards(apps, schema_editor):
-    CustomFunction = apps.get_model("posthog", "CustomFunction")
+    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
     for old_id, new_id in TEMPLATE_MAPPING.items():
-        CustomFunction.objects.filter(template_id=old_id).update(template_id=new_id)
+        InsightsFunction.objects.filter(template_id=old_id).update(template_id=new_id)
 
 
 def backwards(apps, schema_editor):

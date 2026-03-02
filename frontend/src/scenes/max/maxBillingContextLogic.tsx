@@ -7,11 +7,11 @@ import { isAddonVisible } from 'scenes/billing/billing-utils'
 import { billingLogic } from 'scenes/billing/billingLogic'
 import { BillingSpendResponse, billingSpendLogic } from 'scenes/billing/billingSpendLogic'
 import { BillingUsageResponse, billingUsageLogic } from 'scenes/billing/billingUsageLogic'
-import { customFunctionsListLogic } from 'scenes/custom-functions/list/customFunctionsListLogic'
+import { insightsFunctionsListLogic } from 'scenes/insights-functions/list/insightsFunctionsListLogic'
 import { organizationLogic } from 'scenes/organizationLogic'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { BillingType, CustomFunctionType, TeamType } from '~/types'
+import { BillingType, InsightsFunctionType, TeamType } from '~/types'
 
 import type { maxBillingContextLogicType } from './maxBillingContextLogicType'
 
@@ -119,7 +119,7 @@ export const billingToMaxContext = (
     billing: BillingType | null,
     featureFlags: Record<string, any>,
     currentTeam: TeamType,
-    destinations: CustomFunctionType[],
+    destinations: InsightsFunctionType[],
     usageResponse?: BillingUsageResponse | null,
     spendResponse?: BillingSpendResponse | null
 ): MaxBillingContext | null => {
@@ -271,8 +271,8 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
             ['currentTeam'],
             featureFlagLogic,
             ['featureFlags'],
-            customFunctionsListLogic({ type: 'destination' }),
-            ['customFunctions'],
+            insightsFunctionsListLogic({ type: 'destination' }),
+            ['insightsFunctions'],
         ],
     })),
     selectors({
@@ -284,7 +284,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                 s.isAdminOrOwner,
                 s.currentTeam,
                 s.featureFlags,
-                s.customFunctions,
+                s.insightsFunctions,
             ],
             (
                 billing: BillingType | null,
@@ -293,7 +293,7 @@ export const maxBillingContextLogic = kea<maxBillingContextLogicType>([
                 isAdminOrOwner: boolean,
                 currentTeam: TeamType,
                 featureFlags: Record<string, any>,
-                destinations: CustomFunctionType[]
+                destinations: InsightsFunctionType[]
             ): MaxBillingContext | null => {
                 if (!isAdminOrOwner) {
                     return null

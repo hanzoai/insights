@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Capture an event via a custom incoming webhook',
     icon_url: '/static/services/webhook.svg',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 if(inputs.debug) {
   print('Incoming request:', request.body)

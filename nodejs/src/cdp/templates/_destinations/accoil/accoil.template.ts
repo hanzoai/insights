@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     status: 'beta',
     free: true,
     type: 'destination',
@@ -10,7 +10,7 @@ export const template: CustomFunctionTemplate = {
         'Pipe Insights data to Accoil for usage-based account scoring, churn alerts, and expansion insights — automatically shared with Customer Success, Sales, RevOps, and Leadership in tools like Slack and HubSpot.',
     icon_url: '/static/services/accoil.com.png',
     category: ['Analytics'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Skip Insights internal events that start with $ unless they're in our whitelist
 let allowedSystemEvents := ['$pageview', '$screen', '$identify', '$set', '$groupidentify']

@@ -523,9 +523,9 @@ DEV_DISABLE_NAVIGATION_HOOKS = get_from_env("DEV_DISABLE_NAVIGATION_HOOKS", Fals
 # is set to v7 to test new generation but can be set to "og" to revert
 POSTHOG_JS_UUID_VERSION = os.getenv("POSTHOG_JS_UUID_VERSION", "v7")
 
-# Feature flag to enable CustomFunctions daily digest email for specific teams
+# Feature flag to enable InsightsFunctions daily digest email for specific teams
 # Comma-separated list of team IDs that should receive the digest
-CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS", ""))
+INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS = get_list(get_from_env("INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS", ""))
 
 # Comma-separated list of team ids allowed to receive the Error Tracking weekly digest
 # "*" for all, empty to disable feature

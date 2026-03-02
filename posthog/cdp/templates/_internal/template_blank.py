@@ -1,13 +1,13 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionMappingTemplate, CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionMappingTemplate, InsightsFunctionTemplateDC
 
-blank_site_destination: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+blank_site_destination: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_destination",
     id="template-blank-site-destination",
     name="New client-side destination",
     description="New destination with complex event mapping. Works only with posthog-js when opt_in_site_apps is set to true.",
-    icon_url="/static/mascot/builder-icon-01.png",
+    icon_url="",
     category=["Custom", "Analytics"],
     code_language="javascript",
     code="""
@@ -53,7 +53,7 @@ export function onEvent({ inputs, posthog }) {
         },
     ],
     mapping_templates=[
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Aquisition",
             include_by_default=True,
             filters={"events": [{"id": "$pageview", "type": "events"}]},
@@ -80,7 +80,7 @@ export function onEvent({ inputs, posthog }) {
                 },
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Conversion",
             filters={"events": [{"id": "$autocapture", "type": "events"}]},
             inputs_schema=[
@@ -106,7 +106,7 @@ export function onEvent({ inputs, posthog }) {
                 },
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Retention",
             filters={"events": [{"id": "$pageleave", "type": "events"}]},
             inputs_schema=[
@@ -135,14 +135,14 @@ export function onEvent({ inputs, posthog }) {
     ],
 )
 
-blank_site_app: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+blank_site_app: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=True,
     type="site_app",
     id="template-blank-site-app",
     name="New site app",
     description="Run custom JavaScript on your website. Works only with posthog-js when opt_in_site_apps is set to true.",
-    icon_url="/static/mascot/builder-icon-03.png",
+    icon_url="",
     category=["Custom", "Analytics"],
     code_language="javascript",
     code="""

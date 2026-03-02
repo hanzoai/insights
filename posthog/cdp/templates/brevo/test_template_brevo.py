@@ -1,5 +1,5 @@
 from posthog.cdp.templates.brevo.template_brevo import template as template_brevo
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 
 
 def create_inputs(**kwargs):
@@ -13,7 +13,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateBrevo(BaseCustomFunctionTemplateTest):
+class TestTemplateBrevo(BaseInsightsFunctionTemplateTest):
     template = template_brevo
 
     def test_function_works(self):

@@ -33,7 +33,7 @@ describe('insights group identify template', () => {
                     "latest_event": "event-name",
                   },
                   "$group_type": "organization",
-                  "$custom_function_execution_count": 1,
+                  "$insights_function_execution_count": 1,
                 },
                 "team_id": 1,
                 "timestamp": "2025-01-01T00:00:00.000Z",

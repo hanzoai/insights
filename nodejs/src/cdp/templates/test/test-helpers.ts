@@ -5,7 +5,7 @@ import { Settings } from 'luxon'
 import { getTransformationFunctions } from '~/cdp/script-transformations/transformation-functions'
 import { formatLiquidInput } from '~/cdp/services/script-inputs.service'
 import { NativeDestinationExecutorService } from '~/cdp/services/native-destination-executor.service'
-import { isNativeCustomFunction } from '~/cdp/utils'
+import { isNativeInsightsFunction } from '~/cdp/utils'
 import { defaultConfig } from '~/config/config'
 import { CyclotronInputType } from '~/schema/cyclotron'
 import { GeoIPService, GeoIp } from '~/utils/geoip'
@@ -13,22 +13,22 @@ import { GeoIPService, GeoIp } from '~/utils/geoip'
 import { Hub } from '../../../types'
 import { ScriptExecutorService } from '../../services/script-executor.service'
 import {
-    CyclotronJobInvocationCustomFunction,
+    CyclotronJobInvocationInsightsFunction,
     CyclotronJobInvocationResult,
-    CustomFunctionInputSchemaType,
-    CustomFunctionInvocationGlobals,
-    CustomFunctionInvocationGlobalsWithInputs,
-    CustomFunctionTemplate,
-    CustomFunctionTemplateCompiled,
-    CustomFunctionType,
+    InsightsFunctionInputSchemaType,
+    InsightsFunctionInvocationGlobals,
+    InsightsFunctionInvocationGlobalsWithInputs,
+    InsightsFunctionTemplate,
+    InsightsFunctionTemplateCompiled,
+    InsightsFunctionType,
     MinimalLogEntry,
     NativeTemplate,
 } from '../../types'
 import { cloneInvocation, createInvocation } from '../../utils/invocation-utils'
-import { compileScript } from '../compiler'
+import { compileFn } from '../compiler'
 
 /**
- * Sets templating value of 'custom_script' or 'liquid' on hog inputs based on the template used.
+ * Sets templating value of 'fn' or 'liquid' on hog inputs based on the template used.
  */
 export function propagateTemplatingFromSchema(template: any, input: any): any {
     const templatedInputs = { ...input }
@@ -41,7 +41,7 @@ export function propagateTemplatingFromSchema(template: any, input: any): any {
                     if (!templatedInputs[field.key] || typeof templatedInputs[field.key] !== 'object') {
                         templatedInputs[field.key] = { value: templatedInputs[field.key] }
                     }
-                    templatedInputs[field.key]['templating'] = 'custom_script'
+                    templatedInputs[field.key]['templating'] = 'fn'
                 }
                 // If False, do not set templating field
             } else {
@@ -56,17 +56,17 @@ export function propagateTemplatingFromSchema(template: any, input: any): any {
     return templatedInputs
 }
 
-export type DeepPartialCustomFunctionInvocationGlobals = {
-    event?: Partial<CustomFunctionInvocationGlobals['event']>
-    person?: Partial<CustomFunctionInvocationGlobals['person']>
-    source?: Partial<CustomFunctionInvocationGlobals['source']>
-    request?: CustomFunctionInvocationGlobals['request']
+export type DeepPartialInsightsFunctionInvocationGlobals = {
+    event?: Partial<InsightsFunctionInvocationGlobals['event']>
+    person?: Partial<InsightsFunctionInvocationGlobals['person']>
+    source?: Partial<InsightsFunctionInvocationGlobals['source']>
+    request?: InsightsFunctionInvocationGlobals['request']
 }
 
 const compileObject = async (
     obj: any,
     globals?: any,
-    templating_engine: boolean | 'custom_script' | 'liquid' = 'custom_script'
+    templating_engine: boolean | 'fn' | 'liquid' = 'fn'
 ): Promise<any> => {
     if (Array.isArray(obj)) {
         return Promise.all(obj.map((item) => compileObject(item, globals, templating_engine)))
@@ -80,16 +80,16 @@ const compileObject = async (
         // If the string looks like a Liquid template, render it first
         if (templating_engine === 'liquid') {
             const rendered = formatLiquidInput(obj, globals || createGlobals())
-            return await compileScript(`return f'${rendered}'`)
+            return await compileFn(`return f'${rendered}'`)
         }
-        return await compileScript(`return f'${obj}'`)
+        return await compileFn(`return f'${obj}'`)
     } else {
         return obj
     }
 }
 
 export const compileInputs = async (
-    template: CustomFunctionTemplate | NativeTemplate,
+    template: InsightsFunctionTemplate | NativeTemplate,
     _inputs: Record<string, any>,
     globals?: any
 ): Promise<Record<string, CyclotronInputType>> => {
@@ -112,7 +112,7 @@ export const compileInputs = async (
             if (schema?.templating === false) {
                 return [key, value]
             }
-            return [key, await compileObject(value, globals, schema?.templating || 'custom_script')]
+            return [key, await compileObject(value, globals, schema?.templating || 'fn')]
         })
     )
 
@@ -129,8 +129,8 @@ export const compileInputs = async (
 }
 
 const createGlobals = (
-    globals: DeepPartialCustomFunctionInvocationGlobals = {}
-): CustomFunctionInvocationGlobalsWithInputs => {
+    globals: DeepPartialInsightsFunctionInvocationGlobals = {}
+): InsightsFunctionInvocationGlobalsWithInputs => {
     return {
         ...globals,
         inputs: {},
@@ -153,15 +153,15 @@ const createGlobals = (
             ...globals.person,
         },
         source: {
-            url: 'https://us.hanzo.ai/custom_functions/1234',
-            name: 'custom-function-name',
+            url: 'https://us.hanzo.ai/insights_functions/1234',
+            name: 'insights-function-name',
             ...globals.source,
         },
     }
 }
 
 export class TemplateTester {
-    public template: CustomFunctionTemplateCompiled
+    public template: InsightsFunctionTemplateCompiled
     private scriptExecutor: ScriptExecutorService
     private nativeExecutor: NativeDestinationExecutorService
     private mockHub: Hub
@@ -171,7 +171,7 @@ export class TemplateTester {
 
     public mockFetch = jest.fn()
     public mockPrint = jest.fn()
-    constructor(private _template: CustomFunctionTemplate) {
+    constructor(private _template: InsightsFunctionTemplate) {
         this.template = {
             ..._template,
             bytecode: [],
@@ -184,7 +184,7 @@ export class TemplateTester {
     }
 
     private getExecutor(): ScriptExecutorService | NativeDestinationExecutorService {
-        return isNativeCustomFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.scriptExecutor
+        return isNativeInsightsFunction({ template_id: this.template.id }) ? this.nativeExecutor : this.scriptExecutor
     }
 
     /*
@@ -203,7 +203,7 @@ export class TemplateTester {
 
         this.template = {
             ...this._template,
-            bytecode: await compileScript(this._template.code),
+            bytecode: await compileFn(this._template.code),
         }
 
         this.scriptExecutor = new ScriptExecutorService(this.mockHub)
@@ -214,14 +214,14 @@ export class TemplateTester {
         Settings.defaultZone = 'system'
     }
 
-    createGlobals(globals: DeepPartialCustomFunctionInvocationGlobals = {}): CustomFunctionInvocationGlobalsWithInputs {
+    createGlobals(globals: DeepPartialInsightsFunctionInvocationGlobals = {}): InsightsFunctionInvocationGlobalsWithInputs {
         return createGlobals(globals)
     }
 
     async invoke(
         _inputs: Record<string, any>,
-        _globals?: DeepPartialCustomFunctionInvocationGlobals
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+        _globals?: DeepPartialInsightsFunctionInvocationGlobals
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         if (this.template.mapping_templates) {
             throw new Error('Mapping templates found. Use invokeMapping instead.')
         }
@@ -231,7 +231,7 @@ export class TemplateTester {
         const compiledInputs = await compileInputs(this.template, _inputs, globals)
 
         const { code, ...partialTemplate } = this.template
-        const customFunction: CustomFunctionType = {
+        const insightsFunction: InsightsFunctionType = {
             ...partialTemplate,
             script: code,
             inputs: compiledInputs,
@@ -245,10 +245,10 @@ export class TemplateTester {
             template_id: this.template.id,
         }
 
-        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(customFunction, globals)
-        const invocation = createInvocation(globalsWithInputs, customFunction)
+        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
+        const invocation = createInvocation(globalsWithInputs, insightsFunction)
         const transformationFunctions = getTransformationFunctions(this.geoIp!)
-        const extraFunctions = invocation.customFunction.type === 'transformation' ? transformationFunctions : {}
+        const extraFunctions = invocation.insightsFunction.type === 'transformation' ? transformationFunctions : {}
 
         return this.getExecutor().execute(invocation, { functions: extraFunctions })
     }
@@ -256,9 +256,9 @@ export class TemplateTester {
     async invokeMapping(
         mapping_name: string,
         _inputs: Record<string, any>,
-        _globals?: DeepPartialCustomFunctionInvocationGlobals,
+        _globals?: DeepPartialInsightsFunctionInvocationGlobals,
         mapping_inputs?: Record<string, any>
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         if (!this.template.mapping_templates) {
             throw new Error('No mapping templates found')
         }
@@ -301,7 +301,7 @@ export class TemplateTester {
         compiledMappingInputs.inputs = inputsObj
 
         const { code, ...partialTemplate } = this.template
-        const customFunction: CustomFunctionType = {
+        const insightsFunction: InsightsFunctionType = {
             ...partialTemplate,
             script: code,
             team_id: 1,
@@ -314,20 +314,20 @@ export class TemplateTester {
         }
 
         const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(
-            customFunction,
+            insightsFunction,
             this.createGlobals(_globals),
             compiledMappingInputs.inputs
         )
 
-        const invocation = createInvocation(globalsWithInputs, customFunction)
+        const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
         return this.getExecutor().execute(invocation)
     }
 
     async invokeFetchResponse(
-        invocation: CyclotronJobInvocationCustomFunction,
+        invocation: CyclotronJobInvocationInsightsFunction,
         response: { status: number; body: Record<string, any> }
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
         const modifiedInvocation = cloneInvocation(invocation)
 
         modifiedInvocation.state.vmState!.stack.push({
@@ -352,8 +352,8 @@ export class TemplateTester {
 }
 
 export const createAdDestinationPayload = (
-    globals?: DeepPartialCustomFunctionInvocationGlobals
-): DeepPartialCustomFunctionInvocationGlobals => {
+    globals?: DeepPartialInsightsFunctionInvocationGlobals
+): DeepPartialInsightsFunctionInvocationGlobals => {
     let defaultPayload = {
         event: {
             properties: {},
@@ -388,10 +388,10 @@ export const createAdDestinationPayload = (
 
 export const generateTestData = (
     seedName: string,
-    input_schema: CustomFunctionInputSchemaType[],
+    input_schema: InsightsFunctionInputSchemaType[],
     requiredFieldsOnly: boolean = false
 ): Record<string, any> => {
-    const generateValue = (input: CustomFunctionInputSchemaType): any => {
+    const generateValue = (input: InsightsFunctionInputSchemaType): any => {
         const chance = new Chance(seedName)
 
         if (Array.isArray(input.choices)) {
@@ -399,7 +399,7 @@ export const generateTestData = (
             return choice.value
         }
 
-        const getFormat = (input: CustomFunctionInputSchemaType): string => {
+        const getFormat = (input: InsightsFunctionInputSchemaType): string => {
             if (input.key === 'url') {
                 return 'uri'
             } else if (input.key === 'email') {

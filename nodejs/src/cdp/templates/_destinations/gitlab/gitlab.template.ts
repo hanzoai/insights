@@ -1,6 +1,6 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     status: 'alpha',
     free: false,
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Creates an issue in a GitLab project',
     icon_url: '/static/services/gitlab.png',
     category: ['Error tracking'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `let insights_issue_url := f'{project.url}/error_tracking/{inputs.insights_issue_id}'
 let payload := {
     'method': 'POST',

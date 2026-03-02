@@ -21,10 +21,10 @@ from rest_framework.exceptions import NotFound, PermissionDenied, ValidationErro
 from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
-from posthog.api.custom_function import CustomFunctionSerializer
+from posthog.api.insights_function import InsightsFunctionSerializer
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.utils import ClassicBehaviorBooleanFieldSerializer, action
-from posthog.cdp.templates import CUSTOM_FUNCTION_MIGRATORS
+from posthog.cdp.templates import INSIGHTS_FUNCTION_MIGRATORS
 from posthog.event_usage import report_user_action
 from posthog.models import Plugin, PluginAttachment, PluginConfig, User
 from posthog.models.activity_logging.activity_log import (
@@ -234,7 +234,7 @@ class PluginsAccessLevelPermission(BasePermission):
 class PluginSerializer(serializers.ModelSerializer):
     url = serializers.SerializerMethodField()
     organization_name = serializers.SerializerMethodField()
-    custom_function_migration_available = serializers.SerializerMethodField()
+    insights_function_migration_available = serializers.SerializerMethodField()
 
     class Meta:
         model = Plugin
@@ -254,12 +254,12 @@ class PluginSerializer(serializers.ModelSerializer):
             "capabilities",
             "metrics",
             "public_jobs",
-            "custom_function_migration_available",
+            "insights_function_migration_available",
         ]
-        read_only_fields = ["id", "latest_tag", "custom_function_migration_available"]
+        read_only_fields = ["id", "latest_tag", "insights_function_migration_available"]
 
-    def get_custom_function_migration_available(self, plugin: Plugin):
-        return CUSTOM_FUNCTION_MIGRATORS.get(plugin.url) is not None if plugin.url else False
+    def get_insights_function_migration_available(self, plugin: Plugin):
+        return INSIGHTS_FUNCTION_MIGRATORS.get(plugin.url) is not None if plugin.url else False
 
     def get_url(self, plugin: Plugin) -> Optional[str]:
         # remove ?private_token=... from url
@@ -687,7 +687,7 @@ class PluginConfigSerializer(serializers.ModelSerializer):
         validated_data["web_token"] = generate_random_token()
 
         # Try and create a custom function if possible, otherwise create plugin
-        from posthog.cdp.legacy_plugins import custom_function_from_plugin_config
+        from posthog.cdp.legacy_plugins import insights_function_from_plugin_config
         from posthog.event_usage import report_team_action
 
         report_team_action(
@@ -700,16 +700,16 @@ class PluginConfigSerializer(serializers.ModelSerializer):
         )
 
         try:
-            custom_function_serializer = custom_function_from_plugin_config(validated_data, self.context)
+            insights_function_serializer = insights_function_from_plugin_config(validated_data, self.context)
 
-            custom_function = custom_function_serializer.create(custom_function_serializer.validated_data)
+            insights_function = insights_function_serializer.create(insights_function_serializer.validated_data)
             # A bit hacky - we return the non saved plugin config
 
             report_user_action(
                 self.context["request"].user,
                 "custom function created from plugin config api",
                 {
-                    "custom_function_id": custom_function.id,
+                    "insights_function_id": insights_function.id,
                     "plugin_id": validated_data["plugin"].id,
                     "team_id": self.context["team_id"],
                 },
@@ -869,27 +869,27 @@ class PluginConfigViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     @action(methods=["POST"], url_path="migrate", detail=True)
     def migrate(self, request: request.Request, **kwargs):
         obj = self.get_object()
-        migrater = CUSTOM_FUNCTION_MIGRATORS.get(obj.plugin.url)
+        migrater = INSIGHTS_FUNCTION_MIGRATORS.get(obj.plugin.url)
 
         if not migrater:
             raise ValidationError("No migration available for this plugin")
 
-        custom_function_data = migrater.migrate(obj)
-        custom_function_data["template_id"] = custom_function_data["id"]
-        del custom_function_data["id"]
+        insights_function_data = migrater.migrate(obj)
+        insights_function_data["template_id"] = insights_function_data["id"]
+        del insights_function_data["id"]
 
         if obj.enabled:
-            custom_function_data["enabled"] = True
+            insights_function_data["enabled"] = True
 
-        custom_function_serializer = CustomFunctionSerializer(data=custom_function_data, context=self.get_serializer_context())
-        custom_function_serializer.is_valid(raise_exception=True)
-        custom_function_serializer.save()
+        insights_function_serializer = InsightsFunctionSerializer(data=insights_function_data, context=self.get_serializer_context())
+        insights_function_serializer.is_valid(raise_exception=True)
+        insights_function_serializer.save()
 
         if obj.enabled:
             obj.enabled = False
             obj.save()
 
-        return Response(custom_function_serializer.data)
+        return Response(insights_function_serializer.data)
 
 
 def _get_secret_fields_for_plugin(plugin: Plugin) -> set[str]:

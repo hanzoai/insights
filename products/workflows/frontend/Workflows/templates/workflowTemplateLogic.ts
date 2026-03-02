@@ -5,7 +5,7 @@ import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { userLogic } from 'scenes/userLogic'
 
-import type { CustomFlowTemplate } from '../customflows/types'
+import type { InsightsFlowTemplate } from '../insightsflows/types'
 import { workflowLogic } from '../workflowLogic'
 import type { workflowTemplateLogicType } from './workflowTemplateLogicType'
 import { workflowTemplatesLogic } from './workflowTemplatesLogic'
@@ -27,7 +27,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
     actions({
         showSaveAsTemplateModal: true,
         hideSaveAsTemplateModal: true,
-        updateTemplate: (workflowTemplate: CustomFlowTemplate) => ({ workflowTemplate }),
+        updateTemplate: (workflowTemplate: InsightsFlowTemplate) => ({ workflowTemplate }),
         showTemplateJsonModal: true,
         hideTemplateJsonModal: true,
     }),
@@ -85,7 +85,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 }
 
                 try {
-                    await api.customFlowTemplates.createCustomFlowTemplate({
+                    await api.insightsFlowTemplates.createInsightsFlowTemplate({
                         ...workflow,
                         name: formValues.name || workflow.name || '',
                         description: formValues.description || workflow.description || '',
@@ -158,7 +158,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 if (props.editTemplateId) {
                     // In edit mode, use workflow values for name/description, but load template for image_url, tags, and scope
                     try {
-                        const template = await api.customFlowTemplates.getCustomFlowTemplate(props.editTemplateId)
+                        const template = await api.insightsFlowTemplates.getInsightsFlowTemplate(props.editTemplateId)
                         actions.setTemplateFormValues({
                             name: workflow.name,
                             description: workflow.description || '', // Use current workflow description
@@ -191,7 +191,7 @@ export const workflowTemplateLogic = kea<workflowTemplateLogicType>([
                 }
             })
 
-            await api.customFlowTemplates.updateCustomFlowTemplate(workflowTemplate.id, workflowTemplate)
+            await api.insightsFlowTemplates.updateInsightsFlowTemplate(workflowTemplate.id, workflowTemplate)
             lemonToast.success('Template updated')
 
             // Update the template list in workflowTemplatesLogic

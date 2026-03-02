@@ -12,7 +12,7 @@ export const pluginStonlyCleanCampaignName: LegacyTransformationPlugin = {
         id: 'plugin-Plugin-Stonly-Clean-Campaign-Name',
         name: 'Clean Campaign Name',
         description: 'Clean campaign name',
-        icon_url: '/static/mascot/builder-mascot-01.png',
+        icon_url: '',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

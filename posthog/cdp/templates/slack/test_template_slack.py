@@ -1,12 +1,12 @@
 import pytest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.slack.template_slack import template as template_slack
 
 from common.hogvm.python.utils import UncaughtHogVMException
 
 
-class TestTemplateSlack(BaseCustomFunctionTemplateTest):
+class TestTemplateSlack(BaseInsightsFunctionTemplateTest):
     template = template_slack
 
     def _inputs(self, **kwargs):

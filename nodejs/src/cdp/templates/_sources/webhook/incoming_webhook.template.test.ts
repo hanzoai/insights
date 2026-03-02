@@ -50,7 +50,7 @@ describe('incoming webhook template', () => {
                 "distinct_id": "hardcoded",
                 "event": "the event",
                 "properties": {
-                  "$custom_function_execution_count": 1,
+                  "$insights_function_execution_count": 1,
                   "missing": null,
                   "nested_level": "nestedLevelValue",
                   "root_level": "rootLevelValue",

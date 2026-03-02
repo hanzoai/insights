@@ -1,5 +1,5 @@
-import { compileScript } from '../templates/compiler'
-import { execScript } from './script-exec'
+import { compileFn } from '../templates/compiler'
+import { execFn } from './script-exec'
 
 describe('script-exec', () => {
     describe('thread relief', () => {
@@ -26,7 +26,7 @@ describe('script-exec', () => {
         })
 
         it('should process batches in a way that does not block the main thread', async () => {
-            const evilFunctionCode = await compileScript(`
+            const evilFunctionCode = await compileFn(`
                 fn fibonacci(number) {
                     print('I AM FIBONACCI. ')
                     if (number < 2) {
@@ -42,7 +42,7 @@ describe('script-exec', () => {
 
             const results = await Promise.all(
                 Array.from({ length: numberToTest }, () =>
-                    execScript(evilFunctionCode, {
+                    execFn(evilFunctionCode, {
                         timeout: blockTime,
                         functions: {
                             print: () => {},
@@ -67,7 +67,7 @@ describe('script-exec', () => {
         it('should only trigger thread relief if necessary', async () => {
             const blockTime = 100
 
-            const evilFunctionCode = await compileScript(`
+            const evilFunctionCode = await compileFn(`
                 fn fibonacci(number) {
                     print('I AM FIBONACCI. ')
                     if (number < 2) {
@@ -79,7 +79,7 @@ describe('script-exec', () => {
                 print(f'fib {fibonacci(64)}');
             `)
 
-            const simpleCode = await compileScript(`
+            const simpleCode = await compileFn(`
                 print('I AM SIMPLE.')
             `)
 
@@ -99,7 +99,7 @@ describe('script-exec', () => {
 
             const results = await Promise.all(
                 toTest.map((code) =>
-                    execScript(code, {
+                    execFn(code, {
                         timeout: blockTime,
                         functions: {
                             print: () => {},

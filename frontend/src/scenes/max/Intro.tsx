@@ -11,28 +11,28 @@ const LOGOMARK_AIRTIME_MS = 400 // Sync with --logomark-airtime in base.scss
 
 export function Intro(): JSX.Element {
     const { headline } = useValues(maxLogic)
-    const [mascotLastJumped, setMascotLastJumped] = useState<number | null>(() => Date.now())
-    const [mascotJumpIteration, setMascotJumpIteration] = useState(0)
+    const [logoLastJumped, setLogoLastJumped] = useState<number | null>(() => Date.now())
+    const [logoJumpIteration, setLogoJumpIteration] = useState(0)
 
     const handleLogomarkClick = (): void => {
         const now = Date.now()
-        if (mascotLastJumped && now - mascotLastJumped < LOGOMARK_AIRTIME_MS) {
+        if (logoLastJumped && now - logoLastJumped < LOGOMARK_AIRTIME_MS) {
             return // Disallows interrupting the jump animation!
         }
-        setMascotJumpIteration(mascotJumpIteration + 1)
-        setMascotLastJumped(null)
-        requestAnimationFrame(() => setMascotLastJumped(now))
+        setLogoJumpIteration(logoJumpIteration + 1)
+        setLogoLastJumped(null)
+        requestAnimationFrame(() => setLogoLastJumped(now))
     }
 
     return (
         <>
             <div
-                className={`flex *:h-full *:w-12 p-2 cursor-pointer ${mascotLastJumped ? 'animate-logomark-jump' : ''}`}
+                className={`flex *:h-full *:w-12 p-2 cursor-pointer ${logoLastJumped ? 'animate-logomark-jump' : ''}`}
                 // eslint-disable-next-line react/forbid-dom-props
                 style={
                     {
-                        '--logomark-jump-magnitude': mascotJumpIteration
-                            ? 1.5 ** ((mascotJumpIteration % 8) - 2)
+                        '--logomark-jump-magnitude': logoJumpIteration
+                            ? 1.5 ** ((logoJumpIteration % 8) - 2)
                             : 1,
                     } as React.CSSProperties
                 }

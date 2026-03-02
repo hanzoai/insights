@@ -143,7 +143,7 @@ describe('Evaluation Scheduler', () => {
         let mockExecScript: jest.Mock
 
         beforeEach(() => {
-            mockExecScript = require('~/cdp/utils/script-exec').execScript as jest.Mock
+            mockExecScript = require('~/cdp/utils/script-exec').execFn as jest.Mock
         })
 
         it('passes person properties from event to bytecode execution globals', async () => {
@@ -228,7 +228,7 @@ describe('Evaluation Scheduler', () => {
 
         beforeEach(() => {
             matcher = new EvaluationMatcher()
-            mockExecScript = require('~/cdp/utils/script-exec').execScript as jest.Mock
+            mockExecScript = require('~/cdp/utils/script-exec').execFn as jest.Mock
         })
 
         it('returns disabled when evaluation is not enabled', async () => {

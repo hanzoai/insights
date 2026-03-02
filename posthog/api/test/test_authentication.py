@@ -1705,16 +1705,6 @@ class TestTimeSensitivePermissions(APIBaseTest):
             res = self.client.patch("/api/users/@me", payload, format="json")
             assert res.status_code != 403, f"Field update should not require re-authentication, got: {res.json()}"
 
-    def test_user_can_update_mascot_config_without_recent_authentication(self):
-        now = datetime.now()
-        with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
-            res = self.client.patch(
-                "/api/users/@me/mascot_config",
-                {"enabled": True, "color": "red"},
-                format="json",
-            )
-            assert res.status_code == 200
-
     def test_user_can_update_scene_personalisation_without_recent_authentication(self):
         from posthog.models.dashboard import Dashboard
 

@@ -1640,7 +1640,6 @@ class TestDashboard(APIBaseTest, QueryMatchingTest):
             "last_name": self.user.last_name,
             "email": self.user.email,
             "is_email_verified": None,
-            "mascot_config": None,
             "role_at_organization": None,
         }
 

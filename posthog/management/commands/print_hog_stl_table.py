@@ -13,21 +13,21 @@ class Command(BaseCommand):
         from common.hogvm.python.stl import STL
         from common.hogvm.python.stl.bytecode import BYTECODE_STL
 
-        custom_functions = set(STL.keys()).union(set(BYTECODE_STL.keys()))
+        insights_functions = set(STL.keys()).union(set(BYTECODE_STL.keys()))
 
         insightsql_functions = {
             fn
-            if fn not in {f.lower() for f in custom_functions}
-            else next((f for f in custom_functions if f.lower() == fn), fn)
+            if fn not in {f.lower() for f in insights_functions}
+            else next((f for f in insights_functions if f.lower() == fn), fn)
             for fn in insightsql_functions
         }
 
-        all_functions = sorted(custom_functions.union(insightsql_functions))
+        all_functions = sorted(insights_functions.union(insightsql_functions))
         max_length = max(len(fn) for fn in all_functions)
 
         for fn in all_functions:
             print(  # noqa: T201
                 fn.ljust(max_length),
                 "InsightsQL" if fn in insightsql_functions else "     ",
-                "Hog" if fn in custom_functions else "   ",
+                "Hog" if fn in insights_functions else "   ",
             )

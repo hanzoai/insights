@@ -3,8 +3,8 @@ import { kea, path, props, selectors, useValues } from 'kea'
 import { NotFound } from 'lib/components/NotFound'
 import { capitalizeFirstLetter } from 'lib/utils'
 import { availableSourcesDataLogic } from 'scenes/data-warehouse/new/availableSourcesDataLogic'
-import { humanizeCustomFunctionType } from 'scenes/custom-functions/custom-function-utils'
-import { CustomFunctionTemplateList } from 'scenes/custom-functions/list/CustomFunctionTemplateList'
+import { humanizeInsightsFunctionType } from 'scenes/insights-functions/insights-function-utils'
+import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'
 
@@ -13,7 +13,7 @@ import { SceneTitleSection } from '~/layout/scenes/components/SceneTitleSection'
 import { Breadcrumb } from '~/types'
 
 import type { dataPipelinesNewSceneLogicType } from './DataPipelinesNewSceneType'
-import { nonCustomFunctionTemplatesLogic } from './utils/nonCustomFunctionTemplatesLogic'
+import { nonInsightsFunctionTemplatesLogic } from './utils/nonInsightsFunctionTemplatesLogic'
 
 export type DataPipelinesNewSceneKind = 'transformation' | 'destination' | 'source' | 'site_app'
 
@@ -41,13 +41,13 @@ export const dataPipelinesNewSceneLogic = kea<dataPipelinesNewSceneLogicType>([
                 return [
                     {
                         key: mapping.scene,
-                        name: capitalizeFirstLetter(humanizeCustomFunctionType(kind, true)),
+                        name: capitalizeFirstLetter(humanizeInsightsFunctionType(kind, true)),
                         path: mapping.url(),
                         iconType: 'data_pipeline',
                     },
                     {
                         key: Scene.DataPipelinesNew,
-                        name: 'New ' + humanizeCustomFunctionType(kind),
+                        name: 'New ' + humanizeInsightsFunctionType(kind),
                         iconType: 'data_pipeline',
                     },
                 ]
@@ -69,13 +69,13 @@ export function DataPipelinesNewScene(): JSX.Element {
     const { kind } = logicProps
 
     const { availableSources, availableSourcesLoading } = useValues(availableSourcesDataLogic)
-    const { customFunctionTemplatesDataWarehouseSources, customFunctionTemplatesBatchExports } = useValues(
-        nonCustomFunctionTemplatesLogic({
+    const { insightsFunctionTemplatesDataWarehouseSources, insightsFunctionTemplatesBatchExports } = useValues(
+        nonInsightsFunctionTemplatesLogic({
             availableSources: availableSources ?? {},
         })
     )
 
-    const humanizedKind = humanizeCustomFunctionType(kind)
+    const humanizedKind = humanizeInsightsFunctionType(kind)
 
     return (
         <SceneContent>
@@ -87,15 +87,15 @@ export function DataPipelinesNewScene(): JSX.Element {
             />
 
             {kind === 'transformation' ? (
-                <CustomFunctionTemplateList type="transformation" />
+                <InsightsFunctionTemplateList type="transformation" />
             ) : kind === 'destination' ? (
-                <CustomFunctionTemplateList type="destination" manualTemplates={customFunctionTemplatesBatchExports} />
+                <InsightsFunctionTemplateList type="destination" manualTemplates={insightsFunctionTemplatesBatchExports} />
             ) : kind === 'site_app' ? (
-                <CustomFunctionTemplateList type="site_app" />
+                <InsightsFunctionTemplateList type="site_app" />
             ) : kind === 'source' ? (
-                <CustomFunctionTemplateList
+                <InsightsFunctionTemplateList
                     type="source_webhook"
-                    manualTemplates={customFunctionTemplatesDataWarehouseSources}
+                    manualTemplates={insightsFunctionTemplatesDataWarehouseSources}
                     manualTemplatesLoading={availableSourcesLoading}
                 />
             ) : (

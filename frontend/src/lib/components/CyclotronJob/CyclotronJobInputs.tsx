@@ -29,7 +29,7 @@ import { copyToClipboard } from 'lib/utils/copyToClipboard'
 
 import { CyclotronJobInputSchemaType, CyclotronJobInputType, CyclotronJobInvocationGlobalsWithInputs } from '~/types'
 
-import { EmailTemplater } from '../../../scenes/custom-functions/email-templater/EmailTemplater'
+import { EmailTemplater } from '../../../scenes/insights-functions/email-templater/EmailTemplater'
 import { CyclotronJobTemplateSuggestionsButton } from './CyclotronJobTemplateSuggestions'
 import { cyclotronJobInputLogic, formatJsonValue } from './cyclotronJobInputLogic'
 import { CyclotronJobInputIntegration } from './integrations/CyclotronJobInputIntegration'
@@ -122,7 +122,7 @@ function JsonConfigField(props: {
     sampleGlobalsWithInputs: CyclotronJobInvocationGlobalsWithInputs | null
 }): JSX.Element {
     const key = useMemo(() => `json_field_${uuid()}`, [])
-    const templatingKind = props.input.templating ?? 'custom_script'
+    const templatingKind = props.input.templating ?? 'fn'
     const [isExpanded, setIsExpanded] = useState(true)
 
     // Set up validation logic for this JSON field
@@ -146,7 +146,7 @@ function JsonConfigField(props: {
                 <LemonField.Pure error={error}>
                     <span className={clsx('group relative', props.className)}>
                         <CodeEditorResizeable
-                            language={props.templating ? (templatingKind === 'custom_script' ? 'hogJson' : 'liquid') : 'json'}
+                            language={props.templating ? (templatingKind === 'fn' ? 'hogJson' : 'liquid') : 'json'}
                             value={formattedValue}
                             embedded={true}
                             onChange={(value) => setJsonValue(value || '{}')}
@@ -225,7 +225,7 @@ function CyclotronJobTemplateInput(props: {
     input: CyclotronJobInputType
     sampleGlobalsWithInputs: CyclotronJobInvocationGlobalsWithInputs | null
 }): JSX.Element {
-    const templating = props.input.templating ?? 'custom_script'
+    const templating = props.input.templating ?? 'fn'
 
     if (!props.templating) {
         return (
@@ -243,7 +243,7 @@ function CyclotronJobTemplateInput(props: {
                 minHeight="37" // Match other inputs
                 value={props.input.value ?? ''}
                 onChange={(val) => props.onChange?.({ ...props.input, value: val ?? '' })}
-                language={props.input.templating === 'custom_script' ? 'scriptTemplate' : 'liquid'}
+                language={props.input.templating === 'fn' ? 'scriptTemplate' : 'liquid'}
                 globals={props.sampleGlobalsWithInputs ?? undefined}
             />
             <span className="absolute top-0 right-0 z-10 p-px opacity-0 transition-opacity group-hover:opacity-100">

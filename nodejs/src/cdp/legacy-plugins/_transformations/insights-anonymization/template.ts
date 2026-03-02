@@ -11,7 +11,7 @@ export const insightsAnonymization: LegacyTransformationPlugin = {
         id: 'plugin-insights-anonymization',
         name: 'Insights Anonymization',
         description: 'Anonymize your data.',
-        icon_url: '/static/mascot/builder-mascot-01.png',
+        icon_url: '',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

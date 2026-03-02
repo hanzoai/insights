@@ -1,15 +1,15 @@
 import { DestinationDefinition, destinations } from '@segment/action-destinations'
 
-import { CustomFunctionFilterEvent, CustomFunctionInputSchemaType, CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionFilterEvent, InsightsFunctionInputSchemaType, InsightsFunctionTemplate } from '~/cdp/types'
 
 import { EXTEND_OBJECT_KEY } from '../services/script-executor.service'
 
 export type SegmentDestination = {
-    template: CustomFunctionTemplate
+    template: InsightsFunctionTemplate
     destination: DestinationDefinition
 }
 
-const translateFilters = (subscribe: string): { events: CustomFunctionFilterEvent[] } => {
+const translateFilters = (subscribe: string): { events: InsightsFunctionFilterEvent[] } => {
     const mappings = {
         'type = "page"': 'event = "$pageview"',
         'type = "screen"': 'event = "$screen"',
@@ -383,7 +383,7 @@ const SECRET_FIELD_NAMES = [
 const translateInputsSchema = (
     inputs_schema: Record<string, any> | undefined,
     mapping?: Record<string, any> | undefined
-): CustomFunctionInputSchemaType[] => {
+): InsightsFunctionInputSchemaType[] => {
     if (!inputs_schema) {
         return []
     }
@@ -398,7 +398,7 @@ const translateInputsSchema = (
             required: field.required ?? false,
             secret: field.type === 'password' || SECRET_FIELD_NAMES.includes(key.toLowerCase()) ? true : false,
             ...(field.choices ? { choices: field.choices } : {}),
-        })) as CustomFunctionInputSchemaType[]
+        })) as InsightsFunctionInputSchemaType[]
 }
 
 const getIconUrl = (id: string, slug: string | undefined) => {

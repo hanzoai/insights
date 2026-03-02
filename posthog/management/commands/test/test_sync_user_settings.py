@@ -21,7 +21,6 @@ class TestSyncUserSettingsCommand(BaseTest):
         self.user.theme_mode = "light"
         self.user.toolbar_mode = "toolbar"
         self.user.anonymize_data = False
-        self.user.mascot_config = None
         self.user.save()
 
     def _mock_cloud_api_responses(self, mock_get):
@@ -35,7 +34,6 @@ class TestSyncUserSettingsCommand(BaseTest):
             "theme_mode": "dark",
             "toolbar_mode": "disabled",
             "anonymize_data": True,
-            "mascot_config": {"mode": "festive"},
             "partial_notification_settings": {"plugin_disabled": False},
             "has_seen_product_intro_for": {"feature_flags": True},
         }
@@ -86,8 +84,6 @@ class TestSyncUserSettingsCommand(BaseTest):
         assert self.user.theme_mode == "dark"
         assert self.user.toolbar_mode == "disabled"
         assert self.user.anonymize_data is True
-        assert self.user.mascot_config == {"mode": "festive"}
-
         # Verify home settings were synced
         home_settings = UserHomeSettings.objects.get(user=self.user, team=self.team)
         assert len(home_settings.tabs) == 1

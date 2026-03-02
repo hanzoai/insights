@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Update contacts in Intercom",
     icon_url="/static/services/intercom.png",
     category=["Customer Success"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')
@@ -162,7 +162,7 @@ if (res.status >= 400) {
     },
 )
 
-template_send_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template_send_event: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -171,7 +171,7 @@ template_send_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send events to Intercom",
     icon_url="/static/services/intercom.png",
     category=["Customer Success"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')

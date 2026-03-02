@@ -10,12 +10,12 @@ import {
     AlertNotificationType,
     PendingAlertNotification,
     buildAlertFilterConfig,
-    buildCustomFunctionPayload,
+    buildInsightsFunctionPayload,
 } from 'lib/utils/alertUtils'
 import { deleteWithUndo } from 'lib/utils/deleteWithUndo'
 import { projectLogic } from 'scenes/projectLogic'
 
-import { CustomFunctionType, IntegrationType } from '~/types'
+import { InsightsFunctionType, IntegrationType } from '~/types'
 
 import type { alertNotificationLogicType } from './alertNotificationLogicType'
 
@@ -43,8 +43,8 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
         removePendingNotification: (index: number) => ({ index }),
         clearPendingNotifications: true,
         setPendingNotifications: (notifications: PendingAlertNotification[]) => ({ notifications }),
-        deleteExistingCustomFunction: (customFunction: CustomFunctionType) => ({ customFunction }),
-        createPendingCustomFunctions: (alertId: string, alertName?: string) => ({ alertId, alertName }),
+        deleteExistingInsightsFunction: (insightsFunction: InsightsFunctionType) => ({ insightsFunction }),
+        createPendingInsightsFunctions: (alertId: string, alertName?: string) => ({ alertId, alertName }),
         setSelectedType: (selectedType: AlertNotificationType) => ({ selectedType }),
         setSlackChannelValue: (slackChannelValue: string | null) => ({ slackChannelValue }),
         setWebhookUrl: (webhookUrl: string) => ({ webhookUrl }),
@@ -78,11 +78,11 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
                 setSelectedType: (_, { selectedType }) => selectedType,
             },
         ],
-        existingCustomFunctions: [
-            [] as CustomFunctionType[],
+        existingInsightsFunctions: [
+            [] as InsightsFunctionType[],
             {
                 // Optimistic removal so the item disappears immediately
-                deleteExistingCustomFunction: (state, { customFunction }) => state.filter((hf) => hf.id !== customFunction.id),
+                deleteExistingInsightsFunction: (state, { insightsFunction }) => state.filter((hf) => hf.id !== insightsFunction.id),
             },
         ],
     }),
@@ -96,14 +96,14 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
     }),
 
     loaders(({ props }) => ({
-        existingCustomFunctions: [
-            [] as CustomFunctionType[],
+        existingInsightsFunctions: [
+            [] as InsightsFunctionType[],
             {
-                loadExistingCustomFunctions: async () => {
+                loadExistingInsightsFunctions: async () => {
                     if (!props.alertId) {
                         return []
                     }
-                    const response = await api.customFunctions.list({
+                    const response = await api.insightsFunctions.list({
                         types: ['internal_destination'],
                         filter_groups: [buildAlertFilterConfig(props.alertId)],
                         full: true,
@@ -120,22 +120,22 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
                 actions.setSelectedType(ALERT_NOTIFICATION_TYPE_WEBHOOK)
             }
         },
-        deleteExistingCustomFunction: async ({ customFunction }) => {
+        deleteExistingInsightsFunction: async ({ insightsFunction }) => {
             await deleteWithUndo({
-                endpoint: `projects/${values.currentProjectId}/custom_functions`,
+                endpoint: `projects/${values.currentProjectId}/insights_functions`,
                 object: {
-                    id: customFunction.id,
-                    name: customFunction.name,
+                    id: insightsFunction.id,
+                    name: insightsFunction.name,
                 },
                 callback: (undo) => {
                     if (undo) {
-                        actions.loadExistingCustomFunctions()
+                        actions.loadExistingInsightsFunctions()
                     }
                 },
             })
         },
 
-        createPendingCustomFunctions: async ({ alertId, alertName }) => {
+        createPendingInsightsFunctions: async ({ alertId, alertName }) => {
             const pending = values.pendingNotifications
             if (pending.length === 0) {
                 return
@@ -143,8 +143,8 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
 
             const results = await Promise.allSettled(
                 pending.map((notification) => {
-                    const payload = buildCustomFunctionPayload(alertId, alertName, notification)
-                    return api.customFunctions.create(payload)
+                    const payload = buildInsightsFunctionPayload(alertId, alertName, notification)
+                    return api.insightsFunctions.create(payload)
                 })
             )
 
@@ -162,13 +162,13 @@ export const alertNotificationLogic = kea<alertNotificationLogicType>([
                 actions.clearPendingNotifications()
             }
 
-            actions.loadExistingCustomFunctions()
+            actions.loadExistingInsightsFunctions()
         },
     })),
 
     afterMount(({ actions, props }) => {
         if (props.alertId) {
-            actions.loadExistingCustomFunctions()
+            actions.loadExistingInsightsFunctions()
         }
     }),
 ])

@@ -106,13 +106,13 @@ export const pipelinePluginConfigurationLogic = kea<pipelinePluginConfigurationL
                     return res
                 },
 
-                migrateToCustomFunction: async () => {
+                migrateToInsightsFunction: async () => {
                     if (!props.pluginConfigId) {
                         return null
                     }
-                    const customFunction = await api.pluginConfigs.migrate(props.pluginConfigId)
+                    const insightsFunction = await api.pluginConfigs.migrate(props.pluginConfigId)
 
-                    router.actions.replace(urls.customFunction(customFunction.id))
+                    router.actions.replace(urls.insightsFunction(insightsFunction.id))
 
                     return values.pluginConfig
                 },

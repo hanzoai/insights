@@ -27,7 +27,7 @@ import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { JSONEditorInput } from 'scenes/feature-flags/JSONEditorInput'
-import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
+import { LinkedInsightsFunctions } from 'scenes/insights-functions/list/LinkedInsightsFunctions'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { SceneExport } from 'scenes/sceneTypes'
 import { teamLogic } from 'scenes/teamLogic'
@@ -508,7 +508,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             title="Notifications"
                             description="Get notified when people opt in or out of your feature."
                         >
-                            <LinkedCustomFunctions
+                            <LinkedInsightsFunctions
                                 type="destination"
                                 forceFilterGroups={[destinationFilters]}
                                 subTemplateIds={['early-access-feature-enrollment']}

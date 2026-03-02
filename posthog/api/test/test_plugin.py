@@ -11,12 +11,12 @@ from unittest.mock import patch
 
 from rest_framework import status
 
-from posthog.api.test.test_custom_function_templates import MOCK_NODE_TEMPLATES
+from posthog.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from posthog.cdp.templates.helpers import mock_transpile
-from posthog.cdp.templates.custom_function_template import sync_template_to_db
+from posthog.cdp.templates.insights_function_template import sync_template_to_db
 from posthog.constants import FROZEN_POSTHOG_VERSION
 from posthog.models import Plugin, PluginConfig, PluginSourceFile
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.organization import Organization, OrganizationMembership
 from posthog.models.team.team import Team
 from posthog.models.user import User
@@ -504,7 +504,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                 "capabilities": {},
                 "metrics": {},
                 "public_jobs": {},
-                "custom_function_migration_available": False,
+                "insights_function_migration_available": False,
             },
         )
         self.assertEqual(Plugin.objects.count(), 1)
@@ -549,7 +549,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                 "capabilities": {},
                 "metrics": {},
                 "public_jobs": {},
-                "custom_function_migration_available": False,
+                "insights_function_migration_available": False,
             },
         )
         self.assertEqual(Plugin.objects.count(), 1)
@@ -596,7 +596,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
                 "capabilities": {},
                 "metrics": {},
                 "public_jobs": {},
-                "custom_function_migration_available": False,
+                "insights_function_migration_available": False,
             },
         )
         self.assertEqual(Plugin.objects.count(), 1)
@@ -765,7 +765,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             "capabilities": {},
             "metrics": {},
             "public_jobs": {},
-            "custom_function_migration_available": False,
+            "insights_function_migration_available": False,
         }
 
         assert Plugin.objects.count() == 1
@@ -1088,7 +1088,7 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
             ],
         )
 
-    def test_create_custom_function_from_plugin_config(self, mock_get, mock_reload):
+    def test_create_insights_function_from_plugin_config(self, mock_get, mock_reload):
         mock_geoip_plugin = Plugin.objects.create(
             organization=self.organization,
             plugin_type="local",
@@ -1111,26 +1111,26 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         assert response.status_code == 201, response.json()
 
         assert PluginConfig.objects.count() == 0
-        custom_function = CustomFunction.objects.all()
-        assert custom_function.count() == 1
-        assert custom_function[0].template_id == "plugin-posthog-plugin-geoip"
-        assert custom_function[0].type == "transformation"
-        assert custom_function[0].name == "GeoIP"
-        assert custom_function[0].description == "Enrich events with GeoIP data"
-        assert custom_function[0].filters == {
+        insights_function = InsightsFunction.objects.all()
+        assert insights_function.count() == 1
+        assert insights_function[0].template_id == "plugin-posthog-plugin-geoip"
+        assert insights_function[0].type == "transformation"
+        assert insights_function[0].name == "GeoIP"
+        assert insights_function[0].description == "Enrich events with GeoIP data"
+        assert insights_function[0].filters == {
             "source": "events",
             "bytecode": ["_H", 1, 29],
         }  # Assert the compiled bytecode for empty filter
-        assert custom_function[0].hog == "return event"
-        assert custom_function[0].enabled
-        assert custom_function[0].team == self.team
-        assert custom_function[0].created_by == self.user
-        assert custom_function[0].icon_url == "/static/transformations/geoip.png"
-        assert custom_function[0].inputs_schema == []
-        assert custom_function[0].execution_order == 1
-        assert custom_function[0].inputs == {}
+        assert insights_function[0].hog == "return event"
+        assert insights_function[0].enabled
+        assert insights_function[0].team == self.team
+        assert insights_function[0].created_by == self.user
+        assert insights_function[0].icon_url == "/static/transformations/geoip.png"
+        assert insights_function[0].inputs_schema == []
+        assert insights_function[0].execution_order == 1
+        assert insights_function[0].inputs == {}
 
-    def test_create_custom_function_from_plugin_config_with_inputs(self, mock_get, mock_reload):
+    def test_create_insights_function_from_plugin_config_with_inputs(self, mock_get, mock_reload):
         mock_geoip_plugin = Plugin.objects.create(
             organization=self.organization,
             plugin_type="local",
@@ -1153,10 +1153,10 @@ class TestPluginAPI(APIBaseTest, QueryMatchingTest):
         assert response.status_code == 201, response.json()
 
         assert PluginConfig.objects.count() == 0
-        custom_function = CustomFunction.objects.all()
-        assert custom_function.count() == 1
-        assert custom_function[0].template_id == "plugin-taxonomy-plugin"
-        assert custom_function[0].inputs == {
+        insights_function = InsightsFunction.objects.all()
+        assert insights_function.count() == 1
+        assert insights_function[0].template_id == "plugin-taxonomy-plugin"
+        assert insights_function[0].inputs == {
             "defaultNamingConvention": {
                 "order": 0,
                 "value": "snake_case",

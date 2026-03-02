@@ -12,16 +12,16 @@ import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'
 import { LiquidRenderer } from 'lib/utils/liquid'
-import { sanitizeInputs } from 'scenes/custom-functions/configuration/customFunctionConfigurationLogic'
-import { EmailTemplate } from 'scenes/custom-functions/email-templater/emailTemplaterLogic'
+import { sanitizeInputs } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'
+import { EmailTemplate } from 'scenes/insights-functions/email-templater/emailTemplaterLogic'
 import { projectLogic } from 'scenes/projectLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { CustomFunctionTemplateType } from '~/types'
+import { InsightsFunctionTemplateType } from '~/types'
 
-import { CustomFlowActionSchema, isFunctionAction, isTriggerFunction } from './customflows/steps/types'
-import { type CustomFlow, type CustomFlowAction, CustomFlowActionValidationResult, type CustomFlowEdge } from './customflows/types'
+import { InsightsFlowActionSchema, isFunctionAction, isTriggerFunction } from './insightsflows/steps/types'
+import { type InsightsFlow, type InsightsFlowAction, InsightsFlowActionValidationResult, type InsightsFlowEdge } from './insightsflows/types'
 import type { workflowLogicType } from './workflowLogicType'
 import { workflowSceneLogic } from './workflowSceneLogic'
 import { workflowsLogic } from './workflowsLogic'
@@ -36,9 +36,9 @@ export interface WorkflowLogicProps {
 export const TRIGGER_NODE_ID = 'trigger_node'
 export const EXIT_NODE_ID = 'exit_node'
 
-export type TriggerAction = Extract<CustomFlowAction, { type: 'trigger' }>
+export type TriggerAction = Extract<InsightsFlowAction, { type: 'trigger' }>
 
-export const NEW_WORKFLOW: CustomFlow = {
+export const NEW_WORKFLOW: InsightsFlow = {
     id: 'new',
     name: 'New workflow',
     actions: [
@@ -82,7 +82,7 @@ export const NEW_WORKFLOW: CustomFlow = {
     updated_at: '',
 }
 
-function getTemplatingError(value: string, templating?: 'liquid' | 'custom_script'): string | undefined {
+function getTemplatingError(value: string, templating?: 'liquid' | 'fn'): string | undefined {
     if (templating === 'liquid' && typeof value === 'string') {
         try {
             LiquidRenderer.parse(value)
@@ -93,14 +93,14 @@ function getTemplatingError(value: string, templating?: 'liquid' | 'custom_scrip
 }
 
 export function sanitizeWorkflow(
-    workflow: CustomFlow,
-    customFunctionTemplatesById: Record<string, CustomFunctionTemplateType>
-): CustomFlow {
+    workflow: InsightsFlow,
+    insightsFunctionTemplatesById: Record<string, InsightsFunctionTemplateType>
+): InsightsFlow {
     // Sanitize all function-like actions the same as we would a script function
     workflow.actions.forEach((action) => {
         if (isFunctionAction(action) || isTriggerFunction(action)) {
             const inputs = action.config.inputs
-            const template = customFunctionTemplatesById[action.config.template_id]
+            const template = insightsFunctionTemplatesById[action.config.template_id]
             if (template) {
                 action.config.inputs = sanitizeInputs({
                     inputs_schema: template.inputs_schema,
@@ -121,23 +121,23 @@ export const workflowLogic = kea<workflowLogicType>([
         actions: [workflowsLogic, ['archiveWorkflow']],
     })),
     actions({
-        partialSetWorkflowActionConfig: (actionId: string, config: Partial<CustomFlowAction['config']>) => ({
+        partialSetWorkflowActionConfig: (actionId: string, config: Partial<InsightsFlowAction['config']>) => ({
             actionId,
             config,
         }),
-        setWorkflowActionConfig: (actionId: string, config: CustomFlowAction['config']) => ({ actionId, config }),
-        setWorkflowAction: (actionId: string, action: CustomFlowAction) => ({ actionId, action }),
-        setWorkflowActionEdges: (actionId: string, edges: CustomFlow['edges']) => ({ actionId, edges }),
+        setWorkflowActionConfig: (actionId: string, config: InsightsFlowAction['config']) => ({ actionId, config }),
+        setWorkflowAction: (actionId: string, action: InsightsFlowAction) => ({ actionId, action }),
+        setWorkflowActionEdges: (actionId: string, edges: InsightsFlow['edges']) => ({ actionId, edges }),
         // NOTE: This is a wrapper for setWorkflowValues, to get around some weird typegen issues
-        setWorkflowInfo: (workflow: Partial<CustomFlow>) => ({ workflow }),
-        saveWorkflowPartial: (workflow: Partial<CustomFlow>) => ({ workflow }),
+        setWorkflowInfo: (workflow: Partial<InsightsFlow>) => ({ workflow }),
+        saveWorkflowPartial: (workflow: Partial<InsightsFlow>) => ({ workflow }),
         triggerManualWorkflow: (variables: Record<string, any>, scheduledAt?: string | null) => ({
             variables,
             scheduledAt,
         }),
         triggerBatchWorkflow: (
             variables: Record<string, any>,
-            filters: Extract<CustomFlowAction['config'], { type: 'batch' }>['filters'],
+            filters: Extract<InsightsFlowAction['config'], { type: 'batch' }>['filters'],
             scheduledAt?: string | null
         ) => ({
             variables,
@@ -149,20 +149,20 @@ export const workflowLogic = kea<workflowLogicType>([
     }),
     loaders(({ props, values }) => ({
         originalWorkflow: [
-            null as CustomFlow | null,
+            null as InsightsFlow | null,
             {
                 loadWorkflow: async () => {
                     if (!props.id || props.id === 'new') {
                         if (props.editTemplateId) {
                             // Editing a template - load it and add a temporary status field for the editor
-                            const templateWorkflow = await api.customFlowTemplates.getCustomFlowTemplate(props.editTemplateId)
+                            const templateWorkflow = await api.insightsFlowTemplates.getInsightsFlowTemplate(props.editTemplateId)
                             return {
                                 ...templateWorkflow,
                                 status: 'draft' as const, // Temporary status for editor compatibility, won't be saved
-                            } as CustomFlow
+                            } as InsightsFlow
                         }
                         if (props.templateId) {
-                            const templateWorkflow = await api.customFlowTemplates.getCustomFlowTemplate(props.templateId)
+                            const templateWorkflow = await api.insightsFlowTemplates.getInsightsFlowTemplate(props.templateId)
 
                             const newWorkflow = {
                                 ...templateWorkflow,
@@ -181,16 +181,16 @@ export const workflowLogic = kea<workflowLogicType>([
                         return { ...NEW_WORKFLOW }
                     }
 
-                    return api.customFlows.getCustomFlow(props.id)
+                    return api.insightsFlows.getInsightsFlow(props.id)
                 },
-                saveWorkflow: async (updates: CustomFlow) => {
-                    updates = sanitizeWorkflow(updates, values.customFunctionTemplatesById)
+                saveWorkflow: async (updates: InsightsFlow) => {
+                    updates = sanitizeWorkflow(updates, values.insightsFunctionTemplatesById)
 
                     if (!props.id || props.id === 'new') {
-                        const result = await api.customFlows.createCustomFlow(updates)
+                        const result = await api.insightsFlows.createInsightsFlow(updates)
 
                         if (props.templateId) {
-                            posthog.capture('custom_flow_created_from_template', {
+                            posthog.capture('insights_flow_created_from_template', {
                                 workflow_id: result.id,
                                 template_id: props.templateId,
                             })
@@ -198,17 +198,17 @@ export const workflowLogic = kea<workflowLogicType>([
                         return result
                     }
 
-                    return api.customFlows.updateCustomFlow(props.id, updates)
+                    return api.insightsFlows.updateInsightsFlow(props.id, updates)
                 },
             },
         ],
     })),
     lazyLoaders(() => ({
-        customFunctionTemplatesById: [
-            {} as Record<string, CustomFunctionTemplateType>,
+        insightsFunctionTemplatesById: [
+            {} as Record<string, InsightsFunctionTemplateType>,
             {
-                loadCustomFunctionTemplatesById: async () => {
-                    const allTemplates = await api.customFunctions.listTemplates({
+                loadInsightsFunctionTemplatesById: async () => {
+                    const allTemplates = await api.insightsFunctions.listTemplates({
                         types: ['destination', 'source_webhook'],
                     })
 
@@ -217,7 +217,7 @@ export const workflowLogic = kea<workflowLogicType>([
                             acc[template.id] = template
                             return acc
                         },
-                        {} as Record<string, CustomFunctionTemplateType>
+                        {} as Record<string, InsightsFunctionTemplateType>
                     )
 
                     return allTemplatesById
@@ -236,7 +236,7 @@ export const workflowLogic = kea<workflowLogicType>([
                         actions.some((action) => !(values.actionValidationErrorsById[action.id]?.valid ?? true))
                             ? 'Some fields need work'
                             : undefined,
-                } as DeepPartialMap<CustomFlow, ValidationErrorType>
+                } as DeepPartialMap<InsightsFlow, ValidationErrorType>
 
                 return errors
             },
@@ -254,7 +254,7 @@ export const workflowLogic = kea<workflowLogicType>([
         workflowLoading: [(s) => [s.originalWorkflowLoading], (originalWorkflowLoading) => originalWorkflowLoading],
         edgesByActionId: [
             (s) => [s.workflow],
-            (workflow): Record<string, CustomFlowEdge[]> => {
+            (workflow): Record<string, InsightsFlowEdge[]> => {
                 return workflow.edges.reduce(
                     (acc, edge) => {
                         if (!acc[edge.from]) {
@@ -269,26 +269,26 @@ export const workflowLogic = kea<workflowLogicType>([
 
                         return acc
                     },
-                    {} as Record<string, CustomFlowEdge[]>
+                    {} as Record<string, InsightsFlowEdge[]>
                 )
             },
         ],
 
         actionValidationErrorsById: [
-            (s) => [s.workflow, s.customFunctionTemplatesById, s.customFunctionTemplatesByIdLoading],
+            (s) => [s.workflow, s.insightsFunctionTemplatesById, s.insightsFunctionTemplatesByIdLoading],
             (
                 workflow,
-                customFunctionTemplatesById,
-                customFunctionTemplatesByIdLoading
-            ): Record<string, CustomFlowActionValidationResult | null> => {
+                insightsFunctionTemplatesById,
+                insightsFunctionTemplatesByIdLoading
+            ): Record<string, InsightsFlowActionValidationResult | null> => {
                 return workflow.actions.reduce(
                     (acc, action) => {
-                        const result: CustomFlowActionValidationResult = {
+                        const result: InsightsFlowActionValidationResult = {
                             valid: true,
                             schema: null,
                             errors: {},
                         }
-                        const schemaValidation = CustomFlowActionSchema.safeParse(action)
+                        const schemaValidation = InsightsFlowActionSchema.safeParse(action)
 
                         if (!schemaValidation.success) {
                             result.valid = false
@@ -334,9 +334,9 @@ export const workflowLogic = kea<workflowLogicType>([
 
                         if (
                             (isFunctionAction(action) || isTriggerFunction(action)) &&
-                            !customFunctionTemplatesByIdLoading
+                            !insightsFunctionTemplatesByIdLoading
                         ) {
-                            const template = customFunctionTemplatesById[action.config.template_id]
+                            const template = insightsFunctionTemplatesById[action.config.template_id]
                             if (!template) {
                                 result.valid = false
                                 result.errors = {
@@ -382,7 +382,7 @@ export const workflowLogic = kea<workflowLogicType>([
                         acc[action.id] = result
                         return acc
                     },
-                    {} as Record<string, CustomFlowActionValidationResult>
+                    {} as Record<string, InsightsFlowActionValidationResult>
                 )
             },
         ],
@@ -390,8 +390,8 @@ export const workflowLogic = kea<workflowLogicType>([
         workflowHasActionErrors: [
             (s) => [s.workflow, s.actionValidationErrorsById],
             (
-                workflow: CustomFlow,
-                actionValidationErrorsById: Record<string, CustomFlowActionValidationResult | null>
+                workflow: InsightsFlow,
+                actionValidationErrorsById: Record<string, InsightsFlowActionValidationResult | null>
             ): boolean => {
                 return workflow.actions.some((action) => !(actionValidationErrorsById[action.id]?.valid ?? true))
             },
@@ -405,9 +405,9 @@ export const workflowLogic = kea<workflowLogicType>([
         ],
 
         workflowSanitized: [
-            (s) => [s.workflow, s.customFunctionTemplatesById],
-            (workflow, customFunctionTemplatesById): CustomFlow => {
-                return sanitizeWorkflow(workflow, customFunctionTemplatesById)
+            (s) => [s.workflow, s.insightsFunctionTemplatesById],
+            (workflow, insightsFunctionTemplatesById): InsightsFlow => {
+                return sanitizeWorkflow(workflow, insightsFunctionTemplatesById)
             },
         ],
     }),
@@ -496,9 +496,9 @@ export const workflowLogic = kea<workflowLogicType>([
                 return
             }
 
-            action.config = { ...config } as CustomFlowAction['config']
+            action.config = { ...config } as InsightsFlowAction['config']
 
-            const changes = { actions: [...values.workflow.actions] } as Partial<CustomFlow>
+            const changes = { actions: [...values.workflow.actions] } as Partial<InsightsFlow>
             if (action.type === 'trigger') {
                 changes.trigger = action.config as TriggerAction['config']
             }
@@ -511,7 +511,7 @@ export const workflowLogic = kea<workflowLogicType>([
                 return
             }
 
-            actions.setWorkflowActionConfig(actionId, { ...action.config, ...config } as CustomFlowAction['config'])
+            actions.setWorkflowActionConfig(actionId, { ...action.config, ...config } as InsightsFlowAction['config'])
         },
         setWorkflowAction: async ({ actionId, action }) => {
             const newActions = values.workflow.actions.map((a) => (a.id === actionId ? action : a))
@@ -539,7 +539,7 @@ export const workflowLogic = kea<workflowLogicType>([
             delete (newWorkflow as any).created_at
             delete (newWorkflow as any).updated_at
 
-            const createdWorkflow = await api.customFlows.createCustomFlow(newWorkflow)
+            const createdWorkflow = await api.insightsFlows.createInsightsFlow(newWorkflow)
             lemonToast.success('Workflow duplicated')
             router.actions.push(urls.workflow(createdWorkflow.id, 'workflow'))
         },
@@ -588,7 +588,7 @@ export const workflowLogic = kea<workflowLogicType>([
             lemonToast.info(isScheduleTrigger ? 'Scheduling batch workflow...' : 'Triggering batch workflow...')
 
             try {
-                await api.customFlows.createCustomFlowBatchJob(values.workflow.id, {
+                await api.insightsFlows.createInsightsFlowBatchJob(values.workflow.id, {
                     variables,
                     filters,
                     scheduled_at: scheduledAt,
@@ -607,6 +607,6 @@ export const workflowLogic = kea<workflowLogicType>([
     })),
     afterMount(({ actions }) => {
         actions.loadWorkflow()
-        actions.loadCustomFunctionTemplatesById()
+        actions.loadInsightsFunctionTemplatesById()
     }),
 ])

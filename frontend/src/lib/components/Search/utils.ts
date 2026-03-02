@@ -28,7 +28,7 @@ export const getCategoryDisplayName = (category: string): string => {
         event_definition: 'Event definitions',
         property_definition: 'Property definitions',
         session_recording_playlist: 'Session recording filter',
-        custom_flow: 'Workflows',
+        insights_flow: 'Workflows',
         health: 'Health',
         misc: 'Misc',
     }

@@ -4,22 +4,22 @@ import { RedisV2 } from '~/common/redis/redis-v2'
 
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationCustomFlow,
-    CyclotronJobInvocationCustomFunction,
-    CustomFunctionMasking,
+    CyclotronJobInvocationInsightsFlow,
+    CyclotronJobInvocationInsightsFunction,
+    InsightsFunctionMasking,
 } from '../../types'
-import { execScript } from '../../utils/script-exec'
+import { execFn } from '../../utils/script-exec'
 
 export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@posthog/script-masker'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/mask`
 
 // NOTE: These are controlled via the api so are more of a sanity fallback
-const MASKER_MAX_TTL_CUSTOM_FUNCTION = 60 * 60 * 24
-const MASKER_MAX_TTL_CUSTOM_FLOW = 60 * 60 * 24 * 365 * 3 // 3 years
+const MASKER_MAX_TTL_INSIGHTS_FUNCTION = 60 * 60 * 24
+const MASKER_MAX_TTL_INSIGHTS_FLOW = 60 * 60 * 24 * 365 * 3 // 3 years
 const MASKER_MIN_TTL = 1
 
 type MaskContext = {
-    customFunctionId: string
+    insightsFunctionId: string
     hash: string
     increment: number
     ttl: number
@@ -31,32 +31,32 @@ type GenericScriptInvocationWithMasker = CyclotronJobInvocation & {
     masker?: MaskContext
 }
 
-function isCustomFunctionInvocation(invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationCustomFunction {
-    return (invocation as CyclotronJobInvocationCustomFunction).customFunction !== undefined
+function isInsightsFunctionInvocation(invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationInsightsFunction {
+    return (invocation as CyclotronJobInvocationInsightsFunction).insightsFunction !== undefined
 }
 
-function isCustomFlowInvocation(invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationCustomFlow {
-    return (invocation as CyclotronJobInvocationCustomFlow).customFlow !== undefined
+function isInsightsFlowInvocation(invocation: CyclotronJobInvocation): invocation is CyclotronJobInvocationInsightsFlow {
+    return (invocation as CyclotronJobInvocationInsightsFlow).insightsFlow !== undefined
 }
 
 // Helper to extract masking config from different types
-function extractMaskingConfig(invocation: CyclotronJobInvocation): CustomFunctionMasking | null {
-    if (isCustomFunctionInvocation(invocation)) {
-        return invocation.customFunction.masking || null
+function extractMaskingConfig(invocation: CyclotronJobInvocation): InsightsFunctionMasking | null {
+    if (isInsightsFunctionInvocation(invocation)) {
+        return invocation.insightsFunction.masking || null
     }
 
-    if (isCustomFlowInvocation(invocation)) {
-        return invocation.customFlow.trigger_masking || null
+    if (isInsightsFlowInvocation(invocation)) {
+        return invocation.insightsFlow.trigger_masking || null
     }
 
     throw new Error('Unable to extract masking config from unknown invocation type')
 }
 
 function extractGlobals(invocation: CyclotronJobInvocation): Record<string, any> {
-    if (isCustomFunctionInvocation(invocation)) {
+    if (isInsightsFunctionInvocation(invocation)) {
         return invocation.state.globals
     }
-    if (isCustomFlowInvocation(invocation)) {
+    if (isInsightsFlowInvocation(invocation)) {
         // For custom flows, we need to construct globals from the filter globals and event
         return {
             event: invocation.state?.event,
@@ -69,17 +69,17 @@ function extractGlobals(invocation: CyclotronJobInvocation): Record<string, any>
 
 // Helper to get entity ID for masking
 function getEntityId(invocation: CyclotronJobInvocation): string {
-    if (isCustomFunctionInvocation(invocation)) {
-        return invocation.customFunction.id
+    if (isInsightsFunctionInvocation(invocation)) {
+        return invocation.insightsFunction.id
     }
-    if (isCustomFlowInvocation(invocation)) {
-        return invocation.customFlow.id
+    if (isInsightsFlowInvocation(invocation)) {
+        return invocation.insightsFlow.id
     }
     return invocation.functionId
 }
 
-function getTtl(invocation: CyclotronJobInvocation, maskingConfig: CustomFunctionMasking): number {
-    const maxTtl = isCustomFlowInvocation(invocation) ? MASKER_MAX_TTL_CUSTOM_FLOW : MASKER_MAX_TTL_CUSTOM_FUNCTION
+function getTtl(invocation: CyclotronJobInvocation, maskingConfig: InsightsFunctionMasking): number {
+    const maxTtl = isInsightsFlowInvocation(invocation) ? MASKER_MAX_TTL_INSIGHTS_FLOW : MASKER_MAX_TTL_INSIGHTS_FUNCTION
     return Math.max(MASKER_MIN_TTL, Math.min(maxTtl, maskingConfig.ttl ?? maxTtl))
 }
 
@@ -109,25 +109,25 @@ export class ScriptMaskerService {
                 const globals = extractGlobals(item)
 
                 // TODO: Catch errors
-                const execScriptResult = await execScript(maskingConfig.bytecode, {
+                const execFnResult = await execFn(maskingConfig.bytecode, {
                     globals,
                     timeout: 50,
                 })
 
-                if (!execScriptResult.execResult?.result) {
+                if (!execFnResult.execResult?.result) {
                     continue
                 }
                 // What to do if it is null....
 
                 const hash = createHash('md5')
-                    .update(String(execScriptResult.execResult.result))
+                    .update(String(execFnResult.execResult.result))
                     .digest('hex')
                     .substring(0, 32)
                 const entityId = getEntityId(item)
                 const hashKey = `${entityId}:${hash}`
                 masks[hashKey] = masks[hashKey] || {
                     hash,
-                    customFunctionId: entityId,
+                    insightsFunctionId: entityId,
                     increment: 0,
                     ttl: getTtl(item, maskingConfig),
                     threshold: maskingConfig.threshold,
@@ -143,10 +143,10 @@ export class ScriptMaskerService {
         }
 
         const result = await this.redis.usePipeline({ name: 'masker', failOpen: true }, (pipeline) => {
-            Object.values(masks).forEach(({ customFunctionId, hash, increment, ttl }) => {
-                pipeline.incrby(`${REDIS_KEY_TOKENS}/${customFunctionId}/${hash}`, increment)
+            Object.values(masks).forEach(({ insightsFunctionId, hash, increment, ttl }) => {
+                pipeline.incrby(`${REDIS_KEY_TOKENS}/${insightsFunctionId}/${hash}`, increment)
                 // @ts-expect-error - NX is not typed in ioredis
-                pipeline.expire(`${REDIS_KEY_TOKENS}/${customFunctionId}/${hash}`, ttl, 'NX')
+                pipeline.expire(`${REDIS_KEY_TOKENS}/${insightsFunctionId}/${hash}`, ttl, 'NX')
             })
         })
 

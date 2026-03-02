@@ -88,7 +88,7 @@ from .userlist.template_userlist import template as userlist
 from .zapier.template_zapier import template as zapier
 from .zendesk.template_zendesk import template as zendesk
 
-CUSTOM_FUNCTION_TEMPLATES = [
+INSIGHTS_FUNCTION_TEMPLATES = [
     blank_site_destination,
     blank_site_app,
     slack,
@@ -144,7 +144,7 @@ CUSTOM_FUNCTION_TEMPLATES = [
 ]
 
 
-CUSTOM_FUNCTION_MIGRATORS = {
+INSIGHTS_FUNCTION_MIGRATORS = {
     TemplateCustomerioMigrator.plugin_url: TemplateCustomerioMigrator,
     TemplateSendGridMigrator.plugin_url: TemplateSendGridMigrator,
     TemplateGooglePubSubMigrator.plugin_url: TemplateGooglePubSubMigrator,

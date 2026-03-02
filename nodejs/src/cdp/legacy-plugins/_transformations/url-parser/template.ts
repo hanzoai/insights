@@ -11,7 +11,7 @@ export const urlParserPlugin: LegacyTransformationPlugin = {
         id: 'plugin-url-parser-plugin',
         name: 'URL Params Parser (Beta)',
         description: 'Parse your event URLs into useful properties.',
-        icon_url: '/static/mascot/builder-mascot-01.png',
+        icon_url: '',
         category: [],
         code_language: 'javascript',
         code: `return event`,

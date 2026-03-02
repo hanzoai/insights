@@ -5,14 +5,14 @@ import { router } from 'kea-router'
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
 
-import { CustomFunctionConfigurationType } from '~/types'
+import { InsightsFunctionConfigurationType } from '~/types'
 
 import { onboardingLogic } from '../onboardingLogic'
 import type { onboardingErrorTrackingAlertsLogicType } from './onboardingErrorTrackingAlertsLogicType'
 
 export type ErrorTrackingAlertIntegrationType = 'slack' | 'microsoft-teams' | 'discord'
 
-const DEFAULT_CUSTOM_FUNCTION_CONFIGURATION: Partial<CustomFunctionConfigurationType> = {
+const DEFAULT_INSIGHTS_FUNCTION_CONFIGURATION: Partial<InsightsFunctionConfigurationType> = {
     type: 'internal_destination',
     filters: { events: [{ id: '$error_tracking_issue_created', type: 'events' }] },
     enabled: true,
@@ -100,7 +100,7 @@ export const onboardingErrorTrackingAlertsLogic = kea<onboardingErrorTrackingAle
 
             submit: async (formValues) => {
                 const configuration = {
-                    ...DEFAULT_CUSTOM_FUNCTION_CONFIGURATION,
+                    ...DEFAULT_INSIGHTS_FUNCTION_CONFIGURATION,
                     template_id: `template-${values.integration}-error-tracking-issue-created`,
                 }
 
@@ -122,7 +122,7 @@ export const onboardingErrorTrackingAlertsLogic = kea<onboardingErrorTrackingAle
                     }
                 }
 
-                await api.customFunctions.create(configuration)
+                await api.insightsFunctions.create(configuration)
                 actions.goToNextStep()
             },
         },

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.mailgun.template_mailgun import template_mailgun_send_email
 
 
@@ -22,7 +22,7 @@ def create_inputs(overrides: Optional[dict] = None):
     return inputs
 
 
-class TestTemplateMailgunSendEmail(BaseCustomFunctionTemplateTest):
+class TestTemplateMailgunSendEmail(BaseInsightsFunctionTemplateTest):
     template = template_mailgun_send_email
 
     def test_function_works(self):

@@ -1,6 +1,6 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Update contacts in Brevo",
     icon_url="/static/services/brevo.png",
     category=["Email Marketing"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.email)) {
     print('No email set. Skipping...')

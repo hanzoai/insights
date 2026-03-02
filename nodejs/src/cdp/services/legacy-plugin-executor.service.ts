@@ -15,8 +15,8 @@ import {
     LegacyTransformationPlugin,
     LegacyTransformationPluginMeta,
 } from '../legacy-plugins/types'
-import { CyclotronJobInvocationCustomFunction, CyclotronJobInvocationResult } from '../types'
-import { CDP_TEST_ID, createAddLogFunction, destinationE2eLagMsSummary, isLegacyPluginCustomFunction } from '../utils'
+import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult } from '../types'
+import { CDP_TEST_ID, createAddLogFunction, destinationE2eLagMsSummary, isLegacyPluginInsightsFunction } from '../utils'
 import { createInvocationResult } from '../utils/invocation-utils'
 import { cdpTrackedFetch } from './script-executor.service'
 
@@ -116,10 +116,10 @@ export class LegacyPluginExecutorService {
     }
 
     public async execute(
-        invocation: CyclotronJobInvocationCustomFunction,
+        invocation: CyclotronJobInvocationInsightsFunction,
         shouldMockFetch = false
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
-        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(invocation)
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
+        const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(invocation)
         const addLog = createAddLogFunction(result.logs)
 
         const pluginLogger: LegacyPluginLogger = {
@@ -129,13 +129,13 @@ export class LegacyPluginExecutorService {
             error: (...args: any[]) => addLog('error', ...args),
         }
 
-        const pluginId = isLegacyPluginCustomFunction(invocation.customFunction) ? invocation.customFunction.template_id : null
+        const pluginId = isLegacyPluginInsightsFunction(invocation.insightsFunction) ? invocation.insightsFunction.template_id : null
 
         const fetch = async (url: string, fetchParams: FetchOptions): Promise<FetchResponse> => {
             const { fetchError, fetchResponse } = await cdpTrackedFetch({
                 url,
                 fetchParams,
-                templateId: invocation.customFunction.template_id ?? '',
+                templateId: invocation.insightsFunction.template_id ?? '',
             })
 
             if (fetchError || !fetchResponse) {
@@ -156,13 +156,13 @@ export class LegacyPluginExecutorService {
                 throw new Error(`Plugin ${pluginId} not found`)
             }
 
-            if (invocation.customFunction.type === 'destination' && 'processEvent' in plugin) {
+            if (invocation.insightsFunction.type === 'destination' && 'processEvent' in plugin) {
                 throw new Error(`Plugin ${pluginId} is not a destination`)
-            } else if (invocation.customFunction.type === 'transformation' && 'onEvent' in plugin) {
+            } else if (invocation.insightsFunction.type === 'transformation' && 'onEvent' in plugin) {
                 throw new Error(`Plugin ${pluginId} is not a transformation`)
             }
 
-            let state = this.pluginState[invocation.customFunction.id]
+            let state = this.pluginState[invocation.insightsFunction.id]
 
             // NOTE: If this is set then we can add in the legacy storage
             const legacyPluginConfigId = invocation.state.globals.inputs?.legacy_plugin_config_id
@@ -202,12 +202,12 @@ export class LegacyPluginExecutorService {
                             ...meta,
                             // Setup receives the real fetch always
                             fetch,
-                            storage: this.legacyStorage(invocation.customFunction.team_id, legacyPluginConfigId),
+                            storage: this.legacyStorage(invocation.insightsFunction.team_id, legacyPluginConfigId),
                         })
                     }
                 }
 
-                state = this.pluginState[invocation.customFunction.id] = {
+                state = this.pluginState[invocation.insightsFunction.id] = {
                     setupPromise,
                     meta,
                     errored: false,
@@ -220,7 +220,7 @@ export class LegacyPluginExecutorService {
                 throw new Error(`Plugin ${pluginId} setup failed: ${e.message}`)
             }
 
-            const isTestFunction = invocation.customFunction.name.includes(CDP_TEST_ID)
+            const isTestFunction = invocation.insightsFunction.name.includes(CDP_TEST_ID)
 
             const request = async (...args: Parameters<typeof fetch>) => {
                 // TRICKY: We use the overridden fetch here if given as it is used by the comparer service
@@ -235,8 +235,8 @@ export class LegacyPluginExecutorService {
                     })
 
                     result.metrics!.push({
-                        team_id: invocation.customFunction.team_id,
-                        app_source_id: invocation.customFunction.id,
+                        team_id: invocation.insightsFunction.team_id,
+                        app_source_id: invocation.insightsFunction.id,
                         metric_kind: 'other',
                         metric_name: 'fetch',
                         count: 1,
@@ -270,7 +270,7 @@ export class LegacyPluginExecutorService {
             const event = {
                 distinct_id: globals.event.distinct_id,
                 ip: globals.event.properties.$ip,
-                team_id: invocation.customFunction.team_id,
+                team_id: invocation.insightsFunction.team_id,
                 event: globals.event.event,
                 properties: globals.event.properties,
                 timestamp: globals.event.timestamp,
@@ -297,7 +297,7 @@ export class LegacyPluginExecutorService {
                     // NOTE: We override logger and fetch here so we can track the calls
                     logger: pluginLogger,
                     fetch: request,
-                    storage: this.legacyStorage(invocation.customFunction.team_id, legacyPluginConfigId),
+                    storage: this.legacyStorage(invocation.insightsFunction.team_id, legacyPluginConfigId),
                 })
 
                 addLog('info', `Function completed in ${performance.now() - start}ms.`)
@@ -310,7 +310,7 @@ export class LegacyPluginExecutorService {
                             ...state.meta,
                             logger: pluginLogger,
                         },
-                        this.legacyStorage(invocation.customFunction.team_id, legacyPluginConfigId)
+                        this.legacyStorage(invocation.insightsFunction.team_id, legacyPluginConfigId)
                     )
                     result.execResult = transformedEvent
                 } else {

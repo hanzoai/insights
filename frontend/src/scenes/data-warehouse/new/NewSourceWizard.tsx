@@ -7,9 +7,9 @@ import { LemonButton, LemonDivider, LemonSkeleton, LemonTag, Link, Tooltip } fro
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
-import { nonCustomFunctionTemplatesLogic } from 'scenes/data-pipelines/utils/nonCustomFunctionTemplatesLogic'
+import { nonInsightsFunctionTemplatesLogic } from 'scenes/data-pipelines/utils/nonInsightsFunctionTemplatesLogic'
 import { DataWarehouseSourceIcon } from 'scenes/data-warehouse/settings/DataWarehouseSourceIcon'
-import { CustomFunctionTemplateList } from 'scenes/custom-functions/list/CustomFunctionTemplateList'
+import { InsightsFunctionTemplateList } from 'scenes/insights-functions/list/InsightsFunctionTemplateList'
 import { SceneExport } from 'scenes/sceneTypes'
 
 import { SceneContent } from '~/layout/scenes/components/SceneContent'
@@ -236,16 +236,16 @@ function FirstStep({ allowedSources }: NewSourcesWizardProps): JSX.Element {
         {} as Record<string, SourceConfig>
     )
 
-    const { customFunctionTemplatesDataWarehouseSources } = useValues(
-        nonCustomFunctionTemplatesLogic({
+    const { insightsFunctionTemplatesDataWarehouseSources } = useValues(
+        nonInsightsFunctionTemplatesLogic({
             availableSources: sources ?? {},
         })
     )
 
     return (
-        <CustomFunctionTemplateList
+        <InsightsFunctionTemplateList
             type="source_webhook"
-            manualTemplates={customFunctionTemplatesDataWarehouseSources}
+            manualTemplates={insightsFunctionTemplatesDataWarehouseSources}
             manualTemplatesLoading={availableSourcesLoading}
         />
     )

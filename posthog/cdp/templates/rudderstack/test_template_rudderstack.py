@@ -1,6 +1,6 @@
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.rudderstack.template_rudderstack import (
     TemplateRudderstackMigrator,
     template as template_rudderstack,
@@ -8,7 +8,7 @@ from posthog.cdp.templates.rudderstack.template_rudderstack import (
 from posthog.models import PluginConfig
 
 
-class TestTemplateRudderstack(BaseCustomFunctionTemplateTest):
+class TestTemplateRudderstack(BaseInsightsFunctionTemplateTest):
     template = template_rudderstack
 
     def _inputs(self, **kwargs):

@@ -3,9 +3,9 @@ from copy import deepcopy
 
 from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
+from posthog.cdp.templates.insights_function_template import InsightsFunctionTemplateDC, InsightsFunctionTemplateMigrator
 
-template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -14,7 +14,7 @@ template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     description="Send events to Avo",
     icon_url="/static/services/avo.png",
     category=["Analytics"],
-    code_language="custom_script",
+    code_language="fn",
     code="""
 if (empty(inputs.apiKey) or empty(inputs.environment)) {
     print('API Key and environment has to be set. Skipping...')
@@ -134,13 +134,13 @@ fetch('https://api.avo.app/inspector/posthog/v1/track', {
 )
 
 
-class TemplateAvoMigrator(CustomFunctionTemplateMigrator):
+class TemplateAvoMigrator(InsightsFunctionTemplateMigrator):
     plugin_url = "https://github.com/Insights/posthog-avo-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["custom_script"] = hf["code"]
+        hf["fn"] = hf["code"]
         del hf["code"]
 
         apiKey = obj.config.get("avoApiKey", "")

@@ -5,27 +5,27 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 
-import { CyclotronJobInvocationResult, CustomFunctionInvocationGlobals, CustomFunctionType } from '../../cdp/types'
-import { isLegacyPluginCustomFunction } from '../../cdp/utils'
+import { CyclotronJobInvocationResult, InsightsFunctionInvocationGlobals, InsightsFunctionType } from '../../cdp/types'
+import { isLegacyPluginInsightsFunction } from '../../cdp/utils'
 import { Hub } from '../../types'
 import { GeoIp } from '../../utils/geoip'
 import { logger } from '../../utils/logger'
 import { ScriptExecutorService } from '../services/script-executor.service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
-import { CustomFunctionManagerService } from '../services/managers/custom-function-manager.service'
-import { CustomFunctionMonitoringService } from '../services/monitoring/custom-function-monitoring.service'
+import { InsightsFunctionManagerService } from '../services/managers/insights-function-manager.service'
+import { InsightsFunctionMonitoringService } from '../services/monitoring/insights-function-monitoring.service'
 import { ScriptWatcherService, ScriptWatcherState } from '../services/monitoring/script-watcher.service'
-import { convertToCustomFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/custom-function-filtering'
+import { convertToInsightsFunctionFilterGlobal, filterFunctionInstrumented } from '../utils/insights-function-filtering'
 import { createInvocation } from '../utils/invocation-utils'
 import { getTransformationFunctions } from './transformation-functions'
 
 /**
  * Narrowed Hub type for ScriptTransformerService.
  * This includes all fields needed by ScriptTransformerService and its dependencies:
- * - CustomFunctionManagerService
+ * - InsightsFunctionManagerService
  * - ScriptExecutorService
  * - LegacyPluginExecutorService
- * - CustomFunctionMonitoringService
+ * - InsightsFunctionMonitoringService
  * - ScriptWatcherService
  * - createRedisV2Pool
  */
@@ -42,7 +42,7 @@ export type ScriptTransformerHub = Pick<
     | 'CDP_REDIS_HOST'
     | 'CDP_REDIS_PORT'
     | 'CDP_REDIS_PASSWORD'
-    // CustomFunctionManagerService
+    // InsightsFunctionManagerService
     | 'postgres'
     | 'pubSub'
     | 'encryptedFields'
@@ -60,12 +60,12 @@ export type ScriptTransformerHub = Pick<
     | 'SES_ENDPOINT'
     // LegacyPluginExecutorService
     | 'postgres'
-    // CustomFunctionMonitoringService
+    // InsightsFunctionMonitoringService
     | 'kafkaProducer'
     | 'teamManager'
     | 'internalCaptureService'
-    | 'CUSTOM_FUNCTION_MONITORING_APP_METRICS_TOPIC'
-    | 'CUSTOM_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC'
+    | 'INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC'
+    | 'INSIGHTS_FUNCTION_MONITORING_LOG_ENTRIES_TOPIC'
     // ScriptWatcherService
     | 'CDP_WATCHER_HOG_COST_TIMING_LOWER_MS'
     | 'CDP_WATCHER_HOG_COST_TIMING'
@@ -123,10 +123,10 @@ export interface TransformationResult {
 
 export class ScriptTransformerService {
     private scriptExecutor: ScriptExecutorService
-    private customFunctionManager: CustomFunctionManagerService
+    private insightsFunctionManager: InsightsFunctionManagerService
     private hub: ScriptTransformerHub
     private pluginExecutor: LegacyPluginExecutorService
-    private customFunctionMonitoringService: CustomFunctionMonitoringService
+    private insightsFunctionMonitoringService: InsightsFunctionMonitoringService
     private scriptWatcher: ScriptWatcherService
     private redis: RedisV2
     private cachedStates: Record<string, ScriptWatcherState> = {}
@@ -148,10 +148,10 @@ export class ScriptTransformerService {
             poolMinSize: hub.REDIS_POOL_MIN_SIZE,
             poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
         })
-        this.customFunctionManager = new CustomFunctionManagerService(hub)
+        this.insightsFunctionManager = new InsightsFunctionManagerService(hub)
         this.scriptExecutor = new ScriptExecutorService(hub)
         this.pluginExecutor = new LegacyPluginExecutorService(hub.postgres, hub.geoipService)
-        this.customFunctionMonitoringService = new CustomFunctionMonitoringService(hub)
+        this.insightsFunctionMonitoringService = new InsightsFunctionMonitoringService(hub)
         this.scriptWatcher = new ScriptWatcherService(hub, this.redis)
     }
 
@@ -172,9 +172,9 @@ export class ScriptTransformerService {
         const shouldRunScriptWatcher = Math.random() < this.hub.CDP_HOG_WATCHER_SAMPLE_RATE
 
         await Promise.allSettled([
-            this.customFunctionMonitoringService
+            this.insightsFunctionMonitoringService
                 .queueInvocationResults(results)
-                .then(() => this.customFunctionMonitoringService.flush()),
+                .then(() => this.insightsFunctionMonitoringService.flush()),
 
             shouldRunScriptWatcher
                 ? this.scriptWatcher.observeResults(results).catch((error) => {
@@ -192,7 +192,7 @@ export class ScriptTransformerService {
         return this.cachedTransformationFunctions
     }
 
-    private createInvocationGlobals(event: PluginEvent): CustomFunctionInvocationGlobals {
+    private createInvocationGlobals(event: PluginEvent): InsightsFunctionInvocationGlobals {
         return {
             project: {
                 id: event.team_id,
@@ -214,9 +214,9 @@ export class ScriptTransformerService {
     private async transformEventAndProduceMessagesImpl(event: PluginEvent): Promise<TransformationResult> {
         scriptTransformationAttempts.inc({ type: 'with_messages' })
 
-        const teamCustomFunctions = await this.customFunctionManager.getCustomFunctionsForTeam(event.team_id, ['transformation'])
+        const teamInsightsFunctions = await this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, ['transformation'])
 
-        const transformationResult = await this.transformEvent(event, teamCustomFunctions)
+        const transformationResult = await this.transformEvent(event, teamInsightsFunctions)
 
         for (const result of transformationResult.invocationResults) {
             this.invocationResults.push(result)
@@ -237,12 +237,12 @@ export class ScriptTransformerService {
 
     private async transformEventImpl(
         event: PluginEvent,
-        teamCustomFunctions: CustomFunctionType[]
+        teamInsightsFunctions: InsightsFunctionType[]
     ): Promise<TransformationResult> {
         scriptTransformationInvocations.inc()
 
         // Early return if no transformations to run
-        if (teamCustomFunctions.length === 0) {
+        if (teamInsightsFunctions.length === 0) {
             return {
                 event,
                 invocationResults: [],
@@ -259,45 +259,45 @@ export class ScriptTransformerService {
         // Create globals once and update the event properties after each transformation
         const globals = this.createInvocationGlobals(event)
 
-        for (const customFunction of teamCustomFunctions) {
+        for (const insightsFunction of teamInsightsFunctions) {
             // Check if function is in a degraded state, but only if scriptwatcher is enabled
             if (shouldRunScriptWatcher) {
-                const functionState = this.cachedStates[customFunction.id]
+                const functionState = this.cachedStates[insightsFunction.id]
 
                 // If the function is in a degraded state, skip it
                 if (functionState && functionState === ScriptWatcherState.disabled) {
-                    this.customFunctionMonitoringService.queueAppMetric(
+                    this.insightsFunctionMonitoringService.queueAppMetric(
                         {
                             team_id: event.team_id,
-                            app_source_id: customFunction.id,
+                            app_source_id: insightsFunction.id,
                             metric_kind: 'failure',
                             metric_name: 'disabled_permanently',
                             count: 1,
                         },
-                        'custom_function'
+                        'insights_function'
                     )
                     continue
                 }
             }
 
             // Create identifier after the disabled check passes to avoid string allocation for skipped functions
-            const transformationIdentifier = `${customFunction.name} (${customFunction.id})`
+            const transformationIdentifier = `${insightsFunction.name} (${insightsFunction.id})`
 
             // Create filterGlobals for each iteration - it references globals.event.properties
             // which gets updated after each successful transformation
-            const filterGlobals = convertToCustomFunctionFilterGlobal(globals)
+            const filterGlobals = convertToInsightsFunctionFilterGlobal(globals)
 
             // Check if function has filters - if not, always apply
-            if (customFunction.filters?.bytecode) {
+            if (insightsFunction.filters?.bytecode) {
                 const filterResults = await filterFunctionInstrumented({
-                    fn: customFunction,
-                    filters: customFunction.filters,
+                    fn: insightsFunction,
+                    filters: insightsFunction.filters,
                     filterGlobals,
                 })
 
                 // If filter didn't pass skip the actual transformation and add logs and errors from the filterResult
-                this.customFunctionMonitoringService.queueAppMetrics(filterResults.metrics, 'custom_function')
-                this.customFunctionMonitoringService.queueLogs(filterResults.logs, 'custom_function')
+                this.insightsFunctionMonitoringService.queueAppMetrics(filterResults.metrics, 'insights_function')
+                this.insightsFunctionMonitoringService.queueLogs(filterResults.logs, 'insights_function')
 
                 if (!filterResults.match) {
                     transformationsSkipped.push(transformationIdentifier)
@@ -305,7 +305,7 @@ export class ScriptTransformerService {
                 }
             }
 
-            const result = await this.executeCustomFunction(customFunction, globals)
+            const result = await this.executeInsightsFunction(insightsFunction, globals)
 
             results.push(result)
 
@@ -316,15 +316,15 @@ export class ScriptTransformerService {
 
             if (!result.execResult) {
                 scriptTransformationDroppedEvents.inc()
-                this.customFunctionMonitoringService.queueAppMetric(
+                this.insightsFunctionMonitoringService.queueAppMetric(
                     {
                         team_id: event.team_id,
-                        app_source_id: customFunction.id,
+                        app_source_id: insightsFunction.id,
                         metric_kind: 'other',
                         metric_name: 'dropped',
                         count: 1,
                     },
-                    'custom_function'
+                    'insights_function'
                 )
                 transformationsFailed.push(transformationIdentifier)
                 return {
@@ -343,7 +343,7 @@ export class ScriptTransformerService {
                 typeof transformedEvent.properties !== 'object'
             ) {
                 logger.error('⚠️', 'Invalid transformation result - missing or invalid properties', {
-                    function_id: customFunction.id,
+                    function_id: insightsFunction.id,
                 })
                 transformationsFailed.push(transformationIdentifier)
                 continue
@@ -355,7 +355,7 @@ export class ScriptTransformerService {
             if ('event' in transformedEvent) {
                 if (typeof transformedEvent.event !== 'string') {
                     logger.error('⚠️', 'Invalid transformation result - event name must be a string', {
-                        function_id: customFunction.id,
+                        function_id: insightsFunction.id,
                         event: transformedEvent.event,
                     })
                     transformationsFailed.push(transformationIdentifier)
@@ -367,7 +367,7 @@ export class ScriptTransformerService {
             if ('distinct_id' in transformedEvent) {
                 if (typeof transformedEvent.distinct_id !== 'string') {
                     logger.error('⚠️', 'Invalid transformation result - distinct_id must be a string', {
-                        function_id: customFunction.id,
+                        function_id: insightsFunction.id,
                         distinct_id: transformedEvent.distinct_id,
                     })
                     transformationsFailed.push(transformationIdentifier)
@@ -408,7 +408,7 @@ export class ScriptTransformerService {
         }
     }
 
-    public transformEvent(event: PluginEvent, teamCustomFunctions: CustomFunctionType[]): Promise<TransformationResult> {
+    public transformEvent(event: PluginEvent, teamInsightsFunctions: InsightsFunctionType[]): Promise<TransformationResult> {
         // Sanitize transform event properties
         if (event.properties) {
             for (const key of ['$transformations_failed', '$transformations_skipped', '$transformations_succeeded']) {
@@ -418,19 +418,19 @@ export class ScriptTransformerService {
             }
         }
 
-        return instrumentFn(`scriptTransformer.transformEvent`, () => this.transformEventImpl(event, teamCustomFunctions))
+        return instrumentFn(`scriptTransformer.transformEvent`, () => this.transformEventImpl(event, teamInsightsFunctions))
     }
 
-    private async executeCustomFunction(
-        customFunction: CustomFunctionType,
-        globals: CustomFunctionInvocationGlobals
+    private async executeInsightsFunction(
+        insightsFunction: InsightsFunctionType,
+        globals: InsightsFunctionInvocationGlobals
     ): Promise<CyclotronJobInvocationResult> {
         const transformationFunctions = await this.getTransformationFunctions()
-        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(customFunction, globals)
+        const globalsWithInputs = await this.scriptExecutor.buildInputsWithGlobals(insightsFunction, globals)
 
-        const invocation = createInvocation(globalsWithInputs, customFunction)
+        const invocation = createInvocation(globalsWithInputs, insightsFunction)
 
-        const result = isLegacyPluginCustomFunction(customFunction)
+        const result = isLegacyPluginInsightsFunction(insightsFunction)
             ? await this.pluginExecutor.execute(invocation)
             : await this.scriptExecutor.execute(invocation, {
                   functions: transformationFunctions,
@@ -439,7 +439,7 @@ export class ScriptTransformerService {
         return result
     }
 
-    public async fetchAndCacheCustomFunctionStates(functionIds: string[]): Promise<void> {
+    public async fetchAndCacheInsightsFunctionStates(functionIds: string[]): Promise<void> {
         const timer = scriptWatcherLatency.startTimer({ operation: 'getStates' })
         const states = await this.scriptWatcher.getEffectiveStates(functionIds)
         timer()
@@ -450,7 +450,7 @@ export class ScriptTransformerService {
         })
     }
 
-    public clearCustomFunctionStates(functionIds?: string[]): void {
+    public clearInsightsFunctionStates(functionIds?: string[]): void {
         if (functionIds) {
             // Clear specific function states
             functionIds.forEach((id) => {

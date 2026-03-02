@@ -1,4 +1,4 @@
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.cdp.templates.userlist.template_userlist import template as template_userlist
 
 
@@ -16,7 +16,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateUserlist(BaseCustomFunctionTemplateTest):
+class TestTemplateUserlist(BaseInsightsFunctionTemplateTest):
     template = template_userlist
 
     def test_identify_event(self):

@@ -28,7 +28,7 @@ from posthog.insightsql.functions import (
     FIRST_ARG_DATETIME_FUNCTIONS,
     find_insightsql_aggregation,
     find_insightsql_function,
-    find_insightsql_postcustom_function,
+    find_insightsql_postinsights_function,
 )
 from posthog.insightsql.functions.core import validate_function_args
 from posthog.insightsql.functions.embed_text import resolve_embed_text
@@ -551,7 +551,7 @@ class InsightsQLPrinter(Visitor[str]):
         func_meta = (
             find_insightsql_aggregation(node.name)
             or find_insightsql_function(node.name)
-            or find_insightsql_postcustom_function(node.name)
+            or find_insightsql_postinsights_function(node.name)
         )
 
         # Validate parametric arguments
@@ -786,7 +786,7 @@ class InsightsQLPrinter(Visitor[str]):
                 return f"{relevant_clickhouse_name}{params_part}{args_part}"
             else:
                 return f"{node.name}({', '.join([self.visit(arg) for arg in node.args])})"
-        elif func_meta := find_insightsql_postcustom_function(node.name):
+        elif func_meta := find_insightsql_postinsights_function(node.name):
             validate_function_args(
                 node.args,
                 func_meta.min_args,

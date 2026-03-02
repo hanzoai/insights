@@ -1,15 +1,15 @@
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
     id: 'template-url-masking',
     name: 'URL Parameter Masking',
     description: 'Masks sensitive information in URL parameters (query strings) of specified properties',
-    icon_url: '/static/mascot/builder-mascot-01.png',
+    icon_url: '',
     category: ['Custom'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 // Function to check if parameter matches any mask pattern
 fun isParameterInList(paramName, paramsString) {

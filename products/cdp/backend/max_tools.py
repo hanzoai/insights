@@ -12,8 +12,8 @@ from posthog.insightsql.ai import (
     EVENT_TAXONOMY_MESSAGE,
     FILTER_TAXONOMY_MESSAGE,
     HOG_EXAMPLE_MESSAGE,
-    CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT,
-    CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT,
     HOG_GRAMMAR_MESSAGE,
     IDENTITY_MESSAGE_HOG,
     INPUT_SCHEMA_TYPES_MESSAGE,
@@ -25,8 +25,8 @@ from posthog.insightsql.parser import parse_program
 from posthog.cdp.validation import compile_hog
 
 from products.cdp.backend.prompts import (
-    CUSTOM_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
-    CUSTOM_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
     HOG_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
 )
 
@@ -43,11 +43,11 @@ class HogTransformationOutput(BaseModel):
     script_code: str
 
 
-class CreateCustomFunctionFiltersArgs(BaseModel):
+class CreateInsightsFunctionFiltersArgs(BaseModel):
     instructions: str = Field(description="The instructions for what filters to create.")
 
 
-class CustomFunctionFiltersOutput(BaseModel):
+class InsightsFunctionFiltersOutput(BaseModel):
     filters: dict
 
 
@@ -146,20 +146,20 @@ class CreateHogTransformationFunctionTool(MaxTool):
         return HogTransformationOutput(script_code=script_code)
 
 
-class CreateCustomFunctionFiltersTool(MaxTool):
-    name: str = "create_custom_function_filters"  # Must match a value in AssistantTool enum
+class CreateInsightsFunctionFiltersTool(MaxTool):
+    name: str = "create_insights_function_filters"  # Must match a value in AssistantTool enum
     description: str = (
         "Create or edit filters for script functions to specify which events and properties trigger the function"
     )
-    args_schema: type[BaseModel] = CreateCustomFunctionFiltersArgs
-    context_prompt_template: str = CUSTOM_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT
+    args_schema: type[BaseModel] = CreateInsightsFunctionFiltersArgs
+    context_prompt_template: str = INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT
 
     def _run_impl(self, instructions: str) -> tuple[str, str]:
         current_filters = self.context.get("current_filters", "{}")
         function_type = self.context.get("function_type", "destination")
 
         system_content = (
-            CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT
+            INSIGHTS_FUNCTION_FILTERS_SYSTEM_PROMPT
             + f"\n\nCurrent filters: {current_filters}"
             + f"\nFunction type: {function_type}"
             + "\n\n<event_taxonomy>\n"
@@ -202,7 +202,7 @@ class CreateCustomFunctionFiltersTool(MaxTool):
             model="gpt-4.1", temperature=0.3, disable_streaming=True, user=self._user, team=self._team, billable=True
         )
 
-    def _parse_output(self, output: str) -> CustomFunctionFiltersOutput:
+    def _parse_output(self, output: str) -> InsightsFunctionFiltersOutput:
         match = re.search(r"<filters>(.*?)</filters>", output, re.DOTALL)
         if not match:
             # The model may have returned the JSON without tags, or with markdown
@@ -224,29 +224,29 @@ class CreateCustomFunctionFiltersTool(MaxTool):
                 llm_output=json_str, validation_message=f"The filters JSON failed to parse: {str(e)}"
             )
 
-        return CustomFunctionFiltersOutput(filters=filters)
+        return InsightsFunctionFiltersOutput(filters=filters)
 
 
-class CreateCustomFunctionInputsArgs(BaseModel):
+class CreateInsightsFunctionInputsArgs(BaseModel):
     instructions: str = Field(description="The instructions for what inputs to generate or modify.")
 
 
-class CustomFunctionInputsOutput(BaseModel):
+class InsightsFunctionInputsOutput(BaseModel):
     inputs_schema: list = Field(description="The generated inputs schema for the script function")
 
 
-class CreateCustomFunctionInputsTool(MaxTool):
-    name: str = "create_custom_function_inputs"
+class CreateInsightsFunctionInputsTool(MaxTool):
+    name: str = "create_insights_function_inputs"
     description: str = "Generate or modify input variables for script functions based on the current code and requirements"
-    args_schema: type[BaseModel] = CreateCustomFunctionInputsArgs
-    context_prompt_template: str = CUSTOM_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
+    args_schema: type[BaseModel] = CreateInsightsFunctionInputsArgs
+    context_prompt_template: str = INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT
 
     def _run_impl(self, instructions: str) -> tuple[str, list]:
         current_inputs_schema = self.context.get("current_inputs_schema", [])
         script_code = self.context.get("script_code", "")
 
         system_content = (
-            CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT
+            INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT
             + f"\n\nCurrent script code:\n{script_code}"
             + f"\nCurrent inputs schema:\n{current_inputs_schema}"
             + "\n\n<input_schema_types>\n"
@@ -283,7 +283,7 @@ class CreateCustomFunctionInputsTool(MaxTool):
             model="gpt-4.1", temperature=0.3, disable_streaming=True, user=self._user, team=self._team, billable=True
         )
 
-    def _parse_output(self, output: str) -> CustomFunctionInputsOutput:
+    def _parse_output(self, output: str) -> InsightsFunctionInputsOutput:
         import json
 
         match = re.search(r"<inputs_schema>(.*?)</inputs_schema>", output, re.DOTALL)
@@ -310,4 +310,4 @@ class CreateCustomFunctionInputsTool(MaxTool):
                 llm_output=output, validation_message=f"Invalid JSON in inputs schema: {str(e)}"
             )
 
-        return CustomFunctionInputsOutput(inputs_schema=inputs_schema)
+        return InsightsFunctionInputsOutput(inputs_schema=inputs_schema)

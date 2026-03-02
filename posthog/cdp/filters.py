@@ -79,7 +79,7 @@ def _combine_expressions(expressions: list[ast.Expr]) -> ast.Expr:
         return ast.And(exprs=expressions)
 
 
-def custom_function_filters_to_expr(filters: dict, team: Team, actions: dict[int, Action]) -> ast.Expr:
+def insights_function_filters_to_expr(filters: dict, team: Team, actions: dict[int, Action]) -> ast.Expr:
     """
     Build a InsightsQL expression from custom function filters.
 
@@ -131,7 +131,7 @@ def compile_filters_expr(filters: Optional[dict], team: Team, actions: Optional[
         )
         actions = {action.id: action for action in actions_list}
 
-    return custom_function_filters_to_expr(filters, team, actions)
+    return insights_function_filters_to_expr(filters, team, actions)
 
 
 class SelectFinder(TraversingVisitor):
