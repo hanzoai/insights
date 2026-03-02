@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="customfunction",
             name="encrypted_inputs",
-            field=posthog.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
+            field=insights.helpers.encrypted_fields.EncryptedJSONStringField(blank=True, null=True),
         ),
     ]

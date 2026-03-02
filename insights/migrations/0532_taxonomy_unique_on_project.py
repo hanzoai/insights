@@ -96,13 +96,13 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="eventdefinition",
-            constraint=posthog.models.utils.UniqueConstraintByExpression(
+            constraint=insights.models.utils.UniqueConstraintByExpression(
                 concurrently=True, expression="(coalesce(project_id, team_id), name)", name="event_definition_proj_uniq"
             ),
         ),
         migrations.AddConstraint(
             model_name="eventproperty",
-            constraint=posthog.models.utils.UniqueConstraintByExpression(
+            constraint=insights.models.utils.UniqueConstraintByExpression(
                 concurrently=True,
                 expression="(coalesce(project_id, team_id), event, property)",
                 name="posthog_event_property_unique_proj_event_property",
@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="propertydefinition",
-            constraint=posthog.models.utils.UniqueConstraintByExpression(
+            constraint=insights.models.utils.UniqueConstraintByExpression(
                 concurrently=True,
                 expression="(coalesce(project_id, team_id), name, type, coalesce(group_type_index, -1))",
                 name="posthog_propdef_proj_uniq",

@@ -21,10 +21,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
-                ("short_id", models.CharField(blank=True, default=posthog.utils.generate_short_id, max_length=12)),
+                ("short_id", models.CharField(blank=True, default=insights.utils.generate_short_id, max_length=12)),
                 ("name", models.CharField(max_length=400)),
                 ("description", models.TextField(blank=True)),
                 ("pinned", models.BooleanField(default=False)),

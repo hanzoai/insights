@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="batchexportdestination",
             name="config",
-            field=posthog.helpers.encrypted_fields.EncryptedJSONField(
+            field=insights.helpers.encrypted_fields.EncryptedJSONField(
                 blank=True,
                 default=dict,
                 help_text="A JSON field to store all configuration parameters required to access a BatchExportDestination.",
