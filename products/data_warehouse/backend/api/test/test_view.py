@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
 from products.data_warehouse.backend.models import DataWarehouseSavedQuery
@@ -100,7 +100,7 @@ class TestView(APIBaseTest):
         "products.data_warehouse.backend.models.datawarehouse_saved_query.DataWarehouseSavedQuery.get_columns",
         return_value={"id": "String", "a_column": "String"},
     )
-    @patch("posthog.tasks.warehouse.get_client")
+    @patch("insights.tasks.warehouse.get_client")
     def test_view_with_external_table(self, patch_get_columns_1, patch_get_columns_2, patch_get_client):
         response = self.client.post(
             f"/api/environments/{self.team.id}/warehouse_tables/",

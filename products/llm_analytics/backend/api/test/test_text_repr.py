@@ -7,7 +7,7 @@ with formatters for different event types.
 
 from typing import Any
 
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 
 from rest_framework import status
 
@@ -312,7 +312,7 @@ class TestTextReprAPI(APIBaseTest):
     def test_team_isolation(self):
         """Should enforce team isolation."""
         # Create another team
-        from posthog.models import Organization, Team
+        from insights.models import Organization, Team
 
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="Other Team")
@@ -934,7 +934,7 @@ class TestCachingBehavior(APIBaseTest):
 
     def test_cache_isolation_by_team(self):
         """Should isolate cache by team."""
-        from posthog.models import Team
+        from insights.models import Team
 
         # Create another team in same org
         other_team = Team.objects.create(organization=self.organization, name="Other Team")

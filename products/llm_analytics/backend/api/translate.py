@@ -13,12 +13,12 @@ from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.event_usage import report_user_action
-from posthog.models import User
-from posthog.permissions import AccessControlPermission
-from posthog.rate_limit import (
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.event_usage import report_user_action
+from insights.models import User
+from insights.permissions import AccessControlPermission
+from insights.rate_limit import (
     LLMAnalyticsTranslationBurstThrottle,
     LLMAnalyticsTranslationDailyThrottle,
     LLMAnalyticsTranslationSustainedThrottle,

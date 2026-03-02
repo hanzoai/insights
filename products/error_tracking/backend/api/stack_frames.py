@@ -5,11 +5,11 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, viewsets
 from rest_framework.response import Response
 
-from posthog.schema import ProductKey
+from insights.schema import ProductKey
 
-from posthog.api.forbid_destroy_model import ForbidDestroyModel
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.api.utils import action
+from insights.api.forbid_destroy_model import ForbidDestroyModel
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.api.utils import action
 
 from products.error_tracking.backend.models import ErrorTrackingStackFrame
 

@@ -3,15 +3,14 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("ee", "0037_add_conversation_approval_decisions"),
-        ("posthog", "0993_approvalpolicy_bypass_options"),
+        ("insights", "0993_approvalpolicy_bypass_options"),
     ]
 
     operations = [
@@ -52,17 +51,12 @@ class Migration(migrations.Migration):
                 ("promoted_at", models.DateTimeField(blank=True, null=True)),
                 ("last_run_at", models.DateTimeField(blank=True, null=True)),
                 (
-                    "conversation",
-                    models.ForeignKey(
-                        blank=True,
-                        null=True,
-                        on_delete=django.db.models.deletion.SET_NULL,
-                        to="ee.conversation",
-                    ),
+                    "conversation_id_legacy",
+                    models.IntegerField(blank=True, null=True, db_column="conversation_id"),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),
@@ -91,7 +85,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={

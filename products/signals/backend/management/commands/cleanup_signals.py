@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from posthog.clickhouse.client import sync_execute
-from posthog.models import Team
+from insights.clickhouse.client import sync_execute
+from insights.models import Team
 
 from products.error_tracking.backend.embedding import PARTITIONED_SHARDED_DOCUMENT_EMBEDDINGS
 from products.error_tracking.backend.indexed_embedding import EMBEDDING_TABLES

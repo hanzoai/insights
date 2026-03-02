@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0886_fake_social_django_jsonfield_migrations"),
+        ("insights", "0886_fake_social_django_jsonfield_migrations"),
         ("tasks", "0009_task_created_by"),
     ]
 
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE, related_name="runs", to="tasks.task"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "db_table": "posthog_task_run",

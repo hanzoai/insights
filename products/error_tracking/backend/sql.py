@@ -1,10 +1,10 @@
 from django.conf import settings
 
-from posthog.clickhouse.cluster import ON_CLUSTER_CLAUSE
-from posthog.clickhouse.indexes import index_by_kafka_timestamp
-from posthog.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
-from posthog.clickhouse.table_engines import Distributed, ReplacingMergeTree
-from posthog.kafka_client.topics import (
+from insights.clickhouse.cluster import ON_CLUSTER_CLAUSE
+from insights.clickhouse.indexes import index_by_kafka_timestamp
+from insights.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION, kafka_engine
+from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree
+from insights.kafka_client.topics import (
     KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT,
     KAFKA_ERROR_TRACKING_ISSUE_FINGERPRINT_EMBEDDINGS,
 )

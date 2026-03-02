@@ -23,16 +23,16 @@ def test_raises_when_debug_is_false() -> None:
 
 
 @patch("django.conf.settings.DEBUG", True)
-@patch("posthog.models.team.Team.objects.first", return_value=None)
+@patch("insights.models.team.Team.objects.first", return_value=None)
 def test_raises_when_no_team(_mock_first: MagicMock) -> None:
     with pytest.raises(RuntimeError, match="requires at least one Team"):
         render_insightsql_example(SAMPLE_QUERY)
 
 
-@patch("posthog.insightsql.printer.utils.to_printed_insightsql")
-@patch("posthog.insightsql.filters.replace_filters")
-@patch("posthog.insightsql_queries.query_runner.get_query_runner")
-@patch("posthog.models.team.Team.objects.first")
+@patch("insights.insightsql.printer.utils.to_printed_insightsql")
+@patch("insights.insightsql.filters.replace_filters")
+@patch("insights.insightsql_queries.query_runner.get_query_runner")
+@patch("insights.models.team.Team.objects.first")
 @patch("django.conf.settings.DEBUG", True)
 def test_returns_insightsql_string(
     mock_first: MagicMock,
@@ -61,10 +61,10 @@ def test_returns_insightsql_string(
     mock_to_insightsql.assert_called_once_with(filtered_ast, fake_team)
 
 
-@patch("posthog.insightsql.printer.utils.to_printed_insightsql", return_value="SELECT 1")
-@patch("posthog.insightsql.filters.replace_filters")
-@patch("posthog.insightsql_queries.query_runner.get_query_runner")
-@patch("posthog.models.team.Team.objects.first")
+@patch("insights.insightsql.printer.utils.to_printed_insightsql", return_value="SELECT 1")
+@patch("insights.insightsql.filters.replace_filters")
+@patch("insights.insightsql_queries.query_runner.get_query_runner")
+@patch("insights.models.team.Team.objects.first")
 @patch("django.conf.settings.DEBUG", True)
 def test_caches_team_across_calls(
     mock_first: MagicMock,

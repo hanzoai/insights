@@ -106,7 +106,7 @@ sudo apt-get install libxml2-dev libxmlsec1-dev libxmlsec1-openssl
 The `pytest.ini` sets:
 
 - `pythonpath = . common`
-- `DJANGO_SETTINGS_MODULE = posthog.settings`
+- `DJANGO_SETTINGS_MODULE = insights.settings`
 - `DEBUG=1`, `TEST=1`
 
 Default ignores: `--ignore=posthog/user_scripts --ignore=services/llm-gateway --ignore=common/ingestion/acceptance_tests`

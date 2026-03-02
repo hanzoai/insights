@@ -1,5 +1,5 @@
-from posthog.insightsql import ast
-from posthog.insightsql.database.models import (
+from insights.insightsql import ast
+from insights.insightsql.database.models import (
     BooleanDatabaseField,
     DatabaseField,
     DateDatabaseField,
@@ -11,7 +11,7 @@ from posthog.insightsql.database.models import (
     StringJSONDatabaseField,
 )
 
-from posthog.temporal.data_imports.pipelines.pipeline.consts import PARTITION_KEY
+from insights.temporal.data_imports.pipelines.pipeline.consts import PARTITION_KEY
 
 external_tables: dict[str, dict[str, DatabaseField]] = {
     "*": {

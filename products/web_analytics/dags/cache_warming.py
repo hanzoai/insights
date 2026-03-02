@@ -6,17 +6,17 @@ import dagster
 from dagster import Backoff, Jitter, RetryPolicy
 from prometheus_client import Counter, Gauge
 
-from posthog.insightsql.constants import LimitContext
+from insights.insightsql.constants import LimitContext
 
-from posthog.clickhouse.client import sync_execute
-from posthog.clickhouse.query_tagging import Feature, tag_queries
-from posthog.dags.common import JobOwners
-from posthog.dags.common.resources import InsightsAnalyticsResource
-from posthog.exceptions_capture import capture_exception
-from posthog.insightsql_queries.query_cache import DjangoCacheQueryCacheManager
-from posthog.insightsql_queries.query_runner import get_query_runner
-from posthog.models import Team
-from posthog.models.instance_setting import get_instance_setting
+from insights.clickhouse.client import sync_execute
+from insights.clickhouse.query_tagging import Feature, tag_queries
+from insights.dags.common import JobOwners
+from insights.dags.common.resources import InsightsAnalyticsResource
+from insights.exceptions_capture import capture_exception
+from insights.insightsql_queries.query_cache import DjangoCacheQueryCacheManager
+from insights.insightsql_queries.query_runner import get_query_runner
+from insights.models import Team
+from insights.models.instance_setting import get_instance_setting
 
 from products.web_analytics.dags.web_preaggregated_utils import check_for_concurrent_runs
 

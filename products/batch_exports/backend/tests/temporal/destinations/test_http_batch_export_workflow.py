@@ -18,11 +18,11 @@ from temporalio.common import RetryPolicy
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from posthog.batch_exports.service import BackfillDetails, BatchExportModel
-from posthog.sync import database_sync_to_async
-from posthog.temporal.common.clickhouse import ClickHouseClient
-from posthog.temporal.tests.utils.events import generate_test_events_in_clickhouse
-from posthog.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
+from insights.batch_exports.service import BackfillDetails, BatchExportModel
+from insights.sync import database_sync_to_async
+from insights.temporal.common.clickhouse import ClickHouseClient
+from insights.temporal.tests.utils.events import generate_test_events_in_clickhouse
+from insights.temporal.tests.utils.models import acreate_batch_export, adelete_batch_export, afetch_batch_export_runs
 
 from products.batch_exports.backend.temporal.batch_exports import (
     finish_batch_export_run,

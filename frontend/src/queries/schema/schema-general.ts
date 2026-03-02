@@ -4094,7 +4094,7 @@ export type CachedTracesQueryResponse = CachedQueryResponse<TracesQueryResponse>
 export type CachedTraceQueryResponse = CachedQueryResponse<TraceQueryResponse>
 export type CachedTraceNeighborsQueryResponse = CachedQueryResponse<TraceNeighborsQueryResponse>
 
-// NOTE: Keep in sync with posthog/models/exchange_rate/currencies.py
+// NOTE: Keep in sync with insights/models/exchange_rate/currencies.py
 // to provide proper type safety for the baseCurrency field
 export enum CurrencyCode {
     AED = 'AED',

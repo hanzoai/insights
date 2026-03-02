@@ -94,9 +94,9 @@ from typing import Optional
 
 from django.conf import settings
 
-from posthog.clickhouse.indexes import index_by_kafka_timestamp
-from posthog.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION
-from posthog.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
+from insights.clickhouse.indexes import index_by_kafka_timestamp
+from insights.clickhouse.kafka_engine import KAFKA_COLUMNS_WITH_PARTITION
+from insights.clickhouse.table_engines import Distributed, ReplacingMergeTree, ReplicationScheme
 
 # Base SQL template for model-specific tables - same as original but without model_name column
 MODEL_SPECIFIC_EMBEDDINGS_TABLE_BASE_SQL = """
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 
 # SQL for sharded buffer table on data nodes that receives all embeddings from Kafka
 def DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE_SQL():
-    from posthog.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
+    from insights.clickhouse.table_engines import ReplacingMergeTree, ReplicationScheme
 
     engine = ReplacingMergeTree(
         DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE, ver="inserted_at", replication_scheme=ReplicationScheme.SHARDED
@@ -194,7 +194,7 @@ SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1
 
 # SQL for writable distributed buffer table on ingestion nodes (writes to sharded buffer on data nodes)
 def DOCUMENT_EMBEDDINGS_BUFFER_WRITABLE_TABLE_SQL():
-    from posthog.clickhouse.table_engines import Distributed
+    from insights.clickhouse.table_engines import Distributed
 
     engine = Distributed(
         data_table=DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE,

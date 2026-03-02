@@ -5,7 +5,7 @@ from typing import Any, Optional
 import posthoganalytics
 from temporalio import activity, workflow
 
-from posthog.temporal.common.logger import get_logger
+from insights.temporal.common.logger import get_logger
 
 from products.tasks.backend.models import LogLevel
 

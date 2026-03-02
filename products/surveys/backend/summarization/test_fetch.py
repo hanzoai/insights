@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timedelta
 
 from freezegun import freeze_time
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
+from insights.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
 
 from .fetch import fetch_responses
 

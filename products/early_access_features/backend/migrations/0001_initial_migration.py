@@ -2,14 +2,14 @@
 
 from django.db import migrations, models
 
-import posthog.models.utils
+import insights.models.utils
 
 
 class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0548_migrate_early_access_features"),
+        ("insights", "0548_migrate_early_access_features"),
     ]
 
     database_operations = []
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 on_delete=models.deletion.PROTECT,
                 related_name="features",
                 related_query_name="feature",
-                to="posthog.featureflag",
+                to="insights.featureflag",
             ),
         ),
         migrations.AddField(
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 on_delete=models.deletion.CASCADE,
                 related_name="features",
                 related_query_name="feature",
-                to="posthog.team",
+                to="insights.team",
             ),
             preserve_default=False,
         ),

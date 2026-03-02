@@ -12,14 +12,14 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
 
-from posthog.api.monitoring import monitor
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.clickhouse.client import query_with_columns
-from posthog.event_usage import report_user_action
-from posthog.models import User
-from posthog.permissions import AccessControlPermission
-from posthog.temporal.common.client import sync_connect
-from posthog.temporal.llm_analytics.run_evaluation import RunEvaluationInputs
+from insights.api.monitoring import monitor
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.clickhouse.client import query_with_columns
+from insights.event_usage import report_user_action
+from insights.models import User
+from insights.permissions import AccessControlPermission
+from insights.temporal.common.client import sync_connect
+from insights.temporal.llm_analytics.run_evaluation import RunEvaluationInputs
 
 from products.llm_analytics.backend.api.metrics import llma_track_latency
 

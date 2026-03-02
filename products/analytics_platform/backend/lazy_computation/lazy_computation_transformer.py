@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
-from posthog.insightsql import ast
-from posthog.insightsql.ast import CompareOperationOp
-from posthog.insightsql.context import InsightsQLContext
-from posthog.insightsql.helpers.timestamp_visitor import is_simple_timestamp_field_expression
-from posthog.insightsql.visitor import CloningVisitor
+from insights.insightsql import ast
+from insights.insightsql.ast import CompareOperationOp
+from insights.insightsql.context import InsightsQLContext
+from insights.insightsql.helpers.timestamp_visitor import is_simple_timestamp_field_expression
+from insights.insightsql.visitor import CloningVisitor
 
-from posthog.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
-from posthog.models import Team
+from insights.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
+from insights.models import Team
 
 from products.analytics_platform.backend.lazy_computation.lazy_computation_executor import (
     LazyComputationExecutor,

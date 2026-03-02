@@ -1,4 +1,4 @@
-from posthog.test.base import APIBaseTest
+from insights.test.base import APIBaseTest
 from unittest.mock import patch
 
 from django.utils import timezone
@@ -6,9 +6,9 @@ from django.utils import timezone
 from parameterized import parameterized
 from rest_framework import status
 
-from posthog.models.feature_flag import FeatureFlag
-from posthog.models.surveys.survey import Survey
-from posthog.models.team.team import Team
+from insights.models.feature_flag import FeatureFlag
+from insights.models.surveys.survey import Survey
+from insights.models.team.team import Team
 
 from products.product_tours.backend.constants import ProductTourEventName
 from products.product_tours.backend.models import ProductTour

@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import pytest
 from freezegun import freeze_time
-from posthog.test.base import (
+from insights.test.base import (
     APIBaseTest,
     ClickhouseTestMixin,
     _create_event,
@@ -16,12 +16,12 @@ from django.utils import timezone
 
 from parameterized import parameterized
 
-from posthog.schema import CachedUsageMetricsQueryResponse, UsageMetricsQuery
+from insights.schema import CachedUsageMetricsQueryResponse, UsageMetricsQuery
 
-from posthog.insightsql_queries.query_runner import ExecutionMode
-from posthog.models.group.util import create_group
-from posthog.models.group_usage_metric import GroupUsageMetric
-from posthog.test.test_utils import create_group_type_mapping_without_created_at
+from insights.insightsql_queries.query_runner import ExecutionMode
+from insights.models.group.util import create_group
+from insights.models.group_usage_metric import GroupUsageMetric
+from insights.test.test_utils import create_group_type_mapping_without_created_at
 
 from products.customer_analytics.backend.insightsql_queries.usage_metrics_query_runner import UsageMetricsQueryRunner
 

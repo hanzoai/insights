@@ -4,12 +4,12 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import pytest
-from posthog.test.base import APIBaseTest, ClickhouseTestMixin
+from insights.test.base import APIBaseTest, ClickhouseTestMixin
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from rest_framework import exceptions, status
 
-from posthog.clickhouse.client import sync_execute
+from insights.clickhouse.client import sync_execute
 
 from products.logs.backend.explain import (
     LogExplanationResponse,

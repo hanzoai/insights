@@ -5,7 +5,7 @@ from django.conf import settings
 
 from temporalio import activity
 
-from posthog.temporal.common.logger import get_logger
+from insights.temporal.common.logger import get_logger
 
 logger = get_logger(__name__)
 

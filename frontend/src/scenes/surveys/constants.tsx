@@ -60,7 +60,7 @@ export const SurveyMatchTypeLabels = {
     [SurveyMatchType.NotRegex]: allOperatorsMapping[SurveyMatchType.NotRegex],
 }
 
-// Sync with posthog/constants.py
+// Sync with insights/constants.py
 export const defaultSurveyAppearance = {
     fontFamily: 'inherit',
     backgroundColor: '#eeeded',

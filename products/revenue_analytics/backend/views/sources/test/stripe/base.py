@@ -10,9 +10,9 @@ from uuid import uuid4
 
 from unittest.mock import Mock
 
-from posthog.schema import CurrencyCode
+from insights.schema import CurrencyCode
 
-from posthog.temporal.data_imports.sources.stripe.constants import (
+from insights.temporal.data_imports.sources.stripe.constants import (
     CHARGE_RESOURCE_NAME,
     CUSTOMER_RESOURCE_NAME,
     INVOICE_RESOURCE_NAME,

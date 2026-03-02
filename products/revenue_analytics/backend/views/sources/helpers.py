@@ -2,13 +2,13 @@ from datetime import datetime
 
 from django.conf import settings
 
-from posthog.schema import CurrencyCode
+from insights.schema import CurrencyCode
 
-from posthog.insightsql import ast
-from posthog.insightsql.parser import parse_expr
+from insights.insightsql import ast
+from insights.insightsql.parser import parse_expr
 
-from posthog.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
-from posthog.models.team.team import Team
+from insights.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
+from insights.models.team.team import Team
 
 # Stripe represents most currencies with integer amounts multiplied by 100,
 # since most currencies have its smallest unit as 1/100 of their base unit
@@ -75,7 +75,7 @@ def currency_aware_amount() -> ast.Alias:
 
 
 def events_expr_for_team(team: Team) -> ast.Expr:
-    from posthog.insightsql.property import property_to_expr
+    from insights.insightsql.property import property_to_expr
 
     exprs = []
     if (

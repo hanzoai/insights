@@ -3,19 +3,19 @@ from zoneinfo import ZoneInfo
 
 import structlog
 
-from posthog.schema import (
+from insights.schema import (
     CachedErrorTrackingBreakdownsQueryResponse,
     ErrorTrackingBreakdownsQuery,
     ErrorTrackingBreakdownsQueryResponse,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.property import property_to_expr
-from posthog.insightsql.query import execute_insightsql_query
+from insights.insightsql import ast
+from insights.insightsql.property import property_to_expr
+from insights.insightsql.query import execute_insightsql_query
 
-from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner
-from posthog.queries.trends.breakdown import BREAKDOWN_NULL_STRING_LABEL
-from posthog.utils import relative_date_parse
+from insights.insightsql_queries.query_runner import AnalyticsQueryRunner
+from insights.queries.trends.breakdown import BREAKDOWN_NULL_STRING_LABEL
+from insights.utils import relative_date_parse
 
 logger = structlog.get_logger(__name__)
 

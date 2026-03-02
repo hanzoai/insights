@@ -4,7 +4,7 @@ from typing import Any
 import structlog
 from slack_sdk import WebClient
 
-from posthog.models.integration import Integration, SlackIntegration
+from insights.models.integration import Integration, SlackIntegration
 
 logger = structlog.get_logger(__name__)
 

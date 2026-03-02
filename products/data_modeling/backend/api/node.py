@@ -12,12 +12,12 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from temporalio.common import RetryPolicy
 
-from posthog.api.routing import TeamAndOrgViewSetMixin
-from posthog.models import Team, User
-from posthog.temporal.common.client import sync_connect
-from posthog.temporal.data_modeling.run_workflow import RunWorkflowInputs, Selector
-from posthog.temporal.data_modeling.workflows.execute_dag import ExecuteDAGInputs
-from posthog.temporal.data_modeling.workflows.materialize_view import MaterializeViewWorkflowInputs
+from insights.api.routing import TeamAndOrgViewSetMixin
+from insights.models import Team, User
+from insights.temporal.common.client import sync_connect
+from insights.temporal.data_modeling.run_workflow import RunWorkflowInputs, Selector
+from insights.temporal.data_modeling.workflows.execute_dag import ExecuteDAGInputs
+from insights.temporal.data_modeling.workflows.materialize_view import MaterializeViewWorkflowInputs
 
 from products.data_modeling.backend.models import Edge, Node, NodeType
 from products.data_warehouse.backend.models.external_data_schema import sync_frequency_interval_to_sync_frequency

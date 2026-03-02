@@ -8,7 +8,7 @@
         "args": ["runserver"],
         "env": {
             "PYTHONUNBUFFERED": "1",
-            "DJANGO_SETTINGS_MODULE": "posthog.settings",
+            "DJANGO_SETTINGS_MODULE": "insights.settings",
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
@@ -29,7 +29,7 @@
         "args": ["runserver"],
         "env": {
             "PYTHONUNBUFFERED": "1",
-            "DJANGO_SETTINGS_MODULE": "posthog.settings",
+            "DJANGO_SETTINGS_MODULE": "insights.settings",
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
@@ -80,7 +80,7 @@
         "args": ["start_temporal_worker", "--task-queue", "development-task-queue"],
         "env": {
             "PYTHONUNBUFFERED": "1",
-            "DJANGO_SETTINGS_MODULE": "posthog.settings",
+            "DJANGO_SETTINGS_MODULE": "insights.settings",
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",
@@ -132,7 +132,7 @@
         "args": ["migrate", "posthog"],
         "env": {
             "PYTHONUNBUFFERED": "1",
-            "DJANGO_SETTINGS_MODULE": "posthog.settings",
+            "DJANGO_SETTINGS_MODULE": "insights.settings",
             "DEBUG": "1",
             "CLICKHOUSE_SECURE": "False",
             "KAFKA_HOSTS": "localhost",

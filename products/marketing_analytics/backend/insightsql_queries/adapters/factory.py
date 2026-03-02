@@ -5,11 +5,11 @@ from typing import TYPE_CHECKING, Optional
 import structlog
 
 if TYPE_CHECKING:
-    from posthog.models.team.team_marketing_analytics_config import TeamMarketingAnalyticsConfig
+    from insights.models.team.team_marketing_analytics_config import TeamMarketingAnalyticsConfig
 
-from posthog.schema import NativeMarketingSource, SourceMap
+from insights.schema import NativeMarketingSource, SourceMap
 
-from posthog.insightsql.database.database import Database
+from insights.insightsql.database.database import Database
 
 from products.data_warehouse.backend.models import DataWarehouseTable, ExternalDataSource
 from products.marketing_analytics.backend.insightsql_queries.adapters.bing_ads import BingAdsAdapter

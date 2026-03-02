@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional, Union
 from zoneinfo import ZoneInfo
 
-from posthog.schema import (
+from insights.schema import (
     DatabaseSchemaManagedViewTableKind,
     IntervalType,
     RevenueAnalyticsBreakdown,
@@ -15,16 +15,16 @@ from posthog.schema import (
     RevenueAnalyticsTopCustomersQuery,
 )
 
-from posthog.insightsql import ast
-from posthog.insightsql.database.database import Database
-from posthog.insightsql.database.models import SavedQuery
-from posthog.insightsql.property import property_to_expr
+from insights.insightsql import ast
+from insights.insightsql.database.database import Database
+from insights.insightsql.database.models import SavedQuery
+from insights.insightsql.property import property_to_expr
 
-from posthog.insightsql_queries.query_runner import AR, QueryRunnerWithInsightsQLContext
-from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
-from posthog.models import User
-from posthog.models.filters.mixins.utils import cached_property
-from posthog.rbac.user_access_control import UserAccessControl
+from insights.insightsql_queries.query_runner import AR, QueryRunnerWithInsightsQLContext
+from insights.insightsql_queries.utils.query_date_range import QueryDateRange
+from insights.models import User
+from insights.models.filters.mixins.utils import cached_property
+from insights.rbac.user_access_control import UserAccessControl
 
 from products.data_warehouse.backend.models import ExternalDataSchema
 from products.data_warehouse.backend.types import DataWarehouseManagedViewSetKind, ExternalDataSourceType

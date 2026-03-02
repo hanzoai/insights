@@ -16,7 +16,7 @@ def test_excludes_underscore_prefixed() -> None:
 
 
 def test_excludes_udfs() -> None:
-    from posthog.insightsql.functions.udfs import UDFS
+    from insights.insightsql.functions.udfs import UDFS
 
     result = set(insightsql_functions())
     for udf_name in UDFS:

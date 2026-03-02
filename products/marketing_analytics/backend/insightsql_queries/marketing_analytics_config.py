@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from posthog.schema import AttributionMode, MarketingAnalyticsBaseColumns, MarketingAnalyticsConstants
+from insights.schema import AttributionMode, MarketingAnalyticsBaseColumns, MarketingAnalyticsConstants
 
 if TYPE_CHECKING:
-    from posthog.models.team import Team
+    from insights.models.team import Team
 
 from .adapters.base import MarketingSourceAdapter
 from .constants import (

@@ -7,13 +7,13 @@ class EarlyAccessFeaturesConfig(AppConfig):
     label = "early_access_features"
 
     def ready(self) -> None:
-        from posthog.api.file_system.deletion import (
+        from insights.api.file_system.deletion import (
             register_file_system_type,
             register_post_delete_hook,
             register_pre_delete_hook,
         )
-        from posthog.models.activity_logging.activity_log import Detail, log_activity
-        from posthog.models.activity_logging.model_activity import is_impersonated_session
+        from insights.models.activity_logging.activity_log import Detail, log_activity
+        from insights.models.activity_logging.model_activity import is_impersonated_session
 
         def _with_feature_flag(queryset):
             return queryset.select_related("feature_flag")

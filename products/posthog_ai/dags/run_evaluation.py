@@ -12,7 +12,7 @@ from dagster_slack import SlackResource
 from pydantic import BaseModel, Field, ValidationError
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from posthog.dags.common import JobOwners
+from insights.dags.common import JobOwners
 
 from products.llm_analytics.backend.models import Dataset, DatasetItem
 from products.posthog_ai.dags.snapshot_team_data import (
@@ -23,7 +23,6 @@ from products.posthog_ai.dags.snapshot_team_data import (
 )
 from products.posthog_ai.dags.utils import EvaluationResults, format_results
 
-from ee.hogai.eval.schema import DatasetInput, EvalsDockerImageConfig, TeamEvaluationSnapshot
 
 
 def get_object_storage_endpoint() -> str:
@@ -157,8 +156,8 @@ def spawn_evaluation_container(
     # Validate the evaluation module
     if not config.evaluation_module.endswith(".py"):
         raise ValueError("Evaluation module must be a Python file")
-    if not config.evaluation_module.startswith("ee/hogai/eval/"):
-        raise ValueError(f"Evaluation module {config.evaluation_module} must start with 'ee/hogai/eval/'")
+    if not config.evaluation_module.endswith(".py"):
+        raise ValueError(f"Evaluation module {config.evaluation_module} must be a Python file")
 
     asset_key = dagster.AssetKey(["evaluation_dataset", str(prepared_dataset.dataset_id)])
     evaluation_config = EvalsDockerImageConfig(
@@ -242,7 +241,7 @@ def spawn_evaluation_container(
         ops={
             "prepare_dataset": PrepareDatasetConfig(dataset_id=""),
             "spawn_evaluation_container": EvaluationConfig(
-                evaluation_module="ee/hogai/eval/offline/",
+                evaluation_module="eval/offline/",
                 image_name="posthog-ai-evals",
                 image_tag="master",
             ),
