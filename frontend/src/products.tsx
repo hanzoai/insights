@@ -70,7 +70,6 @@ export const productScenes: Record<string, () => Promise<any>> = {
         ),
     FeatureFlagTemplates: () => import('../../products/feature_flags/frontend/FeatureFlagTemplatesScene'),
     Game368Hedgehogs: () => import('../../products/games/368Hedgehogs/368Hedgehogs'),
-    FlappyHog: () => import('../../products/games/FlappyHog/FlappyHog'),
     Links: () => import('../../products/links/frontend/LinksScene'),
     Link: () => import('../../products/links/frontend/LinkScene'),
     LiveDebugger: () => import('../../products/live_debugger/frontend/LiveDebugger'),
@@ -133,7 +132,6 @@ export const productRoutes: Record<string, [string, string]> = {
     '/error_tracking/alerts/new/:templateId': ['HogFunction', 'errorTrackingAlertNew'],
     '/feature_flags/templates': ['FeatureFlagTemplates', 'featureFlagTemplates'],
     '/games/368hedgehogs': ['Game368Hedgehogs', 'game368Hedgehogs'],
-    '/games/flappyhog': ['FlappyHog', 'flappyHog'],
     '/links': ['Links', 'links'],
     '/link/:id': ['Link', 'link'],
     '/live-debugger': ['LiveDebugger', 'liveDebugger'],
@@ -316,7 +314,6 @@ export const productConfiguration: Record<string, any> = {
         defaultDocsPath: '/docs/feature-flags/creating-feature-flags',
     },
     Game368Hedgehogs: { name: '368Hedgehogs', projectBased: true, activityScope: 'Games' },
-    FlappyHog: { name: 'FlappyHog', projectBased: true, activityScope: 'Games' },
     Links: {
         name: 'Links',
         projectBased: true,
@@ -473,14 +470,14 @@ export const productConfiguration: Record<string, any> = {
     Toolbar: {
         name: 'Toolbar',
         projectBased: true,
-        description: 'Hanzo toolbar launches Hanzo Insights right in your app or website.',
+        description: 'Hanzo toolbar launches Insights right in your app or website.',
         iconType: 'toolbar',
     },
     UserInterviews: {
         name: 'User interviews',
         projectBased: true,
         activityScope: 'UserInterview',
-        description: 'Record and analyze user interviews with Hanzo Insights.',
+        description: 'Record and analyze user interviews with Insights.',
         iconType: 'user_interview',
     },
     UserInterview: { name: 'User interview', projectBased: true, activityScope: 'UserInterview' },
@@ -624,7 +621,6 @@ export const productUrls = {
         return `/feature_flags/new?${params.toString()}`
     },
     game368hedgehogs: (): string => `/games/368hedgehogs`,
-    flappyHog: (): string => `/games/flappyhog`,
     groups: (groupTypeIndex: string | number): string => `/groups/${groupTypeIndex}`,
     groupsNew: (groupTypeIndex: string | number): string => `/groups/${groupTypeIndex}/new`,
     group: (groupTypeIndex: string | number, groupKey: string, encode: boolean = true, tab?: string | null): string =>
@@ -1584,7 +1580,6 @@ export const getTreeItemsProducts = (): FileSystemImport[] => [
 /** This const is auto-generated, as is the whole file */
 export const getTreeItemsGames = (): FileSystemImport[] => [
     { path: '368 Hedgehogs', href: urls.game368hedgehogs() },
-    { path: 'Flappy Hog', href: '/games/flappyhog' },
 ]
 
 /** This const is auto-generated, as is the whole file */
