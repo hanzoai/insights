@@ -1,4 +1,4 @@
-import './368Mascots.scss'
+import './368Hedgehogs.scss'
 
 import { useCallback, useRef, useState } from 'react'
 

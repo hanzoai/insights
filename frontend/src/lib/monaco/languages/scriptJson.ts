@@ -7,7 +7,7 @@ import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvide
 
 import { HogLanguage } from '~/queries/schema/schema-general'
 
-import { conf as _conf, language as _language } from './hog'
+import { conf as _conf, language as _language } from './script'
 
 export const conf: () => languages.LanguageConfiguration = () => ({
     ..._conf(),
