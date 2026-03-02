@@ -134,7 +134,7 @@ export const BasicFiltersTab = (): JSX.Element => {
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1 mb-1">
                                 <label className="block text-sm font-medium">Was impersonated?</label>
-                                <Tooltip title="During support, PostHog team members may act as a specific user to help troubleshoot issues. These impersonated actions are logged and can be filtered here.">
+                                <Tooltip title="During support, Hanzo team members may act as a specific user to help troubleshoot issues. These impersonated actions are logged and can be filtered here.">
                                     <IconInfo className="w-4 h-4 text-muted-alt cursor-help" />
                                 </Tooltip>
                             </div>
@@ -160,7 +160,7 @@ export const BasicFiltersTab = (): JSX.Element => {
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-1 mb-1">
                                 <label className="block text-sm font-medium">Is system activity?</label>
-                                <Tooltip title="Activities performed automatically by PostHog's system, such as scheduled tasks, background processes, or automated workflows.">
+                                <Tooltip title="Activities performed automatically by Hanzo's system, such as scheduled tasks, background processes, or automated workflows.">
                                     <IconInfo className="w-4 h-4 text-muted-alt cursor-help" />
                                 </Tooltip>
                             </div>

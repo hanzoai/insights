@@ -452,7 +452,7 @@ export const productConfiguration: Record<string, any> = {
         name: 'Session summaries',
         projectBased: true,
         description:
-            'View and deep-dive into AI-generated summaries of session recordings. Create summaries from the Session replay page by applying filters and asking PostHog AI to summarize sessions.',
+            'View and deep-dive into AI-generated summaries of session recordings. Create summaries from the Session replay page by applying filters and asking Hanzo AI to summarize sessions.',
         iconType: 'notebook',
     },
     SessionGroupSummary: {
@@ -473,14 +473,14 @@ export const productConfiguration: Record<string, any> = {
     Toolbar: {
         name: 'Toolbar',
         projectBased: true,
-        description: 'PostHog toolbar launches PostHog right in your app or website.',
+        description: 'Hanzo toolbar launches Hanzo Insights right in your app or website.',
         iconType: 'toolbar',
     },
     UserInterviews: {
         name: 'User interviews',
         projectBased: true,
         activityScope: 'UserInterview',
-        description: 'Record and analyze user interviews with PostHog.',
+        description: 'Record and analyze user interviews with Hanzo Insights.',
         iconType: 'user_interview',
     },
     UserInterview: { name: 'User interview', projectBased: true, activityScope: 'UserInterview' },
