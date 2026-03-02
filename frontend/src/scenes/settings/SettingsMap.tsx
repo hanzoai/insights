@@ -156,7 +156,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'snippet',
                 title: 'SDK setup',
                 description:
-                    'Install PostHog in your app using one of our SDKs. Select your platform to see the setup instructions.',
+                    'Install Hanzo Insights in your app using one of our SDKs. Select your platform to see the setup instructions.',
                 docsUrl: 'https://posthog.com/docs/getting-started/install',
                 component: <SDKSetupInstructions />,
                 keywords: [
@@ -212,7 +212,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                     </>
                 ),
                 description:
-                    'The V2 snippet includes your project config automatically along with the PostHog JS code, leading to faster load times and fewer calls needed before the SDK is fully functional.',
+                    'The V2 snippet includes your project config automatically along with the Hanzo Insights JS code, leading to faster load times and fewer calls needed before the SDK is fully functional.',
                 flag: 'REMOTE_CONFIG',
                 component: <WebSnippetV2 />,
                 keywords: ['javascript', 'install', 'setup', 'v2', 'fast'],
@@ -243,7 +243,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'business-model',
                 title: 'Business model',
                 description:
-                    'Set whether this project serves B2B or B2C customers so PostHog can tailor the experience and recommendations.',
+                    'Set whether this project serves B2B or B2C customers so Hanzo Insights can tailor the experience and recommendations.',
                 component: <TeamBusinessModel />,
                 keywords: ['b2b', 'b2c', 'saas', 'ecommerce'],
             },
@@ -305,14 +305,14 @@ export const SETTINGS_MAP: SettingSection[] = [
     {
         level: 'environment',
         id: 'environment-max',
-        title: 'PostHog AI',
+        title: 'Hanzo AI',
         group: 'AI',
         settings: [
             {
                 id: 'core-memory',
                 title: 'Memory',
                 description:
-                    "PostHog AI automatically remembers details about your company and product. This context helps our AI assistant provide relevant answers and suggestions. If there are any details you don't want PostHog AI to remember, you can edit or remove them below.",
+                    "Hanzo AI automatically remembers details about your company and product. This context helps our AI assistant provide relevant answers and suggestions. If there are any details you don't want Hanzo AI to remember, you can edit or remove them below.",
                 component: <MaxMemorySettings />,
                 hideOn: [Realm.SelfHostedClickHouse, Realm.SelfHostedPostgres],
             },
@@ -320,7 +320,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'changelog',
                 title: 'Changelog',
                 description:
-                    'See the latest PostHog AI features and control whether the changelog appears in the main UI.',
+                    'See the latest Hanzo AI features and control whether the changelog appears in the main UI.',
                 component: <MaxChangelogSettings />,
                 hideOn: [Realm.SelfHostedClickHouse, Realm.SelfHostedPostgres],
             },
@@ -336,7 +336,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'mcp-server-configure',
                 title: 'Model Context Protocol (MCP) server',
                 description:
-                    'Connect PostHog to AI tools like Claude, Cursor, and Copilot via the MCP protocol for data-driven AI assistance.',
+                    'Connect Hanzo Insights to AI tools like Claude, Cursor, and Copilot via the MCP protocol for data-driven AI assistance.',
                 docsUrl: 'https://posthog.com/docs/model-context-protocol',
                 component: <MCPServerSettings />,
                 keywords: ['ai', 'llm', 'claude', 'cursor', 'copilot'],
@@ -1185,7 +1185,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'integration-github',
                 title: 'GitHub integration',
-                description: 'Connect GitHub to link issues and pull requests with PostHog insights.',
+                description: 'Connect GitHub to link issues and pull requests with Hanzo Insights.',
                 docsUrl: 'https://posthog.com/docs/error-tracking/integrations',
                 component: <GithubIntegration />,
                 keywords: ['github', 'git', 'repository', 'issue', 'pr'],
@@ -1193,7 +1193,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'integration-linear',
                 title: 'Linear integration',
-                description: 'Connect Linear to create and link issues directly from PostHog.',
+                description: 'Connect Linear to create and link issues directly from Hanzo Insights.',
                 docsUrl: 'https://posthog.com/docs/error-tracking/integrations',
                 component: <LinearIntegration />,
                 keywords: ['linear', 'issue', 'project management', 'task'],
@@ -1209,7 +1209,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'integration-ip-allowlist',
                 title: 'Static IP addresses',
                 description:
-                    'PostHog Cloud uses static IP addresses for outbound traffic. Add these to your firewall allowlist if needed.',
+                    'Hanzo Insights Cloud uses static IP addresses for outbound traffic. Add these to your firewall allowlist if needed.',
                 component: <IPAllowListInfo />,
                 keywords: ['whitelist', 'firewall', 'allowlist', 'cidr', 'ip'],
             },
@@ -1284,17 +1284,17 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'organization-display-name',
                 title: 'Name & logo',
                 description:
-                    "Your organization's name and logo are shown across the PostHog interface. Click the avatar to upload a custom logo.",
+                    "Your organization's name and logo are shown across the Hanzo Insights interface. Click the avatar to upload a custom logo.",
                 component: <OrganizationDisplayName />,
                 keywords: ['name', 'rename', 'label', 'organization', 'logo', 'image', 'brand', 'icon', 'avatar'],
             },
             {
                 id: 'organization-ai-consent',
-                title: 'PostHog AI data analysis',
+                title: 'Hanzo AI data analysis',
                 description: (
                     // Note: Sync the copy below with AIConsentPopoverWrapper.tsx
                     <>
-                        PostHog AI features, such as the PostHog AI chat, use{' '}
+                        Hanzo AI features, such as the Hanzo AI chat, use{' '}
                         <Tooltip title={`As of ${dayjs().format('MMMM YYYY')}: Anthropic and OpenAI`}>
                             <dfn>external AI services</dfn>
                         </Tooltip>{' '}
@@ -1309,7 +1309,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 component: <OrganizationAI />,
                 keywords: ['llm', 'consent', 'opt-in', 'data sharing'],
                 searchDescription:
-                    'PostHog AI features use external AI services for data analysis. This can involve transfer of identifying user data.',
+                    'Hanzo AI features use external AI services for data analysis. This can involve transfer of identifying user data.',
             },
             {
                 id: 'organization-ip-anonymization-default',
@@ -1436,7 +1436,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'email-members',
                 title: 'Notification preferences',
-                description: 'Configure which emails your organization members receive from PostHog.',
+                description: 'Configure which emails your organization members receive from Hanzo Insights.',
                 component: <OrganizationEmailPreferences />,
                 keywords: ['email', 'notification', 'digest', 'unsubscribe'],
             },
@@ -1518,7 +1518,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'notifications',
                 title: 'Notifications',
-                description: 'Choose which email notifications you receive from PostHog.',
+                description: 'Choose which email notifications you receive from Hanzo Insights.',
                 component: <UpdateEmailPreferences />,
                 keywords: ['email', 'notification', 'digest', 'unsubscribe'],
             },
@@ -1546,7 +1546,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'optout',
                 title: 'Anonymize data collection',
                 description:
-                    'PostHog uses PostHog to capture information about how people use the product. Anonymize your usage data if you prefer not to share it.',
+                    'Hanzo Insights uses Hanzo Insights to capture information about how people use the product. Anonymize your usage data if you prefer not to share it.',
                 component: <OptOutCapture />,
                 hideOn: [Realm.Cloud],
                 keywords: ['telemetry', 'opt out', 'privacy', 'tracking'],
@@ -1561,7 +1561,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'hedgehog-mode',
                 title: 'Hedgehog mode',
-                description: 'Enable the PostHog hedgehog companion that follows you around the app.',
+                description: 'Enable the Hanzo hedgehog companion that follows you around the app.',
                 component: <HedgehogModeSettings />,
                 keywords: ['hedgehog', 'mascot', 'fun', 'companion', 'hog'],
             },
@@ -1572,7 +1572,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                     <div>
                         Grab some{' '}
                         <Link to="https://posthog.com/merch" target="_blank">
-                            PostHog merch
+                            Hanzo merch
                         </Link>{' '}
                         to customize yourself outside of the app
                     </div>
@@ -1589,7 +1589,7 @@ export const SETTINGS_MAP: SettingSection[] = [
                 id: 'feature-previews',
                 title: 'Feature previews',
                 description:
-                    'Try out upcoming PostHog features before they are generally available. Toggling a preview enables it for your account only.',
+                    'Try out upcoming Hanzo Insights features before they are generally available. Toggling a preview enables it for your account only.',
                 component: <FeaturePreviewsSettings />,
                 keywords: ['beta', 'early access', 'preview', 'opt-in'],
             },
@@ -1626,7 +1626,7 @@ export const SETTINGS_MAP: SettingSection[] = [
             {
                 id: 'user-delete',
                 title: 'Delete account',
-                description: 'Permanently delete your PostHog account. This action cannot be undone.',
+                description: 'Permanently delete your Hanzo Insights account. This action cannot be undone.',
                 component: <UserDangerZone />,
                 keywords: ['delete', 'remove', 'account'],
             },

@@ -37,7 +37,7 @@ export function TwoFactorReset(): JSX.Element {
                 message={
                     <>
                         Welcome to
-                        <br /> PostHog{preflight?.cloud ? ' Cloud' : ''}!
+                        <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
                     </>
                 }
             >
@@ -58,7 +58,7 @@ export function TwoFactorReset(): JSX.Element {
                 message={
                     <>
                         Welcome to
-                        <br /> PostHog{preflight?.cloud ? ' Cloud' : ''}!
+                        <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
                     </>
                 }
             >
@@ -82,7 +82,7 @@ export function TwoFactorReset(): JSX.Element {
                 message={
                     <>
                         Welcome to
-                        <br /> PostHog{preflight?.cloud ? ' Cloud' : ''}!
+                        <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
                     </>
                 }
             >
@@ -111,7 +111,7 @@ export function TwoFactorReset(): JSX.Element {
             message={
                 <>
                     Welcome to
-                    <br /> PostHog{preflight?.cloud ? ' Cloud' : ''}!
+                    <br /> Hanzo Insights{preflight?.cloud ? ' Cloud' : ''}!
                 </>
             }
         >
