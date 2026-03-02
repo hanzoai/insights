@@ -69,7 +69,7 @@ export const productScenes: Record<string, () => Promise<any>> = {
             '../../products/error_tracking/frontend/scenes/ErrorTrackingConfigurationScene/ErrorTrackingConfigurationScene'
         ),
     FeatureFlagTemplates: () => import('../../products/feature_flags/frontend/FeatureFlagTemplatesScene'),
-    Game368Mascots: () => import('../../products/games/368Mascots/368Mascots'),
+    Game368Mascots: () => import('../../products/games/368Hedgehogs/368Hedgehogs'),
     Links: () => import('../../products/links/frontend/LinksScene'),
     Link: () => import('../../products/links/frontend/LinkScene'),
     LiveDebugger: () => import('../../products/live_debugger/frontend/LiveDebugger'),
