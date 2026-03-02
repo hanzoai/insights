@@ -1,10 +1,10 @@
 import { LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
 import { TeamSettingRadio } from '../components/TeamSettingRadio'
 
-type SessionsV2JoinModeType = NonNullable<HogQLQueryModifiers['sessionsV2JoinMode']>
+type SessionsV2JoinModeType = NonNullable<InsightsQLQueryModifiers['sessionsV2JoinMode']>
 
 const sessionsV2JoinModeOptions: LemonRadioOption<SessionsV2JoinModeType>[] = [
     { value: 'string', label: 'String' },

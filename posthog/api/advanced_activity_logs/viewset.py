@@ -156,7 +156,7 @@ class AdvancedActivityLogFiltersSerializer(serializers.Serializer):
     activities = serializers.ListField(child=serializers.CharField(), required=False, default=[])
     search_text = serializers.CharField(required=False, allow_blank=True)
     detail_filters = serializers.JSONField(required=False, default={})
-    hogql_filter = serializers.CharField(required=False, allow_blank=True)
+    insightsql_filter = serializers.CharField(required=False, allow_blank=True)
     was_impersonated = OptionalBooleanField(required=False)
     is_system = OptionalBooleanField(required=False)
     item_ids = serializers.ListField(child=serializers.CharField(), required=False, default=[])

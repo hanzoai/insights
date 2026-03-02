@@ -39,7 +39,7 @@ import {
     ProductKey,
 } from '~/queries/schema/schema-general'
 import { SurveyAnalysisQuestionGroup, SurveyAnalysisResponseItem } from '~/queries/schema/schema-surveys'
-import { HogQLQueryString } from '~/queries/utils'
+import { InsightsQLQueryString } from '~/queries/utils'
 import {
     ActivityScope,
     AnyPropertyFilter,
@@ -50,7 +50,7 @@ import {
     ConsolidatedSurveyResults,
     EventPropertyFilter,
     FeatureFlagFilters,
-    HogFunctionType,
+    CustomFunctionType,
     IntervalType,
     MultipleSurveyQuestion,
     OpenQuestionProcessedResponses,
@@ -93,7 +93,7 @@ import {
     buildPartialResponsesFilter,
     buildSurveyTimestampFilter,
     calculateSurveyRates,
-    createAnswerFilterHogQLExpression,
+    createAnswerFilterInsightsQLExpression,
     getExpressionCommentForQuestion,
     getResponseFieldWithId,
     getSurveyEndDateForQuery,
@@ -715,8 +715,8 @@ export const surveyLogic = kea<surveyLogicType>([
                     return null
                 }
                 // if we have answer filters, we need to apply them to the query for the 'survey sent' event only
-                const answerFilterCondition = values.answerFilterHogQLExpression
-                    ? values.answerFilterHogQLExpression.slice(4)
+                const answerFilterCondition = values.answerFilterInsightsQLExpression
+                    ? values.answerFilterInsightsQLExpression.slice(4)
                     : '1=1' // Use '1=1' for SQL TRUE
 
                 const query = `
@@ -751,9 +751,9 @@ export const surveyLogic = kea<surveyLogicType>([
                                 ${values.partialResponsesFilter}
                             )
                         )
-                    GROUP BY event` as HogQLQueryString
+                    GROUP BY event` as InsightsQLQueryString
 
-                const response = await api.queryHogQL(
+                const response = await api.queryInsightsQL(
                     query,
                     { scene: 'Survey', productKey: 'surveys' },
                     {
@@ -779,9 +779,9 @@ export const surveyLogic = kea<surveyLogicType>([
                 }
                 // if we have answer filters, we need to apply them to the query for the 'survey sent' event only
                 const answerFilterCondition =
-                    values.answerFilterHogQLExpression === ''
+                    values.answerFilterInsightsQLExpression === ''
                         ? '1=1' // Use '1=1' for SQL TRUE
-                        : values.answerFilterHogQLExpression.substring(4)
+                        : values.answerFilterInsightsQLExpression.substring(4)
 
                 const query = `
                     -- QUERYING DISMISSED AND SENT COUNT
@@ -803,9 +803,9 @@ export const surveyLogic = kea<surveyLogicType>([
                         GROUP BY person_id
                         HAVING sum(if(event = '${SurveyEventName.DISMISSED}', 1, 0)) > 0 -- Has at least one dismissed event (matching property filters)
                             AND sum(if(event = '${SurveyEventName.SENT}' AND (${answerFilterCondition}), 1, 0)) > 0 -- Has at least one sent event matching BOTH property and answer filters
-                    ) AS PersonsWithBothEvents` as HogQLQueryString
+                    ) AS PersonsWithBothEvents` as InsightsQLQueryString
 
-                const response = await api.queryHogQL(
+                const response = await api.queryInsightsQL(
                     query,
                     { scene: 'Survey', productKey: 'surveys' },
                     {
@@ -852,14 +852,14 @@ export const surveyLogic = kea<surveyLogicType>([
                     WHERE event = '${SurveyEventName.SENT}'
                         AND properties.${SurveyEventProperties.SURVEY_ID} = '${props.id}'
                         ${values.timestampFilter}
-                        ${values.answerFilterHogQLExpression}
+                        ${values.answerFilterInsightsQLExpression}
                         ${values.partialResponsesFilter}
                         ${values.archivedResponsesFilter}
                         AND {filters}
                     ORDER BY events.timestamp DESC
-                    LIMIT ${limit}` as HogQLQueryString
+                    LIMIT ${limit}` as InsightsQLQueryString
 
-                const responseJSON = await api.queryHogQL(
+                const responseJSON = await api.queryInsightsQL(
                     query,
                     { scene: 'Survey', productKey: 'surveys' },
                     {
@@ -891,13 +891,13 @@ export const surveyLogic = kea<surveyLogicType>([
             },
         ],
         surveyNotifications: [
-            [] as HogFunctionType[],
+            [] as CustomFunctionType[],
             {
-                loadSurveyNotifications: async (): Promise<HogFunctionType[]> => {
+                loadSurveyNotifications: async (): Promise<CustomFunctionType[]> => {
                     if (props.id === NEW_SURVEY.id) {
                         return []
                     }
-                    const response = await api.hogFunctions.list({
+                    const response = await api.customFunctions.list({
                         filter_groups: [
                             {
                                 events: [
@@ -1112,7 +1112,7 @@ export const surveyLogic = kea<surveyLogicType>([
                 actions.loadSurveyNotificationsSuccess(updatedNotifications)
 
                 try {
-                    await api.hogFunctions.update(notificationId, { enabled })
+                    await api.customFunctions.update(notificationId, { enabled })
                 } catch (error) {
                     lemonToast.error('Failed to update notification')
                     actions.loadSurveyNotifications()
@@ -1422,7 +1422,7 @@ export const surveyLogic = kea<surveyLogicType>([
             (
                 showArchivedResponses: boolean,
                 archivedUuids: Set<string>
-            ): Array<{ type: PropertyFilterType.HogQL; key: string }> => {
+            ): Array<{ type: PropertyFilterType.InsightsQL; key: string }> => {
                 if (showArchivedResponses || !archivedUuids || archivedUuids.size === 0) {
                     return []
                 }
@@ -1433,7 +1433,7 @@ export const surveyLogic = kea<surveyLogicType>([
                     .join(', ')
                 return [
                     {
-                        type: PropertyFilterType.HogQL,
+                        type: PropertyFilterType.InsightsQL,
                         key: `uuid NOT IN (${uuidList})`,
                     },
                 ]
@@ -1579,17 +1579,17 @@ export const surveyLogic = kea<surveyLogicType>([
                 return { type: 'survey', ref: id === 'new' ? null : String(id) }
             },
         ],
-        answerFilterHogQLExpression: [
+        answerFilterInsightsQLExpression: [
             (s) => [s.survey, s.answerFilters],
             (survey: Survey, answerFilters: EventPropertyFilter[]): string => {
-                return createAnswerFilterHogQLExpression(answerFilters, survey)
+                return createAnswerFilterInsightsQLExpression(answerFilters, survey)
             },
         ],
         dataTableQuery: [
             (s) => [
                 s.survey,
                 s.propertyFilters,
-                s.answerFilterHogQLExpression,
+                s.answerFilterInsightsQLExpression,
                 s.partialResponsesFilter,
                 s.archivedResponsesFilter,
                 s.dateRange,
@@ -1599,7 +1599,7 @@ export const surveyLogic = kea<surveyLogicType>([
             (
                 survey: Survey,
                 propertyFilters: AnyPropertyFilter[],
-                answerFilterHogQLExpression: string,
+                answerFilterInsightsQLExpression: string,
                 partialResponsesFilter: string,
                 archivedResponsesFilter: string,
                 dateRange: SurveyDateRange
@@ -1612,9 +1612,9 @@ export const surveyLogic = kea<surveyLogicType>([
 
                 const where = [`event == '${SurveyEventName.SENT}'`, partialResponsesFilter.replace(/^AND\s+/, '')]
 
-                if (answerFilterHogQLExpression !== '') {
+                if (answerFilterInsightsQLExpression !== '') {
                     // skip the 'AND ' prefix
-                    where.push(answerFilterHogQLExpression.substring(4))
+                    where.push(answerFilterInsightsQLExpression.substring(4))
                 }
 
                 if (archivedResponsesFilter !== '') {

@@ -6,7 +6,7 @@ import { buildAlertFilterConfig } from 'lib/utils/alertUtils'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { AlertType } from '~/lib/components/Alerts/types'
-import { DashboardType, HogFunctionType, InsightModel, QueryBasedInsightModel } from '~/types'
+import { DashboardType, CustomFunctionType, InsightModel, QueryBasedInsightModel } from '~/types'
 
 import api from '../../api'
 import { DashboardExportResult, generateDashboardHCL } from './dashboardHclExporter'
@@ -54,37 +54,37 @@ async function fetchAlertsForInsights(insights: InsightModel[]): Promise<Map<num
     return alertsByInsightId
 }
 
-async function fetchHogFunctionsForAlerts(alerts: AlertType[]): Promise<Map<string, HogFunctionType[]>> {
-    const hogFunctionsByAlertId = new Map<string, HogFunctionType[]>()
+async function fetchCustomFunctionsForAlerts(alerts: AlertType[]): Promise<Map<string, CustomFunctionType[]>> {
+    const customFunctionsByAlertId = new Map<string, CustomFunctionType[]>()
 
     if (alerts.length === 0) {
-        return hogFunctionsByAlertId
+        return customFunctionsByAlertId
     }
 
-    const hogFunctionPromises = alerts.map(async (alert) => {
+    const customFunctionPromises = alerts.map(async (alert) => {
         try {
-            const response = await api.hogFunctions.list({
+            const response = await api.customFunctions.list({
                 filter_groups: [buildAlertFilterConfig(alert.id)],
                 types: ['internal_destination'],
                 full: true,
             })
-            return { alertId: alert.id, hogFunctions: response.results }
+            return { alertId: alert.id, customFunctions: response.results }
         } catch (e) {
             posthog.captureException(e instanceof Error ? e : new Error(String(e)), {
-                extra: { context: 'TerraformExporter', operation: 'fetchHogFunctionsForAlerts', alertId: alert.id },
+                extra: { context: 'TerraformExporter', operation: 'fetchCustomFunctionsForAlerts', alertId: alert.id },
             })
-            return { alertId: alert.id, hogFunctions: [] }
+            return { alertId: alert.id, customFunctions: [] }
         }
     })
 
-    const results = await Promise.all(hogFunctionPromises)
-    for (const { alertId, hogFunctions } of results) {
-        if (hogFunctions.length > 0) {
-            hogFunctionsByAlertId.set(alertId, hogFunctions)
+    const results = await Promise.all(customFunctionPromises)
+    for (const { alertId, customFunctions } of results) {
+        if (customFunctions.length > 0) {
+            customFunctionsByAlertId.set(alertId, customFunctions)
         }
     }
 
-    return hogFunctionsByAlertId
+    return customFunctionsByAlertId
 }
 
 async function exportInsight(
@@ -100,7 +100,7 @@ async function exportInsight(
     }
 
     const alerts = Array.from(alertsByInsightId.values()).flat()
-    const hogFunctionsByAlertId = await fetchHogFunctionsForAlerts(alerts)
+    const customFunctionsByAlertId = await fetchCustomFunctionsForAlerts(alerts)
 
     if (checkStale()) {
         throw new Error('Fetch cancelled')
@@ -109,7 +109,7 @@ async function exportInsight(
     try {
         return generateInsightHCL(insight, {
             alerts,
-            hogFunctionsByAlertId,
+            customFunctionsByAlertId,
             projectId,
         })
     } catch (e) {
@@ -137,7 +137,7 @@ async function exportDashboard(
     }
 
     const allAlerts = Array.from(alertsByInsightId.values()).flat()
-    const hogFunctionsByAlertId = await fetchHogFunctionsForAlerts(allAlerts)
+    const customFunctionsByAlertId = await fetchCustomFunctionsForAlerts(allAlerts)
 
     if (checkStale()) {
         throw new Error('Fetch cancelled')
@@ -147,7 +147,7 @@ async function exportDashboard(
         return generateDashboardHCL(dashboard, {
             insights,
             alertsByInsightId,
-            hogFunctionsByAlertId,
+            customFunctionsByAlertId,
             projectId,
         })
     } catch (e) {

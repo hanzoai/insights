@@ -1,4 +1,4 @@
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.mailjet.template_mailjet import template_create_contact, template_update_contact_list
 
 
@@ -8,7 +8,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateMailjetCreateContact(BaseHogFunctionTemplateTest):
+class TestTemplateMailjetCreateContact(BaseCustomFunctionTemplateTest):
     template = template_create_contact
 
     def test_function_works(self):
@@ -29,7 +29,7 @@ class TestTemplateMailjetCreateContact(BaseHogFunctionTemplateTest):
         assert self.get_mock_fetch_calls() == []
 
 
-class TestTemplateMailjetUpdateContactList(BaseHogFunctionTemplateTest):
+class TestTemplateMailjetUpdateContactList(BaseCustomFunctionTemplateTest):
     template = template_update_contact_list
 
     def test_function_works(self):

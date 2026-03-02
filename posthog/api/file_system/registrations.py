@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from posthog.api.file_system.deletion import (
-    HOG_FUNCTION_TYPES,
+    CUSTOM_FUNCTION_TYPES,
     DeletionContext,
     RestoreContext,
     register_file_system_type,
@@ -14,7 +14,7 @@ from posthog.api.file_system.deletion import (
 )
 from posthog.models.activity_logging.activity_log import Change, Detail, log_activity
 from posthog.models.activity_logging.model_activity import is_impersonated_session
-from posthog.models.hog_functions.utils import humanize_hog_function_type
+from posthog.models.custom_functions.utils import humanize_custom_function_type
 from posthog.models.user import User
 from posthog.session_recordings.session_recording_playlist_api import log_playlist_activity
 
@@ -276,32 +276,32 @@ def _action_post_restore(context: RestoreContext, action: Any) -> None:
     )
 
 
-def _hog_function_pre_delete(context: DeletionContext, hog_function: Any) -> None:
-    hog_function.enabled = False
+def _custom_function_pre_delete(context: DeletionContext, custom_function: Any) -> None:
+    custom_function.enabled = False
 
 
-def _hog_function_pre_restore(context: RestoreContext, hog_function: Any) -> None:
-    hog_function.enabled = True
+def _custom_function_pre_restore(context: RestoreContext, custom_function: Any) -> None:
+    custom_function.enabled = True
 
 
-def _hog_function_post_delete(context: DeletionContext, hog_function: Any) -> None:
+def _custom_function_post_delete(context: DeletionContext, custom_function: Any) -> None:
     _log_deletion_activity(
         context,
-        scope="HogFunction",
-        item_id=hog_function.id,
-        name=_first_non_blank(getattr(hog_function, "name", None)) or "Untitled",
-        object_type=humanize_hog_function_type(getattr(hog_function, "type", None)),
+        scope="CustomFunction",
+        item_id=custom_function.id,
+        name=_first_non_blank(getattr(custom_function, "name", None)) or "Untitled",
+        object_type=humanize_custom_function_type(getattr(custom_function, "type", None)),
     )
 
 
-def _hog_function_post_restore(context: RestoreContext, hog_function: Any) -> None:
+def _custom_function_post_restore(context: RestoreContext, custom_function: Any) -> None:
     _log_restore_activity(
         context,
-        scope="HogFunction",
-        item_id=hog_function.id,
-        name=_first_non_blank(getattr(hog_function, "name", None)) or "Untitled",
-        object_type=humanize_hog_function_type(getattr(hog_function, "type", None)),
-        extra_changes=[Change(type="HogFunction", action="changed", field="enabled", before=False, after=True)],
+        scope="CustomFunction",
+        item_id=custom_function.id,
+        name=_first_non_blank(getattr(custom_function, "name", None)) or "Untitled",
+        object_type=humanize_custom_function_type(getattr(custom_function, "type", None)),
+        extra_changes=[Change(type="CustomFunction", action="changed", field="enabled", before=False, after=True)],
     )
 
 
@@ -413,15 +413,15 @@ def register_core_file_system_types() -> None:
     register_post_delete_hook("cohort", _cohort_post_delete)
     register_post_restore_hook("cohort", _cohort_post_restore)
 
-    for hog_type in HOG_FUNCTION_TYPES:
-        type_string = f"hog_function/{hog_type}"
+    for hog_type in CUSTOM_FUNCTION_TYPES:
+        type_string = f"custom_function/{hog_type}"
         register_file_system_type(
             type_string,
             "posthog",
-            "HogFunction",
-            undo_message="Send PATCH /api/projects/@current/hog_functions/{id} with deleted=false.",
+            "CustomFunction",
+            undo_message="Send PATCH /api/projects/@current/custom_functions/{id} with deleted=false.",
         )
-        register_pre_delete_hook(type_string, _hog_function_pre_delete)
-        register_pre_restore_hook(type_string, _hog_function_pre_restore)
-        register_post_delete_hook(type_string, _hog_function_post_delete)
-        register_post_restore_hook(type_string, _hog_function_post_restore)
+        register_pre_delete_hook(type_string, _custom_function_pre_delete)
+        register_pre_restore_hook(type_string, _custom_function_pre_restore)
+        register_post_delete_hook(type_string, _custom_function_post_delete)
+        register_post_restore_hook(type_string, _custom_function_post_restore)

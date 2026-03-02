@@ -202,7 +202,7 @@ export function Group({ tabId }: { tabId?: string }): JSX.Element {
                                                                     properties: [
                                                                         {
                                                                             key: `$group_${groupTypeIndex} = '${groupKey}'`,
-                                                                            type: 'hogql',
+                                                                            type: 'insightsql',
                                                                         },
                                                                     ],
                                                                 } as ActionFilter,

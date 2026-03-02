@@ -5,11 +5,11 @@ import openai
 import structlog
 from prometheus_client import Histogram
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
 
 from posthog.api.utils import ServerTimingsGathered
-from posthog.hogql_queries.insights.paginators import HogQLHasMorePaginator
+from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
 from posthog.models import Team, User
 from posthog.utils import get_instance_region
 
@@ -57,7 +57,7 @@ def summarize_survey_responses(
     timer = ServerTimingsGathered()
 
     with timer("prepare_query"):
-        paginator = HogQLHasMorePaginator(limit=100, offset=0)
+        paginator = InsightsQLHasMorePaginator(limit=100, offset=0)
         q = parse_select(
             """
             SELECT getSurveyResponse({question_index}, {question_id})
@@ -81,7 +81,7 @@ def summarize_survey_responses(
         )
 
     with timer("run_query"):
-        query_response = paginator.execute_hogql_query(
+        query_response = paginator.execute_insightsql_query(
             team=team,
             query_type="survey_response_list_query",
             query=cast(ast.SelectQuery, q),

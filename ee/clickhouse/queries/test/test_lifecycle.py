@@ -208,7 +208,7 @@ class TestClickhouseLifecycle(TestLifecycleBase):
 
     @also_test_with_materialized_columns(event_properties=["$current_url"])
     @snapshot_clickhouse_queries
-    def test_lifecycle_hogql_event_properties(self):
+    def test_lifecycle_insightsql_event_properties(self):
         with freeze_time("2021-05-05T12:00:00Z"):
             self._setup_returning_lifecycle_data(20)
             result = self._run_lifecycle(
@@ -218,7 +218,7 @@ class TestClickhouseLifecycle(TestLifecycleBase):
                     "properties": [
                         {
                             "key": "like(properties.$current_url, '%example%') and 'bla' != 'a%sd'",
-                            "type": "hogql",
+                            "type": "insightsql",
                         },
                     ],
                 }
@@ -235,7 +235,7 @@ class TestClickhouseLifecycle(TestLifecycleBase):
 
     @also_test_with_materialized_columns(event_properties=[], person_properties=["email"])
     @snapshot_clickhouse_queries
-    def test_lifecycle_hogql_person_properties(self):
+    def test_lifecycle_insightsql_person_properties(self):
         with freeze_time("2021-05-05T12:00:00Z"):
             self._setup_returning_lifecycle_data(20)
             result = self._run_lifecycle(
@@ -245,7 +245,7 @@ class TestClickhouseLifecycle(TestLifecycleBase):
                     "properties": [
                         {
                             "key": "like(person.properties.email, '%test.com')",
-                            "type": "hogql",
+                            "type": "insightsql",
                         },
                     ],
                 }

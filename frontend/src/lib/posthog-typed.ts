@@ -327,18 +327,18 @@ interface EventSchemas {
     ai_filter_reset: Record<string, any>
     ai_filter_send: Record<string, any>
     ai_filter_success: Record<string, any>
-    ai_hog_function_accepted: Record<string, any>
-    ai_hog_function_filters_accepted: Record<string, any>
-    ai_hog_function_filters_prompted: Record<string, any>
-    ai_hog_function_filters_prompt_open: Record<string, any>
-    ai_hog_function_filters_rejected: Record<string, any>
-    ai_hog_function_inputs_accepted: Record<string, any>
-    ai_hog_function_inputs_prompted: Record<string, any>
-    ai_hog_function_inputs_prompt_open: Record<string, any>
-    ai_hog_function_inputs_rejected: Record<string, any>
-    ai_hog_function_prompted: Record<string, any>
-    ai_hog_function_prompt_open: Record<string, any>
-    ai_hog_function_rejected: Record<string, any>
+    ai_custom_function_accepted: Record<string, any>
+    ai_custom_function_filters_accepted: Record<string, any>
+    ai_custom_function_filters_prompted: Record<string, any>
+    ai_custom_function_filters_prompt_open: Record<string, any>
+    ai_custom_function_filters_rejected: Record<string, any>
+    ai_custom_function_inputs_accepted: Record<string, any>
+    ai_custom_function_inputs_prompted: Record<string, any>
+    ai_custom_function_inputs_prompt_open: Record<string, any>
+    ai_custom_function_inputs_rejected: Record<string, any>
+    ai_custom_function_prompted: Record<string, any>
+    ai_custom_function_prompt_open: Record<string, any>
+    ai_custom_function_rejected: Record<string, any>
     ai_query_accepted: Record<string, any>
     ai_query_prompt_open: Record<string, any>
     ai_query_rejected: Record<string, any>
@@ -526,7 +526,7 @@ interface EventSchemas {
     cBjcAI9O: Record<string, any>
     'cdp destination feedback': Record<string, any>
     'cdp destination search': Record<string, any>
-    'cdp hog function feedback': Record<string, any>
+    'cdp custom function feedback': Record<string, any>
     'cdp transformation feedback': Record<string, any>
     'Chase Balistreri': Record<string, any>
     'chat feedback': Record<string, any>
@@ -1329,7 +1329,7 @@ interface EventSchemas {
     "g0FiBpkE' OR 446=(SELECT 446 FROM PG_SLEEP(15))--": Record<string, any>
     'Gabrielle McKenzie': Record<string, any>
     'Garry Konopelski': Record<string, any>
-    'generated HogQL with AI': Record<string, any>
+    'generated InsightsQL with AI': Record<string, any>
     'Geovanny Borer': Record<string, any>
     'Germaine Abbott': Record<string, any>
     '#{"".getClass().forName("java.net.URL").getConstructors()[2].newInstance("http://vvukg0qpaqnzaglcw9171iv3puvmjha544s2kpac10q.oastify.com.").hashCode()}': Record<
@@ -1688,11 +1688,11 @@ interface EventSchemas {
     hog_flow_activated: Record<string, any>
     hog_flow_created: Record<string, any>
     hog_flow_started: Record<string, any>
-    'hog function created from plugin config api': Record<string, any>
-    'hog function saved': Record<string, any>
-    hog_function_state_change: Record<string, any>
-    'hog function state changed': Record<string, any>
-    hogql_compare: Record<string, any>
+    'custom function created from plugin config api': Record<string, any>
+    'custom function saved': Record<string, any>
+    custom_function_state_change: Record<string, any>
+    'custom function state changed': Record<string, any>
+    insightsql_compare: Record<string, any>
     "hOnSbBQb')) OR 874=(SELECT 874 FROM PG_SLEEP(15))--": Record<string, any>
     'hotkey navigation': Record<string, any>
     "HpdZv5G9') OR 792=(SELECT 792 FROM PG_SLEEP(15))--": Record<string, any>

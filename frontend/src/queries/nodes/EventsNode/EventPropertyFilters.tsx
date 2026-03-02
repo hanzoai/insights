@@ -8,16 +8,16 @@ import { groupsModel } from '~/models/groupsModel'
 import {
     EventsNode,
     EventsQuery,
-    HogQLQuery,
+    InsightsQLQuery,
     SessionAttributionExplorerQuery,
     SessionsQuery,
     TracesQuery,
 } from '~/queries/schema/schema-general'
-import { isHogQLQuery, isSessionAttributionExplorerQuery, isSessionsQuery } from '~/queries/utils'
+import { isInsightsQLQuery, isSessionAttributionExplorerQuery, isSessionsQuery } from '~/queries/utils'
 import { AnyPropertyFilter } from '~/types'
 
 interface EventPropertyFiltersProps<
-    Q extends EventsNode | EventsQuery | HogQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
+    Q extends EventsNode | EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
 > {
     query: Q
     setQuery?: (query: Q) => void
@@ -26,17 +26,17 @@ interface EventPropertyFiltersProps<
 
 let uniqueNode = 0
 export function EventPropertyFilters<
-    Q extends EventsNode | EventsQuery | HogQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
+    Q extends EventsNode | EventsQuery | InsightsQLQuery | SessionAttributionExplorerQuery | SessionsQuery | TracesQuery,
 >({ query, setQuery, taxonomicGroupTypes }: EventPropertyFiltersProps<Q>): JSX.Element {
     const [id] = useState(() => uniqueNode++)
     const properties =
-        isHogQLQuery(query) || isSessionAttributionExplorerQuery(query)
+        isInsightsQLQuery(query) || isSessionAttributionExplorerQuery(query)
             ? query.filters?.properties
             : isSessionsQuery(query)
               ? query.eventProperties
               : query.properties
     const eventNames =
-        isHogQLQuery(query) || isSessionAttributionExplorerQuery(query)
+        isInsightsQLQuery(query) || isSessionAttributionExplorerQuery(query)
             ? []
             : 'event' in query && query.event
               ? [query.event]
@@ -55,11 +55,11 @@ export function EventPropertyFilters<
                     ...groupsTaxonomicTypes,
                     TaxonomicFilterGroupType.Cohorts,
                     TaxonomicFilterGroupType.Elements,
-                    TaxonomicFilterGroupType.HogQLExpression,
+                    TaxonomicFilterGroupType.InsightsQLExpression,
                 ]
             }
             onChange={(value: AnyPropertyFilter[]) => {
-                if (isHogQLQuery(query) || isSessionAttributionExplorerQuery(query)) {
+                if (isInsightsQLQuery(query) || isSessionAttributionExplorerQuery(query)) {
                     setQuery?.({ ...query, filters: { ...query.filters, properties: value } })
                 } else if (isSessionsQuery(query)) {
                     setQuery?.({ ...query, eventProperties: value })

@@ -228,11 +228,11 @@ class TestSchemaHelpers(TestCase):
                 {"exclusions": [FunnelExclusionEventsNode(funnelFromStep=0, funnelToStep=1)]},
                 1,
             ),
-            # funnelAggregateByHogQL
-            # ({}, {"funnelAggregateByHogQL": ""}, 1),
+            # funnelAggregateByInsightsQL
+            # ({}, {"funnelAggregateByInsightsQL": ""}, 1),
             (
-                {"funnelAggregateByHogQL": "distinct_id"},
-                {"funnelAggregateByHogQL": "distinct_id"},
+                {"funnelAggregateByInsightsQL": "distinct_id"},
+                {"funnelAggregateByInsightsQL": "distinct_id"},
                 1,
             ),
             # funnelFromStep and funnelToStep

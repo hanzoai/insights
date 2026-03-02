@@ -64,7 +64,7 @@ export const EventTableInsightNoResults: Story = Template.bind({})
 EventTableInsightNoResults.args = { insight: { ...EventTableInsight.args.insight, result: null } }
 
 export const SQLInsight: Story = Template.bind({})
-SQLInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/dataTableHogQL.json') }
+SQLInsight.args = { insight: require('../../mocks/fixtures/api/projects/team_id/insights/dataTableInsightsQL.json') }
 
 /** This should not happen in the exporter, but if it does, it shouldn't error out - we want a clear message. */
 export const SQLInsightNoResults: Story = Template.bind({})

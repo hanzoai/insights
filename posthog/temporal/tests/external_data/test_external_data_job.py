@@ -581,8 +581,8 @@ async def test_run_stripe_job(activity_environment, team, minio_client, mock_str
         mock.patch(
             "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
             return_value={
-                "id": {"clickhouse": "string", "hogql": "StringDatabaseField"},
-                "name": {"clickhouse": "string", "hogql": "StringDatabaseField"},
+                "id": {"clickhouse": "string", "insightsql": "StringDatabaseField"},
+                "name": {"clickhouse": "string", "insightsql": "StringDatabaseField"},
             },
         ),
     ):
@@ -604,8 +604,8 @@ async def test_run_stripe_job(activity_environment, team, minio_client, mock_str
         mock.patch(
             "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
             return_value={
-                "id": {"clickhouse": "string", "hogql": "StringDatabaseField"},
-                "customer": {"clickhouse": "string", "hogql": "StringDatabaseField"},
+                "id": {"clickhouse": "string", "insightsql": "StringDatabaseField"},
+                "customer": {"clickhouse": "string", "insightsql": "StringDatabaseField"},
             },
         ),
     ):
@@ -667,8 +667,8 @@ async def test_run_stripe_job_row_count_update(activity_environment, team, minio
         mock.patch(
             "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
             return_value={
-                "id": {"clickhouse": "string", "hogql": "StringDatabaseField"},
-                "name": {"clickhouse": "string", "hogql": "StringDatabaseField"},
+                "id": {"clickhouse": "string", "insightsql": "StringDatabaseField"},
+                "name": {"clickhouse": "string", "insightsql": "StringDatabaseField"},
             },
         ),
     ):

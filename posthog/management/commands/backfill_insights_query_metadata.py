@@ -10,7 +10,7 @@ from django.db.models import Q
 
 import structlog
 
-from posthog.hogql_queries.query_metadata import InsightQueryMetadata
+from posthog.insightsql_queries.query_metadata import InsightQueryMetadata
 from posthog.models import Insight
 
 logger = structlog.get_logger(__name__)

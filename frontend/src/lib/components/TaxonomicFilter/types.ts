@@ -96,15 +96,15 @@ export interface TaxonomicFilterProps {
     initialSearchQuery?: string
     /** Allow users to select events that haven't been captured yet (default: false) */
     allowNonCapturedEvents?: boolean
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
 }
 
 export interface DataWarehousePopoverField {
     key: string
     label: string
     description?: string
-    allowHogQL?: boolean
-    hogQLOnly?: boolean
+    allowInsightsQL?: boolean
+    insightsQLOnly?: boolean
     optional?: boolean
     tableName?: string
     type?: DatabaseSerializedFieldType
@@ -125,7 +125,7 @@ export type TaxonomicFilterRender = (props: TaxonomicFilterRenderProps) => JSX.E
 
 export interface TaxonomicFilterGroup {
     name: string
-    /** Null means this group is not searchable (like HogQL expressions). */
+    /** Null means this group is not searchable (like InsightsQL expressions). */
     searchPlaceholder: string | null
     /**
      * Overrides the label in the category pill list
@@ -200,7 +200,7 @@ export enum TaxonomicFilterGroupType {
     Dashboards = 'dashboards',
     GroupNamesPrefix = 'name_groups',
     SessionProperties = 'session_properties',
-    HogQLExpression = 'hogql_expression',
+    InsightsQLExpression = 'insightsql_expression',
     Notebooks = 'notebooks',
     LogEntries = 'log_entries',
     ErrorTrackingIssues = 'error_tracking_issues',

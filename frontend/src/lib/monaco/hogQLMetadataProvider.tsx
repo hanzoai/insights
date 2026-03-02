@@ -3,13 +3,13 @@ import { languages } from 'monaco-editor'
 
 import type { codeEditorLogicType } from './codeEditorLogicType'
 
-export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => ({
+export const insightsQLMetadataProvider: () => languages.CodeActionProvider = () => ({
     provideCodeActions: (model, _range, context) => {
         const logic: BuiltLogic<codeEditorLogicType> | undefined = (model as any).codeEditorLogic
         if (logic?.isMounted()) {
             // Monaco gives us a list of markers that we're looking at, but without the quick fixes.
             const markersFromMonaco = context.markers
-            // We have a list of _all_ markers returned from the HogQL metadata query
+            // We have a list of _all_ markers returned from the InsightsQL metadata query
             const markersFromMetadata = logic.values.modelMarkers
             // We need to merge the two lists
             const quickFixes: languages.CodeAction[] = []
@@ -25,13 +25,13 @@ export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => (
                 })
                 for (const rawMarker of markersFromMetadata) {
                     if (
-                        rawMarker.hogQLFix &&
+                        rawMarker.insightsQLFix &&
                         // if ranges overlap
                         rawMarker.start <= end &&
                         rawMarker.end >= start
                     ) {
                         quickFixes.push({
-                            title: `Replace with: ${rawMarker.hogQLFix}`,
+                            title: `Replace with: ${rawMarker.insightsQLFix}`,
                             diagnostics: [rawMarker],
                             kind: 'quickfix',
                             edit: {
@@ -40,7 +40,7 @@ export const hogQLMetadataProvider: () => languages.CodeActionProvider = () => (
                                         resource: model.uri,
                                         textEdit: {
                                             range: rawMarker,
-                                            text: rawMarker.hogQLFix,
+                                            text: rawMarker.insightsQLFix,
                                         },
                                         versionId: undefined,
                                     },

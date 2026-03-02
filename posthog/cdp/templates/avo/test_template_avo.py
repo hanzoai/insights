@@ -4,11 +4,11 @@ from posthog.cdp.templates.avo.template_avo import (
     TemplateAvoMigrator,
     template as template_avo,
 )
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.models import PluginConfig
 
 
-class TestTemplateAvo(BaseHogFunctionTemplateTest):
+class TestTemplateAvo(BaseCustomFunctionTemplateTest):
     template = template_avo
 
     def _inputs(self, **kwargs):
@@ -204,7 +204,7 @@ class TestTemplateMigration(BaseTest):
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"key": "event not in ('sign up', 'page view')", "type": "hogql"}],
+                    "properties": [{"key": "event not in ('sign up', 'page view')", "type": "insightsql"}],
                 },
             ]
         }

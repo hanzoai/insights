@@ -3,8 +3,8 @@
 import { Monaco } from '@monaco-editor/react'
 import { languages } from 'monaco-editor'
 
-import { hogQLAutocompleteProvider } from 'lib/monaco/hogQLAutocompleteProvider'
-import { hogQLMetadataProvider } from 'lib/monaco/hogQLMetadataProvider'
+import { insightsQLAutocompleteProvider } from 'lib/monaco/insightsQLAutocompleteProvider'
+import { insightsQLMetadataProvider } from 'lib/monaco/insightsQLMetadataProvider'
 
 import { HogLanguage } from '~/queries/schema/schema-general'
 
@@ -253,8 +253,8 @@ export function initHogLanguage(monaco: Monaco): void {
         monaco.languages.register({ id: 'hog', extensions: ['.hog'], mimetypes: ['application/hog'] })
         monaco.languages.setLanguageConfiguration('hog', conf())
         monaco.languages.setMonarchTokensProvider('hog', language())
-        monaco.languages.registerCompletionItemProvider('hog', hogQLAutocompleteProvider(HogLanguage.hog))
-        monaco.languages.registerCodeActionProvider('hog', hogQLMetadataProvider())
+        monaco.languages.registerCompletionItemProvider('hog', insightsQLAutocompleteProvider(HogLanguage.hog))
+        monaco.languages.registerCodeActionProvider('hog', insightsQLMetadataProvider())
     }
 }
 

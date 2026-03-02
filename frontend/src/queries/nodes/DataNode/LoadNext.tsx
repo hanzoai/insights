@@ -6,7 +6,7 @@ import { LemonButton } from 'lib/lemon-ui/LemonButton'
 
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
 import { DataNode } from '~/queries/schema/schema-general'
-import { isDataVisualizationNode, isHogQLQuery } from '~/queries/utils'
+import { isDataVisualizationNode, isInsightsQLQuery } from '~/queries/utils'
 
 import { DEFAULT_PAGE_SIZE } from '../DataVisualization/Components/Table'
 
@@ -19,8 +19,8 @@ export function LoadNext({ query }: LoadNextProps): JSX.Element {
     const { loadNextData } = useActions(dataNodeLogic)
 
     const text = useMemo(() => {
-        // if hogql based viz, show a different text
-        if (isDataVisualizationNode(query) && isHogQLQuery(query.source)) {
+        // if insightsql based viz, show a different text
+        if (isDataVisualizationNode(query) && isInsightsQLQuery(query.source)) {
             // No data limit means the user is controlling the pagination
             if (!dataLimit) {
                 if (numberOfRows && numberOfRows <= DEFAULT_PAGE_SIZE) {
@@ -37,7 +37,7 @@ export function LoadNext({ query }: LoadNextProps): JSX.Element {
                 }`
             }
             return `Default limit of ${dataLimit} rows reached`
-        } else if (isHogQLQuery(query) && !canLoadNextData && hasMoreData && dataLimit) {
+        } else if (isInsightsQLQuery(query) && !canLoadNextData && hasMoreData && dataLimit) {
             return `Default limit of ${dataLimit} rows reached. Try adding a LIMIT clause to adjust.`
         }
         let result = `Showing ${
@@ -54,7 +54,7 @@ export function LoadNext({ query }: LoadNextProps): JSX.Element {
     // pagination component exists
     if (
         isDataVisualizationNode(query) &&
-        isHogQLQuery(query.source) &&
+        isInsightsQLQuery(query.source) &&
         !dataLimit &&
         (!numberOfRows || numberOfRows > DEFAULT_PAGE_SIZE)
     ) {

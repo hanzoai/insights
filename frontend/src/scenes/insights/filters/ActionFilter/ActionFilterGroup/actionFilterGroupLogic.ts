@@ -21,7 +21,7 @@ function getMathProps(filter: LocalFilter): Record<string, any> {
         ...(filter.math && { math: filter.math }),
         ...(filter.math_property && { math_property: filter.math_property }),
         ...(filter.math_property_type && { math_property_type: filter.math_property_type }),
-        ...(filter.math_hogql && { math_hogql: filter.math_hogql }),
+        ...(filter.math_insightsql && { math_insightsql: filter.math_insightsql }),
         ...(filter.math_group_type_index !== undefined && {
             math_group_type_index: filter.math_group_type_index,
         }),
@@ -47,15 +47,15 @@ export const actionFilterGroupLogic = kea<actionFilterGroupLogicType>([
         removeNestedFilter: (nestedIndex: number) => ({ nestedIndex }),
         setMath: (selectedMath: string | undefined) => ({ selectedMath }),
         setMathProperty: (property: string, propertyType: TaxonomicFilterGroupType) => ({ property, propertyType }),
-        setMathHogQL: (hogql: string) => ({ hogql }),
-        setHogQLDropdownVisible: (visible: boolean) => ({ visible }),
+        setMathInsightsQL: (insightsql: string) => ({ insightsql }),
+        setInsightsQLDropdownVisible: (visible: boolean) => ({ visible }),
     }),
 
     reducers({
-        isHogQLDropdownVisible: [
+        isInsightsQLDropdownVisible: [
             false,
             {
-                setHogQLDropdownVisible: (_, { visible }) => visible,
+                setInsightsQLDropdownVisible: (_, { visible }) => visible,
             },
         ],
     }),
@@ -146,9 +146,9 @@ export const actionFilterGroupLogic = kea<actionFilterGroupLogicType>([
                             mathDef?.category === MathCategory.PropertyValue
                                 ? (groupFilter.math_property ?? '$time')
                                 : undefined,
-                        math_hogql:
-                            mathDef?.category === MathCategory.HogQLExpression
-                                ? (groupFilter.math_hogql ?? 'count()')
+                        math_insightsql:
+                            mathDef?.category === MathCategory.InsightsQLExpression
+                                ? (groupFilter.math_insightsql ?? 'count()')
                                 : undefined,
                         math_property_type: groupFilter.math_property_type,
                     }
@@ -157,7 +157,7 @@ export const actionFilterGroupLogic = kea<actionFilterGroupLogicType>([
                         math: undefined,
                         math_property: undefined,
                         math_property_type: undefined,
-                        math_hogql: undefined,
+                        math_insightsql: undefined,
                         math_group_type_index: undefined,
                     }
                 }
@@ -174,12 +174,12 @@ export const actionFilterGroupLogic = kea<actionFilterGroupLogicType>([
                 const mathProps = {
                     math_property: property,
                     math_property_type: propertyType,
-                    math_hogql: undefined,
+                    math_insightsql: undefined,
                 }
                 const newFilters = values.nestedFilters.map((f) => ({ ...f, ...mathProps }))
                 updateGroup(newFilters, { math: groupFilter.math, ...mathProps })
             },
-            setMathHogQL: ({ hogql }) => {
+            setMathInsightsQL: ({ insightsql }) => {
                 const groupFilter = values.groupFilter
                 if (!groupFilter) {
                     return
@@ -188,7 +188,7 @@ export const actionFilterGroupLogic = kea<actionFilterGroupLogicType>([
                 const mathProps = {
                     math_property: undefined,
                     math_property_type: undefined,
-                    math_hogql: hogql,
+                    math_insightsql: insightsql,
                 }
                 const newFilters = values.nestedFilters.map((f) => ({ ...f, ...mathProps }))
                 updateGroup(newFilters, { math: groupFilter.math, ...mathProps })

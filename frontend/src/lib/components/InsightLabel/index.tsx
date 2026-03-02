@@ -52,11 +52,11 @@ interface InsightsLabelProps {
 interface MathTagProps {
     math: string | undefined
     mathProperty: string | undefined | null
-    mathHogQL: string | undefined | null
+    mathInsightsQL: string | undefined | null
     mathGroupTypeIndex: number | null | undefined
 }
 
-function MathTag({ math, mathProperty, mathHogQL, mathGroupTypeIndex }: MathTagProps): JSX.Element {
+function MathTag({ math, mathProperty, mathInsightsQL, mathGroupTypeIndex }: MathTagProps): JSX.Element {
     const { mathDefinitions } = useValues(mathsLogic)
     const { aggregationLabel } = useValues(groupsModel)
 
@@ -88,8 +88,8 @@ function MathTag({ math, mathProperty, mathHogQL, mathGroupTypeIndex }: MathTagP
             </>
         )
     }
-    if (math === 'hogql') {
-        return <LemonTag className="max-w-60 text-ellipsis overflow-hidden">{String(mathHogQL) || 'SQL'}</LemonTag>
+    if (math === 'insightsql') {
+        return <LemonTag className="max-w-60 text-ellipsis overflow-hidden">{String(mathInsightsQL) || 'SQL'}</LemonTag>
     }
     // Use mathDefinitions first, then fall back to capitalizing the math string
     return <LemonTag>{(mathDefinitions as any)[math]?.name || capitalizeFirstLetter(math)}</LemonTag>
@@ -190,7 +190,7 @@ export function InsightLabel({
                             <MathTag
                                 math={action?.math}
                                 mathProperty={action?.math_property}
-                                mathHogQL={action?.math_hogql}
+                                mathInsightsQL={action?.math_insightsql}
                                 mathGroupTypeIndex={action?.math_group_type_index}
                             />
                         </div>

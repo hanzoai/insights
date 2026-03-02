@@ -9,7 +9,7 @@ import { extractExpressionComment } from '~/queries/nodes/DataTable/utils'
 import { DataTableNode } from '~/queries/schema/schema-general'
 import {
     isEventsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isMarketingAnalyticsTableQuery,
     isNonIntegratedConversionsTableQuery,
     isPersonsNode,
@@ -58,7 +58,7 @@ const processRowData = (row: DataTableRow, columns: string[], query: DataTableNo
     const flattenedRecord: Record<string, any> = {}
 
     if (
-        isHogQLQuery(query.source) ||
+        isInsightsQLQuery(query.source) ||
         isMarketingAnalyticsTableQuery(query.source) ||
         isNonIntegratedConversionsTableQuery(query.source)
     ) {
@@ -186,7 +186,7 @@ export const getJsonTableData = (
     }
 
     if (
-        isHogQLQuery(query.source) ||
+        isInsightsQLQuery(query.source) ||
         isMarketingAnalyticsTableQuery(query.source) ||
         isNonIntegratedConversionsTableQuery(query.source)
     ) {

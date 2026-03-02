@@ -45,7 +45,7 @@ export function TrendsSeries(): JSX.Element | null {
         TaxonomicFilterGroupType.Cohorts,
         TaxonomicFilterGroupType.Elements,
         TaxonomicFilterGroupType.SessionProperties,
-        TaxonomicFilterGroupType.HogQLExpression,
+        TaxonomicFilterGroupType.InsightsQLExpression,
         TaxonomicFilterGroupType.DataWarehouseProperties,
         TaxonomicFilterGroupType.DataWarehousePersonProperties,
     ]
@@ -70,7 +70,7 @@ export function TrendsSeries(): JSX.Element | null {
                     <div className="flex items-center">
                         Showing
                         {showGroupsOptions ? (
-                            <AggregationSelect className="mx-2" insightProps={insightProps} hogqlAvailable={false} />
+                            <AggregationSelect className="mx-2" insightProps={insightProps} insightsqlAvailable={false} />
                         ) : (
                             <b> Unique users </b>
                         )}

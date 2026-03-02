@@ -9,7 +9,7 @@ from pydantic import (
 )
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
-from posthog.hogql.hogql import HogQLContext
+from posthog.insightsql.insightsql import InsightsQLContext
 
 from posthog.exceptions import (
     ClickHouseAtCapacity,
@@ -25,7 +25,7 @@ from posthog.models.cohort.util import (
     get_friendly_error_message,
     get_static_cohort_size,
     parse_error_code,
-    print_cohort_hogql_query,
+    print_cohort_insightsql_query,
     simplified_cohort_filter_properties,
     sort_cohorts_topologically,
 )
@@ -354,9 +354,9 @@ class TestCohortUtils(BaseTest):
             },
         )
 
-    def test_print_cohort_hogql_query_includes_settings(self):
-        """Test that cohort queries include HogQL global settings"""
-        # Create a cohort with a HogQL query (simulating a funnel-to-cohort conversion)
+    def test_print_cohort_insightsql_query_includes_settings(self):
+        """Test that cohort queries include InsightsQL global settings"""
+        # Create a cohort with a InsightsQL query (simulating a funnel-to-cohort conversion)
         cohort = Cohort.objects.create(
             team=self.team,
             name="Test Funnel Cohort",
@@ -383,10 +383,10 @@ class TestCohortUtils(BaseTest):
             },
         )
 
-        context = HogQLContext(team_id=self.team.id, enable_select_queries=True)
+        context = InsightsQLContext(team_id=self.team.id, enable_select_queries=True)
 
         # Generate the SQL
-        sql = print_cohort_hogql_query(cohort, context, team=self.team)
+        sql = print_cohort_insightsql_query(cohort, context, team=self.team)
 
         # Assert that settings are included
         self.assertIn("SETTINGS", sql)
@@ -425,9 +425,9 @@ class TestCohortUtils(BaseTest):
         mock_qs.using.assert_not_called()
         self.assertEqual(result, 10)
 
-    def test_print_cohort_hogql_query_raises_error_on_mixed_id_types_in_union(self):
+    def test_print_cohort_insightsql_query_raises_error_on_mixed_id_types_in_union(self):
         """Test that mixed ID types in UNION queries are rejected"""
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         cohort = Cohort.objects.create(
             team=self.team,
@@ -450,7 +450,7 @@ class TestCohortUtils(BaseTest):
             },
         )
 
-        context = HogQLContext(team_id=self.team.id, enable_select_queries=True)
+        context = InsightsQLContext(team_id=self.team.id, enable_select_queries=True)
 
         # Mock get_query_runner to return a mock runner with our UNION query
         def mock_get_query_runner(query, team, limit_context=None):
@@ -472,17 +472,17 @@ class TestCohortUtils(BaseTest):
             )
             return mock_runner
 
-        with patch("posthog.hogql_queries.query_runner.get_query_runner", mock_get_query_runner):
+        with patch("posthog.insightsql_queries.query_runner.get_query_runner", mock_get_query_runner):
             # Should raise ValueError with clear message about mixed ID types
             with self.assertRaises(ValueError) as cm:
-                print_cohort_hogql_query(cohort, context, team=self.team)
+                print_cohort_insightsql_query(cohort, context, team=self.team)
 
         self.assertIn("UNION queries with mixed ID types", str(cm.exception))
         self.assertIn("not currently supported", str(cm.exception))
 
-    def test_print_cohort_hogql_query_with_table_without_id_columns(self):
+    def test_print_cohort_insightsql_query_with_table_without_id_columns(self):
         """Test that queries without person_id, actor_id, id, or distinct_id columns raise an error"""
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         cohort = Cohort.objects.create(
             team=self.team,
@@ -505,7 +505,7 @@ class TestCohortUtils(BaseTest):
             },
         )
 
-        context = HogQLContext(team_id=self.team.id, enable_select_queries=True)
+        context = InsightsQLContext(team_id=self.team.id, enable_select_queries=True)
 
         # Mock get_query_runner to return a query with no recognizable ID columns
         def mock_get_query_runner(query, team, limit_context=None):
@@ -518,16 +518,16 @@ class TestCohortUtils(BaseTest):
             mock_runner.to_query.return_value = select_query
             return mock_runner
 
-        with patch("posthog.hogql_queries.query_runner.get_query_runner", mock_get_query_runner):
+        with patch("posthog.insightsql_queries.query_runner.get_query_runner", mock_get_query_runner):
             # Should raise ValueError about missing ID columns
             with self.assertRaises(ValueError) as cm:
-                print_cohort_hogql_query(cohort, context, team=self.team)
+                print_cohort_insightsql_query(cohort, context, team=self.team)
 
         self.assertIn("Could not find a person_id, actor_id, id, or distinct_id column", str(cm.exception))
 
-    def test_print_cohort_hogql_query_with_distinct_id_column(self):
+    def test_print_cohort_insightsql_query_with_distinct_id_column(self):
         """Test that queries with explicit distinct_id column are wrapped with person_distinct_id2 lookup"""
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         cohort = Cohort.objects.create(
             team=self.team,
@@ -550,7 +550,7 @@ class TestCohortUtils(BaseTest):
             },
         )
 
-        context = HogQLContext(team_id=self.team.id, enable_select_queries=True)
+        context = InsightsQLContext(team_id=self.team.id, enable_select_queries=True)
 
         # Mock get_query_runner to return a query with explicit distinct_id column
         def mock_get_query_runner(query, team, limit_context=None):
@@ -563,8 +563,8 @@ class TestCohortUtils(BaseTest):
             mock_runner.to_query.return_value = select_query
             return mock_runner
 
-        with patch("posthog.hogql_queries.query_runner.get_query_runner", mock_get_query_runner):
-            result = print_cohort_hogql_query(cohort, context, team=self.team)
+        with patch("posthog.insightsql_queries.query_runner.get_query_runner", mock_get_query_runner):
+            result = print_cohort_insightsql_query(cohort, context, team=self.team)
 
         # Should wrap with person_distinct_id2 lookup
         self.assertIn("person_distinct_id2", result)
@@ -573,9 +573,9 @@ class TestCohortUtils(BaseTest):
         # Should include settings
         self.assertIn("SETTINGS", result)
 
-    def test_print_cohort_hogql_query_with_select_star_raises_error(self):
+    def test_print_cohort_insightsql_query_with_select_star_raises_error(self):
         """Test that SELECT * queries without explicit ID columns raise an error"""
-        from posthog.hogql import ast
+        from posthog.insightsql import ast
 
         cohort = Cohort.objects.create(
             team=self.team,
@@ -598,7 +598,7 @@ class TestCohortUtils(BaseTest):
             },
         )
 
-        context = HogQLContext(team_id=self.team.id, enable_select_queries=True)
+        context = InsightsQLContext(team_id=self.team.id, enable_select_queries=True)
 
         # Mock get_query_runner to return a query with SELECT * from a table without known ID handling
         def mock_get_query_runner(query, team, limit_context=None):
@@ -611,10 +611,10 @@ class TestCohortUtils(BaseTest):
             mock_runner.to_query.return_value = select_query
             return mock_runner
 
-        with patch("posthog.hogql_queries.query_runner.get_query_runner", mock_get_query_runner):
+        with patch("posthog.insightsql_queries.query_runner.get_query_runner", mock_get_query_runner):
             # Should raise ValueError about missing ID columns
             with self.assertRaises(ValueError) as cm:
-                print_cohort_hogql_query(cohort, context, team=self.team)
+                print_cohort_insightsql_query(cohort, context, team=self.team)
 
         self.assertIn("Could not find a person_id, actor_id, id, or distinct_id column", str(cm.exception))
 

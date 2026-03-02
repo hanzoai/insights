@@ -20,7 +20,7 @@ import {
 } from '@posthog/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
-import { HogQLDropdown } from 'lib/components/HogQLDropdown/HogQLDropdown'
+import { InsightsQLDropdown } from 'lib/components/InsightsQLDropdown/InsightsQLDropdown'
 import { TablePreview } from 'lib/components/TablePreview/TablePreview'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { IconLink, IconSwapHoriz } from 'lib/lemon-ui/icons'
@@ -69,8 +69,8 @@ export function ViewLinkModal({ mode }: ViewLinkModalProps): JSX.Element {
     )
 }
 
-const HOGQL_EDITOR_PLACEHOLDER = 'Enter SQL expression, such as:\n- pdi.distinct_id\n- properties.email'
-const HOGQL_EDITOR_PLACEHOLDER_REVENUE_ANALYTICS =
+const INSIGHTSQL_EDITOR_PLACEHOLDER = 'Enter SQL expression, such as:\n- pdi.distinct_id\n- properties.email'
+const INSIGHTSQL_EDITOR_PLACEHOLDER_REVENUE_ANALYTICS =
     "Enter SQL expression, such as:\n- metadata.customer_id\n- metadata.organization_id\n- concat(email, ',', customer_id)"
 
 export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
@@ -85,8 +85,8 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
         fieldName,
         isNewJoin,
         selectedJoiningKey,
-        sourceIsUsingHogQLExpression,
-        joiningIsUsingHogQLExpression,
+        sourceIsUsingInsightsQLExpression,
+        joiningIsUsingInsightsQLExpression,
         isViewLinkSubmitting,
         experimentsOptimized,
         experimentsTimestampKey,
@@ -153,7 +153,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                             fullWidth
                                             onSelect={selectSourceKey}
                                             onChange={onChange}
-                                            value={sourceIsUsingHogQLExpression ? '' : (value ?? undefined)}
+                                            value={sourceIsUsingInsightsQLExpression ? '' : (value ?? undefined)}
                                             disabledReason={
                                                 selectedSourceTableName ? '' : 'Select a table to choose join key'
                                             }
@@ -163,16 +163,16 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                             ]}
                                             placeholder="Select a key"
                                         />
-                                        {sourceIsUsingHogQLExpression && (
-                                            <HogQLDropdown
+                                        {sourceIsUsingInsightsQLExpression && (
+                                            <InsightsQLDropdown
                                                 className="mt-2"
-                                                hogQLValue={value}
-                                                onHogQLValueChange={onChange}
+                                                insightsQLValue={value}
+                                                onInsightsQLValueChange={onChange}
                                                 tableName={selectedSourceTableName ?? ''}
-                                                hogQLEditorPlaceholder={
+                                                insightsQLEditorPlaceholder={
                                                     mode === 'revenue_analytics'
-                                                        ? HOGQL_EDITOR_PLACEHOLDER_REVENUE_ANALYTICS
-                                                        : HOGQL_EDITOR_PLACEHOLDER
+                                                        ? INSIGHTSQL_EDITOR_PLACEHOLDER_REVENUE_ANALYTICS
+                                                        : INSIGHTSQL_EDITOR_PLACEHOLDER
                                                 }
                                             />
                                         )}
@@ -197,7 +197,7 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                                 fullWidth
                                                 onSelect={selectJoiningKey}
                                                 onChange={onChange}
-                                                value={joiningIsUsingHogQLExpression ? '' : (value ?? undefined)}
+                                                value={joiningIsUsingInsightsQLExpression ? '' : (value ?? undefined)}
                                                 disabledReason={
                                                     selectedJoiningTableName ? '' : 'Select a table to choose join key'
                                                 }
@@ -207,13 +207,13 @@ export function ViewLinkForm({ mode }: ViewLinkModalProps): JSX.Element {
                                                 ]}
                                                 placeholder="Select a key"
                                             />
-                                            {joiningIsUsingHogQLExpression && (
-                                                <HogQLDropdown
+                                            {joiningIsUsingInsightsQLExpression && (
+                                                <InsightsQLDropdown
                                                     className="mt-2"
-                                                    hogQLValue={value}
-                                                    onHogQLValueChange={onChange}
+                                                    insightsQLValue={value}
+                                                    onInsightsQLValueChange={onChange}
                                                     tableName={selectedJoiningTableName ?? ''}
-                                                    hogQLEditorPlaceholder={HOGQL_EDITOR_PLACEHOLDER}
+                                                    insightsQLEditorPlaceholder={INSIGHTSQL_EDITOR_PLACEHOLDER}
                                                 />
                                             )}
                                         </>
@@ -329,8 +329,8 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
         isNewJoin,
         selectedSourceKey,
         selectedJoiningKey,
-        sourceIsUsingHogQLExpression,
-        joiningIsUsingHogQLExpression,
+        sourceIsUsingInsightsQLExpression,
+        joiningIsUsingInsightsQLExpression,
         isViewLinkSubmitting,
         experimentsOptimized,
         experimentsTimestampKey,
@@ -390,7 +390,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                                     fullWidth
                                                     onSelect={selectSourceKey}
                                                     onChange={onChange}
-                                                    value={sourceIsUsingHogQLExpression ? '' : (value ?? undefined)}
+                                                    value={sourceIsUsingInsightsQLExpression ? '' : (value ?? undefined)}
                                                     disabledReason={
                                                         selectedSourceTableName
                                                             ? ''
@@ -402,16 +402,16 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                                     ]}
                                                     placeholder="Select a key"
                                                 />
-                                                {sourceIsUsingHogQLExpression && (
+                                                {sourceIsUsingInsightsQLExpression && (
                                                     <div className="flex-1">
-                                                        <HogQLDropdown
-                                                            hogQLValue={value ?? ''}
-                                                            onHogQLValueChange={onChange}
+                                                        <InsightsQLDropdown
+                                                            insightsQLValue={value ?? ''}
+                                                            onInsightsQLValueChange={onChange}
                                                             tableName={selectedSourceTableName ?? ''}
-                                                            hogQLEditorPlaceholder={
+                                                            insightsQLEditorPlaceholder={
                                                                 mode === 'revenue_analytics'
-                                                                    ? HOGQL_EDITOR_PLACEHOLDER_REVENUE_ANALYTICS
-                                                                    : HOGQL_EDITOR_PLACEHOLDER
+                                                                    ? INSIGHTSQL_EDITOR_PLACEHOLDER_REVENUE_ANALYTICS
+                                                                    : INSIGHTSQL_EDITOR_PLACEHOLDER
                                                             }
                                                         />
                                                     </div>
@@ -476,7 +476,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                                         onSelect={selectJoiningKey}
                                                         onChange={onChange}
                                                         value={
-                                                            joiningIsUsingHogQLExpression ? '' : (value ?? undefined)
+                                                            joiningIsUsingInsightsQLExpression ? '' : (value ?? undefined)
                                                         }
                                                         disabledReason={
                                                             selectedJoiningTableName
@@ -489,13 +489,13 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                                         ]}
                                                         placeholder="Select a key"
                                                     />
-                                                    {joiningIsUsingHogQLExpression && (
+                                                    {joiningIsUsingInsightsQLExpression && (
                                                         <div className="flex-1">
-                                                            <HogQLDropdown
-                                                                hogQLValue={value ?? ''}
-                                                                onHogQLValueChange={onChange}
+                                                            <InsightsQLDropdown
+                                                                insightsQLValue={value ?? ''}
+                                                                onInsightsQLValueChange={onChange}
                                                                 tableName={selectedJoiningTableName ?? ''}
-                                                                hogQLEditorPlaceholder={HOGQL_EDITOR_PLACEHOLDER}
+                                                                insightsQLEditorPlaceholder={INSIGHTSQL_EDITOR_PLACEHOLDER}
                                                             />
                                                         </div>
                                                     )}

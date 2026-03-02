@@ -16,7 +16,7 @@ from posthog.constants import (
     UNIQUE_USERS,
     ExperimentNoResultsErrorKeys,
 )
-from posthog.hogql_queries.experiments.trends_statistics import (
+from posthog.insightsql_queries.experiments.trends_statistics import (
     are_results_significant,
     calculate_credible_intervals,
     calculate_probabilities,

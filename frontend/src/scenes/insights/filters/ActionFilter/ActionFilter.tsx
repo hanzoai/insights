@@ -104,7 +104,7 @@ export interface ActionFilterProps {
     excludedProperties?: TaxonomicPopoverProps['excludedProperties']
     /** Allow adding non-captured events */
     allowNonCapturedEvents?: boolean
-    hogQLGlobals?: Record<string, any>
+    insightsQLGlobals?: Record<string, any>
 }
 
 export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(function ActionFilter(
@@ -141,7 +141,7 @@ export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(
         addFilterDocLink,
         excludedProperties,
         allowNonCapturedEvents,
-        hogQLGlobals,
+        insightsQLGlobals,
     },
     ref
 ): JSX.Element {
@@ -221,7 +221,7 @@ export const ActionFilter = React.forwardRef<HTMLDivElement, ActionFilterProps>(
         addFilterDocLink,
         excludedProperties,
         allowNonCapturedEvents,
-        hogQLGlobals,
+        insightsQLGlobals,
     }
 
     const reachedLimit: boolean = Boolean(entitiesLimit && localFilters.length >= entitiesLimit)

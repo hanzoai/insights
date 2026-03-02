@@ -276,13 +276,13 @@ def setup_bigquery(
         credential=credentials,
         url_pattern="https://bucket.s3/data/*",
         columns={
-            "id": {"hogql": "IntegerDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+            "id": {"insightsql": "IntegerDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
             incremental_field.name: {
-                "hogql": "IntegerDatabaseField",
+                "insightsql": "IntegerDatabaseField",
                 "clickhouse": clickhouse_type,
                 "schema_valid": True,
             },
-            "value": {"hogql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+            "value": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
         },
     )
     schema = ExternalDataSchema.objects.create(

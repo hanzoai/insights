@@ -38,9 +38,9 @@ import {
     GroupsQuery,
     GroupsQueryResponse,
     HogCompileResponse,
-    HogQLQuery,
-    HogQLQueryResponse,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryResponse,
+    InsightsQLVariable,
     LogMessage,
     LogsQuery,
     MatchingEventsResponse,
@@ -57,7 +57,7 @@ import {
     TileFilters,
     UserProductListItem,
 } from '~/queries/schema/schema-general'
-import { HogQLQueryString, setLatestVersionsOnQuery } from '~/queries/utils'
+import { InsightsQLQueryString, setLatestVersionsOnQuery } from '~/queries/utils'
 import {
     ActionType,
     ActivityScope,
@@ -129,11 +129,11 @@ import {
     HeatmapScreenshotType,
     HeatmapStatus,
     HeatmapType,
-    HogFunctionIconResponse,
-    HogFunctionStatus,
-    HogFunctionTemplateType,
-    HogFunctionType,
-    HogFunctionTypeType,
+    CustomFunctionIconResponse,
+    CustomFunctionStatus,
+    CustomFunctionTemplateType,
+    CustomFunctionType,
+    CustomFunctionTypeType,
     InsightModel,
     IntegrationType,
     JiraProjectType,
@@ -642,20 +642,20 @@ export class ApiRequest {
         return this.projectsDetail(teamId).addPathComponent('hog')
     }
 
-    public hogFunctions(teamId?: TeamType['id']): ApiRequest {
-        return this.environmentsDetail(teamId).addPathComponent('hog_functions')
+    public customFunctions(teamId?: TeamType['id']): ApiRequest {
+        return this.environmentsDetail(teamId).addPathComponent('custom_functions')
     }
 
-    public hogFunction(id: HogFunctionType['id'], teamId?: TeamType['id']): ApiRequest {
-        return this.hogFunctions(teamId).addPathComponent(id)
+    public customFunction(id: CustomFunctionType['id'], teamId?: TeamType['id']): ApiRequest {
+        return this.customFunctions(teamId).addPathComponent(id)
     }
 
-    public hogFunctionTemplates(teamId?: TeamType['id']): ApiRequest {
-        return this.projectsDetail(teamId).addPathComponent('hog_function_templates')
+    public customFunctionTemplates(teamId?: TeamType['id']): ApiRequest {
+        return this.projectsDetail(teamId).addPathComponent('custom_function_templates')
     }
 
-    public hogFunctionTemplate(id: HogFunctionTemplateType['id'], teamId?: TeamType['id']): ApiRequest {
-        return this.hogFunctionTemplates(teamId).addPathComponent(id)
+    public customFunctionTemplate(id: CustomFunctionTemplateType['id'], teamId?: TeamType['id']): ApiRequest {
+        return this.customFunctionTemplates(teamId).addPathComponent(id)
     }
 
     // # Links
@@ -1670,9 +1670,9 @@ export class ApiRequest {
         return this.externalDataSources(teamId).addPathComponent(sourceId).addPathComponent('revenue_analytics_config')
     }
 
-    // Fix HogQL errors
-    public fixHogQLErrors(teamId?: TeamType['id']): ApiRequest {
-        return this.environmentsDetail(teamId).addPathComponent('fix_hogql')
+    // Fix InsightsQL errors
+    public fixInsightsQLErrors(teamId?: TeamType['id']): ApiRequest {
+        return this.environmentsDetail(teamId).addPathComponent('fix_insightsql')
     }
 
     // Insight Variables
@@ -1981,7 +1981,7 @@ const api = {
             basic?: boolean,
             refresh?: RefreshType,
             filtersOverride?: DashboardFilter | null,
-            variablesOverride?: Record<string, HogQLVariable> | null,
+            variablesOverride?: Record<string, InsightsQLVariable> | null,
             tileFiltersOverride?: TileFilters | null
         ): Promise<PaginatedResponse<Partial<InsightModel>>> {
             return new ApiRequest()
@@ -2308,7 +2308,7 @@ const api = {
                 .withQueryString(temporaryToken ? `temporary_token=${temporaryToken}` : '')
                 .update({ data: actionData })
         },
-        async migrate(id: ActionType['id']): Promise<HogFunctionType> {
+        async migrate(id: ActionType['id']): Promise<CustomFunctionType> {
             return await new ApiRequest().actionsDetail(id).withAction('migrate').create()
         },
         async list(params?: string): Promise<PaginatedResponse<ActionType>> {
@@ -2367,7 +2367,7 @@ const api = {
             if (
                 [
                     ActivityScope.PLUGIN,
-                    ActivityScope.HOG_FUNCTION,
+                    ActivityScope.CUSTOM_FUNCTION,
                     ActivityScope.HOG_FLOW,
                     ActivityScope.EXPERIMENT,
                     ActivityScope.TAG,
@@ -2934,7 +2934,7 @@ const api = {
             params: {
                 layoutSize?: 'sm' | 'xs'
                 filtersOverride?: DashboardFilter
-                variablesOverride?: Record<string, HogQLVariable>
+                variablesOverride?: Record<string, InsightsQLVariable>
             } = {},
             onMessage: (data: any) => void,
             onComplete: () => void,
@@ -3297,7 +3297,7 @@ const api = {
         async list(): Promise<PaginatedResponse<PluginConfigTypeNew>> {
             return await new ApiRequest().pluginConfigs().get()
         },
-        async migrate(id: PluginConfigTypeNew['id']): Promise<HogFunctionType> {
+        async migrate(id: PluginConfigTypeNew['id']): Promise<CustomFunctionType> {
             return await new ApiRequest().pluginConfig(id).withAction('migrate').create()
         },
         async logs(pluginConfigId: number, params: LogEntryRequestParams): Promise<LogEntry[]> {
@@ -3335,7 +3335,7 @@ const api = {
             return await new ApiRequest().hog().create({ data: { hog, locals, in_repl: inRepl || false } })
         },
     },
-    hogFunctions: {
+    customFunctions: {
         async list({
             filter_groups,
             search,
@@ -3345,12 +3345,12 @@ const api = {
         }: {
             filter_groups?: CyclotronJobFiltersType[]
             search?: string
-            types?: HogFunctionTypeType[]
+            types?: CustomFunctionTypeType[]
             limit?: number
             full?: boolean
-        }): Promise<CountedPaginatedResponse<HogFunctionType>> {
+        }): Promise<CountedPaginatedResponse<CustomFunctionType>> {
             return await new ApiRequest()
-                .hogFunctions()
+                .customFunctions()
                 .withQueryString({
                     filter_groups,
                     // NOTE: The API expects "type" as thats the DB level name
@@ -3361,54 +3361,54 @@ const api = {
                 })
                 .get()
         },
-        async get(id: HogFunctionType['id']): Promise<HogFunctionType> {
-            return await new ApiRequest().hogFunction(id).get()
+        async get(id: CustomFunctionType['id']): Promise<CustomFunctionType> {
+            return await new ApiRequest().customFunction(id).get()
         },
-        async create(data: Partial<HogFunctionType>): Promise<HogFunctionType> {
-            return await new ApiRequest().hogFunctions().create({ data })
+        async create(data: Partial<CustomFunctionType>): Promise<CustomFunctionType> {
+            return await new ApiRequest().customFunctions().create({ data })
         },
-        async update(id: HogFunctionType['id'], data: Partial<HogFunctionType>): Promise<HogFunctionType> {
-            return await new ApiRequest().hogFunction(id).update({ data })
+        async update(id: CustomFunctionType['id'], data: Partial<CustomFunctionType>): Promise<CustomFunctionType> {
+            return await new ApiRequest().customFunction(id).update({ data })
         },
         async logs(
-            id: HogFunctionType['id'],
+            id: CustomFunctionType['id'],
             params: LogEntryRequestParams = {}
         ): Promise<PaginatedResponse<LogEntry>> {
-            return await new ApiRequest().hogFunction(id).withAction('logs').withQueryString(params).get()
+            return await new ApiRequest().customFunction(id).withAction('logs').withQueryString(params).get()
         },
         async metrics(
-            id: HogFunctionType['id'],
+            id: CustomFunctionType['id'],
             params: AppMetricsV2RequestParams = {}
         ): Promise<AppMetricsV2Response> {
-            return await new ApiRequest().hogFunction(id).withAction('metrics').withQueryString(params).get()
+            return await new ApiRequest().customFunction(id).withAction('metrics').withQueryString(params).get()
         },
         async metricsTotals(
-            id: HogFunctionType['id'],
+            id: CustomFunctionType['id'],
             params: Partial<AppMetricsV2RequestParams> = {}
         ): Promise<AppMetricsTotalsV2Response> {
-            return await new ApiRequest().hogFunction(id).withAction('metrics/totals').withQueryString(params).get()
+            return await new ApiRequest().customFunction(id).withAction('metrics/totals').withQueryString(params).get()
         },
         async listTemplates(params: {
-            types: HogFunctionTypeType[]
-        }): Promise<PaginatedResponse<HogFunctionTemplateType>> {
+            types: CustomFunctionTypeType[]
+        }): Promise<PaginatedResponse<CustomFunctionTemplateType>> {
             const finalParams = {
                 ...params,
                 limit: 500,
                 types: params.types.join(','),
             }
 
-            return new ApiRequest().hogFunctionTemplates().withQueryString(finalParams).get()
+            return new ApiRequest().customFunctionTemplates().withQueryString(finalParams).get()
         },
-        async getTemplate(id: HogFunctionTemplateType['id']): Promise<HogFunctionTemplateType> {
-            return await new ApiRequest().hogFunctionTemplate(id).get()
+        async getTemplate(id: CustomFunctionTemplateType['id']): Promise<CustomFunctionTemplateType> {
+            return await new ApiRequest().customFunctionTemplate(id).get()
         },
 
-        async listIcons(params: { query?: string } = {}): Promise<HogFunctionIconResponse[]> {
-            return await new ApiRequest().hogFunctions().withAction('icons').withQueryString(params).get()
+        async listIcons(params: { query?: string } = {}): Promise<CustomFunctionIconResponse[]> {
+            return await new ApiRequest().customFunctions().withAction('icons').withQueryString(params).get()
         },
 
         async createTestInvocation(
-            id: HogFunctionType['id'],
+            id: CustomFunctionType['id'],
             data: {
                 configuration: Record<string, any>
                 mock_async_functions: boolean
@@ -3417,17 +3417,17 @@ const api = {
                 invocation_id?: string
             }
         ): Promise<CyclotronJobTestInvocationResult> {
-            return await new ApiRequest().hogFunction(id).withAction('invocations').create({ data })
+            return await new ApiRequest().customFunction(id).withAction('invocations').create({ data })
         },
 
-        async getStatus(id: HogFunctionType['id']): Promise<HogFunctionStatus> {
-            return await new ApiRequest().hogFunction(id).withAction('status').get()
+        async getStatus(id: CustomFunctionType['id']): Promise<CustomFunctionStatus> {
+            return await new ApiRequest().customFunction(id).withAction('status').get()
         },
-        async rearrange(orders: Record<string, number>): Promise<HogFunctionType[]> {
-            return await new ApiRequest().hogFunctions().withAction('rearrange').update({ data: { orders } })
+        async rearrange(orders: Record<string, number>): Promise<CustomFunctionType[]> {
+            return await new ApiRequest().customFunctions().withAction('rearrange').update({ data: { orders } })
         },
-        async enableBackfills(id: HogFunctionType['id']): Promise<{ batch_export_id: string }> {
-            return await new ApiRequest().hogFunction(id).withAction('enable_backfills').create()
+        async enableBackfills(id: CustomFunctionType['id']): Promise<{ batch_export_id: string }> {
+            return await new ApiRequest().customFunction(id).withAction('enable_backfills').create()
         },
     },
 
@@ -4009,11 +4009,11 @@ const api = {
         ): Promise<Record<string, any>> {
             return await new ApiRequest().notebook(notebookId).withAction('kernel/execute').create({ data })
         },
-        async hogqlExecute(
+        async insightsqlExecute(
             notebookId: NotebookType['short_id'],
             data: { query: string }
         ): Promise<{ columns?: string[]; results?: any[]; error?: string }> {
-            return await new ApiRequest().notebook(notebookId).withAction('hogql/execute').create({ data })
+            return await new ApiRequest().notebook(notebookId).withAction('insightsql/execute').create({ data })
         },
         async kernelExecuteStream(
             notebookId: NotebookType['short_id'],
@@ -4726,9 +4726,9 @@ const api = {
             return await new ApiRequest().externalDataSourceSchema(schemaId).withAction('delete_data').delete()
         },
     },
-    fixHogQLErrors: {
+    fixInsightsQLErrors: {
         async fix(query: string, error?: string): Promise<Record<string, any>> {
-            return await new ApiRequest().fixHogQLErrors().create({ data: { query, error } })
+            return await new ApiRequest().fixInsightsQLErrors().create({ data: { query, error } })
         },
     },
 
@@ -5000,7 +5000,7 @@ const api = {
     },
 
     queryLog: {
-        async get(queryId: string): Promise<HogQLQueryResponse> {
+        async get(queryId: string): Promise<InsightsQLQueryResponse> {
             return await new ApiRequest().queryLog(queryId).get()
         },
     },
@@ -5187,7 +5187,7 @@ const api = {
         async createHogFlowBatchJob(
             hogFlowId: HogFlow['id'],
             data: {
-                variables: Record<string, HogQLVariable>
+                variables: Record<string, InsightsQLVariable>
                 filters: Extract<HogFlowAction['config'], { type: 'batch' }>['filters']
                 scheduled_at?: string | null
             }
@@ -5253,7 +5253,7 @@ const api = {
             clientQueryId?: string
             refresh?: RefreshType
             filtersOverride?: DashboardFilter | null
-            variablesOverride?: Record<string, HogQLVariable> | null
+            variablesOverride?: Record<string, InsightsQLVariable> | null
             limitContext?: 'posthog_ai'
         }
     ): Promise<
@@ -5276,28 +5276,28 @@ const api = {
         })
     },
 
-    async queryHogQL<T = any[]>(
-        query: HogQLQueryString,
+    async queryInsightsQL<T = any[]>(
+        query: InsightsQLQueryString,
         tags: QueryLogTags,
         queryOptions?: {
             requestOptions?: ApiMethodOptions
             clientQueryId?: string
             refresh?: RefreshType
             filtersOverride?: DashboardFilter | null
-            variablesOverride?: Record<string, HogQLVariable> | null
-            queryParams?: Omit<HogQLQuery, 'kind' | 'query' | 'tags'>
+            variablesOverride?: Record<string, InsightsQLVariable> | null
+            queryParams?: Omit<InsightsQLQuery, 'kind' | 'query' | 'tags'>
         }
-    ): Promise<HogQLQueryResponse<T>> {
-        const hogQLQuery: HogQLQuery = setLatestVersionsOnQuery({
+    ): Promise<InsightsQLQueryResponse<T>> {
+        const insightsQLQuery: InsightsQLQuery = setLatestVersionsOnQuery({
             ...queryOptions?.queryParams,
-            kind: NodeKind.HogQLQuery,
+            kind: NodeKind.InsightsQLQuery,
             query,
             tags,
         })
         return await new ApiRequest().query().create({
             ...queryOptions?.requestOptions,
             data: {
-                query: hogQLQuery,
+                query: insightsQLQuery,
                 client_query_id: queryOptions?.clientQueryId,
                 refresh: queryOptions?.refresh,
                 filters_override: queryOptions?.filtersOverride,

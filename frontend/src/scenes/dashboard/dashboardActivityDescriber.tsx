@@ -1,5 +1,5 @@
 import posthog from 'posthog-js'
-import { DashboardFilter, HogQLVariable } from 'src/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable } from 'src/queries/schema/schema-general'
 
 import { Link } from '@posthog/lemon-ui'
 
@@ -128,7 +128,7 @@ const dashboardActionsMapping: Record<
         }
     },
     variables: function onChangedVariables(change, logItem) {
-        const variablesAfter = change?.after as Record<string, HogQLVariable>
+        const variablesAfter = change?.after as Record<string, InsightsQLVariable>
         return {
             description: ['changed the dashboard variables'],
             extendedDescription: (

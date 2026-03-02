@@ -9,7 +9,7 @@ import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { ActionFilter } from 'scenes/insights/filters/ActionFilter/ActionFilter'
 import { MathAvailability } from 'scenes/insights/filters/ActionFilter/ActionFilterRow/ActionFilterRow'
-import { getHogQLValue } from 'scenes/insights/filters/AggregationSelect'
+import { getInsightsQLValue } from 'scenes/insights/filters/AggregationSelect'
 import { teamLogic } from 'scenes/teamLogic'
 
 import { Query } from '~/queries/Query/Query'
@@ -99,9 +99,9 @@ export function FunnelsMetricForm({ isSecondary = false }: { isSecondary?: boole
             />
             <div className="mt-4 deprecated-space-y-4">
                 <FunnelAggregationSelect
-                    value={getHogQLValue(
+                    value={getInsightsQLValue(
                         currentMetric.funnels_query.aggregation_group_type_index ?? undefined,
-                        currentMetric.funnels_query.funnelsFilter?.funnelAggregateByHogQL ?? undefined
+                        currentMetric.funnels_query.funnelsFilter?.funnelAggregateByInsightsQL ?? undefined
                     )}
                     onChange={(value) => {
                         if (!currentMetric.uuid) {
@@ -109,7 +109,7 @@ export function FunnelsMetricForm({ isSecondary = false }: { isSecondary?: boole
                         }
                         setFunnelsMetric({
                             uuid: currentMetric.uuid,
-                            funnelAggregateByHogQL: value,
+                            funnelAggregateByInsightsQL: value,
                             isSecondary,
                         })
                     }}

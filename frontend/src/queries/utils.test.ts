@@ -7,43 +7,43 @@ import { teamLogic } from 'scenes/teamLogic'
 import { initKeaTests } from '~/test/init'
 import { AppContext, TeamType } from '~/types'
 
-import { escapeHogQLString, hogql } from './utils'
+import { escapeInsightsQLString, insightsql } from './utils'
 
 window.POSTHOG_APP_CONTEXT = { current_team: { id: MOCK_TEAM_ID } } as unknown as AppContext
 
-describe('hogql tag', () => {
+describe('insightsql tag', () => {
     initKeaTests()
     teamLogic.mount()
 
     it('properly returns query with no substitutions', () => {
-        expect(hogql`SELECT * FROM events`).toEqual('SELECT * FROM events')
+        expect(insightsql`SELECT * FROM events`).toEqual('SELECT * FROM events')
     })
 
     it('properly returns query with simple identifier substition', () => {
-        expect(hogql`SELECT * FROM ${hogql.identifier('events')}`).toEqual('SELECT * FROM events')
+        expect(insightsql`SELECT * FROM ${insightsql.identifier('events')}`).toEqual('SELECT * FROM events')
     })
 
     it('properly returns query with escaped identifier substition', () => {
-        expect(hogql`SELECT properties.${hogql.identifier('odd property')} FROM events`).toEqual(
+        expect(insightsql`SELECT properties.${insightsql.identifier('odd property')} FROM events`).toEqual(
             'SELECT properties."odd property" FROM events'
         )
     })
 
     it('properly returns query with string and number substitutions', () => {
-        expect(hogql`SELECT * FROM events WHERE properties.foo = ${'bar'} AND properties.baz = ${3}`).toEqual(
+        expect(insightsql`SELECT * FROM events WHERE properties.foo = ${'bar'} AND properties.baz = ${3}`).toEqual(
             "SELECT * FROM events WHERE properties.foo = 'bar' AND properties.baz = 3"
         )
     })
 
     it('properly returns query with string array substitution', () => {
-        expect(hogql`SELECT * FROM events WHERE properties.foo IN ${['bar', 'baz']}`).toEqual(
+        expect(insightsql`SELECT * FROM events WHERE properties.foo IN ${['bar', 'baz']}`).toEqual(
             "SELECT * FROM events WHERE properties.foo IN ['bar', 'baz']"
         )
     })
 
     it('properly returns query with date substitution in UTC', () => {
         teamLogic.actions.loadCurrentTeamSuccess({ id: MOCK_TEAM_ID, timezone: 'UTC' } as TeamType)
-        expect(hogql`SELECT * FROM events WHERE timestamp > ${dayjs('2023-04-04T04:04:00Z')}`).toEqual(
+        expect(insightsql`SELECT * FROM events WHERE timestamp > ${dayjs('2023-04-04T04:04:00Z')}`).toEqual(
             "SELECT * FROM events WHERE timestamp > '2023-04-04 04:04:00'"
         )
     })
@@ -55,7 +55,7 @@ describe('hogql tag', () => {
             context.current_team.timezone = 'Europe/Moscow'
         }
         teamLogic.actions.loadCurrentTeamSuccess({ id: MOCK_TEAM_ID, timezone: 'Europe/Moscow' } as TeamType)
-        expect(hogql`SELECT * FROM events WHERE timestamp > ${dayjs('2023-04-04T04:04:00Z')}`).toEqual(
+        expect(insightsql`SELECT * FROM events WHERE timestamp > ${dayjs('2023-04-04T04:04:00Z')}`).toEqual(
             "SELECT * FROM events WHERE timestamp > '2023-04-04 07:04:00'" // Offset by 3 hours
         )
         if (context?.current_team) {
@@ -64,19 +64,19 @@ describe('hogql tag', () => {
     })
 
     it('properly escapes single quotes in string values', () => {
-        expect(hogql`SELECT * FROM events WHERE properties.name = ${"O'Reilly"}`).toEqual(
+        expect(insightsql`SELECT * FROM events WHERE properties.name = ${"O'Reilly"}`).toEqual(
             "SELECT * FROM events WHERE properties.name = 'O\\'Reilly'"
         )
     })
 
     it('properly escapes backslashes in string values', () => {
-        expect(hogql`SELECT * FROM events WHERE properties.path = ${'C:\\Users\\test'}`).toEqual(
+        expect(insightsql`SELECT * FROM events WHERE properties.path = ${'C:\\Users\\test'}`).toEqual(
             "SELECT * FROM events WHERE properties.path = 'C:\\\\Users\\\\test'"
         )
     })
 })
 
-describe('escapeHogQLString', () => {
+describe('escapeInsightsQLString', () => {
     it.each([
         ['simple', "'simple'"],
         ["O'Reilly", "'O\\'Reilly'"],
@@ -89,6 +89,6 @@ describe('escapeHogQLString', () => {
         ["multiple'quotes'here", "'multiple\\'quotes\\'here'"],
         ['back\\slash', "'back\\\\slash'"],
     ])('escapes %s to %s', (input, expected) => {
-        expect(escapeHogQLString(input)).toEqual(expected)
+        expect(escapeInsightsQLString(input)).toEqual(expected)
     })
 })

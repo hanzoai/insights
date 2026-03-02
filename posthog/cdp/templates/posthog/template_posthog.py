@@ -1,11 +1,11 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.hogql.escape_sql import escape_hogql_string
+from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -14,7 +14,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send a copy of the incoming data in realtime to another PostHog instance",
     icon_url="/static/posthog-icon.svg",
     category=["Custom", "Analytics"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 let host := inputs.host
 let token := inputs.token
@@ -80,7 +80,7 @@ fetch(f'{host}/e', {
 )
 
 
-class TemplatePostHogMigrator(HogFunctionTemplateMigrator):
+class TemplatePostHogMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/posthog-plugin-replicator"
 
     @classmethod
@@ -104,14 +104,14 @@ class TemplatePostHogMigrator(HogFunctionTemplateMigrator):
 
         hf["filters"] = {}
         if events_to_ignore:
-            event_names = ", ".join([escape_hogql_string(event) for event in events_to_ignore])
+            event_names = ", ".join([escape_insightsql_string(event) for event in events_to_ignore])
             hf["filters"]["events"] = [
                 {
                     "id": None,
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"type": "hogql", "key": f"event not in ({event_names})"}],
+                    "properties": [{"type": "insightsql", "key": f"event not in ({event_names})"}],
                 }
             ]
 

@@ -31,7 +31,7 @@ NON_RETRYABLE_ERRORS = [
     "CannotCoerceColumnException",
     "InvalidNodeTypeException",
     "NodeNotFoundException",
-    "EmptyHogQLResponseColumnsError",
+    "EmptyInsightsQLResponseColumnsError",
 ]
 
 
@@ -81,7 +81,7 @@ class MaterializeViewWorkflow(PostHogWorkflow):
 
     This workflow handles the complete materialization of a single view/materialized view:
     1. Creates a job record to track progress
-    2. Executes the HogQL query and writes results to a delta lake table
+    2. Executes the InsightsQL query and writes results to a delta lake table
     3. Copies the data to DuckLake (if enabled)
     4. Updates the node and job with completion status
 

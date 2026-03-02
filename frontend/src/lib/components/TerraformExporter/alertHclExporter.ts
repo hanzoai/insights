@@ -1,16 +1,16 @@
 import { formatHclValue, sanitizeResourceName } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
 import { AlertType } from '~/lib/components/Alerts/types'
-import { HogFunctionType } from '~/types'
+import { CustomFunctionType } from '~/types'
 
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
-import { generateHogFunctionHCL } from './hogFunctionHclExporter'
+import { generateCustomFunctionHCL } from './customFunctionHclExporter'
 
 export interface AlertHclExportOptions extends HclExportOptions {
     /** When provided, uses TF reference instead of hardcoded insight id */
     insightTfReference?: string
-    /** Child hog functions to include in export */
-    hogFunctions?: HogFunctionType[]
+    /** Child custom functions to include in export */
+    customFunctions?: CustomFunctionType[]
 }
 
 /**
@@ -140,8 +140,8 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
     allWarnings.push(...result.warnings)
     hclSections.push(result.hcl)
 
-    // Generate child hog functions if provided
-    if (options.hogFunctions && options.hogFunctions.length > 0) {
+    // Generate child custom functions if provided
+    if (options.customFunctions && options.customFunctions.length > 0) {
         const alertIdReplacements = new Map<string, string>()
         if (alert.id) {
             const alertTfName = sanitizeResourceName(
@@ -152,12 +152,12 @@ export function generateAlertHCL(alert: Partial<AlertType>, options: AlertHclExp
             alertIdReplacements.set(alert.id, alertTfReference)
         }
 
-        for (const hogFunction of options.hogFunctions) {
-            const hogFunctionResult = generateHogFunctionHCL(hogFunction, { alertIdReplacements })
+        for (const customFunction of options.customFunctions) {
+            const customFunctionResult = generateCustomFunctionHCL(customFunction, { alertIdReplacements })
             hclSections.push('')
-            hclSections.push(hogFunctionResult.hcl)
+            hclSections.push(customFunctionResult.hcl)
             allWarnings.push(
-                ...hogFunctionResult.warnings.map((w) => `[Hog Function: ${hogFunction.name || hogFunction.id}] ${w}`)
+                ...customFunctionResult.warnings.map((w) => `[Custom Function: ${customFunction.name || customFunction.id}] ${w}`)
             )
         }
     }

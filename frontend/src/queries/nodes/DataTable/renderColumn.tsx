@@ -19,7 +19,7 @@ import { sessionColumnRenderers } from 'scenes/sessions/sessionColumnRenderers'
 import { urls } from 'scenes/urls'
 
 import { errorColumn, loadingColumn } from '~/queries/nodes/DataTable/dataTableLogic'
-import { renderHogQLX } from '~/queries/nodes/HogQLX/render'
+import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
 import { DeletePersonButton } from '~/queries/nodes/PersonsNode/DeletePersonButton'
 import {
     CurrencyCode,
@@ -33,7 +33,7 @@ import {
     isActorsQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isPersonsNode,
     isRevenueExampleEventsQuery,
     isTracesQuery,
@@ -128,7 +128,7 @@ export function renderColumn(
             />
         )
     } else if (typeof value === 'object' && Array.isArray(value) && value[0] === '__hx_tag') {
-        return renderHogQLX(value)
+        return renderInsightsQLX(value)
     } else if (value === null) {
         return (
             <Tooltip title="NULL" placement="right" delayMs={0}>
@@ -137,7 +137,7 @@ export function renderColumn(
                 </span>
             </Tooltip>
         )
-    } else if (isHogQLQuery(query.source)) {
+    } else if (isInsightsQLQuery(query.source)) {
         if (typeof value === 'string') {
             try {
                 if (value.startsWith('{') && value.endsWith('}')) {

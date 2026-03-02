@@ -10,8 +10,8 @@ import { teamLogic } from 'scenes/teamLogic'
 
 import { performQuery } from '~/queries/query'
 import {
-    HogQLQuery,
-    HogQLQueryResponse,
+    InsightsQLQuery,
+    InsightsQLQueryResponse,
     NodeKind,
     TrendsQuery,
     TrendsQueryResponse,
@@ -203,7 +203,7 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
                 const handoff = new Date(now)
 
                 // The SSE stream will drop any events older than this value
-                // Those values will be retrieved by the HogQL queries instead
+                // Those values will be retrieved by the InsightsQL queries instead
                 cache.newerThan = handoff
 
                 actions.updateConnection()
@@ -330,9 +330,9 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
 const loadQueryData = async (
     dateFrom: Date,
     dateTo: Date
-): Promise<[HogQLQueryResponse, HogQLQueryResponse, HogQLQueryResponse, TrendsQueryResponse]> => {
-    const usersPageviewsQuery: HogQLQuery = {
-        kind: NodeKind.HogQLQuery,
+): Promise<[InsightsQLQueryResponse, InsightsQLQueryResponse, InsightsQLQueryResponse, TrendsQueryResponse]> => {
+    const usersPageviewsQuery: InsightsQLQuery = {
+        kind: NodeKind.InsightsQLQuery,
         query: `SELECT
                     toStartOfMinute(timestamp) AS minute_bucket,
                     arrayDistinct(groupArray(distinct_id)) AS distinct_ids,
@@ -351,8 +351,8 @@ const loadQueryData = async (
         },
     }
 
-    const createBreakdownQuery = (property: string, alias: string): HogQLQuery => ({
-        kind: NodeKind.HogQLQuery,
+    const createBreakdownQuery = (property: string, alias: string): InsightsQLQuery => ({
+        kind: NodeKind.InsightsQLQuery,
         query: `SELECT
                     minute_bucket,
                     mapFromArrays(
@@ -422,7 +422,7 @@ const loadQueryData = async (
 }
 
 const addUserDataToBuckets = (
-    usersPageviewsResponse: HogQLQueryResponse,
+    usersPageviewsResponse: InsightsQLQueryResponse,
     bucketMap: Map<number, SlidingWindowBucket>
 ): void => {
     const usersResults = usersPageviewsResponse.results as [string, string[], number][]
@@ -445,7 +445,7 @@ const transformDeviceId = (deviceId: string): string => {
 }
 
 const addBreakdownDataToBuckets = (
-    response: HogQLQueryResponse,
+    response: InsightsQLQueryResponse,
     bucketMap: Map<number, SlidingWindowBucket>,
     getBucketMap: (bucket: SlidingWindowBucket) => Map<string, Set<string>>
 ): void => {

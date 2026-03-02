@@ -3,7 +3,7 @@ from typing import Any, Optional, Union
 
 from posthog.schema import PersonsOnEventsMode
 
-from posthog.hogql.database.database import Database
+from posthog.insightsql.database.database import Database
 
 from posthog.clickhouse.materialized_columns import ColumnName
 from posthog.models import Cohort, Filter, Property
@@ -91,12 +91,12 @@ class EventQuery(metaclass=ABCMeta):
         self._extra_fields = extra_fields
         self._person_on_events_mode = alias_poe_mode_for_legacy(person_on_events_mode)
 
-        # HACK: Because we're in a legacy query, we need to override hogql_context with the legacy-alised PoE mode
-        self._filter.hogql_context.modifiers.personsOnEventsMode = self._person_on_events_mode
+        # HACK: Because we're in a legacy query, we need to override insightsql_context with the legacy-alised PoE mode
+        self._filter.insightsql_context.modifiers.personsOnEventsMode = self._person_on_events_mode
 
         # Recreate the database with the legacy-alised PoE mode
-        self._filter.hogql_context.database = Database.create_for(
-            team=self._team, modifiers=self._filter.hogql_context.modifiers
+        self._filter.insightsql_context.database = Database.create_for(
+            team=self._team, modifiers=self._filter.insightsql_context.modifiers
         )
 
         # Guards against a ClickHouse bug involving multiple joins against the same table with the same column name.
@@ -299,7 +299,7 @@ class EventQuery(metaclass=ABCMeta):
             allow_denormalized_props=allow_denormalized_props,
             person_properties_mode=person_properties_mode,
             person_id_joined_alias=person_id_joined_alias,
-            hogql_context=self._filter.hogql_context,
+            insightsql_context=self._filter.insightsql_context,
         )
 
     def _get_not_null_actor_condition(self) -> str:

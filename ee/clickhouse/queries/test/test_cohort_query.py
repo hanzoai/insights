@@ -17,7 +17,7 @@ from posthog.schema import PersonsOnEventsMode
 
 from posthog.clickhouse.client import sync_execute
 from posthog.constants import PropertyOperatorType
-from posthog.hogql_queries.hogql_cohort_query import TestWrapperCohortQuery as CohortQuery
+from posthog.insightsql_queries.insightsql_cohort_query import TestWrapperCohortQuery as CohortQuery
 from posthog.models import Team
 from posthog.models.action import Action
 from posthog.models.cohort import Cohort
@@ -59,9 +59,9 @@ def _create_cohort(**kwargs):
 
 
 def execute(filter: Filter, team: Team, max_retries: int = 5):
-    # Ensure tables are fully merged before comparing HogQL and raw SQL results.
+    # Ensure tables are fully merged before comparing InsightsQL and raw SQL results.
     # Due to ClickHouse's eventual consistency with CollapsingMergeTree and other
-    # MergeTree variants, HogQL and raw SQL queries may see slightly different states.
+    # MergeTree variants, InsightsQL and raw SQL queries may see slightly different states.
     # We retry the comparison to handle transient inconsistencies.
     sync_execute("OPTIMIZE TABLE cohortpeople FINAL")
     sync_execute("OPTIMIZE TABLE person FINAL")
@@ -71,10 +71,10 @@ def execute(filter: Filter, team: Team, max_retries: int = 5):
     for attempt in range(max_retries):
         cohort_query = CohortQuery(filter=filter, team=team)
         q, params = cohort_query.get_query()
-        res = sync_execute(q, {**params, **filter.hogql_context.values})
+        res = sync_execute(q, {**params, **filter.insightsql_context.values})
         try:
-            unittest.TestCase().assertCountEqual(res, cohort_query.hogql_result.results)
-            assert ["id"] == cohort_query.hogql_result.columns
+            unittest.TestCase().assertCountEqual(res, cohort_query.insightsql_result.results)
+            assert ["id"] == cohort_query.insightsql_result.columns
             return res, q, params
         except AssertionError as e:
             last_error = e

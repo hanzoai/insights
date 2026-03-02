@@ -1,4 +1,4 @@
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.june.template_june import template as template_june
 
 
@@ -13,7 +13,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateJune(BaseHogFunctionTemplateTest):
+class TestTemplateJune(BaseCustomFunctionTemplateTest):
     template = template_june
 
     def test_function_works(self):

@@ -31,7 +31,7 @@ import {
     ConditionalFormattingRule,
     DataVisualizationNode,
     HeatmapSettings,
-    HogQLVariable,
+    InsightsQLVariable,
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 import { ChartDisplayType, DashboardType } from '~/types'
@@ -88,7 +88,7 @@ export interface DataVisualizationLogicProps {
     dashboardId?: DashboardType['id']
     loadPriority?: number
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     limitContext?: 'posthog_ai'
 }
 

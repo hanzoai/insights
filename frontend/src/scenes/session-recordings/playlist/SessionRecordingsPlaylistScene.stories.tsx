@@ -150,7 +150,7 @@ const meta: Meta = {
                     }
 
                     if (
-                        body.query.kind === 'HogQLQuery' &&
+                        body.query.kind === 'InsightsQLQuery' &&
                         body.query.query.includes('any(properties.$geoip_country_code) as $geoip_country_code')
                     ) {
                         return res(

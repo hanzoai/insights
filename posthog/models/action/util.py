@@ -4,7 +4,7 @@ from collections import (
 )
 from typing import Literal, Optional
 
-from posthog.hogql.hogql import HogQLContext
+from posthog.insightsql.insightsql import InsightsQLContext
 
 from posthog.constants import AUTOCAPTURE_EVENT
 from posthog.models import Filter
@@ -34,7 +34,7 @@ def format_action_filter_event_only(
 def format_action_filter(
     team_id: int,
     action: Action,
-    hogql_context: HogQLContext,
+    insightsql_context: InsightsQLContext,
     prepend: str = "action",
     filter_by_team=True,
     table_name: str = "",
@@ -106,7 +106,7 @@ def format_action_filter(
                 table_name=table_name,
                 person_properties_mode=person_properties_mode,
                 person_id_joined_alias=person_id_joined_alias,
-                hogql_context=hogql_context,
+                insightsql_context=insightsql_context,
             )
             conditions.append(prop_query.replace("AND", "", 1))
             params.update(prop_params)

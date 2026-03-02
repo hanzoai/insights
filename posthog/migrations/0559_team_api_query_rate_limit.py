@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             name="api_query_rate_limit",
             field=models.CharField(
                 blank=True,
-                help_text="Custom rate limit for HogQL API queries in #requests/{sec,min,hour,day}",
+                help_text="Custom rate limit for InsightsQL API queries in #requests/{sec,min,hour,day}",
                 max_length=32,
                 null=True,
                 validators=[posthog.models.utils.validate_rate_limit],

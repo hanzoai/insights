@@ -49,7 +49,7 @@ export const textContent = (node: RichContentNode): string => {
         [NotebookNodeType.Query]: customOrTitleSerializer,
         [NotebookNodeType.Python]: customOrTitleSerializer,
         [NotebookNodeType.DuckSQL]: customOrTitleSerializer,
-        [NotebookNodeType.HogQLSQL]: customOrTitleSerializer,
+        [NotebookNodeType.InsightsQLSQL]: customOrTitleSerializer,
         [NotebookNodeType.Recording]: customOrTitleSerializer,
         [NotebookNodeType.LLMTrace]: customOrTitleSerializer,
         [NotebookNodeType.Issues]: customOrTitleSerializer,

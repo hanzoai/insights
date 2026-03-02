@@ -136,7 +136,7 @@ export function RetentionCondition({ insightProps }: EditorFilterProps): JSX.Ele
             <div className="flex items-center">
                 For
                 {showGroupsOptions ? (
-                    <AggregationSelect className="mx-2" insightProps={insightProps} hogqlAvailable={false} />
+                    <AggregationSelect className="mx-2" insightProps={insightProps} insightsqlAvailable={false} />
                 ) : (
                     <b> Unique users </b>
                 )}

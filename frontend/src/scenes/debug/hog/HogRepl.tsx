@@ -8,7 +8,7 @@ import { JSONViewer } from 'lib/components/JSONViewer'
 import { CodeEditorInline } from 'lib/monaco/CodeEditorInline'
 import { SceneExport } from 'scenes/sceneTypes'
 
-import { renderHogQLX } from '~/queries/nodes/HogQLX/render'
+import { renderInsightsQLX } from '~/queries/nodes/InsightsQLX/render'
 
 import { ReplChunk as ReplChunkType, hogReplLogic } from './hogReplLogic'
 
@@ -56,7 +56,7 @@ export function ReplResultsTable({ response }: ReplResultsTableProps): JSX.Eleme
 function printRichHogOutput(arg: any): JSX.Element | string {
     if (typeof arg === 'object' && arg !== null) {
         if ('__hx_tag' in arg) {
-            return renderHogQLX(arg)
+            return renderInsightsQLX(arg)
         }
         if ('results' in arg && 'columns' in arg && Array.isArray(arg.results) && Array.isArray(arg.columns)) {
             return <ReplResultsTable response={arg} />

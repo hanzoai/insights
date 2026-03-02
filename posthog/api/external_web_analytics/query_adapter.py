@@ -8,7 +8,7 @@ from rest_framework.utils.urls import remove_query_param, replace_query_param
 from posthog.schema import (
     DateRange,
     EventPropertyFilter,
-    HogQLQueryModifiers,
+    InsightsQLQueryModifiers,
     PropertyOperator,
     WebOverviewQuery,
     WebOverviewQueryResponse,
@@ -23,8 +23,8 @@ from posthog.api.external_web_analytics.serializers import (
     WebAnalyticsBreakdownRequestSerializer,
     WebAnalyticsOverviewRequestSerializer,
 )
-from posthog.hogql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
-from posthog.hogql_queries.web_analytics.web_overview import WebOverviewQueryRunner
+from posthog.insightsql_queries.web_analytics.stats_table import WebStatsTableQueryRunner
+from posthog.insightsql_queries.web_analytics.web_overview import WebOverviewQueryRunner
 from posthog.models import Team
 
 
@@ -120,8 +120,8 @@ class ExternalWebAnalyticsQueryAdapter:
     def _get_datetime_str(self, date_value: date | datetime) -> str:
         return date_value.strftime("%Y-%m-%d")
 
-    def _get_default_modifiers(self) -> HogQLQueryModifiers:
-        return HogQLQueryModifiers(
+    def _get_default_modifiers(self) -> InsightsQLQueryModifiers:
+        return InsightsQLQueryModifiers(
             useWebAnalyticsPreAggregatedTables=True,
             convertToProjectTimezone=True,
         )
