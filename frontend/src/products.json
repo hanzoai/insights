@@ -8,7 +8,7 @@
             "intents": ["site_apps"]
         },
         {
-            "path": "Data pipelines",
+            "path": "Data Pipelines",
             "category": "Tools",
             "iconType": "data_pipeline",
             "type": "insights_function",
@@ -64,7 +64,7 @@
             "intents": ["endpoints"]
         },
         {
-            "path": "Error tracking",
+            "path": "Error Tracking",
             "category": "Behavior",
             "iconType": null,
             "type": "error_tracking",
@@ -93,7 +93,7 @@
             "intents": ["live_debugger"]
         },
         {
-            "path": "LLM analytics",
+            "path": "LLM Analytics",
             "category": "AI Analytics",
             "iconType": null,
             "type": "llm_analytics",
@@ -157,7 +157,7 @@
             "intents": ["product_tours"]
         },
         {
-            "path": "Session replay",
+            "path": "Session Replay",
             "category": "Behavior",
             "iconType": "session_replay",
             "type": "session_recording_playlist",
@@ -173,7 +173,13 @@
         },
         { "path": "Surveys", "category": "Behavior", "iconType": "survey", "type": "survey", "intents": ["surveys"] },
         { "path": "Tasks", "category": "Unreleased", "iconType": "task", "type": "task", "intents": ["tasks"] },
-        { "path": "Toolbar", "category": "Tools", "iconType": "toolbar", "type": "toolbar", "intents": ["toolbar"] },
+        {
+            "path": "Site Inspector",
+            "category": "Tools",
+            "iconType": "toolbar",
+            "type": "toolbar",
+            "intents": ["toolbar"]
+        },
         {
             "path": "User interviews",
             "category": "Unreleased",
@@ -182,7 +188,7 @@
             "intents": ["user_interviews"]
         },
         {
-            "path": "Web analytics",
+            "path": "Web Analytics",
             "category": "Analytics",
             "iconType": "web_analytics",
             "type": null,
@@ -196,28 +202,26 @@
             "intents": ["workflows"]
         }
     ],
-    "games": [
-        { "path": "368 Mascots", "category": null, "iconType": null, "type": null, "intents": [] }
-    ],
+    "games": [{ "path": "368 Mascots", "category": null, "iconType": null, "type": null, "intents": [] }],
     "metadata": [
         { "path": "Actions", "category": "Schema", "iconType": null, "type": null, "intents": [] },
         {
             "path": "Transformations",
-            "category": "Pipeline",
+            "category": "Data Pipeline",
             "iconType": "data_pipeline_metadata",
             "type": "insights_function/transformation",
             "intents": []
         },
         {
             "path": "Destinations",
-            "category": "Pipeline",
+            "category": "Data Pipeline",
             "iconType": "data_pipeline_metadata",
             "type": "insights_function/destination",
             "intents": []
         },
         {
             "path": "Event ingestion warnings",
-            "category": "Pipeline",
+            "category": "Data Pipeline",
             "iconType": "ingestion_warning",
             "type": null,
             "intents": []
@@ -226,7 +230,7 @@
         { "path": "Core events", "category": "Schema", "iconType": null, "type": null, "intents": [] },
         {
             "path": "Sources",
-            "category": "Pipeline",
+            "category": "Data Pipeline",
             "iconType": "data_pipeline_metadata",
             "type": "insights_function/source",
             "intents": []
