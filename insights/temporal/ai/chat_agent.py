@@ -44,7 +44,7 @@ class AssistantConversationRunnerWorkflowInputs:
     is_new_conversation: bool = False
     trace_id: Optional[str] = None
     session_id: Optional[str] = None
-    mode: AssistantMode = AssistantMode.ASSISTANT
+    mode: Optional[str] = None  # Legacy field, AssistantMode was removed with ee/
     billing_context: Optional[MaxBillingContext] = None
     agent_mode: AgentMode | None = None
     is_agent_billable: bool = True
