@@ -54,7 +54,7 @@ describe('CyclotronManager isolation', () => {
             id: mainJobId,
             teamId: 1,
             functionId: uuidv4(),
-            queueName: 'custom_script',
+            queueName: 'fn',
             priority: 1,
         })
 
@@ -63,7 +63,7 @@ describe('CyclotronManager isolation', () => {
             id: shadowJobId,
             teamId: 1,
             functionId: uuidv4(),
-            queueName: 'custom_script',
+            queueName: 'fn',
             priority: 1,
         })
 
@@ -100,7 +100,7 @@ describe('CyclotronManager isolation', () => {
                 id,
                 teamId: 1,
                 functionId: uuidv4(),
-                queueName: 'custom_script',
+                queueName: 'fn',
                 priority: 1,
             }))
         )
@@ -111,7 +111,7 @@ describe('CyclotronManager isolation', () => {
                 id,
                 teamId: 1,
                 functionId: uuidv4(),
-                queueName: 'custom_script',
+                queueName: 'fn',
                 priority: 1,
             }))
         )

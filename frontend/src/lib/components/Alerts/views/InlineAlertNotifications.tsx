@@ -13,7 +13,7 @@ import {
 } from 'lib/utils/alertUtils'
 import { urls } from 'scenes/urls'
 
-import { CustomFunctionType, SlackChannelType } from '~/types'
+import { InsightsFunctionType, SlackChannelType } from '~/types'
 
 import { ALERT_NOTIFICATION_TYPE_OPTIONS, alertNotificationLogic } from '../alertNotificationLogic'
 
@@ -22,8 +22,8 @@ function resolveSlackChannelName(channelValue: string, slackChannels: SlackChann
     return slackChannels.find((c) => c.id === channelId)?.name ?? null
 }
 
-function getCustomFunctionDestination(
-    hf: CustomFunctionType,
+function getInsightsFunctionDestination(
+    hf: InsightsFunctionType,
     slackChannels: SlackChannelType[]
 ): { type: string; detail: string | null } {
     const channelValue = hf.inputs?.channel?.value
@@ -48,8 +48,8 @@ interface InlineAlertNotificationsProps {
 export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsProps): JSX.Element {
     const logic = alertNotificationLogic({ alertId })
     const {
-        existingCustomFunctions,
-        existingCustomFunctionsLoading,
+        existingInsightsFunctions,
+        existingInsightsFunctionsLoading,
         pendingNotifications,
         firstSlackIntegration,
         selectedType,
@@ -59,7 +59,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
     const {
         addPendingNotification,
         removePendingNotification,
-        deleteExistingCustomFunction,
+        deleteExistingInsightsFunction,
         setSelectedType,
         setSlackChannelValue,
         setWebhookUrl,
@@ -112,12 +112,12 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
         <div className="space-y-4">
             {alertId && (
                 <div>
-                    {existingCustomFunctionsLoading ? (
+                    {existingInsightsFunctionsLoading ? (
                         <LemonSkeleton className="h-8" repeat={2} />
-                    ) : existingCustomFunctions.length > 0 ? (
+                    ) : existingInsightsFunctions.length > 0 ? (
                         <div className="space-y-2">
-                            {existingCustomFunctions.map((hf) => {
-                                const { type: destType, detail } = getCustomFunctionDestination(hf, slackChannels)
+                            {existingInsightsFunctions.map((hf) => {
+                                const { type: destType, detail } = getInsightsFunctionDestination(hf, slackChannels)
                                 return (
                                     <div
                                         key={hf.id}
@@ -138,7 +138,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                                             <LemonButton
                                                 icon={<IconExternal />}
                                                 size="xsmall"
-                                                to={urls.customFunction(hf.id)}
+                                                to={urls.insightsFunction(hf.id)}
                                                 targetBlank
                                                 hideExternalLinkIcon
                                                 tooltip="Open destination"
@@ -147,7 +147,7 @@ export function InlineAlertNotifications({ alertId }: InlineAlertNotificationsPr
                                                 icon={<IconTrash />}
                                                 size="xsmall"
                                                 status="danger"
-                                                onClick={() => deleteExistingCustomFunction(hf)}
+                                                onClick={() => deleteExistingInsightsFunction(hf)}
                                                 tooltip="Delete notification"
                                             />
                                         </div>

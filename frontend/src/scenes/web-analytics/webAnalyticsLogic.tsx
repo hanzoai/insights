@@ -230,12 +230,12 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                     return true
                 }
 
-                const [propertiesResponse, customFunctionsResponse] = await Promise.allSettled([
+                const [propertiesResponse, insightsFunctionsResponse] = await Promise.allSettled([
                     api.propertyDefinitions.list({
                         event_names: ['$pageview'],
                         properties: ['$geoip_country_code'],
                     }),
-                    api.customFunctions.list({ types: ['transformation'] }),
+                    api.insightsFunctions.list({ types: ['transformation'] }),
                 ])
 
                 const hasNonStaleCountryCodeDefinition =
@@ -248,18 +248,18 @@ export const webAnalyticsLogic = kea<webAnalyticsLogicType>([
                     return false
                 }
 
-                if (customFunctionsResponse.status !== 'fulfilled') {
+                if (insightsFunctionsResponse.status !== 'fulfilled') {
                     return false
                 }
 
-                const enabledGeoIPCustomFunction = customFunctionsResponse.value.results.find((customFunction) => {
-                    const isFromTemplate = GEOIP_TEMPLATE_IDS.includes(customFunction.template?.id ?? '')
-                    const matchesName = customFunction.name === 'GeoIP' // Failsafe in case someone implements their custom GeoIP function
+                const enabledGeoIPInsightsFunction = insightsFunctionsResponse.value.results.find((insightsFunction) => {
+                    const isFromTemplate = GEOIP_TEMPLATE_IDS.includes(insightsFunction.template?.id ?? '')
+                    const matchesName = insightsFunction.name === 'GeoIP' // Failsafe in case someone implements their custom GeoIP function
 
-                    return (isFromTemplate || matchesName) && customFunction.enabled
+                    return (isFromTemplate || matchesName) && insightsFunction.enabled
                 })
 
-                return Boolean(enabledGeoIPCustomFunction)
+                return Boolean(enabledGeoIPInsightsFunction)
             },
         },
     })),

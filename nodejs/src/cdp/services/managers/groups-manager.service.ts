@@ -4,7 +4,7 @@ import { sanitizeString } from '~/utils/db/utils'
 import { logger } from '~/utils/logger'
 
 import { GroupTypeIndex, Hub, Team } from '../../../types'
-import { GroupType, CustomFunctionInvocationGlobals } from '../../types'
+import { GroupType, InsightsFunctionInvocationGlobals } from '../../types'
 
 /** Narrowed Hub type for GroupsManagerService */
 export type GroupsManagerServiceHub = Pick<Hub, 'teamManager' | 'groupRepository' | 'SITE_URL'>
@@ -120,7 +120,7 @@ export class GroupsManagerService {
      * It iterates over the globals and creates "Group" objects, tracking them referentially in order to later load the properties.
      * Once loaded, the objects are mutated in place.
      */
-    public async enrichGroups(items: CustomFunctionInvocationGlobals[]): Promise<CustomFunctionInvocationGlobals[]> {
+    public async enrichGroups(items: InsightsFunctionInvocationGlobals[]): Promise<InsightsFunctionInvocationGlobals[]> {
         const itemsNeedingGroups = items.filter((x) => !x.groups)
         const byTeamType = await this.fetchGroupTypesMapping(
             Array.from(new Set(itemsNeedingGroups.map((global) => global.project.id)))
@@ -140,7 +140,7 @@ export class GroupsManagerService {
                     }
                 })
             }
-            const groups: CustomFunctionInvocationGlobals['groups'] = {}
+            const groups: InsightsFunctionInvocationGlobals['groups'] = {}
 
             // Add the base group info without properties
             Object.entries(validGroupsProperty).forEach(([groupType, groupKey]) => {

@@ -7,21 +7,21 @@ import supertest from 'supertest'
 import express from 'ultimate-express'
 
 import { setupExpressApp } from '~/api/router'
-import { insertCustomFunction, insertCustomFunctionTemplate } from '~/cdp/_tests/fixtures'
+import { insertInsightsFunction, insertInsightsFunctionTemplate } from '~/cdp/_tests/fixtures'
 import { CdpApi } from '~/cdp/cdp-api'
 import { template as pixelTemplate } from '~/cdp/templates/_sources/pixel/pixel.template'
 import { template as incomingWebhookTemplate } from '~/cdp/templates/_sources/webhook/incoming_webhook.template'
-import { CustomFunctionType } from '~/cdp/types'
-import { CustomFlow } from '~/schema/customflow'
+import { InsightsFunctionType } from '~/cdp/types'
+import { InsightsFlow } from '~/schema/customflow'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 
-import { FixtureCustomFlowBuilder } from '../_tests/builders/customflow.builder'
-import { insertCustomFlow } from '../_tests/fixtures-customflows'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/customflow.builder'
+import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
-import { compileScript } from '../templates/compiler'
+import { compileFn } from '../templates/compiler'
 import { compileInputs } from '../templates/test/test-helpers'
 
 describe('SourceWebhooksConsumer', () => {
@@ -44,8 +44,8 @@ describe('SourceWebhooksConsumer', () => {
         // NOTE: These tests are done via the CdpApi router so we can get full coverage of the code
         let api: CdpApi
         let app: express.Application
-        let customFunction: CustomFunctionType
-        let customFunctionPixel: CustomFunctionType
+        let insightsFunction: InsightsFunctionType
+        let insightsFunctionPixel: InsightsFunctionType
         let server: Server
 
         let mockExecuteSpy: jest.SpyInstance
@@ -63,17 +63,17 @@ describe('SourceWebhooksConsumer', () => {
             app.use('/', api.router())
             server = app.listen(0, () => {})
 
-            customFunction = await insertCustomFunction(hub.postgres, team.id, {
+            insightsFunction = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'source_webhook',
                 script: incomingWebhookTemplate.code,
-                bytecode: await compileScript(incomingWebhookTemplate.code),
+                bytecode: await compileFn(incomingWebhookTemplate.code),
                 inputs: await compileInputs(incomingWebhookTemplate, {}),
             })
 
-            customFunctionPixel = await insertCustomFunction(hub.postgres, team.id, {
+            insightsFunctionPixel = await insertInsightsFunction(hub.postgres, team.id, {
                 type: 'source_webhook',
                 script: pixelTemplate.code,
-                bytecode: await compileScript(pixelTemplate.code),
+                bytecode: await compileFn(pixelTemplate.code),
                 inputs: await compileInputs(pixelTemplate, {}),
             })
 
@@ -96,7 +96,7 @@ describe('SourceWebhooksConsumer', () => {
             body?: Record<string, any>
         }) => {
             return supertest(app)
-                .post(`/public/webhooks/${options.webhookId ?? customFunction.id}`)
+                .post(`/public/webhooks/${options.webhookId ?? insightsFunction.id}`)
                 .set('Content-Type', 'application/json')
                 .set(options.headers ?? {})
                 .send(options.body)
@@ -128,7 +128,7 @@ describe('SourceWebhooksConsumer', () => {
         describe('custom function processing', () => {
             it('should 404 if the custom function does not exist', async () => {
                 const res = await doPostRequest({
-                    webhookId: 'non-existent-custom-function-id',
+                    webhookId: 'non-existent-insights-function-id',
                 })
                 expect(res.status).toEqual(404)
                 expect(res.body).toEqual({
@@ -139,7 +139,7 @@ describe('SourceWebhooksConsumer', () => {
             it('should capture an event using internal capture', async () => {
                 // Mock the monitoring service to verify events ARE captured for regular webhooks
                 const mockQueueInvocationResults = jest.spyOn(
-                    api['cdpSourceWebhooksConsumer']['customFunctionMonitoringService'],
+                    api['cdpSourceWebhooksConsumer']['insightsFunctionMonitoringService'],
                     'queueInvocationResults'
                 )
 
@@ -158,14 +158,14 @@ describe('SourceWebhooksConsumer', () => {
                 // Verify that queueInvocationResults WAS called for regular webhooks (this captures the event)
                 expect(mockQueueInvocationResults).toHaveBeenCalledTimes(1)
                 const result = mockQueueInvocationResults.mock.calls[0][0][0]
-                expect(result.capturedInsightsEvents[0].properties).toHaveProperty('$custom_function_execution_count', 1)
+                expect(result.capturedInsightsEvents[0].properties).toHaveProperty('$insights_function_execution_count', 1)
 
                 await waitForBackgroundTasks()
                 expect(mockInternalFetch).toHaveBeenCalledTimes(1)
                 const internalEvents = mockInternalFetch.mock.calls[0][1]
 
                 expect(forSnapshot(internalEvents)).toEqual({
-                    body: `{"api_key":"THIS IS NOT A TOKEN FOR TEAM 2","timestamp":"2025-01-01T00:00:00.000Z","distinct_id":"test-distinct-id","sent_at":"2025-01-01T00:00:00.000Z","event":"my-event","properties":{"$ip":"0000:0000:0000:0000:0000:ffff:7f00:0001","$lib":"insights-webhook","$source_url":"/project/2/functions/<REPLACED-UUID-0>","$custom_function_execution_count":1,"capture_internal":true}}`,
+                    body: `{"api_key":"THIS IS NOT A TOKEN FOR TEAM 2","timestamp":"2025-01-01T00:00:00.000Z","distinct_id":"test-distinct-id","sent_at":"2025-01-01T00:00:00.000Z","event":"my-event","properties":{"$ip":"0000:0000:0000:0000:0000:ffff:7f00:0001","$lib":"insights-webhook","$source_url":"/project/2/functions/<REPLACED-UUID-0>","$insights_function_execution_count":1,"capture_internal":true}}`,
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -210,7 +210,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should capture an event using GET request with the pixel template', async () => {
                 const res = await doGetRequest({
-                    webhookId: customFunctionPixel.id,
+                    webhookId: insightsFunctionPixel.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -226,7 +226,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should allow capturing an event using GET request with gif extension', async () => {
                 const res = await doGetRequest({
-                    webhookId: customFunctionPixel.id + '.gif',
+                    webhookId: insightsFunctionPixel.id + '.gif',
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -242,11 +242,11 @@ describe('SourceWebhooksConsumer', () => {
         })
 
         describe('custom flow processing', () => {
-            let customFlow: CustomFlow
+            let insightsFlow: InsightsFlow
 
             beforeEach(async () => {
-                const template = await insertCustomFunctionTemplate(hub.postgres, incomingWebhookTemplate)
-                customFlow = new FixtureCustomFlowBuilder()
+                const template = await insertInsightsFunctionTemplate(hub.postgres, incomingWebhookTemplate)
+                insightsFlow = new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -255,26 +255,26 @@ describe('SourceWebhooksConsumer', () => {
                             inputs: {
                                 event: {
                                     value: 'my-event',
-                                    bytecode: await compileScript(`return f'my-event'`),
+                                    bytecode: await compileFn(`return f'my-event'`),
                                 },
                                 distinct_id: {
                                     value: '{request.body.distinct_id}',
-                                    bytecode: await compileScript(`return f'{request.body.distinct_id}'`),
+                                    bytecode: await compileFn(`return f'{request.body.distinct_id}'`),
                                 },
                                 method: {
                                     value: 'POST',
-                                    bytecode: await compileScript(`return f'POST'`),
+                                    bytecode: await compileFn(`return f'POST'`),
                                 },
                             },
                         },
                     })
                     .build()
-                await insertCustomFlow(hub.postgres, customFlow)
+                await insertInsightsFlow(hub.postgres, insightsFlow)
             })
 
             it('should schedule workflow run for scheduled_at on trigger', async () => {
                 const scheduledAt = '2025-01-02T12:00:00.000Z'
-                const scheduledCustomFlow = new FixtureCustomFlowBuilder()
+                const scheduledInsightsFlow = new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -284,24 +284,24 @@ describe('SourceWebhooksConsumer', () => {
                             inputs: {
                                 event: {
                                     value: 'my-event',
-                                    bytecode: await compileScript(`return f'my-event'`),
+                                    bytecode: await compileFn(`return f'my-event'`),
                                 },
                                 distinct_id: {
                                     value: '{request.body.distinct_id}',
-                                    bytecode: await compileScript(`return f'{request.body.distinct_id}'`),
+                                    bytecode: await compileFn(`return f'{request.body.distinct_id}'`),
                                 },
                                 method: {
                                     value: 'POST',
-                                    bytecode: await compileScript(`return f'POST'`),
+                                    bytecode: await compileFn(`return f'POST'`),
                                 },
                             },
                         },
                     })
                     .build()
-                await insertCustomFlow(hub.postgres, scheduledCustomFlow)
+                await insertInsightsFlow(hub.postgres, scheduledInsightsFlow)
 
                 const res = await doPostRequest({
-                    webhookId: scheduledCustomFlow.id,
+                    webhookId: scheduledInsightsFlow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -321,14 +321,14 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should 404 if the custom flow does not exist', async () => {
                 const res = await doPostRequest({
-                    webhookId: 'non-existent-custom-flow-id',
+                    webhookId: 'non-existent-insights-flow-id',
                 })
                 expect(res.status).toEqual(404)
             })
 
             it('should invoke a workflow with the parsed inputs', async () => {
                 const res = await doPostRequest({
-                    webhookId: customFlow.id,
+                    webhookId: insightsFlow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -342,12 +342,12 @@ describe('SourceWebhooksConsumer', () => {
                 expect(mockQueueInvocationsSpy).toHaveBeenCalledTimes(1)
                 const call = mockQueueInvocationsSpy.mock.calls[0][0][0]
                 expect(call.queue).toEqual('customflow')
-                expect(call.customFlow).toMatchObject(customFlow)
+                expect(call.insightsFlow).toMatchObject(insightsFlow)
             })
 
             it('should add logs and metrics', async () => {
                 const res = await doPostRequest({
-                    webhookId: customFlow.id,
+                    webhookId: insightsFlow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -373,12 +373,12 @@ describe('SourceWebhooksConsumer', () => {
             it('should not capture webhook event to database and should remove execution count property', async () => {
                 // Mock the monitoring service to track what events would be captured
                 const mockQueueInvocationResults = jest.spyOn(
-                    api['cdpSourceWebhooksConsumer']['customFunctionMonitoringService'],
+                    api['cdpSourceWebhooksConsumer']['insightsFunctionMonitoringService'],
                     'queueInvocationResults'
                 )
 
                 const res = await doPostRequest({
-                    webhookId: customFlow.id,
+                    webhookId: insightsFlow.id,
                     body: {
                         event: 'my-event',
                         distinct_id: 'test-distinct-id',
@@ -404,14 +404,14 @@ describe('SourceWebhooksConsumer', () => {
                     properties: expect.objectContaining({}),
                 })
 
-                // Explicitly check that $custom_function_execution_count is not in the properties
+                // Explicitly check that $insights_function_execution_count is not in the properties
                 // this key prevents the infinite loop protection from triggering
-                expect(invocation.state.event.properties).not.toHaveProperty('$custom_function_execution_count')
+                expect(invocation.state.event.properties).not.toHaveProperty('$insights_function_execution_count')
             })
 
             it('should add logs and metrics for a controlled failed custom flow', async () => {
                 const res = await doPostRequest({
-                    webhookId: customFlow.id,
+                    webhookId: insightsFlow.id,
                     body: {
                         event: 'my-event',
                         missing_distinct_id: 'test-distinct-id',
@@ -433,7 +433,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should add logs and metrics for an uncontrolled failed custom flow', async () => {
                 // Hacky but otherwise its quite hard to trigger an uncontrolled error
-                customFlow = new FixtureCustomFlowBuilder()
+                insightsFlow = new FixtureInsightsFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
@@ -442,16 +442,16 @@ describe('SourceWebhooksConsumer', () => {
                             inputs: {
                                 distinct_id: {
                                     value: '{i.do.not.exist}',
-                                    bytecode: await compileScript(`return f'{i.do.not.exist}'`),
+                                    bytecode: await compileFn(`return f'{i.do.not.exist}'`),
                                 },
                             },
                         },
                     })
                     .build()
-                await insertCustomFlow(hub.postgres, customFlow)
+                await insertInsightsFlow(hub.postgres, insightsFlow)
 
                 const res = await doPostRequest({
-                    webhookId: customFlow.id,
+                    webhookId: insightsFlow.id,
                     body: {
                         event: 'my-event',
                         missing_distinct_id: 'test-distinct-id',
@@ -474,7 +474,7 @@ describe('SourceWebhooksConsumer', () => {
         describe('scriptwatcher', () => {
             it('should return a degraded response if the function is degraded', async () => {
                 await api['cdpSourceWebhooksConsumer']['scriptWatcher'].forceStateChange(
-                    customFunction,
+                    insightsFunction,
                     ScriptWatcherState.degraded
                 )
                 const res = await doPostRequest({
@@ -492,7 +492,7 @@ describe('SourceWebhooksConsumer', () => {
 
             it('should return a disabled response if the function is disabled', async () => {
                 await api['cdpSourceWebhooksConsumer']['scriptWatcher'].forceStateChange(
-                    customFunction,
+                    insightsFunction,
                     ScriptWatcherState.disabled
                 )
                 const res = await doPostRequest({})

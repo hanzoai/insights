@@ -33,7 +33,7 @@ from posthog.models import (
 from posthog.models.activity_logging.activity_log import ActivityLog
 from posthog.models.comment import Comment
 from posthog.models.comment.utils import build_comment_item_url
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 from posthog.models.utils import UUIDT
 from posthog.ph_client import get_client
 from posthog.user_permissions import UserPermissions
@@ -372,22 +372,22 @@ def send_fatal_plugin_error(
 
 
 @shared_task(**EMAIL_TASK_KWARGS)
-def send_custom_function_disabled(custom_function_id: str) -> None:
+def send_insights_function_disabled(insights_function_id: str) -> None:
     if not is_email_available(with_absolute_urls=True):
         return
-    custom_function: CustomFunction = CustomFunction.objects.prefetch_related("team").get(id=custom_function_id)
-    team = custom_function.team
+    insights_function: InsightsFunction = InsightsFunction.objects.prefetch_related("team").get(id=insights_function_id)
+    team = insights_function.team
 
     memberships_to_email = get_members_to_notify_for_pipeline_error(team, failure_rate=1.0)
     if not memberships_to_email:
         return
 
-    campaign_key: str = f"custom_function_disabled_{custom_function_id}_updated_at_{custom_function.updated_at.timestamp()}"
+    campaign_key: str = f"insights_function_disabled_{insights_function_id}_updated_at_{insights_function.updated_at.timestamp()}"
     message = EmailMessage(
         campaign_key=campaign_key,
-        subject=f"[Alert] Destination '{custom_function.name}' has been disabled in project '{team}' due to high error rate",
-        template_name="custom_function_disabled",
-        template_context={"custom_function": custom_function, "team": team},
+        subject=f"[Alert] Destination '{insights_function.name}' has been disabled in project '{team}' due to high error rate",
+        template_name="insights_function_disabled",
+        template_context={"insights_function": insights_function, "team": team},
     )
     for membership in memberships_to_email:
         message.add_user_recipient(membership.user)
@@ -850,7 +850,7 @@ def send_discussions_mentioned(comment_id: str, mentioned_user_ids: list[int], s
 
 
 @shared_task(**EMAIL_TASK_KWARGS)
-def send_custom_functions_digest_email(digest_data: dict, test_email_override: str | None = None) -> None:
+def send_insights_functions_digest_email(digest_data: dict, test_email_override: str | None = None) -> None:
     if not is_email_available(with_absolute_urls=True):
         return
 
@@ -859,7 +859,7 @@ def send_custom_functions_digest_email(digest_data: dict, test_email_override: s
     try:
         team = Team.objects.get(id=team_id)
     except Team.DoesNotExist:
-        logger.exception(f"Team {team_id} not found for CustomFunctions digest email")
+        logger.exception(f"Team {team_id} not found for InsightsFunctions digest email")
         return
 
     # Get members to email
@@ -883,7 +883,7 @@ def send_custom_functions_digest_email(digest_data: dict, test_email_override: s
 
         # For testing: use only the override recipient
         memberships_to_email = [test_membership]
-        logger.info(f"Sending test CustomFunctions digest email to {test_email_override}")
+        logger.info(f"Sending test InsightsFunctions digest email to {test_email_override}")
 
     all_functions = digest_data["functions"]
     date_suffix = timezone.now().strftime("%Y-%m-%d")
@@ -908,12 +908,12 @@ def send_custom_functions_digest_email(digest_data: dict, test_email_override: s
         # Sort functions by failure rate descending (highest first)
         sorted_functions = sorted(user_functions, key=lambda x: float(x.get("failure_rate", 0) or 0), reverse=True)
 
-        campaign_key = f"custom_functions_daily_digest_{team_id}_{user.uuid}_{date_suffix}"
+        campaign_key = f"insights_functions_daily_digest_{team_id}_{user.uuid}_{date_suffix}"
 
         message = EmailMessage(
             campaign_key=campaign_key,
             subject=f"Data Pipeline Failures Alert for {team.name}",
-            template_name="custom_functions_daily_digest",
+            template_name="insights_functions_daily_digest",
             template_context={
                 "team": team,
                 "functions": sorted_functions,
@@ -925,24 +925,24 @@ def send_custom_functions_digest_email(digest_data: dict, test_email_override: s
         message.send()
         emails_sent += 1
 
-    logger.info(f"Sent CustomFunctions digest email to {emails_sent} members for team {team_id}")
+    logger.info(f"Sent InsightsFunctions digest email to {emails_sent} members for team {team_id}")
 
 
 @shared_task(ignore_result=True)
-def send_custom_functions_daily_digest() -> None:
+def send_insights_functions_daily_digest() -> None:
     """
-    Send daily digest email to teams with CustomFunctions that have failures.
+    Send daily digest email to teams with InsightsFunctions that have failures.
     Queries ClickHouse first to find failures, then fans out to team-specific tasks.
     """
     from posthog.clickhouse.client import sync_execute
 
-    logger.info("Starting CustomFunctions daily digest task")
+    logger.info("Starting InsightsFunctions daily digest task")
 
-    # Query ClickHouse to find all teams with failures and their custom_function_ids
+    # Query ClickHouse to find all teams with failures and their insights_function_ids
     failures_query = """
-    SELECT DISTINCT team_id, app_source_id as custom_function_id
+    SELECT DISTINCT team_id, app_source_id as insights_function_id
     FROM app_metrics2
-    WHERE app_source = 'custom_function'
+    WHERE app_source = 'insights_function'
     AND metric_name = 'failed'
     AND count > 0
     AND timestamp >= NOW() - INTERVAL 24 HOUR
@@ -953,83 +953,83 @@ def send_custom_functions_daily_digest() -> None:
     failed_teams_data = sync_execute(failures_query, {})
 
     if not failed_teams_data:
-        logger.info("No CustomFunctions with failures found")
+        logger.info("No InsightsFunctions with failures found")
         return
 
-    # Group custom_function_ids by team_id
+    # Group insights_function_ids by team_id
     teams_with_functions: dict[int, set[str]] = {}
     for row in failed_teams_data:
-        team_id, custom_function_id = row
+        team_id, insights_function_id = row
         if team_id not in teams_with_functions:
             teams_with_functions[team_id] = set()
-        teams_with_functions[team_id].add(str(custom_function_id))
+        teams_with_functions[team_id].add(str(insights_function_id))
 
     team_ids = list(teams_with_functions.keys())
 
     # Filter teams based on the feature flag setting
-    allowed_team_ids = settings.CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS
+    allowed_team_ids = settings.INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS
     if allowed_team_ids and "*" not in allowed_team_ids:
         # Convert string team IDs to integers for comparison
         allowed_team_ids_int = [int(team_id) for team_id in allowed_team_ids]
         team_ids = [team_id for team_id in team_ids if team_id in allowed_team_ids_int]
-        logger.info(f"Filtered to {len(team_ids)} teams based on CUSTOM_FUNCTIONS_DAILY_DIGEST_TEAM_IDS setting")
+        logger.info(f"Filtered to {len(team_ids)} teams based on INSIGHTS_FUNCTIONS_DAILY_DIGEST_TEAM_IDS setting")
 
     if not team_ids:
-        logger.info("No teams in allowed list have CustomFunctions with failures")
+        logger.info("No teams in allowed list have InsightsFunctions with failures")
         return
 
-    logger.info(f"Found {len(team_ids)} teams with CustomFunction failures")
+    logger.info(f"Found {len(team_ids)} teams with InsightsFunction failures")
 
     # Fan out to team-specific tasks
     for team_id in team_ids:
-        custom_function_ids = list(teams_with_functions[team_id])
-        send_team_custom_functions_digest.delay(team_id, custom_function_ids)
-        logger.info(f"Scheduled digest for team {team_id} with {len(custom_function_ids)} functions")
+        insights_function_ids = list(teams_with_functions[team_id])
+        send_team_insights_functions_digest.delay(team_id, insights_function_ids)
+        logger.info(f"Scheduled digest for team {team_id} with {len(insights_function_ids)} functions")
 
-    logger.info("Completed CustomFunctions daily digest task")
+    logger.info("Completed InsightsFunctions daily digest task")
 
 
 @shared_task(**EMAIL_TASK_KWARGS)
-def send_team_custom_functions_digest(team_id: int, custom_function_ids: list[str] | None = None) -> None:
+def send_team_insights_functions_digest(team_id: int, insights_function_ids: list[str] | None = None) -> None:
     """
-    Send daily digest email for a specific team with their failed CustomFunctions.
+    Send daily digest email for a specific team with their failed InsightsFunctions.
 
     Args:
         team_id: The team ID to process
-        custom_function_ids: Optional list of specific custom function IDs to process
+        insights_function_ids: Optional list of specific custom function IDs to process
     """
     from posthog.clickhouse.client import sync_execute
-    from posthog.models.custom_functions.custom_function import CustomFunction
+    from posthog.models.insights_functions.insights_function import InsightsFunction
 
-    logger.info(f"Processing CustomFunctions digest for team {team_id}")
+    logger.info(f"Processing InsightsFunctions digest for team {team_id}")
 
     # Get metrics data from ClickHouse for all functions in the team
     metrics_query = """
     SELECT
-        app_source_id as custom_function_id,
+        app_source_id as insights_function_id,
         metric_name,
         sum(count) as total_count
     FROM app_metrics2
     WHERE team_id = %(team_id)s
-    AND app_source = 'custom_function'
+    AND app_source = 'insights_function'
     AND timestamp >= NOW() - INTERVAL 24 HOUR
     AND timestamp < NOW()
     AND metric_name IN ('succeeded', 'failed')
-    {custom_function_filter}
+    {insights_function_filter}
     GROUP BY app_source_id, metric_name
     HAVING total_count > 0
     ORDER BY app_source_id, metric_name
     """
 
-    # Add filter for specific custom_function_ids if provided
-    custom_function_filter = ""
+    # Add filter for specific insights_function_ids if provided
+    insights_function_filter = ""
     query_params: dict[str, int | list[str]] = {"team_id": team_id}
 
-    if custom_function_ids:
-        custom_function_filter = "AND app_source_id IN %(custom_function_ids)s"
-        query_params["custom_function_ids"] = custom_function_ids
+    if insights_function_ids:
+        insights_function_filter = "AND app_source_id IN %(insights_function_ids)s"
+        query_params["insights_function_ids"] = insights_function_ids
 
-    final_query = metrics_query.format(custom_function_filter=custom_function_filter)
+    final_query = metrics_query.format(insights_function_filter=insights_function_filter)
 
     metrics_data = sync_execute(
         final_query,
@@ -1040,13 +1040,13 @@ def send_team_custom_functions_digest(team_id: int, custom_function_ids: list[st
         logger.info(f"No functions with metrics found for team {team_id}")
         return
 
-    # Group metrics by custom_function_id
+    # Group metrics by insights_function_id
     metrics_by_function = {}
     for row in metrics_data:
-        custom_function_id, metric_name, count = str(row[0]), row[1], row[2]
-        if custom_function_id not in metrics_by_function:
-            metrics_by_function[custom_function_id] = {"succeeded": 0, "failed": 0}
-        metrics_by_function[custom_function_id][metric_name] = count
+        insights_function_id, metric_name, count = str(row[0]), row[1], row[2]
+        if insights_function_id not in metrics_by_function:
+            metrics_by_function[insights_function_id] = {"succeeded": 0, "failed": 0}
+        metrics_by_function[insights_function_id][metric_name] = count
 
     # Only include functions that have failures
     failed_function_ids = [fid for fid, metrics in metrics_by_function.items() if metrics["failed"] > 0]
@@ -1055,33 +1055,33 @@ def send_team_custom_functions_digest(team_id: int, custom_function_ids: list[st
         logger.info(f"No functions with failures found for team {team_id}")
         return
 
-    # Get all active CustomFunctions for the team that had failures
-    custom_functions = (
-        CustomFunction.objects.filter(team_id=team_id, enabled=True, deleted=False, id__in=failed_function_ids)
+    # Get all active InsightsFunctions for the team that had failures
+    insights_functions = (
+        InsightsFunction.objects.filter(team_id=team_id, enabled=True, deleted=False, id__in=failed_function_ids)
         .select_related("created_by")
         .values("id", "team_id", "name", "type", "created_by__email")
     )
 
-    if not custom_functions:
-        logger.info(f"No active CustomFunctions found for team {team_id}")
+    if not insights_functions:
+        logger.info(f"No active InsightsFunctions found for team {team_id}")
         return
 
-    # Get the last editor for each CustomFunction from activity log
-    custom_function_ids_list = [str(hf["id"]) for hf in custom_functions]
+    # Get the last editor for each InsightsFunction from activity log
+    insights_function_ids_list = [str(hf["id"]) for hf in insights_functions]
     last_editors: dict[str, str | None] = {}
     last_edit_dates: dict[str, str | None] = {}
 
-    # Use a subquery to get only the latest activity for each CustomFunction
+    # Use a subquery to get only the latest activity for each InsightsFunction
     latest_activities_subquery = (
-        ActivityLog.objects.filter(team_id=team_id, scope="CustomFunction", item_id=OuterRef("item_id"))
+        ActivityLog.objects.filter(team_id=team_id, scope="InsightsFunction", item_id=OuterRef("item_id"))
         .order_by("-created_at")
         .values("id")[:1]
     )
 
     latest_activities = ActivityLog.objects.select_related("user").filter(
         team_id=team_id,
-        scope="CustomFunction",
-        item_id__in=custom_function_ids_list,
+        scope="InsightsFunction",
+        item_id__in=insights_function_ids_list,
         id__in=Subquery(latest_activities_subquery),
     )
 
@@ -1095,21 +1095,21 @@ def send_team_custom_functions_digest(team_id: int, custom_function_ids: list[st
                 last_editors[activity.item_id] = None
                 last_edit_dates[activity.item_id] = None
 
-    # Ensure all CustomFunctions have entries (even if no activity log exists)
-    for custom_function_id in custom_function_ids_list:
-        if custom_function_id not in last_editors:
-            last_editors[custom_function_id] = None
-            last_edit_dates[custom_function_id] = None
+    # Ensure all InsightsFunctions have entries (even if no activity log exists)
+    for insights_function_id in insights_function_ids_list:
+        if insights_function_id not in last_editors:
+            last_editors[insights_function_id] = None
+            last_edit_dates[insights_function_id] = None
 
     # Build function metrics. Only include functions with at least one failure; per-user threshold
-    # (data_pipeline_error_threshold) then filters which functions each user sees in send_custom_functions_digest_email.
+    # (data_pipeline_error_threshold) then filters which functions each user sees in send_insights_functions_digest_email.
     function_metrics = []
-    for custom_function in custom_functions:
-        custom_function_id = str(custom_function["id"])
-        if custom_function_id not in metrics_by_function:
+    for insights_function in insights_functions:
+        insights_function_id = str(insights_function["id"])
+        if insights_function_id not in metrics_by_function:
             continue
 
-        metrics = metrics_by_function[custom_function_id]
+        metrics = metrics_by_function[insights_function_id]
         if metrics["failed"] <= 0:
             continue
 
@@ -1117,16 +1117,16 @@ def send_team_custom_functions_digest(team_id: int, custom_function_ids: list[st
         failure_rate = (metrics["failed"] / total_runs * 100) if total_runs > 0 else 0
 
         function_info = {
-            "id": custom_function_id,
-            "name": custom_function["name"],
-            "type": custom_function["type"],
-            "created_by_email": custom_function["created_by__email"],
-            "last_edited_by_email": last_editors.get(custom_function_id),
-            "last_edit_date": last_edit_dates.get(custom_function_id),
+            "id": insights_function_id,
+            "name": insights_function["name"],
+            "type": insights_function["type"],
+            "created_by_email": insights_function["created_by__email"],
+            "last_edited_by_email": last_editors.get(insights_function_id),
+            "last_edit_date": last_edit_dates.get(insights_function_id),
             "succeeded": metrics["succeeded"],
             "failed": metrics["failed"],
             "failure_rate": round(failure_rate, 1),
-            "url": f"{settings.SITE_URL}/project/{team_id}/pipeline/destinations/hog-{custom_function_id}",
+            "url": f"{settings.SITE_URL}/project/{team_id}/pipeline/destinations/hog-{insights_function_id}",
         }
         function_metrics.append(function_info)
 
@@ -1143,8 +1143,8 @@ def send_team_custom_functions_digest(team_id: int, custom_function_ids: list[st
         "functions": function_metrics,
     }
 
-    send_custom_functions_digest_email.delay(digest_data)
-    logger.info(f"Scheduled CustomFunctions digest email for team {team_id} with {len(function_metrics)} failed functions")
+    send_insights_functions_digest_email.delay(digest_data)
+    logger.info(f"Scheduled InsightsFunctions digest email for team {team_id} with {len(function_metrics)} failed functions")
 
 
 @shared_task(**EMAIL_TASK_KWARGS)

@@ -1,4 +1,4 @@
-import { CustomFunctionInvocationGlobals } from '../../../types'
+import { InsightsFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './url-normalization.template'
 
@@ -16,7 +16,7 @@ interface EventResult {
 
 describe('url-normalization.template', () => {
     const tester = new TemplateTester(template)
-    let mockGlobals: CustomFunctionInvocationGlobals
+    let mockGlobals: InsightsFunctionInvocationGlobals
 
     const commonInputs = {
         removeHash: false,
@@ -27,7 +27,7 @@ describe('url-normalization.template', () => {
         await tester.beforeEach()
     })
 
-    const invoke = async (inputs: Record<string, any>, globals: CustomFunctionInvocationGlobals): Promise<EventResult> => {
+    const invoke = async (inputs: Record<string, any>, globals: InsightsFunctionInvocationGlobals): Promise<EventResult> => {
         const response = await tester.invoke(inputs, globals)
         expect(response.finished).toBe(true)
         expect(response.error).toBeUndefined()

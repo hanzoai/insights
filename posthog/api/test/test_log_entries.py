@@ -5,7 +5,7 @@ from posthog.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTes
 from rest_framework import status
 
 from posthog.clickhouse.client.execute import sync_execute
-from posthog.models.custom_functions.custom_function import CustomFunction
+from posthog.models.insights_functions.insights_function import InsightsFunction
 
 
 def create_log_entry(
@@ -34,12 +34,12 @@ def create_log_entry(
 
 
 class TestLogEntries(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
-    custom_function: CustomFunction
+    insights_function: InsightsFunction
 
     def setUp(self):
         super().setUp()
         # Create a base custom function to use as the reference for log entries
-        self.custom_function = CustomFunction.objects.create(
+        self.insights_function = InsightsFunction.objects.create(
             team=self.team,
             name="Fetch URL",
             description="Test description",
@@ -47,13 +47,13 @@ class TestLogEntries(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         )
 
     def get_log_entries(self, params=None):
-        return self.client.get(f"/api/projects/{self.team.id}/custom_functions/{self.custom_function.id}/logs/", params)
+        return self.client.get(f"/api/projects/{self.team.id}/insights_functions/{self.insights_function.id}/logs/", params)
 
     def create_log_for_function(self, level: str, instance_id="instance-id-1", message=None, timestamp=None):
         create_log_entry(
             team_id=self.team.pk,
-            log_source="custom_function",
-            log_source_id=str(self.custom_function.pk),
+            log_source="insights_function",
+            log_source_id=str(self.insights_function.pk),
             instance_id=instance_id,
             message=message or f"Test log. Much {level}.",
             level=level,
@@ -78,7 +78,7 @@ class TestLogEntries(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
 
         assert results == [
             {
-                "log_source_id": str(self.custom_function.pk),
+                "log_source_id": str(self.insights_function.pk),
                 "instance_id": "instance-id-1",
                 "timestamp": "2023-09-22T01:00:00Z",
                 "level": "INFO",

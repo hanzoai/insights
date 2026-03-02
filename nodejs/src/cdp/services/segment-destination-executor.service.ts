@@ -5,9 +5,9 @@ import { parseJSON } from '../../utils/json-parse'
 import { FetchOptions, FetchResponse, Response } from '../../utils/request'
 import { LegacyPluginLogger } from '../legacy-plugins/types'
 import { SEGMENT_DESTINATIONS_BY_ID } from '../segment/segment-templates'
-import { CyclotronJobInvocationCustomFunction, CyclotronJobInvocationResult } from '../types'
+import { CyclotronJobInvocationInsightsFunction, CyclotronJobInvocationResult } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
-import { CDP_TEST_ID, createAddLogFunction, isSegmentPluginCustomFunction } from '../utils'
+import { CDP_TEST_ID, createAddLogFunction, isSegmentPluginInsightsFunction } from '../utils'
 import { createInvocationResult } from '../utils/invocation-utils'
 import { CdpFetchConfig, cdpTrackedFetch, getNextRetryTime, isFetchResponseRetriable } from './script-executor.service'
 
@@ -97,9 +97,9 @@ export class SegmentDestinationExecutorService {
     constructor(private serverConfig: CdpFetchConfig) {}
 
     public async execute(
-        invocation: CyclotronJobInvocationCustomFunction
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
-        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(invocation)
+        invocation: CyclotronJobInvocationInsightsFunction
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationInsightsFunction>> {
+        const result = createInvocationResult<CyclotronJobInvocationInsightsFunction>(invocation)
         const addLog = createAddLogFunction(result.logs)
 
         // Upsert the tries count on the metadata
@@ -110,8 +110,8 @@ export class SegmentDestinationExecutorService {
         // Indicates if a retry is possible. Once we have peformed 1 successful non-GET request, we can't retry.
         let retriesPossible = true
 
-        const segmentDestinationId = isSegmentPluginCustomFunction(invocation.customFunction)
-            ? invocation.customFunction.template_id
+        const segmentDestinationId = isSegmentPluginInsightsFunction(invocation.insightsFunction)
+            ? invocation.insightsFunction.template_id
             : null
 
         try {
@@ -121,7 +121,7 @@ export class SegmentDestinationExecutorService {
                 throw new Error(`Segment destination ${segmentDestinationId} not found`)
             }
 
-            const isTestFunction = invocation.customFunction.name.includes(CDP_TEST_ID)
+            const isTestFunction = invocation.insightsFunction.name.includes(CDP_TEST_ID)
             const start = performance.now()
 
             // All segment options are done as inputs
@@ -211,8 +211,8 @@ export class SegmentDestinationExecutorService {
                     }
 
                     result.metrics!.push({
-                        team_id: invocation.customFunction.team_id,
-                        app_source_id: invocation.customFunction.id,
+                        team_id: invocation.insightsFunction.team_id,
+                        app_source_id: invocation.insightsFunction.id,
                         metric_kind: 'other',
                         metric_name: 'fetch',
                         count: 1,
@@ -246,7 +246,7 @@ export class SegmentDestinationExecutorService {
                     const { fetchError, fetchResponse } = await cdpTrackedFetch({
                         url,
                         fetchParams: fetchOptions,
-                        templateId: invocation.customFunction.template_id ?? '',
+                        templateId: invocation.insightsFunction.template_id ?? '',
                     })
 
                     const fetchResponseText = (await fetchResponse?.text()) ?? 'unknown'

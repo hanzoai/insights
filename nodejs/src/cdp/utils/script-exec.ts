@@ -11,7 +11,7 @@ import { Semaphore } from './sempahore'
 export const MAX_THREAD_WAIT_TIME_MS = 200
 
 const scriptExecThreadReliefCounter = new Counter({
-    name: 'cdp_custom_function_execution_thread_relief',
+    name: 'cdp_insights_function_execution_thread_relief',
     help: 'Whether the custom function execution was blocked by the thread relief',
     // We have a timeout so we don't need to worry about much more than that
     labelNames: ['waited'],
@@ -48,7 +48,7 @@ const waitForThreadRelief = async (timeout: number = DEFAULT_TIMEOUT_MS): Promis
 
 // NOTE: Script execution can be expensive and in really bad cases can block the event loop for a long time.
 // To work around this we have a check when we run it to make sure that
-export async function execScript(
+export async function execFn(
     bytecode: any,
     options?: ExecOptions
 ): Promise<{
@@ -60,7 +60,7 @@ export async function execScript(
     return await semaphore.run(async () => {
         return await instrumentFn(`script-exec`, async () => {
             const waitedForInitialRelief = await waitForThreadRelief(options?.timeout)
-            const result = execScriptImmediate(bytecode, options)
+            const result = execFnImmediate(bytecode, options)
             const waitedForFinalRelief = await waitForThreadRelief(options?.timeout)
 
             const waitedForThreadRelief = waitedForInitialRelief || waitedForFinalRelief
@@ -74,7 +74,7 @@ export async function execScript(
     })
 }
 
-function execScriptImmediate(
+function execFnImmediate(
     bytecode: any,
     options?: ExecOptions
 ): {

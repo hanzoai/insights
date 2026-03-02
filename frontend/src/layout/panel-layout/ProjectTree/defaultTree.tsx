@@ -390,8 +390,8 @@ export function iconForType(type?: FileSystemIconType, colorOverride?: FileSyste
         )
     }
 
-    // Handle custom_function types
-    if (type.startsWith('custom_function/')) {
+    // Handle insights_function types
+    if (type.startsWith('insights_function/')) {
         return (
             <ProductIconWrapper type="plug" colorOverride={colorOverride}>
                 <IconPlug />

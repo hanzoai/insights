@@ -19,13 +19,13 @@ import { urls } from 'scenes/urls'
 
 import { WorkflowsSceneProps } from '../WorkflowsScene'
 import { NewWorkflowModal } from './NewWorkflowModal'
-import { getCustomFlowStep } from './customflows/steps/CustomFlowSteps'
-import { CustomFlow } from './customflows/types'
+import { getInsightsFlowStep } from './insightsflows/steps/InsightsFlowSteps'
+import { InsightsFlow } from './insightsflows/types'
 import { newWorkflowLogic } from './newWorkflowLogic'
 import { workflowLogic } from './workflowLogic'
 import { workflowsLogic } from './workflowsLogic'
 
-function WorkflowTypeTag({ workflow }: { workflow: CustomFlow }): JSX.Element {
+function WorkflowTypeTag({ workflow }: { workflow: InsightsFlow }): JSX.Element {
     const hasMessagingAction = useMemo(() => {
         return workflow.actions.some((action) => {
             return ['function_email', 'function_sms', 'function_slack'].includes(action.type)
@@ -38,11 +38,11 @@ function WorkflowTypeTag({ workflow }: { workflow: CustomFlow }): JSX.Element {
     return <LemonTag type="default">Automation</LemonTag>
 }
 
-function WorkflowActionsSummary({ workflow }: { workflow: CustomFlow }): JSX.Element {
+function WorkflowActionsSummary({ workflow }: { workflow: InsightsFlow }): JSX.Element {
     const actionsByType = useMemo(() => {
         return workflow.actions.reduce(
             (acc, action) => {
-                const step = getCustomFlowStep(action, {})
+                const step = getInsightsFlowStep(action, {})
                 if (!step || !step.type.startsWith('function')) {
                     return acc
                 }
@@ -112,7 +112,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         loadWorkflows()
     })
 
-    const columns: LemonTableColumns<CustomFlow> = [
+    const columns: LemonTableColumns<InsightsFlow> = [
         {
             title: 'Name',
             key: 'name',
@@ -174,7 +174,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
             },
         },
         {
-            ...(updatedAtColumn() as LemonTableColumn<CustomFlow, any>),
+            ...(updatedAtColumn() as LemonTableColumn<InsightsFlow, any>),
             width: 0,
         },
         {
@@ -186,7 +186,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
                         <AppMetricsSparkline
                             logicKey={id}
                             forceParams={{
-                                appSource: 'custom_flow',
+                                appSource: 'insights_flow',
                                 appSourceId: id,
                                 metricKind: ['success', 'failure'],
                                 breakdownBy: 'metric_kind',
@@ -214,7 +214,7 @@ export function WorkflowsTable(props: WorkflowsSceneProps): JSX.Element {
         },
         {
             width: 0,
-            render: function Render(_, workflow: CustomFlow) {
+            render: function Render(_, workflow: InsightsFlow) {
                 return (
                     <More
                         overlay={

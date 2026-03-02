@@ -247,7 +247,7 @@ export class CyclotronJobQueue {
         ])
 
         if (this.shadowPostgres && Date.now() >= this.shadowCircuitOpenUntil) {
-            const scriptInvocations = invocations.filter((x) => x.queue === 'custom_script')
+            const scriptInvocations = invocations.filter((x) => x.queue === 'fn')
             if (!scriptInvocations.length) {
                 return
             }

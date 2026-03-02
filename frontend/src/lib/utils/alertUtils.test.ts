@@ -1,6 +1,6 @@
 import { PropertyFilterType, PropertyOperator } from '~/types'
 
-import { PendingAlertNotification, buildAlertFilterConfig, buildCustomFunctionPayload } from './alertUtils'
+import { PendingAlertNotification, buildAlertFilterConfig, buildInsightsFunctionPayload } from './alertUtils'
 
 describe('alertUtils', () => {
     describe('buildAlertFilterConfig', () => {
@@ -26,7 +26,7 @@ describe('alertUtils', () => {
         })
     })
 
-    describe('buildCustomFunctionPayload', () => {
+    describe('buildInsightsFunctionPayload', () => {
         it.each([
             {
                 name: 'slack notification with alert name',
@@ -67,7 +67,7 @@ describe('alertUtils', () => {
         ])(
             'builds correct payload for $name',
             ({ notification, alertName, expectedName, expectedTemplateId, expectedInputKeys }) => {
-                const result = buildCustomFunctionPayload('alert-456', alertName, notification as PendingAlertNotification)
+                const result = buildInsightsFunctionPayload('alert-456', alertName, notification as PendingAlertNotification)
 
                 expect(result.name).toBe(expectedName)
                 expect(result.template_id).toBe(expectedTemplateId)
@@ -87,7 +87,7 @@ describe('alertUtils', () => {
                 slackChannelName: 'general',
             }
 
-            const result = buildCustomFunctionPayload('alert-789', 'My alert', notification)
+            const result = buildInsightsFunctionPayload('alert-789', 'My alert', notification)
 
             expect(result.inputs?.slack_workspace).toEqual({ value: 42 })
             expect(result.inputs?.channel).toEqual({ value: 'C12345' })
@@ -99,7 +99,7 @@ describe('alertUtils', () => {
                 webhookUrl: 'https://example.com/hook',
             }
 
-            const result = buildCustomFunctionPayload('alert-789', 'My alert', notification)
+            const result = buildInsightsFunctionPayload('alert-789', 'My alert', notification)
 
             expect(result.inputs?.url).toEqual({ value: 'https://example.com/hook' })
             expect(result.inputs?.body).toEqual({

@@ -1,4 +1,4 @@
-from posthog.cdp.templates.custom_function_template import CustomFunctionMappingTemplate, CustomFunctionTemplateDC
+from posthog.cdp.templates.insights_function_template import InsightsFunctionMappingTemplate, InsightsFunctionTemplateDC
 
 
 def build_inputs(multiProductEvent=False):
@@ -37,7 +37,7 @@ def build_inputs(multiProductEvent=False):
     ]
 
 
-template_snapchat_pixel: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
+template_snapchat_pixel: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     status="alpha",
     free=False,
     type="site_destination",
@@ -108,7 +108,7 @@ export function onEvent({ inputs, posthog }) {
         },
     ],
     mapping_templates=[
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Page Viewed",
             include_by_default=True,
             filters={"events": [{"id": "$pageview", "name": "Pageview", "type": "events"}]},
@@ -124,7 +124,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Order Completed",
             include_by_default=True,
             filters={"events": [{"id": "Order Completed", "type": "events"}]},
@@ -140,7 +140,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(True),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Checkout Started",
             include_by_default=True,
             filters={"events": [{"id": "Checkout Started", "type": "events"}]},
@@ -156,7 +156,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(True),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Product Added",
             include_by_default=True,
             filters={"events": [{"id": "Product Added", "type": "events"}]},
@@ -172,7 +172,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Payment Info Entered",
             include_by_default=True,
             filters={"events": [{"id": "Payment Info Entered", "type": "events"}]},
@@ -188,7 +188,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Promotion Clicked",
             include_by_default=True,
             filters={"events": [{"id": "Promotion Clicked", "type": "events"}]},
@@ -204,7 +204,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Promotion Viewed",
             include_by_default=True,
             filters={"events": [{"id": "Promotion Viewed", "type": "events"}]},
@@ -220,7 +220,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Product Added to Wishlist",
             include_by_default=True,
             filters={"events": [{"id": "Product Added to Wishlist", "type": "events"}]},
@@ -236,7 +236,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Product Viewed",
             include_by_default=True,
             filters={"events": [{"id": "Product Viewed", "type": "events"}]},
@@ -252,7 +252,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Product List Viewed",
             include_by_default=True,
             filters={"events": [{"id": "Product List Viewed", "type": "events"}]},
@@ -268,7 +268,7 @@ export function onEvent({ inputs, posthog }) {
                 *build_inputs(),
             ],
         ),
-        CustomFunctionMappingTemplate(
+        InsightsFunctionMappingTemplate(
             name="Products Searched",
             include_by_default=True,
             filters={"events": [{"id": "Products Searched", "type": "events"}]},

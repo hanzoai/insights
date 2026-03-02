@@ -4,11 +4,11 @@ from posthog.cdp.templates.avo.template_avo import (
     TemplateAvoMigrator,
     template as template_avo,
 )
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from posthog.models import PluginConfig
 
 
-class TestTemplateAvo(BaseCustomFunctionTemplateTest):
+class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
     template = template_avo
 
     def _inputs(self, **kwargs):

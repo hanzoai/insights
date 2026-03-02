@@ -7,8 +7,8 @@ from django.core.management.base import CommandError
 
 class TestSendDigestToTeamCommand(BaseTest):
     def test_send_digest_to_existing_team(self):
-        """Test that the command successfully calls send_team_custom_functions_digest for an existing team"""
-        with patch("posthog.management.commands.send_digest_to_team.send_team_custom_functions_digest") as mock_send:
+        """Test that the command successfully calls send_team_insights_functions_digest for an existing team"""
+        with patch("posthog.management.commands.send_digest_to_team.send_team_insights_functions_digest") as mock_send:
             call_command("send_digest_to_team", self.team.id, "--email", "test@example.com")
             mock_send.assert_called_once_with(self.team.id, "test@example.com")
 
@@ -25,13 +25,13 @@ class TestSendDigestToTeamCommand(BaseTest):
         self.user.partial_notification_settings = {"plugin_disabled": True}
         self.user.save()
 
-        with patch("posthog.management.commands.send_digest_to_team.send_team_custom_functions_digest") as mock_send:
+        with patch("posthog.management.commands.send_digest_to_team.send_team_insights_functions_digest") as mock_send:
             call_command("send_digest_to_team", self.team.id, "--email", "test@example.com")
             mock_send.assert_called_once_with(self.team.id, "test@example.com")
 
     def test_send_digest_handles_task_failure(self):
         """Test that the command properly handles when the digest task fails"""
-        with patch("posthog.management.commands.send_digest_to_team.send_team_custom_functions_digest") as mock_send:
+        with patch("posthog.management.commands.send_digest_to_team.send_team_insights_functions_digest") as mock_send:
             mock_send.side_effect = Exception("Task failed")
 
             with self.assertRaises(CommandError) as cm:

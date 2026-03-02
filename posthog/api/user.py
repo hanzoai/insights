@@ -148,7 +148,6 @@ class UserSerializer(serializers.ModelSerializer):
             "has_seen_product_intro_for",
             "scene_personalisation",
             "theme_mode",
-            "mascot_config",
             "allow_sidebar_suggestions",
             "shortcut_position",
             "role_at_organization",
@@ -489,10 +488,9 @@ class UserViewSet(
         "role_at_organization",
     ]
     time_sensitive_exclude_actions = [
-        "mascot_config",
         "scene_personalisation",
     ]
-    time_sensitive_allow_actions = ["mascot_config"]
+    time_sensitive_allow_actions = []
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["is_staff", "email"]
     queryset = User.objects.filter(is_active=True)
@@ -622,26 +620,6 @@ class UserViewSet(
         instance.refresh_from_db()
 
         return Response(self.get_serializer(instance=instance).data)
-
-    @action(
-        methods=["GET", "PATCH"],
-        detail=True,
-        throttle_classes=[],
-        authentication_classes=[
-            TemporaryTokenAuthentication,
-            SessionAuthentication,
-            PersonalAPIKeyAuthentication,
-            OAuthAccessTokenAuthentication,
-        ],
-    )
-    def mascot_config(self, request, **kwargs):
-        instance = self.get_object()
-        if request.method == "GET":
-            return Response(instance.mascot_config or {})
-        else:
-            instance.mascot_config = request.data
-            instance.save()
-            return Response(instance.mascot_config)
 
     # Deprecated - use two_factor_start_setup instead
     @action(methods=["GET"], detail=True)

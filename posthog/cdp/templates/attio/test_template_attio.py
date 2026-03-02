@@ -1,5 +1,5 @@
 from posthog.cdp.templates.attio.template_attio import template as template_attio
-from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 
 
 def create_inputs(**kwargs):
@@ -13,7 +13,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateAttio(BaseCustomFunctionTemplateTest):
+class TestTemplateAttio(BaseInsightsFunctionTemplateTest):
     template = template_attio
 
     def test_function_works(self):

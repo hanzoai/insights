@@ -1,7 +1,7 @@
-import { CustomFunctionInputSchemaType } from '~/cdp/types'
-import { CustomFunctionTemplate } from '~/cdp/types'
+import { InsightsFunctionInputSchemaType } from '~/cdp/types'
+import { InsightsFunctionTemplate } from '~/cdp/types'
 
-const build_inputs = (multiProductEvent = false): CustomFunctionInputSchemaType[] => {
+const build_inputs = (multiProductEvent = false): InsightsFunctionInputSchemaType[] => {
     return [
         {
             key: 'eventId',
@@ -86,7 +86,7 @@ const build_inputs = (multiProductEvent = false): CustomFunctionInputSchemaType[
     ]
 }
 
-export const template: CustomFunctionTemplate = {
+export const template: InsightsFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'destination',
@@ -95,7 +95,7 @@ export const template: CustomFunctionTemplate = {
     description: 'Send conversion events to Snapchat Ads',
     icon_url: '/static/services/snapchat.png',
     category: ['Advertisement'],
-    code_language: 'custom_script',
+    code_language: 'fn',
     code: `
 if (empty(inputs.pixelId) or empty(inputs.oauth.access_token)) {
     throw Error('Pixel ID and access token are required')

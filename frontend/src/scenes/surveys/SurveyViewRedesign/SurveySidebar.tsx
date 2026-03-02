@@ -8,7 +8,7 @@ import { LemonButton, LemonMenu, LemonSelect, LemonSkeleton, LemonSwitch, Link }
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { TZLabel } from 'lib/components/TZLabel'
 import { pluralize } from 'lib/utils'
-import { CustomFunctionIcon } from 'scenes/custom-functions/configuration/CustomFunctionIcon'
+import { InsightsFunctionIcon } from 'scenes/insights-functions/configuration/InsightsFunctionIcon'
 import { CopySurveyLink } from 'scenes/surveys/CopySurveyLink'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'
 import { SurveyConditionsList } from 'scenes/surveys/components/SurveyConditions'
@@ -23,7 +23,7 @@ import { urls } from 'scenes/urls'
 
 import {
     ExporterFormat,
-    CustomFunctionType,
+    InsightsFunctionType,
     Survey,
     SurveyQuestionBranchingType,
     SurveySchedule as SurveyScheduleEnum,
@@ -192,7 +192,7 @@ export function SurveyDetailsPanel(): JSX.Element {
     )
 }
 
-function getNotificationDescription(fn: CustomFunctionType): string | null {
+function getNotificationDescription(fn: InsightsFunctionType): string | null {
     const inputs = fn.inputs
     if (!inputs) {
         return null
@@ -234,12 +234,12 @@ export function SurveyNotificationsPanel(): JSX.Element {
                         const description = getNotificationDescription(fn)
                         return (
                             <div key={fn.id} className="flex items-center gap-2 rounded border p-2">
-                                <CustomFunctionIcon src={fn.icon_url} size="small" />
+                                <InsightsFunctionIcon src={fn.icon_url} size="small" />
                                 <div className="flex-1 min-w-0">
                                     <LemonButton
                                         type="tertiary"
                                         size="xsmall"
-                                        to={urls.customFunction(fn.id)}
+                                        to={urls.insightsFunction(fn.id)}
                                         className="font-medium p-0 h-auto min-h-0"
                                         noPadding
                                     >
