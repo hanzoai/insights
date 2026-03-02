@@ -1,6 +1,7 @@
 import dataclasses
 from typing import Literal
 
+from insights.temporal.ai.session_summary.types.video import ExtraSummaryContext
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
