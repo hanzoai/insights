@@ -342,7 +342,7 @@ export const personsLogic = kea<personsLogicType>([
                 const breadcrumbs: Breadcrumb[] = [
                     {
                         key: Scene.Persons,
-                        name: 'Persons',
+                        name: 'Users',
                         path: urls.persons(),
                         iconType: sceneConfigurations[Scene.Person].iconType || 'default_icon_type',
                     },
@@ -440,7 +440,7 @@ export const personsLogic = kea<personsLogicType>([
                 // :KLUDGE: Person properties are updated asynchronously in the plugin server - the response won't reflect
                 //      the _updated_ properties yet.
                 await api.persons.updateProperty(person.id, key, parsedValue)
-                lemonToast.success(`Person property ${action}`)
+                lemonToast.success(`User property ${action}`)
 
                 eventUsageLogic.actions.reportPersonPropertyUpdated(
                     action,
@@ -460,7 +460,7 @@ export const personsLogic = kea<personsLogicType>([
                 actions.setPerson({ ...person, properties: updatedProperties }) // To update the UI immediately
                 // await api.create(`api/person/${person.id}/delete_property`, { $unset: key })
                 await api.persons.deleteProperty(person.id, key)
-                lemonToast.success(`Person property deleted`)
+                lemonToast.success(`User property deleted`)
 
                 eventUsageLogic.actions.reportPersonPropertyUpdated('removed', 1, undefined, undefined)
             }

@@ -81,7 +81,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
                                     <Tooltip
                                         title={`Automatically included with your plan.${
                                             addon.type === 'enhanced_persons'
-                                                ? ' Used based on whether you capture person profiles with your events.'
+                                                ? ' Used based on whether you capture user profiles with your events.'
                                                 : ''
                                         }`}
                                     >

@@ -45,13 +45,13 @@ export function PropertiesTimeline({ actor, filter }: PropertiesTimelineProps): 
                                 ? crucialPropertyKeys.length > 0
                                     ? 'Key person properties over time'
                                     : 'No key person properties'
-                                : 'Loading key person properties…'}
+                                : 'Loading key user properties…'}
                         </span>
                         {!resultLoading && (
                             <Tooltip
                                 title={
                                     crucialPropertyKeys.length > 0
-                                        ? `Person ${
+                                        ? `User ${
                                               crucialPropertyKeys.length === 1 ? 'property' : 'properties'
                                           } ${humanList(crucialPropertyKeys.map((key) => `\`${key}\``))} ${
                                               crucialPropertyKeys.length === 1 ? 'is' : 'are'
@@ -62,7 +62,7 @@ export function PropertiesTimeline({ actor, filter }: PropertiesTimelineProps): 
                                                   ? 'that key property has'
                                                   : 'those key properties have'
                                           } been changing within this data point's timeframe.`
-                                        : "This insight doesn't rely on any person properties in its query definition. If it did, a timeline showing the values of those key properties would be shown here."
+                                        : "This insight doesn't rely on any user properties in its query definition. If it did, a timeline showing the values of those key properties would be shown here."
                                 }
                             >
                                 <IconInfo className="ml-1 text-secondary text-xl shrink-0" />

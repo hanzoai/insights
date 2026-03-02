@@ -154,7 +154,7 @@ export const sessionRecordingFilePlaybackSceneLogic = kea<sessionRecordingFilePl
             (): Breadcrumb[] => [
                 {
                     key: Scene.Replay,
-                    name: 'Replay',
+                    name: 'Session Replay',
                     path: urls.replay(),
                     iconType: 'session_replay',
                 },
