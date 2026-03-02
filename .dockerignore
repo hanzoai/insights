@@ -8,6 +8,7 @@
 !common/plugin_transpiler/*.*
 !common/plugin_transpiler/src
 !common/tailwind
+!common/insightsql_parser
 !dags
 !docs/onboarding
 !frontend/@posthog
