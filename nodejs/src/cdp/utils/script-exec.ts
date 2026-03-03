@@ -92,7 +92,7 @@ function execFnImmediate(
             maxAsyncSteps: 0,
             ...options,
             external: {
-                regex: { match: (regex, str) => createTrackedRE2(regex, undefined, 'script-exec:regex.match').test(str) },
+                regex: { match: (regex: string, str: string) => createTrackedRE2(regex, undefined, 'script-exec:regex.match').test(str) },
                 crypto,
                 ...options?.external,
             },

@@ -1,6 +1,6 @@
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'

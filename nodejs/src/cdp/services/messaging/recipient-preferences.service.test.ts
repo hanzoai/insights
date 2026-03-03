@@ -7,7 +7,7 @@ import { closeHub, createHub } from '~/utils/db/hub'
 import { logger } from '~/utils/logger'
 import { UUIDT } from '~/utils/utils'
 
-import { InsightsFlowAction } from '../../../schema/customflow'
+import { InsightsFlowAction } from '../../../schema/insightsflow'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
 import { RecipientPreferencesService } from './recipient-preferences.service'
 import { RecipientTokensService } from './recipient-tokens.service'

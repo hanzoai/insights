@@ -1,4 +1,4 @@
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { UUIDT } from '~/utils/utils'
 
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'

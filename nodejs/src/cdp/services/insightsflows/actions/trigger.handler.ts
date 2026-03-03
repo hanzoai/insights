@@ -1,5 +1,5 @@
 import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
-import { InsightsFlowAction } from '~/schema/customflow'
+import { InsightsFlowAction } from '~/schema/insightsflow'
 
 import { findContinueAction } from '../customflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'

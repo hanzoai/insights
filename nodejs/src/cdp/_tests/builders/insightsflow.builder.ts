@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 
 import { findActionByType } from '~/cdp/services/insightsflows/customflow-utils'
-import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/schema/customflow'
+import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/schema/insightsflow'
 import { logger } from '~/utils/logger'
 
 import { FN_FILTERS_EXAMPLES } from '../examples'

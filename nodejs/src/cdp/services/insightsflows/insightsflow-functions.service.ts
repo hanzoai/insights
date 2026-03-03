@@ -5,7 +5,7 @@ import {
     InsightsFunctionInvocationGlobals,
     InsightsFunctionType,
 } from '~/cdp/types'
-import { InsightsFlow, InsightsFlowAction } from '~/schema/customflow'
+import { InsightsFlow, InsightsFlowAction } from '~/schema/insightsflow'
 
 import { ScriptExecutorExecuteAsyncOptions, ScriptExecutorService } from '../script-executor.service'
 import { InsightsFunctionTemplateManagerService } from '../managers/insights-function-template-manager.service'

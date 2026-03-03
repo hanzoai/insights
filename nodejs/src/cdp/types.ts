@@ -4,7 +4,7 @@ import { VMState } from '@posthog/scriptvm'
 
 import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/schema/cyclotron'
 
-import { InsightsFlow } from '../schema/customflow'
+import { InsightsFlow } from '../schema/insightsflow'
 import {
     ClickHouseTimestamp,
     ElementPropertyFilter,
@@ -243,7 +243,7 @@ export type AppMetricType = MinimalAppMetric & {
 }
 
 export interface InsightsFunctionTiming {
-    kind: 'fn' | 'async_function'
+    kind: 'fn' | 'async_function' | 'script'
     duration_ms: number
 }
 
