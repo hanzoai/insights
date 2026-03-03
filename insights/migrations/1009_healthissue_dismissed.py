@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1008_resourcetransfer_created_by_index"),
+        ("posthog", "1008_resourcetransfer_created_by_index"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0821_batchimport_backoff_columns"),
+        ("posthog", "0821_batchimport_backoff_columns"),
     ]
 
     operations = [

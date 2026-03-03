@@ -6,7 +6,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0052_data_precalculate_cohorts"),
+        ("posthog", "0052_data_precalculate_cohorts"),
     ]
 
     operations = [

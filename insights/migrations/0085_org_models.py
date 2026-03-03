@@ -12,10 +12,10 @@ import insights.models.utils
 
 
 def forwards_func(apps, schema_editor):
-    User = apps.get_model("insights", "User")
-    Organization = apps.get_model("insights", "Organization")
-    OrganizationMembership = apps.get_model("insights", "OrganizationMembership")
-    Annotation = apps.get_model("insights", "Annotation")
+    User = apps.get_model("posthog", "User")
+    Organization = apps.get_model("posthog", "Organization")
+    OrganizationMembership = apps.get_model("posthog", "OrganizationMembership")
+    Annotation = apps.get_model("posthog", "Annotation")
     for user in User.objects.all():
         team = user.team_set.first()
         if not team:
@@ -53,7 +53,7 @@ def reverse_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0084_person_uuid"),
+        ("posthog", "0084_person_uuid"),
     ]
 
     operations = [
@@ -97,7 +97,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="teams_currently+",
-                to="insights.Team",
+                to="posthog.Team",
             ),
         ),
         migrations.AlterField(
@@ -122,7 +122,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="personal_api_keys",
-                to="insights.Team",
+                to="posthog.Team",
             ),
         ),
         migrations.AlterField(
@@ -178,7 +178,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="memberships",
                         related_query_name="membership",
-                        to="insights.Organization",
+                        to="posthog.Organization",
                     ),
                 ),
                 (
@@ -246,7 +246,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="invites",
                         related_query_name="invite",
-                        to="insights.Organization",
+                        to="posthog.Organization",
                     ),
                 ),
             ],
@@ -257,7 +257,7 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 related_name="organizations",
                 related_query_name="organization",
-                through="insights.OrganizationMembership",
+                through="posthog.OrganizationMembership",
                 to=settings.AUTH_USER_MODEL,
             ),
         ),
@@ -267,7 +267,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="insights.Organization",
+                to="posthog.Organization",
             ),
         ),
         migrations.AddField(
@@ -278,7 +278,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="teams",
                 related_query_name="team",
-                to="insights.Organization",
+                to="posthog.Organization",
             ),
         ),
         migrations.AddField(
@@ -288,7 +288,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="users_currently+",
-                to="insights.Organization",
+                to="posthog.Organization",
             ),
         ),
         migrations.AddConstraint(

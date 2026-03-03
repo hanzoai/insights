@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0370_externaldatajob_workflow_id"),
+        ("posthog", "0370_externaldatajob_workflow_id"),
     ]
 
     operations = [

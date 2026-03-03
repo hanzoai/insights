@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0302_add_user_pending_email_and_is_verified"),
+        ("posthog", "0302_add_user_pending_email_and_is_verified"),
     ]
 
     operations = [

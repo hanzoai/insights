@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0293_property_definitions_drop_old_constraint"),
+        ("posthog", "0293_property_definitions_drop_old_constraint"),
     ]
 
     operations = [

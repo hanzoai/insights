@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0009_auto_20200127_0018"),
+        ("posthog", "0009_auto_20200127_0018"),
     ]
 
     operations = [
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
                 ),
             ],
         ),
@@ -54,11 +54,11 @@ class Migration(migrations.Migration):
                 ("order", models.IntegerField()),
                 (
                     "action",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Action"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Action"),
                 ),
                 (
                     "funnel",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Funnel"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Funnel"),
                 ),
             ],
         ),

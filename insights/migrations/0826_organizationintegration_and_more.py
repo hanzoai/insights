@@ -10,7 +10,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0825_groupusagemetric_groupusagemetric_unique_metric_name"),
+        ("posthog", "0825_groupusagemetric_groupusagemetric_unique_metric_name"),
     ]
 
     operations = [
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "organization",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.organization"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.organization"),
                 ),
             ],
         ),

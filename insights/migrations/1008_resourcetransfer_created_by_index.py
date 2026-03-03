@@ -5,7 +5,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for CREATE INDEX CONCURRENTLY
 
     dependencies = [
-        ("insights", "1007_resourcetransfer_created_by"),
+        ("posthog", "1007_resourcetransfer_created_by"),
     ]
 
     operations = [

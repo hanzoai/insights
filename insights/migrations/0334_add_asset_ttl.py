@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0333_add_timestamp_fields_to_batch_exports"),
+        ("posthog", "0333_add_timestamp_fields_to_batch_exports"),
     ]
 
     operations = [

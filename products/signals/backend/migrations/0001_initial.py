@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0993_approvalpolicy_bypass_options"),
+        ("posthog", "0993_approvalpolicy_bypass_options"),
     ]
 
     operations = [
@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
         ),
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
             options={

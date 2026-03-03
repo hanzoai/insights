@@ -12,7 +12,7 @@ def salesforce_schemas(apps, schema_editor):
         )
         salesforce_sources = cursor.fetchall()
 
-    ExternalDataSchema = apps.get_model("insights", "ExternalDataSchema")
+    ExternalDataSchema = apps.get_model("posthog", "ExternalDataSchema")
     for source in salesforce_sources:
         schemas = list(ExternalDataSchema.objects.filter(source_id=source[0]))
 
@@ -35,7 +35,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0509_errortrackingsymbolset_failure_reason"),
+        ("posthog", "0509_errortrackingsymbolset_failure_reason"),
     ]
 
     operations = [

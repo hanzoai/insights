@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("insights", "0702_datacolortheme_project")]
+    dependencies = [("posthog", "0702_datacolortheme_project")]
 
     operations = [
         migrations.AddField(
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         #     model_name="dashboard",
         #     name="data_color_theme",
         #     field=models.ForeignKey(
-        #         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.datacolortheme"
+        #         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.datacolortheme"
         #     ),
         # ),
         migrations.SeparateDatabaseAndState(
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="insights.datacolortheme",
+                        to="posthog.datacolortheme",
                     ),
                 )
             ],

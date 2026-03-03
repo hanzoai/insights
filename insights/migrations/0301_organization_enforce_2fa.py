@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0300_add_constraints_to_person_override"),
+        ("posthog", "0300_add_constraints_to_person_override"),
     ]
 
     operations = [

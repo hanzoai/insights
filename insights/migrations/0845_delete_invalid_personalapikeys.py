@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 def purge_null_secure_values(apps, schema_editor):
-    PersonalAPIKey = apps.get_model("insights", "PersonalAPIKey")
+    PersonalAPIKey = apps.get_model("posthog", "PersonalAPIKey")
 
     base_query = PersonalAPIKey.objects.filter(secure_value__isnull=True)
 
@@ -26,7 +26,7 @@ def purge_null_secure_values(apps, schema_editor):
 class Migration(migrations.Migration):
     atomic = True
     dependencies = [
-        ("insights", "0844_alter_externaldatasource_source_type"),
+        ("posthog", "0844_alter_externaldatasource_source_type"),
     ]
 
     operations = [

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def populate_instance_settings(apps, schema_editor):
     try:
-        InstanceSetting = apps.get_model("insights", "InstanceSetting")
+        InstanceSetting = apps.get_model("posthog", "InstanceSetting")
         with connection.cursor() as cursor:
             cursor.execute("SELECT key, value FROM constance_config")
             for key, pickled_value in cursor.fetchall():
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0235_plugin_source_transpilation"),
+        ("posthog", "0235_plugin_source_transpilation"),
     ]
 
     operations = [

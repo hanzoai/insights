@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0376_externaldataschema_last_synced_at"),
+        ("posthog", "0376_externaldataschema_last_synced_at"),
     ]
 
     operations = [

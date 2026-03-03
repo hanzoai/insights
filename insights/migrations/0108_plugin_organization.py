@@ -5,14 +5,14 @@ from django.db import migrations, models
 
 
 def set_plugin_organization(apps, schema_editor):
-    Plugin = apps.get_model("insights", "Plugin")
-    Organization = apps.get_model("insights", "Organization")
+    Plugin = apps.get_model("posthog", "Plugin")
+    Organization = apps.get_model("posthog", "Organization")
     Plugin.objects.update(organization=Organization.objects.first())
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0107_plugin_source"),
+        ("posthog", "0107_plugin_source"),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="plugins",
                 related_query_name="plugin",
-                to="insights.Organization",
+                to="posthog.Organization",
             ),
             preserve_default=False,
         ),
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="plugins",
                 related_query_name="plugin",
-                to="insights.Organization",
+                to="posthog.Organization",
             ),
         ),
     ]

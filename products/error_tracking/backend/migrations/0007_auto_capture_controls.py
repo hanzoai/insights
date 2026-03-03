@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                         size=None,
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_errortrackingautocapturecontrols",

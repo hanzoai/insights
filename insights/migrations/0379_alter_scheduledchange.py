@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0378_alter_user_theme_mode"),
+        ("posthog", "0378_alter_user_theme_mode"),
     ]
 
     operations = [

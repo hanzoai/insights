@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0533_externaldatajob_pipeline_version"),
+        ("posthog", "0533_externaldatajob_pipeline_version"),
     ]
 
     operations = [

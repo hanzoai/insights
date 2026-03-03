@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0039_populate_event_ip_property"),
+        ("posthog", "0039_populate_event_ip_property"),
     ]
 
     operations = [

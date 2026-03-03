@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0724_errortrackinggroupingrule"),
+        ("posthog", "0724_errortrackinggroupingrule"),
     ]
     operations = [
         RemoveIndexConcurrently(

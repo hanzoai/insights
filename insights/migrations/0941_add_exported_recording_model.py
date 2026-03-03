@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0940_user_allow_impersonation"),
+        ("posthog", "0940_user_allow_impersonation"),
     ]
 
     operations = [
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="exported_recordings",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

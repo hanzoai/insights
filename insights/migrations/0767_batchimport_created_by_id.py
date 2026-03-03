@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0766_fix_sub_template_ids_to_template_ids"),
+        ("posthog", "0766_fix_sub_template_ids_to_template_ids"),
     ]
 
     operations = [

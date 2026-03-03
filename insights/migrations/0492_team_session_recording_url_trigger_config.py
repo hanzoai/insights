@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0491_alertconfiguration_snoozed_until_and_more"),
+        ("posthog", "0491_alertconfiguration_snoozed_until_and_more"),
     ]
 
     operations = [

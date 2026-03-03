@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0887_drop_named_query"),
+        ("posthog", "0887_drop_named_query"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
         migrations.AddConstraint(
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="saved_queries",
-                        to="insights.datawarehousemanagedviewset",
+                        to="posthog.datawarehousemanagedviewset",
                     ),
                 ),
             ],

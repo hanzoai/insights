@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0400_datawarehousetable_row_count"),
+        ("posthog", "0400_datawarehousetable_row_count"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                     model_name="experiment",
                     name="exposure_cohort",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.cohort"
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.cohort"
                     ),
                 )
             ],

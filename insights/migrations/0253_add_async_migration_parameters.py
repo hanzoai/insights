@@ -11,7 +11,7 @@ class AddFieldNullSafe(migrations.AddField):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0252_reset_insight_refreshing_status"),
+        ("posthog", "0252_reset_insight_refreshing_status"),
     ]
 
     operations = [

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for CREATE INDEX CONCURRENTLY
 
     dependencies = [
-        ("insights", "0916_alter_userproductlist_reason"),
+        ("posthog", "0916_alter_userproductlist_reason"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_linked_insight",
                         related_query_name="survey_linked_insight",
-                        to="insights.insight",
+                        to="posthog.insight",
                     ),
                 ),
             ],

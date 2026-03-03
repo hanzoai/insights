@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0843_datawarehousesavedquery_is_materialized"),
+        ("posthog", "0843_datawarehousesavedquery_is_materialized"),
     ]
 
     operations = [

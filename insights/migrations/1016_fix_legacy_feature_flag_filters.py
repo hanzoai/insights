@@ -17,7 +17,7 @@ def fix_legacy_feature_flag_filters(apps, schema_editor):
     Mirrors the fallback in FeatureFlag.get_filters() so the method
     can be simplified to just `return self.filters`.
     """
-    FeatureFlag = apps.get_model("insights", "FeatureFlag")
+    FeatureFlag = apps.get_model("posthog", "FeatureFlag")
     queryset = FeatureFlag.objects.filter(Q(filters__isnull=True) | ~Q(filters__has_key="groups"))
 
     total = 0
@@ -50,7 +50,7 @@ def fix_legacy_feature_flag_filters(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1015_normalize_feature_flag_payloads_to_strings"),
+        ("posthog", "1015_normalize_feature_flag_payloads_to_strings"),
     ]
 
     operations = [

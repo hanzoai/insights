@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0163_insights_favorited_updatedat_tags"),
+        ("posthog", "0163_insights_favorited_updatedat_tags"),
     ]
 
     operations = [

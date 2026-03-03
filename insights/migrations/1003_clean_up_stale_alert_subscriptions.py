@@ -20,7 +20,7 @@ def clean_up_stale_alert_subscriptions(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1002_experiment_exposure_preaggregation_enabled"),
+        ("posthog", "1002_experiment_exposure_preaggregation_enabled"),
     ]
 
     operations = [

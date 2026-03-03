@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0496_team_person_processing_opt_out"),
+        ("posthog", "0496_team_person_processing_opt_out"),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                         null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
         migrations.SeparateDatabaseAndState(
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                     model_name="experiment",
                     name="holdout",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.experimentholdout"
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.experimentholdout"
                     ),
                 ),
             ],

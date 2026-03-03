@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("insights", "0524_datawarehousejoin_configuration")]
+    dependencies = [("posthog", "0524_datawarehousejoin_configuration")]
 
     operations = [
         migrations.AddField(

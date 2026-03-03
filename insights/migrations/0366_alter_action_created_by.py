@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0365_update_created_by_flag_constraint"),
+        ("posthog", "0365_update_created_by_flag_constraint"),
     ]
 
     operations = [

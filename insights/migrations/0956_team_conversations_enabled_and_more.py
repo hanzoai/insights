@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0955_alter_organization_is_ai_data_processing_approved"),
+        ("posthog", "0955_alter_organization_is_ai_data_processing_approved"),
     ]
 
     operations = [

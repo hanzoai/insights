@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0827_add_web_analytics_pre_aggregated_tables_enabled_to_team"),
+        ("posthog", "0827_add_web_analytics_pre_aggregated_tables_enabled_to_team"),
     ]
 
     operations = [

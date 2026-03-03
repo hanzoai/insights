@@ -13,8 +13,8 @@ logger = structlog.get_logger(__name__)
 def forwards_func(apps, schema_editor):
     logger.info("Migration 0243 - started")
 
-    Plugin = apps.get_model("insights", "Plugin")
-    PluginSourceFile = apps.get_model("insights", "PluginSourceFile")
+    Plugin = apps.get_model("posthog", "Plugin")
+    PluginSourceFile = apps.get_model("posthog", "PluginSourceFile")
 
     # PluginSourceFile.objects.sync_from_plugin_archive() inlined
     # 5 changes from the original method:
@@ -67,14 +67,14 @@ def forwards_func(apps, schema_editor):
 
 def reverse_func(apps, schema_editor):
     logger.info("Migration 0243 - revert started")
-    PluginSourceFile = apps.get_model("insights", "PluginSourceFile")
+    PluginSourceFile = apps.get_model("posthog", "PluginSourceFile")
     PluginSourceFile.objects.exclude(plugin__plugin_type__in=("source", "local")).delete()
     logger.info("Migration 0243 - revert finished")
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0242_team_live_events_columns"),
+        ("posthog", "0242_team_live_events_columns"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0034_pg_trgm_and_btree_20200318_1447"),
+        ("posthog", "0034_pg_trgm_and_btree_20200318_1447"),
     ]
 
     operations = [

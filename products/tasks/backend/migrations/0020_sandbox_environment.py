@@ -12,7 +12,7 @@ import insights.helpers.encrypted_fields
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("insights", "0925_team_business_model"),
+        ("posthog", "0925_team_business_model"),
         ("tasks", "0019_remove_taskrun_log_storage_path"),
     ]
 
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_sandbox_environment",

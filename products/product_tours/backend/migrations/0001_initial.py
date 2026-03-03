@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0936_survey_headline_response_count_and_more"),
+        ("posthog", "0936_survey_headline_response_count_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="product_tours_internal_targeting_flag",
                         related_query_name="product_tour_internal_targeting_flag",
-                        to="insights.featureflag",
+                        to="posthog.featureflag",
                     ),
                 ),
                 (
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="product_tours",
                         related_query_name="product_tour",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

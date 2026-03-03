@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0719_replace_person_with_person_display_name_in_live_events_columns"),
+        ("posthog", "0719_replace_person_with_person_display_name_in_live_events_columns"),
     ]
 
     operations = [

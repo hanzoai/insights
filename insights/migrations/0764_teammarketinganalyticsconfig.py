@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0763_migrate_team_base_currency"),
+        ("posthog", "0763_migrate_team_base_currency"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         primary_key=True,
                         serialize=False,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 ("_sources_map", models.JSONField(blank=True, db_column="sources_map", default=dict, null=False)),

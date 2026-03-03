@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0518_survey_internal_response_sampling_flag"),
+        ("posthog", "0518_survey_internal_response_sampling_flag"),
     ]
 
     operations = [

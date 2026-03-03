@@ -18,9 +18,9 @@ class BackfillNodesEdgesMigrationTest(NonAtomicTestMigrations):
         return "data_modeling"
 
     def setUpBeforeMigration(self, apps: Any) -> None:
-        Organization = apps.get_model("insights", "Organization")
-        Project = apps.get_model("insights", "Project")
-        Team = apps.get_model("insights", "Team")
+        Organization = apps.get_model("posthog", "Organization")
+        Project = apps.get_model("posthog", "Project")
+        Team = apps.get_model("posthog", "Team")
         DataWarehouseSavedQuery = apps.get_model("data_warehouse", "DataWarehouseSavedQuery")
         Node = apps.get_model("data_modeling", "Node")
 

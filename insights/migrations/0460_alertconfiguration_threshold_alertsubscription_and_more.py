@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0459_convert_personsnode_insights_to_actorsquery"),
+        ("posthog", "0459_convert_personsnode_insights_to_actorsquery"),
     ]
 
     operations = [
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("insight", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.insight")),
+                ("insight", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.insight")),
             ],
             options={
                 "abstract": False,
@@ -64,8 +64,8 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("insight", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.insight")),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("insight", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.insight")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "abstract": False,
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                 ("subscribed", models.BooleanField(default=True)),
                 (
                     "alert_configuration",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.alertconfiguration"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.alertconfiguration"),
                 ),
                 (
                     "created_by",
@@ -115,19 +115,19 @@ class Migration(migrations.Migration):
             model_name="alertconfiguration",
             name="subscribed_users",
             field=models.ManyToManyField(
-                related_name="alert_configurations", through="insights.AlertSubscription", to=settings.AUTH_USER_MODEL
+                related_name="alert_configurations", through="posthog.AlertSubscription", to=settings.AUTH_USER_MODEL
             ),
         ),
         migrations.AddField(
             model_name="alertconfiguration",
             name="team",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
         ),
         migrations.AddField(
             model_name="alertconfiguration",
             name="threshold",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.threshold"
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.threshold"
             ),
         ),
         migrations.CreateModel(
@@ -152,7 +152,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "alert_configuration",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.alertconfiguration"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.alertconfiguration"),
                 ),
             ],
             options={

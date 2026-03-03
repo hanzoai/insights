@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0428_externaldataschema_sync_type"),
+        ("posthog", "0428_externaldataschema_sync_type"),
     ]
 
     operations = [

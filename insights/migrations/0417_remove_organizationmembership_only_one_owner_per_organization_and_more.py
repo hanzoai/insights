@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def backfill_invite_level(apps, schema_editor):
-    OrganizationInvite = apps.get_model("insights", "organizationinvite")
+    OrganizationInvite = apps.get_model("posthog", "organizationinvite")
     for invite in OrganizationInvite.objects.all():
         invite.level = 1
         invite.save()
@@ -12,7 +12,7 @@ def backfill_invite_level(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0416_survey_internal_targeting_flag"),
+        ("posthog", "0416_survey_internal_targeting_flag"),
     ]
 
     operations = [

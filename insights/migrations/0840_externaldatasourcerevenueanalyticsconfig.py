@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0839_alter_integration_kind"),
+        ("posthog", "0839_alter_integration_kind"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         primary_key=True,
                         serialize=False,
-                        to="insights.externaldatasource",
+                        to="posthog.externaldatasource",
                     ),
                 ),
                 ("enabled", models.BooleanField(default=True)),

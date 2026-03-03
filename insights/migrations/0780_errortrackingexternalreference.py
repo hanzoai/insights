@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0779_alter_integration_kind"),
+        ("posthog", "0779_alter_integration_kind"),
     ]
 
     operations = [
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "integration",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.integration"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.integration"),
                 ),
                 (
                     "issue",
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="external_issues",
                         related_query_name="external_issue",
-                        to="insights.errortrackingissue",
+                        to="posthog.errortrackingissue",
                     ),
                 ),
             ],

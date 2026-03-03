@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allow non-atomic migration for concurrent operations
 
     dependencies = [
-        ("insights", "0742_exportedasset_exception"),
+        ("posthog", "0742_exportedasset_exception"),
     ]
 
     operations = [
@@ -30,14 +30,14 @@ class Migration(migrations.Migration):
                         ("version", models.TextField()),
                         ("project", models.TextField()),
                         ("metadata", models.JSONField(null=True)),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
                     ],
                 ),
                 migrations.AddField(
                     model_name="errortrackingsymbolset",
                     name="release",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackingrelease"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackingrelease"
                     ),
                 ),
                 migrations.AddIndex(

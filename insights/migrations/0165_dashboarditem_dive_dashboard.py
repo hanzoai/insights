@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0164_person_index_by_team_and_id"),
+        ("posthog", "0164_person_index_by_team_and_id"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
-                to="insights.dashboard",
+                to="posthog.dashboard",
             ),
         ),
     ]

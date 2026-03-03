@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0947_insightviewed_null_unique_index")]
+    dependencies = [("posthog", "0947_insightviewed_null_unique_index")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
                     model_name="customfunction",
                     name="batch_export",
                     field=models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.batchexport"
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.batchexport"
                     ),
                 ),
                 # No-op in database (just Django state for choices validation)

@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0120_organization_personalization"),
+        ("posthog", "0120_organization_personalization"),
     ]
 
     operations = [

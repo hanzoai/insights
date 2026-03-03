@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0517_survey_response_sampling_fields"),
+        ("posthog", "0517_survey_response_sampling_fields"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_internal_response_sampling_flag",
                         related_query_name="surveys_internal_response_sampling_flag",
-                        to="insights.featureflag",
+                        to="posthog.featureflag",
                     ),
                 )
             ],

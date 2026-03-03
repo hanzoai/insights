@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0925_team_business_model"),
+        ("posthog", "0925_team_business_model"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("data_modeling", "0001_initial"),
     ]
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
             options={

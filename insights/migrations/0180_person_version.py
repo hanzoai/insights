@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0179_add_group_type_mapping"),
+        ("posthog", "0179_add_group_type_mapping"),
     ]
 
     operations = [

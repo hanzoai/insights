@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0828_grouptypemapping_created_at"),
+        ("posthog", "0828_grouptypemapping_created_at"),
     ]
 
     operations = [

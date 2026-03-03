@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0848_activitylog_detail_gin_index"),
+        ("posthog", "0848_activitylog_detail_gin_index"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0834_alter_resourcenotebook_group"),
+        ("posthog", "0834_alter_resourcenotebook_group"),
     ]
 
     operations = [

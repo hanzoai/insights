@@ -9,7 +9,7 @@ MAX_SLUG_LENGTH = 48
 
 
 def slugify_all(apps, schema_editor):
-    Organization = apps.get_model("insights", "Organization")
+    Organization = apps.get_model("posthog", "Organization")
     for instance in Organization.objects.all():
         slugified_name = slugify(instance.name)[:MAX_SLUG_LENGTH]
         for retry_i in range(10):
@@ -29,7 +29,7 @@ def slugify_all(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0173_should_update_person_props_function"),
+        ("posthog", "0173_should_update_person_props_function"),
     ]
 
     operations = [

@@ -7,8 +7,8 @@ def remove_engage_destinations(apps, schema_editor):
     """
     Remove broken engage destination templates and their uses
     """
-    InsightsFunction = apps.get_model("insights", "InsightsFunction")
-    InsightsFunctionTemplate = apps.get_model("insights", "InsightsFunctionTemplate")
+    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
+    InsightsFunctionTemplate = apps.get_model("posthog", "InsightsFunctionTemplate")
 
     # segment engage destinations
     template_ids_to_remove = [
@@ -35,7 +35,7 @@ def reverse_remove_engage_destinations(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0782_remove_segment_hidden_destinations"),
+        ("posthog", "0782_remove_segment_hidden_destinations"),
     ]
 
     operations = [

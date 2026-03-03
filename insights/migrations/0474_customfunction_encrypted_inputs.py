@@ -7,7 +7,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0473_dashboardtemplate_availability_contexts"),
+        ("posthog", "0473_dashboardtemplate_availability_contexts"),
     ]
 
     operations = [

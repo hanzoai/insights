@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0440_organizationinvite_private_project_access"),
+        ("posthog", "0440_organizationinvite_private_project_access"),
     ]
 
     operations = [

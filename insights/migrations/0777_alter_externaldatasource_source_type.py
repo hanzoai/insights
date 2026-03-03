@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0776_move_stripe_to_append"),
+        ("posthog", "0776_move_stripe_to_append"),
     ]
 
     operations = [

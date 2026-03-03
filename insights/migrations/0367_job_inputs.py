@@ -10,7 +10,7 @@ from insights.helpers.encrypted_fields import EncryptedJSONField
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0366_alter_action_created_by"),
+        ("posthog", "0366_alter_action_created_by"),
     ]
 
     operations = [
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
             model_name="datawarehousetable",
             name="external_data_source",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.externaldatasource"
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.externaldatasource"
             ),
         ),
         migrations.CreateModel(
@@ -50,9 +50,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "pipeline",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.externaldatasource"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.externaldatasource"),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "abstract": False,
