@@ -103,9 +103,10 @@ jobs:
               uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
               with:
                   images: |
+                      ghcr.io/hanzoai/insights-plugin
                       ghcr.io/hanzoai/insights-node
+                      hanzoai/insights-plugin
                       hanzoai/insights-node
-                      ${{ steps.aws-ecr.outputs.registry }}/posthog-node
                   tags: |
                       type=ref,event=pr
                       type=ref,event=branch
