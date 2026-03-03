@@ -244,7 +244,7 @@ export class PostgresGroupRepository
 
         const { rows } = await this.postgres.query(
             tx ?? PostgresUse.PERSONS_READ,
-            `SELECT project_id, group_type, group_type_index FROM insights_grouptypemapping WHERE project_id = ANY($1)`,
+            `SELECT project_id, group_type, group_type_index FROM posthog_grouptypemapping WHERE project_id = ANY($1)`,
             [projectIds],
             'fetchGroupTypesByProjectIds'
         )
@@ -288,7 +288,7 @@ export class PostgresGroupRepository
 
         const { rows } = await this.postgres.query(
             tx ?? PostgresUse.PERSONS_READ,
-            `SELECT team_id, group_type, group_type_index FROM insights_grouptypemapping WHERE team_id = ANY($1)`,
+            `SELECT team_id, group_type, group_type_index FROM posthog_grouptypemapping WHERE team_id = ANY($1)`,
             [teamIds],
             'fetchGroupTypesByTeamIds'
         )
@@ -335,14 +335,14 @@ export class PostgresGroupRepository
             tx ?? PostgresUse.PERSONS_WRITE,
             `
             WITH insert_result AS (
-                INSERT INTO insights_grouptypemapping (team_id, project_id, group_type, group_type_index, created_at)
+                INSERT INTO posthog_grouptypemapping (team_id, project_id, group_type, group_type_index, created_at)
                 VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT DO NOTHING
                 RETURNING group_type_index
             )
             SELECT group_type_index, 1 AS is_insert FROM insert_result
             UNION
-            SELECT group_type_index, 0 AS is_insert FROM insights_grouptypemapping WHERE project_id = $2 AND group_type = $3;
+            SELECT group_type_index, 0 AS is_insert FROM posthog_grouptypemapping WHERE project_id = $2 AND group_type = $3;
             `,
             [teamId, projectId, groupType, index, new Date()],
             'insertGroupType'

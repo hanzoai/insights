@@ -56,7 +56,7 @@ export function createProcessPersonlessStep<TInput extends ProcessPersonlessInpu
             const personIsMerged = personsStore.getPersonlessBatchResult(team.id, distinctId)
 
             if (personIsMerged) {
-                // If is_merged came back true, it means the insights_personlessdistinctid
+                // If is_merged came back true, it means the posthog_personlessdistinctid
                 // was updated by a merge. We need to fetch the person again (using the leader)
                 // so that we properly associate this event with the Person we got merged into.
                 existingPerson = await personsStore.fetchForUpdate(team.id, distinctId)
