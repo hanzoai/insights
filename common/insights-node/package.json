@@ -5,21 +5,13 @@
     "author": "Hanzo AI <engineering@hanzo.ai>",
     "repository": "https://github.com/hanzoai/insights",
     "license": "MIT",
-    "types": "dist/index.d.ts",
-    "main": "dist/index.js",
-    "scripts": {
-        "build": "tsc -p tsconfig.json",
-        "clean": "rm -rf dist/*",
-        "prepublishOnly": "pnpm build"
-    },
+    "types": "index.d.ts",
+    "main": "index.js",
     "files": [
-        "dist",
-        "src"
+        "index.js",
+        "index.d.ts"
     ],
     "dependencies": {
         "posthog-node": "5.10.4"
-    },
-    "devDependencies": {
-        "typescript": "catalog:"
     }
 }
