@@ -1,4 +1,4 @@
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { insertRow } from '~/tests/helpers/sql'
 
 import { PostgresRouter } from '../../utils/db/postgres'

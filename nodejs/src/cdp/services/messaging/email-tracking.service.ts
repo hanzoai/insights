@@ -8,7 +8,7 @@ import { parseJSON } from '~/utils/json-parse'
 import { captureException } from '~/utils/insights'
 
 import { logger } from '../../../utils/logger'
-import { InsightsFlowManagerService } from '../insightsflows/customflow-manager.service'
+import { InsightsFlowManagerService } from '../insightsflows/insightsflow-manager.service'
 import { InsightsFunctionManagerService } from '../managers/insights-function-manager.service'
 import { InsightsFunctionMonitoringService } from '../monitoring/insights-function-monitoring.service'
 import { SesWebhookHandler } from './helpers/ses'
