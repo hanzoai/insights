@@ -9,7 +9,7 @@ import {
     MessageHeader,
     Metadata,
     PartitionMetadata,
-    StreamConsumer as RdStreamConsumer,
+    KafkaConsumer as RdStreamConsumer,
     TopicPartitionOffset,
     WatermarkOffsets,
 } from 'node-rdkafka'
