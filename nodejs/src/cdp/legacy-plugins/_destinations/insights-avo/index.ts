@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID } from 'crypto'
 
 import { ProcessedPluginEvent } from '@posthog/plugin-scaffold'

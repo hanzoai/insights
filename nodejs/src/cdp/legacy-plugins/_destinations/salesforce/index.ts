@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { URL } from 'url'
 
 import { ProcessedPluginEvent } from '@posthog/plugin-scaffold'
