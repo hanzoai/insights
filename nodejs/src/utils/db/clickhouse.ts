@@ -46,18 +46,18 @@ export class ClickHouseRouter {
             return
         }
 
-        const CLICKHOUSE_HOST = this.hub.CLICKHOUSE_HOST ?? 'localhost'
-        const CLICKHOUSE_PORT = this.hub.CLICKHOUSE_PORT ?? '8123'
-        const CLICKHOUSE_USERNAME = this.hub.CLICKHOUSE_USERNAME ?? 'default'
-        const CLICKHOUSE_PASSWORD = this.hub.CLICKHOUSE_PASSWORD ?? ''
-        const CLICKHOUSE_DATABASE = this.hub.CLICKHOUSE_DATABASE ?? 'default'
-        logger.info('🤔', 'Connecting to ClickHouse...')
+        const host = this.hub.DATASTORE_HOST ?? 'localhost'
+        const port = this.hub.DATASTORE_PORT ?? '8123'
+        const user = this.hub.DATASTORE_USER ?? 'default'
+        const password = this.hub.DATASTORE_PASSWORD ?? ''
+        const database = this.hub.DATASTORE_DATABASE ?? 'default'
+        logger.info('🤔', 'Connecting to Datastore...')
 
         this.client = createClickHouseClient({
-            url: `http://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}`,
-            username: CLICKHOUSE_USERNAME,
-            password: CLICKHOUSE_PASSWORD,
-            database: CLICKHOUSE_DATABASE,
+            url: `http://${host}:${port}`,
+            username: user,
+            password: password,
+            database: database,
             request_timeout: 30000,
             max_open_connections: 50,
             keep_alive_enabled: true,
