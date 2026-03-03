@@ -7,8 +7,8 @@ from insights.insightsql.compiler.bytecode import create_bytecode
 from insights.cdp.filters import compile_filters_bytecode, insights_function_filters_to_expr
 from insights.models.action.action import Action
 
-from common.hogvm.python.execute import execute_bytecode
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from common.scriptvm.python.execute import execute_bytecode
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):

@@ -4,7 +4,7 @@ from freezegun import freeze_time
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from insights.cdp.templates.onesignal.template_onesignal import template as template_onesignal
 
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 class TestTemplateOneSignal(BaseInsightsFunctionTemplateTest):

@@ -47,8 +47,8 @@ from insights.models.insight_variable import InsightVariable
 from insights.models.property_definition import PropertyDefinition
 from insights.models.team.team import Team
 
-from common.hogvm.python.stl import STL
-from common.hogvm.python.stl.bytecode import BYTECODE_STL
+from common.scriptvm.python.stl import STL
+from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 
 ALL_INSIGHTS_FUNCTIONS = sorted(list(STL.keys()) + list(BYTECODE_STL.keys()))
 MATCH_ANY_CHARACTER = "$$_POSTHOG_ANY_$$"

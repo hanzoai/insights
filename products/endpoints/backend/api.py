@@ -85,7 +85,7 @@ from products.endpoints.backend.rate_limit import (
     clear_endpoint_materialization_cache,
 )
 
-from common.hogvm.python.utils import HogVMException
+from common.scriptvm.python.utils import HogVMException
 
 MIN_CACHE_AGE_SECONDS = 300
 MAX_CACHE_AGE_SECONDS = 86400

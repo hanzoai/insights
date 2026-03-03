@@ -17,7 +17,7 @@ from insights.temporal.common.clickhouse import get_client
 from insights.temporal.common.heartbeat import Heartbeater
 from insights.temporal.common.logger import get_logger
 
-from common.hogvm.python.execute import execute_bytecode
+from common.scriptvm.python.execute import execute_bytecode
 
 if TYPE_CHECKING:
     from insights.kafka_client.client import _KafkaProducer

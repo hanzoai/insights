@@ -41,7 +41,7 @@ jobs:
                   filters: |
                       hog:
                         # Avoid running tests for irrelevant changes
-                        - 'common/hogvm/**/*'
+                        - 'common/scriptvm/**/*'
                         - 'insights/hogql/**/*'
                         - 'bin/hog'
                         - 'bin/hoge'
@@ -128,7 +128,7 @@ jobs:
 
             - name: Run HogVM Python tests
               run: |
-                  pytest common/hogvm
+                  pytest common/scriptvm
 
             - name: Run HogVM TypeScript tests
               run: |
@@ -140,7 +140,7 @@ jobs:
                   pnpm --filter=@insights/scriptvm install --frozen-lockfile
                   pnpm --filter=@insights/scriptvm compile:stl
                   bin/turbo --filter=@insights/scriptvm build
-                  cd common/hogvm
+                  cd common/scriptvm
                   ./test.sh && git diff --exit-code
               env:
                   TEST: 1
@@ -161,7 +161,7 @@ jobs:
               id: check-package-version
               uses: Insights/check-package-version@138438a8fed9213fa112f841b1c89f9bd68f5cca # v2.1.0
               with:
-                  path: common/hogvm/typescript
+                  path: common/scriptvm/typescript
 
     release-hogvm:
         name: Release new HogVM TypeScript version
@@ -211,4 +211,4 @@ jobs:
             - name: Install package.json dependencies
               run: pnpm --filter=@insights/scriptvm install --frozen-lockfile
             - name: Publish the package in the npm registry
-              run: cd common/hogvm/typescript && npm publish --access public
+              run: cd common/scriptvm/typescript && npm publish --access public
