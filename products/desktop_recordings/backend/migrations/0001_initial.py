@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("sdk_upload_id", models.UUIDField(db_index=True, unique=True)),

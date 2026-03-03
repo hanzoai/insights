@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("provider", models.CharField(choices=[("openai", "Openai")], max_length=50)),
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("error_message", models.TextField(blank=True, null=True)),
-                ("encrypted_config", posthog.helpers.encrypted_fields.EncryptedJSONField(default=dict)),
+                ("encrypted_config", insights.helpers.encrypted_fields.EncryptedJSONField(default=dict)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("last_used_at", models.DateTimeField(blank=True, null=True)),
                 (
