@@ -18,7 +18,7 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '~/types'
 import { closeHub, createHub } from '~/utils/db/hub'
 
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import { compileFn } from '../templates/compiler'

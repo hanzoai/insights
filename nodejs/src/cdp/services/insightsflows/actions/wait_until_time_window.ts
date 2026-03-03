@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { CyclotronPerson } from '~/cdp/types'
 import { InsightsFlowAction } from '~/schema/insightsflow'
 
-import { findContinueAction } from '../customflow-utils'
+import { findContinueAction } from '../insightsflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
 type Action = Extract<InsightsFlowAction, { type: 'wait_until_time_window' }>
