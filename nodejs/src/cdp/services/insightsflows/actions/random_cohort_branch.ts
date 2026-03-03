@@ -1,5 +1,5 @@
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
-import { InsightsFlowAction } from '~/schema/customflow'
+import { InsightsFlowAction } from '~/schema/insightsflow'
 
 import { findNextAction } from '../customflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'

@@ -3,7 +3,7 @@ import { Counter, Histogram } from 'prom-client'
 
 import { ExecResult } from '@posthog/scriptvm'
 
-import { InsightsFlow } from '../../schema/customflow'
+import { InsightsFlow } from '../../schema/insightsflow'
 import { RawClickHouseEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'

@@ -1,7 +1,7 @@
 import '~/tests/helpers/mocks/date.mock'
 
 import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { forSnapshot } from '~/tests/helpers/snapshots'
 import { createTeam, getTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub } from '~/types'
@@ -9,7 +9,7 @@ import { closeHub, createHub } from '~/utils/db/hub'
 import { PostgresUse } from '~/utils/db/postgres'
 
 import { insertInsightsFlow } from '../../_tests/fixtures-insightsflows'
-import { InsightsFlowManagerService } from './customflow-manager.service'
+import { InsightsFlowManagerService } from './insightsflow-manager.service'
 
 describe('InsightsFlowManager', () => {
     jest.setTimeout(2000)
