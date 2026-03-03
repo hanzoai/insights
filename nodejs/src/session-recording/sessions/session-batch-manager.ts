@@ -1,7 +1,7 @@
 import { SessionMetadataStore } from '../../session-replay/shared/metadata/session-metadata-store'
 import { KeyStore, RecordingEncryptor } from '../../session-replay/shared/types'
 import { logger } from '../../utils/logger'
-import { KafkaOffsetManager } from '../kafka/offset-manager'
+import { StreamOffsetManager } from '../stream/offset-manager'
 import { SessionBatchFileStorage } from './session-batch-file-storage'
 import { SessionBatchRecorder } from './session-batch-recorder'
 import { SessionConsoleLogStore } from './session-console-log-store'
@@ -15,8 +15,8 @@ export interface SessionBatchManagerConfig {
     maxBatchAgeMs: number
     /** Maximum number of events per session per batch before rate limiting */
     maxEventsPerSessionPerBatch: number
-    /** Manages Kafka offset tracking and commits */
-    offsetManager: KafkaOffsetManager
+    /** Manages stream offset tracking and commits */
+    offsetManager: StreamOffsetManager
     /** Handles writing session batch files to storage */
     fileStorage: SessionBatchFileStorage
     /** Manages storing session metadata */
@@ -72,7 +72,7 @@ export class SessionBatchManager {
     private readonly maxBatchSizeBytes: number
     private readonly maxBatchAgeMs: number
     private readonly maxEventsPerSessionPerBatch: number
-    private readonly offsetManager: KafkaOffsetManager
+    private readonly offsetManager: StreamOffsetManager
     private readonly fileStorage: SessionBatchFileStorage
     private readonly metadataStore: SessionMetadataStore
     private readonly consoleLogStore: SessionConsoleLogStore

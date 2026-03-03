@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { parseEventHeaders } from '../../kafka/consumer'
+import { parseEventHeaders } from '../../stream/consumer'
 import { EventHeaders } from '../../types'
 import { ok } from '../pipelines/results'
 import { ProcessingStep } from '../pipelines/steps'

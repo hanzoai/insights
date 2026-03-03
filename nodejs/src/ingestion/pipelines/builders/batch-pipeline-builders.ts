@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { Team } from '../../../types'
 import { PromiseScheduler } from '../../../utils/promise-scheduler'
 import { BaseBatchPipeline, BatchProcessingStep } from '../base-batch-pipeline'
@@ -206,8 +206,8 @@ export class TeamAwareBatchPipelineBuilder<
     }
 
     handleIngestionWarnings(
-        kafkaProducer: KafkaProducerWrapper
+        streamProducer: StreamProducerWrapper
     ): BatchPipelineBuilder<TInput, TOutput, CInput, COutput> {
-        return new BatchPipelineBuilder(new IngestionWarningHandlingBatchPipeline(kafkaProducer, this.pipeline))
+        return new BatchPipelineBuilder(new IngestionWarningHandlingBatchPipeline(streamProducer, this.pipeline))
     }
 }

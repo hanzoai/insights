@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { TopicMessage } from '../../../../kafka/producer'
+import { TopicMessage } from '../../../../stream/producer'
 import {
     InternalPerson,
     PersonUpdateFields,

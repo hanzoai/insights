@@ -2,13 +2,13 @@ import { DateTime } from 'luxon'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { KAFKA_GROUPS } from '../../../../config/kafka-topics'
-import { KafkaProducerWrapper } from '../../../../kafka/producer'
+import { STREAM_GROUPS } from '../../../../config/stream-topics'
+import { StreamProducerWrapper } from '../../../../stream/producer'
 import { GroupTypeIndex, TeamId, TimestampFormat } from '../../../../types'
 import { castTimestampOrNow } from '../../../../utils/utils'
 
 export class ClickhouseGroupRepository {
-    constructor(private kafkaProducer: KafkaProducerWrapper) {}
+    constructor(private streamProducer: StreamProducerWrapper) {}
 
     public async upsertGroup(
         teamId: TeamId,
@@ -18,8 +18,8 @@ export class ClickhouseGroupRepository {
         createdAt: DateTime,
         version: number
     ): Promise<void> {
-        await this.kafkaProducer.queueMessages({
-            topic: KAFKA_GROUPS,
+        await this.streamProducer.queueMessages({
+            topic: STREAM_GROUPS,
             messages: [
                 {
                     value: JSON.stringify({

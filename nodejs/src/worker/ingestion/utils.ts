@@ -3,13 +3,13 @@ import { Counter } from 'prom-client'
 
 import { PluginEvent, ProcessedPluginEvent } from '@posthog/plugin-scaffold'
 
-import { KafkaProducerWrapper, TopicMessage } from '../../kafka/producer'
+import { StreamProducerWrapper, TopicMessage } from '../../stream/producer'
 import { PipelineEvent, TeamId, TimestampFormat } from '../../types'
 import { safeClickhouseString } from '../../utils/db/utils'
 import { logger } from '../../utils/logger'
 import { IngestionWarningLimiter } from '../../utils/token-bucket'
 import { UUIDT, castTimestampOrNow, castTimestampToClickhouseFormat } from '../../utils/utils'
-import { KAFKA_EVENTS_DEAD_LETTER_QUEUE, KAFKA_INGESTION_WARNINGS } from './../../config/kafka-topics'
+import { STREAM_EVENTS_DEAD_LETTER_QUEUE, STREAM_INGESTION_WARNINGS } from './../../config/stream-topics'
 
 export const ingestionWarningCounter = new Counter({
     name: 'ingestion_warnings_total',
@@ -57,7 +57,7 @@ export function generateEventDeadLetterQueueMessage(
     }
 
     return {
-        topic: KAFKA_EVENTS_DEAD_LETTER_QUEUE,
+        topic: STREAM_EVENTS_DEAD_LETTER_QUEUE,
         messages: [
             {
                 value: JSON.stringify(deadLetterQueueEvent),
@@ -70,7 +70,7 @@ export function generateEventDeadLetterQueueMessage(
 // These warnings get displayed to end users. Make sure these errors are actionable and useful for them and
 // also update IngestionWarningsView.tsx to display useful context.
 export async function captureIngestionWarning(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     teamId: TeamId,
     type: string,
     details: Record<string, any>,
@@ -90,9 +90,9 @@ export async function captureIngestionWarning(
     ingestionWarningCounter.inc({ type, emitted: shouldEmit.toString() })
 
     if (shouldEmit) {
-        return kafkaProducer
+        return streamProducer
             .queueMessages({
-                topic: KAFKA_INGESTION_WARNINGS,
+                topic: STREAM_INGESTION_WARNINGS,
                 messages: [
                     {
                         value: JSON.stringify({

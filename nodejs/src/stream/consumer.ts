@@ -9,7 +9,7 @@ import {
     MessageHeader,
     Metadata,
     PartitionMetadata,
-    KafkaConsumer as RdKafkaConsumer,
+    StreamConsumer as RdStreamConsumer,
     TopicPartitionOffset,
     WatermarkOffsets,
 } from 'node-rdkafka'
@@ -34,22 +34,22 @@ import { captureException } from '../utils/insights'
 import { retryIfRetriable } from '../utils/retries'
 import { promisifyCallback } from '../utils/utils'
 import { ensureTopicExists } from './admin'
-import { getKafkaConfigFromEnv } from './config'
-import { parseBrokerStatistics, trackBrokerMetrics } from './kafka-client-metrics'
+import { getStreamConfigFromEnv } from './config'
+import { parseBrokerStatistics, trackBrokerMetrics } from './stream-client-metrics'
 
 const DEFAULT_BATCH_TIMEOUT_MS = 500
 const SLOW_BATCH_PROCESSING_LOG_THRESHOLD_MS = 10000
 const MAX_HEALTH_HEARTBEAT_INTERVAL_MS = 60_000
 const STATISTICS_INTERVAL_MS = 5000 // Emit internal metrics every 5 seconds
 
-const kafkaConsumerAssignment = new Gauge({
-    name: 'kafka_consumer_assignment',
-    help: 'Kafka consumer partition assignment status',
+const streamConsumerAssignment = new Gauge({
+    name: 'stream_consumer_assignment',
+    help: 'Stream consumer partition assignment status',
     labelNames: ['topic_name', 'partition_id', 'pod', 'group_id'],
 })
 
-const kafkaHeaderStatusCounter = new Counter({
-    name: 'kafka_header_status_total',
+const streamHeaderStatusCounter = new Counter({
+    name: 'stream_header_status_total',
     help: 'Count of events by header name and presence status',
     labelNames: ['header', 'status'],
 })
@@ -78,21 +78,21 @@ const gaugeBatchUtilization = new Gauge({
     labelNames: ['groupId'],
 })
 
-const histogramKafkaBatchSize = new Histogram({
+const histogramStreamBatchSize = new Histogram({
     name: 'consumer_batch_size',
-    help: 'The size of the batches we are receiving from Kafka',
+    help: 'The size of the batches we are receiving from stream',
     buckets: [0, 50, 100, 250, 500, 750, 1000, 1500, 2000, 3000, Infinity],
 })
 
-const histogramKafkaBatchSizeKb = new Histogram({
+const histogramStreamBatchSizeKb = new Histogram({
     name: 'consumer_batch_size_kb',
-    help: 'The size in kb of the batches we are receiving from Kafka',
+    help: 'The size in kb of the batches we are receiving from stream',
     buckets: [0, 128, 512, 1024, 5120, 10240, 20480, 51200, 102400, 204800, Infinity],
 })
 
-const histogramKafkaConsumeInterval = new Histogram({
-    name: 'kafka_consume_interval_ms',
-    help: 'Time elapsed between Kafka consume calls',
+const histogramStreamConsumeInterval = new Histogram({
+    name: 'stream_consume_interval_ms',
+    help: 'Time elapsed between Stream consume calls',
     labelNames: ['topic', 'groupId'],
     buckets: [0, 20, 100, 200, 500, 1000, 2500, 5000, 10000, 20000, 30000, 60000, Infinity],
 })
@@ -124,7 +124,7 @@ export const findOffsetsToCommit = (messages: TopicPartitionOffset[]): TopicPart
             return {
                 topic,
                 partition: parseInt(partition),
-                // When committing to Kafka you commit the offset of the next message you want to consume
+                // When committing to stream you commit the offset of the next message you want to consume
                 offset: highestOffset + 1,
             }
         })
@@ -133,7 +133,7 @@ export const findOffsetsToCommit = (messages: TopicPartitionOffset[]): TopicPart
     return highestOffsets
 }
 
-export type KafkaConsumerConfig = {
+export type StreamConsumerConfig = {
     groupId: string
     topic: string
     batchTimeoutMs?: number
@@ -143,7 +143,7 @@ export type KafkaConsumerConfig = {
     waitForBackgroundTasksOnRebalance?: boolean
 }
 
-export type RdKafkaConsumerConfig = Omit<
+export type RdStreamConsumerConfig = Omit<
     ConsumerGlobalConfig,
     'group.id' | 'enable.auto.offset.store' | 'enable.auto.commit'
 >
@@ -156,10 +156,10 @@ interface RebalanceCoordination {
     rebalanceStartTime: number
 }
 
-export class KafkaConsumer {
+export class StreamConsumer {
     private isStopping = false
     private lastHeartbeatTime = 0
-    private rdKafkaConsumer: RdKafkaConsumer
+    private rdStreamConsumer: RdStreamConsumer
     private consumerConfig: ConsumerGlobalConfig
     private fetchBatchSize: number
     private maxHealthHeartbeatIntervalMs: number
@@ -182,8 +182,8 @@ export class KafkaConsumer {
     private consumerLogStatsLevel: LogLevel
 
     constructor(
-        private config: KafkaConsumerConfig,
-        rdKafkaConfig: RdKafkaConsumerConfig = {}
+        private config: StreamConsumerConfig,
+        rdStreamConfig: RdStreamConsumerConfig = {}
     ) {
         this.backgroundTask = []
         this.podName = process.env.HOSTNAME || hostname()
@@ -209,7 +209,7 @@ export class KafkaConsumer {
         this.consumerConfig = {
             'client.id': hostname(),
             'security.protocol': 'plaintext',
-            'metadata.broker.list': 'kafka:9092', // Overridden with KAFKA_CONSUMER_METADATA_BROKER_LIST
+            'metadata.broker.list': 'stream:9092', // Overridden with STREAM_CONSUMER_METADATA_BROKER_LIST
             log_level: 4, // WARN as the default
             'group.id': this.config.groupId,
             'session.timeout.ms': 30_000,
@@ -220,7 +220,7 @@ export class KafkaConsumer {
             'fetch.wait.max.ms': 50,
             'queued.min.messages': 100000,
             'queued.max.messages.kbytes': 102400, // 1048576 is the default, we go smaller to reduce mem usage.
-            'client.rack': defaultConfig.KAFKA_CLIENT_RACK, // Helps with cross-AZ traffic awareness and is not unique to the consumer
+            'client.rack': defaultConfig.STREAM_CLIENT_RACK, // Helps with cross-AZ traffic awareness and is not unique to the consumer
             'metadata.max.age.ms': 30000, // Refresh metadata every 30s - Relevant for leader loss (MSK Security Patches)
             'socket.timeout.ms': 30000,
             // Only enable statistics when using loop-based health check
@@ -228,9 +228,9 @@ export class KafkaConsumer {
                 ? { 'statistics.interval.ms': STATISTICS_INTERVAL_MS }
                 : {}),
             // Custom settings and overrides - this is where most configuration overrides should be done
-            ...getKafkaConfigFromEnv('CONSUMER'),
+            ...getStreamConfigFromEnv('CONSUMER'),
             // Finally any specifically given consumer config overrides
-            ...rdKafkaConfig,
+            ...rdStreamConfig,
             // Below is config that we explicitly DO NOT want to be overrideable by env vars - i.e. things that would require code changes to change
             'partition.assignment.strategy': isTestEnv() ? 'roundrobin' : 'cooperative-sticky', // Roundrobin is used for testing to avoid flakiness caused by running librdkafka v2.2.0
             'enable.auto.offset.store': false, // NOTE: This is always false - we handle it using a custom function
@@ -240,7 +240,7 @@ export class KafkaConsumer {
             offset_commit_cb: true,
         }
 
-        this.rdKafkaConsumer = this.createConsumer()
+        this.rdStreamConsumer = this.createConsumer()
     }
 
     public getConfig(): ConsumerGlobalConfig {
@@ -260,7 +260,7 @@ export class KafkaConsumer {
         if (!defaultConfig.CONSUMER_LOOP_BASED_HEALTH_CHECK) {
             // this is called as a readiness and a liveness probe
             const isWithinInterval = Date.now() - this.lastHeartbeatTime < this.maxHealthHeartbeatIntervalMs
-            const isConnected = this.rdKafkaConsumer.isConnected()
+            const isConnected = this.rdStreamConsumer.isConnected()
 
             if (isConnected && isWithinInterval) {
                 return new HealthCheckResultOk()
@@ -282,8 +282,8 @@ export class KafkaConsumer {
         }
 
         // 1. Basic connectivity check
-        if (!this.rdKafkaConsumer.isConnected()) {
-            return new HealthCheckResultError('Consumer not connected to Kafka broker', details)
+        if (!this.rdStreamConsumer.isConnected()) {
+            return new HealthCheckResultError('Consumer not connected to stream broker', details)
         }
 
         // 2. Consumer loop liveness check (ensure loop is not stalled)
@@ -356,28 +356,28 @@ export class KafkaConsumer {
     }
 
     public assignments(): Assignment[] {
-        return this.rdKafkaConsumer.isConnected() ? this.rdKafkaConsumer.assignments() : []
+        return this.rdStreamConsumer.isConnected() ? this.rdStreamConsumer.assignments() : []
     }
 
     public offsetsStore(topicPartitionOffsets: TopicPartitionOffset[]): void {
-        return this.rdKafkaConsumer.offsetsStore(topicPartitionOffsets)
+        return this.rdStreamConsumer.offsetsStore(topicPartitionOffsets)
     }
 
-    public on: RdKafkaConsumer['on'] = (...args) => {
+    public on: RdStreamConsumer['on'] = (...args) => {
         // Delegate to the internal consumer
-        return this.rdKafkaConsumer.on(...args)
+        return this.rdStreamConsumer.on(...args)
     }
 
     public async queryWatermarkOffsets(topic: string, partition: number, timeout = 10000): Promise<[number, number]> {
-        if (!this.rdKafkaConsumer.isConnected()) {
+        if (!this.rdStreamConsumer.isConnected()) {
             throw new Error('Not connected')
         }
 
         const offsets = await promisifyCallback<WatermarkOffsets>((cb) =>
-            this.rdKafkaConsumer.queryWatermarkOffsets(topic, partition, timeout, cb)
+            this.rdStreamConsumer.queryWatermarkOffsets(topic, partition, timeout, cb)
         ).catch((err) => {
             captureException(err)
-            logger.error('🔥', 'Failed to query kafka watermark offsets', err)
+            logger.error('🔥', 'Failed to query stream watermark offsets', err)
             throw err
         })
 
@@ -385,11 +385,11 @@ export class KafkaConsumer {
     }
 
     public async getPartitionsForTopic(topic: string): Promise<PartitionMetadata[]> {
-        if (!this.rdKafkaConsumer.isConnected()) {
+        if (!this.rdStreamConsumer.isConnected()) {
             throw new Error('Not connected')
         }
 
-        const meta = await promisifyCallback<Metadata>((cb) => this.rdKafkaConsumer.getMetadata({ topic }, cb)).catch(
+        const meta = await promisifyCallback<Metadata>((cb) => this.rdStreamConsumer.getMetadata({ topic }, cb)).catch(
             (err) => {
                 captureException(err)
                 logger.error('🔥', 'Failed to get partition metadata', err)
@@ -401,7 +401,7 @@ export class KafkaConsumer {
     }
 
     public rebalanceCallback(err: LibrdKafkaError, assignments: Assignment[]): void {
-        logger.info('🔁', 'kafka_consumer_rebalancing', { err, assignments })
+        logger.info('🔁', 'stream_consumer_rebalancing', { err, assignments })
 
         if (err.code === CODES.ERRORS.ERR__ASSIGN_PARTITIONS) {
             // Mark rebalancing as complete when partitions are assigned
@@ -409,7 +409,7 @@ export class KafkaConsumer {
                 this.resetRebalanceCoordination()
             }
             assignments.forEach((tp) => {
-                kafkaConsumerAssignment.set(
+                streamConsumerAssignment.set(
                     {
                         topic_name: tp.topic,
                         partition_id: tp.partition.toString(),
@@ -419,10 +419,10 @@ export class KafkaConsumer {
                     1
                 )
             })
-            if (this.rdKafkaConsumer.rebalanceProtocol() === 'COOPERATIVE') {
-                this.rdKafkaConsumer.incrementalAssign(assignments)
+            if (this.rdStreamConsumer.rebalanceProtocol() === 'COOPERATIVE') {
+                this.rdStreamConsumer.incrementalAssign(assignments)
             } else {
-                this.rdKafkaConsumer.assign(assignments)
+                this.rdStreamConsumer.assign(assignments)
             }
         } else if (err.code === CODES.ERRORS.ERR__REVOKE_PARTITIONS) {
             // Mark rebalancing as starting when partitions are revoked
@@ -444,10 +444,10 @@ export class KafkaConsumer {
                 Promise.all(this.backgroundTask.map((t) => t.promise))
                     .then(() => {
                         logger.info('🔁', 'background_tasks_completed_before_partition_revocation')
-                        if (this.rdKafkaConsumer.rebalanceProtocol() === 'COOPERATIVE') {
-                            this.rdKafkaConsumer.incrementalUnassign(assignments)
+                        if (this.rdStreamConsumer.rebalanceProtocol() === 'COOPERATIVE') {
+                            this.rdStreamConsumer.incrementalUnassign(assignments)
                         } else {
-                            this.rdKafkaConsumer.unassign()
+                            this.rdStreamConsumer.unassign()
                         }
                         this.updateMetricsAfterRevocation(assignments)
                         try {
@@ -465,10 +465,10 @@ export class KafkaConsumer {
                     .catch((error) => {
                         logger.error('🔁', 'background_task_error_during_revocation', { error })
                         // Still proceed with revocation even if background tasks fail
-                        if (this.rdKafkaConsumer.rebalanceProtocol() === 'COOPERATIVE') {
-                            this.rdKafkaConsumer.incrementalUnassign(assignments)
+                        if (this.rdStreamConsumer.rebalanceProtocol() === 'COOPERATIVE') {
+                            this.rdStreamConsumer.incrementalUnassign(assignments)
                         } else {
-                            this.rdKafkaConsumer.unassign()
+                            this.rdStreamConsumer.unassign()
                         }
                         this.updateMetricsAfterRevocation(assignments)
                         try {
@@ -485,27 +485,27 @@ export class KafkaConsumer {
                     })
             } else {
                 // No background tasks or feature disabled, proceed immediately
-                if (this.rdKafkaConsumer.rebalanceProtocol() === 'COOPERATIVE') {
-                    this.rdKafkaConsumer.incrementalUnassign(assignments)
+                if (this.rdStreamConsumer.rebalanceProtocol() === 'COOPERATIVE') {
+                    this.rdStreamConsumer.incrementalUnassign(assignments)
                 } else {
-                    this.rdKafkaConsumer.unassign()
+                    this.rdStreamConsumer.unassign()
                 }
                 this.updateMetricsAfterRevocation(assignments)
             }
         } else {
             // Ignore exceptions if we are not connected
-            if (this.rdKafkaConsumer.isConnected()) {
-                logger.error('🔥', 'kafka_consumer_rebalancing_error', { err })
+            if (this.rdStreamConsumer.isConnected()) {
+                logger.error('🔥', 'stream_consumer_rebalancing_error', { err })
                 captureException(err)
             } else {
-                logger.warn('🔥', 'kafka_consumer_rebalancing_error_while_not_connected', { err })
+                logger.warn('🔥', 'stream_consumer_rebalancing_error_while_not_connected', { err })
             }
         }
     }
 
     private updateMetricsAfterRevocation(assignments: Assignment[]): void {
         assignments.forEach((tp) => {
-            kafkaConsumerAssignment.set(
+            streamConsumerAssignment.set(
                 {
                     topic_name: tp.topic,
                     partition_id: tp.partition.toString(),
@@ -517,8 +517,8 @@ export class KafkaConsumer {
         })
     }
 
-    private createConsumer(): RdKafkaConsumer {
-        const consumer = new RdKafkaConsumer(this.consumerConfig, {
+    private createConsumer(): RdStreamConsumer {
+        const consumer = new RdStreamConsumer(this.consumerConfig, {
             // Default settings
             'auto.offset.reset': 'earliest',
         })
@@ -572,7 +572,7 @@ export class KafkaConsumer {
                     logData.assignment_size = parsedStats.cgrp.assignment_size
                 }
 
-                logger[this.consumerLogStatsLevel]('📊', 'Kafka consumer statistics', logData)
+                logger[this.consumerLogStatsLevel]('📊', 'Stream consumer statistics', logData)
             } catch (error) {
                 logger.error('📊', 'Failed to parse consumer statistics', {
                     error: error instanceof Error ? error.message : String(error),
@@ -582,7 +582,7 @@ export class KafkaConsumer {
         })
 
         consumer.on('subscribed', (topics) => {
-            logger.info('📝', 'librdkafka consumer subscribed', { topics, config: this.consumerConfig })
+            logger.info('📝', 'librdstream consumer subscribed', { topics, config: this.consumerConfig })
         })
 
         consumer.on('connection.failure', (error: LibrdKafkaError, metrics: ClientMetrics) => {
@@ -593,7 +593,7 @@ export class KafkaConsumer {
             if (error) {
                 logger.warn('📝', 'librdkafka_offet_commit_error', { error, topicPartitionOffsets })
             } else {
-                logger.debug('📝', 'librdkafka_offset_commit', { topicPartitionOffsets })
+                logger.debug('📝', 'librdstream_offset_commit', { topicPartitionOffsets })
             }
         })
 
@@ -604,7 +604,7 @@ export class KafkaConsumer {
         if (topicPartitionOffsetsToCommit.length > 0) {
             logger.debug('📝', 'Storing offsets', { topicPartitionOffsetsToCommit })
             try {
-                this.rdKafkaConsumer.offsetsStore(topicPartitionOffsetsToCommit)
+                this.rdStreamConsumer.offsetsStore(topicPartitionOffsetsToCommit)
             } catch (e) {
                 // NOTE: We don't throw here - this can happen if we were re-assigned partitions
                 // and the offsets are no longer valid whilst processing a batch
@@ -631,8 +631,8 @@ export class KafkaConsumer {
         const { topic, groupId, callEachBatchWhenEmpty = false } = this.config
 
         try {
-            await promisifyCallback<Metadata>((cb) => this.rdKafkaConsumer.connect({}, cb))
-            logger.info('📝', 'librdkafka consumer connected')
+            await promisifyCallback<Metadata>((cb) => this.rdStreamConsumer.connect({}, cb))
+            logger.info('📝', 'librdstream consumer connected')
         } catch (error) {
             logger.error('⚠️', 'connect_error', { error: error })
             throw error
@@ -653,8 +653,8 @@ export class KafkaConsumer {
         // batches from this queue, but guarantee we are still running (with smaller
         // batches) if the queue is not full enough. batchingTimeoutMs is that
         // timeout, to return messages even if fetchBatchSize is not reached.
-        this.rdKafkaConsumer.setDefaultConsumeTimeout(this.config.batchTimeoutMs || DEFAULT_BATCH_TIMEOUT_MS)
-        this.rdKafkaConsumer.subscribe([this.config.topic])
+        this.rdStreamConsumer.setDefaultConsumeTimeout(this.config.batchTimeoutMs || DEFAULT_BATCH_TIMEOUT_MS)
+        this.rdStreamConsumer.subscribe([this.config.topic])
 
         const startConsuming = async (): Promise<void> => {
             let lastConsumeTime = 0
@@ -685,13 +685,13 @@ export class KafkaConsumer {
                     const consumeStartTime = performance.now()
                     if (lastConsumeTime > 0) {
                         const intervalMs = consumeStartTime - lastConsumeTime
-                        histogramKafkaConsumeInterval.labels({ topic, groupId }).observe(intervalMs)
+                        histogramStreamConsumeInterval.labels({ topic, groupId }).observe(intervalMs)
                     }
                     lastConsumeTime = consumeStartTime
                     // TRICKY: We wrap this in a retry check. It seems that despite being connected and ready, the client can still have an undeterministic
                     // error when consuming, hence the retryIfRetriable.
                     const messages = await retryIfRetriable(() =>
-                        promisifyCallback<Message[]>((cb) => this.rdKafkaConsumer.consume(this.fetchBatchSize, cb))
+                        promisifyCallback<Message[]>((cb) => this.rdStreamConsumer.consume(this.fetchBatchSize, cb))
                     )
 
                     // After successfully pulling a batch, update heartbeat for backward compatibility
@@ -700,8 +700,8 @@ export class KafkaConsumer {
                     gaugeBatchUtilization.labels({ groupId }).set(messages.length / this.fetchBatchSize)
 
                     logger.debug('🔁', 'main_loop_consumed', { messagesLength: messages.length })
-                    histogramKafkaBatchSize.observe(messages.length)
-                    histogramKafkaBatchSizeKb.observe(
+                    histogramStreamBatchSize.observe(messages.length)
+                    histogramStreamBatchSizeKb.observe(
                         messages.reduce((acc, m) => (m.value?.length ?? 0) + acc, 0) / 1024
                     )
 
@@ -839,9 +839,9 @@ export class KafkaConsumer {
     }
 
     private async disconnectConsumer(): Promise<void> {
-        if (this.rdKafkaConsumer.isConnected()) {
+        if (this.rdStreamConsumer.isConnected()) {
             logger.info('📝', 'Disconnecting consumer...')
-            await new Promise<void>((res, rej) => this.rdKafkaConsumer.disconnect((e) => (e ? rej(e) : res())))
+            await new Promise<void>((res, rej) => this.rdStreamConsumer.disconnect((e) => (e ? rej(e) : res())))
             logger.info('📝', 'Disconnected consumer!')
         }
     }
@@ -852,8 +852,8 @@ export class KafkaConsumer {
     }
 }
 
-export const parseKafkaHeaders = (headers?: MessageHeader[]): Record<string, string> => {
-    // Kafka headers come from librdkafka as an array of objects with keys value pairs per header.
+export const parseStreamHeaders = (headers?: MessageHeader[]): Record<string, string> => {
+    // Stream headers come from librdkafka as an array of objects with keys value pairs per header.
     // It's a confusing format so we simplify it to a record.
 
     const result: Record<string, string> = {}
@@ -868,7 +868,7 @@ export const parseKafkaHeaders = (headers?: MessageHeader[]): Record<string, str
 }
 
 export const parseEventHeaders = (headers?: MessageHeader[]): EventHeaders => {
-    // Kafka headers come from librdkafka as an array of objects with keys value pairs per header.
+    // Stream headers come from librdkafka as an array of objects with keys value pairs per header.
     // We extract the specific headers we care about into a structured format.
 
     const result: EventHeaders = {
@@ -918,7 +918,7 @@ export const parseEventHeaders = (headers?: MessageHeader[]): EventHeaders => {
     ] as const
     trackedHeaders.forEach((header) => {
         const status = result[header] ? 'present' : 'absent'
-        kafkaHeaderStatusCounter.labels(header, status).inc()
+        streamHeaderStatusCounter.labels(header, status).inc()
     })
 
     return result

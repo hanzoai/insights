@@ -2,7 +2,7 @@ import { Client, Connection, TLSConfig, WorkflowHandle } from '@temporalio/clien
 import fs from 'fs/promises'
 import { Counter } from 'prom-client'
 
-import { PluginsServerConfig, RawKafkaEvent } from '../../types'
+import { PluginsServerConfig, RawStreamEvent } from '../../types'
 import { isDevEnv } from '../../utils/env-utils'
 import { logger } from '../../utils/logger'
 
@@ -104,7 +104,7 @@ export class TemporalService {
         return client
     }
 
-    async startEvaluationRunWorkflow(evaluationId: string, event: RawKafkaEvent): Promise<WorkflowHandle> {
+    async startEvaluationRunWorkflow(evaluationId: string, event: RawStreamEvent): Promise<WorkflowHandle> {
         const client = await this.ensureConnected()
 
         const workflowId = `${evaluationId}-${event.uuid}-ingestion`

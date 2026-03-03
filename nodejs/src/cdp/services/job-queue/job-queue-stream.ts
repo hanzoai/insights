@@ -3,14 +3,14 @@
  * To make this easier this class is designed to abstract the queue as much as possible from
  * the underlying implementation.
  */
-import { Message, KafkaConsumer as RdKafkaConsumer } from 'node-rdkafka'
+import { Message, StreamConsumer as RdStreamConsumer } from 'node-rdkafka'
 import { hostname } from 'os'
 import { Counter, Histogram } from 'prom-client'
 import { compress, uncompress } from 'snappy'
 
-import { getKafkaConfigFromEnv } from '../../../kafka/config'
-import { KafkaConsumer } from '../../../kafka/consumer'
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { getStreamConfigFromEnv } from '../../../stream/config'
+import { StreamConsumer } from '../../../stream/consumer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { HealthCheckResult, HealthCheckResultError, PluginsServerConfig } from '../../../types'
 import { parseJSON } from '../../../utils/json-parse'
 import { logger } from '../../../utils/logger'
@@ -29,10 +29,10 @@ export const cdpSeekResult = new Counter({
     labelNames: ['result'],
 })
 
-export class CyclotronJobQueueKafka {
-    private kafkaConsumer?: KafkaConsumer
-    private kafkaProducer?: KafkaProducerWrapper
-    private seekTestConsumer?: RdKafkaConsumer
+export class CyclotronJobQueueStream {
+    private streamConsumer?: StreamConsumer
+    private streamProducer?: StreamProducerWrapper
+    private seekTestConsumer?: RdStreamConsumer
 
     constructor(
         private config: PluginsServerConfig,
@@ -44,31 +44,31 @@ export class CyclotronJobQueueKafka {
      * Helper to only start the producer related code (e.g. when not a consumer)
      */
     public async startAsProducer() {
-        // NOTE: For producing we use different values dedicated for Cyclotron as this is typically using its own Kafka cluster
-        this.kafkaProducer = await KafkaProducerWrapper.create(this.config.KAFKA_CLIENT_RACK, 'CDP_PRODUCER')
+        // NOTE: For producing we use different values dedicated for Cyclotron as this is typically using its own stream cluster
+        this.streamProducer = await StreamProducerWrapper.create(this.config.STREAM_CLIENT_RACK, 'CDP_PRODUCER')
     }
 
     public async startAsConsumer() {
         const groupId = `cdp-cyclotron-${this.queue}-consumer`
         const topic = `cdp_cyclotron_${this.queue}`
 
-        // NOTE: As there is only ever one consumer per process we use the KAFKA_CONSUMER_ vars as with any other consumer
-        this.kafkaConsumer = new KafkaConsumer({ groupId, topic, callEachBatchWhenEmpty: true })
+        // NOTE: As there is only ever one consumer per process we use the STREAM_CONSUMER_ vars as with any other consumer
+        this.streamConsumer = new StreamConsumer({ groupId, topic, callEachBatchWhenEmpty: true })
 
-        logger.info('🔄', 'Connecting kafka consumer', { groupId, topic })
-        await this.kafkaConsumer.connect(async (messages) => {
-            const { backgroundTask } = await this.consumeKafkaBatch(messages)
+        logger.info('🔄', 'Connecting stream consumer', { groupId, topic })
+        await this.streamConsumer.connect(async (messages) => {
+            const { backgroundTask } = await this.consumeStreamBatch(messages)
             return { backgroundTask }
         })
 
         // Initialize seek test consumer if enabled
         if (this.config.CDP_CYCLOTRON_TEST_SEEK_LATENCY) {
             try {
-                this.seekTestConsumer = new RdKafkaConsumer(
+                this.seekTestConsumer = new RdStreamConsumer(
                     {
                         'client.id': `${hostname()}-seek-test`,
-                        'metadata.broker.list': this.config.KAFKA_HOSTS,
-                        ...getKafkaConfigFromEnv('CONSUMER'),
+                        'metadata.broker.list': this.config.STREAM_HOSTS,
+                        ...getStreamConfigFromEnv('CONSUMER'),
                         // Static group.id is safe here: we only use assign() (not subscribe()),
                         // so no group coordination or rebalancing occurs across consumers.
                         'group.id': 'cdp-seek-test',
@@ -92,7 +92,7 @@ export class CyclotronJobQueueKafka {
     }
 
     public async stopConsumer() {
-        await this.kafkaConsumer?.disconnect()
+        await this.streamConsumer?.disconnect()
 
         if (this.seekTestConsumer) {
             await new Promise<void>((resolve) => {
@@ -107,14 +107,14 @@ export class CyclotronJobQueueKafka {
     }
 
     public async stopProducer() {
-        await this.kafkaProducer?.disconnect()
+        await this.streamProducer?.disconnect()
     }
 
     public isHealthy(): HealthCheckResult {
-        if (!this.kafkaConsumer) {
-            return new HealthCheckResultError('Kafka consumer not initialized', {})
+        if (!this.streamConsumer) {
+            return new HealthCheckResultError('Stream consumer not initialized', {})
         }
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 
     public async queueInvocations(invocations: CyclotronJobInvocation[]) {
@@ -122,13 +122,13 @@ export class CyclotronJobQueueKafka {
             return
         }
 
-        const producer = this.getKafkaProducer()
+        const producer = this.getStreamProducer()
 
         await Promise.all(
             invocations.map(async (x) => {
                 const serialized = serializeInvocation(x)
 
-                const value = this.config.CDP_CYCLOTRON_COMPRESS_KAFKA_DATA
+                const value = this.config.CDP_CYCLOTRON_COMPRESS_STREAM_DATA
                     ? await compress(JSON.stringify(serialized))
                     : JSON.stringify(serialized)
 
@@ -154,7 +154,7 @@ export class CyclotronJobQueueKafka {
                         headers,
                     })
                     .catch((e) => {
-                        logger.error('🔄', 'Error producing kafka message', {
+                        logger.error('🔄', 'Error producing stream message', {
                             error: String(e),
                             teamId: x.teamId,
                             functionId: x.functionId,
@@ -168,7 +168,7 @@ export class CyclotronJobQueueKafka {
     }
 
     public async queueInvocationResults(invocationResults: CyclotronJobInvocationResult[]) {
-        // With kafka we are essentially re-queuing the work to the target topic if it isn't finished
+        // With stream we are essentially re-queuing the work to the target topic if it isn't finished
         const invocations = invocationResults.reduce((acc, res) => {
             if (res.finished) {
                 return acc
@@ -180,14 +180,14 @@ export class CyclotronJobQueueKafka {
         await this.queueInvocations(invocations)
     }
 
-    private getKafkaProducer(): KafkaProducerWrapper {
-        if (!this.kafkaProducer) {
-            throw new Error('KafkaProducer not initialized')
+    private getStreamProducer(): StreamProducerWrapper {
+        if (!this.streamProducer) {
+            throw new Error('StreamProducer not initialized')
         }
-        return this.kafkaProducer
+        return this.streamProducer
     }
 
-    private async consumeKafkaBatch(messages: Message[]): Promise<{ backgroundTask: Promise<any> }> {
+    private async consumeStreamBatch(messages: Message[]): Promise<{ backgroundTask: Promise<any> }> {
         if (messages.length === 0) {
             return await this.consumeBatch([])
         }
@@ -202,11 +202,11 @@ export class CyclotronJobQueueKafka {
 
             // Try to decompress, otherwise just use the value as is
             const decompressedValue = await uncompress(rawValue).catch(() => rawValue)
-            const invocation: CyclotronJobInvocation = migrateKafkaCyclotronInvocation(
+            const invocation: CyclotronJobInvocation = migrateStreamCyclotronInvocation(
                 parseJSON(decompressedValue.toString())
             )
 
-            invocation.queueSource = 'kafka' // NOTE: We always set this here, as we know it came from kafka
+            invocation.queueSource = 'stream' // NOTE: We always set this here, as we know it came from stream
             invocations.push(invocation)
         }
 
@@ -284,7 +284,7 @@ export class CyclotronJobQueueKafka {
 
 // NOTE: https://github.com/PostHog/insights/pull/32588 modified the job format to move more things to the generic "state" value
 // This function migrates any legacy jobs to the new format. We can remove this shortly after full release.
-export function migrateKafkaCyclotronInvocation(invocation: CyclotronJobInvocation): CyclotronJobInvocation {
+export function migrateStreamCyclotronInvocation(invocation: CyclotronJobInvocation): CyclotronJobInvocation {
     // Type casting but keeping as a reference
     const unknownInvocation = invocation as Record<string, any>
 

@@ -6,25 +6,25 @@ import {
     MessageValue,
     NumberNullUndefined,
     ProducerGlobalConfig,
-    MessageKey as RdKafkaMessageKey,
+    MessageKey as RdStreamMessageKey,
 } from 'node-rdkafka'
 import { hostname } from 'os'
 import { Counter, Summary } from 'prom-client'
 
 import { DependencyUnavailableError, MessageSizeTooLarge } from '../utils/db/error'
 import { logger } from '../utils/logger'
-import { KafkaConfigTarget, getKafkaConfigFromEnv } from './config'
+import { StreamConfigTarget, getStreamConfigFromEnv } from './config'
 
-/** This class is a wrapper around the rdkafka producer, and does very little.
+/** This class is a wrapper around the rdstream producer, and does very little.
  *
  * The big difference between this and the original is that we return a promise from
  * queueMessage, which will only resolve once we get an ack that the message has
- * been persisted to Kafka. So we should get stronger guarantees on processing.
+ * been persisted to stream. So we should get stronger guarantees on processing.
  *
- * TODO: refactor Kafka producer usage to use rdkafka directly.
+ * TODO: refactor stream producer usage to use rdkafka directly.
  */
 
-export type MessageKey = Exclude<RdKafkaMessageKey, undefined>
+export type MessageKey = Exclude<RdStreamMessageKey, undefined>
 
 export type TopicMessage = {
     topic: string
@@ -35,19 +35,19 @@ export type TopicMessage = {
     }[]
 }
 
-export class KafkaProducerWrapper {
-    /** Kafka producer used for syncing Postgres and ClickHouse person data. */
+export class StreamProducerWrapper {
+    /** Stream producer used for syncing Postgres and ClickHouse person data. */
     private producer: HighLevelProducer
 
-    static async create(kafkaClientRack: string | undefined, mode: KafkaConfigTarget = 'PRODUCER') {
+    static async create(streamClientRack: string | undefined, mode: StreamConfigTarget = 'PRODUCER') {
         // NOTE: In addition to some defaults we allow overriding any setting via env vars.
         // This makes it much easier to react to issues without needing code changes
 
         const producerConfig: ProducerGlobalConfig = {
             // Defaults that could be overridden by env vars
             'client.id': hostname(),
-            'client.rack': kafkaClientRack,
-            'metadata.broker.list': 'kafka:9092',
+            'client.rack': streamClientRack,
+            'metadata.broker.list': 'stream:9092',
             'linger.ms': 20,
             log_level: 4, // WARN as the default
             'batch.size': 8 * 1024 * 1024,
@@ -58,7 +58,7 @@ export class KafkaProducerWrapper {
             'retry.backoff.ms': 500, // Backoff between retry attempts
             'socket.timeout.ms': 30000, // Timeout for socket operations
             'max.in.flight.requests.per.connection': 5, // Required for idempotence ordering
-            ...getKafkaConfigFromEnv(mode),
+            ...getStreamConfigFromEnv(mode),
             dr_cb: true,
         }
 
@@ -86,7 +86,7 @@ export class KafkaProducerWrapper {
             })
         )
 
-        return new KafkaProducerWrapper(producer)
+        return new StreamProducerWrapper(producer)
     }
 
     constructor(producer: HighLevelProducer) {
@@ -105,12 +105,12 @@ export class KafkaProducerWrapper {
         headers?: Record<string, string>
     }): Promise<void> {
         try {
-            const produceTimer = ingestEventKafkaProduceLatency.labels({ topic }).startTimer()
-            kafkaProducerMessagesQueuedCounter.labels({ topic_name: topic }).inc()
+            const produceTimer = ingestEventStreamProduceLatency.labels({ topic }).startTimer()
+            streamProducerMessagesQueuedCounter.labels({ topic_name: topic }).inc()
             logger.debug('📤', 'Producing message', { topic: topic })
 
             // NOTE: The MessageHeader type is super weird. Essentially you are passing in a record and it expects a string key and a string or buffer value.
-            const kafkaHeaders: MessageHeader[] =
+            const streamHeaders: MessageHeader[] =
                 Object.entries(headers ?? {}).map(([key, value]) => ({
                     [key]: value,
                 })) ?? []
@@ -122,19 +122,19 @@ export class KafkaProducerWrapper {
                     value,
                     key,
                     Date.now(),
-                    kafkaHeaders,
+                    streamHeaders,
                     (error: any, offset: NumberNullUndefined) => {
                         return error ? reject(error) : resolve(offset)
                     }
                 )
             })
 
-            kafkaProducerMessagesWrittenCounter.labels({ topic_name: topic }).inc()
+            streamProducerMessagesWrittenCounter.labels({ topic_name: topic }).inc()
             logger.debug('📤', 'Produced message', { topic: topic, offset: result })
             produceTimer()
         } catch (error) {
-            kafkaProducerMessagesFailedCounter.labels({ topic_name: topic }).inc()
-            logger.error('⚠️', 'kafka_produce_error', {
+            streamProducerMessagesFailedCounter.labels({ topic_name: topic }).inc()
+            logger.error('⚠️', 'stream_produce_error', {
                 error: typeof error?.message === 'string' ? error.message : JSON.stringify(error),
                 topic: topic,
             })
@@ -142,7 +142,7 @@ export class KafkaProducerWrapper {
             if ((error as LibrdKafkaError).isRetriable) {
                 // If we get a retriable error, bubble that up so that the
                 // caller can retry.
-                throw new DependencyUnavailableError(error.message, 'Kafka', error)
+                throw new DependencyUnavailableError(error.message, 'Stream', error)
             } else if ((error as LibrdKafkaError).code === 10) {
                 throw new MessageSizeTooLarge(error.message, error)
             }
@@ -207,27 +207,27 @@ export class KafkaProducerWrapper {
     }
 }
 
-export const kafkaProducerMessagesQueuedCounter = new Counter({
-    name: 'kafka_producer_messages_queued_total',
-    help: 'Count of messages queued to the Kafka producer, by destination topic.',
+export const streamProducerMessagesQueuedCounter = new Counter({
+    name: 'stream_producer_messages_queued_total',
+    help: 'Count of messages queued to the Stream producer, by destination topic.',
     labelNames: ['topic_name'],
 })
 
-export const kafkaProducerMessagesWrittenCounter = new Counter({
-    name: 'kafka_producer_messages_written_total',
-    help: 'Count of messages written to Kafka, by destination topic.',
+export const streamProducerMessagesWrittenCounter = new Counter({
+    name: 'stream_producer_messages_written_total',
+    help: 'Count of messages written to stream, by destination topic.',
     labelNames: ['topic_name'],
 })
 
-export const kafkaProducerMessagesFailedCounter = new Counter({
-    name: 'kafka_producer_messages_failed_total',
-    help: 'Count of write failures by the Kafka producer, by destination topic.',
+export const streamProducerMessagesFailedCounter = new Counter({
+    name: 'stream_producer_messages_failed_total',
+    help: 'Count of write failures by the Stream producer, by destination topic.',
     labelNames: ['topic_name'],
 })
 
-export const ingestEventKafkaProduceLatency = new Summary({
-    name: 'ingest_event_kafka_produce_latency',
-    help: 'Wait time for individual Kafka produces',
+export const ingestEventStreamProduceLatency = new Summary({
+    name: 'ingest_event_stream_produce_latency',
+    help: 'Wait time for individual stream produces',
     labelNames: ['topic'],
     percentiles: [0.5, 0.9, 0.95, 0.99],
 })

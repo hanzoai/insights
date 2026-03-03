@@ -5,7 +5,7 @@ import { Properties } from '@posthog/plugin-scaffold'
 import { DatastoreRouter } from '~/utils/db/clickhouse'
 import { logger } from '~/utils/logger'
 
-import { TopicMessage } from '../../../../kafka/producer'
+import { TopicMessage } from '../../../../stream/producer'
 import {
     InternalPerson,
     PersonPropertyFilter,
@@ -452,7 +452,7 @@ export class DatastorePersonRepository implements PersonRepository {
 
     updatePersonsBatch(
         _personUpdates: PersonUpdate[]
-    ): Promise<Map<string, { success: boolean; version?: number; kafkaMessage?: TopicMessage; error?: Error }>> {
+    ): Promise<Map<string, { success: boolean; version?: number; streamMessage?: TopicMessage; error?: Error }>> {
         return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 

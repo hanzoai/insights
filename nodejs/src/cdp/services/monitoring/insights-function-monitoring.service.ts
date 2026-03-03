@@ -21,7 +21,7 @@ import { fixLogDeduplication } from '../../utils'
 
 export type InsightsFunctionMonitoringServiceHub = Pick<
     Hub,
-    | 'kafkaProducer'
+    | 'streamProducer'
     | 'internalCaptureService'
     | 'teamManager'
     | 'INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC'
@@ -42,7 +42,7 @@ export const insightsFunctionExecutionTimeSummary = new Histogram({
 
 const insightsFunctionMonitoringPendingMessages = new Gauge({
     name: 'cdp_insights_function_monitoring_pending_messages',
-    help: 'Number of monitoring messages queued and waiting to be flushed to Kafka. High values indicate accumulation and potential memory leak.',
+    help: 'Number of monitoring messages queued and waiting to be flushed to stream. High values indicate accumulation and potential memory leak.',
 })
 
 const insightsFunctionMonitoringPendingEvents = new Gauge({
@@ -82,7 +82,7 @@ export class InsightsFunctionMonitoringService {
         await Promise.all([
             ...messages.map((x) => {
                 const value = x.value ? Buffer.from(safeClickhouseString(JSON.stringify(x.value))) : null
-                return this.hub.kafkaProducer
+                return this.hub.streamProducer
                     .produce({
                         topic: x.topic,
                         key: x.key ? Buffer.from(x.key) : null,

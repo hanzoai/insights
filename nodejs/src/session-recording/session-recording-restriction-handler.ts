@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
-import { parseEventHeaders, parseKafkaHeaders } from '../kafka/consumer'
-import { KafkaProducerWrapper } from '../kafka/producer'
+import { parseEventHeaders, parseStreamHeaders } from '../stream/consumer'
+import { StreamProducerWrapper } from '../stream/producer'
 import { EventIngestionRestrictionManager, RestrictionType } from '../utils/event-ingestion-restrictions'
 import { logger } from '../utils/logger'
 import { PromiseScheduler } from '../utils/promise-scheduler'
@@ -11,7 +11,7 @@ export class SessionRecordingRestrictionHandler {
     constructor(
         private restrictionManager: EventIngestionRestrictionManager,
         private overflowTopic: string,
-        private overflowProducer: KafkaProducerWrapper | undefined,
+        private overflowProducer: StreamProducerWrapper | undefined,
         private promiseScheduler: PromiseScheduler,
         private consumeOverflow: boolean
     ) {}
@@ -78,14 +78,14 @@ export class SessionRecordingRestrictionHandler {
         return filteredMessages
     }
 
-    private async emitToOverflow(kafkaMessages: Message[]): Promise<void> {
+    private async emitToOverflow(streamMessages: Message[]): Promise<void> {
         if (!this.overflowProducer) {
             logger.warn('🪣', 'No overflow producer available, cannot redirect messages')
             return
         }
 
         await Promise.all(
-            kafkaMessages.map((message) => {
+            streamMessages.map((message) => {
                 logger.info('🪣', 'session_recording_redirected_to_overflow', {
                     partition: message.partition,
                     offset: message.offset,
@@ -94,7 +94,7 @@ export class SessionRecordingRestrictionHandler {
                     topic: this.overflowTopic,
                     value: message.value,
                     key: message.key ?? null,
-                    headers: parseKafkaHeaders(message.headers),
+                    headers: parseStreamHeaders(message.headers),
                 })
             })
         )

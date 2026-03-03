@@ -2,10 +2,10 @@ import { Counter } from 'prom-client'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { TopicMessage } from '~/kafka/producer'
+import { TopicMessage } from '~/stream/producer'
 
 import { defaultConfig } from '../../config/config'
-import { KAFKA_PERSON } from '../../config/kafka-topics'
+import { STREAM_PERSON } from '../../config/stream-topics'
 import { BasePerson, ClickHousePerson, InternalPerson, RawPerson, TimestampFormat } from '../../types'
 import { logger } from '../../utils/logger'
 import { castTimestampOrNow } from '../../utils/utils'
@@ -123,9 +123,9 @@ export function personInitialAndUTMProperties(properties: Properties): Propertie
     return properties
 }
 
-export function generateKafkaPersonUpdateMessage(person: InternalPerson, isDeleted = false): TopicMessage {
+export function generateStreamPersonUpdateMessage(person: InternalPerson, isDeleted = false): TopicMessage {
     return {
-        topic: KAFKA_PERSON,
+        topic: STREAM_PERSON,
         messages: [
             {
                 value: JSON.stringify({

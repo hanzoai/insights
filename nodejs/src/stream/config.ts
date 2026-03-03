@@ -2,7 +2,7 @@ import { GlobalConfig } from 'node-rdkafka'
 
 import { defaultConfig } from '../config/config'
 
-export const RDKAFKA_LOG_LEVEL_MAPPING = {
+export const RDSTREAM_LOG_LEVEL_MAPPING = {
     NOTHING: 0,
     DEBUG: 7,
     INFO: 6,
@@ -10,7 +10,7 @@ export const RDKAFKA_LOG_LEVEL_MAPPING = {
     ERROR: 3,
 }
 
-export type KafkaConfigTarget =
+export type StreamConfigTarget =
     | 'PRODUCER'
     | 'CONSUMER'
     | 'CDP_PRODUCER'
@@ -18,14 +18,16 @@ export type KafkaConfigTarget =
     | 'METRICS_PRODUCER'
     | 'WAREHOUSE_PRODUCER'
 
-export const getKafkaConfigFromEnv = (prefix: KafkaConfigTarget): GlobalConfig => {
+export const getStreamConfigFromEnv = (prefix: StreamConfigTarget): GlobalConfig => {
     // NOTE: We have learnt that having as much exposed config to the env as possible is really useful
     // That said we also want to be able to add defaults on the global config object
     // So what we do is we first find all values from the default config object and then in addition we add the env ones.
 
-    const PREFIX = `KAFKA_${prefix}_`
+    // Support both STREAM_ and legacy KAFKA_ env var prefixes
+    const STREAM_PREFIX = `STREAM_${prefix}_`
+    const LEGACY_PREFIX = `KAFKA_${prefix}_`
     return Object.entries(process.env)
-        .filter(([key]) => key.startsWith(PREFIX))
+        .filter(([key]) => key.startsWith(STREAM_PREFIX) || key.startsWith(LEGACY_PREFIX))
         .reduce(
             (acc, [key, value]) => {
                 // If there is an explicit config value then we don't override it
@@ -48,10 +50,14 @@ export const getKafkaConfigFromEnv = (prefix: KafkaConfigTarget): GlobalConfig =
                     parsedValue = false
                 }
 
-                const rdkafkaKey = key.replace(PREFIX, '').replace(/_/g, '.').toLowerCase()
-                acc[rdkafkaKey] = parsedValue
+                const prefix = key.startsWith(STREAM_PREFIX) ? STREAM_PREFIX : LEGACY_PREFIX
+                const rdstreamKey = key.replace(prefix, '').replace(/_/g, '.').toLowerCase()
+                acc[rdstreamKey] = parsedValue
                 return acc
             },
             {} as Record<string, any>
         )
 }
+
+/** @deprecated Use getStreamConfigFromEnv */
+export const getKafkaConfigFromEnv = getStreamConfigFromEnv

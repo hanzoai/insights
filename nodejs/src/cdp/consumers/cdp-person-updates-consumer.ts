@@ -3,7 +3,7 @@ import { Message } from 'node-rdkafka'
 import { instrumented } from '~/common/tracing/tracing-utils'
 import { UUIDT } from '~/utils/utils'
 
-import { KAFKA_PERSON } from '../../config/kafka-topics'
+import { STREAM_PERSON } from '../../config/stream-topics'
 import { ClickHousePerson, Team } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
@@ -17,16 +17,16 @@ export class CdpPersonUpdatesConsumer extends CdpEventsConsumer {
     protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
 
     constructor(hub: CdpEventsConsumerHub) {
-        super(hub, KAFKA_PERSON, 'cdp-person-updates-consumer')
+        super(hub, STREAM_PERSON, 'cdp-person-updates-consumer')
     }
 
     protected filterInsightsFunction(insightsFunction: InsightsFunctionType): boolean {
         return insightsFunction.filters?.source === 'person-updates'
     }
 
-    // This consumer always parses from kafka
-    @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+    // This consumer always parses from stream
+    @instrumented('cdpConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
         return await this.runWithHeartbeat(async () => {
             const globals: InsightsFunctionInvocationGlobals[] = []
             await Promise.all(

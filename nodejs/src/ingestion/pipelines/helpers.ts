@@ -24,7 +24,7 @@ export function createNewBatchPipeline<T = { message: Message }, C = DefaultCont
 }
 
 /**
- * Helper function to create a batch of ResultWithContext from Kafka messages or objects with a message property
+ * Helper function to create a batch of ResultWithContext from stream messages or objects with a message property
  */
 export function createBatch<T extends DefaultContext>(items: T[]) {
     return items.map((item) => createContext(ok(item), { message: item.message }))
