@@ -46,7 +46,7 @@ def is_http_email_service_available() -> bool:
     Returns whether HTTP email services are available on this instance (i.e. settings are in place).
     This currently only supports Customer.io.
     """
-    return bool(settings.CUSTOMER_IO_API_KEY)
+    return bool(getattr(settings, "CUSTOMER_IO_API_KEY", ""))
 
 
 def is_smtp_email_service_available() -> bool:
