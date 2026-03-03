@@ -12,7 +12,7 @@ export const downsamplingPlugin: LegacyTransformationPlugin = {
         id: 'plugin-downsampling-plugin',
         name: 'Downsample',
         description: 'Reduces event volume coming into Insights',
-        icon_url: 'https://raw.githubusercontent.com/PostHog/downsampling-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/hanzoai/downsampling-plugin/main/logo.png',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

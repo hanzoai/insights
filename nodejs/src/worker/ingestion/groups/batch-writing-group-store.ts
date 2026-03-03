@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import pLimit from 'p-limit'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { StreamProducerWrapper } from '~/stream/producer'
 
@@ -22,11 +22,11 @@ import {
     groupFetchPromisesCacheOperationsCounter,
     groupOptimisticUpdateConflictsPerBatchCounter,
 } from './metrics'
-import { ClickhouseGroupRepository } from './repositories/clickhouse-group-repository'
+import { DatastoreGroupRepository } from './repositories/datastore-group-repository'
 import { GroupRepositoryTransaction } from './repositories/group-repository-transaction.interface'
 import { GroupRepository } from './repositories/group-repository.interface'
 
-export type GroupHub = Pick<Hub, 'streamProducer' | 'groupRepository' | 'clickhouseGroupRepository'>
+export type GroupHub = Pick<Hub, 'streamProducer' | 'groupRepository' | 'datastoreGroupRepository'>
 
 class GroupCache {
     private cache: Map<string, GroupUpdate | null>
@@ -140,7 +140,7 @@ export class BatchWritingGroupStore implements GroupStore {
     private options: BatchWritingGroupStoreOptions
     private streamProducer: StreamProducerWrapper
     private groupRepository: GroupRepository
-    private clickhouseGroupRepository: ClickhouseGroupRepository
+    private datastoreGroupRepository: DatastoreGroupRepository
 
     constructor(groupHub: GroupHub, options?: Partial<BatchWritingGroupStoreOptions>) {
         this.options = { ...DEFAULT_OPTIONS, ...options }
@@ -148,7 +148,7 @@ export class BatchWritingGroupStore implements GroupStore {
         this.databaseOperationCounts = new Map()
         this.streamProducer = groupHub.streamProducer
         this.groupRepository = groupHub.groupRepository
-        this.clickhouseGroupRepository = groupHub.clickhouseGroupRepository
+        this.datastoreGroupRepository = groupHub.datastoreGroupRepository
     }
 
     getGroupCache(): GroupCache {
@@ -316,7 +316,7 @@ export class BatchWritingGroupStore implements GroupStore {
         )
 
         if (propertiesUpdate.updated) {
-            await this.upsertToClickhouse(
+            await this.upsertToDatastore(
                 teamId,
                 groupTypeIndex,
                 groupKey,
@@ -328,7 +328,7 @@ export class BatchWritingGroupStore implements GroupStore {
         }
     }
 
-    private async upsertToClickhouse(
+    private async upsertToDatastore(
         teamId: TeamId,
         groupTypeIndex: GroupTypeIndex,
         groupKey: string,
@@ -337,8 +337,8 @@ export class BatchWritingGroupStore implements GroupStore {
         actualVersion: number,
         source: string
     ): Promise<void> {
-        this.incrementDatabaseOperation('upsertClickhouse' + (source ? `-${source}` : ''))
-        await this.clickhouseGroupRepository.upsertGroup(
+        this.incrementDatabaseOperation('upsertDatastore' + (source ? `-${source}` : ''))
+        await this.datastoreGroupRepository.upsertGroup(
             teamId,
             groupTypeIndex,
             groupKey,
@@ -471,7 +471,7 @@ export class BatchWritingGroupStore implements GroupStore {
         )
 
         if (actualVersion !== undefined) {
-            await this.upsertToClickhouse(
+            await this.upsertToDatastore(
                 update.team_id,
                 update.group_type_index,
                 update.group_key,

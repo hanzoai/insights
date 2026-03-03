@@ -28,7 +28,7 @@ import { cloneInvocation, createInvocation } from '../../utils/invocation-utils'
 import { compileFn } from '../compiler'
 
 /**
- * Sets templating value of 'fn' or 'liquid' on hog inputs based on the template used.
+ * Sets templating value of 'fn' or 'liquid' on script inputs based on the template used.
  */
 export function propagateTemplatingFromSchema(template: any, input: any): any {
     const templatedInputs = { ...input }
@@ -189,7 +189,7 @@ export class TemplateTester {
 
     /*
     we need transformResult to be able to test the geoip template
-    the same way we did it here https://github.com/PostHog/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
+    the same way we did it here https://github.com/hanzoai/insights-plugin-geoip/blob/a5e9370422752eb7ea486f16c5cc8acf916b67b0/index.test.ts#L79
     */
     async beforeEach() {
         Settings.defaultZone = 'UTC'

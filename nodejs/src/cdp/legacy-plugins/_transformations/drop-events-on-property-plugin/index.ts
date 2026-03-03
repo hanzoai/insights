@@ -1,5 +1,5 @@
 // Learn more about plugins at: https://hanzo.ai/docs/plugins/build/overview
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { LegacyTransformationPluginMeta } from '../../types'
 

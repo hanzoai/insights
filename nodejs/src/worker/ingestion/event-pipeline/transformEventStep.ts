@@ -1,4 +1,4 @@
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { ScriptTransformerService, TransformationResult } from '../../../cdp/script-transformations/script-transformer.service'
 

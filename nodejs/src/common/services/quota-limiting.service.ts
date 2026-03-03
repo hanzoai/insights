@@ -12,7 +12,7 @@ export type QuotaResource =
     | 'workflow_destinations_dispatched'
     | 'logs_mb_ingested'
 
-export const QUOTA_LIMITER_CACHE_KEY = '@posthog/quota-limits/'
+export const QUOTA_LIMITER_CACHE_KEY = '@hanzo/quota-limits/'
 
 export interface QuotaLimitedToken {
     token: string

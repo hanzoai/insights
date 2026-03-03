@@ -13,7 +13,7 @@ export const firstTimeEventTrackerPlugin: LegacyTransformationPlugin = {
         name: 'Flatten Properties',
         description:
             'This plugin will flatten all nested properties into a single property. You will not be billed for any events that this plugin drops.',
-        icon_url: 'https://raw.githubusercontent.com/PostHog/flatten-properties-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/hanzoai/flatten-properties-plugin/main/logo.png',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

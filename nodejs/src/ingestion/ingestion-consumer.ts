@@ -55,7 +55,7 @@ export type IngestionConsumerHub = ScriptTransformerHub &
         | 'redisPool'
         // GroupHub (BatchWritingGroupStore)
         | 'groupRepository'
-        | 'clickhouseGroupRepository'
+        | 'datastoreGroupRepository'
         // StreamProducerWrapper.create
         | 'STREAM_CLIENT_RACK'
         // PreprocessingHub (additional fields not in ScriptTransformerHub)

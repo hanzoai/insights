@@ -1,10 +1,10 @@
-import { PluginEvent, ProcessedPluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent, ProcessedPluginEvent } from '@hanzo/plugin-scaffold'
 
-import { ClickHouseEvent, PipelineEvent, PostIngestionEvent, RawClickHouseEvent } from '../types'
+import { DatastoreEvent, PipelineEvent, PostIngestionEvent, RawDatastoreEvent } from '../types'
 import { personInitialAndUTMProperties, sanitizeString } from './db/utils'
 import { chainToElements } from './elements-chain'
 import { parseJSON } from './json-parse'
-import { clickHouseTimestampToDateTime } from './utils'
+import { datastoreTimestampToDateTime } from './utils'
 
 export function convertToOnEventPayload(event: PostIngestionEvent): ProcessedPluginEvent {
     return {
@@ -21,16 +21,16 @@ export function convertToOnEventPayload(event: PostIngestionEvent): ProcessedPlu
     }
 }
 
-/** Parse an event row SELECTed from ClickHouse into a more malleable form. */
-export function parseRawClickHouseEvent(rawEvent: RawClickHouseEvent): ClickHouseEvent {
+/** Parse an event row SELECTed from datastore into a more malleable form. */
+export function parseRawDatastoreEvent(rawEvent: RawDatastoreEvent): DatastoreEvent {
     return {
         ...rawEvent,
-        timestamp: clickHouseTimestampToDateTime(rawEvent.timestamp),
-        created_at: clickHouseTimestampToDateTime(rawEvent.created_at),
+        timestamp: datastoreTimestampToDateTime(rawEvent.timestamp),
+        created_at: datastoreTimestampToDateTime(rawEvent.created_at),
         properties: rawEvent.properties ? parseJSON(rawEvent.properties) : {},
         elements_chain: rawEvent.elements_chain ? chainToElements(rawEvent.elements_chain, rawEvent.team_id) : null,
         person_created_at: rawEvent.person_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.person_created_at)
+            ? datastoreTimestampToDateTime(rawEvent.person_created_at)
             : null,
         person_properties: rawEvent.person_properties ? parseJSON(rawEvent.person_properties) : {},
         group0_properties: rawEvent.group0_properties ? parseJSON(rawEvent.group0_properties) : {},
@@ -39,19 +39,19 @@ export function parseRawClickHouseEvent(rawEvent: RawClickHouseEvent): ClickHous
         group3_properties: rawEvent.group3_properties ? parseJSON(rawEvent.group3_properties) : {},
         group4_properties: rawEvent.group4_properties ? parseJSON(rawEvent.group4_properties) : {},
         group0_created_at: rawEvent.group0_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group0_created_at)
+            ? datastoreTimestampToDateTime(rawEvent.group0_created_at)
             : null,
         group1_created_at: rawEvent.group1_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group1_created_at)
+            ? datastoreTimestampToDateTime(rawEvent.group1_created_at)
             : null,
         group2_created_at: rawEvent.group2_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group2_created_at)
+            ? datastoreTimestampToDateTime(rawEvent.group2_created_at)
             : null,
         group3_created_at: rawEvent.group3_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group3_created_at)
+            ? datastoreTimestampToDateTime(rawEvent.group3_created_at)
             : null,
         group4_created_at: rawEvent.group4_created_at
-            ? clickHouseTimestampToDateTime(rawEvent.group4_created_at)
+            ? datastoreTimestampToDateTime(rawEvent.group4_created_at)
             : null,
     }
 }
@@ -104,7 +104,7 @@ export function normalizeProcessPerson<T extends PipelineEvent | PluginEvent>(ev
         properties.$process_person_profile = false
     } else {
         // Removed as it is the default, note that we have record the `person_mode` column
-        // in ClickHouse for all events.
+        // in datastore for all events.
         delete properties.$process_person_profile
     }
 
