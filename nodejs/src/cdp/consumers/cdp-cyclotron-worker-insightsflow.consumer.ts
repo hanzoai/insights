@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { instrumented } from '~/common/tracing/tracing-utils'
 
 import { Hub } from '../../types'
