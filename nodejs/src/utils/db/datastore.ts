@@ -19,10 +19,6 @@ export interface DatastoreConnectionConfig {
     keep_alive_enabled?: boolean
 }
 
-/** @deprecated Use DatastoreConnectionConfig */
-// @deprecated
-export type ClickHouseConnectionConfig = DatastoreConnectionConfig
-
 function createDatastoreClient(config: DatastoreConnectionConfig): DatastoreNativeClient {
     return createDatastoreNativeClient({
         url: config.url,
@@ -104,6 +100,3 @@ export class DatastoreRouter {
         }
     }
 }
-
-// Backward compat alias - remove after all imports updated
-export { DatastoreRouter as ClickHouseRouter }
