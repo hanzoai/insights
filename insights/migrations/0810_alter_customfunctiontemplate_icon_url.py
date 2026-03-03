@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="hogfunctiontemplate",
+            model_name="customfunctiontemplate",
             name="icon_url",
             field=models.CharField(blank=True, null=True),
         ),

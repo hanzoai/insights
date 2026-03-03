@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0951_hogflowtemplate"),
+        ("posthog", "0951_insightsflowtemplate"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("customer_analytics", "0001_team_customer_analytics_config"),
     ]
