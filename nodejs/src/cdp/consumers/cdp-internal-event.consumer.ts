@@ -2,7 +2,7 @@ import { Message } from 'node-rdkafka'
 
 import { instrumented } from '~/common/tracing/tracing-utils'
 
-import { KAFKA_CDP_INTERNAL_EVENTS } from '../../config/kafka-topics'
+import { STREAM_CDP_INTERNAL_EVENTS } from '../../config/stream-topics'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
 import { CdpInternalEventSchema } from '../schema'
@@ -16,20 +16,20 @@ export class CdpInternalEventsConsumer extends CdpEventsConsumer {
     protected scriptTypes: InsightsFunctionTypeType[] = ['internal_destination']
 
     constructor(hub: CdpEventsConsumerHub) {
-        super(hub, KAFKA_CDP_INTERNAL_EVENTS, 'cdp-internal-events-consumer')
+        super(hub, STREAM_CDP_INTERNAL_EVENTS, 'cdp-internal-events-consumer')
     }
 
-    // This consumer always parses from kafka
-    @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+    // This consumer always parses from stream
+    @instrumented('cdpConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
         return await this.runWithHeartbeat(async () => {
             const events: InsightsFunctionInvocationGlobals[] = []
             await Promise.all(
                 messages.map(async (message) => {
                     try {
-                        const kafkaEvent = parseJSON(message.value!.toString()) as unknown
+                        const streamEvent = parseJSON(message.value!.toString()) as unknown
                         // This is the input stream from elsewhere so we want to do some proper validation
-                        const event = CdpInternalEventSchema.parse(kafkaEvent)
+                        const event = CdpInternalEventSchema.parse(streamEvent)
 
                         const [teamInsightsFunctions, team] = await Promise.all([
                             this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, ['internal_destination']),

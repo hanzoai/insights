@@ -5,7 +5,7 @@ import { Properties } from '@posthog/plugin-scaffold'
 
 import { NoRowsUpdatedError } from '~/utils/utils'
 
-import { KafkaProducerWrapper, TopicMessage } from '../../../kafka/producer'
+import { StreamProducerWrapper, TopicMessage } from '../../../stream/producer'
 import {
     InternalPerson,
     PersonBatchWritingDbWriteMode,
@@ -131,7 +131,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
 
     constructor(
         private personRepository: PersonRepository,
-        private kafkaProducer: KafkaProducerWrapper,
+        private streamProducer: StreamProducerWrapper,
         options?: Partial<BatchWritingPersonsStoreOptions>
     ) {
         this.options = { ...DEFAULT_OPTIONS, ...options }
@@ -273,22 +273,22 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
         }
 
         try {
-            let allKafkaMessages: FlushResult[]
+            let allStreamMessages: FlushResult[]
 
             switch (this.options.dbWriteMode) {
                 case 'NO_ASSERT': {
                     if (this.options.useBatchUpdates) {
                         // Use batch update for NO_ASSERT mode - single query for all updates
-                        allKafkaMessages = await this.flushBatchNoAssert(updateEntries)
+                        allStreamMessages = await this.flushBatchNoAssert(updateEntries)
                     } else {
                         // Use individual updates for NO_ASSERT mode
-                        allKafkaMessages = await this.flushIndividualNoAssert(updateEntries)
+                        allStreamMessages = await this.flushIndividualNoAssert(updateEntries)
                     }
                     break
                 }
                 case 'ASSERT_VERSION': {
                     // Use individual updates for ASSERT_VERSION mode (requires per-person retry logic)
-                    allKafkaMessages = await this.flushIndividualAssertVersion(updateEntries)
+                    allStreamMessages = await this.flushIndividualAssertVersion(updateEntries)
                     break
                 }
             }
@@ -298,7 +298,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
             personFlushLatencyHistogram.observe({ db_write_mode: this.options.dbWriteMode }, flushLatency)
             personFlushOperationsCounter.inc({ db_write_mode: this.options.dbWriteMode, outcome: 'success' })
 
-            return allKafkaMessages
+            return allStreamMessages
         } catch (error) {
             // Record failed flush
             const flushLatency = (performance.now() - flushStartTime) / 1000
@@ -330,15 +330,15 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
         // Try batch update first
         const batchResults = await this.personRepository.updatePersonsBatch(updates)
 
-        const allKafkaMessages: FlushResult[] = []
+        const allStreamMessages: FlushResult[] = []
         const failedUpdates: PersonUpdate[] = []
 
         // Process batch results
         for (const update of updates) {
             const result = batchResults.get(update.uuid)
-            if (result?.success && result.kafkaMessage) {
-                allKafkaMessages.push({
-                    topicMessage: result.kafkaMessage,
+            if (result?.success && result.streamMessage) {
+                allStreamMessages.push({
+                    topicMessage: result.streamMessage,
                     teamId: update.team_id,
                     uuid: update.uuid,
                     distinctId: update.distinct_id,
@@ -352,7 +352,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
                 // Handle specific error types
                 if (result?.error instanceof PersonPropertiesSizeViolationError) {
                     await captureIngestionWarning(
-                        this.kafkaProducer,
+                        this.streamProducer,
                         update.team_id,
                         'person_properties_size_violation',
                         {
@@ -417,10 +417,10 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
                     })
                 )
             )
-            allKafkaMessages.push(...fallbackResults.flat())
+            allStreamMessages.push(...fallbackResults.flat())
         }
 
-        return allKafkaMessages
+        return allStreamMessages
     }
 
     /**
@@ -554,9 +554,9 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
      * Returns FlushResult[] for recoverable errors, throws for fatal errors.
      */
     private async handleIndividualUpdateError(error: unknown, update: PersonUpdate): Promise<FlushResult[]> {
-        // If the Kafka message is too large, we can't retry, so we need to capture a warning and stop retrying
+        // If the Stream message is too large, we can't retry, so we need to capture a warning and stop retrying
         if (error instanceof MessageSizeTooLarge) {
-            await captureIngestionWarning(this.kafkaProducer, update.team_id, 'person_upsert_message_size_too_large', {
+            await captureIngestionWarning(this.streamProducer, update.team_id, 'person_upsert_message_size_too_large', {
                 personId: update.id,
                 distinctId: update.distinct_id,
             })
@@ -569,7 +569,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
         }
 
         if (error instanceof PersonPropertiesSizeViolationError) {
-            await captureIngestionWarning(this.kafkaProducer, update.team_id, 'person_properties_size_violation', {
+            await captureIngestionWarning(this.streamProducer, update.team_id, 'person_properties_size_violation', {
                 personId: update.id,
                 distinctId: update.distinct_id,
                 teamId: update.team_id,
@@ -828,7 +828,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
         forceUpdate?: boolean,
         _tx?: PersonRepositoryTransaction
     ): Promise<[InternalPerson, TopicMessage[], boolean]> {
-        const [updatedPerson, kafkaMessages] = this.addPersonPropertiesUpdateToBatch(
+        const [updatedPerson, streamMessages] = this.addPersonPropertiesUpdateToBatch(
             person,
             propertiesToSet,
             propertiesToUnset,
@@ -836,7 +836,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
             distinctId,
             forceUpdate
         )
-        return Promise.resolve([updatedPerson, kafkaMessages, false])
+        return Promise.resolve([updatedPerson, streamMessages, false])
     }
 
     async deletePerson(
@@ -1442,7 +1442,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
 
         const start = performance.now()
 
-        const [actualVersion, kafkaMessages] = await this.personRepository.updatePersonAssertVersion(personUpdate)
+        const [actualVersion, streamMessages] = await this.personRepository.updatePersonAssertVersion(personUpdate)
         this.recordUpdateLatency(
             'updatePersonAssertVersion',
             (performance.now() - start) / 1000,
@@ -1456,7 +1456,7 @@ export class BatchWritingPersonsStore implements PersonsStore, BatchWritingStore
                 ...personUpdate,
                 version: actualVersion,
             }
-            return { success: true, messages: kafkaMessages, personUpdate: updatedPersonUpdate }
+            return { success: true, messages: streamMessages, personUpdate: updatedPersonUpdate }
         }
 
         // Optimistic update failed due to version mismatch

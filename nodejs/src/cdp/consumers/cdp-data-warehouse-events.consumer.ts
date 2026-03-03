@@ -3,7 +3,7 @@ import { Message } from 'node-rdkafka'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 
 import { convertDataWarehouseEventToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
-import { KafkaConsumer } from '../../kafka/consumer'
+import { StreamConsumer } from '../../stream/consumer'
 import { HealthCheckResult, Hub, PluginsServerConfig } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
@@ -37,7 +37,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase<CdpDatawareh
     protected name = 'CdpDatawarehouseEventsConsumer'
     protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
     private cyclotronJobQueue: CyclotronJobQueue
-    protected kafkaConsumer: KafkaConsumer
+    protected streamConsumer: StreamConsumer
 
     private scriptRateLimiter: ScriptRateLimiterService
 
@@ -48,7 +48,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase<CdpDatawareh
     ) {
         super(hub)
         this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'datawarehouse_table')
-        this.kafkaConsumer = new KafkaConsumer({ groupId, topic })
+        this.streamConsumer = new StreamConsumer({ groupId, topic })
         this.scriptRateLimiter = new ScriptRateLimiterService(hub, this.redis)
     }
 
@@ -368,16 +368,16 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase<CdpDatawareh
         return notMaskedInvocations
     }
 
-    @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+    @instrumented('cdpConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
         const events: InsightsFunctionInvocationGlobals[] = []
 
         await Promise.all(
             messages.map(async (message) => {
                 try {
-                    const kafkaEvent = parseJSON(message.value!.toString()) as unknown
+                    const streamEvent = parseJSON(message.value!.toString()) as unknown
                     // This is the input stream from elsewhere so we want to do some proper validation
-                    const event = CdpDataWarehouseEventSchema.parse(kafkaEvent)
+                    const event = CdpDataWarehouseEventSchema.parse(streamEvent)
 
                     const [teamInsightsFunctions, teamInsightsFlows, team] = await Promise.all([
                         this.insightsFunctionManager.getInsightsFunctionsForTeam(event.team_id, this.scriptTypes),
@@ -405,13 +405,13 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase<CdpDatawareh
         // Make sure we are ready to produce to cyclotron first
         await this.cyclotronJobQueue.startAsProducer()
         // Start consuming messages
-        await this.kafkaConsumer.connect(async (messages) => {
+        await this.streamConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
 
             return await instrumentFn('cdpConsumer.handleEachBatch', async () => {
-                const invocationGlobals = await this._parseKafkaBatch(messages)
+                const invocationGlobals = await this._parseStreamBatch(messages)
                 const { backgroundTask } = await this.processBatch(invocationGlobals)
 
                 return { backgroundTask }
@@ -421,7 +421,7 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase<CdpDatawareh
 
     public async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
-        await this.kafkaConsumer.disconnect()
+        await this.streamConsumer.disconnect()
         logger.info('💤', 'Stopping cyclotron job queue...')
         await this.cyclotronJobQueue.stop()
         logger.info('💤', 'Stopping consumer...')
@@ -431,6 +431,6 @@ export class CdpDatawarehouseEventsConsumer extends CdpConsumerBase<CdpDatawareh
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 }

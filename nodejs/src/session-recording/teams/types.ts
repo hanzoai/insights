@@ -1,5 +1,5 @@
 import { TeamForReplay } from '../../session-replay/shared/teams/types'
-import { ParsedMessageData } from '../kafka/types'
+import { ParsedMessageData } from '../stream/types'
 
 export type { TeamForReplay }
 

@@ -6,8 +6,8 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 
 import { ModifiedRequest } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
-import { KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS, KAFKA_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/kafka-topics'
-import { KafkaProducerWrapper } from '~/kafka/producer'
+import { STREAM_CDP_BATCH_INSIGHTSFLOW_REQUESTS, STREAM_WAREHOUSE_SOURCE_WEBHOOKS } from '~/config/stream-topics'
+import { StreamProducerWrapper } from '~/stream/producer'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, Hub, PluginServerService } from '../types'
 import { logger } from '../utils/logger'
@@ -77,7 +77,7 @@ export class CdpApi {
     private emailTrackingService: EmailTrackingService
     private recipientPreferencesService: RecipientPreferencesService
     private recipientTokensService: RecipientTokensService
-    private cdpWarehouseKafkaProducer?: KafkaProducerWrapper
+    private cdpWarehouseStreamProducer?: StreamProducerWrapper
 
     constructor(private hub: CdpApiHub) {
         this.insightsFunctionManager = new InsightsFunctionManagerService(hub)
@@ -132,15 +132,15 @@ export class CdpApi {
     }
 
     async start(): Promise<void> {
-        this.cdpWarehouseKafkaProducer = await KafkaProducerWrapper.create(
-            this.hub.KAFKA_CLIENT_RACK,
+        this.cdpWarehouseStreamProducer = await StreamProducerWrapper.create(
+            this.hub.STREAM_CLIENT_RACK,
             'WAREHOUSE_PRODUCER'
         )
         await this.cdpSourceWebhooksConsumer.start()
     }
 
     async stop(): Promise<void> {
-        await Promise.all([this.cdpWarehouseKafkaProducer?.disconnect(), this.cdpSourceWebhooksConsumer.stop()])
+        await Promise.all([this.cdpWarehouseStreamProducer?.disconnect(), this.cdpSourceWebhooksConsumer.stop()])
     }
 
     isHealthy(): HealthCheckResult {
@@ -549,9 +549,9 @@ export class CdpApi {
             }
 
             // Queue a message for the CDP batch producer to consume
-            const kafkaProducer = this.hub.kafkaProducer
-            if (!kafkaProducer) {
-                return res.status(500).json({ error: 'Kafka producer not available' })
+            const streamProducer = this.hub.streamProducer
+            if (!streamProducer) {
+                return res.status(500).json({ error: 'Stream producer not available' })
             }
 
             if (insightsFlow.trigger.type !== 'batch') {
@@ -568,8 +568,8 @@ export class CdpApi {
                 },
             }
 
-            await kafkaProducer.produce({
-                topic: KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS,
+            await streamProducer.produce({
+                topic: STREAM_CDP_BATCH_INSIGHTSFLOW_REQUESTS,
                 value: Buffer.from(JSON.stringify(batchInsightsFlowRequest)),
                 key: `${team.id}_${insightsFlow.id}`,
             })
@@ -648,13 +648,13 @@ export class CdpApi {
                     return res.status(500).json({ error: 'Missing schema_id on custom function' })
                 }
 
-                const kafkaProducer = this.cdpWarehouseKafkaProducer
-                if (!kafkaProducer) {
-                    return res.status(500).json({ error: 'Kafka producer not available' })
+                const streamProducer = this.cdpWarehouseStreamProducer
+                if (!streamProducer) {
+                    return res.status(500).json({ error: 'Stream producer not available' })
                 }
 
-                await kafkaProducer.produce({
-                    topic: KAFKA_WAREHOUSE_SOURCE_WEBHOOKS,
+                await streamProducer.produce({
+                    topic: STREAM_WAREHOUSE_SOURCE_WEBHOOKS,
                     key: `${insightsFunction.team_id}:${schemaId}`,
                     value: Buffer.from(JSON.stringify(result.execResult)),
                 })

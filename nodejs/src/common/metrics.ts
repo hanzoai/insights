@@ -1,4 +1,4 @@
-// Metrics that make sense across all Kafka consumers
+// Metrics that make sense across all stream consumers
 import { Counter, Gauge, Histogram } from 'prom-client'
 
 export const eventDroppedCounter = new Counter({

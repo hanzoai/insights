@@ -2,8 +2,8 @@
 import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import express from 'ultimate-express'
 
-import { KAFKA_DATASTORE_SESSION_REPLAY_EVENTS } from '../../config/kafka-topics'
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { STREAM_DATASTORE_SESSION_REPLAY_EVENTS } from '../../config/stream-topics'
+import { StreamProducerWrapper } from '../../stream/producer'
 import {
     HealthCheckResult,
     HealthCheckResultError,
@@ -30,7 +30,7 @@ export class RecordingApi {
     private keyStore: KeyStore | null = null
     private decryptor: RecordingDecryptor | null = null
     private redisPool: RedisPool | null = null
-    private kafkaProducer: KafkaProducerWrapper | null = null
+    private streamProducer: StreamProducerWrapper | null = null
     private recordingService: RecordingService | null = null
 
     constructor(private hub: RecordingApiHub) {}
@@ -106,9 +106,9 @@ export class RecordingApi {
         this.decryptor = getBlockDecryptor(this.keyStore)
         await this.decryptor.start()
 
-        // Initialize Kafka producer for emitting deletion events
-        this.kafkaProducer = await KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK)
-        const metadataStore = new SessionMetadataStore(this.kafkaProducer, KAFKA_DATASTORE_SESSION_REPLAY_EVENTS)
+        // Initialize Stream producer for emitting deletion events
+        this.streamProducer = await StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK)
+        const metadataStore = new SessionMetadataStore(this.streamProducer, STREAM_DATASTORE_SESSION_REPLAY_EVENTS)
 
         // Create the service layer
         this.recordingService = new RecordingService(
@@ -131,8 +131,8 @@ export class RecordingApi {
             await this.redisPool.drain()
             await this.redisPool.clear()
         }
-        if (this.kafkaProducer) {
-            await this.kafkaProducer.disconnect()
+        if (this.streamProducer) {
+            await this.streamProducer.disconnect()
         }
     }
 
@@ -148,8 +148,8 @@ export class RecordingApi {
         if (!this.decryptor) {
             uninitializedComponents.push('decryptor')
         }
-        if (!this.kafkaProducer) {
-            uninitializedComponents.push('kafkaProducer')
+        if (!this.streamProducer) {
+            uninitializedComponents.push('streamProducer')
         }
 
         if (uninitializedComponents.length > 0) {

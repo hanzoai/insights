@@ -3,7 +3,7 @@ import { Counter } from 'prom-client'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { Element, Person, PersonMode, PreIngestionEvent, RawKafkaEvent, TimestampFormat } from '../../types'
+import { Element, Person, PersonMode, PreIngestionEvent, RawStreamEvent, TimestampFormat } from '../../types'
 import { safeClickhouseString } from '../../utils/db/utils'
 import { elementsToString, extractElements } from '../../utils/elements-chain'
 import { logger } from '../../utils/logger'
@@ -49,7 +49,7 @@ export function createEvent(
     processPerson: boolean,
     historicalMigration: boolean,
     capturedAt: Date | null
-): RawKafkaEvent {
+): RawStreamEvent {
     const { eventUuid: uuid, event, teamId, projectId, distinctId, properties, timestamp } = preIngestionEvent
 
     let elementsChain = ''
@@ -89,7 +89,7 @@ export function createEvent(
         personMode = 'propertyless'
     }
 
-    const rawEvent: RawKafkaEvent = {
+    const rawEvent: RawStreamEvent = {
         uuid,
         event: safeClickhouseString(event),
         properties: JSON.stringify(properties ?? {}),

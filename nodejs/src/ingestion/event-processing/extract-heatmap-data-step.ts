@@ -17,7 +17,7 @@ export type ExtractHeatmapDataStepResult<TInput> = TInput & {
 }
 
 export function createExtractHeatmapDataStep<TInput extends ExtractHeatmapDataStepInput>(
-    hub: Pick<Hub, 'DATASTORE_HEATMAPS_KAFKA_TOPIC' | 'kafkaProducer'>
+    hub: Pick<Hub, 'DATASTORE_HEATMAPS_STREAM_TOPIC' | 'streamProducer'>
 ): ProcessingStep<TInput, ExtractHeatmapDataStepResult<TInput>> {
     return async function extractHeatmapDataStep(
         input: TInput
@@ -39,8 +39,8 @@ export function createExtractHeatmapDataStep<TInput extends ExtractHeatmapDataSt
 
             if (heatmapEvents.length > 0) {
                 acks.push(
-                    hub.kafkaProducer.queueMessages({
-                        topic: hub.DATASTORE_HEATMAPS_KAFKA_TOPIC,
+                    hub.streamProducer.queueMessages({
+                        topic: hub.DATASTORE_HEATMAPS_STREAM_TOPIC,
                         messages: heatmapEvents.map((rawEvent) => ({
                             key: eventUuid,
                             value: JSON.stringify(rawEvent),

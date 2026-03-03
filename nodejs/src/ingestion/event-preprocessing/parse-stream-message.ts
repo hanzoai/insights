@@ -10,7 +10,7 @@ import { ProcessingStep } from '../pipelines/steps'
 
 type ParseResult = { event: IncomingEvent } | { error: Error }
 
-function parseKafkaMessage(message: Message): ParseResult {
+function parseStreamMessage(message: Message): ParseResult {
     try {
         // Parse the message payload into the event object
         const { data: dataStr, token: _token, ...rawEvent } = parseJSON(message.value!.toString())
@@ -21,19 +21,19 @@ function parseKafkaMessage(message: Message): ParseResult {
 
         return { event: { event } }
     } catch (error) {
-        logger.warn('Failed to parse Kafka message', { error })
+        logger.warn('Failed to parse stream message', { error })
         return { error: error instanceof Error ? error : new Error(String(error)) }
     }
 }
 
-export function createParseKafkaMessageStep<T extends { message: Message }>(): ProcessingStep<
+export function createParseStreamMessageStep<T extends { message: Message }>(): ProcessingStep<
     T,
     T & { event: IncomingEvent }
 > {
-    return async function parseKafkaMessageStep(input) {
+    return async function parseStreamMessageStep(input) {
         const { message } = input
 
-        const result = parseKafkaMessage(message)
+        const result = parseStreamMessage(message)
         if ('error' in result) {
             return Promise.resolve(dlq('failed_parse_message', result.error))
         }

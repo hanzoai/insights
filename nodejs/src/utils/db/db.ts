@@ -1,4 +1,4 @@
-import { TopicMessage } from '../../kafka/producer'
+import { TopicMessage } from '../../stream/producer'
 import { InternalPerson } from '../../types'
 
 export type MoveDistinctIdsResult =

@@ -8,11 +8,11 @@ import {
 } from '~/utils/realtime-supported-filter-manager-cdp'
 
 import {
-    KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
-    KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS,
-    KAFKA_EVENTS_JSON,
-} from '../../config/kafka-topics'
-import { KafkaConsumer } from '../../kafka/consumer'
+    STREAM_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
+    STREAM_CDP_DATASTORE_PREFILTERED_EVENTS,
+    STREAM_EVENTS_JSON,
+} from '../../config/stream-topics'
+import { StreamConsumer } from '../../stream/consumer'
 import { HealthCheckResult, RawClickHouseEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
@@ -60,21 +60,21 @@ export type CdpPrecalculatedFiltersConsumerHub = CdpConsumerBaseHub
 
 export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalculatedFiltersConsumerHub> {
     protected name = 'CdpPrecalculatedFiltersConsumer'
-    private eventKafkaConsumer: KafkaConsumer
+    private eventStreamConsumer: StreamConsumer
     private realtimeSupportedFilterManager: RealtimeSupportedFilterManagerCDP
 
     constructor(hub: CdpPrecalculatedFiltersConsumerHub) {
         super(hub)
-        this.eventKafkaConsumer = new KafkaConsumer({
+        this.eventStreamConsumer = new StreamConsumer({
             groupId: 'cdp-precalculated-filters-consumer',
-            topic: KAFKA_EVENTS_JSON,
+            topic: STREAM_EVENTS_JSON,
         })
         this.realtimeSupportedFilterManager = new RealtimeSupportedFilterManagerCDP(hub.postgres)
     }
 
     @instrumented('cdpPrecalculatedFiltersConsumer.publishBehavioralEvents')
     private async publishBehavioralEvents(events: ProducedEvent[]): Promise<void> {
-        if (!this.kafkaProducer || events.length === 0) {
+        if (!this.streamProducer || events.length === 0) {
             return
         }
 
@@ -84,7 +84,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
                 key: event.key,
             }))
 
-            await this.kafkaProducer.queueMessages({ topic: KAFKA_CDP_DATASTORE_PREFILTERED_EVENTS, messages })
+            await this.streamProducer.queueMessages({ topic: STREAM_CDP_DATASTORE_PREFILTERED_EVENTS, messages })
         } catch (error) {
             logger.error('Error publishing behavioral events', {
                 error,
@@ -96,7 +96,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
 
     @instrumented('cdpPrecalculatedFiltersConsumer.publishPersonPropertyEvents')
     private async publishPersonPropertyEvents(events: ProducedPersonPropertiesEvent[]): Promise<void> {
-        if (!this.kafkaProducer || events.length === 0) {
+        if (!this.streamProducer || events.length === 0) {
             return
         }
 
@@ -106,8 +106,8 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
                 key: event.key,
             }))
 
-            await this.kafkaProducer.queueMessages({
-                topic: KAFKA_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
+            await this.streamProducer.queueMessages({
+                topic: STREAM_CDP_DATASTORE_PRECALCULATED_PERSON_PROPERTIES,
                 messages,
             })
         } catch (error) {
@@ -179,9 +179,9 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
         }
     }
 
-    // This consumer parses events from kafka and evaluates both behavioral and person property filters
-    @instrumented('cdpPrecalculatedFiltersConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<{
+    // This consumer parses events from stream and evaluates both behavioral and person property filters
+    @instrumented('cdpPrecalculatedFiltersConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<{
         precalculatedEvents: ProducedEvent[]
         precalculatedPersonProperties: ProducedPersonPropertiesEvent[]
     }> {
@@ -310,13 +310,13 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
     public async start(): Promise<void> {
         await super.start()
 
-        await this.eventKafkaConsumer.connect(async (messages) => {
+        await this.eventStreamConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling event batch`, {
                 size: messages.length,
             })
 
             return await instrumentFn('cdpPrecalculatedFiltersConsumer.handleEventBatch', async () => {
-                const { precalculatedEvents, precalculatedPersonProperties } = await this._parseKafkaBatch(messages)
+                const { precalculatedEvents, precalculatedPersonProperties } = await this._parseStreamBatch(messages)
 
                 // Publish both types of events in parallel
                 const backgroundTask = Promise.all([
@@ -335,7 +335,7 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
 
     public async stop(): Promise<void> {
         logger.info('💤', `Stopping ${this.name}...`)
-        await this.eventKafkaConsumer.disconnect()
+        await this.eventStreamConsumer.disconnect()
 
         // IMPORTANT: super always comes last
         await super.stop()
@@ -343,6 +343,6 @@ export class CdpPrecalculatedFiltersConsumer extends CdpConsumerBase<CdpPrecalcu
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.eventKafkaConsumer.isHealthy()
+        return this.eventStreamConsumer.isHealthy()
     }
 }

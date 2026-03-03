@@ -26,12 +26,12 @@ export class PersonEventProcessor {
         const mergeResult = await this.mergeService.handleIdentifyOrAlias()
 
         let personFromMerge: InternalPerson | undefined = undefined
-        let identifyOrAliasKafkaAck: Promise<void> = Promise.resolve()
+        let identifyOrAliasStreamAck: Promise<void> = Promise.resolve()
         let needsPersonUpdate = true
 
         if (mergeResult.success) {
             personFromMerge = mergeResult.person
-            identifyOrAliasKafkaAck = mergeResult.kafkaAck
+            identifyOrAliasStreamAck = mergeResult.streamAck
             needsPersonUpdate = mergeResult.needsPersonUpdate
         } else {
             const errorResult = this.handleMergeError(mergeResult.error, this.context.event)
@@ -47,9 +47,9 @@ export class PersonEventProcessor {
         if (personFromMerge && needsPersonUpdate) {
             // Try to shortcut if we have the person from identify or alias
             try {
-                const [updatedPerson, updateKafkaAck] =
+                const [updatedPerson, updateStreamAck] =
                     await this.propertyService.updatePersonProperties(personFromMerge)
-                return [ok(updatedPerson), Promise.all([identifyOrAliasKafkaAck, updateKafkaAck]).then(() => undefined)]
+                return [ok(updatedPerson), Promise.all([identifyOrAliasStreamAck, updateStreamAck]).then(() => undefined)]
             } catch (error) {
                 // Shortcut didn't work, swallow the error and try normal retry loop below
                 logger.debug('🔁', `failed update after adding distinct IDs, retrying`, { error })
@@ -57,12 +57,12 @@ export class PersonEventProcessor {
         }
 
         if (personFromMerge && !needsPersonUpdate) {
-            return [ok(personFromMerge), identifyOrAliasKafkaAck]
+            return [ok(personFromMerge), identifyOrAliasStreamAck]
         }
 
         // Handle regular property updates
-        const [updatedPerson, updateKafkaAck] = await this.propertyService.handleUpdate()
-        return [ok(updatedPerson), Promise.all([identifyOrAliasKafkaAck, updateKafkaAck]).then(() => undefined)]
+        const [updatedPerson, updateStreamAck] = await this.propertyService.handleUpdate()
+        return [ok(updatedPerson), Promise.all([identifyOrAliasStreamAck, updateStreamAck]).then(() => undefined)]
     }
 
     getContext(): PersonContext {

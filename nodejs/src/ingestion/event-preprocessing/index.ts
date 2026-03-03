@@ -4,7 +4,7 @@ export { createApplyPersonProcessingRestrictionsStep } from './apply-person-proc
 export { createDropExceptionEventsStep } from './drop-exception-events'
 export { createEnrichSurveyPersonPropertiesStep } from './enrich-survey-person-properties'
 export { createParseHeadersStep } from './parse-headers'
-export { createParseKafkaMessageStep } from './parse-kafka-message'
+export { createParseStreamMessageStep } from './parse-stream-message'
 export { createOverflowLaneTTLRefreshStep } from './overflow-lane-ttl-refresh-step'
 export { createRateLimitToOverflowStep } from './rate-limit-to-overflow-step'
 export { createResolveTeamStep } from './resolve-team'

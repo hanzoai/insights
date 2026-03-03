@@ -1,7 +1,7 @@
 import { Message } from 'node-rdkafka'
 
 import { ScriptTransformerService } from '../../cdp/script-transformations/script-transformer.service'
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { Team } from '../../types'
 import { TeamManager } from '../../utils/team-manager'
 import { EventPipelineRunnerOptions } from '../../worker/ingestion/event-pipeline/runner'
@@ -22,15 +22,15 @@ export type PerDistinctIdPipelineInput = EventSubpipelineInput &
 
 export interface PerDistinctIdPipelineConfig {
     options: EventPipelineRunnerOptions & {
-        DATASTORE_JSON_EVENTS_KAFKA_TOPIC: string
-        DATASTORE_HEATMAPS_KAFKA_TOPIC: string
+        DATASTORE_JSON_EVENTS_STREAM_TOPIC: string
+        DATASTORE_HEATMAPS_STREAM_TOPIC: string
     }
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
     scriptTransformer: ScriptTransformerService
     personsStore: PersonsStore
     groupStore: BatchWritingGroupStore
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     groupId: string
 }
 
@@ -56,7 +56,7 @@ export function createPerDistinctIdPipeline<TInput extends PerDistinctIdPipeline
     builder: StartPipelineBuilder<TInput, TContext>,
     config: PerDistinctIdPipelineConfig
 ): PipelineBuilder<TInput, void, TContext> {
-    const { options, teamManager, groupTypeManager, scriptTransformer, personsStore, groupStore, kafkaProducer, groupId } =
+    const { options, teamManager, groupTypeManager, scriptTransformer, personsStore, groupStore, streamProducer, groupId } =
         config
 
     return builder.retry(
@@ -71,7 +71,7 @@ export function createPerDistinctIdPipeline<TInput extends PerDistinctIdPipeline
                             groupTypeManager,
                             personsStore,
                             groupStore,
-                            kafkaProducer,
+                            streamProducer,
                         })
                     )
                     .branch('event', (b) =>
@@ -82,7 +82,7 @@ export function createPerDistinctIdPipeline<TInput extends PerDistinctIdPipeline
                             scriptTransformer,
                             personsStore,
                             groupStore,
-                            kafkaProducer,
+                            streamProducer,
                             groupId,
                         })
                     )
