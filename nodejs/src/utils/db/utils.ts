@@ -1,12 +1,12 @@
 import { Counter } from 'prom-client'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { TopicMessage } from '~/stream/producer'
 
 import { defaultConfig } from '../../config/config'
 import { STREAM_PERSON } from '../../config/stream-topics'
-import { BasePerson, ClickHousePerson, InternalPerson, RawPerson, TimestampFormat } from '../../types'
+import { BasePerson, DatastorePerson, InternalPerson, RawPerson, TimestampFormat } from '../../types'
 import { logger } from '../../utils/logger'
 import { castTimestampOrNow } from '../../utils/utils'
 import { eventToPersonProperties } from '../../worker/ingestion/persons/person-property-utils'
@@ -99,7 +99,7 @@ export function personInitialAndUTMProperties(properties: Properties): Propertie
     }
 
     // For the purposes of $initial properties, $os_name is treated as a fallback alias of $os, starting August 2024
-    // It's a special case due to _some_ SDKs using $os_name: https://github.com/PostHog/insights-js-lite/issues/244
+    // It's a special case due to _some_ SDKs using $os_name: https://github.com/hanzoai/insights-js-lite/issues/244
     const osName = properties.$os_name
     if (osName !== undefined) {
         if (!('$os' in properties)) {
@@ -130,16 +130,16 @@ export function generateStreamPersonUpdateMessage(person: InternalPerson, isDele
             {
                 value: JSON.stringify({
                     id: person.uuid,
-                    created_at: castTimestampOrNow(person.created_at, TimestampFormat.ClickHouseSecondPrecision),
+                    created_at: castTimestampOrNow(person.created_at, TimestampFormat.DatastoreSecondPrecision),
                     properties: JSON.stringify(person.properties),
                     team_id: person.team_id,
                     is_identified: Number(person.is_identified),
                     is_deleted: Number(isDeleted),
                     version: person.version + (isDeleted ? 100 : 0), // keep in sync with delete_person in insights/models/person/util.py
                     last_seen_at: person.last_seen_at
-                        ? castTimestampOrNow(person.last_seen_at, TimestampFormat.ClickHouseSecondPrecision)
+                        ? castTimestampOrNow(person.last_seen_at, TimestampFormat.DatastoreSecondPrecision)
                         : null,
-                } as Omit<ClickHousePerson, 'timestamp'>),
+                } as Omit<DatastorePerson, 'timestamp'>),
             },
         ],
     }
@@ -151,7 +151,7 @@ export function getFinalPostgresQuery(queryString: string, values: any[]): strin
 }
 
 // keep in sync with insights/insights/api/utils.py::safe_datastore_string
-export function safeClickhouseString(str: string): string {
+export function safeDatastoreString(str: string): string {
     // character is a surrogate
     return str.replace(/[\ud800-\udfff]/gu, (match) => {
         surrogatesSubstitutedCounter.inc()

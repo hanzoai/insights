@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { QueryResult } from 'pg'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { sanitizeJsonbValue } from '~/utils/db/utils'
 

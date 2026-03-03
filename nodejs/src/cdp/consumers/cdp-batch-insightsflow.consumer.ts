@@ -4,10 +4,10 @@ import { Message } from 'node-rdkafka'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 import { STREAM_CDP_BATCH_INSIGHTSFLOW_REQUESTS } from '~/config/stream-topics'
 import { InsightsFlow } from '~/schema/insightsflow'
-import { DatastoreRouter } from '~/utils/db/clickhouse'
+import { DatastoreRouter } from '~/utils/db/datastore'
 import { parseJSON } from '~/utils/json-parse'
 import { captureException } from '~/utils/insights'
-import { DatastorePersonRepository } from '~/worker/ingestion/persons/repositories/clickhouse-person-repository'
+import { DatastorePersonRepository } from '~/worker/ingestion/persons/repositories/datastore-person-repository'
 
 import { StreamConsumer } from '../../stream/consumer'
 import { HealthCheckResult, Hub, PersonPropertyFilter, Team } from '../../types'
@@ -261,7 +261,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         await super.start()
         // Make sure we are ready to produce to cyclotron first
         await this.cyclotronJobQueue.startAsProducer()
-        // Connect to ClickHouse
+        // Connect to datastore
         this.datastoreRouter.initialize()
         // Start consuming messages
         await this.streamConsumer.connect(async (messages) => {
@@ -283,7 +283,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         await this.streamConsumer.disconnect()
         logger.info('💤', 'Stopping cyclotron job queue...')
         await this.cyclotronJobQueue.stop()
-        logger.info('💤', 'Stopping ClickHouse router...')
+        logger.info('💤', 'Stopping datastore router...')
         await this.datastoreRouter.close()
         logger.info('💤', 'Stopping consumer...')
         // IMPORTANT: super always comes last

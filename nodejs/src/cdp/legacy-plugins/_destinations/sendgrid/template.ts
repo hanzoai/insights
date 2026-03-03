@@ -13,7 +13,7 @@ export const sendgridPlugin: LegacyDestinationPlugin = {
         id: 'plugin-sendgrid-plugin',
         name: 'Sendgrid',
         description: 'Send emails and user data to Sendgrid when you identify users using Insights.',
-        icon_url: 'https://raw.githubusercontent.com/PostHog/sendgrid-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/hanzoai/sendgrid-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',

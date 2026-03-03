@@ -29,7 +29,7 @@ const EVENT_TO_PERSON_PROPERTIES = new Set([
 // UTM and campaign tracking properties
 // Keep in sync with:
 // - taxonomy.tsx (CAMPAIGN_PROPERTIES)
-// - posthog-js event-utils.ts (CAMPAIGN_PARAMS)
+// - insights-js event-utils.ts (CAMPAIGN_PARAMS)
 const CAMPAIGN_PROPERTIES = new Set([
     'utm_source',
     'utm_medium',

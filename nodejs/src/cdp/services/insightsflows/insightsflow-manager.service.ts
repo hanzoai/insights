@@ -46,7 +46,7 @@ export class InsightsFlowManagerService {
             loader: async (ids) => await this.fetchInsightsFlows(ids),
         })
 
-        this.pubSub.on<{ teamId: Team['id']; insightsFlowIds: InsightsFlow['id'][] }>('reload-hog-flows', (message) => {
+        this.pubSub.on<{ teamId: Team['id']; insightsFlowIds: InsightsFlow['id'][] }>('reload-insights-flows', (message) => {
             const { teamId, insightsFlowIds } = message
             logger.debug('⚡', '[PubSub] Reloading custom flows!', { teamId, insightsFlowIds })
             this.onInsightsFlowsReloaded(teamId, insightsFlowIds)

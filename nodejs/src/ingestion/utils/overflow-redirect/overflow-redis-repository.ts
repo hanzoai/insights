@@ -8,7 +8,7 @@ import { overflowRedirectRedisLatency, overflowRedirectRedisOpsTotal } from './m
 
 export type OverflowType = 'events' | 'recordings' | 'llm'
 
-const REDIS_KEY_PREFIX = '@posthog/stateful-overflow/'
+const REDIS_KEY_PREFIX = '@hanzo/stateful-overflow/'
 
 /**
  * Generates a Redis key for a given type, token, and distinctId.
