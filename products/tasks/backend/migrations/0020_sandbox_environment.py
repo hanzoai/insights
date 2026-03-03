@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.uuid7, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("name", models.CharField(max_length=255)),
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "environment_variables",
-                    posthog.helpers.encrypted_fields.EncryptedJSONStringField(
+                    insights.helpers.encrypted_fields.EncryptedJSONStringField(
                         blank=True,
                         default=dict,
                         help_text="Encrypted environment variables for sandbox execution",
