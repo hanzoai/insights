@@ -105,7 +105,7 @@ class TestAddFieldOperations:
 
     def test_add_many_to_many_field(self):
         """ManyToMany fields create junction tables, not columns - always safe."""
-        field: models.Field = models.ManyToManyField("insights.Survey", blank=True)
+        field: models.Field = models.ManyToManyField("posthog.Survey", blank=True)
 
         op = create_mock_operation(
             migrations.AddField,

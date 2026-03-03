@@ -291,14 +291,14 @@ class Team(UUIDTClassicModel):
     objects: TeamManager = TeamManager()
 
     organization = models.ForeignKey(
-        "insights.Organization",
+        "posthog.Organization",
         on_delete=models.CASCADE,
         related_name="teams",
         related_query_name="team",
     )
     # NOTE: The deletion is not cascade due to us wanting to first of all solve deletion properly before allowing cascading deletes
     parent_team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.SET_NULL,
         related_name="child_teams",
         related_query_name="child_team",
@@ -306,7 +306,7 @@ class Team(UUIDTClassicModel):
     )
     # NOTE: To be removed in favour of parent_team
     project = models.ForeignKey(
-        "insights.Project",
+        "posthog.Project",
         on_delete=models.CASCADE,
         related_name="teams",
         related_query_name="team",
@@ -495,7 +495,7 @@ class Team(UUIDTClassicModel):
     )
 
     primary_dashboard = models.ForeignKey(
-        "insights.Dashboard",
+        "posthog.Dashboard",
         on_delete=models.SET_NULL,
         null=True,
         related_name="primary_dashboard_teams",

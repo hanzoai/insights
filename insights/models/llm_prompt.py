@@ -22,9 +22,9 @@ class LLMPrompt(UUIDModel):
     # TODO: Auto-increment version on updates when versioning feature is implemented
     version = models.PositiveIntegerField(default=1)
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     created_by = models.ForeignKey(
-        "insights.User",
+        "posthog.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

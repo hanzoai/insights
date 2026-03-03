@@ -41,7 +41,7 @@ def hash_key_value(value: str, mode: ModeType = "sha256", iterations: Optional[i
 
 class PersonalAPIKey(ModelActivityMixin, models.Model):
     id = models.CharField(primary_key=True, max_length=50, default=generate_random_token)
-    user = models.ForeignKey("insights.User", on_delete=models.CASCADE, related_name="personal_api_keys")
+    user = models.ForeignKey("posthog.User", on_delete=models.CASCADE, related_name="personal_api_keys")
     label = models.CharField(max_length=40)
     mask_value = models.CharField(max_length=11, editable=False, null=True)
     secure_value = models.CharField(
@@ -61,7 +61,7 @@ class PersonalAPIKey(ModelActivityMixin, models.Model):
     value = deprecate_field(models.CharField(unique=True, max_length=50, editable=False, null=True, blank=True))
     # DEPRECATED: personal API keys are now specifically personal, without team affiliation
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.SET_NULL,
         related_name="personal_api_keys+",
         null=True,

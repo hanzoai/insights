@@ -4,7 +4,7 @@ from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTMod
 
 
 class QueryTabState(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     state = models.JSONField(
         default=dict,
         null=True,

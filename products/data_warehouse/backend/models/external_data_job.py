@@ -20,7 +20,7 @@ class ExternalDataJob(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
         V1 = "v1-dlt-sync", "v1-dlt-sync"
         V2 = "v2-non-dlt", "v2-non-dlt"
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     pipeline = models.ForeignKey("data_warehouse.ExternalDataSource", related_name="jobs", on_delete=models.CASCADE)
     schema = models.ForeignKey("data_warehouse.ExternalDataSchema", on_delete=models.CASCADE, null=True, blank=True)
     status = models.CharField(max_length=400)
