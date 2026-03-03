@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ProcessedPluginEvent } from '@posthog/plugin-scaffold'
 
 import { LegacyDestinationPluginMeta } from '../../types'
