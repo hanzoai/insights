@@ -5,7 +5,7 @@ import { FixtureInsightsFlowBuilder, SimpleInsightsFlowRepresentation } from '~/
 import { createScriptExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
 import { compileFn } from '~/cdp/templates/compiler'
 import { template as insightsCaptureTemplate } from '~/cdp/templates/_destinations/insights_capture/insights-capture.template'
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { fetch } from '~/utils/request'
@@ -18,8 +18,8 @@ import { ScriptExecutorService } from '../script-executor.service'
 import { InsightsFunctionTemplateManagerService } from '../managers/insights-function-template-manager.service'
 import { RecipientsManagerService } from '../managers/recipients-manager.service'
 import { RecipientPreferencesService } from '../messaging/recipient-preferences.service'
-import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './customflow-executor.service'
-import { InsightsFlowFunctionsService } from './customflow-functions.service'
+import { InsightsFlowExecutorService, createInsightsFlowInvocation } from './insightsflow-executor.service'
+import { InsightsFlowFunctionsService } from './insightsflow-functions.service'
 
 // Mock before importing fetch
 jest.mock('~/utils/request', () => {

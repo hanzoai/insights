@@ -3,7 +3,7 @@ import { Summary } from 'prom-client'
 
 import { CyclotronJobInvocationInsightsFlow, CyclotronJobInvocationResult } from '~/cdp/types'
 import { filterFunctionInstrumented } from '~/cdp/utils/insights-function-filtering'
-import { InsightsFlow, InsightsFlowAction } from '~/schema/customflow'
+import { InsightsFlow, InsightsFlowAction } from '~/schema/insightsflow'
 
 export const findActionById = (insightsFlow: InsightsFlow, id: string): InsightsFlowAction => {
     const action = insightsFlow.actions.find((action) => action.id === id)

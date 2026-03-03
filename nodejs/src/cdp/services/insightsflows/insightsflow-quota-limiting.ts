@@ -1,7 +1,7 @@
 import { Counter } from 'prom-client'
 
 import { QuotaLimiting } from '../../../common/services/quota-limiting.service'
-import { InsightsFlow } from '../../../schema/customflow'
+import { InsightsFlow } from '../../../schema/insightsflow'
 import { CyclotronJobInvocationInsightsFlow } from '../../types'
 import { InsightsFunctionMonitoringService } from '../monitoring/insights-function-monitoring.service'
 

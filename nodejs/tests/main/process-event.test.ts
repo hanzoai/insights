@@ -155,7 +155,7 @@ describe('processEvent', () => {
                 // Use emit event step to emit the event
                 const emitEventStep = createEmitEventStep({
                     kafkaProducer: hub.kafkaProducer,
-                    clickhouseJsonEventsTopic: hub.CLICKHOUSE_JSON_EVENTS_KAFKA_TOPIC,
+                    datastoreJsonEventsTopic: hub.DATASTORE_JSON_EVENTS_KAFKA_TOPIC,
                     groupId: 'test-group-id',
                 })
                 const emitResult = await emitEventStep(createResult.value)
@@ -219,7 +219,7 @@ describe('processEvent', () => {
 
     const getEventsFromKafka = (): Record<string, any>[] => {
         const events = mockProducerObserver
-            .getProducedKafkaMessagesForTopic(hub.CLICKHOUSE_JSON_EVENTS_KAFKA_TOPIC)
+            .getProducedKafkaMessagesForTopic(hub.DATASTORE_JSON_EVENTS_KAFKA_TOPIC)
             .map((x) => parseRawClickHouseEvent(x.value as any))
 
         return events
@@ -314,7 +314,7 @@ describe('processEvent', () => {
                 // Use emit event step to emit the event
                 const emitEventStep = createEmitEventStep({
                     kafkaProducer: hub.kafkaProducer,
-                    clickhouseJsonEventsTopic: hub.CLICKHOUSE_JSON_EVENTS_KAFKA_TOPIC,
+                    datastoreJsonEventsTopic: hub.DATASTORE_JSON_EVENTS_KAFKA_TOPIC,
                     groupId: 'test-group-id',
                 })
                 const emitResult = await emitEventStep(createResult.value)

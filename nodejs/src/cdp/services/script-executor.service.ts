@@ -414,7 +414,7 @@ export class ScriptExecutorService {
                     maxAsyncSteps: MAX_ASYNC_STEPS, // NOTE: This will likely be configurable in the future
                     asyncFunctions: asyncFunctions,
                     functions: {
-                        print: (...args) => {
+                        print: (...args: any[]) => {
                             scriptLogs++
                             if (scriptLogs === MAX_HOG_LOGS) {
                                 addLog(
@@ -433,7 +433,7 @@ export class ScriptExecutorService {
                                 message: sanitizeLogMessage(args, sensitiveValues),
                             })
                         },
-                        generateMessagingPreferencesUrl: (identifier): string | null => {
+                        generateMessagingPreferencesUrl: (identifier: any): string | null => {
                             return identifier && typeof identifier === 'string'
                                 ? this.recipientTokensService.generatePreferencesUrl({
                                       team_id: invocation.teamId,
@@ -441,7 +441,7 @@ export class ScriptExecutorService {
                                   })
                                 : null
                         },
-                        insightsCapture: (event) => {
+                        insightsCapture: (event: any) => {
                             const distinctId = event.distinct_id || globals.event?.distinct_id
                             const eventName = event.event
                             const eventProperties = event.properties || {}
@@ -517,7 +517,7 @@ export class ScriptExecutorService {
             result.invocation.state.vmState = execRes.state
 
             if (!execRes.finished) {
-                const args = (execRes.asyncFunctionArgs ?? []).map((arg) => convertScriptToJS(arg))
+                const args = (execRes.asyncFunctionArgs ?? []).map((arg: any) => convertScriptToJS(arg))
                 if (!execRes.state) {
                     // NOTE: This shouldn't be possible so is more of a type sanity check
                     throw new Error('State should be provided for async function')

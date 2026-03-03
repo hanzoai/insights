@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
 import { CyclotronPerson } from '~/cdp/types'
-import { InsightsFlowAction } from '~/schema/customflow'
+import { InsightsFlowAction } from '~/schema/insightsflow'
 
 import { findContinueAction } from '../customflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'

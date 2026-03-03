@@ -1,7 +1,7 @@
 import { get } from 'lodash'
 import { DateTime } from 'luxon'
 
-import { InsightsFlow, InsightsFlowAction } from '../../../schema/customflow'
+import { InsightsFlow, InsightsFlowAction } from '../../../schema/insightsflow'
 import { logger } from '../../../utils/logger'
 import { UUIDT } from '../../../utils/utils'
 import {
@@ -27,7 +27,7 @@ import { InsightsFunctionHandler } from './actions/insights_function'
 import { RandomCohortBranchHandler } from './actions/random_cohort_branch'
 import { TriggerHandler } from './actions/trigger.handler'
 import { WaitUntilTimeWindowHandler } from './actions/wait_until_time_window'
-import { InsightsFlowFunctionsService } from './customflow-functions.service'
+import { InsightsFlowFunctionsService } from './insightsflow-functions.service'
 import {
     actionIdForLogging,
     ensureCurrentAction,

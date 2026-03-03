@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { InsightsFlowAction } from '../../../../schema/customflow'
+import { InsightsFlowAction } from '../../../../schema/insightsflow'
 import {
     CyclotronJobInvocationInsightsFlow,
     CyclotronJobInvocationInsightsFunction,
@@ -10,7 +10,7 @@ import {
 import { ScriptExecutorExecuteAsyncOptions } from '../../script-executor.service'
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
 import { trackInsightsFlowBillableInvocation } from '../billing-utils'
-import { InsightsFlowFunctionsService } from '../customflow-functions.service'
+import { InsightsFlowFunctionsService } from '../insightsflow-functions.service'
 import { actionIdForLogging, findContinueAction } from '../customflow-utils'
 import { ActionHandler, ActionHandlerOptions, ActionHandlerResult } from './action.interface'
 
