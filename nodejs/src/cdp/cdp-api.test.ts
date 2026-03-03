@@ -7,7 +7,7 @@ import express from 'ultimate-express'
 
 import { setupExpressApp } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
-import { InsightsFlow } from '~/schema/customflow'
+import { InsightsFlow } from '~/schema/insightsflow'
 
 import { forSnapshot } from '../../tests/helpers/snapshots'
 import { getFirstTeam, resetTestDatabase } from '../../tests/helpers/sql'
