@@ -245,5 +245,5 @@ export const InsightsFlowSchema = z.object({
 
 // NOTE: these are purposefully exported as interfaces to support kea typegen
 export interface InsightsFlow extends z.infer<typeof InsightsFlowSchema> {}
-export type InsightsFlowAction = z.infer<typeof InsightsFlowActionSchema> & Record<string, unknown>
+export type InsightsFlowAction = z.infer<typeof InsightsFlowActionSchema>
 export interface InsightsFlowEdge extends z.infer<typeof InsightsFlowEdgeSchema> {}
