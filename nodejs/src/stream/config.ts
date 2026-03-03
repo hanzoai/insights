@@ -23,11 +23,9 @@ export const getStreamConfigFromEnv = (prefix: StreamConfigTarget): GlobalConfig
     // That said we also want to be able to add defaults on the global config object
     // So what we do is we first find all values from the default config object and then in addition we add the env ones.
 
-    // Support both STREAM_ and legacy KAFKA_ env var prefixes
     const STREAM_PREFIX = `STREAM_${prefix}_`
-    const LEGACY_PREFIX = `KAFKA_${prefix}_`
     return Object.entries(process.env)
-        .filter(([key]) => key.startsWith(STREAM_PREFIX) || key.startsWith(LEGACY_PREFIX))
+        .filter(([key]) => key.startsWith(STREAM_PREFIX))
         .reduce(
             (acc, [key, value]) => {
                 // If there is an explicit config value then we don't override it
@@ -50,14 +48,10 @@ export const getStreamConfigFromEnv = (prefix: StreamConfigTarget): GlobalConfig
                     parsedValue = false
                 }
 
-                const prefix = key.startsWith(STREAM_PREFIX) ? STREAM_PREFIX : LEGACY_PREFIX
-                const rdstreamKey = key.replace(prefix, '').replace(/_/g, '.').toLowerCase()
+                const rdstreamKey = key.replace(STREAM_PREFIX, '').replace(/_/g, '.').toLowerCase()
                 acc[rdstreamKey] = parsedValue
                 return acc
             },
             {} as Record<string, any>
         )
 }
-
-/** @deprecated Use getStreamConfigFromEnv */
-export const getKafkaConfigFromEnv = getStreamConfigFromEnv

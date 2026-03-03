@@ -1,0 +1,12 @@
+{
+    "name": "@hanzo/siphash",
+    "version": "1.2.0",
+    "description": "SipHash-2-4 fast short-input pseudo-random function",
+    "author": "Hanzo AI <engineering@hanzo.ai>",
+    "repository": "https://github.com/hanzoai/insights",
+    "license": "BSD-2-Clause",
+    "main": "lib/siphash.js",
+    "files": [
+        "lib"
+    ]
+}
