@@ -227,26 +227,26 @@ export class PostgresPersonRepository
         }
 
         let queryString = `SELECT
-                posthog_person.id,
-                posthog_person.uuid,
-                posthog_person.created_at,
-                posthog_person.team_id,
-                posthog_person.properties,
-                posthog_person.properties_last_updated_at,
-                posthog_person.properties_last_operation,
-                posthog_person.is_user_id,
-                posthog_person.version,
-                posthog_person.is_identified,
-                posthog_person.last_seen_at
-            FROM posthog_person
-            JOIN posthog_persondistinctid ON (
-                posthog_persondistinctid.person_id = posthog_person.id
-                AND posthog_persondistinctid.team_id = posthog_person.team_id
+                insights_person.id,
+                insights_person.uuid,
+                insights_person.created_at,
+                insights_person.team_id,
+                insights_person.properties,
+                insights_person.properties_last_updated_at,
+                insights_person.properties_last_operation,
+                insights_person.is_user_id,
+                insights_person.version,
+                insights_person.is_identified,
+                insights_person.last_seen_at
+            FROM insights_person
+            JOIN insights_persondistinctid ON (
+                insights_persondistinctid.person_id = insights_person.id
+                AND insights_persondistinctid.team_id = insights_person.team_id
             )
             WHERE
-                posthog_person.team_id = $1
-                AND posthog_persondistinctid.team_id = $1
-                AND posthog_persondistinctid.distinct_id = $2`
+                insights_person.team_id = $1
+                AND insights_persondistinctid.team_id = $1
+                AND insights_persondistinctid.distinct_id = $2`
         if (options.forUpdate) {
             // Locks the teamId and distinctId tied to this personId + this person's info
             queryString = queryString.concat(` FOR UPDATE`)
@@ -291,26 +291,26 @@ export class PostgresPersonRepository
         const distinctIds = uniqueTeamPersons.map((p) => p.distinctId)
 
         const queryString = `SELECT
-                posthog_person.id,
-                posthog_person.uuid,
-                posthog_person.created_at,
-                posthog_person.team_id,
-                posthog_person.properties,
-                posthog_person.properties_last_updated_at,
-                posthog_person.properties_last_operation,
-                posthog_person.is_user_id,
-                posthog_person.version,
-                posthog_person.is_identified,
-                posthog_person.last_seen_at,
-                posthog_persondistinctid.distinct_id
-            FROM posthog_person
-            JOIN posthog_persondistinctid ON (
-                posthog_persondistinctid.person_id = posthog_person.id
-                AND posthog_persondistinctid.team_id = posthog_person.team_id
+                insights_person.id,
+                insights_person.uuid,
+                insights_person.created_at,
+                insights_person.team_id,
+                insights_person.properties,
+                insights_person.properties_last_updated_at,
+                insights_person.properties_last_operation,
+                insights_person.is_user_id,
+                insights_person.version,
+                insights_person.is_identified,
+                insights_person.last_seen_at,
+                insights_persondistinctid.distinct_id
+            FROM insights_person
+            JOIN insights_persondistinctid ON (
+                insights_persondistinctid.person_id = insights_person.id
+                AND insights_persondistinctid.team_id = insights_person.team_id
             )
             JOIN UNNEST($1::integer[], $2::text[]) AS batch(team_id, distinct_id)
-                ON posthog_persondistinctid.team_id = batch.team_id
-                AND posthog_persondistinctid.distinct_id = batch.distinct_id`
+                ON insights_persondistinctid.team_id = batch.team_id
+                AND insights_persondistinctid.distinct_id = batch.distinct_id`
 
         const { rows } = await this.postgres.query<RawPerson & { distinct_id: string }>(
             useReadReplica ? PostgresUse.PERSONS_READ : PostgresUse.PERSONS_WRITE,
@@ -336,67 +336,67 @@ export class PostgresPersonRepository
             case PropertyOperator.Exact:
                 // For exact match, use JSONB contains operator
                 values.push(JSON.stringify({ [key]: value }))
-                return { condition: `posthog_person.properties @> $${paramIndex}::jsonb`, values }
+                return { condition: `insights_person.properties @> $${paramIndex}::jsonb`, values }
 
             case PropertyOperator.IsNot:
                 // For is_not, check that the property either doesn't exist or has a different value
                 values.push(JSON.stringify({ [key]: value }))
                 return {
-                    condition: `NOT (posthog_person.properties @> $${paramIndex}::jsonb)`,
+                    condition: `NOT (insights_person.properties @> $${paramIndex}::jsonb)`,
                     values,
                 }
 
             case PropertyOperator.IContains:
                 values.push(`%${value}%`)
                 return {
-                    condition: `posthog_person.properties->>'${sanitizeSqlIdentifier(key)}' ILIKE $${paramIndex}`,
+                    condition: `insights_person.properties->>'${sanitizeSqlIdentifier(key)}' ILIKE $${paramIndex}`,
                     values,
                 }
 
             case PropertyOperator.NotIContains:
                 values.push(`%${value}%`)
                 return {
-                    condition: `NOT (posthog_person.properties->>'${sanitizeSqlIdentifier(key)}' ILIKE $${paramIndex})`,
+                    condition: `NOT (insights_person.properties->>'${sanitizeSqlIdentifier(key)}' ILIKE $${paramIndex})`,
                     values,
                 }
 
             case PropertyOperator.Regex:
                 values.push(value)
                 return {
-                    condition: `posthog_person.properties->>'${sanitizeSqlIdentifier(key)}' ~ $${paramIndex}`,
+                    condition: `insights_person.properties->>'${sanitizeSqlIdentifier(key)}' ~ $${paramIndex}`,
                     values,
                 }
 
             case PropertyOperator.NotRegex:
                 values.push(value)
                 return {
-                    condition: `NOT (posthog_person.properties->>'${sanitizeSqlIdentifier(key)}' ~ $${paramIndex})`,
+                    condition: `NOT (insights_person.properties->>'${sanitizeSqlIdentifier(key)}' ~ $${paramIndex})`,
                     values,
                 }
 
             case PropertyOperator.GreaterThan:
                 values.push(value)
                 return {
-                    condition: `(posthog_person.properties->>'${sanitizeSqlIdentifier(key)}')::numeric > $${paramIndex}::numeric`,
+                    condition: `(insights_person.properties->>'${sanitizeSqlIdentifier(key)}')::numeric > $${paramIndex}::numeric`,
                     values,
                 }
 
             case PropertyOperator.LessThan:
                 values.push(value)
                 return {
-                    condition: `(posthog_person.properties->>'${sanitizeSqlIdentifier(key)}')::numeric < $${paramIndex}::numeric`,
+                    condition: `(insights_person.properties->>'${sanitizeSqlIdentifier(key)}')::numeric < $${paramIndex}::numeric`,
                     values,
                 }
 
             case PropertyOperator.IsSet:
                 return {
-                    condition: `posthog_person.properties ? '${sanitizeSqlIdentifier(key)}'`,
+                    condition: `insights_person.properties ? '${sanitizeSqlIdentifier(key)}'`,
                     values: [],
                 }
 
             case PropertyOperator.IsNotSet:
                 return {
-                    condition: `NOT (posthog_person.properties ? '${sanitizeSqlIdentifier(key)}')`,
+                    condition: `NOT (insights_person.properties ? '${sanitizeSqlIdentifier(key)}')`,
                     values: [],
                 }
 
@@ -405,7 +405,7 @@ export class PostgresPersonRepository
                 const op = operator === PropertyOperator.IsDateAfter ? '>' : '<'
                 values.push(value)
                 return {
-                    condition: `(posthog_person.properties->>'${sanitizeSqlIdentifier(key)}')::timestamp ${op} $${paramIndex}::timestamp`,
+                    condition: `(insights_person.properties->>'${sanitizeSqlIdentifier(key)}')::timestamp ${op} $${paramIndex}::timestamp`,
                     values,
                 }
             }
@@ -413,7 +413,7 @@ export class PostgresPersonRepository
             default:
                 // Fallback to exact match for unknown operators
                 values.push(JSON.stringify({ [key]: value }))
-                return { condition: `posthog_person.properties @> $${paramIndex}::jsonb`, values }
+                return { condition: `insights_person.properties @> $${paramIndex}::jsonb`, values }
         }
     }
 
@@ -439,8 +439,8 @@ export class PostgresPersonRepository
 
         const queryString = `
             SELECT COUNT(*) as count
-            FROM posthog_person
-            WHERE posthog_person.team_id = $1
+            FROM insights_person
+            WHERE insights_person.team_id = $1
               AND (${whereConditions.join(' AND ')})
         `
 
@@ -479,7 +479,7 @@ export class PostgresPersonRepository
         // Add cursor condition for cursor-based pagination (more reliable than offset)
         if (cursor) {
             const cursorParamIndex = values.length + 1
-            whereConditions.push(`posthog_person.id > $${cursorParamIndex}`)
+            whereConditions.push(`insights_person.id > $${cursorParamIndex}`)
             values.push(parseInt(cursor, 10))
         }
 
@@ -488,26 +488,26 @@ export class PostgresPersonRepository
         values.push(limit)
 
         const queryString = `
-            SELECT DISTINCT ON (posthog_person.id)
-                posthog_person.id,
-                posthog_person.uuid,
-                posthog_person.created_at,
-                posthog_person.team_id,
-                posthog_person.properties,
-                posthog_person.properties_last_updated_at,
-                posthog_person.properties_last_operation,
-                posthog_person.is_user_id,
-                posthog_person.is_identified,
-                posthog_person.last_seen_at,
-                posthog_persondistinctid.distinct_id
-            FROM posthog_person
-            JOIN posthog_persondistinctid ON (
-                posthog_persondistinctid.person_id = posthog_person.id
-                AND posthog_persondistinctid.team_id = posthog_person.team_id
+            SELECT DISTINCT ON (insights_person.id)
+                insights_person.id,
+                insights_person.uuid,
+                insights_person.created_at,
+                insights_person.team_id,
+                insights_person.properties,
+                insights_person.properties_last_updated_at,
+                insights_person.properties_last_operation,
+                insights_person.is_user_id,
+                insights_person.is_identified,
+                insights_person.last_seen_at,
+                insights_persondistinctid.distinct_id
+            FROM insights_person
+            JOIN insights_persondistinctid ON (
+                insights_persondistinctid.person_id = insights_person.id
+                AND insights_persondistinctid.team_id = insights_person.team_id
             )
-            WHERE posthog_person.team_id = $1
+            WHERE insights_person.team_id = $1
               AND (${whereConditions.join(' AND ')})
-            ORDER BY posthog_person.id, posthog_persondistinctid.distinct_id
+            ORDER BY insights_person.id, insights_persondistinctid.distinct_id
             LIMIT $${limitParamIndex}
         `
 
@@ -606,10 +606,10 @@ export class PostgresPersonRepository
             const distinctIdsCTE =
                 distinctIds.length > 0
                     ? `, distinct_ids AS (
-                            INSERT INTO posthog_persondistinctid (distinct_id, person_id, team_id, version)
+                            INSERT INTO insights_persondistinctid (distinct_id, person_id, team_id, version)
                             VALUES ${distinctIds
                                 .map(
-                                    // NOTE: Keep this in sync with the posthog_persondistinctid INSERT in
+                                    // NOTE: Keep this in sync with the insights_persondistinctid INSERT in
                                     // `addDistinctId`
                                     (_, index) => `(
                                 $${distinctIdStartIndex + index},
@@ -624,7 +624,7 @@ export class PostgresPersonRepository
 
             const query =
                 `WITH inserted_person AS (
-                        INSERT INTO posthog_person (${columns.join(', ')})
+                        INSERT INTO insights_person (${columns.join(', ')})
                         VALUES (${valuePlaceholders})
                         RETURNING *
                     )` +
@@ -715,7 +715,7 @@ export class PostgresPersonRepository
         try {
             const result = await this.postgres.query<{ version: string }>(
                 tx ?? PostgresUse.PERSONS_WRITE,
-                'DELETE FROM posthog_person WHERE team_id = $1 AND id = $2 RETURNING version',
+                'DELETE FROM insights_person WHERE team_id = $1 AND id = $2 RETURNING version',
                 [person.team_id, person.id],
                 'deletePerson'
             )
@@ -748,8 +748,8 @@ export class PostgresPersonRepository
     ): Promise<TopicMessage[]> {
         const insertResult = await this.postgres.query(
             tx ?? PostgresUse.PERSONS_WRITE,
-            // NOTE: Keep this in sync with the posthog_persondistinctid INSERT in `createPerson`
-            'INSERT INTO posthog_persondistinctid (distinct_id, person_id, team_id, version) VALUES ($1, $2, $3, $4) RETURNING *',
+            // NOTE: Keep this in sync with the insights_persondistinctid INSERT in `createPerson`
+            'INSERT INTO insights_persondistinctid (distinct_id, person_id, team_id, version) VALUES ($1, $2, $3, $4) RETURNING *',
             [distinctId, person.id, person.team_id, version],
             'addDistinctId',
             'warn'
@@ -788,20 +788,20 @@ export class PostgresPersonRepository
                 ? `
                     WITH rows_to_update AS (
                         SELECT id
-                        FROM posthog_persondistinctid
+                        FROM insights_persondistinctid
                         WHERE person_id = $2
                           AND team_id = $3
                         ORDER BY id
                         FOR UPDATE SKIP LOCKED
                         LIMIT $4
                     )
-                    UPDATE posthog_persondistinctid
+                    UPDATE insights_persondistinctid
                     SET person_id = $1, version = COALESCE(version, 0)::numeric + 1
                     WHERE id IN (SELECT id FROM rows_to_update)
                     RETURNING *
                 `
                 : `
-                    UPDATE posthog_persondistinctid
+                    UPDATE insights_persondistinctid
                     SET person_id = $1, version = COALESCE(version, 0)::numeric + 1
                     WHERE person_id = $2
                       AND team_id = $3
@@ -822,7 +822,7 @@ export class PostgresPersonRepository
         } catch (error) {
             if (
                 (error as Error).message.includes(
-                    'insert or update on table "posthog_persondistinctid" violates foreign key constraint'
+                    'insert or update on table "insights_persondistinctid" violates foreign key constraint'
                 )
             ) {
                 // this is caused by a race condition where the _target_ person was deleted after fetching but
@@ -886,14 +886,14 @@ export class PostgresPersonRepository
         const queryString = hasLimit
             ? `
                 SELECT distinct_id
-                FROM posthog_persondistinctid
+                FROM insights_persondistinctid
                 WHERE person_id = $1 AND team_id = $2
                 ORDER BY id
                 LIMIT $3
             `
             : `
                 SELECT distinct_id
-                FROM posthog_persondistinctid
+                FROM insights_persondistinctid
                 WHERE person_id = $1 AND team_id = $2
                 ORDER BY id
             `
@@ -922,10 +922,10 @@ export class PostgresPersonRepository
         const result = await this.postgres.query(
             tx ?? PostgresUse.PERSONS_WRITE,
             `
-                INSERT INTO posthog_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
+                INSERT INTO insights_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
                 VALUES ($1, $2, false, now())
                 ON CONFLICT (team_id, distinct_id) DO UPDATE
-                SET is_merged = posthog_personlessdistinctid.is_merged
+                SET is_merged = insights_personlessdistinctid.is_merged
                 RETURNING is_merged
             `,
             [teamId, distinctId],
@@ -943,7 +943,7 @@ export class PostgresPersonRepository
         const result = await this.postgres.query(
             tx ?? PostgresUse.PERSONS_WRITE,
             `
-                INSERT INTO posthog_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
+                INSERT INTO insights_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
                 VALUES ($1, $2, true, now())
                 ON CONFLICT (team_id, distinct_id) DO UPDATE
                 SET is_merged = true
@@ -980,11 +980,11 @@ export class PostgresPersonRepository
         const result = await this.postgres.query(
             PostgresUse.PERSONS_WRITE,
             `
-                INSERT INTO posthog_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
+                INSERT INTO insights_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
                 SELECT team_id, distinct_id, false, now()
                 FROM UNNEST($1::integer[], $2::text[]) AS batch(team_id, distinct_id)
                 ON CONFLICT (team_id, distinct_id) DO UPDATE
-                SET is_merged = posthog_personlessdistinctid.is_merged
+                SET is_merged = insights_personlessdistinctid.is_merged
                 RETURNING team_id, distinct_id, is_merged
             `,
             [teamIds, distinctIds],
@@ -1001,7 +1001,7 @@ export class PostgresPersonRepository
     async personPropertiesSize(personId: string, teamId: number): Promise<number> {
         const queryString = `
             SELECT COALESCE(pg_column_size(properties)::bigint, 0::bigint) AS total_props_bytes
-            FROM posthog_person
+            FROM insights_person
             WHERE id = $1 AND team_id = $2`
 
         const { rows } = await this.postgres.query<PersonPropertiesSize>(
@@ -1065,7 +1065,7 @@ export class PostgresPersonRepository
          */
         const idParamIndex = Object.values(update).length + 1
         const teamIdParamIndex = Object.values(update).length + 2
-        const queryStringWithPropertiesSize = `UPDATE posthog_person SET version = ${versionString}, ${Object.keys(
+        const queryStringWithPropertiesSize = `UPDATE insights_person SET version = ${versionString}, ${Object.keys(
             update
         ).map(
             (field, index) => `"${sanitizeSqlIdentifier(field)}" = $${index + 1}`
@@ -1074,7 +1074,7 @@ export class PostgresPersonRepository
         /* operation='updatePersonWithPropertiesSize',purpose='${tag || 'update'}' */`
 
         // Potentially overriding values badly if there was an update to the person after computing updateValues above
-        const queryString = `UPDATE posthog_person SET version = ${versionString}, ${Object.keys(update).map(
+        const queryString = `UPDATE insights_person SET version = ${versionString}, ${Object.keys(update).map(
             (field, index) => `"${sanitizeSqlIdentifier(field)}" = $${index + 1}`
         )} WHERE id = $${idParamIndex} AND team_id = $${teamIdParamIndex}
         RETURNING *
@@ -1149,7 +1149,7 @@ export class PostgresPersonRepository
             const { rows } = await this.postgres.query<RawPerson>(
                 PostgresUse.PERSONS_WRITE,
                 `
-                UPDATE posthog_person SET
+                UPDATE insights_person SET
                     properties = $1,
                     properties_last_updated_at = $2,
                     properties_last_operation = $3,
@@ -1264,7 +1264,7 @@ export class PostgresPersonRepository
             const { rows } = await this.postgres.query<RawPerson>(
                 PostgresUse.PERSONS_WRITE,
                 `
-                UPDATE posthog_person AS p SET
+                UPDATE insights_person AS p SET
                     properties = batch.new_properties::jsonb,
                     properties_last_updated_at = batch.new_properties_last_updated_at::jsonb,
                     properties_last_operation = batch.new_properties_last_operation::jsonb,
@@ -1373,17 +1373,17 @@ export class PostgresPersonRepository
             // happens rarely, so we're just going to do the performance optimal thing i.e. do
             // nothing on conflicts, so we keep using the value that the person merged into had
             `WITH cohort_update AS (
-                UPDATE posthog_cohortpeople
+                UPDATE insights_cohortpeople
                 SET person_id = $1
                 WHERE person_id = $2
                 RETURNING person_id
             ),
             deletions AS (
-                DELETE FROM posthog_featureflaghashkeyoverride
+                DELETE FROM insights_featureflaghashkeyoverride
                 WHERE team_id = $3 AND person_id = $2
                 RETURNING team_id, person_id, feature_flag_key, hash_key
             )
-            INSERT INTO posthog_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
+            INSERT INTO insights_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
                 SELECT team_id, $1, feature_flag_key, hash_key
                 FROM deletions
                 ON CONFLICT DO NOTHING`,
