@@ -17,7 +17,7 @@
         "prestart:devNoWatch": "pnpm build:cyclotron",
         "build": "pnpm clean && pnpm typescript:compile && pnpm typescript:compile-cleanup",
         "clean": "rm -rf dist/*",
-        "typescript:compile": "tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+        "typescript:compile": "tsc -p tsconfig.build.json --noCheck && tsc-alias -p tsconfig.build.json",
         "typescript:compile-cleanup": "[ -d dist/src ] && mv dist/src/* dist/ || true",
         "typescript:check": "tsc --noEmit -p .",
         "lint": "eslint .",
