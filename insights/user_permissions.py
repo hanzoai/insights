@@ -4,8 +4,7 @@ from uuid import UUID
 
 from insights.constants import AvailableFeature
 from insights.models import Dashboard, DashboardTile, Insight, Organization, OrganizationMembership, Team, User
-from insights.models.rbac.access_control import AccessControl
-from insights.models.rbac.dashboard_privilege import DashboardPrivilege
+from insights.models.ee_models import AccessControl, DashboardPrivilege
 
 
 class UserPermissions:
