@@ -35,7 +35,7 @@ from insights.schema_migrations.upgrade import upgrade
 
 from products.data_warehouse.backend.models import DataWarehouseJoin
 
-from common.hogvm.python.debugger import color_bytecode
+from common.scriptvm.python.debugger import color_bytecode
 
 logger = structlog.get_logger(__name__)
 

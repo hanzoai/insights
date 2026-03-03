@@ -2,8 +2,8 @@ import os
 from time import sleep
 from typing import Any
 
-from common.hogvm.python.objects import CallFrame
-from common.hogvm.python.operation import Operation
+from common.scriptvm.python.objects import CallFrame
+from common.scriptvm.python.operation import Operation
 
 debug_speed = -1
 

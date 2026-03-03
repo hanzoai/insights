@@ -8,7 +8,7 @@ from insights.insightsql.placeholders import find_placeholders, replace_placehol
 from insights.insightsql.printer import to_printed_insightsql
 from insights.insightsql.visitor import clear_locations
 
-from common.hogvm.python.utils import HogVMException
+from common.scriptvm.python.utils import HogVMException
 
 
 class TestParser(BaseTest):

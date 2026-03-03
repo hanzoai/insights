@@ -6,7 +6,7 @@ from insights.cdp.templates.intercom.template_intercom import (
     template_send_event as template_intercom_event,
 )
 
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):

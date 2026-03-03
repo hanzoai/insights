@@ -8,7 +8,7 @@ from insights.cdp.templates.customerio.template_customerio import (
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from insights.models.plugin import PluginConfig
 
-from common.hogvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtHogVMException
 
 
 def create_inputs(**kwargs):
