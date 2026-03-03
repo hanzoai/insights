@@ -64,13 +64,13 @@ export function getDefaultConfig(): PluginsServerConfig {
         POSTGRES_BEHAVIORAL_COHORTS_HOST: 'localhost',
         POSTGRES_BEHAVIORAL_COHORTS_USER: 'postgres',
         POSTGRES_BEHAVIORAL_COHORTS_PASSWORD: '',
-        CLICKHOUSE_HOST: process.env.DATASTORE_HOST || 'localhost',
-        CLICKHOUSE_PORT: Number(process.env.DATASTORE_PORT) || 8123,
-        CLICKHOUSE_DATABASE:
+        DATASTORE_HOST: process.env.DATASTORE_HOST || 'localhost',
+        DATASTORE_PORT: Number(process.env.DATASTORE_PORT) || 8123,
+        DATASTORE_DATABASE:
             process.env.DATASTORE_DATABASE ||
             (isTestEnv() ? 'insights_test' : isDevEnv() ? 'default' : ''),
-        CLICKHOUSE_USERNAME: process.env.DATASTORE_USER || 'default',
-        CLICKHOUSE_PASSWORD: process.env.DATASTORE_PASSWORD || '',
+        DATASTORE_USER: process.env.DATASTORE_USER || 'default',
+        DATASTORE_PASSWORD: process.env.DATASTORE_PASSWORD || '',
         EVENT_OVERFLOW_BUCKET_CAPACITY: 1000,
         EVENT_OVERFLOW_BUCKET_REPLENISH_RATE: 1.0,
         KAFKA_BATCH_START_LOGGING_ENABLED: false,
