@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0330_add_autocapture_exceptions_events_to_ignore"),
+        ("posthog", "0330_add_autocapture_exceptions_events_to_ignore"),
     ]
 
     operations = [

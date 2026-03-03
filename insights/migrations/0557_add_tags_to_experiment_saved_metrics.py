@@ -48,7 +48,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0556_add_execution_order_to_insights_functions"),
+        ("posthog", "0556_add_execution_order_to_insights_functions"),
     ]
 
     operations = [
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="tagged_items",
-                        to="insights.experimentsavedmetric",
+                        to="posthog.experimentsavedmetric",
                     ),
                 ),
                 migrations.AlterUniqueTogether(

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0334_add_asset_ttl"),
+        ("posthog", "0334_add_asset_ttl"),
     ]
 
     operations = [

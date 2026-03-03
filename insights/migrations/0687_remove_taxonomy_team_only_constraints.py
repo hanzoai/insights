@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False  # Because revert contains CURRENTLY
 
     dependencies = [
-        ("insights", "0686_alter_errortrackingissue_status"),
+        ("posthog", "0686_alter_errortrackingissue_status"),
     ]
 
     operations = [

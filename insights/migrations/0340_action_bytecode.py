@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0339_add_user_scene_personalisation"),
+        ("posthog", "0339_add_user_scene_personalisation"),
     ]
 
     operations = [

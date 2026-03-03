@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0970_add_session_recording_encryption"),
+        ("posthog", "0970_add_session_recording_encryption"),
     ]
 
     operations = [

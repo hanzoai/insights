@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
+        ("posthog", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                     model_name="errortrackingissueassignment",
                     name="user_group",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"
                     ),
                 ),
                 migrations.AlterField(
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                     field=models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="assignment",
-                        to="insights.errortrackingissue",
+                        to="posthog.errortrackingissue",
                     ),
                 ),
                 migrations.AlterField(
@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
 # ORIGINAL MIGRATION
 # class Migration(migrations.Migration):
 #     dependencies = [
-#         ("insights", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
+#         ("posthog", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
 #     ]
 
 #     operations = [
@@ -111,13 +111,13 @@ class Migration(migrations.Migration):
 #         migrations.AddField(
 #             model_name="errortrackingissueassignment",
 #             name="user_group",
-#             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
+#             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
 #         ),
 #         migrations.AlterField(
 #             model_name="errortrackingissueassignment",
 #             name="issue",
 #             field=models.OneToOneField(
-#                 on_delete=django.db.models.deletion.CASCADE, related_name="assignment", to="insights.errortrackingissue"
+#                 on_delete=django.db.models.deletion.CASCADE, related_name="assignment", to="posthog.errortrackingissue"
 #             ),
 #         ),
 #         migrations.AlterField(

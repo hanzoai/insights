@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0857_dashboardtile_filters_overrides"),
+        ("posthog", "0857_dashboardtile_filters_overrides"),
     ]
 
     operations = [

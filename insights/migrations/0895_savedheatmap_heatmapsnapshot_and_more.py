@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0894_organizationdomain_scim_bearer_token_and_more"),
+        ("posthog", "0894_organizationdomain_scim_bearer_token_and_more"),
     ]
 
     operations = [
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_heatmapsaved",
@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 (
                     "heatmap",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="snapshots", to="insights.savedheatmap"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="snapshots", to="posthog.savedheatmap"
                     ),
                 ),
             ],

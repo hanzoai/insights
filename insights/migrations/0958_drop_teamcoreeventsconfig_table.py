@@ -6,7 +6,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0957_refactor_core_events_to_table"),
+        ("posthog", "0957_refactor_core_events_to_table"),
     ]
 
     operations = [

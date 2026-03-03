@@ -4,8 +4,8 @@ from django.db import migrations
 
 
 def disable_all_action_webhooks(apps, schema_editor):
-    Action = apps.get_model("insights", "Action")
-    Team = apps.get_model("insights", "Team")
+    Action = apps.get_model("posthog", "Action")
+    Team = apps.get_model("posthog", "Team")
 
     # Get teams that have Slack webhooks configured
     teams_with_slack = (
@@ -39,7 +39,7 @@ def disable_all_action_webhooks(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0551_batchimport"),
+        ("posthog", "0551_batchimport"),
     ]
 
     operations = [

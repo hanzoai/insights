@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0312_organization_available_product_features"),
+        ("posthog", "0312_organization_available_product_features"),
     ]
 
     operations = [
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.PROTECT,
                         related_name="features",
                         related_query_name="feature",
-                        to="insights.featureflag",
+                        to="posthog.featureflag",
                     ),
                 ),
                 (
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="features",
                         related_query_name="feature",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

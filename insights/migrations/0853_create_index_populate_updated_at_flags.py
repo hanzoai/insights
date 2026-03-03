@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0852_alter_integration_kind"),
+        ("posthog", "0852_alter_integration_kind"),
     ]
 
     atomic = False

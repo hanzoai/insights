@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0849_duplicate_warehouse_tables"),
+        ("posthog", "0849_duplicate_warehouse_tables"),
     ]
 
     operations = [

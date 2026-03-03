@@ -8,8 +8,8 @@ from insights.models import Filter
 
 
 def forwards_func(apps, schema_editor):
-    Dashboard = apps.get_model("insights", "Dashboard")
-    DashboardItem = apps.get_model("insights", "DashboardItem")
+    Dashboard = apps.get_model("posthog", "Dashboard")
+    DashboardItem = apps.get_model("posthog", "DashboardItem")
     dashboards = Dashboard.objects.all()
     for dashboard in dashboards:
         dashboard.share_token = secrets.token_urlsafe(22)
@@ -31,7 +31,7 @@ def reverse_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0070_team_event_properties_numerical"),
+        ("posthog", "0070_team_event_properties_numerical"),
     ]
 
     operations = [
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 null=True,
                 on_delete=models.deletion.CASCADE,
-                to="insights.Funnel",
+                to="posthog.Funnel",
             ),
         ),
         migrations.RunPython(forwards_func, reverse_func, elidable=True),

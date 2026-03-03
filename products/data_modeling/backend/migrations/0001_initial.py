@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("data_warehouse", "0009_alter_externaldatasource_source_type"),
-        ("insights", "0923_add_quick_filters"),
+        ("posthog", "0923_add_quick_filters"),
     ]
 
     operations = [
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                         to="data_warehouse.datawarehousesavedquery",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_datamodelingnode",

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0431_externaldataschema_sync_type_payload"),
+        ("posthog", "0431_externaldataschema_sync_type_payload"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "team",
-                    models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(db_index=False, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
         ),

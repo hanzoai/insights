@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0436_alter_proxyrecord_status"),
+        ("posthog", "0436_alter_proxyrecord_status"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
             model_name="externaldatajob",
             name="pipeline",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="jobs", to="insights.externaldatasource"
+                on_delete=django.db.models.deletion.CASCADE, related_name="jobs", to="posthog.externaldatasource"
             ),
         ),
         migrations.RunSQL(

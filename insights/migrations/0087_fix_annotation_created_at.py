@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0086_team_session_recording_opt_in"),
+        ("posthog", "0086_team_session_recording_opt_in"),
     ]
 
     operations = [

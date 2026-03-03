@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0922_remove_persons_db_team_fks"),
+        ("posthog", "0922_remove_persons_db_team_fks"),
     ]
 
     operations = [
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ("options", models.JSONField(blank=True, default=list, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_quickfilter",
@@ -56,10 +56,10 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="context_memberships",
-                        to="insights.quickfilter",
+                        to="posthog.quickfilter",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "db_table": "posthog_quickfiltercontext",

@@ -6,7 +6,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0711_externaldatasource_revenue_analytics_enabled"),
+        ("posthog", "0711_externaldatasource_revenue_analytics_enabled"),
     ]
 
     operations = [
@@ -29,10 +29,10 @@ class Migration(migrations.Migration):
                 (
                     "created_by",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.user"
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.user"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
     ]

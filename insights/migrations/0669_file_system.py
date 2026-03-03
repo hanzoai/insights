@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0668_hostdefinition_and_more"),
+        ("posthog", "0668_hostdefinition_and_more"),
     ]
 
     operations = [
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                         null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
     ]

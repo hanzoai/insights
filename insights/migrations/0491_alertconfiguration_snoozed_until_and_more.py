@@ -7,7 +7,7 @@ import insights.schema
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0490_dashboard_variables"),
+        ("posthog", "0490_dashboard_variables"),
     ]
 
     operations = [

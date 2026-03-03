@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0231_add_refreshing_data_to_tiles"),
+        ("posthog", "0231_add_refreshing_data_to_tiles"),
     ]
 
     operations = [

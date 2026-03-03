@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0282_fix_insight_caching_state_model"),
+        ("posthog", "0282_fix_insight_caching_state_model"),
     ]
 
     operations = [
@@ -65,9 +65,9 @@ class Migration(migrations.Migration):
                 ("autorun", models.BooleanField(default=True)),
                 (
                     "must_have_completed",
-                    models.ManyToManyField(blank=True, to="insights.PromptSequence"),
+                    models.ManyToManyField(blank=True, to="posthog.PromptSequence"),
                 ),
-                ("prompts", models.ManyToManyField(to="insights.Prompt")),
+                ("prompts", models.ManyToManyField(to="posthog.Prompt")),
             ],
         ),
         migrations.CreateModel(
@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                     "sequence",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.promptsequence",
+                        to="posthog.promptsequence",
                     ),
                 ),
                 (

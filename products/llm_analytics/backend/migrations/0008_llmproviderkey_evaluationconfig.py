@@ -10,7 +10,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0932_add_session_ids_to_restriction_config"),
+        ("posthog", "0932_add_session_ids_to_restriction_config"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("llm_analytics", "0007_drop_evaluation_prompt_column"),
     ]
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "indexes": [models.Index(fields=["team", "provider"], name="llm_analyti_team_pr_idx")],
@@ -61,7 +61,7 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         related_name="evaluation_config",
                         serialize=False,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 ("trial_eval_limit", models.IntegerField(default=100)),

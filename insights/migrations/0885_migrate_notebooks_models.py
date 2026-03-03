@@ -26,7 +26,7 @@ def reverse_content_type(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0884_experimenttimeseriesrecalculation_and_more")]
+    dependencies = [("posthog", "0884_experimenttimeseriesrecalculation_and_more")]
 
     operations = [
         migrations.SeparateDatabaseAndState(

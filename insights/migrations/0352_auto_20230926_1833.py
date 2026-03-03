@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False  # Cannot create index concurrently atomically
 
     dependencies = [
-        ("insights", "0351_team_surveys_opt_in"),
+        ("posthog", "0351_team_surveys_opt_in"),
     ]
 
     operations = [

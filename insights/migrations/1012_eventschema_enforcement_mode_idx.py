@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "1011_eventschema_enforcement_mode"),
+        ("posthog", "1011_eventschema_enforcement_mode"),
     ]
 
     operations = [

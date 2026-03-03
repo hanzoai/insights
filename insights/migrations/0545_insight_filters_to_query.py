@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def migrate_insight_filters_to_query(apps, schema_editor):
-    Insight = apps.get_model("insights", "Insight")
+    Insight = apps.get_model("posthog", "Insight")
     insights = Insight.objects.filter(Q(filters__insight__isnull=False) & Q(query__kind__isnull=True))
     migrated_at = datetime.now()
 
@@ -42,7 +42,7 @@ def rollback_insight_filters_to_query(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0544_team_flags_persistence_default")]
+    dependencies = [("posthog", "0544_team_flags_persistence_default")]
 
     operations = [
         migrations.RunPython(migrate_insight_filters_to_query, rollback_insight_filters_to_query),

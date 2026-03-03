@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0316_action_href_text_matching"),
+        ("posthog", "0316_action_href_text_matching"),
     ]
 
     operations = [
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The team this belongs to.",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 (
@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The destination to export data to.",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.batchexportdestination",
+                        to="posthog.batchexportdestination",
                     ),
                 ),
                 (
@@ -217,7 +217,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="The BatchExport this run belongs to.",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.batchexport",
+                        to="posthog.batchexport",
                     ),
                 ),
             ],

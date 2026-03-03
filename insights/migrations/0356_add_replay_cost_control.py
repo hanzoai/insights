@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0355_add_batch_export_backfill_model"),
+        ("posthog", "0355_add_batch_export_backfill_model"),
     ]
 
     operations = [

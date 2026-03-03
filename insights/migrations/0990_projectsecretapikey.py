@@ -10,7 +10,7 @@ import insights.models.utils
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0989_add_tags_to_hogflow_template")]
+    dependencies = [("posthog", "0989_add_tags_to_hogflow_template")]
 
     operations = [
         migrations.CreateModel(
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="project_secret_api_keys",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],
