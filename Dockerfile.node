@@ -55,7 +55,7 @@ COPY ./patches ./patches
 COPY ./rust ./rust
 COPY ./common/esbuilder/ ./common/esbuilder/
 COPY ./common/plugin_transpiler/ ./common/plugin_transpiler/
-COPY ./common/hogvm/typescript/ ./common/hogvm/typescript/
+COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
 COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/tsconfig.build.json ./nodejs/
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
@@ -130,9 +130,9 @@ COPY --from=nodejs-build --chown=insights:insights /code/rust/cyclotron-node/ind
 COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpiler/dist /code/common/plugin_transpiler/dist
 COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpiler/node_modules /code/common/plugin_transpiler/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/common/plugin_transpiler/package.json /code/common/plugin_transpiler/package.json
-COPY --from=nodejs-build --chown=insights:insights /code/common/hogvm/typescript/dist /code/common/hogvm/typescript/dist
-COPY --from=nodejs-build --chown=insights:insights /code/common/hogvm/typescript/node_modules /code/common/hogvm/typescript/node_modules
-COPY --from=nodejs-build --chown=insights:insights /code/common/hogvm/typescript/package.json /code/common/hogvm/typescript/package.json
+COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/dist /code/common/scriptvm/typescript/dist
+COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/node_modules /code/common/scriptvm/typescript/node_modules
+COPY --from=nodejs-build --chown=insights:insights /code/common/scriptvm/typescript/package.json /code/common/scriptvm/typescript/package.json
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/dist /code/nodejs/dist
 COPY --from=nodejs-build --chown=insights:insights /code/node_modules /code/node_modules
 COPY --from=nodejs-build --chown=insights:insights /code/nodejs/node_modules /code/nodejs/node_modules

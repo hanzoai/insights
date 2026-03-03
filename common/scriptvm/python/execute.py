@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any, Optional
 
-from common.hogvm.python.debugger import color_bytecode, debugger
-from common.hogvm.python.objects import (
+from common.scriptvm.python.debugger import color_bytecode, debugger
+from common.scriptvm.python.objects import (
     CallFrame,
     ThrowFrame,
     is_hog_error,
@@ -15,10 +15,10 @@ from common.hogvm.python.objects import (
     new_hog_callable,
     new_hog_closure,
 )
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INSIGHTSQL_BYTECODE_IDENTIFIER_V0, Operation
-from common.hogvm.python.stl import STL
-from common.hogvm.python.stl.bytecode import BYTECODE_STL
-from common.hogvm.python.utils import (
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INSIGHTSQL_BYTECODE_IDENTIFIER_V0, Operation
+from common.scriptvm.python.stl import STL
+from common.scriptvm.python.stl.bytecode import BYTECODE_STL
+from common.scriptvm.python.utils import (
     HogVMException,
     HogVMMemoryExceededException,
     HogVMRuntimeExceededException,

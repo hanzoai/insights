@@ -41,7 +41,7 @@ class ReplacePlaceholders(CloningVisitor):
         # avoid circular imports
         from insights.insightsql.compiler.bytecode import create_bytecode
 
-        from common.hogvm.python.execute import execute_bytecode
+        from common.scriptvm.python.execute import execute_bytecode
 
         bytecode = create_bytecode(node.expr)
         response = execute_bytecode(bytecode.bytecode, self.placeholders)

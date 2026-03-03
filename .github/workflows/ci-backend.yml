@@ -1150,7 +1150,7 @@ jobs:
                   }} -m "not async_migrations" \
                       --ignore=insights/temporal \
                       --ignore=insights/dags \
-                      --ignore=common/hogvm/python/test \
+                      --ignore=common/scriptvm/python/test \
                       ${{ matrix.person-on-events && '--ignore=insights/hogql_queries' || '' }} \
                       ${{ matrix.person-on-events && '--ignore=insights/hogql' || '' }} \
                       --splits ${{ matrix.concurrency }} --group ${{ matrix.group }} \
