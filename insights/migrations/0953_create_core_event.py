@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0952_add_billable_action_to_hogflows"),
+        ("posthog", "0952_add_billable_action_to_insightsflows"),
     ]
 
     operations = [
