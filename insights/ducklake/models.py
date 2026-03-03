@@ -22,7 +22,7 @@ class DuckLakeCatalog(CreatedMetaFields, UpdatedMetaFields, UUIDModel):
     """
 
     team = models.OneToOneField(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="ducklake_catalog",
     )

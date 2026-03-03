@@ -69,7 +69,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         MANAGED_VIEWSET = DataWarehouseSavedQueryOrigin.MANAGED_VIEWSET
 
     name = models.CharField(max_length=128, validators=[validate_saved_query_name])
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     latest_error = models.TextField(default=None, null=True, blank=True)
     columns = models.JSONField(
         default=dict,

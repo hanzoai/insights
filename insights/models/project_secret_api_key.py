@@ -67,7 +67,7 @@ class ProjectSecretAPIKey(ModelActivityMixin, models.Model):
 
     id = models.CharField(primary_key=True, max_length=50, default=generate_random_token)
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="project_secret_api_keys",
     )
@@ -82,7 +82,7 @@ class ProjectSecretAPIKey(ModelActivityMixin, models.Model):
 
     created_at = models.DateTimeField(default=timezone.now)
     created_by = models.ForeignKey(
-        "insights.User", on_delete=models.SET_NULL, related_name="created_project_secret_api_keys", null=True
+        "posthog.User", on_delete=models.SET_NULL, related_name="created_project_secret_api_keys", null=True
     )
     last_used_at = models.DateTimeField(null=True, blank=True)
     last_rolled_at = models.DateTimeField(null=True, blank=True)

@@ -39,7 +39,7 @@ class ExternalDataSource(ModelActivityMixin, CreatedMetaFields, UpdatedMetaField
     source_id = models.CharField(max_length=400)
     connection_id = models.CharField(max_length=400)
     destination_id = models.CharField(max_length=400, null=True, blank=True)
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
 
     # Deprecated, use `ExternalDataSchema.sync_frequency_interval`
     sync_frequency = models.CharField(

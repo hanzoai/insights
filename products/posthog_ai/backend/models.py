@@ -14,12 +14,12 @@ EMBEDDING_MODEL_TOKEN_LIMIT = 8192
 
 class AgentMemory(UUIDModel):
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="agent_memories",
     )
     user = models.ForeignKey(
-        "insights.User",
+        "posthog.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
