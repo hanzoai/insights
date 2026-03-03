@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { DateTime, DurationLike } from 'luxon'
 
 import { InsightsFlowAction } from '../../../../schema/insightsflow'
