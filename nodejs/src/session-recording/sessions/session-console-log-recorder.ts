@@ -127,7 +127,7 @@ export class SessionConsoleLogRecorder {
                         log_source: 'session_replay',
                         log_source_id: this.sessionId,
                         instance_id: null,
-                        timestamp: castTimestampOrNow(timestamp, TimestampFormat.ClickHouse),
+                        timestamp: castTimestampOrNow(timestamp, TimestampFormat.Datastore),
                         batch_id: this.batchId,
                     })
                 }

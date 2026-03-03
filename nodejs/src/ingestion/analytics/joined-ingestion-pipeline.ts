@@ -35,7 +35,7 @@ export type PreprocessingHub = Pick<
     | 'cookielessManager'
     | 'INGESTION_OVERFLOW_PRESERVE_PARTITION_LOCALITY'
     | 'PERSONS_PREFETCH_ENABLED'
-    | 'CDP_HOG_WATCHER_SAMPLE_RATE'
+    | 'CDP_SCRIPT_WATCHER_SAMPLE_RATE'
 >
 
 export interface JoinedIngestionPipelineConfig {
@@ -150,7 +150,7 @@ export function createJoinedIngestionPipeline<
         personsStore,
         personsPrefetchEnabled: hub.PERSONS_PREFETCH_ENABLED,
         scriptTransformer,
-        cdpScriptWatcherSampleRate: hub.CDP_HOG_WATCHER_SAMPLE_RATE,
+        cdpScriptWatcherSampleRate: hub.CDP_SCRIPT_WATCHER_SAMPLE_RATE,
     }
 
     const perEventConfig: PerDistinctIdPipelineConfig = {

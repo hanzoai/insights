@@ -7,7 +7,7 @@ import { CyclotronInputType, CyclotronInvocationQueueParametersType } from '~/sc
 
 import { InsightsFlow } from '../schema/insightsflow'
 import {
-    ClickHouseTimestamp,
+    DatastoreTimestamp,
     ElementPropertyFilter,
     EventPropertyFilter,
     InsightsQLPropertyFilter,
@@ -201,7 +201,7 @@ export type LogEntry = MinimalLogEntry & {
 }
 
 export type LogEntrySerialized = Omit<LogEntry, 'timestamp'> & {
-    timestamp: ClickHouseTimestamp
+    timestamp: DatastoreTimestamp
 }
 
 export type MinimalAppMetric = {
@@ -239,7 +239,7 @@ export type MinimalAppMetric = {
 }
 
 export type AppMetricType = MinimalAppMetric & {
-    timestamp: ClickHouseTimestamp
+    timestamp: DatastoreTimestamp
     app_source: MetricLogSource
 }
 

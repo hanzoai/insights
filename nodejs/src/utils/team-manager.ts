@@ -1,4 +1,4 @@
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { OrganizationAvailableFeature, ProjectId, Team } from '../types'
 import { PostgresRouter, PostgresUse } from './db/postgres'

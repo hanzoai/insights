@@ -49,7 +49,7 @@ interface QueuedMetric {
     metric: AppMetricIdentifier
 }
 
-/** An aggregated AppMetric, as written to/read from a ClickHouse row. */
+/** An aggregated AppMetric, as written to/read from a datastore row. */
 export interface RawAppMetric {
     timestamp: string
     team_id: number
@@ -144,7 +144,7 @@ export class LegacyPluginAppMetrics {
 
         const messages: TopicMessage['messages'] = Object.values(queue).map((value) => ({
             value: JSON.stringify({
-                timestamp: castTimestampOrNow(DateTime.fromMillis(value.lastTimestamp), TimestampFormat.ClickHouse),
+                timestamp: castTimestampOrNow(DateTime.fromMillis(value.lastTimestamp), TimestampFormat.Datastore),
                 team_id: value.metric.teamId,
                 plugin_config_id: value.metric.pluginConfigId,
                 job_id: value.metric.jobId ?? null,

@@ -4,7 +4,7 @@ import { instrumented } from '~/common/tracing/tracing-utils'
 import { UUIDT } from '~/utils/utils'
 
 import { STREAM_PERSON } from '../../config/stream-topics'
-import { ClickHousePerson, Team } from '../../types'
+import { DatastorePerson, Team } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
 import { CyclotronPerson, InsightsFunctionInvocationGlobals, InsightsFunctionType, InsightsFunctionTypeType } from '../types'
@@ -32,7 +32,7 @@ export class CdpPersonUpdatesConsumer extends CdpEventsConsumer {
             await Promise.all(
                 messages.map(async (message) => {
                     try {
-                        const data = parseJSON(message.value!.toString()) as ClickHousePerson
+                        const data = parseJSON(message.value!.toString()) as DatastorePerson
 
                         const [teamInsightsFunctions, team] = await Promise.all([
                             this.insightsFunctionManager.getInsightsFunctionsForTeam(data.team_id, ['destination']),
@@ -45,7 +45,7 @@ export class CdpPersonUpdatesConsumer extends CdpEventsConsumer {
                             return
                         }
 
-                        globals.push(convertClickhousePersonToInvocationGlobals(data, team, this.hub.SITE_URL))
+                        globals.push(convertDatastorePersonToInvocationGlobals(data, team, this.hub.SITE_URL))
                     } catch (e) {
                         logger.error('Error parsing message', e)
                         counterParseError.labels({ error: e.message }).inc()
@@ -58,8 +58,8 @@ export class CdpPersonUpdatesConsumer extends CdpEventsConsumer {
     }
 }
 
-function convertClickhousePersonToInvocationGlobals(
-    data: ClickHousePerson,
+function convertDatastorePersonToInvocationGlobals(
+    data: DatastorePerson,
     team: Team,
     siteUrl: string
 ): InsightsFunctionInvocationGlobals {

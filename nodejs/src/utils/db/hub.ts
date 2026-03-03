@@ -11,7 +11,7 @@ import { CookielessManager } from '../../ingestion/cookieless/cookieless-manager
 import { StreamProducerWrapper } from '../../stream/producer'
 import { Hub, PluginsServerConfig } from '../../types'
 import { GroupTypeManager } from '../../worker/ingestion/group-type-manager'
-import { ClickhouseGroupRepository } from '../../worker/ingestion/groups/repositories/clickhouse-group-repository'
+import { DatastoreGroupRepository } from '../../worker/ingestion/groups/repositories/datastore-group-repository'
 import { PostgresGroupRepository } from '../../worker/ingestion/groups/repositories/postgres-group-repository'
 import { PostgresPersonRepository } from '../../worker/ingestion/persons/repositories/postgres-person-repository'
 import { isTestEnv } from '../env-utils'
@@ -124,7 +124,7 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     }
     const personRepository = new PostgresPersonRepository(postgres, personRepositoryOptions)
 
-    const clickhouseGroupRepository = new ClickhouseGroupRepository(streamProducer)
+    const datastoreGroupRepository = new DatastoreGroupRepository(streamProducer)
     const cookielessManager = new CookielessManager(serverConfig, cookielessRedisPool)
     const geoipService = new GeoIPService(serverConfig)
     await geoipService.get()
@@ -143,7 +143,7 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
         groupTypeManager,
         teamManager,
         groupRepository,
-        clickhouseGroupRepository,
+        datastoreGroupRepository,
         personRepository,
         geoipService,
         encryptedFields,

@@ -8,7 +8,7 @@ export const TEST_TIMESTAMP = DateTime.fromISO('2024-01-15T10:30:00.000Z').toUTC
 export async function getFirstTeam(postgres: PostgresRouter): Promise<Team> {
     const teams = await postgres.query(
         PostgresUse.COMMON_WRITE,
-        'SELECT * FROM posthog_team LIMIT 1',
+        'SELECT * FROM insights_team LIMIT 1',
         [],
         'getFirstTeam'
     )
@@ -22,14 +22,14 @@ export async function getFirstTeam(postgres: PostgresRouter): Promise<Team> {
 
 export async function fetchPersons(postgres: PostgresRouter): Promise<InternalPerson[]> {
     return await postgres
-        .query<RawPerson>(PostgresUse.PERSONS_WRITE, 'SELECT * FROM posthog_person', undefined, 'fetchPersons')
+        .query<RawPerson>(PostgresUse.PERSONS_WRITE, 'SELECT * FROM insights_person', undefined, 'fetchPersons')
         .then(({ rows }) => rows.map(toPerson))
 }
 
 export async function fetchDistinctIds(postgres: PostgresRouter, person: InternalPerson): Promise<PersonDistinctId[]> {
     const result = await postgres.query(
         PostgresUse.PERSONS_WRITE, // used in tests only
-        'SELECT * FROM posthog_persondistinctid WHERE person_id=$1 AND team_id=$2 ORDER BY id',
+        'SELECT * FROM insights_persondistinctid WHERE person_id=$1 AND team_id=$2 ORDER BY id',
         [person.id, person.team_id],
         'fetchDistinctIds'
     )

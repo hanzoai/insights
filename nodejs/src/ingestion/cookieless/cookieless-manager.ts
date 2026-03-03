@@ -8,8 +8,8 @@ import { Message } from 'node-rdkafka'
 import { Counter } from 'prom-client'
 import { getDomain } from 'tldts'
 
-import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
-import * as siphashDouble from '@posthog/siphash/lib/siphash-double'
+import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
+import * as siphashDouble from '@hanzo/siphash/lib/siphash-double'
 
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 

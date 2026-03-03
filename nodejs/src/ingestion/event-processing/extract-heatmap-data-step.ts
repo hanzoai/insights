@@ -1,6 +1,6 @@
 import { URL } from 'url'
 
-import { Hub, PreIngestionEvent, RawClickhouseHeatmapEvent, TimestampFormat } from '../../types'
+import { Hub, PreIngestionEvent, RawDatastoreHeatmapEvent, TimestampFormat } from '../../types'
 import { logger } from '../../utils/logger'
 import { castTimestampOrNow } from '../../utils/utils'
 import { isDistinctIdIllegal } from '../../worker/ingestion/persons/person-merge-service'
@@ -99,7 +99,7 @@ function isValidBoolean(b: unknown): b is boolean {
 
 function extractScrollDepthHeatmapData(
     event: PreIngestionEvent
-): PipelineResult<{ heatmapEvents: RawClickhouseHeatmapEvent[]; warnings: PipelineWarning[] }> {
+): PipelineResult<{ heatmapEvents: RawDatastoreHeatmapEvent[]; warnings: PipelineWarning[] }> {
     const warnings: PipelineWarning[] = []
 
     const { teamId, timestamp, properties, distinctId } = event
@@ -131,7 +131,7 @@ function extractScrollDepthHeatmapData(
         })
     }
 
-    const heatmapEvents: RawClickhouseHeatmapEvent[] = []
+    const heatmapEvents: RawDatastoreHeatmapEvent[] = []
 
     if (!heatmapData || Object.entries(heatmapData).length === 0) {
         return ok({ heatmapEvents: [], warnings })
@@ -152,7 +152,7 @@ function extractScrollDepthHeatmapData(
         return drop('heatmap_invalid_viewport_dimensions')
     }
 
-    const eventTimestamp = castTimestampOrNow(timestamp ?? null, TimestampFormat.ClickHouse)
+    const eventTimestamp = castTimestampOrNow(timestamp ?? null, TimestampFormat.Datastore)
     const sessionIdStr = String($session_id)
     const scaledViewportHeight = Math.round($viewport_height / SCALE_FACTOR)
     const scaledViewportWidth = Math.round($viewport_width / SCALE_FACTOR)
