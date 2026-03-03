@@ -9,6 +9,9 @@
 !common/plugin_transpiler/src
 !common/tailwind
 !common/insightsql_parser
+!common/plugin-scaffold
+!common/siphash
+!common/insights-node
 !dags
 !docs/onboarding
 !frontend/@posthog
