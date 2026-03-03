@@ -149,3 +149,4 @@ EXPOSE 8001
 
 # Default command: run the nodejs services
 CMD ["node", "nodejs/dist/index.js"]
+
