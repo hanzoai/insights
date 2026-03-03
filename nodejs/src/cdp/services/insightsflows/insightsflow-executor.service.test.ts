@@ -1,7 +1,7 @@
 // sort-imports-ignore
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder, SimpleInsightsFlowRepresentation } from '~/cdp/_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder, SimpleInsightsFlowRepresentation } from '~/cdp/_tests/builders/insightsflow.builder'
 import { createScriptExecutionGlobals, insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
 import { compileFn } from '~/cdp/templates/compiler'
 import { template as insightsCaptureTemplate } from '~/cdp/templates/_destinations/insights_capture/insights-capture.template'

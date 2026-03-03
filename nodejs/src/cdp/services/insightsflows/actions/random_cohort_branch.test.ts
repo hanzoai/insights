@@ -1,9 +1,9 @@
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
 import { CyclotronJobInvocationInsightsFlow } from '~/cdp/types'
 import { InsightsFlowAction } from '~/schema/insightsflow'
 
-import { findActionById, findActionByType } from '../customflow-utils'
+import { findActionById, findActionByType } from '../insightsflow-utils'
 import { getRandomCohort } from './random_cohort_branch'
 
 describe('getRandomCohort', () => {

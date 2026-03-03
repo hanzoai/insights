@@ -155,7 +155,7 @@ describe('ScriptTransformer', () => {
                     return returnEvent
                 `,
             })
-            fn.bytecode = await compileFn(fn.fn)
+            fn.bytecode = await compileFn(fn.script)
             await insertInsightsFunction(hub.postgres, teamId, fn)
             scriptTransformer['insightsFunctionManager']['onInsightsFunctionsReloaded'](teamId, [fn.id])
 
@@ -808,7 +808,7 @@ describe('ScriptTransformer', () => {
                 name: filterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(filterTemplate.fn),
+                bytecode: await compileFn(filterTemplate.script),
                 filters: {
                     bytecode: await compileFn(`
                         return event = 'match-me'
@@ -880,7 +880,7 @@ describe('ScriptTransformer', () => {
                 name: successTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(successTemplate.fn),
+                bytecode: await compileFn(successTemplate.script),
                 execution_order: 1,
             })
 
@@ -889,7 +889,7 @@ describe('ScriptTransformer', () => {
                 name: skippedTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(skippedTemplate.fn),
+                bytecode: await compileFn(skippedTemplate.script),
                 execution_order: 2,
                 filters: {
                     bytecode: await compileFn(`
@@ -1115,7 +1115,7 @@ describe('ScriptTransformer', () => {
                 name: filterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(filterTemplate.fn),
+                bytecode: await compileFn(filterTemplate.script),
                 filters: {
                     bytecode: await compileFn(`
                         return event = 'match-me'
@@ -1161,7 +1161,7 @@ describe('ScriptTransformer', () => {
                 name: filterMatchingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(filterMatchingTemplate.fn),
+                bytecode: await compileFn(filterMatchingTemplate.script),
                 filters: {
                     bytecode: await compileFn(`
                         // Filter that matches events with event name 'match-me'
@@ -1219,7 +1219,7 @@ describe('ScriptTransformer', () => {
                 name: noFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(noFilterTemplate.fn),
+                bytecode: await compileFn(noFilterTemplate.script),
                 // No filters defined
             })
 
@@ -1274,7 +1274,7 @@ describe('ScriptTransformer', () => {
                 name: errorFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(errorFilterTemplate.fn),
+                bytecode: await compileFn(errorFilterTemplate.script),
                 filters: {
                     bytecode: await compileFn(`
                         // Invalid filter that will throw an error
@@ -1289,7 +1289,7 @@ describe('ScriptTransformer', () => {
                 name: workingTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(workingTemplate.fn),
+                bytecode: await compileFn(workingTemplate.script),
             })
 
             await insertInsightsFunction(hub.postgres, teamId, errorFunction)
@@ -1358,7 +1358,7 @@ describe('ScriptTransformer', () => {
                 name: multiFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(multiFilterTemplate.fn),
+                bytecode: await compileFn(multiFilterTemplate.script),
                 filters: {
                     bytecode: await compileFn(`
                         // First filter checks for 'match-me-1'
@@ -1412,7 +1412,7 @@ describe('ScriptTransformer', () => {
                 name: multiFilterTemplate.name,
                 team_id: teamId,
                 enabled: true,
-                bytecode: await compileFn(multiFilterTemplate.fn),
+                bytecode: await compileFn(multiFilterTemplate.script),
                 filters: {
                     bytecode: await compileFn(`
                         // First filter checks for 'match-me-1'
