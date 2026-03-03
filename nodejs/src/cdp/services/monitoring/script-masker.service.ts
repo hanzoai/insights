@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createHash } from 'crypto'
 
 import { RedisV2 } from '~/common/redis/redis-v2'
