@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0456_hogfunction_masking"),
+        ("posthog", "0456_hogfunction_masking"),
     ]
 
     operations = [

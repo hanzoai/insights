@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0318_alter_earlyaccessfeature_stage"),
+        ("posthog", "0318_alter_earlyaccessfeature_stage"),
     ]
 
     operations = [

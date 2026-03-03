@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0092_rename_projects_to_default"),
+        ("posthog", "0092_rename_projects_to_default"),
     ]
 
     operations = [

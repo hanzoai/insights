@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0350_add_notebook_text_content"),
+        ("posthog", "0350_add_notebook_text_content"),
     ]
 
     operations = [

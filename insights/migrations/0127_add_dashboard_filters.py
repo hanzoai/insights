@@ -6,7 +6,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0126_fix_funnels_insights_links"),
+        ("posthog", "0126_fix_funnels_insights_links"),
     ]
 
     operations = [

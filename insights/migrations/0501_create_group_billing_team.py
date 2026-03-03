@@ -14,7 +14,7 @@ def reverse_create_billing_team_group(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0500_errortrackingsymbolset_errortrackingstackframe_and_more"),
+        ("posthog", "0500_errortrackingsymbolset_errortrackingstackframe_and_more"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0977_alter_team_default_evaluation_environments_enabled_and_more"),
+        ("posthog", "0977_alter_team_default_evaluation_environments_enabled_and_more"),
     ]
 
     operations = [

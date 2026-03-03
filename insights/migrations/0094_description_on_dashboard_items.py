@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0093_remove_user_is_superuser"),
+        ("posthog", "0093_remove_user_is_superuser"),
     ]
 
     operations = [

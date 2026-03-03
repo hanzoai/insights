@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0379_alter_scheduledchange"),
+        ("posthog", "0379_alter_scheduledchange"),
     ]
 
     operations = [
@@ -38,10 +38,10 @@ class Migration(migrations.Migration):
                 (
                     "source_comment",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.comment"
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.comment"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
         migrations.AddIndex(

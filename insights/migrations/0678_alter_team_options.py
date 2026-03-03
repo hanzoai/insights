@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0677_datawarehousesavedquery_deleted_name")]
+    dependencies = [("posthog", "0677_datawarehousesavedquery_deleted_name")]
 
     operations = [
         migrations.AlterModelOptions(

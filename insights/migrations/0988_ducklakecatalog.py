@@ -10,7 +10,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0987_add_column_configuration_constraints"),
+        ("posthog", "0987_add_column_configuration_constraints"),
     ]
 
     operations = [
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="ducklake_catalog", to="insights.team"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="ducklake_catalog", to="posthog.team"
                     ),
                 ),
             ],

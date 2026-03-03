@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0095_session_recording_event_table"),
+        ("posthog", "0095_session_recording_event_table"),
     ]
 
     operations = [
@@ -65,14 +65,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "plugin",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Plugin"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Plugin"),
                 ),
                 (
                     "team",
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.Team",
+                        to="posthog.Team",
                     ),
                 ),
             ],

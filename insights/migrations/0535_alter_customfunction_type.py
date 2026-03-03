@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0534_team_cookieless_server_hash_mode"),
+        ("posthog", "0534_team_cookieless_server_hash_mode"),
     ]
 
     operations = [

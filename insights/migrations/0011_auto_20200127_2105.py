@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0010_funnel_funnelstep"),
+        ("posthog", "0010_funnel_funnelstep"),
     ]
 
     operations = [
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="steps",
-                to="insights.Funnel",
+                to="posthog.Funnel",
             ),
         ),
         migrations.CreateModel(
@@ -68,11 +68,11 @@ class Migration(migrations.Migration):
                 ("distinct_id", models.CharField(max_length=400)),
                 (
                     "person",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Person"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Person"),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
                 ),
             ],
         ),

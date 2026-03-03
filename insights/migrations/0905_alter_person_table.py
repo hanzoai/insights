@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("insights", "0904_alter_dashboard_creation_mode"),
+        ("posthog", "0904_alter_dashboard_creation_mode"),
     ]
 
     operations = [

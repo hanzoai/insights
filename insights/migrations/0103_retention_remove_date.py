@@ -5,7 +5,7 @@ from django.db import migrations
 
 
 def forward(apps, schema_editor):
-    DashboardItem = apps.get_model("insights", "DashboardItem")
+    DashboardItem = apps.get_model("posthog", "DashboardItem")
     for item in DashboardItem.objects.filter(
         filters__insight="RETENTION",
         filters__selectedDate__isnull=False,
@@ -21,7 +21,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0102_dashboarditem_filters_hash"),
+        ("posthog", "0102_dashboarditem_filters_hash"),
     ]
 
     operations = [

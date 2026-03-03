@@ -3,13 +3,13 @@ from django.db import migrations
 
 
 def reset_team_timezone_to_UTC(apps, _) -> None:
-    Team = apps.get_model("insights", "Team")
+    Team = apps.get_model("posthog", "Team")
     Team.objects.exclude(timezone="UTC").update(timezone="UTC")
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0236_add_instance_setting_model"),
+        ("posthog", "0236_add_instance_setting_model"),
     ]
 
     def reverse(apps, _) -> None:

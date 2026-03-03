@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0903_organization_default_anonymize_ips"),
+        ("posthog", "0903_organization_default_anonymize_ips"),
     ]
 
     operations = [

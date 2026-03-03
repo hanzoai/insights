@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0969_add_oauth_is_verified"),
+        ("posthog", "0969_add_oauth_is_verified"),
     ]
 
     operations = [

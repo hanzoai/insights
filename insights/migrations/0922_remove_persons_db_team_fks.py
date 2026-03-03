@@ -4,7 +4,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0921_teammarketinganalyticsconfig__campaign_field_preferences_and_more"),
+        ("posthog", "0921_teammarketinganalyticsconfig__campaign_field_preferences_and_more"),
     ]
 
     operations = [

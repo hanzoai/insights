@@ -27,7 +27,7 @@ def validate_query_name(value: str) -> None:
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0859_alter_team_session_recording_retention_period"),
+        ("posthog", "0859_alter_team_session_recording_retention_period"),
     ]
 
     operations = [
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                     "created_by",
                     models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "indexes": [

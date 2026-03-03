@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1003_clean_up_stale_alert_subscriptions"),
+        ("posthog", "1003_clean_up_stale_alert_subscriptions"),
     ]
 
     operations = [
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="inbound_resource_transfers",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
                 (
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="outbound_resource_transfers",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

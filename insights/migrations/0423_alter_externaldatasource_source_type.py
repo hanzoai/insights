@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0422_proxyrecord_message"),
+        ("posthog", "0422_proxyrecord_message"),
     ]
 
     operations = [

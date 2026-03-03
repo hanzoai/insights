@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0996_oauthapplication_is_first_party"),
+        ("posthog", "0996_oauthapplication_is_first_party"),
     ]
 
     operations = [

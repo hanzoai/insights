@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0448_add_mysql_externaldatasource_source_type"),
+        ("posthog", "0448_add_mysql_externaldatasource_source_type"),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="plugins",
                         related_query_name="plugin",
-                        to="insights.organization",
+                        to="posthog.organization",
                     ),
                 ),
             ],

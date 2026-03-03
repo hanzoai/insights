@@ -5,8 +5,8 @@ def migrate_playlist_types(apps, schema_editor):
     # Bulk update every CHUNK_SIZE items
     CHUNK_SIZE = 100
 
-    SessionRecordingPlaylist = apps.get_model("insights", "SessionRecordingPlaylist")
-    SessionRecordingPlaylistItem = apps.get_model("insights", "SessionRecordingPlaylistItem")
+    SessionRecordingPlaylist = apps.get_model("posthog", "SessionRecordingPlaylist")
+    SessionRecordingPlaylistItem = apps.get_model("posthog", "SessionRecordingPlaylistItem")
 
     # 1. Get IDs of playlists that have playlist_items (should be COLLECTION)
     playlist_ids_with_items = (
@@ -52,7 +52,7 @@ def migrate_playlist_types(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0788_organization_members_can_create_personal_api_keys"),
+        ("posthog", "0788_organization_members_can_create_personal_api_keys"),
     ]
 
     operations = [

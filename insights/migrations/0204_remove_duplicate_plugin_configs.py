@@ -3,7 +3,7 @@ from django.db import migrations
 
 
 def remove_duplicate_plugin_configs(apps, schema_editor):
-    PluginConfig = apps.get_model("insights", "PluginConfig")
+    PluginConfig = apps.get_model("posthog", "PluginConfig")
     configs = PluginConfig.objects.raw(
         """
         select * from posthog_pluginconfig ou
@@ -24,7 +24,7 @@ def remove_duplicate_plugin_configs(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0203_dashboard_permissions"),
+        ("posthog", "0203_dashboard_permissions"),
     ]
 
     operations = [

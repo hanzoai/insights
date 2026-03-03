@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0547_externaldatajob_billable"),
+        ("posthog", "0547_externaldatajob_billable"),
     ]
 
     # No operations here, since we don't want to delete the table

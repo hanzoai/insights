@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0064_toolbar_mode"),
+        ("posthog", "0064_toolbar_mode"),
     ]
 
     operations = [

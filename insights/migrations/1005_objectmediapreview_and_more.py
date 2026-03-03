@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1004_resource_transfer"),
+        ("posthog", "1004_resource_transfer"),
     ]
 
     operations = [
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="media_previews",
-                        to="insights.eventdefinition",
+                        to="posthog.eventdefinition",
                     ),
                 ),
                 (
@@ -48,10 +48,10 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="object_previews",
-                        to="insights.exportedasset",
+                        to="posthog.exportedasset",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
                 (
                     "uploaded_media",
                     models.ForeignKey(
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="object_previews",
-                        to="insights.uploadedmedia",
+                        to="posthog.uploadedmedia",
                     ),
                 ),
             ],

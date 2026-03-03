@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0109_fix_retention_filters"),
+        ("posthog", "0109_fix_retention_filters"),
     ]
 
     operations = [

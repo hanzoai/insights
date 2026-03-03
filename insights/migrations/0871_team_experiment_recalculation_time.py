@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0870_move_recording_coment_to_replay"),
+        ("posthog", "0870_move_recording_coment_to_replay"),
     ]
 
     operations = [

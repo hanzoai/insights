@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0938_add_redirect_to_dlq_restriction_type"),
+        ("posthog", "0938_add_redirect_to_dlq_restriction_type"),
     ]
 
     operations = [

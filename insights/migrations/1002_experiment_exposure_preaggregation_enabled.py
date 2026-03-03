@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "1001_fix_person_property_in_operator"),
+        ("posthog", "1001_fix_person_property_in_operator"),
     ]
 
     operations = [

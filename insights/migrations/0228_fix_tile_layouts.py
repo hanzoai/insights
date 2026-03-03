@@ -11,7 +11,7 @@ def migrate_dashboard_insight_relations(apps, _) -> None:
     logger = structlog.get_logger(__name__)
     logger.info("starting_0228_fix_tile_layouts")
 
-    DashboardTile = apps.get_model("insights", "DashboardTile")
+    DashboardTile = apps.get_model("posthog", "DashboardTile")
 
     tiles = DashboardTile.objects.order_by("id").all()
     paginator = Paginator(tiles, 500)
@@ -44,7 +44,7 @@ def migrate_dashboard_insight_relations(apps, _) -> None:
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0227_add_dashboard_tiles"),
+        ("posthog", "0227_add_dashboard_tiles"),
     ]
 
     def reverse(apps, _) -> None:

@@ -7,7 +7,7 @@ import insights.models.utils
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0750_dwh_model_statuses")]
+    dependencies = [("posthog", "0750_dwh_model_statuses")]
 
     operations = [
         migrations.CreateModel(
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("order_key", models.IntegerField()),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "indexes": [models.Index(fields=["team_id"], name="posthog_err_team_id_503a5b_idx")],

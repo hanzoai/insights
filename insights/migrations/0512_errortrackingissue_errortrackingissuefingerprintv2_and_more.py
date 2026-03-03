@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0511_grouptypemapping_project_backfill"),
+        ("posthog", "0511_grouptypemapping_project_backfill"),
     ]
 
     operations = [
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                         default="active",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "abstract": False,
@@ -55,9 +55,9 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "issue",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackingissue"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackingissue"),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
         ),
         migrations.CreateModel(
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "issue",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackingissue"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackingissue"),
                 ),
                 ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

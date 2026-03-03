@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0198_async_migration_error"),
+        ("posthog", "0198_async_migration_error"),
     ]
 
     operations = [

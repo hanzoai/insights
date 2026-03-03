@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0264_user_partial_notification_settings"),
+        ("posthog", "0264_user_partial_notification_settings"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="tiles",
-                to="insights.dashboard",
+                to="posthog.dashboard",
             ),
         ),
     ]

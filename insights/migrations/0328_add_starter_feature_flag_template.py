@@ -2,7 +2,7 @@ from django.db import migrations
 
 
 def create_starter_template(apps, schema_editor):
-    DashboardTemplate = apps.get_model("insights", "DashboardTemplate")
+    DashboardTemplate = apps.get_model("posthog", "DashboardTemplate")
     DashboardTemplate.objects.create(
         template_name="Flagged Feature Usage",
         dashboard_description="Overview of engagement with the flagged feature including daily active users and weekly active users.",
@@ -60,7 +60,7 @@ def create_starter_template(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0327_alter_earlyaccessfeature_stage"),
+        ("posthog", "0327_alter_earlyaccessfeature_stage"),
     ]
 
     operations = [migrations.RunPython(create_starter_template, reverse_code=migrations.RunPython.noop)]

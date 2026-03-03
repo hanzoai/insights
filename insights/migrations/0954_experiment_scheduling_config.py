@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0953_create_core_event"),
+        ("posthog", "0953_create_core_event"),
     ]
 
     operations = [

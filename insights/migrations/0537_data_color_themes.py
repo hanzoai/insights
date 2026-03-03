@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 
 def add_default_themes(apps, schema_editor):
-    DataColorTheme = apps.get_model("insights", "DataColorTheme")
+    DataColorTheme = apps.get_model("posthog", "DataColorTheme")
 
     DataColorTheme.objects.create(
         name="Default Theme",
@@ -36,7 +36,7 @@ def remove_default_themes(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0536_alertconfiguration_skip_weekend")]
+    dependencies = [("posthog", "0536_alertconfiguration_skip_weekend")]
 
     operations = [
         migrations.CreateModel(
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 (
                     "team",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="insights.team", null=True, blank=True
+                        on_delete=django.db.models.deletion.CASCADE, to="posthog.team", null=True, blank=True
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True, null=True)),

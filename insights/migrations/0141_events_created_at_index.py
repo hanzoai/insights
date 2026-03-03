@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0140_team_data_attributes"),
+        ("posthog", "0140_team_data_attributes"),
     ]
 
     operations = [

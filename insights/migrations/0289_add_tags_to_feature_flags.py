@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0288_add_session_recording_persistence"),
+        ("posthog", "0288_add_session_recording_persistence"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="tagged_items",
-                to="insights.featureflag",
+                to="posthog.featureflag",
             ),
         ),
         migrations.AlterUniqueTogether(

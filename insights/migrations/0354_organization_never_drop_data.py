@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0353_add_5_minute_interval_to_batch_exports"),
+        ("posthog", "0353_add_5_minute_interval_to_batch_exports"),
     ]
 
     operations = [

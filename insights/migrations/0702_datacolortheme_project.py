@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0701_uploadedmedia_project"),
+        ("posthog", "0701_uploadedmedia_project"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                     model_name="datacolortheme",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
+                        null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
                     ),
                 ),
             ],

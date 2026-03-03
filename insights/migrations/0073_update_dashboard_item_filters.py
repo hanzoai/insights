@@ -6,7 +6,7 @@ from insights.models import Filter
 
 
 def forwards_func(apps, schema_editor):
-    DashboardItem = apps.get_model("insights", "DashboardItem")
+    DashboardItem = apps.get_model("posthog", "DashboardItem")
     items = DashboardItem.objects.filter(filters__isnull=False)
     for item in items:
         if item.filters == {}:
@@ -21,7 +21,7 @@ def reverse_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0072_action_step_url_matching_regex"),
+        ("posthog", "0072_action_step_url_matching_regex"),
     ]
 
     operations = [
