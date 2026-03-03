@@ -1,7 +1,5 @@
 from django.db import models
 
-from insights.models.organization import Organization
-
 
 # DEPRECATED - do not use
 class OrganizationResourceAccess(models.Model):
@@ -20,7 +18,7 @@ class OrganizationResourceAccess(models.Model):
 
     resource = models.CharField(max_length=32, choices=Resources.choices)
     access_level = models.PositiveSmallIntegerField(default=AccessLevel.CAN_ALWAYS_EDIT, choices=AccessLevel.choices)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="resource_access")
+    organization = models.ForeignKey("posthog.Organization", on_delete=models.CASCADE, related_name="resource_access")
     created_by = models.ForeignKey(
         "posthog.User",
         on_delete=models.SET_NULL,

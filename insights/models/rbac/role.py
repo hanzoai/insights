@@ -1,7 +1,6 @@
 from django.db import models
 
 from insights.models.utils import UUIDTModel
-from insights.models.rbac.organization_resource_access import OrganizationResourceAccess
 
 
 class Role(UUIDTModel):
@@ -28,9 +27,10 @@ class Role(UUIDTModel):
     )
 
     # DEPRECATED - do not use
+    # Default 37 = CAN_ALWAYS_EDIT from OrganizationResourceAccess.AccessLevel
     feature_flags_access_level = models.PositiveSmallIntegerField(
-        default=OrganizationResourceAccess.AccessLevel.CAN_ALWAYS_EDIT,
-        choices=OrganizationResourceAccess.AccessLevel.choices,
+        default=37,
+        choices=[(21, "Can only view"), (37, "Can always edit")],
     )
 
     members = models.ManyToManyField(
