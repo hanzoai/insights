@@ -16,7 +16,7 @@ POSTHOG_ALLOWED_MODELS: dict[str, list[str]] = {
 class LLMModelConfiguration(UUIDTModel):
     """Configuration for LLM model selection, used by evals and other features."""
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     provider = models.CharField(max_length=50, choices=LLMProvider.choices)
     model = models.CharField(max_length=100)
     provider_key = models.ForeignKey(

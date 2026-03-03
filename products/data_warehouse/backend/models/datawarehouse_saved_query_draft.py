@@ -9,7 +9,7 @@ class DataWarehouseSavedQueryDraft(CreatedMetaFields, UpdatedMetaFields, UUIDTMo
     before materializing them as actual saved queries.
     """
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     query = models.JSONField(default=dict, blank=True, help_text="InsightsQL query draft")
 
     # 255 should be safe. the max length of a view name is 128
