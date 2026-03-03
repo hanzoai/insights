@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0951_hogflowtemplate"),
+        ("posthog", "0951_insightsflowtemplate"),
     ]
 
     operations = [
