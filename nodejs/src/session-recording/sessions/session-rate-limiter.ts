@@ -1,4 +1,4 @@
-import { ParsedMessageData } from '../kafka/types'
+import { ParsedMessageData } from '../stream/types'
 import { SessionBatchMetrics } from './metrics'
 
 /**

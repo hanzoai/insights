@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { HealthCheckResult, Hub, PluginServerService, TeamId } from '../../types'
 import { logger } from '../../utils/logger'
 import { CdpFetchConfig, ScriptExecutorService, ScriptExecutorServiceHub } from '../services/script-executor.service'
@@ -43,8 +43,8 @@ export type CdpConsumerBaseHub = CdpFetchConfig &
         | 'CDP_REDIS_HOST'
         | 'CDP_REDIS_PORT'
         | 'CDP_REDIS_PASSWORD'
-        // KafkaProducerWrapper.create
-        | 'KAFKA_CLIENT_RACK'
+        // StreamProducerWrapper.create
+        | 'STREAM_CLIENT_RACK'
         // PersonsManagerService needs personRepository
         | 'personRepository'
         // QuotaLimiting
@@ -86,7 +86,7 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
     recipientPreferencesService: RecipientPreferencesService
     segmentDestinationExecutorService: SegmentDestinationExecutorService
 
-    protected kafkaProducer?: KafkaProducerWrapper
+    protected streamProducer?: StreamProducerWrapper
     protected abstract name: string
 
     protected heartbeat = () => {}
@@ -154,8 +154,8 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
     public async start(): Promise<void> {
         // NOTE: This is only for starting shared services
         await Promise.all([
-            KafkaProducerWrapper.create(this.hub.KAFKA_CLIENT_RACK).then((producer) => {
-                this.kafkaProducer = producer
+            StreamProducerWrapper.create(this.hub.STREAM_CLIENT_RACK).then((producer) => {
+                this.streamProducer = producer
             }),
         ])
     }
@@ -165,8 +165,8 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
         this.isStopping = true
 
         // Mark as stopping so that we don't actually process any more incoming messages, but still keep the process alive
-        logger.info('🔁', `${this.name} - stopping kafka producer`)
-        await this.kafkaProducer?.disconnect()
+        logger.info('🔁', `${this.name} - stopping stream producer`)
+        await this.streamProducer?.disconnect()
         logger.info('👍', `${this.name} - stopped!`)
     }
 

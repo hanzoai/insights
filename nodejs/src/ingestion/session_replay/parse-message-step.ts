@@ -8,7 +8,7 @@ import {
     RawEventMessageSchema,
     SnapshotEvent,
     SnapshotEventSchema,
-} from '../../session-recording/kafka/types'
+} from '../../session-recording/stream/types'
 import { TopTracker } from '../../session-recording/top-tracker'
 import { parseJSON } from '../../utils/json-parse'
 import { dlq, drop, ok } from '../pipelines/results'
@@ -75,7 +75,7 @@ export interface ParseMessageStepConfig {
 }
 
 /**
- * Creates a step that parses raw Kafka messages into ParsedMessageData.
+ * Creates a step that parses raw stream messages into ParsedMessageData.
  *
  * This step processes one message at a time since there are no batch-level optimizations.
  * Gzip decompression is done synchronously since the pipeline already runs steps concurrently.

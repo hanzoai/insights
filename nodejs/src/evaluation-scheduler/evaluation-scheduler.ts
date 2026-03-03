@@ -11,12 +11,12 @@ import { Message } from 'node-rdkafka'
 import { Counter } from 'prom-client'
 
 import { execFn } from '../cdp/utils/script-exec'
-import { KAFKA_EVENTS_JSON, prefix as KAFKA_PREFIX } from '../config/kafka-topics'
-import { KafkaConsumer } from '../kafka/consumer'
+import { STREAM_EVENTS_JSON, prefix as STREAM_PREFIX } from '../config/stream-topics'
+import { StreamConsumer } from '../stream/consumer'
 import { EvaluationManagerService } from '../llm-analytics/services/evaluation-manager.service'
 import { TemporalService, TemporalServiceHub } from '../llm-analytics/services/temporal.service'
 import { Evaluation, EvaluationConditionSet } from '../llm-analytics/types'
-import { Hub, PluginServerService, RawKafkaEvent } from '../types'
+import { Hub, PluginServerService, RawStreamEvent } from '../types'
 import { parseJSON } from '../utils/json-parse'
 import { logger } from '../utils/logger'
 
@@ -37,7 +37,7 @@ const evaluationMatchesCounter = new Counter({
 
 const evaluationSchedulerMessagesReceived = new Counter({
     name: 'evaluation_scheduler_messages_received',
-    help: 'Number of Kafka messages received before filtering',
+    help: 'Number of Stream messages received before filtering',
 })
 
 const evaluationSchedulerEventsFiltered = new Counter({
@@ -54,7 +54,7 @@ const evaluationSchedulerHeaderValues = new Counter({
 
 // Pure functions for testability
 
-export function filterAndParseMessages(messages: Message[]): RawKafkaEvent[] {
+export function filterAndParseMessages(messages: Message[]): RawStreamEvent[] {
     return messages
         .filter((message) => {
             const headers = message.headers as { productTrack?: Buffer }[] | undefined
@@ -66,18 +66,18 @@ export function filterAndParseMessages(messages: Message[]): RawKafkaEvent[] {
         })
         .map((message) => {
             try {
-                return parseJSON(message.value!.toString()) as RawKafkaEvent
+                return parseJSON(message.value!.toString()) as RawStreamEvent
             } catch (e) {
                 logger.error('Error parsing event', { error: e })
                 return null
             }
         })
-        .filter((event): event is RawKafkaEvent => event !== null)
+        .filter((event): event is RawStreamEvent => event !== null)
         .filter((event) => event.event === '$ai_generation')
 }
 
-export function groupEventsByTeam(events: RawKafkaEvent[]): Map<number, RawKafkaEvent[]> {
-    const grouped = new Map<number, RawKafkaEvent[]>()
+export function groupEventsByTeam(events: RawStreamEvent[]): Map<number, RawStreamEvent[]> {
+    const grouped = new Map<number, RawStreamEvent[]>()
     for (const event of events) {
         const teamEvents = grouped.get(event.team_id) || []
         teamEvents.push(event)
@@ -99,7 +99,7 @@ export function checkRolloutPercentage(eventId: string, rolloutPercentage: numbe
     return percentage < rolloutPercentage
 }
 
-export async function checkConditionMatch(event: RawKafkaEvent, condition: EvaluationConditionSet): Promise<boolean> {
+export async function checkConditionMatch(event: RawStreamEvent, condition: EvaluationConditionSet): Promise<boolean> {
     if (!condition.bytecode) {
         if (condition.bytecode_error) {
             logger.warn('Condition has bytecode error, skipping', {
@@ -170,7 +170,7 @@ export type EvaluationMatchResult =
     | { matched: false; reason: 'no_conditions' | 'disabled' | 'filtered' | 'sampling_excluded' }
 
 export class EvaluationMatcher {
-    async shouldTriggerEvaluation(event: RawKafkaEvent, evaluation: Evaluation): Promise<EvaluationMatchResult> {
+    async shouldTriggerEvaluation(event: RawStreamEvent, evaluation: Evaluation): Promise<EvaluationMatchResult> {
         if (!evaluation.enabled) {
             return { matched: false, reason: 'disabled' }
         }
@@ -206,23 +206,23 @@ export const startEvaluationScheduler = async (hub: EvaluationSchedulerHub): Pro
     const temporalService = new TemporalService(hub)
     const evaluationManager = new EvaluationManagerService(hub.postgres, hub.pubSub)
 
-    const kafkaConsumer = new KafkaConsumer({
-        groupId: `${KAFKA_PREFIX}evaluation-scheduler`,
-        topic: KAFKA_EVENTS_JSON,
+    const streamConsumer = new StreamConsumer({
+        groupId: `${STREAM_PREFIX}evaluation-scheduler`,
+        topic: STREAM_EVENTS_JSON,
     })
 
-    await kafkaConsumer.connect((messages) =>
+    await streamConsumer.connect((messages) =>
         eachBatchEvaluationScheduler(messages, evaluationManager, temporalService)
     )
 
     const onShutdown = async () => {
         await temporalService.disconnect()
-        await kafkaConsumer.disconnect()
+        await streamConsumer.disconnect()
     }
 
     return {
         id: 'evaluation-scheduler',
-        healthcheck: () => kafkaConsumer.isHealthy(),
+        healthcheck: () => streamConsumer.isHealthy(),
         onShutdown,
     }
 }
@@ -294,7 +294,7 @@ async function eachBatchEvaluationScheduler(
 }
 
 async function processEventEvaluationMatch(
-    event: RawKafkaEvent,
+    event: RawStreamEvent,
     evaluationDefinition: Evaluation,
     matcher: EvaluationMatcher,
     temporalService: TemporalService

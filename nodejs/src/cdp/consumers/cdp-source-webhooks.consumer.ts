@@ -486,7 +486,7 @@ export class CdpSourceWebhooksConsumer extends CdpConsumerBase<CdpSourceWebhooks
     }
 
     public isHealthy(): HealthCheckResult {
-        // TODO: What should we consider healthy / unhealthy here? kafka?
+        // TODO: What should we consider healthy / unhealthy here? stream?
         return new HealthCheckResultOk()
     }
 }

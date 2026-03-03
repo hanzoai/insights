@@ -4,8 +4,8 @@ import { QueryResult } from 'pg'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { KAFKA_PERSON_DISTINCT_ID } from '../../../../config/kafka-topics'
-import { TopicMessage } from '../../../../kafka/producer'
+import { STREAM_PERSON_DISTINCT_ID } from '../../../../config/stream-topics'
+import { TopicMessage } from '../../../../stream/producer'
 import {
     InternalPerson,
     PersonDistinctId,
@@ -25,7 +25,7 @@ import {
     personUpdateVersionMismatchCounter,
 } from '../../../../utils/db/metrics'
 import { PostgresRouter, PostgresUse, TransactionClient } from '../../../../utils/db/postgres'
-import { generateKafkaPersonUpdateMessage, sanitizeJsonbValue, unparsePersonPartial } from '../../../../utils/db/utils'
+import { generateStreamPersonUpdateMessage, sanitizeJsonbValue, unparsePersonPartial } from '../../../../utils/db/utils'
 import { logger } from '../../../../utils/logger'
 import { NoRowsUpdatedError, sanitizeSqlIdentifier } from '../../../../utils/utils'
 import {
@@ -133,14 +133,14 @@ export class PostgresPersonRepository
                 ...update,
                 properties: trimmedProperties,
             }
-            const [updatedPerson, kafkaMessages, versionDisparity] = await this.updatePerson(
+            const [updatedPerson, streamMessages, versionDisparity] = await this.updatePerson(
                 person,
                 trimmedUpdate,
                 'oversized_properties_remediation',
                 tx
             )
             oversizedPersonPropertiesTrimmedCounter.inc({ result: 'success' })
-            return [updatedPerson, kafkaMessages, versionDisparity]
+            return [updatedPerson, streamMessages, versionDisparity]
         } catch (error) {
             oversizedPersonPropertiesTrimmedCounter.inc({ result: 'failed' })
             logger.error('Failed to handle previously oversized person record', {
@@ -650,11 +650,11 @@ export class PostgresPersonRepository
             )
             const person = this.toPerson(rows[0])
 
-            const kafkaMessages = [generateKafkaPersonUpdateMessage(person)]
+            const streamMessages = [generateStreamPersonUpdateMessage(person)]
 
             for (const distinctId of distinctIds) {
-                kafkaMessages.push({
-                    topic: KAFKA_PERSON_DISTINCT_ID,
+                streamMessages.push({
+                    topic: STREAM_PERSON_DISTINCT_ID,
                     messages: [
                         {
                             value: JSON.stringify({
@@ -672,7 +672,7 @@ export class PostgresPersonRepository
             return {
                 success: true,
                 person,
-                messages: kafkaMessages,
+                messages: streamMessages,
                 created: true,
             }
         } catch (error) {
@@ -731,13 +731,13 @@ export class PostgresPersonRepository
             throw error
         }
 
-        let kafkaMessages: TopicMessage[] = []
+        let streamMessages: TopicMessage[] = []
 
         if (rows.length > 0) {
             const [row] = rows
-            kafkaMessages = [generateKafkaPersonUpdateMessage({ ...person, version: Number(row.version || 0) }, true)]
+            streamMessages = [generateStreamPersonUpdateMessage({ ...person, version: Number(row.version || 0) }, true)]
         }
-        return kafkaMessages
+        return streamMessages
     }
 
     async addDistinctId(
@@ -758,7 +758,7 @@ export class PostgresPersonRepository
         const { id, ...personDistinctIdCreated } = insertResult.rows[0] as PersonDistinctId
         const messages = [
             {
-                topic: KAFKA_PERSON_DISTINCT_ID,
+                topic: STREAM_PERSON_DISTINCT_ID,
                 messages: [
                     {
                         value: JSON.stringify({
@@ -857,12 +857,12 @@ export class PostgresPersonRepository
             }
         }
 
-        const kafkaMessages = []
+        const streamMessages = []
         for (const row of movedDistinctIdResult.rows) {
             const { id, version: versionStr, ...usefulColumns } = row as PersonDistinctId
             const version = Number(versionStr || 0)
-            kafkaMessages.push({
-                topic: KAFKA_PERSON_DISTINCT_ID,
+            streamMessages.push({
+                topic: STREAM_PERSON_DISTINCT_ID,
                 messages: [
                     {
                         value: JSON.stringify({ ...usefulColumns, version, person_id: target.uuid, is_deleted: 0 }),
@@ -876,7 +876,7 @@ export class PostgresPersonRepository
 
         return {
             success: true,
-            messages: kafkaMessages,
+            messages: streamMessages,
             distinctIdsMoved: movedDistinctIdResult.rows.map((row) => row.distinct_id),
         }
     }
@@ -1117,14 +1117,14 @@ export class PostgresPersonRepository
                 personUpdateVersionMismatchCounter.inc()
             }
 
-            const kafkaMessage = generateKafkaPersonUpdateMessage(updatedPerson)
+            const streamMessage = generateStreamPersonUpdateMessage(updatedPerson)
 
             logger.debug(
                 '🧑‍🦰',
                 `Updated person ${updatedPerson.uuid} of team ${updatedPerson.team_id} to version ${updatedPerson.version}.`
             )
 
-            return [updatedPerson, [kafkaMessage], versionDisparity > 0]
+            return [updatedPerson, [streamMessage], versionDisparity > 0]
         } catch (error) {
             if (this.isPropertiesSizeConstraintViolation(error) && tag !== 'oversized_properties_remediation') {
                 return await this.handleOversizedPersonProperties(person, update, tx)
@@ -1178,9 +1178,9 @@ export class PostgresPersonRepository
 
             const updatedPerson = this.toPerson(rows[0])
 
-            const kafkaMessage = generateKafkaPersonUpdateMessage(updatedPerson)
+            const streamMessage = generateStreamPersonUpdateMessage(updatedPerson)
 
-            return [updatedPerson.version, [kafkaMessage]]
+            return [updatedPerson.version, [streamMessage]]
         } catch (error) {
             // Handle properties size constraint violation
             if (this.isPropertiesSizeConstraintViolation(error)) {
@@ -1216,10 +1216,10 @@ export class PostgresPersonRepository
      */
     async updatePersonsBatch(
         personUpdates: PersonUpdate[]
-    ): Promise<Map<string, { success: boolean; version?: number; kafkaMessage?: TopicMessage; error?: Error }>> {
+    ): Promise<Map<string, { success: boolean; version?: number; streamMessage?: TopicMessage; error?: Error }>> {
         const results = new Map<
             string,
-            { success: boolean; version?: number; kafkaMessage?: TopicMessage; error?: Error }
+            { success: boolean; version?: number; streamMessage?: TopicMessage; error?: Error }
         >()
 
         if (personUpdates.length === 0) {
@@ -1312,7 +1312,7 @@ export class PostgresPersonRepository
                     results.set(update.uuid, {
                         success: true,
                         version: updatedPerson.version,
-                        kafkaMessage: generateKafkaPersonUpdateMessage(updatedPerson),
+                        streamMessage: generateStreamPersonUpdateMessage(updatedPerson),
                     })
                 } else {
                     // Person was not found/updated - likely deleted or merged

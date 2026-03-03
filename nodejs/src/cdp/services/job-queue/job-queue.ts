@@ -17,7 +17,7 @@ import {
     CyclotronJobQueueSource,
 } from '../../types'
 import { CyclotronJobQueueDelay } from './job-queue-delay'
-import { CyclotronJobQueueKafka } from './job-queue-kafka'
+import { CyclotronJobQueueStream } from './job-queue-stream'
 import { CyclotronJobQueuePostgres, CyclotronJobQueuePostgresShadow } from './job-queue-postgres'
 
 const cyclotronBatchUtilizationGauge = new Gauge({
@@ -51,7 +51,7 @@ export class CyclotronJobQueue {
     private producerTeamMapping: CyclotronJobQueueTeamRouting
     private producerForceScheduledToPostgres: boolean
     private jobQueuePostgres: CyclotronJobQueuePostgres
-    private jobQueueKafka: CyclotronJobQueueKafka
+    private jobQueueStream: CyclotronJobQueueStream
     private jobQueueDelay: CyclotronJobQueueDelay
     private shadowPostgres: CyclotronJobQueuePostgresShadow | null = null
     private shadowFailures = 0
@@ -68,8 +68,8 @@ export class CyclotronJobQueue {
         this.producerTeamMapping = getProducerTeamMapping(this.config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_TEAM_MAPPING)
         this.producerForceScheduledToPostgres = this.config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_FORCE_SCHEDULED_TO_POSTGRES
 
-        this.jobQueueKafka = new CyclotronJobQueueKafka(this.config, this.queue, (invocations) =>
-            this.consumeBatch(invocations, 'kafka')
+        this.jobQueueStream = new CyclotronJobQueueStream(this.config, this.queue, (invocations) =>
+            this.consumeBatch(invocations, 'stream')
         )
         this.jobQueueDelay = new CyclotronJobQueueDelay(this.config, this.queue, (invocations) =>
             this.consumeBatch(invocations, 'delay')
@@ -138,8 +138,8 @@ export class CyclotronJobQueue {
             await this.jobQueuePostgres.startAsProducer()
         }
 
-        if (anySplitRouting || targets.has('kafka')) {
-            await this.jobQueueKafka.startAsProducer()
+        if (anySplitRouting || targets.has('stream')) {
+            await this.jobQueueStream.startAsProducer()
         }
 
         if (this.consumerMode === 'delay') {
@@ -166,8 +166,8 @@ export class CyclotronJobQueue {
 
         if (this.consumerMode === 'postgres' || this.consumerMode === 'shadow') {
             await this.jobQueuePostgres.startAsConsumer()
-        } else if (this.consumerMode === 'kafka') {
-            await this.jobQueueKafka.startAsConsumer()
+        } else if (this.consumerMode === 'stream') {
+            await this.jobQueueStream.startAsConsumer()
         } else if (this.consumerMode === 'delay') {
             await this.jobQueueDelay.startAsConsumer()
         }
@@ -177,14 +177,14 @@ export class CyclotronJobQueue {
         // Important - first shut down the consumers so we aren't processing anything
         await Promise.all([
             this.jobQueuePostgres.stopConsumer(),
-            this.jobQueueKafka.stopConsumer(),
+            this.jobQueueStream.stopConsumer(),
             this.jobQueueDelay.stopConsumer(),
         ])
 
         // Only then do we shut down the producers
         await Promise.all([
             this.jobQueuePostgres.stopProducer(),
-            this.jobQueueKafka.stopProducer(),
+            this.jobQueueStream.stopProducer(),
             this.jobQueueDelay.stopProducer(),
             this.shadowPostgres?.stopProducer(),
         ])
@@ -193,8 +193,8 @@ export class CyclotronJobQueue {
     public isHealthy() {
         if (this.consumerMode === 'postgres' || this.consumerMode === 'shadow') {
             return this.jobQueuePostgres.isHealthy()
-        } else if (this.consumerMode === 'kafka') {
-            return this.jobQueueKafka.isHealthy()
+        } else if (this.consumerMode === 'stream') {
+            return this.jobQueueStream.isHealthy()
         } else if (this.consumerMode === 'delay') {
             return this.jobQueueDelay.isHealthy()
         }
@@ -207,9 +207,9 @@ export class CyclotronJobQueue {
             this.producerForceScheduledToPostgres &&
             invocation.queueScheduledAt &&
             invocation.queueScheduledAt > DateTime.now().plus({ milliseconds: JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS }) &&
-            invocation.queue !== 'scriptoverflow' // overflow is always sent to kafka
+            invocation.queue !== 'scriptoverflow' // overflow is always sent to stream
         ) {
-            // Kafka doesn't support delays so if enabled we should force scheduled jobs to postgres
+            // Stream doesn't support delays so if enabled we should force scheduled jobs to postgres
             return 'postgres'
         }
 
@@ -220,7 +220,7 @@ export class CyclotronJobQueue {
         let target = producerConfig.target
 
         if (producerConfig.percentage < 1) {
-            const otherTarget = target === 'postgres' ? 'kafka' : 'postgres'
+            const otherTarget = target === 'postgres' ? 'stream' : 'postgres'
             target = Math.random() < producerConfig.percentage ? target : otherTarget
         }
 
@@ -229,7 +229,7 @@ export class CyclotronJobQueue {
 
     public async queueInvocations(invocations: CyclotronJobInvocation[]) {
         const postgresInvocations: CyclotronJobInvocation[] = []
-        const kafkaInvocations: CyclotronJobInvocation[] = []
+        const streamInvocations: CyclotronJobInvocation[] = []
 
         for (const invocation of invocations) {
             const target = this.getTarget(invocation)
@@ -237,13 +237,13 @@ export class CyclotronJobQueue {
             if (target === 'postgres') {
                 postgresInvocations.push(invocation)
             } else {
-                kafkaInvocations.push(invocation)
+                streamInvocations.push(invocation)
             }
         }
 
         await Promise.all([
             this.jobQueuePostgres.queueInvocations(postgresInvocations),
-            this.jobQueueKafka.queueInvocations(kafkaInvocations),
+            this.jobQueueStream.queueInvocations(streamInvocations),
         ])
 
         if (this.shadowPostgres && Date.now() >= this.shadowCircuitOpenUntil) {
@@ -269,7 +269,7 @@ export class CyclotronJobQueue {
     }
 
     public async dequeueInvocations(invocations: CyclotronJobInvocation[]) {
-        // NOTE: This is only relevant to postgres backed jobs as kafka jobs can just be dropped
+        // NOTE: This is only relevant to postgres backed jobs as stream jobs can just be dropped
         const pgJobsToDequeue = invocations.filter((x) => x.queueSource === 'postgres')
         if (pgJobsToDequeue.length > 0) {
             await this.jobQueuePostgres.dequeueInvocations(pgJobsToDequeue)
@@ -277,7 +277,7 @@ export class CyclotronJobQueue {
     }
 
     public async cancelInvocations(invocations: CyclotronJobInvocation[]) {
-        // NOTE: This is only relevant to postgres backed jobs as kafka jobs can just be dropped
+        // NOTE: This is only relevant to postgres backed jobs as stream jobs can just be dropped
         const pgJobsToCancel = invocations.filter((x) => x.queueSource === 'postgres')
         if (pgJobsToCancel.length > 0) {
             await this.jobQueuePostgres.cancelInvocations(pgJobsToCancel)
@@ -290,7 +290,7 @@ export class CyclotronJobQueue {
 
         const postgresInvocationsToCreate: CyclotronJobInvocationResult[] = []
         const postgresInvocationsToUpdate: CyclotronJobInvocationResult[] = []
-        const kafkaInvocations: CyclotronJobInvocationResult[] = []
+        const streamInvocations: CyclotronJobInvocationResult[] = []
 
         for (const invocationResult of invocationResults) {
             const target = this.getTarget(invocationResult.invocation)
@@ -302,12 +302,12 @@ export class CyclotronJobQueue {
                     postgresInvocationsToCreate.push(invocationResult)
                 }
             } else {
-                kafkaInvocations.push(invocationResult)
+                streamInvocations.push(invocationResult)
             }
         }
 
         logger.debug('🔄', 'Queueing postgres invocations', {
-            kafka: kafkaInvocations.map(
+            stream: streamInvocations.map(
                 (x) => `${x.invocation.id} (queue:${x.invocation.queue},source:${x.invocation.queueSource})`
             ),
             postgres_update: postgresInvocationsToUpdate.map(
@@ -328,10 +328,10 @@ export class CyclotronJobQueue {
             promises.push(this.jobQueuePostgres.queueInvocations(postgresInvocationsToCreate.map((x) => x.invocation)))
         }
 
-        if (kafkaInvocations.length > 0) {
-            promises.push(this.jobQueueKafka.queueInvocationResults(kafkaInvocations))
+        if (streamInvocations.length > 0) {
+            promises.push(this.jobQueueStream.queueInvocationResults(streamInvocations))
 
-            const jobsToRelease = kafkaInvocations
+            const jobsToRelease = streamInvocations
                 .filter((x) => x.invocation.queueSource === 'postgres')
                 .map((x) => x.invocation)
 
@@ -348,7 +348,7 @@ export class CyclotronJobQueue {
  * Parses a mapping config from a string into a routing object.
  * Format is like `QUEUE:TARGET:PERCENTAGE with percentage being optional and defaulting to 100
  *
- * So for example `*:kafka:10,fetch:postgres` would result in all fetch jobs being routed to postgres and 10% of all other jobs being routed to kafka and the rest to postgres
+ * So for example `*:stream:10,fetch:postgres` would result in all fetch jobs being routed to postgres and 10% of all other jobs being routed to stream and the rest to postgres
  */
 export function getProducerMapping(stringMapping: string): CyclotronJobQueueRouting {
     const routing: CyclotronJobQueueRouting = {}
@@ -399,7 +399,7 @@ export function getProducerMapping(stringMapping: string): CyclotronJobQueueRout
 
 /**
  * Same as getProducerMapping but with a team check too.
- * So for example `1:*:kafka,2:*:postgres` would result in team 1 using kafka and team 2 using postgres
+ * So for example `1:*:stream,2:*:postgres` would result in team 1 using stream and team 2 using postgres
  */
 export function getProducerTeamMapping(stringMapping: string): CyclotronJobQueueTeamRouting {
     if (!stringMapping) {
