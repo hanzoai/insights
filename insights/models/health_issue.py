@@ -19,7 +19,7 @@ class HealthIssue(UUIDModel):
         RESOLVED = "resolved", "Resolved"
 
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="health_issues",
     )

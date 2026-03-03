@@ -22,7 +22,7 @@ class Evaluation(UUIDTModel):
         ]
 
     # Core fields
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     name = models.CharField(max_length=400)
     description = models.TextField(blank=True, default="")
     enabled = models.BooleanField(default=False)
@@ -47,7 +47,7 @@ class Evaluation(UUIDTModel):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
     deleted = models.BooleanField(default=False)
 
     def __str__(self):
