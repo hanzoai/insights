@@ -38,7 +38,7 @@ def fix_contenttype_duplicates(apps, schema_editor):
 
     try:
         # Get both ContentType entries
-        old_ct = ContentType.objects.get(app_label="insights", model="earlyaccessfeature")
+        old_ct = ContentType.objects.get(app_label="posthog", model="earlyaccessfeature")
         new_ct = ContentType.objects.get(app_label="early_access_features", model="earlyaccessfeature")
 
         # Sanity check: ensure no permissions are assigned to users/groups
