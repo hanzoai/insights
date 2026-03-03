@@ -4,11 +4,11 @@ import { UUIDT } from '~/utils/utils'
 import { getFirstTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureInsightsFlowBuilder } from '../_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '../_tests/builders/insightsflow.builder'
 import { createKafkaMessage } from '../_tests/fixtures'
 import { insertInsightsFlow as _insertInsightsFlow } from '../_tests/fixtures-insightsflows'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { BatchInsightsFlowRequest, CdpBatchInsightsFlowRequestsConsumer } from './cdp-batch-customflow.consumer'
+import { BatchInsightsFlowRequest, CdpBatchInsightsFlowRequestsConsumer } from './cdp-batch-insightsflow.consumer'
 
 jest.setTimeout(1000)
 
