@@ -28,10 +28,10 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
-                ("short_id", models.CharField(blank=True, default=posthog.utils.generate_short_id, max_length=12)),
+                ("short_id", models.CharField(blank=True, default=insights.utils.generate_short_id, max_length=12)),
                 ("title", models.CharField(blank=True, max_length=256, null=True)),
                 ("content", models.JSONField(blank=True, default=None, null=True)),
                 ("text_content", models.TextField(blank=True, null=True)),
@@ -73,7 +73,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("group", models.IntegerField(blank=True, db_column="group_id", null=True)),
