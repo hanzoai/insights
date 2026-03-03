@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0862_alter_team_session_recording_retention_period"),
+        ("posthog", "0862_alter_team_session_recording_retention_period"),
     ]
 
     operations = [
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ("error_message", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("experiment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.experiment")),
+                ("experiment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.experiment")),
             ],
             options={
                 "indexes": [

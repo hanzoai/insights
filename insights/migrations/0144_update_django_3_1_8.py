@@ -7,7 +7,7 @@ import insights.models.team
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0143_user_uuid"),
+        ("posthog", "0143_user_uuid"),
     ]
 
     operations = [

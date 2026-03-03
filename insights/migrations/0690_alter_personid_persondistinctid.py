@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allows these schema changes (DDL) without holding a transaction the whole time
 
     dependencies = [
-        ("insights", "0689_survey_enable_partial_responses"),
+        ("posthog", "0689_survey_enable_partial_responses"),
     ]
 
     operations = [
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                     model_name="cohortpeople",
                     name="person",
                     field=models.ForeignKey(
-                        to="insights.person",
+                        to="posthog.person",
                         on_delete=models.CASCADE,
                     ),
                 ),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                     model_name="featureflaghashkeyoverride",
                     name="person",
                     field=models.ForeignKey(
-                        to="insights.person",
+                        to="posthog.person",
                         on_delete=models.CASCADE,
                     ),
                 ),
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                     model_name="persondistinctid",
                     name="person",
                     field=models.ForeignKey(
-                        to="insights.person",
+                        to="posthog.person",
                         on_delete=models.CASCADE,
                     ),
                 ),

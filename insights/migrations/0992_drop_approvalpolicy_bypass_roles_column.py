@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("insights", "0991_remove_approvalpolicy_bypass_roles"),
+        ("posthog", "0991_remove_approvalpolicy_bypass_roles"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0858_datamodelingjob_storage_delta_mib_and_more"),
+        ("posthog", "0858_datamodelingjob_storage_delta_mib_and_more"),
     ]
 
     operations = [

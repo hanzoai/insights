@@ -11,7 +11,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0926_featureflag_bucketing_identifier"),
+        ("posthog", "0926_featureflag_bucketing_identifier"),
     ]
 
     operations = [
@@ -85,9 +85,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "organization",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.organization"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.organization"),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "ordering": ["-created_at"],
@@ -124,12 +124,12 @@ class Migration(migrations.Migration):
                 ("enabled", models.BooleanField(default=True)),
                 (
                     "organization",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.organization"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.organization"),
                 ),
                 (
                     "team",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.team"
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"
                     ),
                 ),
             ],
@@ -164,7 +164,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="approvals",
-                        to="insights.changerequest",
+                        to="posthog.changerequest",
                     ),
                 ),
             ],

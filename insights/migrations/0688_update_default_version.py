@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0687_remove_taxonomy_team_only_constraints"),
+        ("posthog", "0687_remove_taxonomy_team_only_constraints"),
     ]
 
     operations = [

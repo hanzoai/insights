@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0912_alter_survey_linked_insight_type"),
+        ("posthog", "0912_alter_survey_linked_insight_type"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_linked_insight",
                         related_query_name="survey_linked_insight",
-                        to="insights.insight",
+                        to="posthog.insight",
                     ),
                 ),
             ],

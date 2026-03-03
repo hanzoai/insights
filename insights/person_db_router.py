@@ -43,7 +43,7 @@ class PersonDBRouter:
     A router to control all database operations on models in the persons database.
     """
 
-    PERSONS_APP_LABEL = "insights"  # All models are in the 'insights' app
+    PERSONS_APP_LABEL = "posthog"  # Django app_label kept as posthog for DB compat
 
     def db_for_read(self, model, **hints):
         """

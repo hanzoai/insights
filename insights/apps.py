@@ -17,6 +17,7 @@ logger = structlog.get_logger(__name__)
 
 class InsightsConfig(AppConfig):
     name = "insights"
+    label = "posthog"  # Keep DB table prefix as posthog_* for backward compatibility
     verbose_name = "Insights"
 
     def ready(self):

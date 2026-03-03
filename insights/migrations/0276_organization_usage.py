@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0275_feature_flag_rollback_fields"),
+        ("posthog", "0275_feature_flag_rollback_fields"),
     ]
 
     operations = [

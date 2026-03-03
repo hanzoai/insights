@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def add_plugin_types(apps, schema_editor):
-    Plugin = apps.get_model("insights", "Plugin")
+    Plugin = apps.get_model("posthog", "Plugin")
     for plugin in Plugin.objects.filter(plugin_type__isnull=True):
         plugin.plugin_type = "local" if plugin.url and plugin.url.startswith("file:") else "custom"
         plugin.save()
@@ -16,7 +16,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0106_dashboard_item_type_to_display"),
+        ("posthog", "0106_dashboard_item_type_to_display"),
     ]
 
     operations = [

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0864_create_feature_flag_evaluation_tag_table"),
+        ("posthog", "0864_create_feature_flag_evaluation_tag_table"),
     ]
 
     operations = [

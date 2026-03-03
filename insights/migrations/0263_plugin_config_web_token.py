@@ -6,7 +6,7 @@ from insights.models.utils import generate_random_token
 
 
 def forwards_func(apps, schema_editor):
-    PluginConfig = apps.get_model("insights", "PluginConfig")
+    PluginConfig = apps.get_model("posthog", "PluginConfig")
     plugin_configs = PluginConfig.objects.all()
     for plugin_config in plugin_configs:
         plugin_config.web_token = generate_random_token()
@@ -15,7 +15,7 @@ def forwards_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0262_track_viewed_notifications"),
+        ("posthog", "0262_track_viewed_notifications"),
     ]
 
     operations = [

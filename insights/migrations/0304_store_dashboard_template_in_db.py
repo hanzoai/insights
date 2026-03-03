@@ -14,7 +14,7 @@ class AlterFieldNullSafe(migrations.AlterField):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0303_team_session_recording_version"),
+        ("posthog", "0303_team_session_recording_version"),
     ]
 
     operations = [

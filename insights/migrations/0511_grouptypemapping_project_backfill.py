@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0510_salesforce_missing_schemas"),
+        ("posthog", "0510_salesforce_missing_schemas"),
     ]
 
     operations = [

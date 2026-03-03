@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0820_organization_allow_publicly_shared_resources"),
+        ("posthog", "0820_organization_allow_publicly_shared_resources"),
     ]
 
     operations = [

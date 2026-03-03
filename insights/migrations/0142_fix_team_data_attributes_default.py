@@ -8,7 +8,7 @@ import insights.models.team
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0141_events_created_at_index"),
+        ("posthog", "0141_events_created_at_index"),
     ]
 
     operations = [

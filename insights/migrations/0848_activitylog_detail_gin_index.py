@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0847_alter_batchexportrun_status"),
+        ("posthog", "0847_alter_batchexportrun_status"),
     ]
 
     operations = [

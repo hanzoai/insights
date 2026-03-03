@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0482_alertconfiguration_calculation_interval_and_more"),
+        ("posthog", "0482_alertconfiguration_calculation_interval_and_more"),
     ]
 
     operations = [
@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="insights.datawarehousetable",
+                        to="posthog.datawarehousetable",
                     ),
                 ),
             ],
