@@ -1,7 +1,7 @@
 import FuseClass from 'fuse.js'
 import { actions, kea, key, path, props, reducers, selectors } from 'kea'
 
-import { STL as SCRIPT_STL } from '@posthog/hogvm'
+import { STL as SCRIPT_STL } from '@insights/scriptvm'
 
 import type { cyclotronJobTemplateSuggestionsLogicType } from './cyclotronJobTemplateSuggestionsLogicType'
 
