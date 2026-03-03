@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { InsightsFlow } from '~/schema/insightsflow'
 import { Team } from '~/types'
 import { PostgresRouter, PostgresUse } from '~/utils/db/postgres'

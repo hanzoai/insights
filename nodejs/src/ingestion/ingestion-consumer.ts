@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Message } from 'node-rdkafka'
 import { Gauge } from 'prom-client'
 

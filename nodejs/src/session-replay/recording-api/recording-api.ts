@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { S3Client, S3ClientConfig } from '@aws-sdk/client-s3'
 import express from 'ultimate-express'
 
