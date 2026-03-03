@@ -2,7 +2,7 @@
 !.devcontainer
 !.kearc
 !bin
-!common/hogvm
+!common/scriptvm
 !common/esbuilder
 !common/migration_utils
 !common/plugin_transpiler/*.*
