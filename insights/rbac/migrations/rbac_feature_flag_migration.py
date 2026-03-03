@@ -3,7 +3,7 @@ from django.db import transaction
 import structlog
 
 from insights.exceptions_capture import capture_exception
-from insights.models.rbac.access_control import AccessControl
+from insights.models.ee_models import AccessControl
 from insights.models.team import Team
 
 
