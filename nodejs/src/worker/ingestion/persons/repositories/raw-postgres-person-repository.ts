@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { TopicMessage } from '../../../../kafka/producer'
+import { TopicMessage } from '../../../../stream/producer'
 import {
     InternalPerson,
     PersonPropertyFilter,
@@ -62,7 +62,7 @@ export interface RawPostgresPersonRepository {
 
     updatePersonsBatch(
         personUpdates: PersonUpdate[]
-    ): Promise<Map<string, { success: boolean; version?: number; kafkaMessage?: TopicMessage; error?: Error }>>
+    ): Promise<Map<string, { success: boolean; version?: number; streamMessage?: TopicMessage; error?: Error }>>
 
     deletePerson(person: InternalPerson, tx?: TransactionClient): Promise<TopicMessage[]>
 

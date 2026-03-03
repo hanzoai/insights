@@ -218,7 +218,7 @@ export const gzipObject = async <T extends object>(object: T): Promise<string> =
     )
     const res = buffer.toString('base64')
 
-    // NOTE: Base64 encoding isn't as efficient but we would need to change the kafka producer/consumers to use ucs2 or something
+    // NOTE: Base64 encoding isn't as efficient but we would need to change the stream producer/consumers to use ucs2 or something
     // as well in order to support binary data better
 
     return res

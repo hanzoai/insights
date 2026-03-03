@@ -5,7 +5,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 import { Person, Team } from '~/types'
 
 import { PipelineResult, isOkResult, ok } from '../../../ingestion/pipelines/results'
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { PersonContext } from '../persons/person-context'
 import { PersonEventProcessor } from '../persons/person-event-processor'
 import { PersonMergeService } from '../persons/person-merge-service'
@@ -14,7 +14,7 @@ import { PersonPropertyService } from '../persons/person-property-service'
 import { PersonsStore } from '../persons/persons-store'
 
 export async function processPersonsStep(
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     mergeMode: MergeMode,
     measurePersonJsonbSize: number,
     personPropertiesUpdateAll: boolean,
@@ -30,7 +30,7 @@ export async function processPersonsStep(
         String(event.distinct_id),
         timestamp,
         processPerson,
-        kafkaProducer,
+        streamProducer,
         personsStore,
         measurePersonJsonbSize,
         mergeMode,
@@ -42,10 +42,10 @@ export async function processPersonsStep(
         new PersonPropertyService(context),
         new PersonMergeService(context)
     )
-    const [result, kafkaAck] = await processor.processEvent()
+    const [result, streamAck] = await processor.processEvent()
 
     if (isOkResult(result)) {
-        return ok([event, result.value, kafkaAck])
+        return ok([event, result.value, streamAck])
     } else {
         return result
     }

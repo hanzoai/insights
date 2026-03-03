@@ -15,7 +15,7 @@ export interface DropOldEventsInput {
  * Creates a pipeline step that drops events older than a team's configured threshold.
  *
  * If an event is too old, it returns a `drop` result with an ingestion warning
- * that will be sent to Kafka by `handleIngestionWarnings`.
+ * that will be sent to stream by `handleIngestionWarnings`.
  *
  * Uses the `timestamp` and `now` headers set by the Rust capture service.
  * The timestamp header contains milliseconds since epoch (already normalized with clock skew correction).

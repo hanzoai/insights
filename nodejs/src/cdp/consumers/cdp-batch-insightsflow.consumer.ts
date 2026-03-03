@@ -2,14 +2,14 @@
 import { Message } from 'node-rdkafka'
 
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
-import { KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS } from '~/config/kafka-topics'
+import { STREAM_CDP_BATCH_INSIGHTSFLOW_REQUESTS } from '~/config/stream-topics'
 import { InsightsFlow } from '~/schema/insightsflow'
 import { DatastoreRouter } from '~/utils/db/clickhouse'
 import { parseJSON } from '~/utils/json-parse'
 import { captureException } from '~/utils/insights'
 import { DatastorePersonRepository } from '~/worker/ingestion/persons/repositories/clickhouse-person-repository'
 
-import { KafkaConsumer } from '../../kafka/consumer'
+import { StreamConsumer } from '../../stream/consumer'
 import { HealthCheckResult, Hub, PersonPropertyFilter, Team } from '../../types'
 import { logger } from '../../utils/logger'
 import { UUIDT } from '../../utils/utils'
@@ -38,7 +38,7 @@ export interface BatchInsightsFlowRequestMessage {
 export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
     protected name = 'CdpBatchInsightsFlowRequestsConsumer'
     private cyclotronJobQueue: CyclotronJobQueue
-    protected kafkaConsumer: KafkaConsumer
+    protected streamConsumer: StreamConsumer
 
     private scriptRateLimiter: ScriptRateLimiterService
 
@@ -48,12 +48,12 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
 
     constructor(
         hub: Hub,
-        topic: string = KAFKA_CDP_BATCH_INSIGHTSFLOW_REQUESTS,
+        topic: string = STREAM_CDP_BATCH_INSIGHTSFLOW_REQUESTS,
         groupId: string = 'cdp-batch-customflow-requests-consumer'
     ) {
         super(hub)
         this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'customflow')
-        this.kafkaConsumer = new KafkaConsumer({ groupId, topic })
+        this.streamConsumer = new StreamConsumer({ groupId, topic })
         this.scriptRateLimiter = new ScriptRateLimiterService(hub, this.redis)
 
         this.datastoreRouter = new DatastoreRouter(hub)
@@ -216,8 +216,8 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         })
     }
 
-    @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<BatchInsightsFlowRequestMessage[]> {
+    @instrumented('cdpConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<BatchInsightsFlowRequestMessage[]> {
         const batchInsightsFlowRequests: BatchInsightsFlowRequestMessage[] = []
 
         await Promise.all(
@@ -264,13 +264,13 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
         // Connect to ClickHouse
         this.datastoreRouter.initialize()
         // Start consuming messages
-        await this.kafkaConsumer.connect(async (messages) => {
+        await this.streamConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
 
             return await instrumentFn('cdpConsumer.handleEachBatch', async () => {
-                const batchInsightsFlowRequestMessages = await this._parseKafkaBatch(messages)
+                const batchInsightsFlowRequestMessages = await this._parseStreamBatch(messages)
                 const { backgroundTask } = await this.processBatch(batchInsightsFlowRequestMessages)
 
                 return { backgroundTask }
@@ -280,7 +280,7 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
 
     public async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
-        await this.kafkaConsumer.disconnect()
+        await this.streamConsumer.disconnect()
         logger.info('💤', 'Stopping cyclotron job queue...')
         await this.cyclotronJobQueue.stop()
         logger.info('💤', 'Stopping ClickHouse router...')
@@ -292,6 +292,6 @@ export class CdpBatchInsightsFlowRequestsConsumer extends CdpConsumerBase {
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 }

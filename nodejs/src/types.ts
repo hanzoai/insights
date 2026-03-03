@@ -12,7 +12,7 @@ import { CyclotronJobQueueKind, CyclotronJobQueueSource } from './cdp/types'
 import { EncryptedFields } from './cdp/utils/encryption-utils'
 import { InternalCaptureService } from './common/services/internal-capture'
 import type { CookielessManager } from './ingestion/cookieless/cookieless-manager'
-import { KafkaProducerWrapper } from './kafka/producer'
+import { StreamProducerWrapper } from './stream/producer'
 import { PostgresRouter } from './utils/db/postgres'
 import { GeoIPService } from './utils/geoip'
 import { PubSub } from './utils/pubsub'
@@ -28,14 +28,14 @@ type Brand<K, T> = K & { __brand: T }
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
-export enum KafkaSecurityProtocol {
+export enum StreamSecurityProtocol {
     Plaintext = 'PLAINTEXT',
     SaslPlaintext = 'SASL_PLAINTEXT',
     Ssl = 'SSL',
     SaslSsl = 'SASL_SSL',
 }
 
-export enum KafkaSaslMechanism {
+export enum StreamSaslMechanism {
     Plain = 'plain',
     ScramSha256 = 'scram-sha-256',
     ScramSha512 = 'scram-sha-512',
@@ -157,9 +157,9 @@ export type CdpConfig = {
     DISABLE_OPENTELEMETRY_TRACING: boolean
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_KIND: CyclotronJobQueueKind
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: CyclotronJobQueueSource
-    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING: string // A comma-separated list of queue to mode like `fn:kafka,fetch:postgres,*:kafka` with * being the default
+    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING: string // A comma-separated list of queue to mode like `fn:stream,fetch:postgres,*:stream` with * being the default
     CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_TEAM_MAPPING: string // Like the above but with a team check too
-    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_FORCE_SCHEDULED_TO_POSTGRES: boolean // If true then scheduled jobs will be routed to postgres even if they are mapped to kafka
+    CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_FORCE_SCHEDULED_TO_POSTGRES: boolean // If true then scheduled jobs will be routed to postgres even if they are mapped to stream
 
     CDP_LEGACY_EVENT_CONSUMER_GROUP_ID: string
     CDP_LEGACY_EVENT_CONSUMER_TOPIC: string
@@ -170,7 +170,7 @@ export type CdpConfig = {
     CDP_CYCLOTRON_INSERT_PARALLEL_BATCHES: boolean
     CDP_CYCLOTRON_COMPRESS_VM_STATE: boolean
     CDP_CYCLOTRON_USE_BULK_COPY_JOB: boolean
-    CDP_CYCLOTRON_COMPRESS_KAFKA_DATA: boolean
+    CDP_CYCLOTRON_COMPRESS_STREAM_DATA: boolean
     CDP_REDIS_HOST: string
     CDP_REDIS_PORT: number
     CDP_REDIS_PASSWORD: string
@@ -218,7 +218,7 @@ export type IngestionConsumerConfig = {
     /** The lane this consumer is processing (e.g. main, overflow, historical, async) */
     INGESTION_LANE?: IngestionLane
 
-    // Kafka consumer config
+    // Stream consumer config
     INGESTION_CONSUMER_GROUP_ID: string
     INGESTION_CONSUMER_CONSUME_TOPIC: string
     INGESTION_CONSUMER_DLQ_TOPIC: string
@@ -227,10 +227,10 @@ export type IngestionConsumerConfig = {
 
     // Ingestion pipeline config
     INGESTION_CONCURRENCY: number // number of parallel event ingestion queues per batch
-    INGESTION_BATCH_SIZE: number // kafka consumer batch size
+    INGESTION_BATCH_SIZE: number // stream consumer batch size
     INGESTION_OVERFLOW_ENABLED: boolean // whether or not overflow rerouting is enabled
     INGESTION_FORCE_OVERFLOW_BY_TOKEN_DISTINCT_ID: string // comma-separated list of token or token:distinct_id to force overflow
-    INGESTION_OVERFLOW_PRESERVE_PARTITION_LOCALITY: boolean // whether Kafka message keys should be preserved when rerouted to overflow
+    INGESTION_OVERFLOW_PRESERVE_PARTITION_LOCALITY: boolean // whether Stream message keys should be preserved when rerouted to overflow
 
     // Person batch writing config
     PERSON_BATCH_WRITING_DB_WRITE_MODE: PersonBatchWritingDbWriteMode
@@ -281,12 +281,12 @@ export type IngestionConsumerConfig = {
     SKIP_UPDATE_EVENT_AND_PROPERTIES_STEP: boolean
     EVENT_SCHEMA_ENFORCEMENT_ENABLED: boolean
     PIPELINE_STEP_STALLED_LOG_TIMEOUT: number
-    KAFKA_BATCH_START_LOGGING_ENABLED: boolean
+    STREAM_BATCH_START_LOGGING_ENABLED: boolean
     TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE: number
 
     // Clickhouse topics
-    DATASTORE_JSON_EVENTS_KAFKA_TOPIC: string
-    DATASTORE_HEATMAPS_KAFKA_TOPIC: string
+    DATASTORE_JSON_EVENTS_STREAM_TOPIC: string
+    DATASTORE_HEATMAPS_STREAM_TOPIC: string
 
     // Cookieless server hash mode config
     COOKIELESS_DISABLED: boolean
@@ -362,8 +362,8 @@ export type SessionRecordingConfig = {
     SESSION_RECORDING_V2_S3_ACCESS_KEY_ID: string
     SESSION_RECORDING_V2_S3_SECRET_ACCESS_KEY: string
     SESSION_RECORDING_V2_S3_TIMEOUT_MS: number
-    SESSION_RECORDING_V2_REPLAY_EVENTS_KAFKA_TOPIC: string
-    SESSION_RECORDING_V2_CONSOLE_LOG_ENTRIES_KAFKA_TOPIC: string
+    SESSION_RECORDING_V2_REPLAY_EVENTS_STREAM_TOPIC: string
+    SESSION_RECORDING_V2_CONSOLE_LOG_ENTRIES_STREAM_TOPIC: string
     SESSION_RECORDING_V2_CONSOLE_LOG_STORE_SYNC_BATCH_LIMIT: number
     SESSION_RECORDING_V2_MAX_EVENTS_PER_SESSION_PER_BATCH: number
     SESSION_RECORDING_NEW_SESSION_BUCKET_CAPACITY: number
@@ -379,7 +379,7 @@ export type SessionRecordingConfig = {
     /** Rate (0.0–1.0) at which to verify encrypt→decrypt round-trip integrity during ingestion */
     SESSION_RECORDING_CRYPTO_INTEGRITY_CHECK_RATE: number
 
-    // Kafka consumer config (overrides hardcoded defaults when set)
+    // Stream consumer config (overrides hardcoded defaults when set)
     INGESTION_SESSION_REPLAY_CONSUMER_CONSUME_TOPIC: string
     INGESTION_SESSION_REPLAY_CONSUMER_GROUP_ID: string
     INGESTION_SESSION_REPLAY_CONSUMER_OVERFLOW_TOPIC: string
@@ -432,8 +432,8 @@ export interface PluginsServerConfig
     REDIS_POOL_MIN_SIZE: number // minimum number of Redis connections to use per thread
     REDIS_POOL_MAX_SIZE: number // maximum number of Redis connections to use per thread
 
-    CONSUMER_BATCH_SIZE: number // Primarily for kafka consumers the batch size to use
-    CONSUMER_MAX_HEARTBEAT_INTERVAL_MS: number // Primarily for kafka consumers the max heartbeat interval to use after which it will be considered unhealthy
+    CONSUMER_BATCH_SIZE: number // Primarily for stream consumers the batch size to use
+    CONSUMER_MAX_HEARTBEAT_INTERVAL_MS: number // Primarily for stream consumers the max heartbeat interval to use after which it will be considered unhealthy
     CONSUMER_LOOP_STALL_THRESHOLD_MS: number // Threshold in ms after which the consumer loop is considered stalled
     CONSUMER_LOG_STATS_LEVEL: LogLevel // Log level for consumer statistics
     CONSUMER_LOOP_BASED_HEALTH_CHECK: boolean // Use consumer loop monitoring for health checks instead of heartbeats
@@ -441,18 +441,18 @@ export interface PluginsServerConfig
     CONSUMER_WAIT_FOR_BACKGROUND_TASKS_ON_REBALANCE: boolean
     CONSUMER_AUTO_CREATE_TOPICS: boolean
 
-    // Kafka params - identical for client and producer
-    KAFKA_HOSTS: string // comma-delimited Kafka hosts
-    KAFKA_SECURITY_PROTOCOL: KafkaSecurityProtocol | undefined
-    KAFKA_CLIENT_RACK: string | undefined
+    // Stream params - identical for client and producer
+    STREAM_HOSTS: string // comma-delimited stream hosts
+    STREAM_SECURITY_PROTOCOL: StreamSecurityProtocol | undefined
+    STREAM_CLIENT_RACK: string | undefined
 
     // Other methods that are generally only used by self-hosted users
-    KAFKA_CLIENT_CERT_B64: string | undefined
-    KAFKA_CLIENT_CERT_KEY_B64: string | undefined
-    KAFKA_TRUSTED_CERT_B64: string | undefined
-    KAFKA_SASL_MECHANISM: KafkaSaslMechanism | undefined
-    KAFKA_SASL_USER: string | undefined
-    KAFKA_SASL_PASSWORD: string | undefined
+    STREAM_CLIENT_CERT_B64: string | undefined
+    STREAM_CLIENT_CERT_KEY_B64: string | undefined
+    STREAM_TRUSTED_CERT_B64: string | undefined
+    STREAM_SASL_MECHANISM: StreamSaslMechanism | undefined
+    STREAM_SASL_USER: string | undefined
+    STREAM_SASL_PASSWORD: string | undefined
 
     APP_METRICS_FLUSH_FREQUENCY_MS: number
     APP_METRICS_FLUSH_MAX_QUEUE_SIZE: number
@@ -472,7 +472,7 @@ export interface PluginsServerConfig
     TEMPORAL_CLIENT_CERT: string | undefined
     TEMPORAL_CLIENT_KEY: string | undefined
     PERSON_INFO_CACHE_TTL: number
-    KAFKA_HEALTHCHECK_SECONDS: number
+    STREAM_HEALTHCHECK_SECONDS: number
     PLUGIN_SERVER_MODE: PluginServerMode | null
     /** Comma-separated list of capability groups for local dev: cdp_workflows, realtime_cohorts, session_replay, logs, feature_flags */
     NODEJS_CAPABILITY_GROUPS: string | null
@@ -542,7 +542,7 @@ export interface Hub extends PluginsServerConfig {
     redisPool: GenericPool<Redis>
     insightsRedisPool: GenericPool<Redis>
     cookielessRedisPool: GenericPool<Redis>
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     // tools
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
@@ -633,8 +633,8 @@ export enum Service {
     DjangoServer = 'django_server',
     Redis = 'redis',
     Postgres = 'postgres',
-    ClickHouse = 'clickhouse',
-    Kafka = 'kafka',
+    Datastore = 'datastore',
+    Stream = 'stream',
 }
 export interface Alert {
     id: string
@@ -723,7 +723,7 @@ export interface BaseEventMessage {
     uuid: string
 }
 
-/** Raw event message as received via Kafka. */
+/** Raw event message as received via stream. */
 export interface RawEventMessage extends BaseEventMessage {
     /** JSON-encoded object. */
     data: string
@@ -732,7 +732,7 @@ export interface RawEventMessage extends BaseEventMessage {
     /** ISO-formatted datetime. May be empty! */
     sent_at: string
     /** JSON-encoded number. */
-    kafka_offset: string
+    stream_offset: string
     /** Messages may have a token instead of a team_id, to be used e.g. to
      * resolve to a team_id */
     token?: string
@@ -784,7 +784,7 @@ export interface RawClickHouseEvent extends BaseEvent {
     historical_migration?: boolean
 }
 
-export interface RawKafkaEvent extends RawClickHouseEvent {
+export interface RawStreamEvent extends RawClickHouseEvent {
     /**
      * The project ID field is only included in the `datastore_events_json` topic, not present in ClickHouse.
      * That's because we need it in `property-defs-rs` and not elsewhere.
@@ -1171,7 +1171,7 @@ export interface RawSessionReplayEvent {
 
 export enum TimestampFormat {
     ClickHouseSecondPrecision = 'clickhouse-second-precision',
-    ClickHouse = 'clickhouse',
+    Datastore = 'datastore',
     ISO = 'iso',
 }
 

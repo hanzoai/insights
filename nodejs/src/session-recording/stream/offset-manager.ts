@@ -5,7 +5,7 @@ import { PartitionOffset } from '../types'
 
 type CommitOffsetsCallback = (offsets: TopicPartitionOffset[]) => Promise<void>
 
-export class KafkaOffsetManager {
+export class StreamOffsetManager {
     private partitionOffsets: Map<number, number> = new Map()
 
     constructor(

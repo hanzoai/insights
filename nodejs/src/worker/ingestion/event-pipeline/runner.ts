@@ -4,7 +4,7 @@ import { PluginEvent } from '@posthog/plugin-scaffold'
 
 import { PipelineWarning } from '../../../ingestion/pipelines/pipeline.interface'
 import { PipelineResult, dlq, isOkResult, ok } from '../../../ingestion/pipelines/results'
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { EventHeaders, Person, PipelineEvent, PreIngestionEvent, Team } from '../../../types'
 import { DependencyUnavailableError } from '../../../utils/db/error'
 import { timeoutGuard } from '../../../utils/db/utils'
@@ -72,7 +72,7 @@ export class EventPipelineRunner {
 
     constructor(
         private options: EventPipelineRunnerOptions,
-        private kafkaProducer: KafkaProducerWrapper,
+        private streamProducer: StreamProducerWrapper,
         teamManager: TeamManager,
         groupTypeManager: GroupTypeManager,
         private originalEvent: PipelineEvent,
@@ -104,21 +104,21 @@ export class EventPipelineRunner {
         normalizedEvent: PluginEvent,
         timestamp: DateTime,
         team: Team,
-        kafkaAcks: Promise<unknown>[],
+        streamAcks: Promise<unknown>[],
         warnings: PipelineWarning[]
     ): Promise<PipelineResult<EventPipelineHeatmapResult>> {
         const processPerson = false
 
         const prepareResult = await this.runStep<PreIngestionEvent, typeof prepareEventStep>(
             prepareEventStep,
-            [this.kafkaProducer, this.eventsProcessor, this.groupStore, normalizedEvent, processPerson, team],
+            [this.streamProducer, this.eventsProcessor, this.groupStore, normalizedEvent, processPerson, team],
             team.id,
             true,
-            kafkaAcks,
+            streamAcks,
             warnings
         )
         if (!isOkResult(prepareResult)) {
-            // TODO: We pass kafkaAcks, so the side effects should be merged, but this needs to be refactored
+            // TODO: We pass streamAcks, so the side effects should be merged, but this needs to be refactored
             return prepareResult
         }
         const preparedEvent = prepareResult.value
@@ -126,7 +126,7 @@ export class EventPipelineRunner {
         const result = this.registerLastStep('prepareEventStep', {
             preparedEvent,
         })
-        return ok(result, kafkaAcks, warnings)
+        return ok(result, streamAcks, warnings)
     }
 
     async runHeatmapPipeline(
@@ -141,9 +141,9 @@ export class EventPipelineRunner {
                 ...normalizedEvent,
                 team_id: team.id,
             }
-            const kafkaAcks: Promise<void>[] = []
+            const streamAcks: Promise<void>[] = []
             const warnings: PipelineWarning[] = []
-            return await this.runHeatmapPipelineSteps(pluginEvent, timestamp, team, kafkaAcks, warnings)
+            return await this.runHeatmapPipelineSteps(pluginEvent, timestamp, team, streamAcks, warnings)
         } catch (error) {
             if (error instanceof StepErrorNoRetry) {
                 return dlq('Step error - non-retriable', error)
@@ -173,7 +173,7 @@ export class EventPipelineRunner {
                 // At the step level we have chosen to drop these events and send them to DLQ
                 return dlq('Step error - non-retriable', error)
             } else {
-                // Otherwise rethrow, which leads to Kafka offsets not getting committed and retries
+                // Otherwise rethrow, which leads to Stream offsets not getting committed and retries
                 captureException(error, {
                     tags: { pipeline_step: 'outside' },
                     extra: { originalEvent: this.originalEvent },
@@ -190,7 +190,7 @@ export class EventPipelineRunner {
         processPerson: boolean,
         personlessPerson?: Person
     ): Promise<EventPipelinePipelineResult> {
-        const kafkaAcks: Promise<unknown>[] = []
+        const streamAcks: Promise<unknown>[] = []
         const warnings: PipelineWarning[] = []
 
         const personProcessingResult = await this.processPersonForEvent(
@@ -199,7 +199,7 @@ export class EventPipelineRunner {
             timestamp,
             personlessPerson,
             team.id,
-            kafkaAcks,
+            streamAcks,
             warnings
         )
 
@@ -207,19 +207,19 @@ export class EventPipelineRunner {
             return personProcessingResult
         }
 
-        const { event: postPersonEvent, person, kafkaAck: personKafkaAck } = personProcessingResult.value
-        kafkaAcks.push(personKafkaAck)
+        const { event: postPersonEvent, person, streamAck: personStreamAck } = personProcessingResult.value
+        streamAcks.push(personStreamAck)
 
         const prepareResult = await this.runStep<PreIngestionEvent, typeof prepareEventStep>(
             prepareEventStep,
-            [this.kafkaProducer, this.eventsProcessor, this.groupStore, postPersonEvent, processPerson, team],
+            [this.streamProducer, this.eventsProcessor, this.groupStore, postPersonEvent, processPerson, team],
             team.id,
             true,
-            kafkaAcks,
+            streamAcks,
             warnings
         )
         if (!isOkResult(prepareResult)) {
-            // TODO: We pass kafkaAcks, so the side effects should be merged, but this needs to be refactored
+            // TODO: We pass streamAcks, so the side effects should be merged, but this needs to be refactored
             return prepareResult
         }
         const preparedEvent = prepareResult.value
@@ -232,7 +232,7 @@ export class EventPipelineRunner {
             historicalMigration,
         })
 
-        return ok(result, kafkaAcks, warnings)
+        return ok(result, streamAcks, warnings)
     }
 
     private async processPersonForEvent(
@@ -241,12 +241,12 @@ export class EventPipelineRunner {
         timestamp: DateTime,
         personlessPerson: Person | undefined,
         teamId: number,
-        kafkaAcks: Promise<unknown>[],
+        streamAcks: Promise<unknown>[],
         warnings: PipelineWarning[]
-    ): Promise<PipelineResult<{ event: PluginEvent; person: Person; kafkaAck: Promise<void> }>> {
+    ): Promise<PipelineResult<{ event: PluginEvent; person: Person; streamAck: Promise<void> }>> {
         let postPersonEvent = event
         let person: Person
-        let personKafkaAck: Promise<void> = Promise.resolve()
+        let personStreamAck: Promise<void> = Promise.resolve()
         let shouldProcessPerson = !personlessPerson
         let forceUpgrade = false
 
@@ -264,7 +264,7 @@ export class EventPipelineRunner {
             >(
                 processPersonsStep,
                 [
-                    this.kafkaProducer,
+                    this.streamProducer,
                     this.mergeMode,
                     this.options.PERSON_JSONB_SIZE_ESTIMATE_ENABLE,
                     this.options.PERSON_PROPERTIES_UPDATE_ALL,
@@ -276,7 +276,7 @@ export class EventPipelineRunner {
                 ],
                 teamId,
                 true,
-                kafkaAcks,
+                streamAcks,
                 warnings
             )
 
@@ -287,7 +287,7 @@ export class EventPipelineRunner {
             const [processedEvent, processedPerson, ack] = personStepResult.value
             postPersonEvent = processedEvent
             person = processedPerson
-            personKafkaAck = ack
+            personStreamAck = ack
 
             // Preserve force_upgrade flag if it was set by personless step
             if (forceUpgrade) {
@@ -295,7 +295,7 @@ export class EventPipelineRunner {
             }
         }
 
-        return ok({ event: postPersonEvent, person: person!, kafkaAck: personKafkaAck })
+        return ok({ event: postPersonEvent, person: person!, streamAck: personStreamAck })
     }
 
     registerLastStep<T extends object>(stepName: string, result: T): RunnerResult<T> {
@@ -315,7 +315,7 @@ export class EventPipelineRunner {
         args: Parameters<Step>,
         teamId: number,
         sentToDql = true,
-        kafkaAcks: Promise<unknown>[] = [],
+        streamAcks: Promise<unknown>[] = [],
         warnings: PipelineWarning[] = []
     ): Promise<PipelineResult<T>> {
         const timer = new Date()
@@ -337,7 +337,7 @@ export class EventPipelineRunner {
             pipelineStepMsSummary.labels(step.name).observe(Date.now() - timer.getTime())
             return ok(result, [], warnings)
         } catch (err) {
-            return this.mapError<T>(err, step.name, args, teamId, sentToDql, kafkaAcks, warnings)
+            return this.mapError<T>(err, step.name, args, teamId, sentToDql, streamAcks, warnings)
         } finally {
             clearTimeout(timeout)
         }
@@ -348,7 +348,7 @@ export class EventPipelineRunner {
         args: Parameters<Step>,
         teamId: number,
         sentToDql = true,
-        kafkaAcks: Promise<unknown>[] = [],
+        streamAcks: Promise<unknown>[] = [],
         warnings: PipelineWarning[] = []
     ): Promise<PipelineResult<T>> {
         const timer = new Date()
@@ -377,7 +377,7 @@ export class EventPipelineRunner {
             }
             return result
         } catch (err) {
-            return this.mapError<T>(err, step.name, args, teamId, sentToDql, kafkaAcks, warnings)
+            return this.mapError<T>(err, step.name, args, teamId, sentToDql, streamAcks, warnings)
         } finally {
             clearTimeout(timeout)
         }
@@ -394,7 +394,7 @@ export class EventPipelineRunner {
         if (err instanceof PersonMergeLimitExceededError) {
             return false
         }
-        // TODO: Disallow via env of errors we're going to put into DLQ instead of taking Kafka lag
+        // TODO: Disallow via env of errors we're going to put into DLQ instead of taking stream lag
         return false
     }
 
@@ -404,7 +404,7 @@ export class EventPipelineRunner {
         currentArgs: any,
         teamId: number,
         sendToDlq: boolean,
-        kafkaAcks: Promise<unknown>[] = [],
+        streamAcks: Promise<unknown>[] = [],
         warnings: PipelineWarning[] = []
     ): PipelineResult<T> {
         logger.error('🔔', 'step_failed', { currentStepName, err })
@@ -422,7 +422,7 @@ export class EventPipelineRunner {
         }
 
         if (sendToDlq) {
-            return dlq<T>(`Step error - ${currentStepName}`, err, kafkaAcks, warnings)
+            return dlq<T>(`Step error - ${currentStepName}`, err, streamAcks, warnings)
         }
 
         // These errors are dropped rather than retried - throw StepErrorNoRetry which will be caught at the pipeline level

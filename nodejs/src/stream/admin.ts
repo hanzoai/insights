@@ -8,8 +8,8 @@ export const ensureTopicExists = async (connectionConfig: GlobalConfig, topic: s
     // Before subscribing, we need to ensure that the topic exists. We don't
     // currently have a way to manage topic creation elsewhere (we handle this
     // via terraform in production but this isn't applicable e.g. to hobby
-    // deployments) so we use the Kafka admin client to do so. We don't use the
-    // Kafka `enable.auto.create.topics` option as the behaviour of this doesn't
+    // deployments) so we use the stream admin client to do so. We don't use the
+    // Stream `enable.auto.create.topics` option as the behaviour of this doesn't
     // seem to be well documented and it seems to not function as expected in
     // our testing of it, we end up getting "Unknown topic or partition" errors
     // on consuming, possibly similar to

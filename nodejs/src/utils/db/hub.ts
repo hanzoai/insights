@@ -8,7 +8,7 @@ import { QuotaLimiting } from '~/common/services/quota-limiting.service'
 import { EncryptedFields } from '../../cdp/utils/encryption-utils'
 import { defaultConfig } from '../../config/config'
 import { CookielessManager } from '../../ingestion/cookieless/cookieless-manager'
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { Hub, PluginsServerConfig } from '../../types'
 import { GroupTypeManager } from '../../worker/ingestion/group-type-manager'
 import { ClickhouseGroupRepository } from '../../worker/ingestion/groups/repositories/clickhouse-group-repository'
@@ -56,10 +56,10 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
         ...config,
     }
 
-    logger.info('🤔', `Connecting to Kafka...`)
+    logger.info('🤔', `Connecting to stream...`)
 
-    const kafkaProducer = await KafkaProducerWrapper.create(serverConfig.KAFKA_CLIENT_RACK)
-    logger.info('👍', `Kafka ready`)
+    const streamProducer = await StreamProducerWrapper.create(serverConfig.STREAM_CLIENT_RACK)
+    logger.info('👍', `Stream ready`)
 
     const postgres = new PostgresRouter(serverConfig)
     logger.info('👍', `Postgres Router ready`)
@@ -124,7 +124,7 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
     }
     const personRepository = new PostgresPersonRepository(postgres, personRepositoryOptions)
 
-    const clickhouseGroupRepository = new ClickhouseGroupRepository(kafkaProducer)
+    const clickhouseGroupRepository = new ClickhouseGroupRepository(streamProducer)
     const cookielessManager = new CookielessManager(serverConfig, cookielessRedisPool)
     const geoipService = new GeoIPService(serverConfig)
     await geoipService.get()
@@ -139,7 +139,7 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
         redisPool,
         insightsRedisPool,
         cookielessRedisPool,
-        kafkaProducer,
+        streamProducer,
         groupTypeManager,
         teamManager,
         groupRepository,
@@ -159,10 +159,10 @@ export async function createHub(config: Partial<PluginsServerConfig> = {}): Prom
 
 export const closeHub = async (hub: Hub): Promise<void> => {
     logger.info('💤', 'Closing hub...')
-    logger.info('💤', 'Closing kafka, redis, postgres...')
+    logger.info('💤', 'Closing stream, redis, postgres...')
     await hub.pubSub.stop()
     await Promise.allSettled([
-        hub.kafkaProducer.disconnect(),
+        hub.streamProducer.disconnect(),
         hub.redisPool.drain(),
         hub.insightsRedisPool.drain(),
         hub.cookielessRedisPool.drain(),

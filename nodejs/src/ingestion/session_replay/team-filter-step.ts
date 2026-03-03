@@ -1,4 +1,4 @@
-import { ParsedMessageData } from '../../session-recording/kafka/types'
+import { ParsedMessageData } from '../../session-recording/stream/types'
 import { TeamForReplay } from '../../session-recording/teams/types'
 import { TeamService } from '../../session-replay/shared/teams/team-service'
 import { dlq, drop, ok } from '../pipelines/results'

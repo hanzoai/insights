@@ -1,4 +1,4 @@
-// This is the incoming message from Kafka
+// This is the incoming message from stream
 import { Message } from 'node-rdkafka'
 
 // Re-export shared RetentionPeriod so existing recording-ingestion imports still work

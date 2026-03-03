@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 
-import { KAFKA_APP_METRICS } from '../../config/kafka-topics'
-import { KafkaProducerWrapper, TopicMessage } from '../../kafka/producer'
+import { STREAM_APP_METRICS } from '../../config/stream-topics'
+import { StreamProducerWrapper, TopicMessage } from '../../stream/producer'
 import { TeamId, TimestampFormat } from '../../types'
 import { logger } from '../../utils/logger'
 import { castTimestampOrNow } from '../../utils/utils'
@@ -65,7 +65,7 @@ export interface RawAppMetric {
 }
 
 export class LegacyPluginAppMetrics {
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     queuedData: Record<string, QueuedMetric>
 
     flushFrequencyMs: number
@@ -75,10 +75,10 @@ export class LegacyPluginAppMetrics {
     // For quick access to queueSize instead of using Object.keys(queuedData).length every time
     queueSize: number
 
-    constructor(kafkaProducer: KafkaProducerWrapper, flushFrequencyMs: number, maxQueueSize: number) {
+    constructor(streamProducer: StreamProducerWrapper, flushFrequencyMs: number, maxQueueSize: number) {
         this.queuedData = {}
 
-        this.kafkaProducer = kafkaProducer
+        this.streamProducer = streamProducer
         this.flushFrequencyMs = flushFrequencyMs
         this.maxQueueSize = maxQueueSize
         this.lastFlushTime = Date.now()
@@ -160,8 +160,8 @@ export class LegacyPluginAppMetrics {
             } as RawAppMetric),
         }))
 
-        await this.kafkaProducer.queueMessages({
-            topic: KAFKA_APP_METRICS,
+        await this.streamProducer.queueMessages({
+            topic: STREAM_APP_METRICS,
             messages: messages,
         })
         logger.debug('🚽', `Finished flushing app metrics, took ${Date.now() - startTime}ms`)

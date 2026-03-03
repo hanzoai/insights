@@ -3,7 +3,7 @@ import { Message } from 'node-rdkafka'
 
 import { PluginEvent } from '@posthog/plugin-scaffold'
 
-import { KafkaProducerWrapper } from '../../kafka/producer'
+import { StreamProducerWrapper } from '../../stream/producer'
 import { EventHeaders, Person, Team } from '../../types'
 import { TeamManager } from '../../utils/team-manager'
 import {
@@ -34,7 +34,7 @@ export type EventPipelineRunnerStepResult = EventPipelineResult & {
 
 export function createEventPipelineRunnerV1Step(
     config: EventPipelineRunnerOptions,
-    kafkaProducer: KafkaProducerWrapper,
+    streamProducer: StreamProducerWrapper,
     teamManager: TeamManager,
     groupTypeManager: GroupTypeManager,
     personsStore: PersonsStore,
@@ -55,7 +55,7 @@ export function createEventPipelineRunnerV1Step(
 
         const runner = new EventPipelineRunner(
             config,
-            kafkaProducer,
+            streamProducer,
             teamManager,
             groupTypeManager,
             normalizedEvent,

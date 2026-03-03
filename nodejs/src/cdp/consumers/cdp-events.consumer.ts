@@ -4,8 +4,8 @@ import { Message } from 'node-rdkafka'
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
 
 import { convertToInsightsFunctionInvocationGlobals } from '../../cdp/utils'
-import { KAFKA_EVENTS_JSON } from '../../config/kafka-topics'
-import { KafkaConsumer } from '../../kafka/consumer'
+import { STREAM_EVENTS_JSON } from '../../config/stream-topics'
+import { StreamConsumer } from '../../stream/consumer'
 import { HealthCheckResult, Hub, PluginsServerConfig, RawClickHouseEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
@@ -39,14 +39,14 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
     protected name = 'CdpEventsConsumer'
     protected scriptTypes: InsightsFunctionTypeType[] = ['destination']
     private cyclotronJobQueue: CyclotronJobQueue
-    protected kafkaConsumer: KafkaConsumer
+    protected streamConsumer: StreamConsumer
 
     private scriptRateLimiter: ScriptRateLimiterService
 
-    constructor(hub: THub, topic: string = KAFKA_EVENTS_JSON, groupId: string = 'cdp-processed-events-consumer') {
+    constructor(hub: THub, topic: string = STREAM_EVENTS_JSON, groupId: string = 'cdp-processed-events-consumer') {
         super(hub)
         this.cyclotronJobQueue = new CyclotronJobQueue(hub, 'fn')
-        this.kafkaConsumer = new KafkaConsumer({ groupId, topic })
+        this.streamConsumer = new StreamConsumer({ groupId, topic })
         this.scriptRateLimiter = new ScriptRateLimiterService(hub, this.redis)
     }
 
@@ -373,8 +373,8 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         return notMaskedInvocations
     }
 
-    @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
+    @instrumented('cdpConsumer.handleEachBatch.parseStreamMessages')
+    public async _parseStreamBatch(messages: Message[]): Promise<InsightsFunctionInvocationGlobals[]> {
         const events: InsightsFunctionInvocationGlobals[] = []
 
         await Promise.all(
@@ -408,13 +408,13 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
         // Make sure we are ready to produce to cyclotron first
         await this.cyclotronJobQueue.startAsProducer()
         // Start consuming messages
-        await this.kafkaConsumer.connect(async (messages) => {
+        await this.streamConsumer.connect(async (messages) => {
             logger.info('🔁', `${this.name} - handling batch`, {
                 size: messages.length,
             })
 
             return await instrumentFn('cdpConsumer.handleEachBatch', async () => {
-                const invocationGlobals = await this._parseKafkaBatch(messages)
+                const invocationGlobals = await this._parseStreamBatch(messages)
                 const { backgroundTask } = await this.processBatch(invocationGlobals)
 
                 return { backgroundTask }
@@ -424,7 +424,7 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
 
     public async stop(): Promise<void> {
         logger.info('💤', 'Stopping consumer...')
-        await this.kafkaConsumer.disconnect()
+        await this.streamConsumer.disconnect()
         logger.info('💤', 'Stopping cyclotron job queue...')
         await this.cyclotronJobQueue.stop()
         logger.info('💤', 'Stopping consumer...')
@@ -434,6 +434,6 @@ export class CdpEventsConsumer<THub extends CdpEventsConsumerHub = CdpEventsCons
     }
 
     public isHealthy(): HealthCheckResult {
-        return this.kafkaConsumer.isHealthy()
+        return this.streamConsumer.isHealthy()
     }
 }
