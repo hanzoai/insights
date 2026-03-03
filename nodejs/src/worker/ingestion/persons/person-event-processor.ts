@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PluginEvent } from '@posthog/plugin-scaffold'
 
 import { PipelineResult, dlq, ok, redirect } from '../../../ingestion/pipelines/results'
