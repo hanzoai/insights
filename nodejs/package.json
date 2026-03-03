@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/nodejs",
+    "name": "@insights/nodejs",
     "version": "1.10.5",
     "description": "PostHog Node.js services",
     "types": "dist/index.d.ts",
@@ -37,7 +37,7 @@
         "services:stop": "cd .. && docker compose -f docker-compose.dev.yml down",
         "services:clean": "cd .. && docker compose -f docker-compose.dev.yml rm -v",
         "services": "pnpm services:stop && pnpm services:clean && pnpm services:start",
-        "build:cyclotron": "pnpm --filter=@posthog/cyclotron package",
+        "build:cyclotron": "pnpm --filter=@insights/cyclotron package",
         "update-ai-costs": "ts-node src/ingestion/ai/costs/scripts/update-ai-costs.ts",
         "sync-segment-icons": "DATABASE_URL=something ts-node src/cdp/segment/sync-segment-icons.ts"
     },
@@ -71,8 +71,8 @@
         "@opentelemetry/sdk-node": "^0.203.0",
         "@opentelemetry/sdk-trace-node": "^2.0.1",
         "@opentelemetry/semantic-conventions": "^1.36.0",
-        "@posthog/cyclotron": "workspace:*",
-        "@posthog/hogvm": "workspace:*",
+        "@insights/cyclotron": "workspace:*",
+        "@insights/scriptvm": "workspace:*",
         "@posthog/plugin-scaffold": "1.4.4",
         "@posthog/siphash": "1.1.1",
         "@pyroscope/nodejs": "^0.4.8",
