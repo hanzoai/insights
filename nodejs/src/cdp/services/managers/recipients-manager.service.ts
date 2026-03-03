@@ -94,7 +94,7 @@ export class RecipientsManagerService {
                 created_at,
                 updated_at,
                 deleted
-            FROM insights_messagerecipientpreference
+            FROM posthog_messagerecipientpreference
             WHERE ${conditions} AND deleted = false`
 
         // Flatten the parameters: [teamId1, identifier1, teamId2, identifier2, ...]
