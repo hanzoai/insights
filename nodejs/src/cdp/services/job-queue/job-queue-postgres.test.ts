@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { CyclotronJobQueuePostgres, CyclotronJobQueuePostgresShadow } from './job-queue-postgres'
 
 // Mock external dependency to avoid needing the actual implementation in tests
-jest.mock('@posthog/cyclotron', () => ({
+jest.mock('@insights/cyclotron', () => ({
     CyclotronManager: jest.fn(),
     CyclotronShadowManager: jest.fn(),
     CyclotronWorker: jest.fn(),
