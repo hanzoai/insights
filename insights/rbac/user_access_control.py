@@ -12,13 +12,12 @@ from insights.constants import AvailableFeature
 from insights.models import Organization, OrganizationMembership, Team, User
 from insights.scopes import API_SCOPE_OBJECTS, APIScopeObject
 
+from insights.models.rbac.access_control import AccessControl
+
 if TYPE_CHECKING:
     from insights.models.file_system.file_system import FileSystem
 
-
-    _AccessControl = AccessControl
-else:
-    _AccessControl = object
+_AccessControl = AccessControl
 
 
 class AccessSource(Enum):
