@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { Person, Team } from '../../types'
 import { uuidFromDistinctId } from '../../worker/ingestion/person-uuid'
@@ -99,7 +99,7 @@ export function createProcessPersonlessStep<TInput extends ProcessPersonlessInpu
  * that this is a synthetic person, not a real one.
  */
 function createFakePerson(teamId: number, distinctId: string): Person {
-    // We need a value from the `person_created_column` in ClickHouse. This should be
+    // We need a value from the `person_created_column` in datastore. This should be
     // hidden from users for events without a real person, anyway. It's slightly offset
     // from the 0 date (by 5 seconds) in order to assist in debugging by being
     // harmlessly distinct from Unix UTC "0".

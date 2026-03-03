@@ -13,7 +13,7 @@ export const avoPlugin: LegacyDestinationPlugin = {
         id: 'plugin-insights-avo-plugin',
         name: 'Avo Inspector Plugin',
         description: 'Export Insights events to Avo inspector.',
-        icon_url: 'https://raw.githubusercontent.com/PostHog/insights-avo-plugin/main/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/hanzoai/insights-avo-plugin/main/logo.png',
         category: [],
         code_language: 'javascript',
         code: 'return event',

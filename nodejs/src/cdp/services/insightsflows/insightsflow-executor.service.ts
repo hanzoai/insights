@@ -116,7 +116,7 @@ export class InsightsFlowExecutorService {
         const logs: LogEntry[] = []
         const invocations: CyclotronJobInvocationInsightsFlow[] = []
 
-        // TRICKY: The frontend generates filters matching the Clickhouse event type so we are converting back
+        // TRICKY: The frontend generates filters matching the datastore event type so we are converting back
         const filterGlobals = convertToInsightsFunctionFilterGlobal(triggerGlobals)
 
         for (const insightsFlow of insightsFlows) {

@@ -1,6 +1,6 @@
 /**
  * This file is a cut-down version of the segmenter.ts
- * https://github.com/PostHog/insights/blob/db2deaf650d2eca9addba5e3f304a17a21041f25/frontend/src/scenes/session-recordings/player/utils/segmenter.ts
+ * https://github.com/hanzoai/insights/blob/db2deaf650d2eca9addba5e3f304a17a21041f25/frontend/src/scenes/session-recordings/player/utils/segmenter.ts
  *
  * It has been modified to not need the same dependencies
  * Any changes may need to be sync'd between the two

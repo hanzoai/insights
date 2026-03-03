@@ -13,7 +13,7 @@ export const insightsAppUrlParametersToEventProperties: LegacyTransformationPlug
         name: 'URL parameters to event properties',
         description: 'Converts URL query parameters to event properties',
         icon_url:
-            'https://raw.githubusercontent.com/PostHog/insights-app-url-parameters-to-event-properties/main/logo.png',
+            'https://raw.githubusercontent.com/hanzoai/insights-app-url-parameters-to-event-properties/main/logo.png',
         category: ['Transformation'],
         code_language: 'javascript',
         code: `return event`,

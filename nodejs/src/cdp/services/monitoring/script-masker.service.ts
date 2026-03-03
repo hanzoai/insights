@@ -11,7 +11,7 @@ import {
 } from '../../types'
 import { execFn } from '../../utils/script-exec'
 
-export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@posthog/script-masker'
+export const BASE_REDIS_KEY = process.env.NODE_ENV == 'test' ? '@insights-test/script-masker' : '@hanzo/script-masker'
 const REDIS_KEY_TOKENS = `${BASE_REDIS_KEY}/mask`
 
 // NOTE: These are controlled via the api so are more of a sanity fallback

@@ -5,11 +5,11 @@ import { Counter, Histogram } from 'prom-client'
 import { ExecResult } from '@insights/scriptvm'
 
 import { InsightsFlow } from '../../schema/insightsflow'
-import { RawClickHouseEvent } from '../../types'
+import { RawDatastoreEvent } from '../../types'
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
 import { createTrackedRE2 } from '../../utils/tracked-re2'
-import { UUIDT, clickHouseTimestampToISO } from '../../utils/utils'
+import { UUIDT, datastoreTimestampToISO } from '../../utils/utils'
 import {
     InsightsFunctionFilterGlobals,
     InsightsFunctionInvocationGlobals,
@@ -99,14 +99,14 @@ function getElementsChainElements(elementsChain: string): string[] {
     return Array.from(elementMatches)
 }
 
-export function convertClickhouseRawEventToFilterGlobals(event: RawClickHouseEvent): InsightsFunctionFilterGlobals {
+export function convertDatastoreRawEventToFilterGlobals(event: RawDatastoreEvent): InsightsFunctionFilterGlobals {
     const properties = event.properties ? parseJSON(event.properties) : {}
     const elementsChain = event.elements_chain ?? properties['$elements_chain']
 
     // Handle timestamp conversion
     const eventTimestamp = DateTime.fromISO(event.timestamp).isValid
         ? event.timestamp
-        : clickHouseTimestampToISO(event.timestamp)
+        : datastoreTimestampToISO(event.timestamp)
 
     // Handle person
     let person: InsightsFunctionFilterGlobals['person'] = null
@@ -157,7 +157,7 @@ export function convertClickhouseRawEventToFilterGlobals(event: RawClickHouseEve
         variables: {},
     }
 
-    // Handle groups from RawClickHouseEvent
+    // Handle groups from RawDatastoreEvent
     const groupProperties = [
         event.group0_properties,
         event.group1_properties,
@@ -287,7 +287,7 @@ export function convertToInsightsFunctionFilterGlobal(
         }
     }
 
-    // The elements_chain_* fields are stored as materialized columns in ClickHouse.
+    // The elements_chain_* fields are stored as materialized columns in datastore.
     // We use the same formula to calculate them here.
     if (elementsChain) {
         const cache: Record<string, any> = {}
@@ -322,7 +322,7 @@ export function convertToInsightsFunctionFilterGlobal(
     return response
 }
 
-const HOG_FILTERING_TIMEOUT_MS = 100
+const SCRIPT_FILTERING_TIMEOUT_MS = 100
 
 function preFilterResult(filters: InsightsFunctionType['filters'], filterGlobals: InsightsFunctionFilterGlobals): boolean {
     const eventMatches = filters?.events?.some((eventFilter) => {
@@ -401,7 +401,7 @@ export async function filterFunctionInstrumented(options: {
             insightsFunctionFilterDuration.observe({ type }, execFnOutcome.durationMs)
         }
 
-        if (execFnOutcome.durationMs > HOG_FILTERING_TIMEOUT_MS) {
+        if (execFnOutcome.durationMs > SCRIPT_FILTERING_TIMEOUT_MS) {
             logger.error('🦔', `[${fnKind}] Filter took longer than expected`, {
                 functionId: fn.id,
                 functionName: fn.name,

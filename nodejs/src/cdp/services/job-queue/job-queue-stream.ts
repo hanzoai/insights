@@ -282,7 +282,7 @@ export class CyclotronJobQueueStream {
     }
 }
 
-// NOTE: https://github.com/PostHog/insights/pull/32588 modified the job format to move more things to the generic "state" value
+// NOTE: https://github.com/hanzoai/insights/pull/32588 modified the job format to move more things to the generic "state" value
 // This function migrates any legacy jobs to the new format. We can remove this shortly after full release.
 export function migrateStreamCyclotronInvocation(invocation: CyclotronJobInvocation): CyclotronJobInvocation {
     // Type casting but keeping as a reference

@@ -2,7 +2,7 @@ import { PluginServerCapabilities, PluginServerMode, PluginsServerConfig, string
 
 // =============================================================================
 // Capability Groups for Local Development
-// These can be combined via hogli dev:setup to reduce event loop contention and memory overhead
+// These can be combined via insights-cli dev:setup to reduce event loop contention and memory overhead
 // =============================================================================
 
 /** CDP - destinations, webhooks, and realtime alerts */

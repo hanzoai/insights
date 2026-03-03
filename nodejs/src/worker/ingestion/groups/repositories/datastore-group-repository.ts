@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { STREAM_GROUPS } from '../../../../config/stream-topics'
 import { StreamProducerWrapper } from '../../../../stream/producer'
 import { GroupTypeIndex, TeamId, TimestampFormat } from '../../../../types'
 import { castTimestampOrNow } from '../../../../utils/utils'
 
-export class ClickhouseGroupRepository {
+export class DatastoreGroupRepository {
     constructor(private streamProducer: StreamProducerWrapper) {}
 
     public async upsertGroup(
@@ -27,7 +27,7 @@ export class ClickhouseGroupRepository {
                         group_key: groupKey,
                         team_id: teamId,
                         group_properties: JSON.stringify(properties),
-                        created_at: castTimestampOrNow(createdAt, TimestampFormat.ClickHouseSecondPrecision),
+                        created_at: castTimestampOrNow(createdAt, TimestampFormat.DatastoreSecondPrecision),
                         version,
                     }),
                 },

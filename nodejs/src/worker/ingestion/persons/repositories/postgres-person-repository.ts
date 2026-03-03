@@ -2,7 +2,7 @@
 import { DateTime } from 'luxon'
 import { QueryResult } from 'pg'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { STREAM_PERSON_DISTINCT_ID } from '../../../../config/stream-topics'
 import { TopicMessage } from '../../../../stream/producer'
