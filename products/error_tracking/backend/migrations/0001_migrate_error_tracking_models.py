@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -102,7 +102,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("hash_id", models.TextField()),
@@ -122,7 +122,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("ref", models.TextField()),
@@ -149,7 +149,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("filters", models.JSONField()),
@@ -168,7 +168,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("raw_id", models.TextField()),
@@ -196,7 +196,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("fingerprint", models.TextField()),
@@ -244,7 +244,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
@@ -278,7 +278,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("bytecode", models.JSONField()),
@@ -311,7 +311,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("provider", models.TextField(null=True)),
@@ -342,7 +342,7 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
+                        default=insights.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                     ),
                 ),
                 ("order_key", models.IntegerField()),
