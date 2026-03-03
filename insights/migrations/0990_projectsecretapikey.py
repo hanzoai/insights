@@ -10,7 +10,7 @@ import insights.models.utils
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0989_add_tags_to_hogflow_template")]
+    dependencies = [("posthog", "0989_add_tags_to_insightsflow_template")]
 
     operations = [
         migrations.CreateModel(
