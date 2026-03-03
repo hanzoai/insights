@@ -2,7 +2,7 @@
 import { DateTime } from 'luxon'
 import { Counter } from 'prom-client'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import { TopicMessage } from '../../../stream/producer'
 import { InternalPerson } from '../../../types'
@@ -163,7 +163,7 @@ export class PersonMergeService {
         teamId: number,
         timestamp: DateTime
     ): Promise<PersonMergeResult> {
-        // No reason to alias person against itself. Done by posthog-node when updating user properties
+        // No reason to alias person against itself. Done by insights-node when updating user properties
         if (mergeIntoDistinctId === otherPersonDistinctId) {
             // Create a success result with undefined person to indicate no merge was needed
             return mergeSuccess(undefined, Promise.resolve(), true)
@@ -219,12 +219,12 @@ export class PersonMergeService {
         //
         // Historically, we always INSERT-ed new `insights_persondistinctid` rows with `version=0`.
         // Overrides are only created when the version is > 0, see:
-        //   https://github.com/PostHog/insights/blob/92e17ce307a577c4233d4ab252eebc6c2207a5ee/insights/models/person/sql.py#L269-L287
+        //   https://github.com/hanzoai/insights/blob/92e17ce307a577c4233d4ab252eebc6c2207a5ee/insights/models/person/sql.py#L269-L287
         //
         // With the addition of optional person profile processing, we are no longer creating
         // `insights_persondistinctid` and `insights_person` rows when $process_person_profile=false.
         // This means that at merge time, it's possible this `distinct_id` and its deterministically
-        // generated `person.uuid` has already been used for events in ClickHouse, but they have no
+        // generated `person.uuid` has already been used for events in datastore, but they have no
         // corresponding rows in the `insights_persondistinctid` or `insights_person` tables.
         //
         // For this reason, $process_person_profile=false write to the `insights_personlessdistinctid`
@@ -232,7 +232,7 @@ export class PersonMergeService {
         // our merges transactions below, we do two things:
         //   1. We check whether a row exists in `insights_personlessdistinctid` for that Distinct ID,
         //      if so, we need to write out `insights_persondistinctid` rows with `version=1` so that
-        //      an override is created in ClickHouse which will associate the old "personless" events
+        //      an override is created in datastore which will associate the old "personless" events
         //      with the Person UUID they were merged into.
         //   2. We insert and/or update the `insights_personlessdistinctid` ourselves, to mark that
         //      the Distinct ID has been merged. This is important so that an event being processed
@@ -379,7 +379,7 @@ export class PersonMergeService {
         // In case of PoE Embrace the join mode:
         //   we want to keep using the older person to reduce the number of partitions that need to be updated during squash
         //   to do that we'll swap otherPerson and mergeInto person (after properties merge computation!)
-        //   additionally update person overrides table in postgres and clickhouse
+        //   additionally update person overrides table in postgres and datastore
         //   TODO: ^
         // If the merge fails:
         //   we'll roll back the transaction and then try from scratch in the origial order of persons provided for property merges

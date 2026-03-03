@@ -36,7 +36,7 @@ export type TopicMessage = {
 }
 
 export class StreamProducerWrapper {
-    /** Stream producer used for syncing Postgres and ClickHouse person data. */
+    /** Stream producer used for syncing Postgres and datastore person data. */
     private producer: HighLevelProducer
 
     static async create(streamClientRack: string | undefined, mode: StreamConfigTarget = 'PRODUCER') {

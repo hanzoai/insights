@@ -2,7 +2,7 @@ import escapeStringRegexp from 'escape-string-regexp'
 import equal from 'fast-deep-equal'
 import { Summary } from 'prom-client'
 
-import { Properties } from '@posthog/plugin-scaffold'
+import { Properties } from '@hanzo/plugin-scaffold'
 
 import {
     Action,
@@ -50,7 +50,7 @@ const actionMatchMsSummary = new Summary({
 })
 
 /** Return whether two values compare to each other according to the specified operator.
- * This simulates the behavior of ClickHouse (or other DBMSs) which like to cast values in SELECTs to the column's type.
+ * This simulates the behavior of datastore (or other DBMSs) which like to cast values in SELECTs to the column's type.
  */
 export function castingCompare(
     a: any,
@@ -58,9 +58,9 @@ export function castingCompare(
     operator: PropertyOperator.Exact | PropertyOperator.IsNot | PropertyOperator.LessThan | PropertyOperator.GreaterThan
 ): boolean {
     // Do null transformation first
-    // Clickhouse treats the string "null" as null, while here we treat them as different values
+    // Datastore treats the string "null" as null, while here we treat them as different values
     // Thus, this check special cases the string "null" to be equal to the null value
-    // See more: https://github.com/PostHog/insights/issues/12893
+    // See more: https://github.com/hanzoai/insights/issues/12893
     if (a === null) {
         a = 'null'
     }
@@ -115,7 +115,7 @@ export function castingCompare(
 export function matchString(actual: string, expected: string, matching: StringMatching): boolean {
     switch (matching) {
         case StringMatching.Regex:
-            // Using RE2 here because that's what ClickHouse uses for regex matching anyway
+            // Using RE2 here because that's what datastore uses for regex matching anyway
             // It's also safer for user-provided patterns because of a few explicit limitations
             try {
                 return createTrackedRE2(expected, undefined, 'action-matcher:matchString').test(actual)

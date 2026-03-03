@@ -12,7 +12,7 @@ export const propertyFilterPlugin: LegacyTransformationPlugin = {
         id: 'plugin-property-filter-plugin',
         name: 'Property Filter',
         description: 'This plugin will set all configured properties to null inside an ingested event.',
-        icon_url: 'https://raw.githubusercontent.com/PostHog/property-filter-plugin/dev/logo.png',
+        icon_url: 'https://raw.githubusercontent.com/hanzoai/property-filter-plugin/dev/logo.png',
         category: ['Transformation'],
         code_language: 'javascript',
         code: `return event`,

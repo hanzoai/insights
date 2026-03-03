@@ -2,7 +2,7 @@
 import { DateTime } from 'luxon'
 import express from 'ultimate-express'
 
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { ModifiedRequest } from '~/api/router'
 import { createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'

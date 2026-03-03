@@ -1,4 +1,4 @@
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { StreamProducerWrapper } from '../../stream/producer'
 import { EventHeaders, Team } from '../../types'

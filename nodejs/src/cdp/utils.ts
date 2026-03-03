@@ -4,9 +4,9 @@ import { gunzip, gzip } from 'zlib'
 
 import { sanitizeForUTF8 } from '~/utils/strings'
 
-import { RawClickHouseEvent, Team, TimestampFormat } from '../types'
+import { RawDatastoreEvent, Team, TimestampFormat } from '../types'
 import { parseJSON } from '../utils/json-parse'
-import { UUIDT, castTimestampOrNow, clickHouseTimestampToISO } from '../utils/utils'
+import { UUIDT, castTimestampOrNow, datastoreTimestampToISO } from '../utils/utils'
 import { CdpDataWarehouseEvent, CdpInternalEvent } from './schema'
 import { InsightsFunctionInvocationGlobals, InsightsFunctionType, LogEntry, LogEntrySerialized, MinimalLogEntry } from './types'
 
@@ -32,7 +32,7 @@ export const getPersonDisplayName = (team: Team, distinctId: string, properties:
 
 // that we can keep to as a contract
 export function convertToInsightsFunctionInvocationGlobals(
-    event: RawClickHouseEvent,
+    event: RawDatastoreEvent,
     team: Team,
     siteUrl: string
 ): InsightsFunctionInvocationGlobals {
@@ -57,12 +57,12 @@ export function convertToInsightsFunctionInvocationGlobals(
     // so we need to handle that case
     const eventTimestamp = DateTime.fromISO(event.timestamp).isValid
         ? event.timestamp
-        : clickHouseTimestampToISO(event.timestamp)
+        : datastoreTimestampToISO(event.timestamp)
 
     const eventCapturedAt = event.captured_at
         ? DateTime.fromISO(event.captured_at).isValid
             ? event.captured_at
-            : clickHouseTimestampToISO(event.captured_at)
+            : datastoreTimestampToISO(event.captured_at)
         : null
 
     const context: InsightsFunctionInvocationGlobals = {
@@ -244,7 +244,7 @@ export const fixLogDeduplication = (logs: LogEntry[]): LogEntrySerialized[] => {
     let previousTimestamp = sortedLogs[0].timestamp.minus(1)
 
     sortedLogs.forEach((logEntry) => {
-        // TRICKY: The clickhouse table dedupes logs with the same timestamp - we need to ensure they are unique by simply plus-ing 1ms
+        // TRICKY: The datastore table dedupes logs with the same timestamp - we need to ensure they are unique by simply plus-ing 1ms
         // if the timestamp is the same as the previous one
         if (logEntry.timestamp <= previousTimestamp) {
             logEntry.timestamp = previousTimestamp.plus(1)
@@ -254,7 +254,7 @@ export const fixLogDeduplication = (logs: LogEntry[]): LogEntrySerialized[] => {
 
         const sanitized: LogEntrySerialized = {
             ...logEntry,
-            timestamp: castTimestampOrNow(logEntry.timestamp, TimestampFormat.ClickHouse),
+            timestamp: castTimestampOrNow(logEntry.timestamp, TimestampFormat.Datastore),
         }
         preparedLogs.push(sanitized)
     })

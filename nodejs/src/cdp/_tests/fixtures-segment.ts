@@ -42,7 +42,7 @@ export const amplitudeInputs = {
         email: 'max@hanzo.ai',
         gclid: null,
         qclid: null,
-        realm: 'hosted-clickhouse',
+        realm: 'hosted-datastore',
         sccid: null,
         fbclid: null,
         gbraid: null,

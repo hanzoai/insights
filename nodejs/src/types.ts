@@ -3,7 +3,7 @@ import { Redis } from 'ioredis'
 import { DateTime } from 'luxon'
 import { Message } from 'node-rdkafka'
 
-import { Element, PluginEvent, Properties } from '@posthog/plugin-scaffold'
+import { Element, PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { QuotaLimiting } from '~/common/services/quota-limiting.service'
 
@@ -18,11 +18,11 @@ import { GeoIPService } from './utils/geoip'
 import { PubSub } from './utils/pubsub'
 import { TeamManager } from './utils/team-manager'
 import { GroupTypeManager } from './worker/ingestion/group-type-manager'
-import { ClickhouseGroupRepository } from './worker/ingestion/groups/repositories/clickhouse-group-repository'
+import { DatastoreGroupRepository } from './worker/ingestion/groups/repositories/datastore-group-repository'
 import { GroupRepository } from './worker/ingestion/groups/repositories/group-repository.interface'
 import { PersonRepository } from './worker/ingestion/persons/repositories/person-repository'
 
-export { Element } from '@posthog/plugin-scaffold' // Re-export Element from scaffolding, for backwards compat.
+export { Element } from '@hanzo/plugin-scaffold' // Re-export Element from scaffolding, for backwards compat.
 
 type Brand<K, T> = K & { __brand: T }
 
@@ -133,9 +133,9 @@ export type PluginServerService = {
 
 export type CdpConfig = {
     CDP_WATCHER_COST_ERROR: number // The max cost of an erroring function
-    CDP_WATCHER_HOG_COST_TIMING: number // The max cost of a slow function
-    CDP_WATCHER_HOG_COST_TIMING_LOWER_MS: number // The lower bound in ms where the timing cost is not incurred
-    CDP_WATCHER_HOG_COST_TIMING_UPPER_MS: number // The upper bound in ms where the timing cost is fully incurred
+    CDP_WATCHER_COST_TIMING: number // The max cost of a slow function
+    CDP_WATCHER_COST_TIMING_LOWER_MS: number // The lower bound in ms where the timing cost is not incurred
+    CDP_WATCHER_COST_TIMING_UPPER_MS: number // The upper bound in ms where the timing cost is fully incurred
     CDP_WATCHER_ASYNC_COST_TIMING: number // The max cost of a slow async function
     CDP_WATCHER_ASYNC_COST_TIMING_LOWER_MS: number // The lower bound in ms where the async timing cost is not incurred
     CDP_WATCHER_ASYNC_COST_TIMING_UPPER_MS: number // The upper bound in ms where the async timing cost is fully incurred
@@ -153,7 +153,7 @@ export type CdpConfig = {
     CDP_RATE_LIMITER_BUCKET_SIZE: number // The total bucket size
     CDP_RATE_LIMITER_REFILL_RATE: number // The number of tokens to be refilled per second
     CDP_RATE_LIMITER_TTL: number // The expiry for the rate limit key
-    CDP_HOG_FILTERS_TELEMETRY_TEAMS: string
+    CDP_FILTERS_TELEMETRY_TEAMS: string
     DISABLE_OPENTELEMETRY_TRACING: boolean
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_KIND: CyclotronJobQueueKind
     CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE: CyclotronJobQueueSource
@@ -284,7 +284,7 @@ export type IngestionConsumerConfig = {
     STREAM_BATCH_START_LOGGING_ENABLED: boolean
     TIMESTAMP_COMPARISON_LOGGING_SAMPLE_RATE: number
 
-    // Clickhouse topics
+    // Datastore topics
     DATASTORE_JSON_EVENTS_STREAM_TOPIC: string
     DATASTORE_HEATMAPS_STREAM_TOPIC: string
 
@@ -511,7 +511,7 @@ export interface PluginsServerConfig
     PROPERTY_DEFS_WRITE_DISABLED: boolean
 
     // Shared between ingestion and CDP (used by script transformer in both)
-    CDP_HOG_WATCHER_SAMPLE_RATE: number
+    CDP_SCRIPT_WATCHER_SAMPLE_RATE: number
     CDP_BATCH_WORKFLOW_PRODUCER_BATCH_SIZE: number
 
     // for enablement/sampling of expensive person JSONB sizes; value in [0,1]
@@ -547,7 +547,7 @@ export interface Hub extends PluginsServerConfig {
     teamManager: TeamManager
     groupTypeManager: GroupTypeManager
     groupRepository: GroupRepository
-    clickhouseGroupRepository: ClickhouseGroupRepository
+    datastoreGroupRepository: DatastoreGroupRepository
     personRepository: PersonRepository
     // geoip database, setup in workers
     geoipService: GeoIPService
@@ -745,7 +745,7 @@ export interface EventMessage extends BaseEventMessage {
     sent_at: DateTime | null
 }
 
-/** Properties shared by RawClickHouseEvent and ClickHouseEvent. */
+/** Properties shared by RawDatastoreEvent and DatastoreEvent. */
 interface BaseEvent {
     uuid: string
     event: string
@@ -756,44 +756,44 @@ interface BaseEvent {
 }
 
 export type ISOTimestamp = Brand<string, 'ISOTimestamp'>
-export type ClickHouseTimestamp = Brand<string, 'ClickHouseTimestamp'>
-export type ClickHouseTimestampSecondPrecision = Brand<string, 'ClickHouseTimestamp'>
+export type DatastoreTimestamp = Brand<string, 'DatastoreTimestamp'>
+export type DatastoreTimestampSecondPrecision = Brand<string, 'DatastoreTimestamp'>
 export type PersonMode = 'full' | 'propertyless' | 'force_upgrade'
 
-/** Raw event row from ClickHouse. */
-export interface RawClickHouseEvent extends BaseEvent {
+/** Raw event row from datastore. */
+export interface RawDatastoreEvent extends BaseEvent {
     project_id: ProjectId
-    timestamp: ClickHouseTimestamp
-    created_at: ClickHouseTimestamp
-    captured_at?: ClickHouseTimestamp | null
+    timestamp: DatastoreTimestamp
+    created_at: DatastoreTimestamp
+    captured_at?: DatastoreTimestamp | null
     properties?: string
     elements_chain: string
-    person_created_at?: ClickHouseTimestamp
+    person_created_at?: DatastoreTimestamp
     person_properties?: string
     group0_properties?: string
     group1_properties?: string
     group2_properties?: string
     group3_properties?: string
     group4_properties?: string
-    group0_created_at?: ClickHouseTimestamp
-    group1_created_at?: ClickHouseTimestamp
-    group2_created_at?: ClickHouseTimestamp
-    group3_created_at?: ClickHouseTimestamp
-    group4_created_at?: ClickHouseTimestamp
+    group0_created_at?: DatastoreTimestamp
+    group1_created_at?: DatastoreTimestamp
+    group2_created_at?: DatastoreTimestamp
+    group3_created_at?: DatastoreTimestamp
+    group4_created_at?: DatastoreTimestamp
     person_mode: PersonMode
     historical_migration?: boolean
 }
 
-export interface RawStreamEvent extends RawClickHouseEvent {
+export interface RawStreamEvent extends RawDatastoreEvent {
     /**
-     * The project ID field is only included in the `datastore_events_json` topic, not present in ClickHouse.
+     * The project ID field is only included in the `datastore_events_json` topic, not present in datastore.
      * That's because we need it in `property-defs-rs` and not elsewhere.
      */
     project_id: ProjectId
 }
 
-/** Parsed event row from ClickHouse. */
-export interface ClickHouseEvent extends BaseEvent {
+/** Parsed event row from datastore. */
+export interface DatastoreEvent extends BaseEvent {
     project_id: ProjectId
     timestamp: DateTime
     created_at: DateTime
@@ -815,7 +815,7 @@ export interface ClickHouseEvent extends BaseEvent {
 }
 
 /** Event structure before initial ingestion.
- * This is what is used for all ingestion steps that run _before_ the clickhouse events topic.
+ * This is what is used for all ingestion steps that run _before_ the datastore events topic.
  */
 export interface PreIngestionEvent {
     eventUuid: string
@@ -828,7 +828,7 @@ export interface PreIngestionEvent {
 }
 
 /** Parsed event structure after initial ingestion.
- * This is what is used for all ingestion steps that run _after_ the clickhouse events topic.
+ * This is what is used for all ingestion steps that run _after_ the datastore events topic.
  */
 
 export interface PostIngestionEvent extends PreIngestionEvent {
@@ -924,8 +924,8 @@ export interface Person {
     force_upgrade?: boolean
 }
 
-/** Clickhouse Person model. */
-export interface ClickHousePerson {
+/** Datastore Person model. */
+export interface DatastorePerson {
     id: string
     created_at: string
     team_id: number
@@ -962,8 +962,8 @@ export interface Group extends BaseGroup {
 }
 
 export type GroupKey = string
-/** Clickhouse Group model */
-export interface ClickhouseGroup {
+/** Datastore Group model */
+export interface DatastoreGroup {
     group_type_index: GroupTypeIndex
     group_key: GroupKey
     created_at: string
@@ -980,8 +980,8 @@ export interface PersonDistinctId {
     version: string | null
 }
 
-/** ClickHouse PersonDistinctId model. (person_distinct_id2 table) */
-export interface ClickHousePersonDistinctId2 {
+/** Datastore PersonDistinctId model. (person_distinct_id2 table) */
+export interface DatastorePersonDistinctId2 {
     team_id: number
     person_id: string
     distinct_id: string
@@ -1148,7 +1148,7 @@ export interface Action extends Omit<RawAction, 'steps_json'> {
     hooks: Hook[]
 }
 
-/** Raw session recording event row from ClickHouse. */
+/** Raw session recording event row from datastore. */
 export interface RawSessionRecordingEvent {
     uuid: string
     timestamp: string
@@ -1160,7 +1160,7 @@ export interface RawSessionRecordingEvent {
     created_at: string
 }
 
-/** Raw session replay event row from ClickHouse. */
+/** Raw session replay event row from datastore. */
 export interface RawSessionReplayEvent {
     min_first_timestamp: string
     team_id: number
@@ -1170,7 +1170,7 @@ export interface RawSessionReplayEvent {
 }
 
 export enum TimestampFormat {
-    ClickHouseSecondPrecision = 'clickhouse-second-precision',
+    DatastoreSecondPrecision = 'datastore-second-precision',
     Datastore = 'datastore',
     ISO = 'iso',
 }
@@ -1296,7 +1296,7 @@ export interface ValueMatcher<T> {
     (value: T): boolean
 }
 
-export type RawClickhouseHeatmapEvent = {
+export type RawDatastoreHeatmapEvent = {
     /**
      * session id lets us offer example recordings on high traffic parts of the page,
      * and could let us offer more advanced filtering of heatmap data

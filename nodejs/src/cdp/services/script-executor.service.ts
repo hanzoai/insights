@@ -41,7 +41,7 @@ export type CdpFetchConfig = Pick<Hub, 'CDP_FETCH_RETRIES' | 'CDP_FETCH_BACKOFF_
 export type ScriptExecutorServiceHub = CdpFetchConfig &
     ScriptInputsServiceHub &
     EmailServiceHub &
-    Pick<Hub, 'CDP_WATCHER_HOG_COST_TIMING_UPPER_MS' | 'CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN' | 'teamManager'>
+    Pick<Hub, 'CDP_WATCHER_COST_TIMING_UPPER_MS' | 'CDP_GOOGLE_ADWORDS_DEVELOPER_TOKEN' | 'teamManager'>
 
 const cdpHttpRequests = new Counter({
     name: 'cdp_http_requests',
@@ -126,7 +126,7 @@ export const getNextRetryTime = (backoffBaseMs: number, backoffMaxMs: number, tr
 }
 
 export const MAX_ASYNC_STEPS = 5
-export const MAX_HOG_LOGS = 25
+export const MAX_SCRIPT_LOGS = 25
 export const EXTEND_OBJECT_KEY = '$$_extend_object'
 
 const scriptExecutionDuration = new Histogram({
@@ -182,7 +182,7 @@ export class ScriptExecutorService {
         const logs: LogEntry[] = []
         const invocations: CyclotronJobInvocationInsightsFunction[] = []
 
-        // TRICKY: The frontend generates filters matching the Clickhouse event type so we are converting back
+        // TRICKY: The frontend generates filters matching the datastore event type so we are converting back
         const filterGlobals = convertToInsightsFunctionFilterGlobal(triggerGlobals)
 
         const _filterInsightsFunction = async (
@@ -410,20 +410,20 @@ export class ScriptExecutorService {
 
                 const execFnOutcome = await execFn(invocationInput, {
                     globals,
-                    timeout: this.hub.CDP_WATCHER_HOG_COST_TIMING_UPPER_MS,
+                    timeout: this.hub.CDP_WATCHER_COST_TIMING_UPPER_MS,
                     maxAsyncSteps: MAX_ASYNC_STEPS, // NOTE: This will likely be configurable in the future
                     asyncFunctions: asyncFunctions,
                     functions: {
                         print: (...args: any[]) => {
                             scriptLogs++
-                            if (scriptLogs === MAX_HOG_LOGS) {
+                            if (scriptLogs === MAX_SCRIPT_LOGS) {
                                 addLog(
                                     'warn',
                                     `Function exceeded maximum log entries. No more logs will be collected. Event: ${eventId}`
                                 )
                             }
 
-                            if (scriptLogs >= MAX_HOG_LOGS) {
+                            if (scriptLogs >= MAX_SCRIPT_LOGS) {
                                 return
                             }
 

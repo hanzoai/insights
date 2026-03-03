@@ -1,4 +1,4 @@
-import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
+import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { cloneObject } from '~/utils/utils'
 

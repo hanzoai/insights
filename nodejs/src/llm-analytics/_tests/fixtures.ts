@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 
 import { insertRow } from '~/tests/helpers/sql'
 
-import { ClickHouseTimestamp, ProjectId, RawClickHouseEvent, Team } from '../../types'
+import { DatastoreTimestamp, ProjectId, RawDatastoreEvent, Team } from '../../types'
 import { PostgresRouter } from '../../utils/db/postgres'
 import { Evaluation, EvaluationConditionSet } from '../types'
 
@@ -60,18 +60,18 @@ export const insertEvaluation = async (
     return res
 }
 
-export const createAiGenerationEvent = (teamId: number, data: Partial<RawClickHouseEvent> = {}): RawClickHouseEvent => {
+export const createAiGenerationEvent = (teamId: number, data: Partial<RawDatastoreEvent> = {}): RawDatastoreEvent => {
     return {
         team_id: teamId,
         project_id: teamId as ProjectId,
-        created_at: new Date().toISOString() as ClickHouseTimestamp,
+        created_at: new Date().toISOString() as DatastoreTimestamp,
         elements_chain: '[]',
-        person_created_at: new Date().toISOString() as ClickHouseTimestamp,
+        person_created_at: new Date().toISOString() as DatastoreTimestamp,
         person_properties: '{}',
         distinct_id: 'distinct_id_1',
         uuid: randomUUID(),
         event: '$ai_generation',
-        timestamp: new Date().toISOString() as ClickHouseTimestamp,
+        timestamp: new Date().toISOString() as DatastoreTimestamp,
         properties: JSON.stringify({
             $ai_model: 'gpt-4',
             $ai_input: ['test input'],
