@@ -9,7 +9,7 @@ import { HealthCheckResult, Hub, PluginsServerConfig, RawClickHouseEvent } from 
 import { parseJSON } from '../../utils/json-parse'
 import { logger } from '../../utils/logger'
 import { captureException } from '../../utils/insights'
-import { shouldBlockInsightsFlowDueToQuota } from '../services/insightsflows/customflow-quota-limiting'
+import { shouldBlockInsightsFlowDueToQuota } from '../services/insightsflows/insightsflow-quota-limiting'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import { ScriptRateLimiterService, ScriptRateLimiterServiceHub } from '../services/monitoring/script-rate-limiter.service'
 import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'

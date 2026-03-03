@@ -8,7 +8,7 @@ import { InsightsFunctionType } from '../types'
  * As such we have a bunch of prebuilt examples here for usage in tests.
  */
 
-export const FN_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'fn' | 'bytecode' | 'type'>> = {
+export const FN_EXAMPLES: Record<string, Pick<InsightsFunctionType, 'script' | 'bytecode' | 'type'>> = {
     // Simple return examples (no async functions)
     simple_return_object: {
         type: 'destination',

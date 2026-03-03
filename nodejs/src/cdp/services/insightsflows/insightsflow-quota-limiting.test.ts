@@ -6,7 +6,7 @@ import {
     checkInsightsFlowQuotaLimits,
     counterInsightsFlowQuotaLimited,
     shouldBlockInsightsFlowDueToQuota,
-} from './customflow-quota-limiting'
+} from './insightsflow-quota-limiting'
 
 describe('InsightsFlow Quota Limiting', () => {
     let mockQuotaLimiting: jest.Mocked<QuotaLimiting>

@@ -9,7 +9,7 @@ import { logger } from '../../utils/logger'
 import { PromiseScheduler } from '../../utils/promise-scheduler'
 import { UUID, UUIDT } from '../../utils/utils'
 import { createInsightsFlowInvocation } from '../services/insightsflows/insightsflow-executor.service'
-import { actionIdForLogging } from '../services/insightsflows/customflow-utils'
+import { actionIdForLogging } from '../services/insightsflows/insightsflow-utils'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import { ScriptWatcherFunctionState, ScriptWatcherState } from '../services/monitoring/script-watcher.service'
 import {
