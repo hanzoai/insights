@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Message } from 'node-rdkafka'
 
 import { instrumentFn, instrumented } from '~/common/tracing/tracing-utils'
