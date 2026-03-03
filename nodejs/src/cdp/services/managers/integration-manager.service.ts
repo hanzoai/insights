@@ -41,7 +41,7 @@ export class IntegrationManagerService {
 
         const response = await this.postgres.query<IntegrationType>(
             PostgresUse.COMMON_READ,
-            `SELECT id, team_id, kind, config, sensitive_config FROM posthog_integration WHERE id = ANY($1)`,
+            `SELECT id, team_id, kind, config, sensitive_config FROM insights_integration WHERE id = ANY($1)`,
             [ids],
             'fetchIntegrations'
         )

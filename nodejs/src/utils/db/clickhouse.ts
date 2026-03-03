@@ -7,11 +7,9 @@ import { logger } from '../logger'
 import { timeoutGuard } from './utils'
 
 /**
- * Configuration for a ClickHouse connection.
- * Consumers should build this config inline where they create ClickHouse connections,
- * rather than relying on centralized builder functions.
+ * Configuration for a Datastore connection.
  */
-export interface ClickHouseConnectionConfig {
+export interface DatastoreConnectionConfig {
     url: string
     username?: string
     password?: string
@@ -21,7 +19,10 @@ export interface ClickHouseConnectionConfig {
     keep_alive_enabled?: boolean
 }
 
-function createClickHouseClient(config: ClickHouseConnectionConfig): ClickHouseClient {
+/** @deprecated Use DatastoreConnectionConfig */
+export type ClickHouseConnectionConfig = DatastoreConnectionConfig
+
+function createDatastoreClient(config: DatastoreConnectionConfig): ClickHouseClient {
     return createClickhouseClient({
         url: config.url,
         username: config.username,
@@ -36,7 +37,7 @@ function createClickHouseClient(config: ClickHouseConnectionConfig): ClickHouseC
     })
 }
 
-export class ClickHouseRouter {
+export class DatastoreRouter {
     private client: ClickHouseClient | null = null
 
     constructor(private hub: PluginsServerConfig) {}
@@ -53,7 +54,7 @@ export class ClickHouseRouter {
         const database = this.hub.DATASTORE_DATABASE ?? 'default'
         logger.info('🤔', 'Connecting to Datastore...')
 
-        this.client = createClickHouseClient({
+        this.client = createDatastoreClient({
             url: `http://${host}:${port}`,
             username: user,
             password: password,
@@ -63,16 +64,16 @@ export class ClickHouseRouter {
             keep_alive_enabled: true,
         })
 
-        logger.info('👍', 'ClickHouse ready')
+        logger.info('👍', 'Datastore ready')
     }
 
     public async query<T>(query: string, tag: string = 'unknown'): Promise<T[]> {
         if (!this.client) {
-            throw new Error('ClickHouse client not initialized. Call initialize() first.')
+            throw new Error('Datastore client not initialized. Call initialize() first.')
         }
 
-        return withSpan('clickhouse', 'query.clickhouse', { tag }, async () => {
-            const timeout = timeoutGuard('ClickHouse slow query warning after 30 sec', { query })
+        return withSpan('datastore', 'query.datastore', { tag }, async () => {
+            const timeout = timeoutGuard('Datastore slow query warning after 30 sec', { query })
 
             try {
                 const queryResult = await this.client!.query({
@@ -83,7 +84,7 @@ export class ClickHouseRouter {
                 const jsonData = (await queryResult.json()).data as T[]
                 return jsonData
             } catch (error) {
-                logger.error('🔴', 'ClickHouse query error', {
+                logger.error('🔴', 'Datastore query error', {
                     query,
                     error,
                     stack: error instanceof Error ? error.stack : undefined,
@@ -102,3 +103,6 @@ export class ClickHouseRouter {
         }
     }
 }
+
+// Backward compat alias - remove after all imports updated
+export { DatastoreRouter as ClickHouseRouter }

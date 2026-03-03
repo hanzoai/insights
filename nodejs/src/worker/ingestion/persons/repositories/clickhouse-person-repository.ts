@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { ClickHouseRouter } from '~/utils/db/clickhouse'
+import { DatastoreRouter } from '~/utils/db/clickhouse'
 import { logger } from '~/utils/logger'
 
 import { TopicMessage } from '../../../../kafka/producer'
@@ -32,8 +32,8 @@ import { PersonRepositoryTransaction } from './person-repository-transaction'
  * Note: This only implements required read methods. Write operations are not supported and will
  * throw errors if called, and can be implemented in the future if needed.
  */
-export class ClickHousePersonRepository implements PersonRepository {
-    constructor(private clickHouseRouter: ClickHouseRouter) {}
+export class DatastorePersonRepository implements PersonRepository {
+    constructor(private datastoreRouter: DatastoreRouter) {}
 
     async countPersonsByProperties(teamPersons: {
         teamId: TeamId
@@ -139,7 +139,7 @@ export class ClickHousePersonRepository implements PersonRepository {
             SETTINGS optimize_aggregation_in_order = 1
         `
 
-        logger.debug('ClickHousePersonRepository.fetchPersonsByProperties', {
+        logger.debug('DatastorePersonRepository.fetchPersonsByProperties', {
             properties,
             query,
         })
@@ -344,7 +344,7 @@ export class ClickHousePersonRepository implements PersonRepository {
     }
 
     private async query<T>(query: string): Promise<T[]> {
-        return await this.clickHouseRouter.query<T>(query)
+        return await this.datastoreRouter.query<T>(query)
     }
 
     private parseRelativeDate(value: string): string | null {
@@ -411,7 +411,7 @@ export class ClickHousePersonRepository implements PersonRepository {
         _distinctId: string,
         _options?: { forUpdate?: boolean; useReadReplica?: boolean }
     ): Promise<InternalPerson | undefined> {
-        return Promise.reject(new Error('fetchPerson operation not yet supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('fetchPerson operation not yet supported in DatastorePersonRepository'))
     }
 
     fetchPersonsByDistinctIds(
@@ -419,7 +419,7 @@ export class ClickHousePersonRepository implements PersonRepository {
         _useReadReplica?: boolean
     ): Promise<InternalPersonWithDistinctId[]> {
         return Promise.reject(
-            new Error('fetchPersonsByDistinctIds operation not yet supported in ClickHousePersonRepository')
+            new Error('fetchPersonsByDistinctIds operation not yet supported in DatastorePersonRepository')
         )
     }
 
@@ -435,7 +435,7 @@ export class ClickHousePersonRepository implements PersonRepository {
         _primaryDistinctId: { distinctId: string; version?: number },
         _extraDistinctIds?: { distinctId: string; version?: number }[]
     ): Promise<CreatePersonResult> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     updatePerson(
@@ -443,41 +443,41 @@ export class ClickHousePersonRepository implements PersonRepository {
         _update: PersonUpdateFields,
         _tag?: string
     ): Promise<[InternalPerson, TopicMessage[], boolean]> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     updatePersonAssertVersion(_personUpdate: PersonUpdate): Promise<[number | undefined, TopicMessage[]]> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     updatePersonsBatch(
         _personUpdates: PersonUpdate[]
     ): Promise<Map<string, { success: boolean; version?: number; kafkaMessage?: TopicMessage; error?: Error }>> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     deletePerson(_person: InternalPerson): Promise<TopicMessage[]> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     addDistinctId(_person: InternalPerson, _distinctId: string, _version: number): Promise<TopicMessage[]> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     addPersonlessDistinctId(_teamId: Team['id'], _distinctId: string): Promise<boolean> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     addPersonlessDistinctIdForMerge(_teamId: Team['id'], _distinctId: string): Promise<boolean> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     addPersonlessDistinctIdsBatch(_entries: { teamId: number; distinctId: string }[]): Promise<Map<string, boolean>> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     personPropertiesSize(_personId: string, _teamId: number): Promise<number> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     updateCohortsAndFeatureFlagsForMerge(
@@ -485,11 +485,11 @@ export class ClickHousePersonRepository implements PersonRepository {
         _sourcePersonID: InternalPerson['id'],
         _targetPersonID: InternalPerson['id']
     ): Promise<void> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 
     inTransaction<T>(_description: string, _transaction: (tx: PersonRepositoryTransaction) => Promise<T>): Promise<T> {
-        return Promise.reject(new Error('Write operations not supported in ClickHousePersonRepository'))
+        return Promise.reject(new Error('Write operations not supported in DatastorePersonRepository'))
     }
 }
 

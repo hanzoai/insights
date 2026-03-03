@@ -65,8 +65,8 @@ export class LegacyPluginExecutorService {
         const get = async (key: string, defaultValue: unknown): Promise<unknown> => {
             const result = await this.postgres.query(
                 PostgresUse.PLUGIN_STORAGE_RW,
-                `SELECT * FROM posthog_pluginstorage as ps 
-                   JOIN posthog_pluginconfig as pc ON ps."plugin_config_id" = pc."id" 
+                `SELECT * FROM insights_pluginstorage as ps 
+                   JOIN insights_pluginconfig as pc ON ps."plugin_config_id" = pc."id" 
                    WHERE pc."team_id" = $1 AND pc."id" = $2 AND ps."key" = $3
                    LIMIT 1`,
                 [teamId, pluginConfigId, key],
@@ -82,7 +82,7 @@ export class LegacyPluginExecutorService {
                 // Check if the plugin config for that team exists
                 const result = await this.postgres.query(
                     PostgresUse.COMMON_READ,
-                    `SELECT * FROM posthog_pluginconfig as pc 
+                    `SELECT * FROM insights_pluginconfig as pc 
                    WHERE pc."team_id" = $1 AND pc."id" = $2
                    LIMIT 1`,
                     [teamId, pluginConfigId],
@@ -99,7 +99,7 @@ export class LegacyPluginExecutorService {
             await this.postgres.query(
                 PostgresUse.PLUGIN_STORAGE_RW,
                 `
-                    INSERT INTO posthog_pluginstorage ("plugin_config_id", "key", "value")
+                    INSERT INTO insights_pluginstorage ("plugin_config_id", "key", "value")
                     VALUES ($1, $2, $3)
                     ON CONFLICT ("plugin_config_id", "key")
                     DO UPDATE SET value = $3

@@ -107,13 +107,13 @@ export class PluginServer {
                 const consumersOptions = [
                     {
                         topic: KAFKA_EVENTS_PLUGIN_INGESTION,
-                        group_id: `clickhouse-ingestion`,
+                        group_id: `datastore-ingestion`,
                     },
                     {
                         topic: KAFKA_EVENTS_PLUGIN_INGESTION_HISTORICAL,
-                        group_id: `clickhouse-ingestion-historical`,
+                        group_id: `datastore-ingestion-historical`,
                     },
-                    { topic: KAFKA_EVENTS_PLUGIN_INGESTION_OVERFLOW, group_id: 'clickhouse-ingestion-overflow' },
+                    { topic: KAFKA_EVENTS_PLUGIN_INGESTION_OVERFLOW, group_id: 'datastore-ingestion-overflow' },
                     { topic: 'client_iwarnings_ingestion', group_id: 'client_iwarnings_ingestion' },
                     { topic: 'heatmaps_ingestion', group_id: 'heatmaps_ingestion' },
                 ]
