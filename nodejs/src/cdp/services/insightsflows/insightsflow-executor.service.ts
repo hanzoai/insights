@@ -34,7 +34,7 @@ import {
     findContinueAction,
     shouldSkipAction,
     trackE2eLag,
-} from './customflow-utils'
+} from './insightsflow-utils'
 
 export const MAX_ACTION_STEPS_HARD_LIMIT = 1000
 

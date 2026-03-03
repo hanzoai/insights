@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 
-import { findActionByType } from '~/cdp/services/insightsflows/customflow-utils'
+import { findActionByType } from '~/cdp/services/insightsflows/insightsflow-utils'
 import { InsightsFlow, InsightsFlowAction, InsightsFlowEdge } from '~/schema/insightsflow'
 import { logger } from '~/utils/logger'
 

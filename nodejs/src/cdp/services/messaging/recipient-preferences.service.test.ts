@@ -1,4 +1,4 @@
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { createExampleInvocation } from '~/cdp/_tests/fixtures'
 import { CyclotronJobInvocationInsightsFunction } from '~/cdp/types'
 import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'

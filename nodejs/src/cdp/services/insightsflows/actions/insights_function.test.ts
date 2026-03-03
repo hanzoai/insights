@@ -2,7 +2,7 @@ import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
 import { DateTime } from 'luxon'
 
-import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/customflow.builder'
+import { FixtureInsightsFlowBuilder } from '~/cdp/_tests/builders/insightsflow.builder'
 import { insertInsightsFunctionTemplate, insertIntegration } from '~/cdp/_tests/fixtures'
 import { createExampleInsightsFlowInvocation } from '~/cdp/_tests/fixtures-insightsflows'
 import { createInvocationResult } from '~/cdp/utils/invocation-utils'
@@ -16,7 +16,7 @@ import { ScriptExecutorService } from '../../script-executor.service'
 import { InsightsFunctionTemplateManagerService } from '../../managers/insights-function-template-manager.service'
 import { RecipientPreferencesService } from '../../messaging/recipient-preferences.service'
 import { InsightsFlowFunctionsService } from '../insightsflow-functions.service'
-import { findActionByType } from '../customflow-utils'
+import { findActionByType } from '../insightsflow-utils'
 import { InsightsFunctionHandler } from './insights_function'
 
 describe('InsightsFunctionHandler', () => {

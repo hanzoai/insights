@@ -93,8 +93,8 @@ describe.each(['postgres' as const, 'kafka' as const, 'hybrid' as const])('CDP C
 
             fnFetchNoFilters = await insertInsightsFunction({
                 type: 'destination',
-                script: hog,
-                bytecode: await compileFn(fnCode),
+                script: scriptSource,
+                bytecode: await compileFn(scriptSource),
                 inputs_schema: [
                     ...(FN_INPUTS_EXAMPLES.simple_fetch.inputs_schema ?? []),
                     { key: 'oauth', type: 'integration', label: 'Slack', secret: false, required: true },
