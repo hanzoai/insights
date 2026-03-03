@@ -9,7 +9,7 @@ from django.core.management import call_command
 from insights.models.cohort.cohort import Cohort
 from insights.models.team.team import Team
 
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 def _has_condition_hash(obj: Any) -> bool:
