@@ -65,9 +65,9 @@ ENV BUILD_LIBRDKAFKA=0
 # Compile and install Node.js dependencies
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && \
-    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@posthog/nodejs... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
-    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@posthog/plugin-transpiler... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
-    NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/plugin-transpiler build
+    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@insights/nodejs... install --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@insights/plugin-transpiler... install --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@insights/plugin-transpiler build
 
 # Build the nodejs services
 COPY ./nodejs/src/ ./nodejs/src/
@@ -76,10 +76,10 @@ COPY ./nodejs/assets/ ./nodejs/assets/
 COPY ./nodejs/bin/ ./nodejs/bin/
 
 # Build cyclotron first
-RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/cyclotron build
+RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@insights/cyclotron build
 
 # Then build the nodejs services
-RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@posthog/nodejs build
+RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@insights/nodejs build
 
 
 #
