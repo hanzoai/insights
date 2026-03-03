@@ -116,7 +116,7 @@ from insights.utils import (
     variables_override_requested_by_client,
 )
 
-from common.hogvm.python.utils import HogVMException
+from common.scriptvm.python.utils import HogVMException
 
 logger = structlog.get_logger(__name__)
 

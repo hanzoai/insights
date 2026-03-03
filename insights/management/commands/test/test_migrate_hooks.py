@@ -6,7 +6,7 @@ from insights.management.commands.migrate_hooks import migrate_hooks
 from insights.models.action.action import Action
 from insights.models.insights_functions.insights_function import InsightsFunction
 
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 class TestMigrateHooks(BaseTest):

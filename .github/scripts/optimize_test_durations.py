@@ -82,7 +82,7 @@ def collect_existing_tests(segment: str | None = None) -> set[str]:
         "--ignore=posthog/dags",
         "--ignore=products/**/dags",
         "--ignore=products/batch_exports/backend/tests/temporal",
-        "--ignore=common/hogvm/python/test",
+        "--ignore=common/scriptvm/python/test",
         "--collect-only",
         "-q",
     ]

@@ -12,7 +12,7 @@ from insights.cdp.validation import (
     compile_script,
 )
 
-from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from common.scriptvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 def validate_inputs(schema, inputs):

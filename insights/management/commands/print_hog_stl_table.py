@@ -10,8 +10,8 @@ class Command(BaseCommand):
 
         insightsql_functions = set(INSIGHTSQL_COMPARISON_MAPPING.keys()).union(set(INSIGHTSQL_CLICKHOUSE_FUNCTIONS.keys()))
 
-        from common.hogvm.python.stl import STL
-        from common.hogvm.python.stl.bytecode import BYTECODE_STL
+        from common.scriptvm.python.stl import STL
+        from common.scriptvm.python.stl.bytecode import BYTECODE_STL
 
         insights_functions = set(STL.keys()).union(set(BYTECODE_STL.keys()))
 

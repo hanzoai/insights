@@ -55,7 +55,7 @@ from insights.rate_limit import (
 from insights.rbac.user_access_control import UserAccessControlError
 from insights.schema_migrations.upgrade import upgrade
 
-from common.hogvm.python.utils import HogVMException
+from common.scriptvm.python.utils import HogVMException
 
 
 def _process_query_request(
