@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 
-import { KafkaProducerWrapper } from '../../../kafka/producer'
+import { StreamProducerWrapper } from '../../../stream/producer'
 import { TimestampFormat } from '../../../types'
 import { logger } from '../../../utils/logger'
 import { castTimestampOrNow } from '../../../utils/utils'
@@ -8,8 +8,8 @@ import { SessionBlockMetadata } from './session-block-metadata'
 
 export class SessionMetadataStore {
     constructor(
-        private producer: KafkaProducerWrapper,
-        private kafkaTopic: string
+        private producer: StreamProducerWrapper,
+        private streamTopic: string
     ) {
         logger.debug('🔍', 'session_metadata_store_created')
     }
@@ -45,7 +45,7 @@ export class SessionMetadataStore {
         }))
 
         await this.producer.queueMessages({
-            topic: this.kafkaTopic,
+            topic: this.streamTopic,
             messages: events.map((event) => ({
                 key: event.session_id,
                 value: JSON.stringify(event),

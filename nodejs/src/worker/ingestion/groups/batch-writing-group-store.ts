@@ -3,7 +3,7 @@ import pLimit from 'p-limit'
 
 import { Properties } from '@posthog/plugin-scaffold'
 
-import { KafkaProducerWrapper } from '~/kafka/producer'
+import { StreamProducerWrapper } from '~/stream/producer'
 
 import { GroupTypeIndex, Hub, TeamId } from '../../../types'
 import { MessageSizeTooLarge } from '../../../utils/db/error'
@@ -26,7 +26,7 @@ import { ClickhouseGroupRepository } from './repositories/clickhouse-group-repos
 import { GroupRepositoryTransaction } from './repositories/group-repository-transaction.interface'
 import { GroupRepository } from './repositories/group-repository.interface'
 
-export type GroupHub = Pick<Hub, 'kafkaProducer' | 'groupRepository' | 'clickhouseGroupRepository'>
+export type GroupHub = Pick<Hub, 'streamProducer' | 'groupRepository' | 'clickhouseGroupRepository'>
 
 class GroupCache {
     private cache: Map<string, GroupUpdate | null>
@@ -138,7 +138,7 @@ export class BatchWritingGroupStore implements GroupStore {
     private groupCache: GroupCache
     private databaseOperationCounts: Map<string, number>
     private options: BatchWritingGroupStoreOptions
-    private kafkaProducer: KafkaProducerWrapper
+    private streamProducer: StreamProducerWrapper
     private groupRepository: GroupRepository
     private clickhouseGroupRepository: ClickhouseGroupRepository
 
@@ -146,7 +146,7 @@ export class BatchWritingGroupStore implements GroupStore {
         this.options = { ...DEFAULT_OPTIONS, ...options }
         this.groupCache = new GroupCache()
         this.databaseOperationCounts = new Map()
-        this.kafkaProducer = groupHub.kafkaProducer
+        this.streamProducer = groupHub.streamProducer
         this.groupRepository = groupHub.groupRepository
         this.clickhouseGroupRepository = groupHub.clickhouseGroupRepository
     }
@@ -202,7 +202,7 @@ export class BatchWritingGroupStore implements GroupStore {
         distinctId: string
     ): Promise<void> {
         if (error instanceof MessageSizeTooLarge) {
-            await captureIngestionWarning(this.kafkaProducer, update.team_id, 'group_upsert_message_size_too_large', {
+            await captureIngestionWarning(this.streamProducer, update.team_id, 'group_upsert_message_size_too_large', {
                 groupTypeIndex: update.group_type_index,
                 groupKey: update.group_key,
             })
@@ -554,7 +554,7 @@ export class BatchWritingGroupStore implements GroupStore {
         timestamp: DateTime
     ): Promise<void> {
         if (error instanceof MessageSizeTooLarge) {
-            await captureIngestionWarning(this.kafkaProducer, teamId, 'group_upsert_message_size_too_large', {
+            await captureIngestionWarning(this.streamProducer, teamId, 'group_upsert_message_size_too_large', {
                 groupTypeIndex,
                 groupKey,
             })

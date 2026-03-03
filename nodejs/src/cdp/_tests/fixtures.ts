@@ -87,7 +87,7 @@ export const createIncomingEvent = (teamId: number, data: Partial<RawClickHouseE
     }
 }
 
-export const createKafkaMessage = (event: any, overrides: Partial<Message> = {}): Message => {
+export const createStreamMessage = (event: any, overrides: Partial<Message> = {}): Message => {
     return {
         partition: 1,
         topic: 'test',

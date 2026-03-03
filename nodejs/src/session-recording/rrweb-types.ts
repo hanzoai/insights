@@ -1,4 +1,4 @@
-import { SnapshotEvent } from './kafka/types'
+import { SnapshotEvent } from './stream/types'
 
 export enum RRWebEventType {
     DomContentLoaded = 0,

@@ -61,7 +61,7 @@ export type ScriptTransformerHub = Pick<
     // LegacyPluginExecutorService
     | 'postgres'
     // InsightsFunctionMonitoringService
-    | 'kafkaProducer'
+    | 'streamProducer'
     | 'teamManager'
     | 'internalCaptureService'
     | 'INSIGHTS_FUNCTION_MONITORING_APP_METRICS_TOPIC'

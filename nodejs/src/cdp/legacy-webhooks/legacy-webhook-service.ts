@@ -10,7 +10,7 @@ import {
     Hub,
     PostIngestionEvent,
     RawClickHouseEvent,
-    RawKafkaEvent,
+    RawStreamEvent,
     Team,
 } from '../../types'
 import { PostgresUse } from '../../utils/db/postgres'
@@ -152,7 +152,7 @@ export class LegacyWebhookService {
     }
 }
 
-function convertToPostIngestionEvent(event: RawKafkaEvent): PostIngestionEvent {
+function convertToPostIngestionEvent(event: RawStreamEvent): PostIngestionEvent {
     const properties = event.properties ? parseJSON(event.properties) : {}
     if (event.elements_chain) {
         properties['$elements_chain'] = event.elements_chain

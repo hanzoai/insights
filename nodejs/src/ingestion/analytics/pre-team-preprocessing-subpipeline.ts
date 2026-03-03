@@ -11,7 +11,7 @@ import {
     createDropExceptionEventsStep,
     createEnrichSurveyPersonPropertiesStep,
     createParseHeadersStep,
-    createParseKafkaMessageStep,
+    createParseStreamMessageStep,
     createResolveTeamStep,
     createValidateAiEventTokensStep,
     createValidateHistoricalMigrationStep,
@@ -53,7 +53,7 @@ export function createPreTeamPreprocessingSubpipeline<TInput extends PreTeamPrep
                 preservePartitionLocality,
             })
         )
-        .pipe(createParseKafkaMessageStep())
+        .pipe(createParseStreamMessageStep())
         .pipe(createDropExceptionEventsStep())
         .pipe(createResolveTeamStep(teamManager))
         .pipe(createValidateHistoricalMigrationStep())

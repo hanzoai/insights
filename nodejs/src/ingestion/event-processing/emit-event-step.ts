@@ -1,8 +1,8 @@
 import { Message } from 'node-rdkafka'
 
 import { ingestionLagGauge, ingestionLagHistogram } from '../../common/metrics'
-import { KafkaProducerWrapper } from '../../kafka/producer'
-import { EventHeaders, RawKafkaEvent } from '../../types'
+import { StreamProducerWrapper } from '../../stream/producer'
+import { EventHeaders, RawStreamEvent } from '../../types'
 import { MessageSizeTooLarge } from '../../utils/db/error'
 import { eventProcessedAndIngestedCounter } from '../../worker/ingestion/event-pipeline/metrics'
 import { captureIngestionWarning } from '../../worker/ingestion/utils'
@@ -10,13 +10,13 @@ import { PipelineResult, ok } from '../pipelines/results'
 import { ProcessingStep } from '../pipelines/steps'
 
 export interface EmitEventStepConfig {
-    kafkaProducer: KafkaProducerWrapper
+    streamProducer: StreamProducerWrapper
     datastoreJsonEventsTopic: string
     groupId: string
 }
 
 export interface EmitEventStepInput {
-    eventToEmit: RawKafkaEvent
+    eventToEmit: RawStreamEvent
     inputHeaders: EventHeaders
     inputMessage: Message
 }
@@ -26,7 +26,7 @@ export function createEmitEventStep<T extends EmitEventStepInput>(
 ): ProcessingStep<T, void> {
     return function emitEventStep(input: T): Promise<PipelineResult<void>> {
         const { eventToEmit, inputHeaders, inputMessage } = input
-        const { kafkaProducer, datastoreJsonEventsTopic, groupId } = config
+        const { streamProducer, datastoreJsonEventsTopic, groupId } = config
 
         // Record ingestion lag metric if we have the required data
         if (inputHeaders?.now && inputMessage?.topic !== undefined && inputMessage?.partition !== undefined) {
@@ -40,7 +40,7 @@ export function createEmitEventStep<T extends EmitEventStepInput>(
         // TODO: It's not great that we put the produce outcome in side effects, we should probably await it here
         //       but it might slow the pipeline down. Historically, it has always been like that.
         //       We should investigate this later.
-        const emitPromise = kafkaProducer
+        const emitPromise = streamProducer
             .produce({
                 topic: datastoreJsonEventsTopic,
                 key: eventToEmit.uuid,
@@ -58,7 +58,7 @@ export function createEmitEventStep<T extends EmitEventStepInput>(
                 // Some messages end up significantly larger than the original
                 // after plugin processing, person & group enrichment, etc.
                 if (error instanceof MessageSizeTooLarge) {
-                    await captureIngestionWarning(kafkaProducer, eventToEmit.team_id, 'message_size_too_large', {
+                    await captureIngestionWarning(streamProducer, eventToEmit.team_id, 'message_size_too_large', {
                         eventUuid: eventToEmit.uuid,
                         distinctId: eventToEmit.distinct_id,
                     })
@@ -71,6 +71,6 @@ export function createEmitEventStep<T extends EmitEventStepInput>(
     }
 }
 
-export function productTrackHeader(event: RawKafkaEvent): string {
+export function productTrackHeader(event: RawStreamEvent): string {
     return event.event.startsWith('$ai_') ? 'llma' : 'general'
 }
