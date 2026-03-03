@@ -43,12 +43,12 @@ export function getDefaultConfig(): PluginsServerConfig {
         PERSONS_DATABASE_URL: isTestEnv()
             ? 'postgres://insights:insights@localhost:5432/test_persons'
             : isDevEnv()
-              ? 'postgres://insights:insights@localhost:5432/insights_persons'
+              ? 'postgres://insights:insights@localhost:5432/posthog_persons'
               : '',
         PERSONS_READONLY_DATABASE_URL: isTestEnv()
             ? 'postgres://insights:insights@localhost:5432/test_persons'
             : isDevEnv()
-              ? 'postgres://insights:insights@localhost:5432/insights_persons'
+              ? 'postgres://insights:insights@localhost:5432/posthog_persons'
               : '',
         BEHAVIORAL_COHORTS_DATABASE_URL: isTestEnv()
             ? 'postgres://insights:insights@localhost:5432/test_behavioral_cohorts'

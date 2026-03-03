@@ -138,7 +138,7 @@ export async function fetchAllActionsGroupedByTeam(
             PostgresUse.COMMON_READ,
             `
             SELECT ${ACTION_SELECT_FIELDS.join(',')}
-            FROM insights_action
+            FROM posthog_action
             WHERE deleted = FALSE AND (post_to_slack OR id = ANY($1))
         `,
             [additionalActionIds],
@@ -194,7 +194,7 @@ export async function fetchAction(client: PostgresRouter, id: Action['id']): Pro
     const rawActions: RawAction[] = (
         await client.query(
             PostgresUse.COMMON_READ,
-            `SELECT ${ACTION_SELECT_FIELDS.join(',')} FROM insights_action WHERE id = $1 AND deleted = FALSE`,
+            `SELECT ${ACTION_SELECT_FIELDS.join(',')} FROM posthog_action WHERE id = $1 AND deleted = FALSE`,
             [id],
             'fetchActions'
         )
