@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0873_alter_cohortpeople_options_and_more"),
+        ("posthog", "0873_alter_cohortpeople_options_and_more"),
     ]
 
     operations = [

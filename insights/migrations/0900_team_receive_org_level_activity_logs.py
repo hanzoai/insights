@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0899_add_cohort_type"),
+        ("posthog", "0899_add_cohort_type"),
     ]
 
     operations = [

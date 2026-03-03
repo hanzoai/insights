@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0170_project_based_permissioning"),
+        ("posthog", "0170_project_based_permissioning"),
     ]
 
     operations = [

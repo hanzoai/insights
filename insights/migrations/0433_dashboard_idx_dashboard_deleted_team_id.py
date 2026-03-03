@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("insights", "0432_personlessdistinctid"),
+        ("posthog", "0432_personlessdistinctid"),
     ]
 
     operations = [

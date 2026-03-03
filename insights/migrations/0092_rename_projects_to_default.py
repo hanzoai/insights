@@ -2,14 +2,14 @@ from django.db import migrations
 
 
 def forwards_func(apps, schema_editor):
-    Team = apps.get_model("insights", "Team")
+    Team = apps.get_model("posthog", "Team")
     Team.objects.filter(organization__isnull=False).exclude(name__iexact="Hogflix Demo App").update(
         name=Team._meta.get_field("name").get_default()
     )
 
 
 def reverse_func(apps, schema_editor):
-    Team = apps.get_model("insights", "Team")
+    Team = apps.get_model("posthog", "Team")
     for team in (
         Team.objects.filter(organization__isnull=False)
         .exclude(name__iexact="Hogflix Demo App")
@@ -21,7 +21,7 @@ def reverse_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0091_messagingrecord"),
+        ("posthog", "0091_messagingrecord"),
     ]
 
     operations = [

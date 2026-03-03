@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0984_clear_temporary_tokens"),
+        ("posthog", "0984_clear_temporary_tokens"),
     ]
 
     operations = [

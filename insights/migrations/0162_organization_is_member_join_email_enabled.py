@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0161_property_defs_search"),
+        ("posthog", "0161_property_defs_search"),
     ]
 
     operations = [

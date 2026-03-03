@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0784_fix_null_event_triggers"),
+        ("posthog", "0784_fix_null_event_triggers"),
     ]
 
     operations = [

@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0708_add_trigger_match_type")]
+    dependencies = [("posthog", "0708_add_trigger_match_type")]
 
     operations = [
         migrations.AlterField(

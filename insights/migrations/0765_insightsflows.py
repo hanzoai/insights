@@ -8,7 +8,7 @@ import insights.models.utils
 
 
 class Migration(migrations.Migration):
-    dependencies = [("insights", "0764_teammarketinganalyticsconfig")]
+    dependencies = [("posthog", "0764_teammarketinganalyticsconfig")]
 
     operations = [
         migrations.CreateModel(
@@ -58,7 +58,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
             ],
             options={
                 "indexes": [

@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def forward(apps, schema_editor):
-    DashboardItem = apps.get_model("insights", "DashboardItem")
+    DashboardItem = apps.get_model("posthog", "DashboardItem")
     # no cases of type AND display being null in production
     for item in DashboardItem.objects.filter(filters__display__isnull=True):
         item.filters["display"] = item.type or "ActionsLineGraph"
@@ -24,7 +24,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0105_cohort_errors_calculating"),
+        ("posthog", "0105_cohort_errors_calculating"),
     ]
 
     operations = [

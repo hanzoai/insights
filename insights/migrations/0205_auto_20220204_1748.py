@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0204_remove_duplicate_plugin_configs"),
+        ("posthog", "0204_remove_duplicate_plugin_configs"),
     ]
 
     operations = [

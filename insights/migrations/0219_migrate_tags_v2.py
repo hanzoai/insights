@@ -9,10 +9,10 @@ from insights.models.tag import tagify
 
 
 def forwards(apps, schema_editor):
-    Tag = apps.get_model("insights", "Tag")
-    TaggedItem = apps.get_model("insights", "TaggedItem")
-    Insight = apps.get_model("insights", "Insight")
-    Dashboard = apps.get_model("insights", "Dashboard")
+    Tag = apps.get_model("posthog", "Tag")
+    TaggedItem = apps.get_model("posthog", "TaggedItem")
+    Insight = apps.get_model("posthog", "Insight")
+    Dashboard = apps.get_model("posthog", "Dashboard")
 
     createables: list[tuple[Any, Any]] = []
     batch_size = 1_000
@@ -92,7 +92,7 @@ def forwards(apps, schema_editor):
 
 
 def reverse(apps, schema_editor):
-    TaggedItem = apps.get_model("insights", "TaggedItem")
+    TaggedItem = apps.get_model("posthog", "TaggedItem")
     TaggedItem.objects.filter(Q(dashboard_id__isnull=False) | Q(insight_id__isnull=False)).delete()
     # Cascade deletes tag objects
 
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0218_uniqueness_constraint_tagged_items"),
+        ("posthog", "0218_uniqueness_constraint_tagged_items"),
     ]
 
     operations = [migrations.RunPython(forwards, reverse, elidable=True)]

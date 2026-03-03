@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0874_activitylog_idx_alog_org_created_at_and_more"),
+        ("posthog", "0874_activitylog_idx_alog_org_created_at_and_more"),
     ]
 
     operations = [

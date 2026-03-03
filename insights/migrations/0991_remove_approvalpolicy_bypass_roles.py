@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("insights", "0990_projectsecretapikey"),
+        ("posthog", "0990_projectsecretapikey"),
     ]
 
     operations = [

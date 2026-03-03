@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def remove_revenue_analytics_modifiers(apps, schema_editor):
-    Insight = apps.get_model("insights", "Insight")
+    Insight = apps.get_model("posthog", "Insight")
 
     # Find all dashboard items that have the revenue analytics modifiers
     items_to_update = Insight.objects.raw("""
@@ -35,7 +35,7 @@ def reverse_remove_revenue_analytics_modifiers(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0795_add_progress_tracking_to_datamodelingjob"),
+        ("posthog", "0795_add_progress_tracking_to_datamodelingjob"),
     ]
 
     operations = [

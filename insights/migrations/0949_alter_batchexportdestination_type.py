@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for CREATE INDEX CONCURRENTLY
 
     dependencies = [
-        ("insights", "0948_hogfunction_batch_export_and_more"),
+        ("posthog", "0948_hogfunction_batch_export_and_more"),
     ]
 
     operations = [

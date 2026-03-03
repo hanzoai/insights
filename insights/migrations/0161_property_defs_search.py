@@ -7,7 +7,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0160_organization_domain_whitelist"),
+        ("posthog", "0160_organization_domain_whitelist"),
     ]
 
     operations = [

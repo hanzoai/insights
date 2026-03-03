@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False  # DROP INDEX CONCURRENTLY cannot be run in a transaction
 
     dependencies = [
-        ("insights", "0211_async_migrations_errors_length"),
+        ("posthog", "0211_async_migrations_errors_length"),
     ]
 
     operations = [
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                     field=models.ForeignKey(
                         db_index=False,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 )
             ],

@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0910_userproductlist_reason_text"),
+        ("posthog", "0910_userproductlist_reason_text"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="response_archives",
                         related_query_name="response_archive",
-                        to="insights.survey",
+                        to="posthog.survey",
                     ),
                 ),
                 (
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="survey_response_archives",
                         related_query_name="survey_response_archive",
-                        to="insights.team",
+                        to="posthog.team",
                     ),
                 ),
             ],

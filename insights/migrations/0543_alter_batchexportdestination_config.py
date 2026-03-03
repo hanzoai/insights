@@ -7,7 +7,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0542_remove_errortrackingissueassignment_unique_on_user_and_issue_and_more"),
+        ("posthog", "0542_remove_errortrackingissueassignment_unique_on_user_and_issue_and_more"),
     ]
 
     operations = [

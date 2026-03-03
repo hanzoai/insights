@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0175_should_update_person_props_function"),
+        ("posthog", "0175_should_update_person_props_function"),
     ]
 
     # The type and function were never used

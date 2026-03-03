@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0393_datawarehousejoin_delete_datawarehouseviewlink"),
+        ("posthog", "0393_datawarehousejoin_delete_datawarehouseviewlink"),
     ]
 
     operations = [

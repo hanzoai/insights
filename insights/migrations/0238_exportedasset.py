@@ -8,7 +8,7 @@ import insights.models.exported_asset
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0237_remove_timezone_from_teams"),
+        ("posthog", "0237_remove_timezone_from_teams"),
     ]
 
     operations = [
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.dashboard",
+                        to="posthog.dashboard",
                     ),
                 ),
                 (
@@ -59,12 +59,12 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="insights.insight",
+                        to="posthog.insight",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
                 ),
             ],
         ),

@@ -6,7 +6,7 @@ from django.db import migrations, models
 ## Original Migration
 # class Migration(migrations.Migration):
 #     dependencies = [
-#         ("insights", "0444_integration_unique_id"),
+#         ("posthog", "0444_integration_unique_id"),
 #     ]
 
 #     operations = [
@@ -14,7 +14,7 @@ from django.db import migrations, models
 #             model_name="annotation",
 #             name="dashboard",
 #             field=models.ForeignKey(
-#                 blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.dashboard"
+#                 blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.dashboard"
 #             ),
 #         ),
 #         migrations.AlterField(
@@ -37,7 +37,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("insights", "0445_require_team_project_id_not_valid"),
+        ("posthog", "0445_require_team_project_id_not_valid"),
     ]
 
     operations = [
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="insights.dashboard",
+                        to="posthog.dashboard",
                     ),
                 )
             ],

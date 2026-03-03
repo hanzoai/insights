@@ -6,7 +6,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0119_mandatory_plugin_order"),
+        ("posthog", "0119_mandatory_plugin_order"),
     ]
 
     operations = [

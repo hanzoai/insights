@@ -5,13 +5,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0402_externaldatajob_schema"),
+        ("posthog", "0402_externaldatajob_schema"),
     ]
 
     operations = [
         migrations.AddField(
             model_name="plugin",
             name="has_private_access",
-            field=models.ManyToManyField(to="insights.organization"),
+            field=models.ManyToManyField(to="posthog.organization"),
         ),
     ]

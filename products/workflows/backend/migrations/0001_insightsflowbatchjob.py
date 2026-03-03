@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("insights", "0956_team_conversations_enabled_and_more"),
+        ("posthog", "0956_team_conversations_enabled_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "insights_flow",
-                    models.ForeignKey(to="insights.customflow", on_delete=django.db.models.deletion.DO_NOTHING),
+                    models.ForeignKey(to="posthog.customflow", on_delete=django.db.models.deletion.DO_NOTHING),
                 ),
                 (
                     "variables",
@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to="insights.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to="posthog.team")),
             ],
             options={
                 "indexes": [models.Index(fields=["team"], name="workflows_h_team_id_cacc51_idx")],

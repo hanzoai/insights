@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0931_materialized_column_slots"),
+        ("posthog", "0931_materialized_column_slots"),
     ]
 
     operations = [

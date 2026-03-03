@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0254_prompt_sequence_state"),
+        ("posthog", "0254_prompt_sequence_state"),
     ]
 
     operations = [

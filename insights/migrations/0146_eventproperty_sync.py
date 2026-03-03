@@ -52,9 +52,9 @@ def sync_event_and_properties_definitions(team_uuid: str, Team, EventDefinition,
 
 
 def sync_team_event_names_and_properties(apps, schema_editor):
-    Team = apps.get_model("insights", "Team")
-    EventDefinition = apps.get_model("insights", "EventDefinition")
-    PropertyDefinition = apps.get_model("insights", "PropertyDefinition")
+    Team = apps.get_model("posthog", "Team")
+    EventDefinition = apps.get_model("posthog", "EventDefinition")
+    PropertyDefinition = apps.get_model("posthog", "PropertyDefinition")
     for team in Team.objects.all():
         try:
             sync_event_and_properties_definitions(team.uuid, Team, EventDefinition, PropertyDefinition)
@@ -64,7 +64,7 @@ def sync_team_event_names_and_properties(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("insights", "0145_eventdefinition_propertydefinition"),
+        ("posthog", "0145_eventdefinition_propertydefinition"),
     ]
 
     operations = [

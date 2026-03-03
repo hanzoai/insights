@@ -12,7 +12,7 @@ def fix_for_deleted_primary_dashboards(apps, _):
     logger = structlog.get_logger(__name__)
     logger.info("starting 0222_fix_deleted_primary_dashboards")
 
-    Team = apps.get_model("insights", "Team")
+    Team = apps.get_model("posthog", "Team")
 
     expected_team_dashboards = []
     with connection.cursor() as cursor:
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("insights", "0221_add_activity_log_model"),
+        ("posthog", "0221_add_activity_log_model"),
     ]
 
     operations = [migrations.RunPython(fix_for_deleted_primary_dashboards, reverse, elidable=True)]
