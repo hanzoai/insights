@@ -786,7 +786,7 @@ export interface RawClickHouseEvent extends BaseEvent {
 
 export interface RawKafkaEvent extends RawClickHouseEvent {
     /**
-     * The project ID field is only included in the `clickhouse_events_json` topic, not present in ClickHouse.
+     * The project ID field is only included in the `datastore_events_json` topic, not present in ClickHouse.
      * That's because we need it in `property-defs-rs` and not elsewhere.
      */
     project_id: ProjectId

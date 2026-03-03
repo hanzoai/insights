@@ -3,18 +3,18 @@ import { DateTime, Settings } from 'luxon'
 import { Clickhouse } from '../../../../../tests/helpers/clickhouse'
 import { resetTestDatabase } from '../../../../../tests/helpers/sql'
 import { Hub, PropertyOperator, Team } from '../../../../types'
-import { ClickHouseRouter } from '../../../../utils/db/clickhouse'
+import { DatastoreRouter } from '../../../../utils/db/clickhouse'
 import { closeHub, createHub } from '../../../../utils/db/hub'
 import { PostgresUse } from '../../../../utils/db/postgres'
 import { UUIDT } from '../../../../utils/utils'
-import { ClickHousePersonRepository } from './clickhouse-person-repository'
+import { DatastorePersonRepository } from './clickhouse-person-repository'
 
 jest.mock('../../../../utils/logger')
 
-describe('ClickHousePersonRepository', () => {
+describe('DatastorePersonRepository', () => {
     let hub: Hub
-    let clickHouseRouter: ClickHouseRouter
-    let repository: ClickHousePersonRepository
+    let datastoreRouter: DatastoreRouter
+    let repository: DatastorePersonRepository
     let clickhouse: Clickhouse
 
     async function executeClickHouseTestQuery(query: string): Promise<void> {
@@ -29,13 +29,13 @@ describe('ClickHousePersonRepository', () => {
         hub = await createHub()
         await resetTestDatabase()
         await clickhouse.resetTestDatabase()
-        clickHouseRouter = new ClickHouseRouter(hub)
-        clickHouseRouter.initialize()
-        repository = new ClickHousePersonRepository(clickHouseRouter)
+        datastoreRouter = new DatastoreRouter(hub)
+        datastoreRouter.initialize()
+        repository = new DatastorePersonRepository(datastoreRouter)
     })
 
     afterEach(async () => {
-        await clickHouseRouter.close()
+        await datastoreRouter.close()
         await closeHub(hub)
         jest.clearAllMocks()
     })
@@ -1112,13 +1112,13 @@ describe('ClickHousePersonRepository', () => {
     describe('unimplemented methods', () => {
         it('should throw error for fetchPerson', async () => {
             await expect(repository.fetchPerson(1, 'distinct-id')).rejects.toThrow(
-                'fetchPerson operation not yet supported in ClickHousePersonRepository'
+                'fetchPerson operation not yet supported in DatastorePersonRepository'
             )
         })
 
         it('should throw error for fetchPersonsByDistinctIds', async () => {
             await expect(repository.fetchPersonsByDistinctIds([])).rejects.toThrow(
-                'fetchPersonsByDistinctIds operation not yet supported in ClickHousePersonRepository'
+                'fetchPersonsByDistinctIds operation not yet supported in DatastorePersonRepository'
             )
         })
 
@@ -1127,7 +1127,7 @@ describe('ClickHousePersonRepository', () => {
                 repository.createPerson(TIMESTAMP, {}, {}, {}, 1, null, false, new UUIDT().toString(), {
                     distinctId: 'test',
                 })
-            ).rejects.toThrow('Write operations not supported in ClickHousePersonRepository')
+            ).rejects.toThrow('Write operations not supported in DatastorePersonRepository')
         })
 
         it('should throw error for updatePerson', async () => {
@@ -1145,7 +1145,7 @@ describe('ClickHousePersonRepository', () => {
                 last_seen_at: null,
             }
             await expect(repository.updatePerson(person, {} as any)).rejects.toThrow(
-                'Write operations not supported in ClickHousePersonRepository'
+                'Write operations not supported in DatastorePersonRepository'
             )
         })
 
@@ -1164,7 +1164,7 @@ describe('ClickHousePersonRepository', () => {
                 last_seen_at: null,
             }
             await expect(repository.deletePerson(person)).rejects.toThrow(
-                'Write operations not supported in ClickHousePersonRepository'
+                'Write operations not supported in DatastorePersonRepository'
             )
         })
 
@@ -1183,13 +1183,13 @@ describe('ClickHousePersonRepository', () => {
                 last_seen_at: null,
             }
             await expect(repository.addDistinctId(person, 'new-distinct-id', 0)).rejects.toThrow(
-                'Write operations not supported in ClickHousePersonRepository'
+                'Write operations not supported in DatastorePersonRepository'
             )
         })
 
         it('should throw error for addPersonlessDistinctId', async () => {
             await expect(repository.addPersonlessDistinctId(1, 'distinct-id')).rejects.toThrow(
-                'Write operations not supported in ClickHousePersonRepository'
+                'Write operations not supported in DatastorePersonRepository'
             )
         })
     })
