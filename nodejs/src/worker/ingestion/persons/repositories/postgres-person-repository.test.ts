@@ -381,7 +381,7 @@ describe('PostgresPersonRepository', () => {
             // Delete distinct IDs first to avoid FK constraint violation
             await hub.postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                'DELETE FROM insights_persondistinctid WHERE person_id = $1',
+                'DELETE FROM posthog_persondistinctid WHERE person_id = $1',
                 [person.id],
                 'deleteDistinctIds'
             )
@@ -553,7 +553,7 @@ describe('PostgresPersonRepository', () => {
                 // Verify that there are still distinct IDs left on the source person
                 const remainingResult = await postgres.query(
                     PostgresUse.PERSONS_WRITE,
-                    'SELECT COUNT(*) as count FROM insights_persondistinctid WHERE person_id = $1 AND team_id = $2',
+                    'SELECT COUNT(*) as count FROM posthog_persondistinctid WHERE person_id = $1 AND team_id = $2',
                     [sourcePerson.id, team.id],
                     'countRemainingDistinctIds'
                 )
@@ -584,7 +584,7 @@ describe('PostgresPersonRepository', () => {
                 // Verify no distinct IDs remain on the source person
                 const remainingResult = await postgres.query(
                     PostgresUse.PERSONS_WRITE,
-                    'SELECT COUNT(*) as count FROM insights_persondistinctid WHERE person_id = $1 AND team_id = $2',
+                    'SELECT COUNT(*) as count FROM posthog_persondistinctid WHERE person_id = $1 AND team_id = $2',
                     [sourcePerson.id, team.id],
                     'countRemainingDistinctIds'
                 )
@@ -607,7 +607,7 @@ describe('PostgresPersonRepository', () => {
             // Get all distinct IDs in database order (by id, not by distinct_id value)
             const allDistinctIdsBeforeMove = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                'SELECT id, distinct_id FROM insights_persondistinctid WHERE person_id = $1 AND team_id = $2 ORDER BY id',
+                'SELECT id, distinct_id FROM posthog_persondistinctid WHERE person_id = $1 AND team_id = $2 ORDER BY id',
                 [sourcePerson.id, team.id],
                 'getAllDistinctIds'
             )
@@ -631,7 +631,7 @@ describe('PostgresPersonRepository', () => {
                 // Verify the remaining distinct IDs are the ones with higher database IDs
                 const remainingIds = await postgres.query(
                     PostgresUse.PERSONS_WRITE,
-                    'SELECT distinct_id FROM insights_persondistinctid WHERE person_id = $1 AND team_id = $2 ORDER BY id',
+                    'SELECT distinct_id FROM posthog_persondistinctid WHERE person_id = $1 AND team_id = $2 ORDER BY id',
                     [sourcePerson.id, team.id],
                     'getRemainingDistinctIds'
                 )
@@ -684,7 +684,7 @@ describe('PostgresPersonRepository', () => {
                 // Verify no distinct IDs remain on the source person
                 const remainingResult = await postgres.query(
                     PostgresUse.PERSONS_WRITE,
-                    'SELECT COUNT(*) as count FROM insights_persondistinctid WHERE person_id = $1 AND team_id = $2',
+                    'SELECT COUNT(*) as count FROM posthog_persondistinctid WHERE person_id = $1 AND team_id = $2',
                     [sourcePerson.id, team.id],
                     'countRemainingDistinctIds'
                 )
@@ -908,7 +908,7 @@ describe('PostgresPersonRepository', () => {
             // Verify the record was actually inserted
             const selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team.id, distinctId],
                 'verifyInsert'
             )
@@ -932,7 +932,7 @@ describe('PostgresPersonRepository', () => {
             // Verify only one record exists
             const selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT COUNT(*) as count FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT COUNT(*) as count FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team.id, distinctId],
                 'verifyCount'
             )
@@ -956,14 +956,14 @@ describe('PostgresPersonRepository', () => {
             // Verify both records exist
             const selectResult1 = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team1.id, distinctId],
                 'verifyTeam1'
             )
 
             const selectResult2 = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team2Id, distinctId],
                 'verifyTeam2'
             )
@@ -987,7 +987,7 @@ describe('PostgresPersonRepository', () => {
             // Verify the record was actually inserted with is_merged = true
             const selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team.id, distinctId],
                 'verifyMergeInsert'
             )
@@ -1007,7 +1007,7 @@ describe('PostgresPersonRepository', () => {
             // Verify initial state
             let selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team.id, distinctId],
                 'verifyInitialState'
             )
@@ -1020,7 +1020,7 @@ describe('PostgresPersonRepository', () => {
             // Verify it was updated to merged
             selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team.id, distinctId],
                 'verifyMergeUpdate'
             )
@@ -1039,7 +1039,7 @@ describe('PostgresPersonRepository', () => {
                 // Verify within transaction
                 const selectResult = await postgres.query(
                     tx,
-                    `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                    `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                     [team.id, distinctId],
                     'verifyInTransaction'
                 )
@@ -1050,7 +1050,7 @@ describe('PostgresPersonRepository', () => {
             // Verify after transaction
             const selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT is_merged FROM insights_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
+                `SELECT is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 AND distinct_id = $2`,
                 [team.id, distinctId],
                 'verifyAfterTransaction'
             )
@@ -1079,7 +1079,7 @@ describe('PostgresPersonRepository', () => {
             // Verify records were inserted
             const selectResult = await postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                `SELECT distinct_id, is_merged FROM insights_personlessdistinctid WHERE team_id = $1 ORDER BY distinct_id`,
+                `SELECT distinct_id, is_merged FROM posthog_personlessdistinctid WHERE team_id = $1 ORDER BY distinct_id`,
                 [team.id],
                 'verifyBatchInsert'
             )
@@ -1586,7 +1586,7 @@ describe('PostgresPersonRepository', () => {
         async function getAllHashKeyOverrides(): Promise<any> {
             const result = await hub.postgres.query(
                 PostgresUse.PERSONS_WRITE,
-                'SELECT feature_flag_key, hash_key, person_id FROM insights_featureflaghashkeyoverride',
+                'SELECT feature_flag_key, hash_key, person_id FROM posthog_featureflaghashkeyoverride',
                 [],
                 ''
             )
@@ -1638,13 +1638,13 @@ describe('PostgresPersonRepository', () => {
         })
 
         it('updates all valid keys when target person had no overrides', async () => {
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: sourcePersonID,
                 feature_flag_key: 'aloha',
                 hash_key: 'override_value_for_aloha',
             })
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: sourcePersonID,
                 feature_flag_key: 'beta-feature',
@@ -1673,19 +1673,19 @@ describe('PostgresPersonRepository', () => {
         })
 
         it('updates all valid keys when conflicts with target person', async () => {
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: sourcePersonID,
                 feature_flag_key: 'aloha',
                 hash_key: 'override_value_for_aloha',
             })
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: sourcePersonID,
                 feature_flag_key: 'beta-feature',
                 hash_key: 'override_value_for_beta_feature',
             })
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: targetPersonID,
                 feature_flag_key: 'beta-feature',
@@ -1714,13 +1714,13 @@ describe('PostgresPersonRepository', () => {
         })
 
         it('updates nothing when target person overrides exist', async () => {
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: targetPersonID,
                 feature_flag_key: 'aloha',
                 hash_key: 'override_value_for_aloha',
             })
-            await insertRow(hub.postgres, 'insights_featureflaghashkeyoverride', {
+            await insertRow(hub.postgres, 'posthog_featureflaghashkeyoverride', {
                 team_id: team.id,
                 person_id: targetPersonID,
                 feature_flag_key: 'beta-feature',
@@ -1875,7 +1875,7 @@ describe('PostgresPersonRepository', () => {
 
                 const originalQuery = postgres.query.bind(postgres)
                 const mockQuery = jest.spyOn(postgres, 'query').mockImplementation(async (use, query, values, tag) => {
-                    if (typeof query === 'string' && query.includes('INSERT INTO insights_person')) {
+                    if (typeof query === 'string' && query.includes('INSERT INTO posthog_person')) {
                         const error = new Error('Check constraint violation')
                         ;(error as any).code = '23514'
                         ;(error as any).constraint = 'check_properties_size'
@@ -1960,7 +1960,7 @@ describe('PostgresPersonRepository', () => {
 
                 const originalQuery = postgres.query.bind(postgres)
                 const mockQuery = jest.spyOn(postgres, 'query').mockImplementation(async (use, query, values, tag) => {
-                    if (typeof query === 'string' && query.includes('UPDATE insights_person SET')) {
+                    if (typeof query === 'string' && query.includes('UPDATE posthog_person SET')) {
                         const error = new Error('Check constraint violation')
                         ;(error as any).code = '23514'
                         ;(error as any).constraint = 'check_properties_size'
@@ -2006,7 +2006,7 @@ describe('PostgresPersonRepository', () => {
                 const originalQuery = postgres.query.bind(postgres)
                 let updateCallCount = 0
                 const mockQuery = jest.spyOn(postgres, 'query').mockImplementation(async (use, query, values, tag) => {
-                    if (typeof query === 'string' && query.includes('UPDATE insights_person SET')) {
+                    if (typeof query === 'string' && query.includes('UPDATE posthog_person SET')) {
                         updateCallCount++
                         if (updateCallCount === 1) {
                             const error = new Error('Check constraint violation')
@@ -2083,7 +2083,7 @@ describe('PostgresPersonRepository', () => {
                 const originalQuery = postgres.query.bind(postgres)
                 let updateCallCount = 0
                 const mockQuery = jest.spyOn(postgres, 'query').mockImplementation(async (use, query, values, tag) => {
-                    if (typeof query === 'string' && query.includes('UPDATE insights_person SET')) {
+                    if (typeof query === 'string' && query.includes('UPDATE posthog_person SET')) {
                         updateCallCount++
 
                         const error = new Error('Check constraint violation')
@@ -2155,7 +2155,7 @@ describe('PostgresPersonRepository', () => {
 
                 const originalQuery = postgres.query.bind(postgres)
                 const mockQuery = jest.spyOn(postgres, 'query').mockImplementation(async (use, query, values, tag) => {
-                    if (typeof query === 'string' && query.includes('UPDATE insights_person SET')) {
+                    if (typeof query === 'string' && query.includes('UPDATE posthog_person SET')) {
                         const error = new Error('Check constraint violation')
                         ;(error as any).code = '23514'
                         ;(error as any).constraint = 'check_properties_size'
@@ -2209,7 +2209,7 @@ describe('PostgresPersonRepository', () => {
 
                 const originalQuery = postgres.query.bind(postgres)
                 const mockQuery = jest.spyOn(postgres, 'query').mockImplementation(async (use, query, values, tag) => {
-                    if (typeof query === 'string' && query.includes('INSERT INTO insights_person')) {
+                    if (typeof query === 'string' && query.includes('INSERT INTO posthog_person')) {
                         const error = new Error('Check constraint violation')
                         ;(error as any).code = '23514'
                         ;(error as any).constraint = 'check_properties_size'
@@ -3135,7 +3135,7 @@ describe('PostgresPersonRepository', () => {
 async function getFirstTeam(hub: Hub): Promise<Team> {
     const teams = await hub.postgres.query(
         PostgresUse.COMMON_WRITE,
-        'SELECT * FROM insights_team LIMIT 1',
+        'SELECT * FROM posthog_team LIMIT 1',
         [],
         'getFirstTeam'
     )
@@ -3145,7 +3145,7 @@ async function getFirstTeam(hub: Hub): Promise<Team> {
 async function fetchPersonByPersonId(hub: Hub, teamId: number, personId: string): Promise<any | undefined> {
     const selectResult = await hub.postgres.query(
         PostgresUse.PERSONS_WRITE,
-        `SELECT * FROM insights_person WHERE team_id = $1 AND id = $2`,
+        `SELECT * FROM posthog_person WHERE team_id = $1 AND id = $2`,
         [teamId, personId],
         'fetchPersonByPersonId'
     )
