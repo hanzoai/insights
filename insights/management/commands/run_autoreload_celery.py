@@ -34,8 +34,7 @@ class Command(BaseCommand):
 
         # Define directories we actually care about for Celery reloading
         watch_dirs = [
-            project_root / "posthog",
-            project_root / "ee",
+            project_root / "insights",
             project_root / "products",
         ]
 
@@ -71,7 +70,7 @@ class Command(BaseCommand):
 
         args = [
             "-A",
-            "posthog",
+            "insights",
             "worker",
             "--pool=threads",
             f"--queues={','.join(q.value for q in CeleryQueue)}",
