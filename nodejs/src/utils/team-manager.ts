@@ -48,7 +48,7 @@ export class TeamManager {
         if (!team.ingested_event) {
             await this.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE insights_team SET ingested_event = $1 WHERE id = $2`,
+                `UPDATE posthog_team SET ingested_event = $1 WHERE id = $2`,
                 [true, team.id],
                 'setTeamIngestedEvent'
             )
@@ -58,9 +58,9 @@ export class TeamManager {
 
             const organizationMembers = await this.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                'SELECT distinct_id FROM insights_user JOIN insights_organizationmembership ON insights_user.id = insights_organizationmembership.user_id WHERE organization_id = $1',
+                'SELECT distinct_id FROM posthog_user JOIN posthog_organizationmembership ON posthog_user.id = posthog_organizationmembership.user_id WHERE organization_id = $1',
                 [team.organization_id],
-                'insights_organizationmembership'
+                'posthog_organizationmembership'
             )
 
             const distinctIds: { distinct_id: string }[] = organizationMembers.rows
@@ -120,8 +120,8 @@ export class TeamManager {
                 t.logs_settings,
                 extract('epoch' from t.drop_events_older_than) as drop_events_older_than_seconds,
                 o.available_product_features
-            FROM insights_team t
-            JOIN insights_organization o ON o.id = t.organization_id
+            FROM posthog_team t
+            JOIN posthog_organization o ON o.id = t.organization_id
             WHERE t.id = ANY($1) OR t.api_token = ANY($2)
             `,
             [teamIds, tokens],
