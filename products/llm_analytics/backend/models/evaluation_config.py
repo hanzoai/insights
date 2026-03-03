@@ -5,7 +5,7 @@ class EvaluationConfig(models.Model):
     """Team-level configuration and usage tracking for LLM evaluations"""
 
     team = models.OneToOneField(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         primary_key=True,
         related_name="evaluation_config",

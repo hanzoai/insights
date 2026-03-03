@@ -8,7 +8,7 @@ from insights.models.utils import UUIDModel
 class QuickFilter(UUIDModel):
     TYPE_CHOICES = [(t.value, t.value) for t in QuickFilterType]
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     property_name = models.CharField(max_length=500)
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=QuickFilterType.MANUAL_OPTIONS.value)
@@ -27,7 +27,7 @@ class QuickFilter(UUIDModel):
 
 
 class QuickFilterContext(UUIDModel):
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     quick_filter = models.ForeignKey(QuickFilter, on_delete=models.CASCADE, related_name="context_memberships")
     context = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)

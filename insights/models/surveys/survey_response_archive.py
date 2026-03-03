@@ -10,13 +10,13 @@ class SurveyResponseArchive(UUIDModel):
     """
 
     team = models.ForeignKey(
-        "insights.Team",
+        "posthog.Team",
         on_delete=models.CASCADE,
         related_name="survey_response_archives",
         related_query_name="survey_response_archive",
     )
     survey = models.ForeignKey(
-        "insights.Survey",
+        "posthog.Survey",
         on_delete=models.CASCADE,
         related_name="response_archives",
         related_query_name="response_archive",

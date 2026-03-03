@@ -21,7 +21,7 @@ class Notebook(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         DEFAULT = "default", "default"
 
     short_id = models.CharField(max_length=12, blank=True, default=generate_short_id)
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     title = models.CharField(max_length=256, blank=True, null=True)
     content: JSONField = JSONField(default=None, null=True, blank=True)
     text_content = models.TextField(blank=True, null=True)
@@ -29,10 +29,10 @@ class Notebook(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     visibility = models.CharField(choices=Visibility.choices, default=Visibility.DEFAULT, max_length=20)
     version = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, blank=True)
-    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
     last_modified_at = models.DateTimeField(default=timezone.now)
     last_modified_by = models.ForeignKey(
-        "insights.User",
+        "posthog.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -148,10 +148,10 @@ class KernelRuntime(UUIDTModel):
         DISCARDED = "discarded", "discarded"
         ERROR = "error", "error"
 
-    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
     notebook = models.ForeignKey("notebooks.Notebook", on_delete=models.SET_NULL, null=True, blank=True)
     notebook_short_id = models.CharField(max_length=12)
-    user = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     last_used_at = models.DateTimeField(default=timezone.now)
     status = models.CharField(choices=Status.choices, default=Status.STARTING, max_length=20)
