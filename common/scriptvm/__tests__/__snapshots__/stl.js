@@ -1,21 +1,21 @@
 function upper (value) { return value.toUpperCase() }
 function __x_typeof (value) {
     if (value === null || value === undefined) { return 'null'
-    } else if (__isHogDateTime(value)) { return 'datetime'
-    } else if (__isHogDate(value)) { return 'date'
-    } else if (__isHogError(value)) { return 'error'
+    } else if (__isIQLDateTime(value)) { return 'datetime'
+    } else if (__isIQLDate(value)) { return 'date'
+    } else if (__isIQLError(value)) { return 'error'
     } else if (typeof value === 'function') { return 'function'
-    } else if (Array.isArray(value)) { if (value.__isHogTuple) { return 'tuple' } return 'array'
+    } else if (Array.isArray(value)) { if (value.__isIQLTuple) { return 'tuple' } return 'array'
     } else if (typeof value === 'object') { return 'object'
     } else if (typeof value === 'number') { return Number.isInteger(value) ? 'integer' : 'float'
     } else if (typeof value === 'string') { return 'string'
     } else if (typeof value === 'boolean') { return 'boolean' }
     return 'unknown'
 }
-function tuple (...args) { const tuple = args.slice(); tuple.__isHogTuple = true; return tuple; }
+function tuple (...args) { const tuple = args.slice(); tuple.__isIQLTuple = true; return tuple; }
 function today() {
     const now = new Date();
-    return __toHogDate(now.getUTCFullYear(), now.getUTCMonth()+1, now.getUTCDate());
+    return __toIQLDate(now.getUTCFullYear(), now.getUTCMonth()+1, now.getUTCDate());
 }
 function toYear(value) { return extract('year', value) }
 function toYYYYMM(value) {
@@ -24,11 +24,11 @@ function toYYYYMM(value) {
     return y*100 + m;
 }
 function toStartOfWeek(value) {
-    if (!__isHogDateTime(value) && !__isHogDate(value)) {
-        throw new Error('Expected HogDate or HogDateTime');
+    if (!__isIQLDateTime(value) && !__isIQLDate(value)) {
+        throw new Error('Expected IQLDate or IQLDateTime');
     }
     let d;
-    if (__isHogDate(value)) {
+    if (__isIQLDate(value)) {
         d = new Date(Date.UTC(value.year, value.month - 1, value.day));
     } else {
         d = new Date(value.dt * 1000);
@@ -45,20 +45,20 @@ function toStartOfWeek(value) {
     // Zero out hours, minutes, seconds, ms
     start.setUTCHours(0, 0, 0, 0);
 
-    return { __hogDateTime__: true, dt: start.getTime() / 1000, zone: (__isHogDateTime(value) ? value.zone : 'UTC') };
+    return { __iqlDateTime__: true, dt: start.getTime() / 1000, zone: (__isIQLDateTime(value) ? value.zone : 'UTC') };
 }
 function toStartOfDay(value) {
-    if (!__isHogDateTime(value) && !__isHogDate(value)) {
-        throw new Error('Expected HogDate or HogDateTime for toStartOfDay');
+    if (!__isIQLDateTime(value) && !__isIQLDate(value)) {
+        throw new Error('Expected IQLDate or IQLDateTime for toStartOfDay');
     }
-    if (__isHogDate(value)) {
-        value = __toHogDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
+    if (__isIQLDate(value)) {
+        value = __toIQLDateTime(Date.UTC(value.year, value.month-1, value.day)/1000, 'UTC');
     }
     return dateTrunc('day', value);
 }
 function toMonth(value) { return extract('month', value) }
-function toIntervalMonth(val) { return __toHogInterval(val, 'month') }
-function toIntervalDay(val) { return __toHogInterval(val, 'day') }
+function toIntervalMonth(val) { return __toIQLInterval(val, 'month') }
+function toIntervalDay(val) { return __toIQLInterval(val, 'day') }
 function toDateTime (input, zone) { return __toDateTime(input, zone) }
 function toDate (input) { return __toDate(input) }
 function substring(s, start, optionalLength) {
@@ -86,7 +86,7 @@ function range(...args) {
         return Array.from({length:end - start}, (_,i)=>start+i);
     }
 }
-function print (...args) { console.log(...args.map(__printHogStringOutput)) }
+function print (...args) { console.log(...args.map(__printIQLStringOutput)) }
 function plus(a, b) { return a + b }
 function or(...args) { return args.some(Boolean) }
 function now () { return __now() }
@@ -111,7 +111,7 @@ function jsonStringify (value, spacing) {
                     return obj
                 }
                 if (Array.isArray(x)) { return x.map((v) => convert(v, marked)) }
-                if (__isHogDateTime(x) || __isHogDate(x) || __isHogError(x)) { return x }
+                if (__isIQLDateTime(x) || __isIQLDate(x) || __isIQLError(x)) { return x }
                 if (typeof x === 'function') { return `fn<${x.name || 'lambda'}(${x.length})>` }
                 const obj = {}; for (const key in x) { obj[key] = convert(x[key], marked) }
                 return obj
@@ -129,7 +129,7 @@ function jsonStringify (value, spacing) {
 function isNull (value) { return value === null || value === undefined }
 function isNotNull (value) { return value !== null && value !== undefined }
 function __x_in(val, arr) {
-    if (Array.isArray(arr) || (arr && arr.__isHogTuple)) {
+    if (Array.isArray(arr) || (arr && arr.__isIQLTuple)) {
         return arr.includes(val);
     }
     return false;
@@ -140,9 +140,9 @@ function generateUUIDv4 () { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.repla
 function floor(a) { return Math.floor(a) }
 function extract(part, val) {
     function toDate(obj) {
-        if (__isHogDateTime(obj)) {
+        if (__isIQLDateTime(obj)) {
             return new Date(obj.dt * 1000);
-        } else if (__isHogDate(obj)) {
+        } else if (__isIQLDate(obj)) {
             return new Date(Date.UTC(obj.year, obj.month - 1, obj.day));
         } else {
             return new Date(obj);
@@ -167,7 +167,7 @@ function empty (value) {
     return !value }
 function decodeURLComponent (str) { return decodeURIComponent(str) }
 function dateTrunc(unit, val) {
-    if (!__isHogDateTime(val)) {
+    if (!__isIQLDateTime(val)) {
         throw new Error('Expected a DateTime for dateTrunc');
     }
     const zone = val.zone || 'UTC';
@@ -195,13 +195,13 @@ function dateTrunc(unit, val) {
     }
 
     const truncated = new Date(Date.UTC(year, month, day, hour, minute, second, ms));
-    return { __hogDateTime__: true, dt: truncated.getTime()/1000, zone: zone };
+    return { __iqlDateTime__: true, dt: truncated.getTime()/1000, zone: zone };
 }
 function dateDiff(unit, startVal, endVal) {
     function toDateTime(obj) {
-        if (__isHogDateTime(obj)) {
+        if (__isIQLDateTime(obj)) {
             return new Date(obj.dt * 1000);
-        } else if (__isHogDate(obj)) {
+        } else if (__isIQLDate(obj)) {
             return new Date(Date.UTC(obj.year, obj.month - 1, obj.day));
         } else {
             return new Date(obj);
@@ -243,7 +243,7 @@ function dateAdd(unit, amount, datetime) {
         unit = 'month';
         amount = amount * 12;
     }
-    const interval = __toHogInterval(amount, unit);
+    const interval = __toIQLInterval(amount, unit);
     return __applyIntervalToDateTime(datetime, interval);
 }
 function coalesce(...args) {
@@ -262,35 +262,35 @@ function assumeNotNull(value) {
 }
 function and(...args) { return args.every(Boolean) }
 function addDays(dateOrDt, days) {
-    const interval = __toHogInterval(days, 'day');
+    const interval = __toIQLInterval(days, 'day');
     return __applyIntervalToDateTime(dateOrDt, interval);
 }
-function __toHogInterval(value, unit) {
-    return { __hogInterval__: true, value: value, unit: unit };
+function __toIQLInterval(value, unit) {
+    return { __iqlInterval__: true, value: value, unit: unit };
 }
 function __toDateTime(input, zone) { let dt;
     if (typeof input === 'number') { dt = input; }
     else { const date = new Date(input); if (isNaN(date.getTime())) { throw new Error('Invalid date input'); } dt = date.getTime() / 1000; }
-    return { __hogDateTime__: true, dt: dt, zone: zone || 'UTC' }; }
+    return { __iqlDateTime__: true, dt: dt, zone: zone || 'UTC' }; }
 function __toDate(input) { let date;
     if (typeof input === 'number') { date = new Date(input * 1000); } else { date = new Date(input); }
     if (isNaN(date.getTime())) { throw new Error('Invalid date input'); }
-    return { __hogDate__: true, year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() }; }
-function __printHogStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printHogValue(obj) }
-function __printHogValue(obj, marked = new Set()) {
+    return { __iqlDate__: true, year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() }; }
+function __printIQLStringOutput(obj) { if (typeof obj === 'string') { return obj } return __printIQLValue(obj) }
+function __printIQLValue(obj, marked = new Set()) {
     if (typeof obj === 'object' && obj !== null && obj !== undefined) {
-        if (marked.has(obj) && !__isHogDateTime(obj) && !__isHogDate(obj) && !__isHogError(obj)) { return 'null'; }
+        if (marked.has(obj) && !__isIQLDateTime(obj) && !__isIQLDate(obj) && !__isIQLError(obj)) { return 'null'; }
         marked.add(obj);
         try {
             if (Array.isArray(obj)) {
-                if (obj.__isHogTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printHogValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printHogValue(o, marked)).join(', ')})`; }
-                return `[${obj.map((o) => __printHogValue(o, marked)).join(', ')}]`;
+                if (obj.__isIQLTuple) { return obj.length < 2 ? `tuple(${obj.map((o) => __printIQLValue(o, marked)).join(', ')})` : `(${obj.map((o) => __printIQLValue(o, marked)).join(', ')})`; }
+                return `[${obj.map((o) => __printIQLValue(o, marked)).join(', ')}]`;
             }
-            if (__isHogDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
-            if (__isHogDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
-            if (__isHogError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printHogValue(obj.payload, marked)}` : ''})`; }
-            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`; }
-            return `{${Object.entries(obj).map(([key, value]) => `${__printHogValue(key, marked)}: ${__printHogValue(value, marked)}`).join(', ')}}`;
+            if (__isIQLDateTime(obj)) { const millis = String(obj.dt); return `DateTime(${millis}${millis.includes('.') ? '' : '.0'}, ${__escapeString(obj.zone)})`; }
+            if (__isIQLDate(obj)) return `Date(${obj.year}, ${obj.month}, ${obj.day})`;
+            if (__isIQLError(obj)) { return `${String(obj.type)}(${__escapeString(obj.message)}${obj.payload ? `, ${__printIQLValue(obj.payload, marked)}` : ''})`; }
+            if (obj instanceof Map) { return `{${Array.from(obj.entries()).map(([key, value]) => `${__printIQLValue(key, marked)}: ${__printIQLValue(value, marked)}`).join(', ')}}`; }
+            return `{${Object.entries(obj).map(([key, value]) => `${__printIQLValue(key, marked)}: ${__printIQLValue(value, marked)}`).join(', ')}}`;
         } finally {
             marked.delete(obj);
         }
@@ -300,8 +300,8 @@ function __printHogValue(obj, marked = new Set()) {
             if (typeof obj === 'function') return `fn<${__escapeIdentifier(obj.name || 'lambda')}(${obj.length})>`;
     return obj.toString();
 }
-function __now(zone) { return __toHogDateTime(Date.now() / 1000, zone) }
-function __isHogError(obj) {return obj && obj.__hogError__ === true}
+function __now(zone) { return __toIQLDateTime(Date.now() / 1000, zone) }
+function __isIQLError(obj) {return obj && obj.__iqlError__ === true}
 function __escapeString(value) {
     const singlequoteEscapeCharsMap = { '\b': '\\b', '\f': '\\f', '\r': '\\r', '\n': '\\n', '\t': '\\t', '\0': '\\0', '\v': '\\v', '\\': '\\\\', "'": "\\'" }
     return `'${value.split('').map((c) => singlequoteEscapeCharsMap[c] || c).join('')}'`;
@@ -313,15 +313,15 @@ function __escapeIdentifier(identifier) {
     return `\`${identifier.split('').map((c) => backquoteEscapeCharsMap[c] || c).join('')}\``;
 }
 function __applyIntervalToDateTime(base, interval) {
-    // base can be HogDate or HogDateTime
-    if (!(__isHogDate(base) || __isHogDateTime(base))) {
-        throw new Error("Expected a HogDate or HogDateTime");
+    // base can be IQLDate or IQLDateTime
+    if (!(__isIQLDate(base) || __isIQLDateTime(base))) {
+        throw new Error("Expected a IQLDate or IQLDateTime");
     }
 
-    let zone = __isHogDateTime(base) ? (base.zone || 'UTC') : 'UTC';
+    let zone = __isIQLDateTime(base) ? (base.zone || 'UTC') : 'UTC';
 
     function toDate(obj) {
-        if (__isHogDateTime(obj)) {
+        if (__isIQLDateTime(obj)) {
             return new Date(obj.dt * 1000);
         } else {
             return new Date(Date.UTC(obj.year, obj.month - 1, obj.day));
@@ -371,22 +371,22 @@ function __applyIntervalToDateTime(base, interval) {
 
     const newDt = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds, ms));
 
-    if (__isHogDate(base)) {
-        return __toHogDate(newDt.getUTCFullYear(), newDt.getUTCMonth() + 1, newDt.getUTCDate());
+    if (__isIQLDate(base)) {
+        return __toIQLDate(newDt.getUTCFullYear(), newDt.getUTCMonth() + 1, newDt.getUTCDate());
     } else {
-        return __toHogDateTime(newDt.getTime() / 1000, zone);
+        return __toIQLDateTime(newDt.getTime() / 1000, zone);
     }
 }
-function __toHogDateTime(timestamp, zone) {
-    if (__isHogDate(timestamp)) {
+function __toIQLDateTime(timestamp, zone) {
+    if (__isIQLDate(timestamp)) {
         const date = new Date(Date.UTC(timestamp.year, timestamp.month - 1, timestamp.day));
         const dt = date.getTime() / 1000;
-        return { __hogDateTime__: true, dt: dt, zone: zone || 'UTC' };
+        return { __iqlDateTime__: true, dt: dt, zone: zone || 'UTC' };
     }
-    return { __hogDateTime__: true, dt: timestamp, zone: zone || 'UTC' }; }
-function __toHogDate(year, month, day) { return { __hogDate__: true, year: year, month: month, day: day, } }
-function __isHogDateTime(obj) { return obj && obj.__hogDateTime__ === true }
-function __isHogDate(obj) { return obj && obj.__hogDate__ === true }
+    return { __iqlDateTime__: true, dt: timestamp, zone: zone || 'UTC' }; }
+function __toIQLDate(year, month, day) { return { __iqlDate__: true, year: year, month: month, day: day, } }
+function __isIQLDateTime(obj) { return obj && obj.__iqlDateTime__ === true }
+function __isIQLDate(obj) { return obj && obj.__iqlDate__ === true }
 function JSONExtractString(obj, ...path) {
     try {
         if (typeof obj === 'string') { obj = JSON.parse(obj); }

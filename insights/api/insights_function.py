@@ -224,14 +224,14 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
     def validate(self, attrs):
         team = self.context["get_team"]()
         attrs["team"] = team  # NOTE: This has to be done at this level
-        hog_type = self.context["function_type"]
+        iql_type = self.context["function_type"]
         is_create = self.context.get("is_create") or (
             self.context.get("view") and self.context["view"].action == "create"
         )
 
         # Check for transformation limit per team when the function will be enabled
         # We allow unlimited creation of disabled transformations as they don't run during ingestion
-        if hog_type == "transformation" and attrs.get("enabled", False):
+        if iql_type == "transformation" and attrs.get("enabled", False):
             # Don't apply the limit for updates where the function was already enabled
             apply_limit = is_create or (isinstance(self.instance, InsightsFunction) and not self.instance.enabled)
 
@@ -254,20 +254,20 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
                 attrs["filters"].pop("events", None)
                 attrs["filters"].pop("actions", None)
 
-            if hog_type not in ["site_destination", "destination"]:
+            if iql_type not in ["site_destination", "destination"]:
                 raise serializers.ValidationError({"mappings": "Mappings are only allowed for destinations."})
 
         if "iql" in attrs:
             # First check the raw code size before trying to compile/transpile it
-            hog_code_size = len(attrs["fn"].encode("utf-8"))
-            if hog_code_size > MAX_SCRIPT_CODE_SIZE_BYTES:
+            iql_code_size = len(attrs["fn"].encode("utf-8"))
+            if iql_code_size > MAX_SCRIPT_CODE_SIZE_BYTES:
                 raise serializers.ValidationError(
                     {
                         "fn": f"Script code exceeds maximum size of {MAX_SCRIPT_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
                     }
                 )
 
-            if hog_type in TYPES_WITH_JAVASCRIPT_SOURCE:
+            if iql_type in TYPES_WITH_JAVASCRIPT_SOURCE:
                 try:
                     # Validate transpilation using the model instance
                     attrs["transpiled"] = get_transpiled_function(
@@ -282,7 +282,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
                     raise serializers.ValidationError({"fn": "Error in TypeScript code"})
                 attrs["bytecode"] = None
             else:
-                attrs["bytecode"] = compile_script(attrs["fn"], hog_type)
+                attrs["bytecode"] = compile_script(attrs["fn"], iql_type)
                 attrs["transpiled"] = None
 
         if is_create:

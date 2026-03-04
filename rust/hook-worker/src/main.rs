@@ -74,7 +74,7 @@ async fn main() -> Result<(), WorkerError> {
         config.allow_internal_ips,
         kafka_producer,
         config.cdp_function_callbacks_topic.to_owned(),
-        config.hog_mode,
+        config.iql_mode,
         worker_liveness,
     );
 

@@ -10,8 +10,8 @@ export RUST_LOG=${DEBUG:-debug}
 SQLX_QUERY_LEVEL=${SQLX_QUERY_LEVEL:-warn}
 export RUST_LOG=$RUST_LOG,sqlx::query=$SQLX_QUERY_LEVEL
 
-export HOG_MODE=true
-DATABASE_NAME=${DEBUG:-hoghooks}
+export IQL_MODE=true
+DATABASE_NAME=${DEBUG:-insightshooks}
 export DATABASE_URL=postgres://insights:insights@localhost:5432/$DATABASE_NAME
 export ALLOW_INTERNAL_IPS=true
 

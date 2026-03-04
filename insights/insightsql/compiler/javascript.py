@@ -148,9 +148,9 @@ class JavaScriptCompiler(Visitor):
         # You may enter "ast" mode with `sql()` or `(select ...)`
         if self.mode == "iql" or isinstance(node, ast.Placeholder):
             return super().visit(node)
-        return self._visit_hog_ast(node)
+        return self._visit_iql_ast(node)
 
-    def _visit_hog_ast(self, node: AST | None) -> str:
+    def _visit_iql_ast(self, node: AST | None) -> str:
         if node is None:
             return "null"
         if isinstance(node, ast.InsightsQLXTag):
@@ -643,7 +643,7 @@ class JavaScriptCompiler(Visitor):
         last_mode = self.mode
         self.mode = "ast"
         try:
-            return self._visit_hog_ast(node)
+            return self._visit_iql_ast(node)
         finally:
             self.mode = last_mode
 

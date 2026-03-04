@@ -100,13 +100,13 @@ class TestFetchSessionDataActivity:
         spy_setex = mocker.spy(redis_test_setup.redis_client, "setex")
         with (
             # Mock DB calls
-            patch("ee.hogai.session_summaries.session.input_data.get_team", return_value=ateam),
+            patch("ee.insightsai.session_summaries.session.input_data.get_team", return_value=ateam),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.get_session_metadata",
+                "ee.insightsai.session_summaries.session.summarize_session.get_session_metadata",
                 return_value=mock_raw_metadata,
             ),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.get_session_events",
+                "ee.insightsai.session_summaries.session.summarize_session.get_session_events",
                 return_value=(mock_raw_events_columns, mock_raw_events),
             ),
         ):
@@ -141,13 +141,13 @@ class TestFetchSessionDataActivity:
         """Test that fetch_session_data_activity returns False when no events are found (e.g., for static recordings)."""
         input_data = mock_single_session_summary_inputs(mock_session_id, ateam.id, auser.id, "test-no-events-key-base")
         with (
-            patch("ee.hogai.session_summaries.session.input_data.get_team", return_value=ateam),
+            patch("ee.insightsai.session_summaries.session.input_data.get_team", return_value=ateam),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.get_session_metadata",
+                "ee.insightsai.session_summaries.session.summarize_session.get_session_metadata",
                 return_value=mock_raw_metadata,
             ),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.get_session_events",
+                "ee.insightsai.session_summaries.session.summarize_session.get_session_events",
                 return_value=(mock_raw_events_columns, []),
             ),
         ):
@@ -203,7 +203,7 @@ class TestStreamLlmSummaryActivity:
         mock_stream_llm_instance = mock_stream_llm()
         with (
             patch(
-                "ee.hogai.session_summaries.llm.consume.stream_llm", return_value=mock_stream_llm_instance
+                "ee.insightsai.session_summaries.llm.consume.stream_llm", return_value=mock_stream_llm_instance
             ) as mock_stream_llm_patch,
             patch("temporalio.activity.heartbeat") as mock_heartbeat,
             patch("temporalio.activity.info") as mock_activity_info,
@@ -235,7 +235,7 @@ class TestStreamLlmSummaryActivity:
         spy_setex.reset_mock()
         # Second run: should retrieve from DB without calling LLM
         with (
-            patch("ee.hogai.session_summaries.llm.consume.stream_llm") as mock_stream_llm_patch_2,
+            patch("ee.insightsai.session_summaries.llm.consume.stream_llm") as mock_stream_llm_patch_2,
             patch("temporalio.activity.heartbeat") as mock_heartbeat_2,
             patch("temporalio.activity.info") as mock_activity_info_2,
         ):
@@ -292,15 +292,15 @@ class TestSummarizeSingleSessionStreamWorkflow:
             ) as worker:
                 with (
                     # Mock LLM call
-                    patch("ee.hogai.session_summaries.llm.consume.stream_llm", return_value=mock_stream_llm()),
+                    patch("ee.insightsai.session_summaries.llm.consume.stream_llm", return_value=mock_stream_llm()),
                     # Mock DB calls
-                    patch("ee.hogai.session_summaries.session.input_data.get_team", return_value=mock_team),
+                    patch("ee.insightsai.session_summaries.session.input_data.get_team", return_value=mock_team),
                     patch(
-                        "ee.hogai.session_summaries.session.summarize_session.get_session_metadata",
+                        "ee.insightsai.session_summaries.session.summarize_session.get_session_metadata",
                         return_value=mock_raw_metadata,
                     ),
                     patch(
-                        "ee.hogai.session_summaries.session.summarize_session.get_session_events",
+                        "ee.insightsai.session_summaries.session.summarize_session.get_session_events",
                         return_value=(mock_raw_events_columns, mock_raw_events),
                     ),
                     # Mock deterministic hex generation
@@ -417,11 +417,11 @@ class TestSummarizeSingleSessionStreamWorkflow:
         mock_workflow_handle.result = AsyncMock(return_value=expected_final_summary)
         with (
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.prepare_data_for_single_session_summary",
+                "ee.insightsai.session_summaries.session.summarize_session.prepare_data_for_single_session_summary",
                 return_value=sample_session_summary_data,
             ),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.prepare_single_session_summary_input",
+                "ee.insightsai.session_summaries.session.summarize_session.prepare_single_session_summary_input",
                 return_value=input_data,
             ),
             patch(
@@ -494,11 +494,11 @@ class TestSummarizeSingleSessionStreamWorkflow:
         mock_workflow_handle.describe = AsyncMock(return_value=MagicMock(status=WorkflowExecutionStatus.RUNNING))
         with (
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.prepare_data_for_single_session_summary",
+                "ee.insightsai.session_summaries.session.summarize_session.prepare_data_for_single_session_summary",
                 return_value=sample_session_summary_data,
             ),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.prepare_single_session_summary_input",
+                "ee.insightsai.session_summaries.session.summarize_session.prepare_single_session_summary_input",
                 return_value=input_data,
             ),
             patch(
@@ -582,11 +582,11 @@ class TestSummarizeSingleSessionStreamWorkflow:
         mock_workflow_handle.result = AsyncMock(return_value=expected_final_summary)
         with (
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.prepare_data_for_single_session_summary",
+                "ee.insightsai.session_summaries.session.summarize_session.prepare_data_for_single_session_summary",
                 return_value=sample_session_summary_data,
             ),
             patch(
-                "ee.hogai.session_summaries.session.summarize_session.prepare_single_session_summary_input",
+                "ee.insightsai.session_summaries.session.summarize_session.prepare_single_session_summary_input",
                 return_value=input_data,
             ),
             patch(

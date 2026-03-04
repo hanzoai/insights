@@ -334,7 +334,7 @@
         "$raw_user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
         "$feature_flag_payloads": {},
         "unit_amount_usd.session_replay": null,
-        "$feature/mascot-skin-spiderhog": true,
+        "$feature/mascot-skin-spidermascot": true,
         "$feature/data-modeling": true,
         "usage_limit.data_warehouse": 1000000,
         "$active_feature_flags": [
@@ -376,7 +376,7 @@
             "settings-session-table-version",
             "insights-http-batch-exports",
             "data-modeling",
-            "mascot-skin-spiderhog",
+            "mascot-skin-spidermascot",
             "insight_variables",
             "web-experiments",
             "bigquery-dwh",
