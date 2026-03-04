@@ -255,13 +255,13 @@ class TestPluginsUtils(BaseTest):
         )
 
         parsed_url = parse_url(
-            "https://gitlab.com/gitlab-org/gl-openshift/openshift-demos/openshift-custom-pipeline/-/tree/master"
+            "https://gitlab.com/gitlab-org/gl-openshift/openshift-demos/openshift-custom-pipeline/-/tree/main"
         )
         self.assertEqual(
             parsed_url["project"],
             "gitlab-org/gl-openshift/openshift-demos/openshift-custom-pipeline",
         )
-        self.assertEqual(parsed_url["tag"], "master")
+        self.assertEqual(parsed_url["tag"], "main")
         self.assertEqual(mock_get.call_count, 1)
 
         parsed_url = parse_url(
@@ -291,7 +291,7 @@ class TestPluginsUtils(BaseTest):
             parsed_url["project"],
             "gitlab-org/gl-openshift/openshift-demos/openshift-custom-pipeline",
         )
-        self.assertEqual(parsed_url["tag"], "master")
+        self.assertEqual(parsed_url["tag"], "main")
         self.assertEqual(mock_get.call_count, 1)
 
         # private tokens

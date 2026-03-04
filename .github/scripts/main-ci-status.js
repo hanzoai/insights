@@ -1,4 +1,4 @@
-// Master CI Status - Latching alarm model for tracking CI failures on master
+// Master CI Status - Latching alarm model for tracking CI failures on main
 //
 // State structure:
 // {
@@ -13,7 +13,7 @@
 // A workflow is "known failing" iff fail_ts[w] > ok_ts[w]
 // Resolution occurs when no workflows are known failing
 
-const STATE_FILE = '.master-ci-incident';
+const STATE_FILE = '.main-ci-incident';
 
 async function getCommitTimestamp(github, context, sha) {
     const { data } = await github.rest.repos.getCommit({

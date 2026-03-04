@@ -98,4 +98,4 @@ warn_unused_ignores = true
 managed = true
 
 [tool.uv.sources]
-hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "master" }
+hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "main" }

@@ -202,7 +202,7 @@ class TestSecretAlertEndpoint(APIBaseTest):
             {
                 "token": "hix_test_token_123",
                 "type": GITHUB_TYPE_FOR_PROJECT_SECRET,
-                "url": "https://github.com/hanzoai/insights/blob/master/example.py",
+                "url": "https://github.com/hanzoai/insights/blob/main/example.py",
                 "source": "github",
             }
         ]

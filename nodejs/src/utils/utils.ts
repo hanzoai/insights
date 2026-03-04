@@ -153,7 +153,7 @@ export class UUID {
      * XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX
      */
     toString(): string {
-        // Adapted from https://github.com/uuidjs/uuid/blob/master/src/stringify.js
+        // Adapted from https://github.com/uuidjs/uuid/blob/main/src/stringify.js
         // Note: Be careful editing this code! It's been tuned for performance and works in ways you may not expect.
         // See https://github.com/uuidjs/uuid/pull/434
         const arr = this.array

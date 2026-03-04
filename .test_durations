@@ -9617,7 +9617,7 @@
     "insights/clickhouse/test/test_sessions_model.py::TestSessionsModel::test_select_from_sessions_mv": 2.626884222000001,
     "insights/clickhouse/test/test_sessions_model.py::TestSessionsModel::test_separates_sessions_across_same_user": 2.7595619190000207,
     "insights/demo/test/test_matrix_manager.py::TestMatrixManager::test_create_team": 2.8838282890000073,
-    "insights/demo/test/test_matrix_manager.py::TestMatrixManager::test_reset_master": 8.453681619999998,
+    "insights/demo/test/test_matrix_manager.py::TestMatrixManager::test_reset_primary": 8.453681619999998,
     "insights/demo/test/test_matrix_manager.py::TestMatrixManager::test_run_on_team": 8.084029044999966,
     "insights/demo/test/test_matrix_manager.py::TestMatrixManager::test_run_on_team_using_pre_save": 8.803045455000074,
     "insights/ducklake/test_storage.py::TestCrossAccountDestination::test_destination_attributes": 0.01,

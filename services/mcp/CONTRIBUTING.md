@@ -378,7 +378,7 @@ When you need a completely new visualization (not just adding a tool to an exist
 
 The MCP server is deployed to Cloudflare Workers. Deployment is handled by CI/CD:
 
-- **CI** (`.github/workflows/ci-mcp.yml`): Runs tests on PRs and master
+- **CI** (`.github/workflows/ci-mcp.yml`): Runs tests on PRs and main
 - **Publish** (`.github/workflows/mcp-publish.yml`): Publishes to npm on version bump
 
 To deploy manually to Cloudflare:

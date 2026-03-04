@@ -6,7 +6,7 @@ name: Backend CI
 on:
     push:
         branches:
-            - master
+            - main
     workflow_dispatch:
         inputs:
             clickhouseServerVersion:
@@ -66,7 +66,7 @@ jobs:
             legacy: ${{ steps.filter.outputs.legacy || 'true' }}
         steps:
             # For pull requests it's not necessary to checkout the code, but we
-            # also want this to run on master so we need to checkout
+            # also want this to run on main so we need to checkout
             - uses: actions/checkout@v6
               with:
                   clean: false
@@ -78,7 +78,7 @@ jobs:
 
             - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
               id: filter
-              if: github.event_name != 'push' # Run all tests on master push
+              if: github.event_name != 'push' # Run all tests on main push
               with:
                   list-files: 'escape'
                   filters: |
@@ -207,7 +207,7 @@ jobs:
                   # Determines if Django needs to run based on contract changes.
                   #
                   # Logic:
-                  # - Push to master: run Django (full CI)
+                  # - Push to main: run Django (full CI)
                   # - Legacy (insights/common) changed: run Django
                   # - Any contract-check cache miss: run Django
                   # - All cache hits: skip Django (isolated impl-only changes)
@@ -216,7 +216,7 @@ jobs:
                   # warm as a baseline for future product-only PRs.
 
                   if [[ "${{ github.event_name }}" != "pull_request" ]]; then
-                    echo "Push to master - Django will run"
+                    echo "Push to main - Django will run"
                     echo "run_legacy=true" >> $GITHUB_OUTPUT
                   elif [[ "${{ needs.changes.outputs.legacy }}" == "true" ]]; then
                     echo "Legacy code changed - Django will run"
@@ -299,7 +299,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install SAML dependencies
               if: steps.setup-uv.outputs.cache-hit != 'true'
@@ -316,7 +316,7 @@ jobs:
               with:
                   shared-key: 'v2-rust-backend'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               run: cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked
@@ -356,15 +356,15 @@ jobs:
               env:
                   # --reuse-db: keep the test database between sequential product runs to avoid
                   # ClickHouse drop/create race conditions with ReplicatedMergeTree ZK metadata.
-                  # On master, also collect timing data for pytest-split sharding.
+                  # On main, also collect timing data for pytest-split sharding.
                   PYTEST_ADDOPTS: >-
                       --reuse-db
-                      ${{ github.ref == 'refs/heads/master' && '--store-durations --durations-path ../../.test_durations' || '' }}
+                      ${{ github.ref == 'refs/heads/main' && '--store-durations --durations-path ../../.test_durations' || '' }}
               run: pnpm turbo run backend:test ${{ matrix.filters }} --concurrency=1 --output-logs=full --force --log-order=stream ${{ matrix.pytest_args }}
 
             - name: Upload timing data
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-              if: ${{ github.ref == 'refs/heads/master' }}
+              if: ${{ github.ref == 'refs/heads/main' }}
               with:
                   name: timing_data-Products-${{ strategy.job-index }}
                   path: .test_durations
@@ -425,7 +425,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install SAML (python3-saml) dependencies
               if: steps.setup-uv.outputs.cache-hit != 'true'
@@ -443,30 +443,30 @@ jobs:
               with:
                   shared-key: 'v2-rust-backend'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               run: |
                   cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked
 
-            # First running migrations from master, to simulate the real-world scenario
-            - name: Checkout master
+            # First running migrations from main, to simulate the real-world scenario
+            - name: Checkout main
               uses: actions/checkout@v6
               with:
-                  ref: master
+                  ref: main
                   clean: false
 
-            - name: Install python dependencies for master
+            - name: Install python dependencies for main
               run: |
-                  UV_PROJECT_ENVIRONMENT=.venv-master uv sync --frozen --dev
+                  UV_PROJECT_ENVIRONMENT=.venv-main uv sync --frozen --dev
 
             - name: Wait for Docker services
               run: bin/wait-for-docker
 
-            - name: Run migrations up to master
+            - name: Run migrations up to main
               run: |
                   # Run Django migrations first (excluding managed=False models)
-                  .venv-master/bin/python manage.py migrate
+                  .venv-main/bin/python manage.py migrate
                   # Then run persons migrations using sqlx; comment out until we've merged
                   # DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                   #   sqlx database create
@@ -668,20 +668,20 @@ jobs:
                   retention-days: 90
 
             - name: Check migrations
-              # Skip migration safety check on master push (no migration_files from path filter)
+              # Skip migration safety check on main push (no migration_files from path filter)
               if: github.event_name != 'push'
               run: |
                   DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons" \
                     sqlx migrate info --source rust/persons_migrations/
                   python manage.py makemigrations --check --dry-run
-                  git fetch origin master
+                  git fetch origin main
                   # Check migration safety using old SQL-based checker (still uses stdin from git diff)
                   echo "${{ needs.changes.outputs.migrations_files }}" | grep -v migrations/0001_ | grep -v 'rust/persons_migrations' | python manage.py test_migrations_are_safe
 
             - name: Check CH migrations
               run: |
                   # Same as above, except now for CH looking at files that were added in insights/clickhouse/migrations/
-                  git diff --name-status origin/master..HEAD | grep "A\sinsights/clickhouse/migrations/" | grep -v README | awk '{print $2}' | python manage.py test_ch_migrations_are_safe
+                  git diff --name-status origin/main..HEAD | grep "A\sinsights/clickhouse/migrations/" | grep -v README | awk '{print $2}' | python manage.py test_ch_migrations_are_safe
 
             - name: Install pnpm
               uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4
@@ -1006,7 +1006,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install SAML (python3-saml) dependencies
               if: ${{ needs.changes.outputs.backend == 'true' && steps.setup-uv-tests.outputs.cache-hit != 'true' }}
@@ -1027,19 +1027,19 @@ jobs:
               with:
                   shared-key: 'v2-rust-backend'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               if: needs.changes.outputs.backend == 'true'
               run: |
                   cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked
 
-            - name: Determine if insightsql-parser has changed compared to master
+            - name: Determine if insightsql-parser has changed compared to main
               shell: bash
               id: insightsql-parser-diff
               run: |
-                  git fetch --no-tags --prune --depth=1 origin master
-                  changed=$(git diff --quiet HEAD origin/master -- common/insightsql_parser/ && echo "false" || echo "true")
+                  git fetch --no-tags --prune --depth=1 origin main
+                  changed=$(git diff --quiet HEAD origin/main -- common/insightsql_parser/ && echo "false" || echo "true")
                   echo "changed=$changed" >> $GITHUB_OUTPUT
 
             # tests would intermittently fail in GH actions
@@ -1232,7 +1232,7 @@ jobs:
             - name: Upload updated timing data as artifacts
               uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
               # Only upload timing data on main branch to avoid artifact bloat from PRs
-              if: ${{ github.ref == 'refs/heads/master' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events && matrix.clickhouse-server-image == needs.get_clickhouse_versions.outputs.oldest_supported_image }}
+              if: ${{ github.ref == 'refs/heads/main' && needs.changes.outputs.backend == 'true' && !matrix.person-on-events && matrix.clickhouse-server-image == needs.get_clickhouse_versions.outputs.oldest_supported_image }}
               with:
                   name: timing_data-${{ matrix.segment }}-${{ matrix.group }}
                   path: .test_durations
@@ -1568,7 +1568,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install SAML (python3-saml) dependencies
               if: steps.setup-uv-async.outputs.cache-hit != 'true'
@@ -1587,7 +1587,7 @@ jobs:
               with:
                   shared-key: 'v2-rust-backend'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               run: |

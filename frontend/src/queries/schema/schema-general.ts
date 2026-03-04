@@ -3098,7 +3098,7 @@ export interface ExperimentTrendsQuery extends DataNode<ExperimentTrendsQueryRes
     experiment_id?: integer
     count_query: TrendsQuery
     // Defaults to $feature_flag_called if not specified
-    // https://github.com/hanzoai/insights/blob/master/insights/insightsql_queries/experiments/experiment_trends_query_runner.py
+    // https://github.com/hanzoai/insights/blob/main/insights/insightsql_queries/experiments/experiment_trends_query_runner.py
     exposure_query?: TrendsQuery
     fingerprint?: string
 }

@@ -1061,7 +1061,7 @@ declare abstract class SubtleCrypto {
      */
     generateKey(algorithm: string | SubtleCryptoGenerateKeyAlgorithm, extractable: boolean, keyUsages: string[]): Promise<CryptoKey | CryptoKeyPair>;
     /**
-     * The **`deriveKey()`** method of the SubtleCrypto interface can be used to derive a secret key from a master key.
+     * The **`deriveKey()`** method of the SubtleCrypto interface can be used to derive a secret key from a main key.
      *
      * [MDN Reference](https://developer.mozilla.org/docs/Web/API/SubtleCrypto/deriveKey)
      */
@@ -3566,7 +3566,7 @@ declare abstract class BaseAiTranslation {
 }
 /**
  * Workers AI support for OpenAI's Responses API
- * Reference: https://github.com/openai/openai-node/blob/master/src/resources/responses/responses.ts
+ * Reference: https://github.com/openai/openai-node/blob/main/src/resources/responses/responses.ts
  *
  * It's a stripped down version from its source.
  * It currently supports basic function calling, json mode and accepts images as input.

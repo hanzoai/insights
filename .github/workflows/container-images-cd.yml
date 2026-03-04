@@ -12,7 +12,7 @@ name: Container Images CD
 on:
     push:
         branches:
-            - master
+            - main
         paths-ignore:
             - 'rust/**'
             - 'livestream/**'
@@ -73,7 +73,7 @@ jobs:
               with:
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ghcr.io/hanzoai/insights:latest,ghcr.io/hanzoai/insights:${{ github.sha }},hanzoai/insights:${{ github.sha }},hanzoai/insights:latest,${{ steps.aws-ecr.outputs.registry }}/insights-cloud:master,${{ steps.aws-ecr.outputs.registry }}/insights-cloud:${{ github.sha }}
+                  tags: ghcr.io/hanzoai/insights:latest,ghcr.io/hanzoai/insights:${{ github.sha }},hanzoai/insights:${{ github.sha }},hanzoai/insights:latest,${{ steps.aws-ecr.outputs.registry }}/insights-cloud:main,${{ steps.aws-ecr.outputs.registry }}/insights-cloud:${{ github.sha }}
                   platforms: linux/arm64,linux/amd64
                   build-args: |
                       COMMIT_HASH=${{ github.sha }}
