@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name="hogflowtemplate",
+            model_name="insightsflowtemplate",
             name="scope",
             field=models.CharField(
                 choices=[

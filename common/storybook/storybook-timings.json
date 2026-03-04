@@ -99,7 +99,7 @@
         "chromium": 34.8,
         "webkit": 3.3
     },
-    "frontend/src/lib/components/HedgehogBuddy/HedgehogBuddy.stories.tsx": {
+    "frontend/src/lib/components/MascotBuddy/MascotBuddy.stories.tsx": {
         "chromium": 2.4,
         "webkit": 2.5
     },
@@ -107,7 +107,7 @@
         "chromium": 12.4,
         "webkit": 2.9
     },
-    "frontend/src/lib/components/Hogfetti/Hogfetti.stories.tsx": {
+    "frontend/src/lib/components/Confetti/Confetti.stories.tsx": {
         "chromium": 5.9,
         "webkit": 2.4
     },

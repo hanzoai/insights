@@ -21,8 +21,8 @@ pub fn add_routes(
 
     if hog_mode {
         router.route(
-            "/hoghook",
-            routing::post(webhook::post_hoghook)
+            "/insightshook",
+            routing::post(webhook::post_insightshook)
                 .with_state(pg_pool)
                 .layer::<_, Infallible>(ConcurrencyLimitLayer::new(concurrency_limit))
                 .layer(DefaultBodyLimit::max(max_body_size)),

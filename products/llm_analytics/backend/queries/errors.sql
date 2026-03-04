@@ -3,7 +3,7 @@
 -- The $ai_error_normalized property contains the pre-computed normalized error message.
 -- See: nodejs/src/ingestion/ai/errors/normalize-error.ts
 --
--- This query uses HogQL property syntax (properties.$prop) to leverage materialized columns
+-- This query uses InsightsQL property syntax (properties.$prop) to leverage materialized columns
 -- for $ai_trace_id, $ai_session_id, and $ai_is_error for better performance.
 */
 
