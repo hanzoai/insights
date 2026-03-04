@@ -8456,7 +8456,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["email", "name"], person_properties=["email", "name"])
     def test_ilike_regression_with_current_clickhouse_version(self):
-        # CH upgrade to 22.3 has this problem: https://github.com/ClickHouse/ClickHouse/issues/36279
+        # CH upgrade to 22.3 has this problem: https://github.com/hanzoai/datastore/issues/36279
         # While we're waiting to upgrade to a newer version, a workaround is to set `optimize_move_to_prewhere = 0`
         # Only happens in the materialized version
 

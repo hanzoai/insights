@@ -608,7 +608,7 @@ SELECT toUInt16(0) AS total, {date_to_truncated} - {interval_func}(number) AS da
 -- Get the number of `intervals` between date_from and date_to.
 --
 -- NOTE: for week there is some unusual behavior, see:
---       https://github.com/ClickHouse/ClickHouse/issues/7322
+--       https://github.com/hanzoai/datastore/issues/7322
 --
 --       This actually aligns with what we want, as they are assuming Sunday week starts,
 --       and we'd rather have the relative week num difference. Likewise the same for

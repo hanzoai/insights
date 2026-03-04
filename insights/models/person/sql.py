@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS {table_name} {on_cluster_clause}
 
 
 # You must include the database here because of a bug in clickhouse
-# related to https://github.com/ClickHouse/ClickHouse/issues/10471
+# related to https://github.com/hanzoai/datastore/issues/10471
 def PERSONS_DISTINCT_ID_TABLE_MV_SQL():
     return """
 CREATE MATERIALIZED VIEW IF NOT EXISTS {table_name}_mv ON CLUSTER '{cluster}'
