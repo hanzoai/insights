@@ -1,4 +1,4 @@
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import { processAiErrorNormalization } from './index'
 import { normalizeError } from './normalize-error'

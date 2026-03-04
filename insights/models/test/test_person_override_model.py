@@ -441,7 +441,7 @@ def _merge_people(
     This mimics how we expect the code to do person merges, i.e. in a transaction
     that deletes the old person, adds old person->override person override and updates
     all old person as override person rows to now point to the new override person.
-    Note that we don't actually handle the merge on the posthog_person table,
+    Note that we don't actually handle the merge on the insights_person table,
     but rather simply DELETE the record associated with `old_person_id`. It may
     be that we remove the implmentation of deleting merged persons, in which
     case we'll need to update the constraint to also include e.g. the
@@ -450,7 +450,7 @@ def _merge_people(
     cursor.execute(
         """
             DELETE FROM
-                posthog_person
+                insights_person
             WHERE
                 uuid = %(old_person_uuid)s
                 AND team_id = %(team_id)s;
@@ -458,7 +458,7 @@ def _merge_people(
         {"team_id": team.id, "old_person_uuid": old_person_uuid},
     )
 
-    # The following INSERTs and UPDATEs will lock posthog_personoverridemapping
+    # The following INSERTs and UPDATEs will lock insights_personoverridemapping
     # Until the constraints are checked, which happens when the transaction commits.
     if can_lock_event is not None:
         # Wait until we are allowed to lock.
@@ -468,7 +468,7 @@ def _merge_people(
     cursor.execute(
         """
             WITH insert_id AS (
-                INSERT INTO posthog_personoverridemapping(
+                INSERT INTO insights_personoverridemapping(
                     team_id,
                     uuid
                 )
@@ -485,7 +485,7 @@ def _merge_people(
             -- Fear not, the constraints on personoverride will handle any inconsistencies.
             -- This mapping table is really nothing more than a mapping.
             SELECT id
-            FROM posthog_personoverridemapping
+            FROM insights_personoverridemapping
             WHERE uuid = %(old_person_uuid)s
         """,
         {"team_id": team.id, "old_person_uuid": old_person_uuid},
@@ -495,7 +495,7 @@ def _merge_people(
     cursor.execute(
         """
             WITH insert_id AS (
-                INSERT INTO posthog_personoverridemapping(
+                INSERT INTO insights_personoverridemapping(
                     team_id,
                     uuid
                 )
@@ -509,7 +509,7 @@ def _merge_people(
             SELECT * FROM insert_id
             UNION ALL
             SELECT id
-            FROM posthog_personoverridemapping
+            FROM insights_personoverridemapping
             WHERE uuid = %(override_person_uuid)s
         """,
         {"team_id": team.id, "override_person_uuid": override_person_uuid},
@@ -518,7 +518,7 @@ def _merge_people(
 
     cursor.execute(
         """
-            INSERT INTO posthog_personoverride(
+            INSERT INTO insights_personoverride(
                 team_id,
                 old_person_id,
                 override_person_id,
@@ -533,7 +533,7 @@ def _merge_people(
                 1
             );
             UPDATE
-                posthog_personoverride
+                insights_personoverride
             SET
                 override_person_id = %(override_person_id)s,
                 version = version + 1

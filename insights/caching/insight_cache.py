@@ -21,7 +21,7 @@ logger = structlog.get_logger(__name__)
 REQUEUE_DELAY = timedelta(hours=2)
 MAX_ATTEMPTS = 3
 
-INSIGHT_CACHE_WRITE_COUNTER = Counter("posthog_cloud_insight_cache_write", "A write to the redis insight cache")
+INSIGHT_CACHE_WRITE_COUNTER = Counter("insights_cloud_insight_cache_write", "A write to the redis insight cache")
 
 CACHE_UPDATE_SKIPPED_COUNTER = Counter(
     "insight_cache_state_update_skipped", "Insight caching state is within target cache age and was not refreshed"

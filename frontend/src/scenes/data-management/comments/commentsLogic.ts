@@ -1,8 +1,8 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonSelectOption, lemonToast } from '@posthog/lemon-ui'
+import { LemonSelectOption, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { capitalizeFirstLetter } from 'lib/utils'
@@ -143,7 +143,7 @@ export const commentsLogic = kea<commentsLogicType>([
             lemonToast.success('Comment deleted')
         },
         deleteCommentFailure: (e) => {
-            posthog.captureException(e, { action: 'data management scene deleting comment' })
+            insights.captureException(e, { action: 'data management scene deleting comment' })
             lemonToast.error('Could not delete comment, refresh and try again')
         },
     })),

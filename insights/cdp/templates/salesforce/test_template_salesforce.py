@@ -56,7 +56,7 @@ class TestTemplateSalesforceCreate(BaseInsightsFunctionTemplateTest):
         assert self.get_mock_fetch_calls()[0] == (
             "https://example.my.salesforce.com/services/data/v61.0/sobjects/Contact",
             {
-                "body": {"email": "example@posthog.com", "foo": "bar"},
+                "body": {"email": "example@hanzo.ai", "foo": "bar"},
                 "method": "POST",
                 "headers": {"Authorization": "Bearer oauth-1234", "Content-Type": "application/json"},
             },
@@ -72,7 +72,7 @@ class TestTemplateSalesforceUpdate(BaseInsightsFunctionTemplateTest):
                 "instance_url": "https://example.my.salesforce.com",
                 "access_token": "oauth-1234",
             },
-            "path": "Lead/Email/example@posthog.com",
+            "path": "Lead/Email/example@hanzo.ai",
             "properties": {
                 "foo": "bar",
             },
@@ -84,7 +84,7 @@ class TestTemplateSalesforceUpdate(BaseInsightsFunctionTemplateTest):
         self.mock_fetch_response = lambda *args: {"status": 200, "body": {"ok": True}}  # type: ignore
         self.run_function(self._inputs())
         assert self.get_mock_fetch_calls()[0] == (
-            "https://example.my.salesforce.com/services/data/v61.0/sobjects/Lead/Email/example@posthog.com",
+            "https://example.my.salesforce.com/services/data/v61.0/sobjects/Lead/Email/example@hanzo.ai",
             {
                 "body": {"foo": "bar"},
                 "method": "PATCH",
@@ -96,7 +96,7 @@ class TestTemplateSalesforceUpdate(BaseInsightsFunctionTemplateTest):
         self.mock_fetch_response = lambda *args: {"status": 200, "body": {"ok": True}}  # type: ignore
         self.run_function(self._inputs(include_all_event_properties=True))
         assert self.get_mock_fetch_calls()[0] == (
-            "https://example.my.salesforce.com/services/data/v61.0/sobjects/Lead/Email/example@posthog.com",
+            "https://example.my.salesforce.com/services/data/v61.0/sobjects/Lead/Email/example@hanzo.ai",
             {
                 "body": {"$current_url": "https://example.com", "foo": "bar"},
                 "method": "PATCH",
@@ -108,9 +108,9 @@ class TestTemplateSalesforceUpdate(BaseInsightsFunctionTemplateTest):
         self.mock_fetch_response = lambda *args: {"status": 200, "body": {"ok": True}}  # type: ignore
         self.run_function(self._inputs(include_all_person_properties=True))
         assert self.get_mock_fetch_calls()[0] == (
-            "https://example.my.salesforce.com/services/data/v61.0/sobjects/Lead/Email/example@posthog.com",
+            "https://example.my.salesforce.com/services/data/v61.0/sobjects/Lead/Email/example@hanzo.ai",
             {
-                "body": {"email": "example@posthog.com", "foo": "bar"},
+                "body": {"email": "example@hanzo.ai", "foo": "bar"},
                 "method": "PATCH",
                 "headers": {"Authorization": "Bearer oauth-1234", "Content-Type": "application/json"},
             },

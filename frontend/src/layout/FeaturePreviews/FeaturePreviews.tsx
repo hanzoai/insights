@@ -1,8 +1,8 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 import { useLayoutEffect, useState } from 'react'
 
-import { IconBell, IconCheck } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonSwitch, LemonTextArea, Link } from '@posthog/lemon-ui'
+import { IconBell, IconCheck } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonSwitch, LemonTextArea, Link } from '@hanzo/lemon-ui'
 
 import { BasicCard } from 'lib/components/Cards/BasicCard'
 import { SpinnerOverlay } from 'lib/lemon-ui/Spinner'
@@ -11,10 +11,10 @@ import { Label } from 'lib/ui/Label/Label'
 
 import { EnrichedEarlyAccessFeature, featurePreviewsLogic } from './featurePreviewsLogic'
 
-const hasPosthogJsFailedToLoadFeaturePreviews = (): boolean => !!window.POSTHOG_GLOBAL_ERRORS?.onFeatureFlagsLoadError
+const hasInsightsJsFailedToLoadFeaturePreviews = (): boolean => !!window.INSIGHTS_GLOBAL_ERRORS?.onFeatureFlagsLoadError
 
 // Feature previews can be linked to by using hash in the url
-// example external link: https://app.posthog.com/settings/user-feature-previews#llm-analytics
+// example external link: https://insights.hanzo.ai/settings/user-feature-previews#llm-analytics
 export function FeaturePreviews(): JSX.Element {
     const { earlyAccessFeatures, rawEarlyAccessFeaturesLoading } = useValues(featurePreviewsLogic)
     const { loadEarlyAccessFeatures } = useActions(featurePreviewsLogic)
@@ -22,7 +22,7 @@ export function FeaturePreviews(): JSX.Element {
     useLayoutEffect(() => loadEarlyAccessFeatures(), [loadEarlyAccessFeatures])
 
     const betaFeatures = earlyAccessFeatures.filter((f) => f.stage === 'beta')
-    const failedToLoadFeaturePreviews = earlyAccessFeatures.length === 0 && hasPosthogJsFailedToLoadFeaturePreviews()
+    const failedToLoadFeaturePreviews = earlyAccessFeatures.length === 0 && hasInsightsJsFailedToLoadFeaturePreviews()
 
     return (
         <div className="flex flex-col gap-2">
@@ -36,7 +36,7 @@ export function FeaturePreviews(): JSX.Element {
                         <span className="italic">
                             Note: If you use feature flags for your app, you can avoid this issue for your users by
                             using a{' '}
-                            <Link to="https://posthog.com/docs/advanced/proxy" target="_blank">
+                            <Link to="https://hanzo.ai/docs/advanced/proxy" target="_blank">
                                 reverse proxy
                             </Link>
                             .

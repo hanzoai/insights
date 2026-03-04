@@ -63,12 +63,12 @@ TEST_TIME = dt.datetime.now(dt.UTC)
 
 
 @pytest_asyncio.fixture
-async def posthog_table_names(ateam):
+async def insights_table_names(ateam):
     team = await database_sync_to_async(Team.objects.get)(id=ateam.pk)
     insightsql_db = await database_sync_to_async(Database.create_for)(team=team)
-    posthog_table_names = insightsql_db.get_posthog_table_names()
+    insights_table_names = insightsql_db.get_insights_table_names()
 
-    return posthog_table_names
+    return insights_table_names
 
 
 @pytest.mark.parametrize(
@@ -89,10 +89,10 @@ async def posthog_table_names(ateam):
         },
     ],
 )
-async def test_run_dag_activity_activity_materialize_mocked(activity_environment, ateam, dag, posthog_table_names):
+async def test_run_dag_activity_activity_materialize_mocked(activity_environment, ateam, dag, insights_table_names):
     """Test all models are completed with a mocked materialize."""
     for model_label in dag.keys():
-        if model_label not in posthog_table_names:
+        if model_label not in insights_table_names:
             await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
                 team=ateam,
                 name=model_label,
@@ -110,7 +110,7 @@ async def test_run_dag_activity_activity_materialize_mocked(activity_environment
         async with asyncio.timeout(10):
             results = await activity_environment.run(run_dag_activity, run_dag_activity_inputs)
 
-        models_materialized = [model for model in dag.keys() if model not in posthog_table_names]
+        models_materialized = [model for model in dag.keys() if model not in insights_table_names]
 
     calls = magic_mock.mock_calls
 
@@ -152,7 +152,7 @@ async def test_run_dag_activity_activity_materialize_mocked(activity_environment
     ],
 )
 async def test_run_dag_activity_activity_skips_if_ancestor_failed_mocked(
-    activity_environment, ateam, dag, make_fail, posthog_table_names
+    activity_environment, ateam, dag, make_fail, insights_table_names
 ):
     """Test some models are completed while some fail with a mocked materialize.
 
@@ -163,7 +163,7 @@ async def test_run_dag_activity_activity_skips_if_ancestor_failed_mocked(
     """
     # Create the necessary saved queries for the test
     for model_label in dag.keys():
-        if model_label not in posthog_table_names:
+        if model_label not in insights_table_names:
             await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
                 team=ateam,
                 name=model_label,
@@ -174,7 +174,7 @@ async def test_run_dag_activity_activity_skips_if_ancestor_failed_mocked(
         team=ateam,
     )
     run_dag_activity_inputs = RunDagActivityInputs(team_id=ateam.pk, dag=dag, job_id=job.id)
-    assert all(model not in posthog_table_names for model in make_fail), "Insights tables cannot fail"
+    assert all(model not in insights_table_names for model in make_fail), "Insights tables cannot fail"
 
     def raise_if_should_make_fail(model_label, *args, **kwargs):
         if model_label in make_fail:
@@ -204,7 +204,7 @@ async def test_run_dag_activity_activity_skips_if_ancestor_failed_mocked(
             results = await activity_environment.run(run_dag_activity, run_dag_activity_inputs)
 
         models_materialized = [
-            model for model in expected_failed | expected_completed if model not in posthog_table_names
+            model for model in expected_failed | expected_completed if model not in insights_table_names
         ]
 
     calls = magic_mock.mock_calls

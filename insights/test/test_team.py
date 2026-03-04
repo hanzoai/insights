@@ -78,7 +78,7 @@ class TestTeam(BaseTest):
             [
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 },
@@ -115,7 +115,7 @@ class TestTeam(BaseTest):
         # Ensure insights are created and linked
         self.assertEqual(DashboardTile.objects.filter(dashboard=team.primary_dashboard).count(), 6)
 
-    @mock.patch("posthoganalytics.feature_enabled", return_value=True)
+    @mock.patch("hanzoanalytics.feature_enabled", return_value=True)
     def test_team_on_cloud_uses_feature_flag_to_determine_person_on_events(self, mock_feature_enabled):
         with self.is_cloud(True):
             with override_instance_config("PERSON_ON_EVENTS_ENABLED", False):
@@ -138,7 +138,7 @@ class TestTeam(BaseTest):
                     send_feature_flag_events=False,
                 )
 
-    @mock.patch("posthoganalytics.feature_enabled", return_value=False)
+    @mock.patch("hanzoanalytics.feature_enabled", return_value=False)
     def test_team_on_self_hosted_uses_instance_setting_to_determine_person_on_events(self, mock_feature_enabled):
         with self.is_cloud(False):
             with override_instance_config("PERSON_ON_EVENTS_V2_ENABLED", True):
@@ -196,8 +196,8 @@ class TestTeam(BaseTest):
 
     @parameterized.expand(
         [
-            (None, {"recorder_script": "posthog-recorder"}),
-            ({"other_setting": "value"}, {"other_setting": "value", "recorder_script": "posthog-recorder"}),
+            (None, {"recorder_script": "insights-recorder"}),
+            ({"other_setting": "value"}, {"other_setting": "value", "recorder_script": "insights-recorder"}),
             ({"recorder_script": "custom-recorder"}, {"recorder_script": "custom-recorder"}),
         ]
     )

@@ -70,21 +70,21 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 # Agent SDK
 ###
 
-# Set up /scripts as a Node.js project and install @posthog/agent
+# Set up /scripts as a Node.js project and install @hanzo/agent
 RUN mkdir -p /scripts && \
     cd /scripts && \
     npm init -y && \
-    npm install @posthog/agent@1.27.0
+    npm install @hanzo/agent@1.27.0
 
 # Download agent runner script from GitHub
 RUN cd /scripts && \
-    curl -fsSL https://raw.githubusercontent.com/PostHog/posthog/master/products/tasks/scripts/runAgent.mjs \
+    curl -fsSL https://raw.githubusercontent.com/hanzoai/insights/main/products/tasks/scripts/runAgent.mjs \
     -o runAgent.mjs && \
     chmod +x runAgent.mjs
 
 # Configure git for commits - TODO: Use user's email and name
-RUN git config --global user.email "array@posthog.com" && \
-    git config --global user.name "Array"
+RUN git config --global user.email "dev@hanzo.ai" && \
+    git config --global user.name "Hanzo"
 
 # This is required for the Claude Code SDK to allow --dangerously-skip-permissions as the root user
 ENV IS_SANDBOX=1

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGear } from '@posthog/icons'
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { Scene, SceneExport } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
@@ -62,7 +62,7 @@ const LogsSceneContent = (): JSX.Element => {
                     type="info"
                     dismissKey="logs-setup-hint-banner"
                     action={{
-                        to: 'https://posthog.com/docs/logs/',
+                        to: 'https://hanzo.ai/docs/logs/',
                         targetBlank: true,
                         children: 'Setup guide',
                     }}

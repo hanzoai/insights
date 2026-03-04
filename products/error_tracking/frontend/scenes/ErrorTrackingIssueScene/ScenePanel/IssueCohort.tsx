@@ -1,7 +1,7 @@
 import { useAsyncActions } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonDialog, LemonInput, Link, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput, Link, lemonToast } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

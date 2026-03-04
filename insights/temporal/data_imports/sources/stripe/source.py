@@ -89,7 +89,7 @@ By clicking the link above, you will be taken to a form that pre-fills everythin
 These permissions are automatically pre-filled in the API key creation form if you use the link above, so all you need to do is scroll down and click "Create Key".
 """,
             iconPath="/static/services/stripe.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/stripe",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/stripe",
             fields=cast(
                 list[FieldType],
                 [

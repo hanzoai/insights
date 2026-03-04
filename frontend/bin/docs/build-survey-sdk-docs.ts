@@ -9,19 +9,19 @@ import * as path from 'path'
 import { SURVEY_SDK_REQUIREMENTS, SurveySdkType } from '../../src/scenes/surveys/surveyVersionRequirements'
 
 const SDK_INFO: Record<SurveySdkType, { name: string; docsUrl: string }> = {
-    'posthog-js': { name: 'JavaScript Web', docsUrl: '/docs/libraries/js' },
-    'posthog-react-native': { name: 'React Native', docsUrl: '/docs/libraries/react-native' },
-    'posthog-ios': { name: 'iOS', docsUrl: '/docs/libraries/ios' },
-    'posthog-android': { name: 'Android', docsUrl: '/docs/libraries/android' },
-    posthog_flutter: { name: 'Flutter', docsUrl: '/docs/libraries/flutter' },
+    'insights-js': { name: 'JavaScript Web', docsUrl: '/docs/libraries/js' },
+    'insights-react-native': { name: 'React Native', docsUrl: '/docs/libraries/react-native' },
+    'insights-ios': { name: 'iOS', docsUrl: '/docs/libraries/ios' },
+    'insights-android': { name: 'Android', docsUrl: '/docs/libraries/android' },
+    insights_flutter: { name: 'Flutter', docsUrl: '/docs/libraries/flutter' },
 }
 
 const SDK_ORDER: SurveySdkType[] = [
-    'posthog-js',
-    'posthog-react-native',
-    'posthog-ios',
-    'posthog-android',
-    'posthog_flutter',
+    'insights-js',
+    'insights-react-native',
+    'insights-ios',
+    'insights-android',
+    'insights_flutter',
 ]
 
 function generateMarkdown(): string {
@@ -32,7 +32,7 @@ function generateMarkdown(): string {
         'showTitle: true',
         '---',
         '',
-        "import { IconCheck, IconWrench, IconX } from '@posthog/icons'",
+        "import { IconCheck, IconWrench, IconX } from '@hanzo/icons'",
         '',
         'Not all survey features are available on every SDK. Web has the most complete support, while mobile SDKs have some limitations.',
         '',

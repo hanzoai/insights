@@ -1,9 +1,9 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
-import { IconSearch, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonModal, Spinner } from '@posthog/lemon-ui'
+import { IconSearch, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonModal, Spinner } from '@hanzo/lemon-ui'
 
 import { LemonModalContent, LemonModalHeader } from 'lib/lemon-ui/LemonModal/LemonModal'
 import { maxGlobalLogic } from 'scenes/max/maxGlobalLogic'
@@ -35,7 +35,7 @@ export const SimilarIssuesList = (): JSX.Element => {
     const handleMerge = async (relatedIssueId: string, maxDistance: number): Promise<void> => {
         if (issue) {
             await mergeIssues([issue.id, relatedIssueId])
-            posthog.capture('similar_issue_merged', { maxDistance: maxDistance })
+            insights.capture('similar_issue_merged', { maxDistance: maxDistance })
             loadSimilarIssues(true)
         }
     }

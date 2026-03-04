@@ -3,7 +3,7 @@ import './InsightOptions.scss'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconPlay } from '@posthog/icons'
+import { IconPlay } from '@hanzo/icons'
 
 import { LemonCard } from 'lib/lemon-ui/LemonCard'
 import { Link } from 'lib/lemon-ui/Link'

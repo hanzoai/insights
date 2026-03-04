@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, path, props, selectors } from 'kea'
 import { lazyLoaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { Scene } from 'scenes/sceneTypes'
@@ -125,7 +125,7 @@ export const personLogic = kea<personLogicType>([
                         const [sessionCount, eventCount, lastSeen] = row
                         return { sessionCount, eventCount, lastSeen }
                     } catch (error: any) {
-                        posthog.captureException(error)
+                        insights.captureException(error)
                         return {
                             sessionCount: 0,
                             eventCount: 0,
@@ -165,7 +165,7 @@ export const personLogic = kea<personLogicType>([
                             lifetimeValue: row[1] ?? null,
                         }
                     } catch (error) {
-                        posthog.captureException(error, { tag: 'person_revenue_analytics_data_query_failed' })
+                        insights.captureException(error, { tag: 'person_revenue_analytics_data_query_failed' })
                         return null
                     }
                 },

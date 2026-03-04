@@ -1,7 +1,7 @@
 import { router } from 'kea-router'
 
-import { IconEllipsis } from '@posthog/icons'
-import { LemonButton, LemonMenu, Tooltip, lemonToast } from '@posthog/lemon-ui'
+import { IconEllipsis } from '@hanzo/icons'
+import { LemonButton, LemonMenu, Tooltip, lemonToast } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'

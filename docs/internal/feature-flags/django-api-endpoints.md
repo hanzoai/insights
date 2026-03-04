@@ -2,7 +2,7 @@
 
 Django serves the admin/management API for feature flags: CRUD operations, local SDK evaluation, analytics, and organization-level operations. Runtime flag evaluation (`/flags`, `/decide`) is routed directly to the [Rust service](rust-service-overview.md) by Contour/Envoy at the Kubernetes infrastructure level -- these requests never reach Django. Django does make internal service-to-service HTTP calls to the Rust service for actions like `my_flags` and `evaluation_reasons`.
 
-The `/api/feature_flag/local_evaluation` endpoint (used by server-side SDKs for local flag evaluation) runs on a **dedicated Django deployment** (`posthog-local-evaluation`), separate from the main Django web service.
+The `/api/feature_flag/local_evaluation` endpoint (used by server-side SDKs for local flag evaluation) runs on a **dedicated Django deployment** (`insights-local-evaluation`), separate from the main Django web service.
 
 ## Architecture overview
 
@@ -34,14 +34,14 @@ The `/api/feature_flag/local_evaluation` endpoint (used by server-side SDKs for 
 
 ## Viewsets
 
-All in `posthog/api/feature_flag.py` unless noted otherwise.
+All in `insights/api/feature_flag.py` unless noted otherwise.
 
 | Viewset                       | Route                                   | Notes                                                                    |
 | ----------------------------- | --------------------------------------- | ------------------------------------------------------------------------ |
 | `FeatureFlagViewSet`          | `api/projects/{id}/feature_flags/`      | Primary viewset. Full CRUD, soft delete via `ForbidDestroyModel`.        |
 | `LegacyFeatureFlagViewSet`    | `api/feature_flag/`                     | Inherits `FeatureFlagViewSet`, derives team from session.                |
-| `OrganizationFeatureFlagView` | `api/organizations/{id}/feature_flags/` | Cross-team operations. File: `posthog/api/organization_feature_flag.py`. |
-| `FlagValueViewSet`            | `api/projects/{id}/flag_value/`         | Returns possible values for a flag. File: `posthog/api/flag_value.py`.   |
+| `OrganizationFeatureFlagView` | `api/organizations/{id}/feature_flags/` | Cross-team operations. File: `insights/api/organization_feature_flag.py`. |
+| `FlagValueViewSet`            | `api/projects/{id}/flag_value/`         | Returns possible values for a flag. File: `insights/api/flag_value.py`.   |
 
 ## Endpoint reference
 
@@ -79,15 +79,15 @@ Requires `ProjectSecretAPIKeyAuthentication` or `TemporaryTokenAuthentication`. 
 
 ### `my_flags` and `evaluation_reasons`
 
-Both actions **proxy to the Rust flags service** via `get_flags_from_service()` in `posthog/api/services/flags_service.py`. The Rust service URL defaults to `http://localhost:3001` (configured via `FEATURE_FLAGS_SERVICE_URL` in `posthog/settings/data_stores.py`).
+Both actions **proxy to the Rust flags service** via `get_flags_from_service()` in `insights/api/services/flags_service.py`. The Rust service URL defaults to `http://localhost:3001` (configured via `FEATURE_FLAGS_SERVICE_URL` in `insights/settings/data_stores.py`).
 
 ### `create_static_cohort_for_flag`
 
-Creates a static cohort containing all users that match a flag's conditions. This is the **only remaining use** of the legacy Python flag matching code in `posthog/models/feature_flag/flag_matching.py`.
+Creates a static cohort containing all users that match a flag's conditions. This is the **only remaining use** of the legacy Python flag matching code in `insights/models/feature_flag/flag_matching.py`.
 
 ## Django model
 
-### FeatureFlag (`posthog/models/feature_flag/feature_flag.py`)
+### FeatureFlag (`insights/models/feature_flag/feature_flag.py`)
 
 Key things to know:
 
@@ -113,11 +113,11 @@ Key things to know:
 
 | File                                               | Purpose                                                                    |
 | -------------------------------------------------- | -------------------------------------------------------------------------- |
-| `posthog/models/feature_flag/flag_matching.py`     | **Legacy** Python evaluation engine (only used for static cohort creation) |
-| `posthog/models/feature_flag/flags_cache.py`       | HyperCache for the Rust flags service with signal-based invalidation       |
-| `posthog/models/feature_flag/local_evaluation.py`  | Prepares flag data for SDK local evaluation with HyperCache                |
-| `posthog/models/feature_flag/user_blast_radius.py` | Estimates user/group match counts for conditions                           |
-| `posthog/api/services/flags_service.py`            | HTTP proxy to the Rust flags service                                       |
+| `insights/models/feature_flag/flag_matching.py`     | **Legacy** Python evaluation engine (only used for static cohort creation) |
+| `insights/models/feature_flag/flags_cache.py`       | HyperCache for the Rust flags service with signal-based invalidation       |
+| `insights/models/feature_flag/local_evaluation.py`  | Prepares flag data for SDK local evaluation with HyperCache                |
+| `insights/models/feature_flag/user_blast_radius.py` | Estimates user/group match counts for conditions                           |
+| `insights/api/services/flags_service.py`            | HTTP proxy to the Rust flags service                                       |
 
 ## Remote config endpoints
 

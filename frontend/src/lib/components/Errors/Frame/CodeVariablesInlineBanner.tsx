@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
 import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
@@ -31,7 +31,7 @@ export function CodeVariablesInlineBanner(): JSX.Element | null {
                     <span className="italic">Code variables would appear here. </span>
                     <Link
                         className="font-medium"
-                        to={`https://posthog.com/docs/error-tracking/code-variables/${exceptionAttributes.runtime}`}
+                        to={`https://hanzo.ai/docs/error-tracking/code-variables/${exceptionAttributes.runtime}`}
                         target="_blank"
                     >
                         Learn how to enable them

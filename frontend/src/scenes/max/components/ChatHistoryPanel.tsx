@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { memo, useRef } from 'react'
 
-import { IconEllipsis, IconPlusSmall, IconSearch, IconShare, IconSidebarClose } from '@posthog/icons'
-import { LemonSkeleton, Link, Spinner } from '@posthog/lemon-ui'
+import { IconEllipsis, IconPlusSmall, IconSearch, IconShare, IconSidebarClose } from '@hanzo/icons'
+import { LemonSkeleton, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ResizerLogicProps } from 'lib/components/Resizer/resizerLogic'

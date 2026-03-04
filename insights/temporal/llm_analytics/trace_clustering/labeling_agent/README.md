@@ -118,7 +118,7 @@ From `constants.py`:
 ## Usage
 
 ```python
-from posthog.temporal.llm_analytics.trace_clustering.labeling_agent import run_labeling_agent
+from insights.temporal.llm_analytics.trace_clustering.labeling_agent import run_labeling_agent
 
 labels = run_labeling_agent(
     team_id=1,

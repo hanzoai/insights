@@ -50,7 +50,7 @@ class TeamInline(TabularInlinePaginated):
 
     def displayed_name(self, team: Team):
         return format_html(
-            '<a href="/admin/posthog/team/{}/change/">{}.&nbsp;{}</a>',
+            '<a href="/admin/insights/team/{}/change/">{}.&nbsp;{}</a>',
             team.pk,
             team.pk,
             team.name,

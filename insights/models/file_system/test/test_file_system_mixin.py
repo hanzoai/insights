@@ -9,7 +9,7 @@ class TestFileSystemSyncMixin(TestCase):
     def setUp(self):
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.user = User.objects.create_user("test@posthog.com", "testpassword", "Tester")
+        self.user = User.objects.create_user("test@hanzo.ai", "testpassword", "Tester")
 
     def test_feature_flag_create_triggers_file_creation(self):
         """

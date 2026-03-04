@@ -18,10 +18,10 @@ function VueCreateComposableFileSnippet(): JSX.Element {
 
     return (
         <CodeSnippet language={Language.JavaScript}>
-            {`import posthog from 'posthog-js'
+            {`import insights from '@hanzo/insights'
 
 export function useInsights() {
-  posthog.init('${currentTeam?.api_token}', {
+  insights.init('${currentTeam?.api_token}', {
     api_host: '${apiHostOrigin()}',
     defaults: '${SDK_DEFAULTS_DATE}',
     ${
@@ -31,7 +31,7 @@ export function useInsights() {
     }
   })
 
-  return { posthog }
+  return { insights }
 }`}
         </CodeSnippet>
     )
@@ -60,7 +60,7 @@ const router = createRouter({
   ],
 })
 
-const { posthog } = useInsights()
+const { insights } = useInsights()
 
 export default router`}
         </CodeSnippet>
@@ -73,11 +73,11 @@ export function SDKInstallVueInstructions(): JSX.Element {
             <p>
                 The below guide is for integrating using plugins in Vue versions 3 and above. For integrating Insights
                 using Provide/inject, Vue.prototype, or versions 2.7 and below, see our{' '}
-                <Link to="https://posthog.com/docs/libraries/vue-js">Vue docs</Link>
+                <Link to="https://hanzo.ai/docs/libraries/vue-js">Vue docs</Link>
             </p>
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
-            <h3>Add Posthog to your app</h3>
+            <h3>Add Insights to your app</h3>
             <p>
                 Create a new file <code>src/composables/useInsights SDK</code>:
             </p>

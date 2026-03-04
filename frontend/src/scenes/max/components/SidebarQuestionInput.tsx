@@ -5,7 +5,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef } from 'react'
 import { CSSTransition } from 'react-transition-group'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { cn } from 'lib/utils/css-classes'

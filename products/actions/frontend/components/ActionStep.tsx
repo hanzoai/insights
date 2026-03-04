@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, Link } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSegmentedButton, Link } from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -30,7 +30,7 @@ import {
 } from '../utils/screenName'
 import { EventName } from './EventName'
 
-const learnMoreLink = 'https://posthog.com/docs/data/actions?utm_medium=in-product&utm_campaign=action-page'
+const learnMoreLink = 'https://hanzo.ai/docs/data/actions?utm_medium=in-product&utm_campaign=action-page'
 
 interface Props {
     step: ActionStepType
@@ -107,7 +107,7 @@ export function ActionStep({
                             />
 
                             <small>
-                                <Link to="https://posthog.com/docs/libraries" target="_blank">
+                                <Link to="https://hanzo.ai/docs/libraries" target="_blank">
                                     See documentation
                                 </Link>{' '}
                                 on how to send custom events in lots of languages.

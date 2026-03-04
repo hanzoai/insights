@@ -1,6 +1,6 @@
 import { actions, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { ParsedLogMessage } from 'products/logs/frontend/types'
 import { getSessionIdFromLogAttributes } from 'products/logs/frontend/utils'
@@ -27,14 +27,14 @@ export const logDetailsModalLogic = kea<logDetailsModalLogicType>([
 
     listeners(() => ({
         setActiveTab: ({ tab }) => {
-            posthog.capture('logs details tab changed', { tab })
+            insights.capture('logs details tab changed', { tab })
         },
     })),
 
     subscriptions(() => ({
         isLogDetailsOpen: (isLogDetailsOpen: boolean, wasOpen: boolean) => {
             if (isLogDetailsOpen && !wasOpen) {
-                posthog.capture('logs details opened')
+                insights.capture('logs details opened')
             }
         },
     })),

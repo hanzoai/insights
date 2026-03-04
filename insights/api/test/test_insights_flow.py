@@ -745,7 +745,7 @@ class TestInsightsFlowAPI(APIBaseTest):
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -809,8 +809,8 @@ class TestInsightsFlowAPI(APIBaseTest):
         assert len(bytecode_with) > len(bytecode_without), "Bytecode with filter_test_accounts should be longer"
 
         # Verify the bytecode includes the test account filter pattern
-        # The pattern "%@posthog.com%" indicates the not_icontains check
-        assert "%@posthog.com%" in bytecode_with, "Bytecode should include test account filter value"
+        # The pattern "%@hanzo.ai%" indicates the not_icontains check
+        assert "%@hanzo.ai%" in bytecode_with, "Bytecode should include test account filter value"
         assert "email" in bytecode_with, "Bytecode should include email property check"
         assert "person" in bytecode_with, "Bytecode should include person property type"
 

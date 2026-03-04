@@ -44,13 +44,13 @@ class TestGitHubPRWebhook(TestCase):
             title="Test Task",
             description="Test description",
             origin_product=Task.OriginProduct.USER_CREATED,
-            repository="posthog/posthog",
+            repository="hanzoai/insights",
         )
         self.task_run = TaskRun.objects.create(
             task=self.task,
             team=self.team,
             status=TaskRun.Status.COMPLETED,
-            output={"pr_url": "https://github.com/posthog/posthog/pull/123"},
+            output={"pr_url": "https://github.com/hanzoai/insights/pull/123"},
         )
 
     def _make_webhook_request(self, payload: dict, event_type: str = "pull_request"):
@@ -67,7 +67,7 @@ class TestGitHubPRWebhook(TestCase):
         )
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.posthoganalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
     def test_pr_merged_webhook(self, mock_capture, mock_get_secret):
         """Test that a PR merged webhook creates a log entry and analytics event."""
         mock_get_secret.return_value = self.webhook_secret
@@ -75,7 +75,7 @@ class TestGitHubPRWebhook(TestCase):
         payload = {
             "action": "closed",
             "pull_request": {
-                "html_url": "https://github.com/posthog/posthog/pull/123",
+                "html_url": "https://github.com/hanzoai/insights/pull/123",
                 "merged": True,
             },
         }
@@ -88,12 +88,12 @@ class TestGitHubPRWebhook(TestCase):
         mock_capture.assert_called_once()
         call_kwargs = mock_capture.call_args[1]
         self.assertEqual(call_kwargs["event"], "pr_merged")
-        self.assertEqual(call_kwargs["properties"]["pr_url"], "https://github.com/posthog/posthog/pull/123")
+        self.assertEqual(call_kwargs["properties"]["pr_url"], "https://github.com/hanzoai/insights/pull/123")
         self.assertEqual(call_kwargs["properties"]["task_id"], str(self.task.id))
         self.assertEqual(call_kwargs["properties"]["run_id"], str(self.task_run.id))
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.posthoganalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
     def test_pr_closed_without_merge_webhook(self, mock_capture, mock_get_secret):
         """Test that a PR closed (not merged) webhook creates correct events."""
         mock_get_secret.return_value = self.webhook_secret
@@ -101,7 +101,7 @@ class TestGitHubPRWebhook(TestCase):
         payload = {
             "action": "closed",
             "pull_request": {
-                "html_url": "https://github.com/posthog/posthog/pull/123",
+                "html_url": "https://github.com/hanzoai/insights/pull/123",
                 "merged": False,
             },
         }
@@ -116,7 +116,7 @@ class TestGitHubPRWebhook(TestCase):
         self.assertEqual(call_kwargs["event"], "pr_closed")
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.posthoganalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
     def test_pr_opened_webhook(self, mock_capture, mock_get_secret):
         """Test that a PR opened webhook creates correct events."""
         mock_get_secret.return_value = self.webhook_secret
@@ -124,7 +124,7 @@ class TestGitHubPRWebhook(TestCase):
         payload = {
             "action": "opened",
             "pull_request": {
-                "html_url": "https://github.com/posthog/posthog/pull/123",
+                "html_url": "https://github.com/hanzoai/insights/pull/123",
                 "merged": False,
             },
         }
@@ -173,7 +173,7 @@ class TestGitHubPRWebhook(TestCase):
         self.assertEqual(response.status_code, 403)
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.posthoganalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
     def test_unknown_pr_url_returns_200(self, mock_capture, mock_get_secret):
         """Test that webhooks for unknown PR URLs return 200 but don't emit events."""
         mock_get_secret.return_value = self.webhook_secret
@@ -211,7 +211,7 @@ class TestGitHubPRWebhook(TestCase):
             payload = {
                 "action": action,
                 "pull_request": {
-                    "html_url": "https://github.com/posthog/posthog/pull/123",
+                    "html_url": "https://github.com/hanzoai/insights/pull/123",
                     "merged": False,
                 },
             }

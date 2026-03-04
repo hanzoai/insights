@@ -204,7 +204,7 @@ class TestChangeRequestViewSet(APIBaseTest):
         assert cr.state == ChangeRequestState.REJECTED
 
     def test_cancel_only_by_requester(self):
-        other_user = User.objects.create(email="other@posthog.com")
+        other_user = User.objects.create(email="other@hanzo.ai")
         cr = self._create_change_request(created_by=other_user)
 
         response = self.client.post(f"/api/environments/{self.team.id}/change_requests/{cr.id}/cancel/")
@@ -219,7 +219,7 @@ class TestChangeRequestViewSet(APIBaseTest):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_cancel_blocked_when_has_approvals(self):
-        other_user = User.objects.create(email="approver@posthog.com")
+        other_user = User.objects.create(email="approver@hanzo.ai")
         cr = self._create_change_request(policy_snapshot={"quorum": 3, "users": [self.user.id, other_user.id]})
         Approval.objects.create(change_request=cr, created_by=other_user, decision=ApprovalDecision.APPROVED)
 
@@ -228,7 +228,7 @@ class TestChangeRequestViewSet(APIBaseTest):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_cancel_allowed_when_stale_despite_approvals(self):
-        other_user = User.objects.create(email="approver@posthog.com")
+        other_user = User.objects.create(email="approver@hanzo.ai")
         cr = self._create_change_request(
             policy_snapshot={"quorum": 3, "users": [self.user.id, other_user.id]},
             validation_status=ValidationStatus.STALE,
@@ -251,7 +251,7 @@ class TestChangeRequestViewSet(APIBaseTest):
         assert response.json()["status"] == "canceled"
 
     def test_can_cancel_field_false_when_has_approvals(self):
-        other_user = User.objects.create(email="approver@posthog.com")
+        other_user = User.objects.create(email="approver@hanzo.ai")
         cr = self._create_change_request(policy_snapshot={"quorum": 3, "users": [self.user.id, other_user.id]})
         Approval.objects.create(change_request=cr, created_by=other_user, decision=ApprovalDecision.APPROVED)
 
@@ -261,7 +261,7 @@ class TestChangeRequestViewSet(APIBaseTest):
         assert response.json()["can_cancel"] is False
 
     def test_can_cancel_field_true_when_stale_with_approvals(self):
-        other_user = User.objects.create(email="approver@posthog.com")
+        other_user = User.objects.create(email="approver@hanzo.ai")
         cr = self._create_change_request(
             policy_snapshot={"quorum": 3, "users": [self.user.id, other_user.id]},
             validation_status=ValidationStatus.STALE,

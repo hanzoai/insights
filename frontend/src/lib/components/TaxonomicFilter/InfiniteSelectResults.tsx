@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconCheck, IconSort } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonTag } from '@posthog/lemon-ui'
+import { IconCheck, IconSort } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonTag } from '@hanzo/lemon-ui'
 
 import { InfiniteList } from 'lib/components/TaxonomicFilter/InfiniteList'
 import { infiniteListLogic } from 'lib/components/TaxonomicFilter/infiniteListLogic'

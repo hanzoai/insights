@@ -17,7 +17,7 @@ class TestCohortTypeValidationSerializer(BaseTest):
             "filters": {
                 "properties": {
                     "type": "AND",
-                    "values": [{"type": "person", "key": "email", "operator": "icontains", "value": "@posthog.com"}],
+                    "values": [{"type": "person", "key": "email", "operator": "icontains", "value": "@hanzo.ai"}],
                 }
             },
         }
@@ -112,7 +112,7 @@ class TestCohortTypeValidationSerializer(BaseTest):
                 "properties": {
                     "type": "AND",
                     "values": [
-                        {"type": "person", "key": "email", "operator": "icontains", "value": "@posthog.com"},
+                        {"type": "person", "key": "email", "operator": "icontains", "value": "@hanzo.ai"},
                         {
                             "type": "behavioral",
                             "key": "performed_event",
@@ -252,7 +252,7 @@ class TestCohortTypeValidationSerializer(BaseTest):
             "filters": {
                 "properties": {
                     "type": "AND",
-                    "values": [{"type": "person", "key": "email", "operator": "icontains", "value": "@posthog.com"}],
+                    "values": [{"type": "person", "key": "email", "operator": "icontains", "value": "@hanzo.ai"}],
                 }
             }
         }

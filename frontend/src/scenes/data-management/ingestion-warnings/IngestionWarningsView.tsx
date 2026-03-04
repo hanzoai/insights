@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@posthog/lemon-ui'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { Sparkline } from 'lib/components/Sparkline'
@@ -321,7 +321,7 @@ export function IngestionWarningsView(): JSX.Element {
                                     <>
                                         {type} (
                                         <Link
-                                            to={`https://posthog.com/docs/data#${type
+                                            to={`https://hanzo.ai/docs/data#${type
                                                 .toLowerCase()
                                                 .replace(',', '')
                                                 .split(' ')
@@ -372,7 +372,7 @@ export function IngestionWarningsView(): JSX.Element {
                     productKey={ProductKey.INGESTION_WARNINGS}
                     isEmpty={true}
                     description="Nice! You've had no ingestion warnings in the past 30 days. If we detect any issues with your data, we'll show them here."
-                    docsURL="https://posthog.com/docs/data/data-management#ingestion-warnings"
+                    docsURL="https://hanzo.ai/docs/data/data-management#ingestion-warnings"
                     customHog={ReadingHog}
                 />
             )}

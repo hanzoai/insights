@@ -1,6 +1,6 @@
 import { City } from '@maxmind/geoip2-node'
 
-import { createPageview, resetMeta } from '@posthog/plugin-scaffold/test/utils'
+import { createPageview, resetMeta } from '@hanzo/plugin-scaffold/test/utils'
 
 import { defaultConfig } from '../../../../config/config'
 import { GeoIPService, GeoIp } from '../../../../utils/geoip'

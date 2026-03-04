@@ -33,18 +33,18 @@ const setupMsw = (): void => {
         },
     })
     ;(window as any).__mockServiceWorker = worker
-    ;(window as any).POSTHOG_APP_CONTEXT = getStorybookAppContext()
+    ;(window as any).INSIGHTS_APP_CONTEXT = getStorybookAppContext()
 }
 setupMsw()
 
-const setupPosthogJs = (): void => {
-    // Make sure we don't hit production posthog. We want to control requests to,
+const setupInsightsJs = (): void => {
+    // Make sure we don't hit production insights. We want to control requests to,
     // e.g. `/decide/` for feature flags
-    window.JS_POSTHOG_HOST = apiHostOrigin()
+    window.JS_INSIGHTS_HOST = apiHostOrigin()
 
     loadInsightsJS()
 }
-setupPosthogJs()
+setupInsightsJs()
 
 /** Storybook global parameters. See https://storybook.js.org/docs/react/writing-stories/parameters#global-parameters */
 export const parameters: Parameters = {

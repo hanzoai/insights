@@ -111,7 +111,7 @@ export const SidePanelSupportWithEmail: StoryFn = () => {
             '/api/users/@me': () => [
                 200,
                 {
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                     first_name: 'Test Mascot',
                     organization: {
                         ...organizationCurrent,

@@ -10,7 +10,7 @@ import { ProductIntentContext, ProductKey } from '~/queries/schema/schema-genera
 import { sidePanelStateLogic } from '../sidePanelStateLogic'
 import type { sidePanelDocsLogicType } from './sidePanelDocsLogicType'
 
-export const POSTHOG_WEBSITE_ORIGIN = 'https://posthog.com'
+export const INSIGHTS_WEBSITE_ORIGIN = 'https://hanzo.ai'
 
 const sanitizePath = (path: string): string => {
     return path[0] === '/' ? path : `/${path}`
@@ -97,13 +97,13 @@ export const sidePanelDocsLogic = kea<sidePanelDocsLogicType>([
         iframeSrc: [
             (s) => [s.initialPath],
             (initialPath) => {
-                return `${POSTHOG_WEBSITE_ORIGIN}${initialPath ?? ''}`
+                return `${INSIGHTS_WEBSITE_ORIGIN}${initialPath ?? ''}`
             },
         ],
         currentUrl: [
             (s) => [s.currentPath],
             (currentPath) => {
-                return `${POSTHOG_WEBSITE_ORIGIN}${currentPath ?? ''}`
+                return `${INSIGHTS_WEBSITE_ORIGIN}${currentPath ?? ''}`
             },
         ],
     }),
@@ -158,7 +158,7 @@ export const sidePanelDocsLogic = kea<sidePanelDocsLogicType>([
     afterMount(async ({ actions, values, cache }) => {
         // Set message receiver for the iframe very early on the `afterMount` hook
         const onWindowMessage = (event: MessageEvent): void => {
-            if (event.origin === POSTHOG_WEBSITE_ORIGIN) {
+            if (event.origin === INSIGHTS_WEBSITE_ORIGIN) {
                 if (event.data.type === 'internal-navigation') {
                     actions.updatePath(event.data.url)
                     return
@@ -169,7 +169,7 @@ export const sidePanelDocsLogic = kea<sidePanelDocsLogicType>([
                 }
 
                 if (event.data.type === 'external-navigation') {
-                    // This should only be triggered for us|eu.posthog.com links
+                    // This should only be triggered for us|insights.hanzo.ai links
                     actions.handleExternalUrl(event.data.url)
                     return
                 }

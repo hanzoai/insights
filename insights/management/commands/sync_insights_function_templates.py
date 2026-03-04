@@ -28,7 +28,7 @@ TEST_INCLUDE_PYTHON_TEMPLATE_IDS = [
 TEST_INCLUDE_NODEJS_TEMPLATE_IDS = [
     "template-webhook",
     "template-geoip",
-    "plugin-posthog-plugin-geoip",
+    "plugin-insights-plugin-geoip",
     "plugin-taxonomy-plugin",
 ]
 

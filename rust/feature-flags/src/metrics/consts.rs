@@ -74,7 +74,7 @@ pub const FLAG_DATABASE_ERROR_COUNTER: &str = "flags_database_error_total";
 
 // Tombstone metric for tracking "impossible" failures that should never happen in production
 // Different failure types are tracked via the "failure_type" label
-pub const TOMBSTONE_COUNTER: &str = "posthog_tombstone_total";
+pub const TOMBSTONE_COUNTER: &str = "insights_tombstone_total";
 
 // DB operations per request metric
 // Tracks the count of DB operations per request, labeled by team_id and operation_type.

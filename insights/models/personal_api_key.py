@@ -19,7 +19,7 @@ PERSONAL_API_KEY_MODES_TO_TRY: tuple[tuple[ModeType, Optional[int]], ...] = (
     ("pbkdf2", 390000),  # This is the iteration count used briefly on some API keys.
 )
 
-LEGACY_PERSONAL_API_KEY_SALT = "posthog_personal_api_key"
+LEGACY_PERSONAL_API_KEY_SALT = "insights_personal_api_key"
 
 
 def hash_key_value(value: str, mode: ModeType = "sha256", iterations: Optional[int] = None) -> str:

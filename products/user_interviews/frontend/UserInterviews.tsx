@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@posthog/icons'
-import { LemonButton, LemonTable, LemonTableColumn } from '@posthog/lemon-ui'
+import { IconDownload } from '@hanzo/icons'
+import { LemonButton, LemonTable, LemonTableColumn } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { PhonePairHogs } from 'lib/components/mascots'
@@ -51,7 +51,7 @@ export function UserInterviews(): JSX.Element {
                         type="primary"
                         icon={<IconDownload />}
                         onClick={() => updateHasSeenProductIntroFor(ProductKey.USER_INTERVIEWS)}
-                        to="https://posthog.com/recorder"
+                        to="https://hanzo.ai/recorder"
                         data-attr="install-recorder"
                     >
                         Install Insights Recorder

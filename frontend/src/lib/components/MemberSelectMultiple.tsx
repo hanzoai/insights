@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInputSelect } from '@posthog/lemon-ui'
+import { LemonInputSelect } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { fullName } from 'lib/utils'

@@ -1,8 +1,8 @@
 import clsx from 'clsx'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React, { MutableRefObject, memo } from 'react'
 
-import { IconComment } from '@posthog/icons'
+import { IconComment } from '@hanzo/icons'
 
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -78,7 +78,7 @@ function PlayerSeekbarTick({
                 placement="top-start"
                 delayMs={10}
                 onOpen={() => {
-                    posthog.capture('player seekbar tick tooltip shown', {
+                    insights.capture('player seekbar tick tooltip shown', {
                         item_type: item.type,
                         ...(isEventItem(item) && { event: item.data.event }),
                     })

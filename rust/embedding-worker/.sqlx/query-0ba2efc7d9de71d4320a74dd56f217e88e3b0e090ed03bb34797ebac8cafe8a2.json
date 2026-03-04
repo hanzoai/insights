@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n                o.id, o.is_ai_data_processing_approved\n            FROM posthog_organization o\n                JOIN posthog_team ON o.id = posthog_team.organization_id\n            WHERE posthog_team.id = $1",
+  "query": "SELECT\n                o.id, o.is_ai_data_processing_approved\n            FROM insights_organization o\n                JOIN insights_team ON o.id = insights_team.organization_id\n            WHERE insights_team.id = $1",
   "describe": {
     "columns": [
       {

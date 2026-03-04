@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
-import { renderSurveysPreview } from 'posthog-js/dist/surveys-preview'
+import { renderSurveysPreview } from '@hanzo/insights/dist/surveys-preview'
 import { useEffect, useMemo, useRef } from 'react'
 
-import { IconThumbsDown, IconThumbsDownFilled, IconThumbsUp, IconThumbsUpFilled } from '@posthog/icons'
+import { IconThumbsDown, IconThumbsDownFilled, IconThumbsUp, IconThumbsUpFilled } from '@hanzo/icons'
 
 import { UploadedLogo } from 'lib/lemon-ui/UploadedLogo/UploadedLogo'
 import { organizationLogic } from 'scenes/organizationLogic'

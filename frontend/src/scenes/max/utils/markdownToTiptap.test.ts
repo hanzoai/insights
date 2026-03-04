@@ -221,7 +221,7 @@ describe('markdownToTiptap', () => {
         })
 
         it('parses links', () => {
-            const result = markdownToTiptap('[Insights](https://posthog.com)')
+            const result = markdownToTiptap('[Insights](https://hanzo.ai)')
             expect(result).toEqual([
                 {
                     type: 'paragraph',
@@ -229,7 +229,7 @@ describe('markdownToTiptap', () => {
                         {
                             type: 'text',
                             text: 'Insights',
-                            marks: [{ type: 'link', attrs: { href: 'https://posthog.com', title: null } }],
+                            marks: [{ type: 'link', attrs: { href: 'https://hanzo.ai', title: null } }],
                         },
                     ],
                 },

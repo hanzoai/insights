@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel, LemonModal, LemonSelect } from '@posthog/lemon-ui'
-import { LemonButton, LemonColorPicker, LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { LemonLabel, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
+import { LemonButton, LemonColorPicker, LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
 
 import { DataColorToken } from 'lib/colors'
 import stringWithWBR from 'lib/utils/stringWithWBR'

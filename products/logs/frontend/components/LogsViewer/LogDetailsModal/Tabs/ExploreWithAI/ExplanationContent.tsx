@@ -1,4 +1,4 @@
-import { LemonCollapse } from '@posthog/lemon-ui'
+import { LemonCollapse } from '@hanzo/lemon-ui'
 
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'
 

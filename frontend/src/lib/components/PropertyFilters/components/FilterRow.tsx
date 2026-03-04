@@ -3,7 +3,7 @@ import './FilterRow.scss'
 import clsx from 'clsx'
 import React, { useState } from 'react'
 
-import { IconPlusSmall, IconTrash, IconX } from '@posthog/icons'
+import { IconPlusSmall, IconTrash, IconX } from '@hanzo/icons'
 
 import { isValidPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

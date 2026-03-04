@@ -313,7 +313,7 @@ class TestActionApi(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         )
         self.assertEqual(response.status_code, 201, response.json())
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_create_action_event_with_space(self, patch_capture, *args):
         response = self.client.post(
             f"/api/projects/{self.team.id}/actions/",

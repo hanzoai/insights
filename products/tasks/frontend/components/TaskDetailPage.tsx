@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconArchive, IconExternal, IconGithub, IconPlay } from '@posthog/icons'
-import { LemonButton, Spinner } from '@posthog/lemon-ui'
+import { IconArchive, IconExternal, IconGithub, IconPlay } from '@hanzo/icons'
+import { LemonButton, Spinner } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { LemonMarkdown } from 'lib/lemon-ui/LemonMarkdown'

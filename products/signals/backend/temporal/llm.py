@@ -6,9 +6,9 @@ from django.conf import settings
 
 import tiktoken
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from anthropic.types import MessageParam
-from posthoganalytics.ai.anthropic import AsyncAnthropic
+from hanzoanalytics.ai.anthropic import AsyncAnthropic
 
 logger = structlog.get_logger(__name__)
 
@@ -32,8 +32,8 @@ TIMEOUT = 100.0
 
 def get_async_anthropic_client() -> AsyncAnthropic:
     """Get configured AsyncAnthropic client with Insights analytics."""
-    posthog_client = posthoganalytics.default_client
-    if not posthog_client:
+    analytics_client = hanzoanalytics.default_client
+    if not analytics_client:
         raise ValueError("Insights analytics client not configured")
 
     api_key = settings.ANTHROPIC_API_KEY
@@ -42,7 +42,7 @@ def get_async_anthropic_client() -> AsyncAnthropic:
 
     return AsyncAnthropic(
         api_key=api_key,
-        posthog_client=posthog_client,
+        analytics_client=analytics_client,
         timeout=TIMEOUT,
     )
 

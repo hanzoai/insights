@@ -26,7 +26,7 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
     STRIPE_INVOICE_COLUMNS,
 )
 
-TEST_BUCKET = "test_storage_bucket-posthog.revenue.stripe_invoices"
+TEST_BUCKET = "test_storage_bucket-insights.revenue.stripe_invoices"
 
 
 @snapshot_clickhouse_queries
@@ -191,7 +191,7 @@ class TestRevenueExampleDataWarehouseTablesQueryRunner(ClickhouseTestMixin, APIB
         ]
 
     def test_database_query_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self._create_managed_viewsets()
 
             response = self._run_revenue_example_external_tables_query()

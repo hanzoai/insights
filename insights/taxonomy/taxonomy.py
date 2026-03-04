@@ -18,7 +18,7 @@ class CoreFilterDefinition(TypedDict):
 
 
 """
-Same as https://github.com/PostHog/posthog-js/blob/master/src/utils/event-utils.ts
+Same as https://github.com/Hanzo Insights/insights-js/blob/master/src/utils/event-utils.ts
 Ideally this would be imported from one place.
 """
 CAMPAIGN_PROPERTIES: list[str] = [
@@ -164,12 +164,12 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "$feature_view": {
             "label": "Feature view",
             "description": "When a user views a feature.",
-            "ignored_in_assistant": True,  # Specific to posthog-js/react, niche
+            "ignored_in_assistant": True,  # Specific to insights-js/react, niche
         },
         "$feature_interaction": {
             "label": "Feature interaction",
             "description": "When a user interacts with a feature.",
-            "ignored_in_assistant": True,  # Specific to posthog-js/react, niche
+            "ignored_in_assistant": True,  # Specific to insights-js/react, niche
         },
         "$feature_enrollment_update": {
             "label": "Feature enrollment",
@@ -293,7 +293,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "href": {
             "label": "Target (href)",
             "description": "Filter on the `href` attribute of the element.",
-            "examples": ["https://posthog.com/about"],
+            "examples": ["https://hanzo.ai/about"],
         },
     },
     "metadata": {
@@ -484,7 +484,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
             "ignored_in_assistant": True,
             "used_for_debug": True,
         },
-        "$last_posthog_reset": {
+        "$last_insights_reset": {
             "label": "Timestamp of last call to `Reset` in the web sdk",
             "description": "The timestamp of the last call to `Reset` in the web SDK. This can be useful for debugging.",
             "ignored_in_assistant": True,
@@ -620,7 +620,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$session_entry_referrer": {
             "description": "URL of where the user came from. Captured at the start of the session and remains constant for the duration of the session.",
-            "examples": ["https://google.com/search?q=posthog&rlz=1C..."],
+            "examples": ["https://google.com/search?q=insights&rlz=1C..."],
             "label": "Session entry Referrer URL",
             "ignored_in_assistant": True,
         },
@@ -714,7 +714,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$lib_rate_limit_remaining_tokens": {
             "label": "Clientside rate limit remaining tokens",
-            "description": "Remaining rate limit tokens for the posthog-js library client-side rate limiting implementation.",
+            "description": "Remaining rate limit tokens for the insights-js library client-side rate limiting implementation.",
             "examples": ["100"],
             "ignored_in_assistant": True,
             "used_for_debug": True,
@@ -803,12 +803,12 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$exception_capture_endpoint": {
             "label": "Exception capture endpoint",
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": ["/e/"],
         },
         "$exception_capture_endpoint_suffix": {
             "label": "Exception capture endpoint suffix",
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": ["/e/"],
         },
         "$exception_capture_enabled_server_side": {
@@ -844,7 +844,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$browser_type": {
             "label": "Browser type",
-            "description": "This is only added when posthog-js config.opt_out_useragent_filter is true.",
+            "description": "This is only added when insights-js config.opt_out_useragent_filter is true.",
             "examples": ["browser", "bot"],
         },
         "$device_id": {
@@ -904,13 +904,13 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$session_recording_url_trigger_activated_session": {
             "label": "Session recording URL trigger activated session",
-            "description": "Session recording URL trigger activated session config. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger activated session config. Used by insights-js to track URL activation of session replay.",
             "system": True,
             "used_for_debug": True,
         },
         "$session_recording_url_trigger_status": {
             "label": "Session recording URL trigger status",
-            "description": "Session recording URL trigger status. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger status. Used by insights-js to track URL activation of session replay.",
             "system": True,
             "used_for_debug": True,
         },
@@ -1051,7 +1051,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "$app_namespace": {
             "label": "App namespace",
             "description": "The namespace of the app as identified in the app store.",
-            "examples": ["com.posthog.app"],
+            "examples": ["com.insights.app"],
         },
         "$app_version": {
             "label": "App version",
@@ -1317,7 +1317,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "$lib": {
             "label": "Library",
             "description": "What library was used to send the event.",
-            "examples": ["web", "posthog-ios"],
+            "examples": ["web", "insights-ios"],
         },
         "$lib_custom_api_host": {
             "label": "Library custom API host",
@@ -1347,7 +1347,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "$referrer": {
             "label": "Referrer URL",
             "description": "URL of where the user came from.",
-            "examples": ["https://google.com/search?q=posthog&rlz=1C..."],
+            "examples": ["https://google.com/search?q=insights&rlz=1C..."],
         },
         "$referring_domain": {
             "label": "Referring domain",
@@ -1356,7 +1356,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$user_id": {
             "label": "User ID",
-            "description": "This variable will be set to the distinct ID if you've called `posthog.identify('distinct id')`. If the user is anonymous, it'll be empty.",
+            "description": "This variable will be set to the distinct ID if you've called `insights.identify('distinct id')`. If the user is anonymous, it'll be empty.",
         },
         "$ip": {
             "label": "IP address",
@@ -1554,7 +1554,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "referring_application": {
             "label": "Referrer application",
             "description": "The namespace of the app that made the request.",
-            "examples": ["com.posthog.app"],
+            "examples": ["com.insights.app"],
         },
         "version": {
             "label": "App version",
@@ -1654,11 +1654,11 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$is_identified": {
             "label": "Is identified",
-            "description": "Client-side property set by posthog-js indicating whether the user has been previously identified on the device.",
+            "description": "Client-side property set by insights-js indicating whether the user has been previously identified on the device.",
         },
         "$initial_person_info": {
             "label": "Initial person info",
-            "description": "posthog-js initial person information. used in the $set_once flow",
+            "description": "insights-js initial person information. used in the $set_once flow",
             "system": True,
         },
         "revenue": {
@@ -1707,58 +1707,58 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$prev_pageview_last_scroll": {
             "label": "Previous pageview last scroll",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [0],
         },
         "$prev_pageview_id": {
             "label": "Previous pageview ID",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": ["1"],
             "system": True,
         },
         "$prev_pageview_last_scroll_percentage": {
             "label": "Previous pageview last scroll percentage",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [0],
         },
         "$prev_pageview_max_scroll": {
             "examples": [0],
             "label": "Previous pageview max scroll",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
         },
         "$prev_pageview_max_scroll_percentage": {
             "examples": [0],
             "label": "Previous pageview max scroll percentage",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
         },
         "$prev_pageview_last_content": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview last content",
         },
         "$prev_pageview_last_content_percentage": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview last content percentage",
         },
         "$prev_pageview_max_content": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview max content",
         },
         "$prev_pageview_max_content_percentage": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview max content percentage",
         },
         "$prev_pageview_pathname": {
             "examples": ["/pricing", "/about-us/team"],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview pathname",
         },
         "$prev_pageview_duration": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview duration",
         },
         "$surveys_activated": {
@@ -1994,8 +1994,8 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$ai_evaluation_key_type": {
             "label": "AI Evaluation Key Type (LLM)",
-            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = Insights default).",
-            "examples": ["byok", "posthog"],
+            "description": "The type of API key used for the evaluation (byok = user's own key, insights = Insights default).",
+            "examples": ["byok", "insights"],
         },
         "$ai_evaluation_key_id": {
             "label": "AI Evaluation Key ID (LLM)",
@@ -2126,11 +2126,11 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "email": {
             "label": "Email address",
             "description": "The email address of the user.",
-            "examples": ["johnny.appleseed@icloud.com", "sales@posthog.com", "test@example.com"],
+            "examples": ["johnny.appleseed@icloud.com", "sales@hanzo.ai", "test@example.com"],
             "type": "String",
         },
         "$virt_initial_channel_type": {
-            "description": "What type of acquisition channel this user initially came from. Learn more about channels types and how to customise them in [our documentation](https://posthog.com/docs/data/channel-type)",
+            "description": "What type of acquisition channel this user initially came from. Learn more about channels types and how to customise them in [our documentation](https://hanzo.ai/docs/data/channel-type)",
             "examples": ["Paid Search", "Organic Video", "Direct"],
             "label": "Initial channel type",
             "type": "String",
@@ -2159,7 +2159,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
     "session_properties": {
         "$session_duration": {
             "label": "Session duration",
-            "description": "The duration of the session being tracked. Learn more about how Insights tracks sessions in [our documentation](https://posthog.com/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
+            "description": "The duration of the session being tracked. Learn more about how Insights tracks sessions in [our documentation](https://hanzo.ai/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
             "examples": ["30", "146", "2"],
             "type": "Numeric",
         },

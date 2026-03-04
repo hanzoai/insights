@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArrowRight, IconCode } from '@posthog/icons'
-import { LemonButton, LemonCard, LemonSelect, Spinner } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCode } from '@hanzo/icons'
+import { LemonButton, LemonCard, LemonSelect, Spinner } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

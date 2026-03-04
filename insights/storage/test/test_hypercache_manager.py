@@ -71,13 +71,13 @@ class TestDjangoKeyPrefix(BaseTest):
 
         # Mock cache client with key_prefix and version
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 1
 
         with patch.object(config.hypercache, "cache_client", mock_cache_client):
             prefix = config._django_key_prefix
 
-        assert prefix == "posthog:1:"
+        assert prefix == "insights:1:"
 
     def test_returns_empty_string_when_no_prefix(self):
         """Test that _django_key_prefix returns empty string when key_prefix is empty."""
@@ -109,26 +109,26 @@ class TestDjangoKeyPrefix(BaseTest):
         config = create_test_config()
 
         mock_cache_client = MagicMock(spec=["key_prefix"])
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         # version is missing, should default to 1
 
         with patch.object(config.hypercache, "cache_client", mock_cache_client):
             prefix = config._django_key_prefix
 
-        assert prefix == "posthog:1:"
+        assert prefix == "insights:1:"
 
     def test_handles_custom_version(self):
         """Test that custom version is used in prefix."""
         config = create_test_config()
 
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 2
 
         with patch.object(config.hypercache, "cache_client", mock_cache_client):
             prefix = config._django_key_prefix
 
-        assert prefix == "posthog:2:"
+        assert prefix == "insights:2:"
 
 
 class TestRedisPatterns(BaseTest):
@@ -139,39 +139,39 @@ class TestRedisPatterns(BaseTest):
         config = create_test_config(namespace="feature_flags", value="flags.json")
 
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 1
 
         with patch.object(config.hypercache, "cache_client", mock_cache_client):
             pattern = config.redis_pattern
 
-        assert pattern == "posthog:1:cache/teams/*/feature_flags/*"
+        assert pattern == "insights:1:cache/teams/*/feature_flags/*"
 
     def test_redis_stats_pattern_includes_django_prefix(self):
         """Test that redis_stats_pattern includes the Django key prefix."""
         config = create_test_config(namespace="feature_flags", value="flags.json")
 
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 1
 
         with patch.object(config.hypercache, "cache_client", mock_cache_client):
             pattern = config.redis_stats_pattern
 
-        assert pattern == "posthog:1:cache/teams/*/feature_flags/flags.json"
+        assert pattern == "insights:1:cache/teams/*/feature_flags/flags.json"
 
     def test_redis_pattern_for_token_based_cache(self):
         """Test that token-based caches use team_tokens prefix."""
         config = create_test_config(namespace="feature_flags", value="flags.json", token_based=True)
 
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 1
 
         with patch.object(config.hypercache, "cache_client", mock_cache_client):
             pattern = config.redis_pattern
 
-        assert pattern == "posthog:1:cache/team_tokens/*/feature_flags/*"
+        assert pattern == "insights:1:cache/team_tokens/*/feature_flags/*"
 
     def test_redis_pattern_without_django_prefix(self):
         """Test pattern generation when there's no Django prefix."""
@@ -311,7 +311,7 @@ class TestInvalidateAllCaches(BaseTest):
         config = create_test_config(namespace="feature_flags", value="flags.json")
 
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 1
 
         mock_redis = MagicMock()
@@ -324,7 +324,7 @@ class TestInvalidateAllCaches(BaseTest):
         # Verify scan was called with the correct pattern
         mock_redis.scan_iter.assert_called_once()
         call_kwargs = mock_redis.scan_iter.call_args[1]
-        assert call_kwargs["match"] == "posthog:1:cache/teams/*/feature_flags/*"
+        assert call_kwargs["match"] == "insights:1:cache/teams/*/feature_flags/*"
 
 
 class TestGetCacheStats(BaseTest):
@@ -411,7 +411,7 @@ class TestGetCacheStats(BaseTest):
         config = create_test_config(namespace="feature_flags", value="flags.json")
 
         mock_cache_client = MagicMock()
-        mock_cache_client.key_prefix = "posthog"
+        mock_cache_client.key_prefix = "insights"
         mock_cache_client.version = 1
 
         mock_redis = MagicMock()
@@ -425,7 +425,7 @@ class TestGetCacheStats(BaseTest):
 
         # First scan call should use the stats pattern
         first_call = mock_redis.scan_iter.call_args_list[0]
-        assert first_call[1]["match"] == "posthog:1:cache/teams/*/feature_flags/flags.json"
+        assert first_call[1]["match"] == "insights:1:cache/teams/*/feature_flags/flags.json"
 
 
 class TestPushHypercacheStatsMetrics(BaseTest):

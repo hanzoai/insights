@@ -10,7 +10,7 @@ from typing import Any, Literal, Union
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-import posthoganalytics
+import hanzoanalytics
 from pydantic import BaseModel, Field, ValidationError
 
 from insights.models import Team, User
@@ -18,7 +18,7 @@ from insights.session_recordings.queries.test.session_replay_sql import produce_
 
 
 def initialize_self_capture(team_id: int | None = None):
-    """Initialize self-capture for posthoganalytics in management command context"""
+    """Initialize self-capture for hanzoanalytics in management command context"""
     try:
         team = None
         if team_id is not None:
@@ -40,10 +40,10 @@ def initialize_self_capture(team_id: int | None = None):
 
         if team:
             # Reset any existing client to ensure new settings are used
-            posthoganalytics.default_client = None
-            posthoganalytics.disabled = False
-            posthoganalytics.api_key = team.api_token
-            posthoganalytics.host = settings.SITE_URL
+            hanzoanalytics.default_client = None
+            hanzoanalytics.disabled = False
+            hanzoanalytics.api_key = team.api_token
+            hanzoanalytics.host = settings.SITE_URL
             logging.info(f"Self-capture initialized with team {team.name} (id={team.pk})")
             return team
         else:
@@ -519,7 +519,7 @@ class Command(BaseCommand):
 
                 # Send $identify event to create/update person profile
                 # In backend SDKs, we need to send an event with $set properties
-                posthoganalytics.capture(
+                hanzoanalytics.capture(
                     distinct_id=distinct_id,
                     event="$identify",
                     timestamp=random_timestamp,
@@ -536,7 +536,7 @@ class Command(BaseCommand):
                 weights = [opt.probability for opt in prop_options]
                 exposure_props[prop_key] = random.choices(values, weights=weights)[0]
 
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=distinct_id,
                 event="$feature_flag_called",
                 timestamp=random_timestamp,
@@ -553,7 +553,7 @@ class Command(BaseCommand):
                 other_variants = [v for v in variants if v != variant]
                 if other_variants:
                     other_variant = random.choice(other_variants)
-                    posthoganalytics.capture(
+                    hanzoanalytics.capture(
                         distinct_id=distinct_id,
                         event="$feature_flag_called",
                         timestamp=random_timestamp + timedelta(minutes=1),
@@ -588,7 +588,7 @@ class Command(BaseCommand):
                             else:
                                 properties[prop_name] = prop_value
                         minutes_after_exposure += action.time_delay
-                        posthoganalytics.capture(
+                        hanzoanalytics.capture(
                             distinct_id=distinct_id,
                             event=action.event,
                             timestamp=random_timestamp + timedelta(minutes=minutes_after_exposure),
@@ -625,7 +625,7 @@ class Command(BaseCommand):
 
         # TODO: need to figure out how to wait for the data to be flushed. shutdown() doesn't work as expected.
         time.sleep(3)
-        posthoganalytics.shutdown()
+        hanzoanalytics.shutdown()
 
         logging.info(f"Generated data for {experiment_id}")
         logging.info(f"Variant counts: {variant_counts}")

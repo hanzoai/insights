@@ -243,7 +243,7 @@ class AtomicFalsePolicy(MigrationPolicy):
 
 
 # Registry of all Insights policies
-POSTHOG_POLICIES = [
+INSIGHTS_POLICIES = [
     UUIDPrimaryKeyPolicy(),
     AtomicFalsePolicy(),
 ]

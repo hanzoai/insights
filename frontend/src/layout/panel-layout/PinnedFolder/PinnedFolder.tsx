@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconGear, IconPencil, IconPlusSmall } from '@posthog/icons'
+import { IconCheck, IconGear, IconPencil, IconPlusSmall } from '@hanzo/icons'
 
 import { ItemSelectModalButton } from 'lib/components/FileSystem/ItemSelectModal/ItemSelectModal'
 import { FEATURE_FLAGS } from 'lib/constants'

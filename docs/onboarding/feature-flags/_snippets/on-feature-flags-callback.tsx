@@ -17,9 +17,9 @@ export const OnFeatureFlagsCallbackSnippet = (): JSX.Element => {
             <CodeBlock
                 language="javascript"
                 code={dedent`
-                    posthog.onFeatureFlags(function (flags, flagVariants, { errorsLoading }) {
+                    insights.onFeatureFlags(function (flags, flagVariants, { errorsLoading }) {
                         // feature flags are guaranteed to be available at this point
-                        if (posthog.isFeatureEnabled('flag-key')) {
+                        if (insights.isFeatureEnabled('flag-key')) {
                             // do something
                         }
                     })

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Wrapper script for mcp-grafana that uses kubectl port-forward to bypass ALB Cognito auth
 #
-# PostHog's Grafana instances require Cognito OAuth at the ALB level, which doesn't
+# Hanzo Insights's Grafana instances require Cognito OAuth at the ALB level, which doesn't
 # support Bearer token authentication. This script creates a port-forward to access
 # Grafana directly within the K8s cluster, enabling the MCP server to authenticate
 # with a service account token.
@@ -11,7 +11,7 @@
 # then restart your MCP client.
 #
 # Prerequisites:
-#   - kubectl configured with access to PostHog K8s clusters
+#   - kubectl configured with access to Hanzo Insights K8s clusters
 #   - AWS SSO session active (`aws sso login`)
 #   - mcp-grafana binary installed (go install github.com/grafana/mcp-grafana/cmd/mcp-grafana@latest)
 #   - Grafana service account token stored in macOS Keychain (see grafana-token script)
@@ -44,10 +44,10 @@ fi
 get_k8s_context() {
     local pattern
     case "$1" in
-        # us matches posthog-prod but not posthog-prod-eu
-        us)  pattern='posthog-prod$' ;;
-        eu)  pattern='posthog-prod-eu' ;;
-        dev) pattern='posthog-dev' ;;
+        # us matches insights-prod but not insights-prod-eu
+        us)  pattern='insights-prod$' ;;
+        eu)  pattern='insights-prod-eu' ;;
+        dev) pattern='insights-dev' ;;
         *)   return 1 ;;
     esac
     kubectl config get-contexts -o name 2>/dev/null | grep -E "$pattern" | head -1

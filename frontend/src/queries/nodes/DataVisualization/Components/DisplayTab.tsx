@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonCollapse, LemonSelect, LemonSwitch } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonCollapse, LemonSelect, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { GoalLinesList } from 'lib/components/GoalLinesList'
 

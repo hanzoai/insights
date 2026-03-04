@@ -4,7 +4,7 @@ from time import perf_counter
 from typing import Optional
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from celery import current_task, shared_task
 from prometheus_client import Counter, Histogram
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_exponential_jitter
@@ -126,7 +126,7 @@ def export_asset_direct(
 
     tag_queries(exported_asset_id=exported_asset.id, export_format=exported_asset.export_format)
 
-    posthoganalytics.capture(
+    hanzoanalytics.capture(
         distinct_id=distinct_id,
         event="export started",
         properties=analytics_props,
@@ -168,7 +168,7 @@ def export_asset_direct(
             exported_asset_id=exported_asset.id,
             team_id=team.id,
         )
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=distinct_id,
             event="export succeeded",
             properties={
@@ -199,7 +199,7 @@ def export_asset_direct(
                 team_id=team.id,
             )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=distinct_id,
             event="export failed",
             properties={

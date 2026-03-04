@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, LemonCollapse, LemonInput, LemonSwitch, Tooltip } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, LemonCollapse, LemonInput, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { LemonField } from 'lib/lemon-ui/LemonField'
@@ -120,7 +120,7 @@ export function TourSettingsPanel({ tourId }: TourSettingsPanelProps): JSX.Eleme
                 <span className="text-sm font-medium">API trigger</span>
                 <p className="text-xs text-secondary mt-1 mb-2">Trigger programmatically from your code</p>
                 <CodeSnippet language={Language.JavaScript} compact>
-                    {`posthog.productTours.showProductTour('${tourId}')`}
+                    {`insights.productTours.showProductTour('${tourId}')`}
                 </CodeSnippet>
             </div>
         </div>

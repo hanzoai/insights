@@ -6,7 +6,7 @@ from infi.clickhouse_orm.utils import import_submodules
 from semantic_version.base import Version
 
 from insights.async_migrations.definition import AsyncMigrationDefinition
-from insights.constants import FROZEN_POSTHOG_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.async_migration import AsyncMigration, get_all_completed_async_migrations
 from insights.models.instance_setting import get_instance_setting
 from insights.settings import TEST
@@ -31,7 +31,7 @@ all_migrations = import_submodules(ASYNC_MIGRATIONS_MODULE_PATH)
 reload_migration_definitions()
 
 
-def setup_async_migrations(ignore_posthog_version: bool = False):
+def setup_async_migrations(ignore_insights_version: bool = False):
     """
     Execute the necessary setup for async migrations to work:
     1. Import all the migration definitions
@@ -47,12 +47,12 @@ def setup_async_migrations(ignore_posthog_version: bool = False):
         setup_model(migration_name, migration)
 
         if (
-            (not ignore_posthog_version)
+            (not ignore_insights_version)
             and (migration_name in unapplied_migrations)
-            and (FROZEN_POSTHOG_VERSION > Version(migration.posthog_max_version))
+            and (FROZEN_INSIGHTS_VERSION > Version(migration.insights_max_version))
         ):
             raise ImproperlyConfigured(
-                f"Migration {migration_name} is required for Insights versions above {FROZEN_POSTHOG_VERSION}."
+                f"Migration {migration_name} is required for Insights versions above {FROZEN_INSIGHTS_VERSION}."
             )
 
     first_migration = _set_up_dependency_constants()
@@ -65,8 +65,8 @@ def setup_model(migration_name: str, migration: AsyncMigrationDefinition) -> Asy
     sm = AsyncMigration.objects.get_or_create(name=migration_name)[0]
 
     sm.description = migration.description
-    sm.posthog_max_version = migration.posthog_max_version
-    sm.posthog_min_version = migration.posthog_min_version
+    sm.insights_max_version = migration.insights_max_version
+    sm.insights_min_version = migration.insights_min_version
 
     sm.save()
     return sm

@@ -28,7 +28,7 @@ class OAuthApplicationAccessLevel(enum.Enum):
 
 
 class OAuthApplicationAuthBrand(enum.Enum):
-    POSTHOG = "posthog"
+    INSIGHTS = "insights"
     TWIG = "twig"
 
 
@@ -170,7 +170,7 @@ class OAuthApplication(AbstractApplication):
     auth_brand: models.CharField = models.CharField(
         max_length=32,
         choices=[(brand.value, brand.value) for brand in OAuthApplicationAuthBrand],
-        default=OAuthApplicationAuthBrand.POSTHOG.value,
+        default=OAuthApplicationAuthBrand.INSIGHTS.value,
         help_text="Branding to use on authentication pages",
     )
 

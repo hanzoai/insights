@@ -1,15 +1,15 @@
 [package]
-name = "posthog-symbol-data"
+name = "insights-symbol-data"
 version = "0.3.0"
 authors = [
-    "David <david@posthog.com>",
-    "Olly <oliver@posthog.com>",
-    "Hugues <hugues@posthog.com>",
+    "David <david@insights.com>",
+    "Olly <oliver@insights.com>",
+    "Hugues <hugues@insights.com>",
 ]
-description = "A shared library for serialising/deserialising PostHog symbol data"
+description = "A shared library for serialising/deserialising Hanzo Insights symbol data"
 edition = "2021"
 license = "MIT"
-homepage = "https://posthog.com"
+homepage = "https://insights.com"
 
 
 [lints]

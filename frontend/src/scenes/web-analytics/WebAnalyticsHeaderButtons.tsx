@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconBolt } from '@posthog/icons'
+import { IconBolt } from '@hanzo/icons'
 
 import { LiveUserCount } from 'lib/components/LiveUserCount'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -36,7 +36,7 @@ export function WebAnalyticsHeaderButtons(): JSX.Element {
         <div className="flex items-center gap-2">
             {showLiveUserCount && (
                 <LiveUserCount
-                    docLink="https://posthog.com/docs/web-analytics/faq#i-am-online-but-the-online-user-count-is-not-reflecting-my-user"
+                    docLink="https://hanzo.ai/docs/web-analytics/faq#i-am-online-but-the-online-user-count-is-not-reflecting-my-user"
                     dataAttr="web-analytics-live-user-count"
                 />
             )}

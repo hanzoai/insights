@@ -3,8 +3,8 @@ import { env } from 'cloudflare:workers'
 import type { CloudRegion } from '@/tools/types'
 
 // Region-specific Insights API base URLs
-export const POSTHOG_US_BASE_URL = 'https://us.posthog.com'
-export const POSTHOG_EU_BASE_URL = 'https://eu.posthog.com'
+export const INSIGHTS_US_BASE_URL = 'https://insights.hanzo.ai'
+export const INSIGHTS_EU_BASE_URL = 'https://insights.hanzo.ai'
 
 // Normalize a string to a valid CloudRegion, defaulting to 'us'
 export const toCloudRegion = (value: string | undefined | null): CloudRegion => {
@@ -17,7 +17,7 @@ export const toCloudRegion = (value: string | undefined | null): CloudRegion => 
 
 // Get the Insights base URL for a region
 export const getBaseUrlForRegion = (region: CloudRegion): string => {
-    return region === 'eu' ? POSTHOG_EU_BASE_URL : POSTHOG_US_BASE_URL
+    return region === 'eu' ? INSIGHTS_EU_BASE_URL : INSIGHTS_US_BASE_URL
 }
 
 /**
@@ -27,7 +27,7 @@ export const getBaseUrlForRegion = (region: CloudRegion): string => {
  * The code automatically handles US/EU region routing via getAuthorizationServerUrl().
  * Only set this for self-hosted Insights deployments.
  */
-export const CUSTOM_API_BASE_URL = env.POSTHOG_API_BASE_URL
+export const CUSTOM_API_BASE_URL = env.INSIGHTS_API_BASE_URL
 
 // Get the authorization server URL for OAuth, respecting CUSTOM_API_BASE_URL for self-hosted instances
 export const getAuthorizationServerUrl = (regionParam: string | null): string => {
@@ -43,7 +43,7 @@ export const getAuthorizationServerUrl = (regionParam: string | null): string =>
 export const OAUTH_AUTHORIZATION_SERVER_URL =
     (env as unknown as Record<string, string | undefined>).OAUTH_AUTHORIZATION_SERVER_URL || CUSTOM_API_BASE_URL
 
-export const MCP_DOCS_URL = 'https://posthog.com/docs/model-context-protocol'
+export const MCP_DOCS_URL = 'https://hanzo.ai/docs/model-context-protocol'
 
 // OAuth Protected Resource Metadata (RFC 9728)
 // Scopes that this resource server supports

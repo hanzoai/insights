@@ -1,4 +1,4 @@
-import { convertScriptToJS } from '@insights/scriptvm'
+import { convertScriptToJS } from '@hanzo/scriptvm'
 
 import { ACCESS_TOKEN_PLACEHOLDER } from '~/config/constants'
 import { CyclotronInputType } from '~/schema/cyclotron'

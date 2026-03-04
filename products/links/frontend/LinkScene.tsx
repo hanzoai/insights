@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { QRCodeSVG } from 'qrcode.react'
 
-import { IconCopy, IconDownload } from '@posthog/icons'
+import { IconCopy, IconDownload } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDivider,
@@ -15,7 +15,7 @@ import {
     LemonTag,
     LemonTextArea,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useFileSystemLogView } from 'lib/hooks/useFileSystemLogView'
@@ -196,7 +196,7 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                     <div className="flex gap-1 items-center">
                                         <LemonField name="redirect_url">
                                             <LemonInput
-                                                placeholder="https://loooooooooooooong.posthog.com/"
+                                                placeholder="https://loooooooooooooong.hanzo.ai/"
                                                 fullWidth
                                                 autoWidth={false}
                                             />
@@ -284,7 +284,7 @@ export function LinkScene({ id }: LinkLogicProps): JSX.Element {
                                             value={fullLink}
                                             level="H"
                                             imageSettings={{
-                                                src: '/static/posthog-icon.svg',
+                                                src: '/static/insights-icon.svg',
                                                 height: 35,
                                                 width: 35,
                                                 excavate: true,

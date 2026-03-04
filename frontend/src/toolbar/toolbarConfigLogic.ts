@@ -3,7 +3,7 @@ import { combineUrl, encodeParams } from 'kea-router'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
 
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ToolbarProps } from '~/types'
 
 import type { toolbarConfigLogicType } from './toolbarConfigLogicType'
@@ -38,14 +38,14 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
     })),
 
     selectors({
-        posthog: [(s) => [s.props], (props) => props.posthog ?? null],
+        insights: [(s) => [s.props], (props) => props.insights ?? null],
         // UI host for navigation links (actions, feature flags, experiments, etc.) and API requests
-        // Uses posthog.config.ui_host if available, otherwise falls back to props.apiURL for backwards compatibility
+        // Uses insights.config.ui_host if available, otherwise falls back to props.apiURL for backwards compatibility
         uiHost: [
             (s) => [s.props],
             (props: ToolbarProps): string => {
-                if (props.posthog?.config?.ui_host) {
-                    return props.posthog.config.ui_host.replace(/\/+$/, '')
+                if (props.insights?.config?.ui_host) {
+                    return props.insights.config.ui_host.replace(/\/+$/, '')
                 }
 
                 // Fallback: if apiURL prop is set, use it (backwards compatibility)
@@ -58,12 +58,12 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
             },
         ],
         // API host for JS and static assets (CSS)
-        // Uses posthog.config.api_host if available, otherwise falls back to props.apiURL for backwards compatibility
+        // Uses insights.config.api_host if available, otherwise falls back to props.apiURL for backwards compatibility
         apiHost: [
             (s) => [s.props],
             (props: ToolbarProps): string => {
-                if (props.posthog?.config?.api_host) {
-                    return props.posthog.config.api_host.replace(/\/+$/, '')
+                if (props.insights?.config?.api_host) {
+                    return props.insights.config.api_host.replace(/\/+$/, '')
                 }
 
                 // Fallback: if apiURL prop is set, use it (backwards compatibility)
@@ -82,18 +82,18 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
 
     listeners(({ values, actions }) => ({
         authenticate: () => {
-            toolbarPosthogJS.capture('toolbar authenticate', { is_authenticated: values.isAuthenticated })
+            toolbarInsightsJS.capture('toolbar authenticate', { is_authenticated: values.isAuthenticated })
             const encodedUrl = encodeURIComponent(window.location.href)
             actions.persistConfig()
             // Use UI host for auth redirects (SSO/login)
             window.location.href = `${values.uiHost}/authorize_and_redirect/?redirect=${encodedUrl}`
         },
         logout: () => {
-            toolbarPosthogJS.capture('toolbar logout')
+            toolbarInsightsJS.capture('toolbar logout')
             localStorage.removeItem(LOCALSTORAGE_KEY)
         },
         tokenExpired: () => {
-            toolbarPosthogJS.capture('toolbar token expired')
+            toolbarInsightsJS.capture('toolbar token expired')
             console.warn('Insights Toolbar API token expired. Clearing session.')
             if (values.props.source !== 'localstorage') {
                 lemonToast.error('Insights Toolbar API token expired.')
@@ -110,7 +110,7 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
                 experimentId: values.experimentId ?? undefined,
                 productTourId: values.productTourId ?? undefined,
                 userIntent: values.userIntent ?? undefined,
-                posthog: undefined,
+                insights: undefined,
             }
 
             localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(toolbarParams))
@@ -121,14 +121,14 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
         if (props.instrument) {
             const distinctId = props.distinctId
 
-            toolbarPosthogJS.opt_in_capturing()
+            toolbarInsightsJS.opt_in_capturing()
 
             if (distinctId) {
-                toolbarPosthogJS.identify(distinctId, props.userEmail ? { email: props.userEmail } : {})
+                toolbarInsightsJS.identify(distinctId, props.userEmail ? { email: props.userEmail } : {})
             }
         }
 
-        toolbarPosthogJS.capture('toolbar loaded', { is_authenticated: values.isAuthenticated })
+        toolbarInsightsJS.capture('toolbar loaded', { is_authenticated: values.isAuthenticated })
     }),
 ])
 

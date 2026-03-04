@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconChevronRight, IconTerminal } from '@posthog/icons'
-import { LemonTag, Spinner } from '@posthog/lemon-ui'
+import { IconChevronRight, IconTerminal } from '@hanzo/icons'
+import { LemonTag, Spinner } from '@hanzo/lemon-ui'
 
 import { ToolStatus } from '../../lib/parse-logs'
 

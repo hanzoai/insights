@@ -53,7 +53,7 @@ export function Elements(): JSX.Element {
     return (
         <>
             <div
-                id="posthog-infowindow-container"
+                id="insights-infowindow-container"
                 className="w-full h-full absolute top-0 left-0 pointer-events-none z-[2147483021]"
                 {...themeProps}
             >
@@ -61,7 +61,7 @@ export function Elements(): JSX.Element {
             </div>
 
             <div
-                id="posthog-toolbar-elements"
+                id="insights-toolbar-elements"
                 className="w-full h-full absolute top-0 pointer-events-none z-[2147483010]"
                 // eslint-disable-next-line react/forbid-dom-props
                 style={{

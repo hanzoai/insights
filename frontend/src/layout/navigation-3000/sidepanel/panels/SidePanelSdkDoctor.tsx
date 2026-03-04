@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconInfo, IconStethoscope } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTable, LemonTableColumns, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconStethoscope } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTable, LemonTableColumns, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
@@ -17,68 +17,68 @@ import { AugmentedTeamSdkVersionsInfoRelease, type SdkType, sidePanelSdkDoctorLo
 
 const SDK_TYPE_READABLE_NAME: Record<SdkType, string> = {
     web: 'Web',
-    'posthog-ios': 'iOS',
-    'posthog-android': 'Android',
-    'posthog-node': 'Node.js',
-    'posthog-python': 'Python',
-    'posthog-php': 'PHP',
-    'posthog-ruby': 'Ruby',
-    'posthog-go': 'Go',
-    'posthog-flutter': 'Flutter',
-    'posthog-react-native': 'React Native',
-    'posthog-dotnet': '.NET',
-    'posthog-elixir': 'Elixir',
+    'insights-ios': 'iOS',
+    'insights-android': 'Android',
+    'insights-node': 'Node.js',
+    'insights-python': 'Python',
+    'insights-php': 'PHP',
+    'insights-ruby': 'Ruby',
+    'insights-go': 'Go',
+    'insights-flutter': 'Flutter',
+    'insights-react-native': 'React Native',
+    'insights-dotnet': '.NET',
+    'insights-elixir': 'Elixir',
 }
 
 // SDK documentation links mapping
 const SDK_DOCS_LINKS: Record<SdkType, { releases: string; docs: string }> = {
     web: {
-        releases: 'https://github.com/PostHog/posthog-js/blob/main/packages/browser/CHANGELOG.md',
-        docs: 'https://posthog.com/docs/libraries/js',
+        releases: 'https://github.com/hanzoai/insights-js/blob/main/packages/browser/CHANGELOG.md',
+        docs: 'https://hanzo.ai/docs/libraries/js',
     },
-    'posthog-ios': {
-        releases: 'https://github.com/PostHog/posthog-ios/releases',
-        docs: 'https://posthog.com/docs/libraries/ios',
+    'insights-ios': {
+        releases: 'https://github.com/hanzoai/insights-ios/releases',
+        docs: 'https://hanzo.ai/docs/libraries/ios',
     },
-    'posthog-android': {
-        releases: 'https://github.com/PostHog/posthog-android/releases',
-        docs: 'https://posthog.com/docs/libraries/android',
+    'insights-android': {
+        releases: 'https://github.com/hanzoai/insights-android/releases',
+        docs: 'https://hanzo.ai/docs/libraries/android',
     },
-    'posthog-node': {
-        releases: 'https://github.com/PostHog/posthog-js/blob/main/packages/node/CHANGELOG.md',
-        docs: 'https://posthog.com/docs/libraries/node',
+    'insights-node': {
+        releases: 'https://github.com/hanzoai/insights-js/blob/main/packages/node/CHANGELOG.md',
+        docs: 'https://hanzo.ai/docs/libraries/node',
     },
-    'posthog-python': {
-        releases: 'https://github.com/PostHog/posthog-python/releases',
-        docs: 'https://posthog.com/docs/libraries/python',
+    'insights-python': {
+        releases: 'https://github.com/hanzoai/insights-python/releases',
+        docs: 'https://hanzo.ai/docs/libraries/python',
     },
-    'posthog-php': {
-        releases: 'https://github.com/PostHog/posthog-php/releases',
-        docs: 'https://posthog.com/docs/libraries/php',
+    'insights-php': {
+        releases: 'https://github.com/hanzoai/insights-php/releases',
+        docs: 'https://hanzo.ai/docs/libraries/php',
     },
-    'posthog-ruby': {
-        releases: 'https://github.com/PostHog/posthog-ruby/releases',
-        docs: 'https://posthog.com/docs/libraries/ruby',
+    'insights-ruby': {
+        releases: 'https://github.com/hanzoai/insights-ruby/releases',
+        docs: 'https://hanzo.ai/docs/libraries/ruby',
     },
-    'posthog-go': {
-        releases: 'https://github.com/PostHog/posthog-go/releases',
-        docs: 'https://posthog.com/docs/libraries/go',
+    'insights-go': {
+        releases: 'https://github.com/hanzoai/insights-go/releases',
+        docs: 'https://hanzo.ai/docs/libraries/go',
     },
-    'posthog-flutter': {
-        releases: 'https://github.com/PostHog/posthog-flutter/releases',
-        docs: 'https://posthog.com/docs/libraries/flutter',
+    'insights-flutter': {
+        releases: 'https://github.com/hanzoai/insights-flutter/releases',
+        docs: 'https://hanzo.ai/docs/libraries/flutter',
     },
-    'posthog-react-native': {
-        releases: 'https://github.com/PostHog/posthog-js/blob/main/packages/react-native/CHANGELOG.md',
-        docs: 'https://posthog.com/docs/libraries/react-native',
+    'insights-react-native': {
+        releases: 'https://github.com/hanzoai/insights-js/blob/main/packages/react-native/CHANGELOG.md',
+        docs: 'https://hanzo.ai/docs/libraries/react-native',
     },
-    'posthog-dotnet': {
-        releases: 'https://github.com/PostHog/posthog-dotnet/releases',
-        docs: 'https://posthog.com/docs/libraries/dotnet',
+    'insights-dotnet': {
+        releases: 'https://github.com/hanzoai/insights-dotnet/releases',
+        docs: 'https://hanzo.ai/docs/libraries/dotnet',
     },
-    'posthog-elixir': {
-        releases: 'https://github.com/PostHog/posthog-elixir/releases',
-        docs: 'https://posthog.com/docs/libraries/elixir',
+    'insights-elixir': {
+        releases: 'https://github.com/hanzoai/insights-elixir/releases',
+        docs: 'https://hanzo.ai/docs/libraries/elixir',
     },
 }
 
@@ -96,7 +96,7 @@ const COLUMNS: LemonTableColumns<AugmentedTeamSdkVersionsInfoRelease> = [
                     <Tooltip title="View events" delayMs={0}>
                         <Link
                             onClick={() => {
-                                posthog.capture('sdk doctor view events', {
+                                insights.capture('sdk doctor view events', {
                                     sdkType: record.type,
                                 })
                                 newInternalTab(
@@ -195,16 +195,16 @@ export function SidePanelSdkDoctor(): JSX.Element | null {
     const { loadRawData, snoozeSdkDoctor } = useActions(sidePanelSdkDoctorLogic)
 
     useOnMountEffect(() => {
-        posthog.capture('sdk doctor loaded', { needsUpdatingCount })
+        insights.capture('sdk doctor loaded', { needsUpdatingCount })
     })
 
     const scanEvents = (): void => {
-        posthog.capture('sdk doctor scan events')
+        insights.capture('sdk doctor scan events')
         loadRawData({ forceRefresh: true })
     }
 
     const snoozeWarning = (): void => {
-        posthog.capture('sdk doctor snooze warning')
+        insights.capture('sdk doctor snooze warning')
         snoozeSdkDoctor()
     }
 

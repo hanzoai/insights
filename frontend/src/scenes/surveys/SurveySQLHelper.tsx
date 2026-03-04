@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
-import { SurveyQuestionType } from 'posthog-js'
+import { SurveyQuestionType } from '@hanzo/insights'
 
-import { LemonButton, LemonDivider, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonDivider, LemonModal } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { IconOpenInNew } from 'lib/lemon-ui/icons'

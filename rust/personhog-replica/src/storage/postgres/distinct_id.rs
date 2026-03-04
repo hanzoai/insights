@@ -37,7 +37,7 @@ impl DistinctIdLookup for PostgresStorage {
         let rows = sqlx::query_as::<_, DistinctIdWithVersionRow>(
             r#"
             SELECT distinct_id, version
-            FROM posthog_persondistinctid
+            FROM insights_persondistinctid
             WHERE team_id = $1 AND person_id = $2
             "#,
         )
@@ -76,7 +76,7 @@ impl DistinctIdLookup for PostgresStorage {
         let rows = sqlx::query_as::<_, DistinctIdRow>(
             r#"
             SELECT person_id, distinct_id
-            FROM posthog_persondistinctid
+            FROM insights_persondistinctid
             WHERE team_id = $1 AND person_id = ANY($2)
             "#,
         )

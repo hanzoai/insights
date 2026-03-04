@@ -2,10 +2,10 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconPlusSmall, IconTrash, IconUndo } from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconTrash, IconUndo } from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -272,7 +272,7 @@ export function ActionFilterGroup({
                                     icon={<IconUndo />}
                                     onClick={() => {
                                         splitLocalFilter(index)
-                                        posthog.capture('split_events', {
+                                        insights.capture('split_events', {
                                             insight_type: insightType,
                                             team_id: currentTeamId,
                                         })
@@ -347,7 +347,7 @@ export function ActionFilterGroup({
                                         const newIndex = nestedFilters.length
                                         addNestedFilter(item.eventName, item.eventName, EntityTypes.EVENTS)
                                         updateNestedFilterProperties(newIndex, quickFilterToPropertyFilters(item))
-                                        posthog.capture('add_event_to_group', {
+                                        insights.capture('add_event_to_group', {
                                             insight_type: insightType,
                                             team_id: currentTeamId,
                                         })
@@ -357,7 +357,7 @@ export function ActionFilterGroup({
                                 const entityType = taxonomicFilterGroupTypeToEntityType(groupType)
                                 if (entityType && value) {
                                     addNestedFilter(String(value), item?.name || String(value), entityType)
-                                    posthog.capture('add_event_to_group', {
+                                    insights.capture('add_event_to_group', {
                                         insight_type: insightType,
                                         team_id: currentTeamId,
                                     })

@@ -1,4 +1,4 @@
-{% extends "email/base.html" %} {% load posthog_assets %} {% load posthog_filters %}
+{% extends "email/base.html" %} {% load insights_assets %} {% load insights_filters %}
 {% block preheader %}Your materialized view failed to sync{% endblock %}
 {% block heading %}Materialized view '{{ saved_query_name }}' sync failed{% endblock %}
 {% block section %}
@@ -25,10 +25,10 @@
 
 {% block footer %}
 Need help?
-<a href="https://posthog.com/questions?{{ utm_tags }}"
+<a href="https://hanzo.ai/questions?{{ utm_tags }}"
     target="_blank"><b>Visit support</b></a>
 or
-<a href="https://posthog.com/docs/data-warehouse/views?{{ utm_tags }}"
+<a href="https://hanzo.ai/docs/data-warehouse/views?{{ utm_tags }}"
     target="_blank"><b>read our documentation</b></a>.<br /><br />
 
 <a href="{% absolute_uri '/settings/user-notifications' %}">Manage these notifications in Insights</a>

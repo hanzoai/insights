@@ -24,7 +24,7 @@ class MailJetSource(SimpleSource[MailjetSourceConfig]):
             name=SchemaExternalDataSourceType.MAILJET,
             label="Mailjet",
             iconPath="/static/services/mailjet.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/mailjet",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/mailjet",
             fields=cast(list[FieldType], []),
             unreleasedSource=True,
         )

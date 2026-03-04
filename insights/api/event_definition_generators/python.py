@@ -48,9 +48,9 @@ Provides type-safe event tracking via capture_<event_name>() methods.
 
 USAGE
 =====
-    from posthog_typed import PosthogTyped
+    from insights_typed import InsightsTyped
 
-    client = PosthogTyped(
+    client = InsightsTyped(
         "<ph_project_api_key>",
         host="<ph_client_api_host>",
     )
@@ -61,7 +61,7 @@ USAGE
         distinct_id="user_123",
     )
 
-    # All other Posthog methods work as usual
+    # All other Insights methods work as usual
     client.identify(...)
     client.flush()
     client.shutdown()
@@ -70,17 +70,17 @@ USAGE
 
 from typing_extensions import Unpack
 
-from insights import Posthog
+from insights import Insights
 from insights.args import OptionalCaptureArgs
 
 
 '''
 
-        class_definition = f'''class PosthogTyped(Posthog):
+        class_definition = f'''class InsightsTyped(Insights):
     """
     A type-safe Insights client with per-event capture methods.
 
-    Drop-in replacement for Posthog that provides IDE autocomplete
+    Drop-in replacement for Insights that provides IDE autocomplete
     and type checking via capture_<event_name>() methods.
     """
 
@@ -92,7 +92,7 @@ from insights.args import OptionalCaptureArgs
     def _generate_capture_method(
         self, event_name: str, properties: list[SchemaPropertyGroupProperty], used_method_names: set[str]
     ) -> str:
-        """Generate a capture_<event_name>() method for the PosthogTyped class."""
+        """Generate a capture_<event_name>() method for the InsightsTyped class."""
         method_name = self._get_unique_name(self._to_method_name(event_name), used_method_names)
         escaped_event_name = self._escape_python_string(event_name)
 

@@ -52,11 +52,11 @@ impl FeatureFlagStorage for PostgresStorage {
             sqlx::query_as::<_, HashKeyOverrideContextRow>(
                 r#"
                 SELECT DISTINCT p.person_id, p.distinct_id, existing.feature_flag_key, existing.hash_key
-                FROM posthog_persondistinctid p
-                LEFT JOIN posthog_featureflaghashkeyoverride existing
+                FROM insights_persondistinctid p
+                LEFT JOIN insights_featureflaghashkeyoverride existing
                     ON existing.person_id = p.person_id AND existing.team_id = p.team_id
                 WHERE p.team_id = $1 AND p.distinct_id = ANY($2)
-                    AND EXISTS (SELECT 1 FROM posthog_person WHERE id = p.person_id AND team_id = p.team_id)
+                    AND EXISTS (SELECT 1 FROM insights_person WHERE id = p.person_id AND team_id = p.team_id)
                 "#,
             )
             .bind(team_id)
@@ -68,8 +68,8 @@ impl FeatureFlagStorage for PostgresStorage {
             sqlx::query_as::<_, HashKeyOverrideContextRow>(
                 r#"
                 SELECT ppd.person_id, ppd.distinct_id, fhko.feature_flag_key, fhko.hash_key
-                FROM posthog_persondistinctid ppd
-                LEFT JOIN posthog_featureflaghashkeyoverride fhko
+                FROM insights_persondistinctid ppd
+                LEFT JOIN insights_featureflaghashkeyoverride fhko
                     ON fhko.person_id = ppd.person_id AND fhko.team_id = ppd.team_id
                 WHERE ppd.team_id = $1 AND ppd.distinct_id = ANY($2)
                 "#,
@@ -135,7 +135,7 @@ impl FeatureFlagStorage for PostgresStorage {
 
         let result = sqlx::query(
             r#"
-            INSERT INTO posthog_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
+            INSERT INTO insights_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
             SELECT $1, person_id, flag_key, $2
             FROM UNNEST($3::bigint[], $4::text[]) AS t(person_id, flag_key)
             ON CONFLICT DO NOTHING
@@ -164,7 +164,7 @@ impl FeatureFlagStorage for PostgresStorage {
 
         let result = sqlx::query(
             r#"
-            DELETE FROM posthog_featureflaghashkeyoverride
+            DELETE FROM insights_featureflaghashkeyoverride
             WHERE team_id = ANY($1)
             "#,
         )

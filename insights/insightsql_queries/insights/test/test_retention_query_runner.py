@@ -2483,7 +2483,7 @@ class TestRetention(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             team_id=self.team.pk,
             distinct_ids=["person1", "alias1"],
-            properties={"email": "test@posthog.com"},
+            properties={"email": "test@hanzo.ai"},
         )
         _create_person(team_id=self.team.pk, distinct_ids=["person2"])
 

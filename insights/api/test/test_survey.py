@@ -95,7 +95,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -320,7 +320,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -351,7 +351,7 @@ class TestSurvey(APIBaseTest):
                 }
             ]
         }
-        assert response_data["conditions"] == {"url": "https://app.posthog.com/notebooks"}
+        assert response_data["conditions"] == {"url": "https://insights.hanzo.ai/notebooks"}
         assert response_data["questions"] == [
             {
                 "id": str(response_data["questions"][0]["id"]),
@@ -389,7 +389,7 @@ class TestSurvey(APIBaseTest):
                     ]
                 },
                 "remove_targeting_flag": False,
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -413,7 +413,7 @@ class TestSurvey(APIBaseTest):
                 }
             ]
         }
-        assert response_data["conditions"] == {"url": "https://app.posthog.com/notebooks"}
+        assert response_data["conditions"] == {"url": "https://insights.hanzo.ai/notebooks"}
         assert response_data["questions"] == [
             {
                 "id": str(response_data["questions"][0]["id"]),
@@ -454,7 +454,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -478,7 +478,7 @@ class TestSurvey(APIBaseTest):
                     }
                 ],
                 "linked_flag_id": notebooks_flag.id,
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -528,7 +528,7 @@ class TestSurvey(APIBaseTest):
                     ]
                 },
                 "iteration_count": MAX_ITERATION_COUNT + 1,
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -556,7 +556,7 @@ class TestSurvey(APIBaseTest):
                             "value": "performed_event_first_time",
                             "type": "behavioral",
                         },
-                        {"key": "email", "value": "test@posthog.com", "type": "person"},
+                        {"key": "email", "value": "test@hanzo.ai", "type": "person"},
                     ],
                 }
             },
@@ -583,7 +583,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         )
@@ -618,7 +618,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -646,7 +646,7 @@ class TestSurvey(APIBaseTest):
                             "properties": [
                                 {
                                     "key": "email",
-                                    "value": ["max@posthog.com"],
+                                    "value": ["max@hanzo.ai"],
                                     "operator": "exact",
                                     "type": "person",
                                 }
@@ -711,7 +711,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -755,7 +755,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -802,7 +802,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -843,7 +843,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -976,7 +976,7 @@ class TestSurvey(APIBaseTest):
                 "name": "survey with targeting",
                 "type": "popover",
                 "linked_flag_id": linked_flag.id,
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -1175,7 +1175,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -1211,7 +1211,7 @@ class TestSurvey(APIBaseTest):
             data={
                 "name": "survey with targeting",
                 "type": "popover",
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()
@@ -1578,7 +1578,7 @@ class TestSurvey(APIBaseTest):
                         }
                     ]
                 },
-                "conditions": {"url": "https://app.posthog.com/notebooks"},
+                "conditions": {"url": "https://insights.hanzo.ai/notebooks"},
             },
             format="json",
         ).json()

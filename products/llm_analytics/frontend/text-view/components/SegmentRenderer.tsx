@@ -1,8 +1,8 @@
 /**
  * Component for rendering different segment types (truncated, gen_expandable, tools_expandable)
  */
-import { IconExternal } from '@posthog/icons'
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { urls } from 'scenes/urls'
 

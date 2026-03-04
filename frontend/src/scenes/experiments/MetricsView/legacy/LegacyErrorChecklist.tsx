@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { combineUrl } from 'kea-router/lib/utils'
 
-import { IconCheck, IconX } from '@posthog/icons'
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconX } from '@hanzo/icons'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
 import { urls } from 'scenes/urls'

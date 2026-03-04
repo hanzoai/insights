@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCheck, IconExternal, IconLock, IconTarget } from '@posthog/icons'
-import { LemonButton, LemonSelect, Link } from '@posthog/lemon-ui'
+import { IconCheck, IconExternal, IconLock, IconTarget } from '@hanzo/icons'
+import { LemonButton, LemonSelect, Link } from '@hanzo/lemon-ui'
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 import { SetupTaskId } from 'lib/components/ProductSetup'
@@ -517,7 +517,7 @@ function PopoverFooter({ isDismissed, onMinimize, onRestore, selectedProduct }: 
                 </LemonButton>
             )}
             <Link
-                to={`https://posthog.com/docs/${selectedProduct.replace(/_/g, '-')}`}
+                to={`https://hanzo.ai/docs/${selectedProduct.replace(/_/g, '-')}`}
                 target="_blank"
                 className="text-xs text-muted hover:text-primary"
             >

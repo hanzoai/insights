@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconOpenSidebar, IconPlus, IconX } from '@posthog/icons'
+import { IconOpenSidebar, IconPlus, IconX } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { cn } from 'lib/utils/css-classes'

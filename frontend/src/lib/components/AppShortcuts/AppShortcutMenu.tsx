@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-import { IconArrowRight } from '@posthog/icons'
+import { IconArrowRight } from '@hanzo/icons'
 
 import { LemonSwitch } from 'lib/lemon-ui/LemonSwitch'
 import { IconAction } from 'lib/lemon-ui/icons'

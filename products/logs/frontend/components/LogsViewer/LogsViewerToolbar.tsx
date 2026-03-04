@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { LemonCheckbox, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import { humanFriendlyNumber } from 'lib/utils'
 

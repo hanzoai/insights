@@ -33,7 +33,7 @@ describe('hogvm utils', () => {
     test('convertJSToHog preserves circular references', () => {
         const obj: any = { a: null, b: true }
         obj.a = obj
-        const hog = convertJSToHog(obj)
+        const iql = convertJSToHog(obj)
         expect(hog.get('a') === hog).toBe(true)
     })
 

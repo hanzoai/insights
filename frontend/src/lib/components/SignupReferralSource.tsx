@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonInput } from '@posthog/lemon-ui'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { LemonField } from 'lib/lemon-ui/LemonField'

@@ -1,4 +1,4 @@
-import { IconCode, IconDatabase, IconPulse, IconWarning } from '@posthog/icons'
+import { IconCode, IconDatabase, IconPulse, IconWarning } from '@hanzo/icons'
 
 export type HealthIssueCategory = 'ingestion' | 'sdk' | 'pipelines' | 'other'
 

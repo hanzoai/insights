@@ -1,4 +1,4 @@
-import { IconTrending } from '@posthog/icons'
+import { IconTrending } from '@hanzo/icons'
 
 import { getColorVar } from 'lib/colors'
 import { IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'

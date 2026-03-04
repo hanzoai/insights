@@ -23,11 +23,11 @@ class DeletingCredentialsMigrationTest(NonAtomicTestMigrations):
         return "data_warehouse"
 
     def setUp(self):
-        """Override to specify posthog migration state alongside data_warehouse migration"""
+        """Override to specify insights migration state alongside data_warehouse migration"""
         from django.db import connection
         from django.db.migrations.executor import MigrationExecutor
 
-        # Migrate from both data_warehouse 0012 AND posthog 0955 (which includes default_anonymize_ips)
+        # Migrate from both data_warehouse 0012 AND insights 0955 (which includes default_anonymize_ips)
         migrate_from = [
             ("data_warehouse", self.migrate_from),
             ("insights", "0955_alter_organization_is_ai_data_processing_approved"),
@@ -59,7 +59,7 @@ class DeletingCredentialsMigrationTest(NonAtomicTestMigrations):
         )
         ExternalDataSource: ExternalDataSourceModel = apps.get_model("data_warehouse", "ExternalDataSource")
 
-        # At migration 0012, posthog migration 0955 has been applied (per dependency),
+        # At migration 0012, insights migration 0955 has been applied (per dependency),
         # which means default_anonymize_ips field exists and needs to be set explicitly
         org = Organization.objects.create(name="Test Organization", default_anonymize_ips=False)
         proj = Project.objects.create(id=999999, organization=org, name="Test Project")

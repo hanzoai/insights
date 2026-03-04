@@ -22,7 +22,7 @@ class ProjectInline(TabularInlinePaginated):
 
     def displayed_name(self, project: Project):
         return format_html(
-            '<a href="/admin/posthog/project/{}/change/">{}.&nbsp;{}</a>',
+            '<a href="/admin/insights/project/{}/change/">{}.&nbsp;{}</a>',
             project.pk,
             project.pk,
             project.name,

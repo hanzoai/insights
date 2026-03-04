@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useMemo } from 'react'
 
-import { IconAI } from '@posthog/icons'
+import { IconAI } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { addProductIntent } from 'lib/utils/product-intents'
@@ -75,7 +75,7 @@ function useExperimentSummaryMaxTool(): ReturnType<typeof useMaxTool> {
             })
 
             if (toolOutput?.error) {
-                posthog.captureException(toolOutput?.error || 'Undefined error when summarizing experiment with Max', {
+                insights.captureException(toolOutput?.error || 'Undefined error when summarizing experiment with Max', {
                     action: 'max-ai-experiment-summary-failed',
                     experiment_id: experiment.id,
                     ...toolOutput,

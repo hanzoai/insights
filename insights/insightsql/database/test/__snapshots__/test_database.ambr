@@ -31,798 +31,798 @@
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.1
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.10
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.11
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.12
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.13
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.14
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.15
   '''
-  SELECT "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin",
-         "posthog_datawarehousetable"."created_by_id",
-         "posthog_datawarehousetable"."created_at",
-         "posthog_datawarehousetable"."updated_at",
-         "posthog_datawarehousetable"."deleted",
-         "posthog_datawarehousetable"."deleted_at",
-         "posthog_datawarehousetable"."id",
-         "posthog_datawarehousetable"."name",
-         "posthog_datawarehousetable"."format",
-         "posthog_datawarehousetable"."team_id",
-         "posthog_datawarehousetable"."url_pattern",
-         "posthog_datawarehousetable"."queryable_folder",
-         "posthog_datawarehousetable"."credential_id",
-         "posthog_datawarehousetable"."external_data_source_id",
-         "posthog_datawarehousetable"."columns",
-         "posthog_datawarehousetable"."row_count",
-         "posthog_datawarehousetable"."size_in_s3_mib",
-         "posthog_datawarehousecredential"."created_by_id",
-         "posthog_datawarehousecredential"."created_at",
-         "posthog_datawarehousecredential"."id",
-         "posthog_datawarehousecredential"."access_key",
-         "posthog_datawarehousecredential"."access_secret",
-         "posthog_datawarehousecredential"."team_id",
-         "posthog_datawarehousemanagedviewset"."created_by_id",
-         "posthog_datawarehousemanagedviewset"."created_at",
-         "posthog_datawarehousemanagedviewset"."updated_at",
-         "posthog_datawarehousemanagedviewset"."id",
-         "posthog_datawarehousemanagedviewset"."team_id",
-         "posthog_datawarehousemanagedviewset"."kind"
-  FROM "posthog_datawarehousesavedquery"
-  LEFT OUTER JOIN "posthog_datawarehousemanagedviewset" ON ("posthog_datawarehousesavedquery"."managed_viewset_id" = "posthog_datawarehousemanagedviewset"."id")
-  LEFT OUTER JOIN "posthog_datawarehousetable" ON ("posthog_datawarehousesavedquery"."table_id" = "posthog_datawarehousetable"."id")
-  LEFT OUTER JOIN "posthog_datawarehousecredential" ON ("posthog_datawarehousetable"."credential_id" = "posthog_datawarehousecredential"."id")
-  WHERE ("posthog_datawarehousesavedquery"."team_id" = 99999
-         AND NOT ("posthog_datawarehousesavedquery"."deleted"
-                  AND "posthog_datawarehousesavedquery"."deleted" IS NOT NULL)
-         AND "posthog_datawarehousesavedquery"."managed_viewset_id" IS NULL)
-  ORDER BY "posthog_datawarehousesavedquery"."name" ASC
+  SELECT "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin",
+         "insights_datawarehousetable"."created_by_id",
+         "insights_datawarehousetable"."created_at",
+         "insights_datawarehousetable"."updated_at",
+         "insights_datawarehousetable"."deleted",
+         "insights_datawarehousetable"."deleted_at",
+         "insights_datawarehousetable"."id",
+         "insights_datawarehousetable"."name",
+         "insights_datawarehousetable"."format",
+         "insights_datawarehousetable"."team_id",
+         "insights_datawarehousetable"."url_pattern",
+         "insights_datawarehousetable"."queryable_folder",
+         "insights_datawarehousetable"."credential_id",
+         "insights_datawarehousetable"."external_data_source_id",
+         "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."row_count",
+         "insights_datawarehousetable"."size_in_s3_mib",
+         "insights_datawarehousecredential"."created_by_id",
+         "insights_datawarehousecredential"."created_at",
+         "insights_datawarehousecredential"."id",
+         "insights_datawarehousecredential"."access_key",
+         "insights_datawarehousecredential"."access_secret",
+         "insights_datawarehousecredential"."team_id",
+         "insights_datawarehousemanagedviewset"."created_by_id",
+         "insights_datawarehousemanagedviewset"."created_at",
+         "insights_datawarehousemanagedviewset"."updated_at",
+         "insights_datawarehousemanagedviewset"."id",
+         "insights_datawarehousemanagedviewset"."team_id",
+         "insights_datawarehousemanagedviewset"."kind"
+  FROM "insights_datawarehousesavedquery"
+  LEFT OUTER JOIN "insights_datawarehousemanagedviewset" ON ("insights_datawarehousesavedquery"."managed_viewset_id" = "insights_datawarehousemanagedviewset"."id")
+  LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
+  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
+  WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
+         AND NOT ("insights_datawarehousesavedquery"."deleted"
+                  AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL)
+         AND "insights_datawarehousesavedquery"."managed_viewset_id" IS NULL)
+  ORDER BY "insights_datawarehousesavedquery"."name" ASC
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.16
   '''
-  SELECT "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin",
-         "posthog_datawarehousetable"."created_by_id",
-         "posthog_datawarehousetable"."created_at",
-         "posthog_datawarehousetable"."updated_at",
-         "posthog_datawarehousetable"."deleted",
-         "posthog_datawarehousetable"."deleted_at",
-         "posthog_datawarehousetable"."id",
-         "posthog_datawarehousetable"."name",
-         "posthog_datawarehousetable"."format",
-         "posthog_datawarehousetable"."team_id",
-         "posthog_datawarehousetable"."url_pattern",
-         "posthog_datawarehousetable"."queryable_folder",
-         "posthog_datawarehousetable"."credential_id",
-         "posthog_datawarehousetable"."external_data_source_id",
-         "posthog_datawarehousetable"."columns",
-         "posthog_datawarehousetable"."row_count",
-         "posthog_datawarehousetable"."size_in_s3_mib",
-         "posthog_datawarehousecredential"."created_by_id",
-         "posthog_datawarehousecredential"."created_at",
-         "posthog_datawarehousecredential"."id",
-         "posthog_datawarehousecredential"."access_key",
-         "posthog_datawarehousecredential"."access_secret",
-         "posthog_datawarehousecredential"."team_id"
-  FROM "posthog_datawarehousesavedquery"
-  LEFT OUTER JOIN "posthog_datawarehousetable" ON ("posthog_datawarehousesavedquery"."table_id" = "posthog_datawarehousetable"."id")
-  LEFT OUTER JOIN "posthog_datawarehousecredential" ON ("posthog_datawarehousetable"."credential_id" = "posthog_datawarehousecredential"."id")
-  WHERE ("posthog_datawarehousesavedquery"."team_id" = 99999
-         AND "posthog_datawarehousesavedquery"."origin" = 'endpoint'
-         AND NOT ("posthog_datawarehousesavedquery"."deleted"
-                  AND "posthog_datawarehousesavedquery"."deleted" IS NOT NULL))
+  SELECT "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin",
+         "insights_datawarehousetable"."created_by_id",
+         "insights_datawarehousetable"."created_at",
+         "insights_datawarehousetable"."updated_at",
+         "insights_datawarehousetable"."deleted",
+         "insights_datawarehousetable"."deleted_at",
+         "insights_datawarehousetable"."id",
+         "insights_datawarehousetable"."name",
+         "insights_datawarehousetable"."format",
+         "insights_datawarehousetable"."team_id",
+         "insights_datawarehousetable"."url_pattern",
+         "insights_datawarehousetable"."queryable_folder",
+         "insights_datawarehousetable"."credential_id",
+         "insights_datawarehousetable"."external_data_source_id",
+         "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."row_count",
+         "insights_datawarehousetable"."size_in_s3_mib",
+         "insights_datawarehousecredential"."created_by_id",
+         "insights_datawarehousecredential"."created_at",
+         "insights_datawarehousecredential"."id",
+         "insights_datawarehousecredential"."access_key",
+         "insights_datawarehousecredential"."access_secret",
+         "insights_datawarehousecredential"."team_id"
+  FROM "insights_datawarehousesavedquery"
+  LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
+  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
+  WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
+         AND "insights_datawarehousesavedquery"."origin" = 'endpoint'
+         AND NOT ("insights_datawarehousesavedquery"."deleted"
+                  AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.17
   '''
-  SELECT "posthog_externaldatasource"."created_by_id",
-         "posthog_externaldatasource"."created_at",
-         "posthog_externaldatasource"."updated_at",
-         "posthog_externaldatasource"."deleted",
-         "posthog_externaldatasource"."deleted_at",
-         "posthog_externaldatasource"."id",
-         "posthog_externaldatasource"."source_id",
-         "posthog_externaldatasource"."connection_id",
-         "posthog_externaldatasource"."destination_id",
-         "posthog_externaldatasource"."team_id",
-         "posthog_externaldatasource"."sync_frequency",
-         "posthog_externaldatasource"."status",
-         "posthog_externaldatasource"."source_type",
-         "posthog_externaldatasource"."job_inputs",
-         "posthog_externaldatasource"."are_tables_created",
-         "posthog_externaldatasource"."prefix",
-         "posthog_externaldatasource"."description",
-         "posthog_externaldatasource"."revenue_analytics_enabled",
-         "posthog_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
-         "posthog_externaldatasourcerevenueanalyticsconfig"."enabled",
-         "posthog_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
-  FROM "posthog_externaldatasource"
-  LEFT OUTER JOIN "posthog_externaldatasourcerevenueanalyticsconfig" ON ("posthog_externaldatasource"."id" = "posthog_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
-  WHERE ("posthog_externaldatasource"."source_type" IN ('Stripe')
-         AND "posthog_externaldatasource"."team_id" = 99999
-         AND NOT ("posthog_externaldatasource"."deleted"
-                  AND "posthog_externaldatasource"."deleted" IS NOT NULL))
+  SELECT "insights_externaldatasource"."created_by_id",
+         "insights_externaldatasource"."created_at",
+         "insights_externaldatasource"."updated_at",
+         "insights_externaldatasource"."deleted",
+         "insights_externaldatasource"."deleted_at",
+         "insights_externaldatasource"."id",
+         "insights_externaldatasource"."source_id",
+         "insights_externaldatasource"."connection_id",
+         "insights_externaldatasource"."destination_id",
+         "insights_externaldatasource"."team_id",
+         "insights_externaldatasource"."sync_frequency",
+         "insights_externaldatasource"."status",
+         "insights_externaldatasource"."source_type",
+         "insights_externaldatasource"."job_inputs",
+         "insights_externaldatasource"."are_tables_created",
+         "insights_externaldatasource"."prefix",
+         "insights_externaldatasource"."description",
+         "insights_externaldatasource"."revenue_analytics_enabled",
+         "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
+         "insights_externaldatasourcerevenueanalyticsconfig"."enabled",
+         "insights_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
+  FROM "insights_externaldatasource"
+  LEFT OUTER JOIN "insights_externaldatasourcerevenueanalyticsconfig" ON ("insights_externaldatasource"."id" = "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
+  WHERE ("insights_externaldatasource"."source_type" IN ('Stripe')
+         AND "insights_externaldatasource"."team_id" = 99999
+         AND NOT ("insights_externaldatasource"."deleted"
+                  AND "insights_externaldatasource"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.18
   '''
-  SELECT "posthog_datawarehousetable"."created_by_id",
-         "posthog_datawarehousetable"."created_at",
-         "posthog_datawarehousetable"."updated_at",
-         "posthog_datawarehousetable"."deleted",
-         "posthog_datawarehousetable"."deleted_at",
-         "posthog_datawarehousetable"."id",
-         "posthog_datawarehousetable"."name",
-         "posthog_datawarehousetable"."format",
-         "posthog_datawarehousetable"."team_id",
-         "posthog_datawarehousetable"."url_pattern",
-         "posthog_datawarehousetable"."queryable_folder",
-         "posthog_datawarehousetable"."credential_id",
-         "posthog_datawarehousetable"."external_data_source_id",
-         "posthog_datawarehousetable"."columns",
-         "posthog_datawarehousetable"."row_count",
-         "posthog_datawarehousetable"."size_in_s3_mib",
-         "posthog_datawarehousecredential"."created_by_id",
-         "posthog_datawarehousecredential"."created_at",
-         "posthog_datawarehousecredential"."id",
-         "posthog_datawarehousecredential"."access_key",
-         "posthog_datawarehousecredential"."access_secret",
-         "posthog_datawarehousecredential"."team_id",
-         "posthog_externaldatasource"."created_by_id",
-         "posthog_externaldatasource"."created_at",
-         "posthog_externaldatasource"."updated_at",
-         "posthog_externaldatasource"."deleted",
-         "posthog_externaldatasource"."deleted_at",
-         "posthog_externaldatasource"."id",
-         "posthog_externaldatasource"."source_id",
-         "posthog_externaldatasource"."connection_id",
-         "posthog_externaldatasource"."destination_id",
-         "posthog_externaldatasource"."team_id",
-         "posthog_externaldatasource"."sync_frequency",
-         "posthog_externaldatasource"."status",
-         "posthog_externaldatasource"."source_type",
-         "posthog_externaldatasource"."job_inputs",
-         "posthog_externaldatasource"."are_tables_created",
-         "posthog_externaldatasource"."prefix",
-         "posthog_externaldatasource"."description",
-         "posthog_externaldatasource"."revenue_analytics_enabled"
-  FROM "posthog_datawarehousetable"
-  LEFT OUTER JOIN "posthog_datawarehousecredential" ON ("posthog_datawarehousetable"."credential_id" = "posthog_datawarehousecredential"."id")
-  LEFT OUTER JOIN "posthog_externaldatasource" ON ("posthog_datawarehousetable"."external_data_source_id" = "posthog_externaldatasource"."id")
-  WHERE ("posthog_datawarehousetable"."team_id" = 99999
-         AND NOT ("posthog_datawarehousetable"."deleted"
-                  AND "posthog_datawarehousetable"."deleted" IS NOT NULL))
+  SELECT "insights_datawarehousetable"."created_by_id",
+         "insights_datawarehousetable"."created_at",
+         "insights_datawarehousetable"."updated_at",
+         "insights_datawarehousetable"."deleted",
+         "insights_datawarehousetable"."deleted_at",
+         "insights_datawarehousetable"."id",
+         "insights_datawarehousetable"."name",
+         "insights_datawarehousetable"."format",
+         "insights_datawarehousetable"."team_id",
+         "insights_datawarehousetable"."url_pattern",
+         "insights_datawarehousetable"."queryable_folder",
+         "insights_datawarehousetable"."credential_id",
+         "insights_datawarehousetable"."external_data_source_id",
+         "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."row_count",
+         "insights_datawarehousetable"."size_in_s3_mib",
+         "insights_datawarehousecredential"."created_by_id",
+         "insights_datawarehousecredential"."created_at",
+         "insights_datawarehousecredential"."id",
+         "insights_datawarehousecredential"."access_key",
+         "insights_datawarehousecredential"."access_secret",
+         "insights_datawarehousecredential"."team_id",
+         "insights_externaldatasource"."created_by_id",
+         "insights_externaldatasource"."created_at",
+         "insights_externaldatasource"."updated_at",
+         "insights_externaldatasource"."deleted",
+         "insights_externaldatasource"."deleted_at",
+         "insights_externaldatasource"."id",
+         "insights_externaldatasource"."source_id",
+         "insights_externaldatasource"."connection_id",
+         "insights_externaldatasource"."destination_id",
+         "insights_externaldatasource"."team_id",
+         "insights_externaldatasource"."sync_frequency",
+         "insights_externaldatasource"."status",
+         "insights_externaldatasource"."source_type",
+         "insights_externaldatasource"."job_inputs",
+         "insights_externaldatasource"."are_tables_created",
+         "insights_externaldatasource"."prefix",
+         "insights_externaldatasource"."description",
+         "insights_externaldatasource"."revenue_analytics_enabled"
+  FROM "insights_datawarehousetable"
+  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
+  LEFT OUTER JOIN "insights_externaldatasource" ON ("insights_datawarehousetable"."external_data_source_id" = "insights_externaldatasource"."id")
+  WHERE ("insights_datawarehousetable"."team_id" = 99999
+         AND NOT ("insights_datawarehousetable"."deleted"
+                  AND "insights_datawarehousetable"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.19
   '''
-  SELECT "posthog_datawarehousejoin"."created_by_id",
-         "posthog_datawarehousejoin"."created_at",
-         "posthog_datawarehousejoin"."deleted",
-         "posthog_datawarehousejoin"."deleted_at",
-         "posthog_datawarehousejoin"."id",
-         "posthog_datawarehousejoin"."team_id",
-         "posthog_datawarehousejoin"."source_table_name",
-         "posthog_datawarehousejoin"."source_table_key",
-         "posthog_datawarehousejoin"."joining_table_name",
-         "posthog_datawarehousejoin"."joining_table_key",
-         "posthog_datawarehousejoin"."field_name",
-         "posthog_datawarehousejoin"."configuration"
-  FROM "posthog_datawarehousejoin"
-  WHERE ("posthog_datawarehousejoin"."team_id" = 99999
-         AND NOT ("posthog_datawarehousejoin"."deleted"
-                  AND "posthog_datawarehousejoin"."deleted" IS NOT NULL))
+  SELECT "insights_datawarehousejoin"."created_by_id",
+         "insights_datawarehousejoin"."created_at",
+         "insights_datawarehousejoin"."deleted",
+         "insights_datawarehousejoin"."deleted_at",
+         "insights_datawarehousejoin"."id",
+         "insights_datawarehousejoin"."team_id",
+         "insights_datawarehousejoin"."source_table_name",
+         "insights_datawarehousejoin"."source_table_key",
+         "insights_datawarehousejoin"."joining_table_name",
+         "insights_datawarehousejoin"."joining_table_key",
+         "insights_datawarehousejoin"."field_name",
+         "insights_datawarehousejoin"."configuration"
+  FROM "insights_datawarehousejoin"
+  WHERE ("insights_datawarehousejoin"."team_id" = 99999
+         AND NOT ("insights_datawarehousejoin"."deleted"
+                  AND "insights_datawarehousejoin"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.2
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.3
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.4
   '''
-  SELECT "posthog_datamodelingnode"."created_by_id",
-         "posthog_datamodelingnode"."created_at",
-         "posthog_datamodelingnode"."updated_at",
-         "posthog_datamodelingnode"."id",
-         "posthog_datamodelingnode"."team_id",
-         "posthog_datamodelingnode"."saved_query_id",
-         "posthog_datamodelingnode"."dag_id",
-         "posthog_datamodelingnode"."dag_id_text",
-         "posthog_datamodelingnode"."name",
-         "posthog_datamodelingnode"."type",
-         "posthog_datamodelingnode"."properties",
-         "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin"
-  FROM "posthog_datamodelingnode"
-  INNER JOIN "posthog_datawarehousesavedquery" ON ("posthog_datamodelingnode"."saved_query_id" = "posthog_datawarehousesavedquery"."id")
-  WHERE "posthog_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
+  SELECT "insights_datamodelingnode"."created_by_id",
+         "insights_datamodelingnode"."created_at",
+         "insights_datamodelingnode"."updated_at",
+         "insights_datamodelingnode"."id",
+         "insights_datamodelingnode"."team_id",
+         "insights_datamodelingnode"."saved_query_id",
+         "insights_datamodelingnode"."dag_id",
+         "insights_datamodelingnode"."dag_id_text",
+         "insights_datamodelingnode"."name",
+         "insights_datamodelingnode"."type",
+         "insights_datamodelingnode"."properties",
+         "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin"
+  FROM "insights_datamodelingnode"
+  INNER JOIN "insights_datawarehousesavedquery" ON ("insights_datamodelingnode"."saved_query_id" = "insights_datawarehousesavedquery"."id")
+  WHERE "insights_datamodelingnode"."saved_query_id" = '00000000000000000000000000000000'::uuid
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.5
   '''
-  SELECT "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin",
-         "posthog_datawarehousetable"."created_by_id",
-         "posthog_datawarehousetable"."created_at",
-         "posthog_datawarehousetable"."updated_at",
-         "posthog_datawarehousetable"."deleted",
-         "posthog_datawarehousetable"."deleted_at",
-         "posthog_datawarehousetable"."id",
-         "posthog_datawarehousetable"."name",
-         "posthog_datawarehousetable"."format",
-         "posthog_datawarehousetable"."team_id",
-         "posthog_datawarehousetable"."url_pattern",
-         "posthog_datawarehousetable"."queryable_folder",
-         "posthog_datawarehousetable"."credential_id",
-         "posthog_datawarehousetable"."external_data_source_id",
-         "posthog_datawarehousetable"."columns",
-         "posthog_datawarehousetable"."row_count",
-         "posthog_datawarehousetable"."size_in_s3_mib",
-         "posthog_datawarehousecredential"."created_by_id",
-         "posthog_datawarehousecredential"."created_at",
-         "posthog_datawarehousecredential"."id",
-         "posthog_datawarehousecredential"."access_key",
-         "posthog_datawarehousecredential"."access_secret",
-         "posthog_datawarehousecredential"."team_id",
-         "posthog_datawarehousemanagedviewset"."created_by_id",
-         "posthog_datawarehousemanagedviewset"."created_at",
-         "posthog_datawarehousemanagedviewset"."updated_at",
-         "posthog_datawarehousemanagedviewset"."id",
-         "posthog_datawarehousemanagedviewset"."team_id",
-         "posthog_datawarehousemanagedviewset"."kind"
-  FROM "posthog_datawarehousesavedquery"
-  LEFT OUTER JOIN "posthog_datawarehousemanagedviewset" ON ("posthog_datawarehousesavedquery"."managed_viewset_id" = "posthog_datawarehousemanagedviewset"."id")
-  LEFT OUTER JOIN "posthog_datawarehousetable" ON ("posthog_datawarehousesavedquery"."table_id" = "posthog_datawarehousetable"."id")
-  LEFT OUTER JOIN "posthog_datawarehousecredential" ON ("posthog_datawarehousetable"."credential_id" = "posthog_datawarehousecredential"."id")
-  WHERE ("posthog_datawarehousesavedquery"."team_id" = 99999
-         AND NOT ("posthog_datawarehousesavedquery"."deleted"
-                  AND "posthog_datawarehousesavedquery"."deleted" IS NOT NULL)
-         AND "posthog_datawarehousesavedquery"."managed_viewset_id" IS NULL)
-  ORDER BY "posthog_datawarehousesavedquery"."name" ASC
+  SELECT "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin",
+         "insights_datawarehousetable"."created_by_id",
+         "insights_datawarehousetable"."created_at",
+         "insights_datawarehousetable"."updated_at",
+         "insights_datawarehousetable"."deleted",
+         "insights_datawarehousetable"."deleted_at",
+         "insights_datawarehousetable"."id",
+         "insights_datawarehousetable"."name",
+         "insights_datawarehousetable"."format",
+         "insights_datawarehousetable"."team_id",
+         "insights_datawarehousetable"."url_pattern",
+         "insights_datawarehousetable"."queryable_folder",
+         "insights_datawarehousetable"."credential_id",
+         "insights_datawarehousetable"."external_data_source_id",
+         "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."row_count",
+         "insights_datawarehousetable"."size_in_s3_mib",
+         "insights_datawarehousecredential"."created_by_id",
+         "insights_datawarehousecredential"."created_at",
+         "insights_datawarehousecredential"."id",
+         "insights_datawarehousecredential"."access_key",
+         "insights_datawarehousecredential"."access_secret",
+         "insights_datawarehousecredential"."team_id",
+         "insights_datawarehousemanagedviewset"."created_by_id",
+         "insights_datawarehousemanagedviewset"."created_at",
+         "insights_datawarehousemanagedviewset"."updated_at",
+         "insights_datawarehousemanagedviewset"."id",
+         "insights_datawarehousemanagedviewset"."team_id",
+         "insights_datawarehousemanagedviewset"."kind"
+  FROM "insights_datawarehousesavedquery"
+  LEFT OUTER JOIN "insights_datawarehousemanagedviewset" ON ("insights_datawarehousesavedquery"."managed_viewset_id" = "insights_datawarehousemanagedviewset"."id")
+  LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
+  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
+  WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
+         AND NOT ("insights_datawarehousesavedquery"."deleted"
+                  AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL)
+         AND "insights_datawarehousesavedquery"."managed_viewset_id" IS NULL)
+  ORDER BY "insights_datawarehousesavedquery"."name" ASC
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.6
   '''
-  SELECT "posthog_datawarehousesavedquery"."created_by_id",
-         "posthog_datawarehousesavedquery"."created_at",
-         "posthog_datawarehousesavedquery"."deleted",
-         "posthog_datawarehousesavedquery"."deleted_at",
-         "posthog_datawarehousesavedquery"."id",
-         "posthog_datawarehousesavedquery"."name",
-         "posthog_datawarehousesavedquery"."team_id",
-         "posthog_datawarehousesavedquery"."latest_error",
-         "posthog_datawarehousesavedquery"."columns",
-         "posthog_datawarehousesavedquery"."external_tables",
-         "posthog_datawarehousesavedquery"."query",
-         "posthog_datawarehousesavedquery"."status",
-         "posthog_datawarehousesavedquery"."last_run_at",
-         "posthog_datawarehousesavedquery"."sync_frequency_interval",
-         "posthog_datawarehousesavedquery"."table_id",
-         "posthog_datawarehousesavedquery"."is_materialized",
-         "posthog_datawarehousesavedquery"."deleted_name",
-         "posthog_datawarehousesavedquery"."managed_viewset_id",
-         "posthog_datawarehousesavedquery"."origin",
-         "posthog_datawarehousetable"."created_by_id",
-         "posthog_datawarehousetable"."created_at",
-         "posthog_datawarehousetable"."updated_at",
-         "posthog_datawarehousetable"."deleted",
-         "posthog_datawarehousetable"."deleted_at",
-         "posthog_datawarehousetable"."id",
-         "posthog_datawarehousetable"."name",
-         "posthog_datawarehousetable"."format",
-         "posthog_datawarehousetable"."team_id",
-         "posthog_datawarehousetable"."url_pattern",
-         "posthog_datawarehousetable"."queryable_folder",
-         "posthog_datawarehousetable"."credential_id",
-         "posthog_datawarehousetable"."external_data_source_id",
-         "posthog_datawarehousetable"."columns",
-         "posthog_datawarehousetable"."row_count",
-         "posthog_datawarehousetable"."size_in_s3_mib",
-         "posthog_datawarehousecredential"."created_by_id",
-         "posthog_datawarehousecredential"."created_at",
-         "posthog_datawarehousecredential"."id",
-         "posthog_datawarehousecredential"."access_key",
-         "posthog_datawarehousecredential"."access_secret",
-         "posthog_datawarehousecredential"."team_id"
-  FROM "posthog_datawarehousesavedquery"
-  LEFT OUTER JOIN "posthog_datawarehousetable" ON ("posthog_datawarehousesavedquery"."table_id" = "posthog_datawarehousetable"."id")
-  LEFT OUTER JOIN "posthog_datawarehousecredential" ON ("posthog_datawarehousetable"."credential_id" = "posthog_datawarehousecredential"."id")
-  WHERE ("posthog_datawarehousesavedquery"."team_id" = 99999
-         AND "posthog_datawarehousesavedquery"."origin" = 'endpoint'
-         AND NOT ("posthog_datawarehousesavedquery"."deleted"
-                  AND "posthog_datawarehousesavedquery"."deleted" IS NOT NULL))
+  SELECT "insights_datawarehousesavedquery"."created_by_id",
+         "insights_datawarehousesavedquery"."created_at",
+         "insights_datawarehousesavedquery"."deleted",
+         "insights_datawarehousesavedquery"."deleted_at",
+         "insights_datawarehousesavedquery"."id",
+         "insights_datawarehousesavedquery"."name",
+         "insights_datawarehousesavedquery"."team_id",
+         "insights_datawarehousesavedquery"."latest_error",
+         "insights_datawarehousesavedquery"."columns",
+         "insights_datawarehousesavedquery"."external_tables",
+         "insights_datawarehousesavedquery"."query",
+         "insights_datawarehousesavedquery"."status",
+         "insights_datawarehousesavedquery"."last_run_at",
+         "insights_datawarehousesavedquery"."sync_frequency_interval",
+         "insights_datawarehousesavedquery"."table_id",
+         "insights_datawarehousesavedquery"."is_materialized",
+         "insights_datawarehousesavedquery"."deleted_name",
+         "insights_datawarehousesavedquery"."managed_viewset_id",
+         "insights_datawarehousesavedquery"."origin",
+         "insights_datawarehousetable"."created_by_id",
+         "insights_datawarehousetable"."created_at",
+         "insights_datawarehousetable"."updated_at",
+         "insights_datawarehousetable"."deleted",
+         "insights_datawarehousetable"."deleted_at",
+         "insights_datawarehousetable"."id",
+         "insights_datawarehousetable"."name",
+         "insights_datawarehousetable"."format",
+         "insights_datawarehousetable"."team_id",
+         "insights_datawarehousetable"."url_pattern",
+         "insights_datawarehousetable"."queryable_folder",
+         "insights_datawarehousetable"."credential_id",
+         "insights_datawarehousetable"."external_data_source_id",
+         "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."row_count",
+         "insights_datawarehousetable"."size_in_s3_mib",
+         "insights_datawarehousecredential"."created_by_id",
+         "insights_datawarehousecredential"."created_at",
+         "insights_datawarehousecredential"."id",
+         "insights_datawarehousecredential"."access_key",
+         "insights_datawarehousecredential"."access_secret",
+         "insights_datawarehousecredential"."team_id"
+  FROM "insights_datawarehousesavedquery"
+  LEFT OUTER JOIN "insights_datawarehousetable" ON ("insights_datawarehousesavedquery"."table_id" = "insights_datawarehousetable"."id")
+  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
+  WHERE ("insights_datawarehousesavedquery"."team_id" = 99999
+         AND "insights_datawarehousesavedquery"."origin" = 'endpoint'
+         AND NOT ("insights_datawarehousesavedquery"."deleted"
+                  AND "insights_datawarehousesavedquery"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.7
   '''
-  SELECT "posthog_externaldatasource"."created_by_id",
-         "posthog_externaldatasource"."created_at",
-         "posthog_externaldatasource"."updated_at",
-         "posthog_externaldatasource"."deleted",
-         "posthog_externaldatasource"."deleted_at",
-         "posthog_externaldatasource"."id",
-         "posthog_externaldatasource"."source_id",
-         "posthog_externaldatasource"."connection_id",
-         "posthog_externaldatasource"."destination_id",
-         "posthog_externaldatasource"."team_id",
-         "posthog_externaldatasource"."sync_frequency",
-         "posthog_externaldatasource"."status",
-         "posthog_externaldatasource"."source_type",
-         "posthog_externaldatasource"."job_inputs",
-         "posthog_externaldatasource"."are_tables_created",
-         "posthog_externaldatasource"."prefix",
-         "posthog_externaldatasource"."description",
-         "posthog_externaldatasource"."revenue_analytics_enabled",
-         "posthog_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
-         "posthog_externaldatasourcerevenueanalyticsconfig"."enabled",
-         "posthog_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
-  FROM "posthog_externaldatasource"
-  LEFT OUTER JOIN "posthog_externaldatasourcerevenueanalyticsconfig" ON ("posthog_externaldatasource"."id" = "posthog_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
-  WHERE ("posthog_externaldatasource"."source_type" IN ('Stripe')
-         AND "posthog_externaldatasource"."team_id" = 99999
-         AND NOT ("posthog_externaldatasource"."deleted"
-                  AND "posthog_externaldatasource"."deleted" IS NOT NULL))
+  SELECT "insights_externaldatasource"."created_by_id",
+         "insights_externaldatasource"."created_at",
+         "insights_externaldatasource"."updated_at",
+         "insights_externaldatasource"."deleted",
+         "insights_externaldatasource"."deleted_at",
+         "insights_externaldatasource"."id",
+         "insights_externaldatasource"."source_id",
+         "insights_externaldatasource"."connection_id",
+         "insights_externaldatasource"."destination_id",
+         "insights_externaldatasource"."team_id",
+         "insights_externaldatasource"."sync_frequency",
+         "insights_externaldatasource"."status",
+         "insights_externaldatasource"."source_type",
+         "insights_externaldatasource"."job_inputs",
+         "insights_externaldatasource"."are_tables_created",
+         "insights_externaldatasource"."prefix",
+         "insights_externaldatasource"."description",
+         "insights_externaldatasource"."revenue_analytics_enabled",
+         "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id",
+         "insights_externaldatasourcerevenueanalyticsconfig"."enabled",
+         "insights_externaldatasourcerevenueanalyticsconfig"."include_invoiceless_charges"
+  FROM "insights_externaldatasource"
+  LEFT OUTER JOIN "insights_externaldatasourcerevenueanalyticsconfig" ON ("insights_externaldatasource"."id" = "insights_externaldatasourcerevenueanalyticsconfig"."external_data_source_id")
+  WHERE ("insights_externaldatasource"."source_type" IN ('Stripe')
+         AND "insights_externaldatasource"."team_id" = 99999
+         AND NOT ("insights_externaldatasource"."deleted"
+                  AND "insights_externaldatasource"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.8
   '''
-  SELECT "posthog_datawarehousetable"."created_by_id",
-         "posthog_datawarehousetable"."created_at",
-         "posthog_datawarehousetable"."updated_at",
-         "posthog_datawarehousetable"."deleted",
-         "posthog_datawarehousetable"."deleted_at",
-         "posthog_datawarehousetable"."id",
-         "posthog_datawarehousetable"."name",
-         "posthog_datawarehousetable"."format",
-         "posthog_datawarehousetable"."team_id",
-         "posthog_datawarehousetable"."url_pattern",
-         "posthog_datawarehousetable"."queryable_folder",
-         "posthog_datawarehousetable"."credential_id",
-         "posthog_datawarehousetable"."external_data_source_id",
-         "posthog_datawarehousetable"."columns",
-         "posthog_datawarehousetable"."row_count",
-         "posthog_datawarehousetable"."size_in_s3_mib",
-         "posthog_datawarehousecredential"."created_by_id",
-         "posthog_datawarehousecredential"."created_at",
-         "posthog_datawarehousecredential"."id",
-         "posthog_datawarehousecredential"."access_key",
-         "posthog_datawarehousecredential"."access_secret",
-         "posthog_datawarehousecredential"."team_id",
-         "posthog_externaldatasource"."created_by_id",
-         "posthog_externaldatasource"."created_at",
-         "posthog_externaldatasource"."updated_at",
-         "posthog_externaldatasource"."deleted",
-         "posthog_externaldatasource"."deleted_at",
-         "posthog_externaldatasource"."id",
-         "posthog_externaldatasource"."source_id",
-         "posthog_externaldatasource"."connection_id",
-         "posthog_externaldatasource"."destination_id",
-         "posthog_externaldatasource"."team_id",
-         "posthog_externaldatasource"."sync_frequency",
-         "posthog_externaldatasource"."status",
-         "posthog_externaldatasource"."source_type",
-         "posthog_externaldatasource"."job_inputs",
-         "posthog_externaldatasource"."are_tables_created",
-         "posthog_externaldatasource"."prefix",
-         "posthog_externaldatasource"."description",
-         "posthog_externaldatasource"."revenue_analytics_enabled"
-  FROM "posthog_datawarehousetable"
-  LEFT OUTER JOIN "posthog_datawarehousecredential" ON ("posthog_datawarehousetable"."credential_id" = "posthog_datawarehousecredential"."id")
-  LEFT OUTER JOIN "posthog_externaldatasource" ON ("posthog_datawarehousetable"."external_data_source_id" = "posthog_externaldatasource"."id")
-  WHERE ("posthog_datawarehousetable"."team_id" = 99999
-         AND NOT ("posthog_datawarehousetable"."deleted"
-                  AND "posthog_datawarehousetable"."deleted" IS NOT NULL))
+  SELECT "insights_datawarehousetable"."created_by_id",
+         "insights_datawarehousetable"."created_at",
+         "insights_datawarehousetable"."updated_at",
+         "insights_datawarehousetable"."deleted",
+         "insights_datawarehousetable"."deleted_at",
+         "insights_datawarehousetable"."id",
+         "insights_datawarehousetable"."name",
+         "insights_datawarehousetable"."format",
+         "insights_datawarehousetable"."team_id",
+         "insights_datawarehousetable"."url_pattern",
+         "insights_datawarehousetable"."queryable_folder",
+         "insights_datawarehousetable"."credential_id",
+         "insights_datawarehousetable"."external_data_source_id",
+         "insights_datawarehousetable"."columns",
+         "insights_datawarehousetable"."row_count",
+         "insights_datawarehousetable"."size_in_s3_mib",
+         "insights_datawarehousecredential"."created_by_id",
+         "insights_datawarehousecredential"."created_at",
+         "insights_datawarehousecredential"."id",
+         "insights_datawarehousecredential"."access_key",
+         "insights_datawarehousecredential"."access_secret",
+         "insights_datawarehousecredential"."team_id",
+         "insights_externaldatasource"."created_by_id",
+         "insights_externaldatasource"."created_at",
+         "insights_externaldatasource"."updated_at",
+         "insights_externaldatasource"."deleted",
+         "insights_externaldatasource"."deleted_at",
+         "insights_externaldatasource"."id",
+         "insights_externaldatasource"."source_id",
+         "insights_externaldatasource"."connection_id",
+         "insights_externaldatasource"."destination_id",
+         "insights_externaldatasource"."team_id",
+         "insights_externaldatasource"."sync_frequency",
+         "insights_externaldatasource"."status",
+         "insights_externaldatasource"."source_type",
+         "insights_externaldatasource"."job_inputs",
+         "insights_externaldatasource"."are_tables_created",
+         "insights_externaldatasource"."prefix",
+         "insights_externaldatasource"."description",
+         "insights_externaldatasource"."revenue_analytics_enabled"
+  FROM "insights_datawarehousetable"
+  LEFT OUTER JOIN "insights_datawarehousecredential" ON ("insights_datawarehousetable"."credential_id" = "insights_datawarehousecredential"."id")
+  LEFT OUTER JOIN "insights_externaldatasource" ON ("insights_datawarehousetable"."external_data_source_id" = "insights_externaldatasource"."id")
+  WHERE ("insights_datawarehousetable"."team_id" = 99999
+         AND NOT ("insights_datawarehousetable"."deleted"
+                  AND "insights_datawarehousetable"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_database_with_warehouse_tables_and_saved_queries_n_plus_1.9
   '''
-  SELECT "posthog_datawarehousejoin"."created_by_id",
-         "posthog_datawarehousejoin"."created_at",
-         "posthog_datawarehousejoin"."deleted",
-         "posthog_datawarehousejoin"."deleted_at",
-         "posthog_datawarehousejoin"."id",
-         "posthog_datawarehousejoin"."team_id",
-         "posthog_datawarehousejoin"."source_table_name",
-         "posthog_datawarehousejoin"."source_table_key",
-         "posthog_datawarehousejoin"."joining_table_name",
-         "posthog_datawarehousejoin"."joining_table_key",
-         "posthog_datawarehousejoin"."field_name",
-         "posthog_datawarehousejoin"."configuration"
-  FROM "posthog_datawarehousejoin"
-  WHERE ("posthog_datawarehousejoin"."team_id" = 99999
-         AND NOT ("posthog_datawarehousejoin"."deleted"
-                  AND "posthog_datawarehousejoin"."deleted" IS NOT NULL))
+  SELECT "insights_datawarehousejoin"."created_by_id",
+         "insights_datawarehousejoin"."created_at",
+         "insights_datawarehousejoin"."deleted",
+         "insights_datawarehousejoin"."deleted_at",
+         "insights_datawarehousejoin"."id",
+         "insights_datawarehousejoin"."team_id",
+         "insights_datawarehousejoin"."source_table_name",
+         "insights_datawarehousejoin"."source_table_key",
+         "insights_datawarehousejoin"."joining_table_name",
+         "insights_datawarehousejoin"."joining_table_key",
+         "insights_datawarehousejoin"."field_name",
+         "insights_datawarehousejoin"."configuration"
+  FROM "insights_datawarehousejoin"
+  WHERE ("insights_datawarehousejoin"."team_id" = 99999
+         AND NOT ("insights_datawarehousejoin"."deleted"
+                  AND "insights_datawarehousejoin"."deleted" IS NOT NULL))
   '''
 # ---
 # name: TestDatabase.test_serialize_database_no_person_on_events
@@ -1370,7 +1370,7 @@
           "id": "events",
           "name": "events",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "groups": {
           "fields": {
@@ -1469,7 +1469,7 @@
           "id": "groups",
           "name": "groups",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "persons": {
           "fields": {
@@ -1602,7 +1602,7 @@
           "id": "persons",
           "name": "persons",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "sessions": {
           "fields": {
@@ -2080,7 +2080,7 @@
           "id": "sessions",
           "name": "sessions",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "logs": {
           "fields": {
@@ -2258,7 +2258,7 @@
           "id": "logs",
           "name": "logs",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "query_log": {
           "fields": {
@@ -4484,7 +4484,7 @@
           "id": "events",
           "name": "events",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "groups": {
           "fields": {
@@ -4583,7 +4583,7 @@
           "id": "groups",
           "name": "groups",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "persons": {
           "fields": {
@@ -4716,7 +4716,7 @@
           "id": "persons",
           "name": "persons",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "sessions": {
           "fields": {
@@ -5194,7 +5194,7 @@
           "id": "sessions",
           "name": "sessions",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "logs": {
           "fields": {
@@ -5372,7 +5372,7 @@
           "id": "logs",
           "name": "logs",
           "row_count": null,
-          "type": "posthog"
+          "type": "insights"
       },
       "query_log": {
           "fields": {

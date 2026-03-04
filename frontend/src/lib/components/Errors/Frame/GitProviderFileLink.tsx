@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
-import { IconExternal, IconGitLab, IconGithub } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconExternal, IconGitLab, IconGithub } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import useIsHovering from 'lib/hooks/useIsHovering'
 import { Link } from 'lib/lemon-ui/Link'

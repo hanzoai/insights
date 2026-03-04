@@ -20,7 +20,7 @@ import {
     IconToggle,
     IconTrends,
     IconWarning,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { APIScopeObject } from '~/types'
 

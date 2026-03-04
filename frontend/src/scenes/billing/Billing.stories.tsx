@@ -85,7 +85,7 @@ export const BillingWithCreditCTA = (): JSX.Element => {
                 status: 'none',
                 eligible: true,
                 estimated_monthly_credit_amount_usd: 1200,
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
                 cc_last_four: '1234',
                 cc_brand: 'Visa',
             },
@@ -117,7 +117,7 @@ export const BillingPurchaseCreditsModal = (): JSX.Element => {
                 status: 'none',
                 eligible: true,
                 estimated_monthly_credit_amount_usd: 1200,
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
                 cc_last_four: '1234',
                 cc_brand: 'Visa',
                 credit_brackets: [

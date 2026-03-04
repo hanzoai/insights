@@ -2982,7 +2982,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
             )
 
         def test_with_recursive(self):
-            parsed = self._select("WITH RECURSIVE events AS (SELECT * FROM posthog_event) SELECT * FROM events;")
+            parsed = self._select("WITH RECURSIVE events AS (SELECT * FROM insights_event) SELECT * FROM events;")
 
             expected = SelectQuery(
                 ctes={
@@ -2991,7 +2991,7 @@ def parser_test_factory(backend: InsightsQLParserBackend):
                         expr=SelectQuery(
                             select=[Field(chain=["*"], from_asterisk=False)],
                             select_from=JoinExpr(
-                                table=Field(chain=["posthog_event"], from_asterisk=False),
+                                table=Field(chain=["insights_event"], from_asterisk=False),
                             ),
                         ),
                         cte_type="subquery",

@@ -1,6 +1,6 @@
 import { JSONContent } from '@tiptap/core'
 
-import { LemonCard } from '@posthog/lemon-ui'
+import { LemonCard } from '@hanzo/lemon-ui'
 
 import type { ChatMessage, Ticket } from '../../types'
 import { MessageInput } from './MessageInput'

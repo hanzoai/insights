@@ -45,7 +45,7 @@ class TestExternalTicketAPI(BaseTest):
             ("no_header", ""),
             ("bad_scheme", "Basic abc123"),
             ("empty_bearer", "Bearer "),
-            ("wrong_token", "Bearer phc_wrong_token"),
+            ("wrong_token", "Bearer hi_wrong_token"),
         ]
     )
     def test_get_rejects_invalid_auth(self, _name, auth_value):

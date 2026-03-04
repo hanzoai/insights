@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { BindLogic } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconFunnels, IconRetention, IconTrends } from '@posthog/icons'
+import { IconFunnels, IconRetention, IconTrends } from '@hanzo/icons'
 
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -30,12 +30,12 @@ export function AddInsightToDashboardModal(): JSX.Element {
     const { dashboard } = useValues(dashboardLogic)
 
     const handleClose = (): void => {
-        posthog.capture('insight dashboard modal - closed')
+        insights.capture('insight dashboard modal - closed')
         hideAddInsightToDashboardModal()
     }
 
     const handleNewInsightClicked = (insightType: string): void => {
-        posthog.capture('insight dashboard modal - new insight clicked', {
+        insights.capture('insight dashboard modal - new insight clicked', {
             insight_type: insightType,
         })
         handleClose()

@@ -42,11 +42,11 @@ class TestOrganizationDomainsAPI(APIBaseTest):
     def setUpTestData(cls):
         super().setUpTestData()
 
-        cls.domain = OrganizationDomain.objects.create(organization=cls.organization, domain="myposthog.com")
+        cls.domain = OrganizationDomain.objects.create(organization=cls.organization, domain="myhanzo.ai")
 
         cls.another_org = Organization.objects.create(name="Another Org")
         Team.objects.create(organization=cls.another_org)
-        cls.another_domain = OrganizationDomain.objects.create(organization=cls.another_org, domain="org.posthog.net")
+        cls.another_domain = OrganizationDomain.objects.create(organization=cls.another_org, domain="org.insights.net")
 
     # List & retrieve domains
 
@@ -57,7 +57,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(response_data["count"], 1)
         item = response_data["results"][0]
 
-        self.assertEqual(item["domain"], "myposthog.com")
+        self.assertEqual(item["domain"], "myhanzo.ai")
         self.assertEqual(item["verified_at"], None)
         self.assertEqual(item["is_verified"], False)
         self.assertEqual(item["jit_provisioning_enabled"], False)
@@ -82,7 +82,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
     # Create domains
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_create_domain(self, mock_capture):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization.available_product_features = [
@@ -95,7 +95,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
             response = self.client.post(
                 "/api/organizations/@current/domains/",
                 {
-                    "domain": "the.posthog.com",
+                    "domain": "the.hanzo.ai",
                     "verified_at": "2022-01-01T14:25:25.000Z",  # ignore me
                     "verification_challenge": "123",  # ignore me
                     "jit_provisioning_enabled": True,  # ignore me
@@ -105,14 +105,14 @@ class TestOrganizationDomainsAPI(APIBaseTest):
             )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         response_data = response.json()
-        self.assertEqual(response_data["domain"], "the.posthog.com")
+        self.assertEqual(response_data["domain"], "the.hanzo.ai")
         self.assertEqual(response_data["verified_at"], None)
         self.assertEqual(response_data["jit_provisioning_enabled"], False)
         self.assertEqual(response_data["scim_enabled"], False)
         self.assertRegex(response_data["verification_challenge"], r"[0-9A-Za-z_-]{32}")
 
         instance = OrganizationDomain.objects.get(id=response_data["id"])
-        self.assertEqual(instance.domain, "the.posthog.com")
+        self.assertEqual(instance.domain, "the.hanzo.ai")
         self.assertEqual(instance.verified_at, None)
         self.assertEqual(instance.last_verification_retry, None)
         self.assertEqual(instance.sso_enforcement, "")
@@ -123,7 +123,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
             event="organization domain created",
             distinct_id=self.user.distinct_id,
             properties={
-                "domain": "the.posthog.com",
+                "domain": "the.hanzo.ai",
                 "jit_provisioning_enabled": False,
                 "sso_enforcement": None,
             },
@@ -138,7 +138,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
             response = self.client.post(
                 "/api/organizations/@current/domains/",
                 {
-                    "domain": "the.posthog.com",
+                    "domain": "the.hanzo.ai",
                     "verified_at": "2022-01-01T14:25:25.000Z",  # ignore me
                     "verification_challenge": "123",  # ignore me
                     "jit_provisioning_enabled": True,  # ignore me
@@ -172,7 +172,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
         invalid_domains = [
-            "test@posthog.com",
+            "test@hanzo.ai",
             "🦔🦔🦔.com",
             "one.two.c",
             "--alpha.com",
@@ -202,7 +202,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         mock_dns_query.return_value = FakeDNSResponse(
             [
                 dns.rrset.from_text(
-                    "_posthog-challenge.myposthog.com.",
+                    "_insights-challenge.myhanzo.ai.",
                     3600,
                     "IN",
                     "TXT",
@@ -216,7 +216,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
-        self.assertEqual(response_data["domain"], "myposthog.com")
+        self.assertEqual(response_data["domain"], "myhanzo.ai")
         self.assertEqual(
             response_data["verified_at"],
             self.domain.verified_at.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -242,7 +242,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
-        self.assertEqual(response_data["domain"], "myposthog.com")
+        self.assertEqual(response_data["domain"], "myhanzo.ai")
         self.assertEqual(response_data["verified_at"], None)
         self.assertEqual(self.domain.verified_at, None)
         self.assertEqual(
@@ -263,7 +263,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
-        self.assertEqual(response_data["domain"], "myposthog.com")
+        self.assertEqual(response_data["domain"], "myhanzo.ai")
         self.assertEqual(response_data["verified_at"], None)
         self.assertEqual(self.domain.verified_at, None)
         self.assertEqual(
@@ -279,7 +279,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         mock_dns_query.return_value = FakeDNSResponse(
             [
                 dns.rrset.from_text(
-                    "_posthog-challenge.myposthog.com.",
+                    "_insights-challenge.myhanzo.ai.",
                     3600,
                     "IN",
                     "TXT",
@@ -294,7 +294,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.domain.refresh_from_db()
-        self.assertEqual(response_data["domain"], "myposthog.com")
+        self.assertEqual(response_data["domain"], "myhanzo.ai")
         self.assertEqual(response_data["verified_at"], None)
         self.assertEqual(self.domain.verified_at, None)
         self.assertEqual(
@@ -322,7 +322,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
     def test_only_admin_can_create_verified_domains(self):
         count = OrganizationDomain.objects.count()
-        response = self.client.post("/api/organizations/@current/domains/", {"domain": "evil.posthog.com"})
+        response = self.client.post("/api/organizations/@current/domains/", {"domain": "evil.hanzo.ai"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(
             response.json(),
@@ -453,7 +453,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
     # Delete domains
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_admin_can_delete_domain(self, mock_capture):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()
@@ -469,7 +469,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
             event="organization domain deleted",
             distinct_id=self.user.distinct_id,
             properties={
-                "domain": "myposthog.com",
+                "domain": "myhanzo.ai",
                 "is_verified": False,
                 "had_saml": False,
                 "had_jit_provisioning": False,

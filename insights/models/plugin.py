@@ -16,7 +16,7 @@ from rest_framework.exceptions import ValidationError
 from semantic_version.base import SimpleSpec
 
 from insights.cloud_utils import is_cloud
-from insights.constants import FROZEN_POSTHOG_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.organization import Organization
 from insights.models.signals import mutable_receiver
 from insights.models.team import Team
@@ -66,7 +66,7 @@ def update_validated_data_from_url(validated_data: dict[str, Any], url: str) -> 
         validated_data["description"] = plugin_json.get("description", "")
         validated_data["config_schema"] = plugin_json.get("config", [])
         validated_data["public_jobs"] = plugin_json.get("publicJobs", {})
-        posthog_version = plugin_json.get("posthogVersion", None)
+        insights_version = plugin_json.get("insightsVersion", None)
         validated_data["is_stateless"] = plugin_json.get("stateless", False)
     else:
         parsed_url = parse_url(url, get_latest_if_none=True)
@@ -86,7 +86,7 @@ def update_validated_data_from_url(validated_data: dict[str, Any], url: str) -> 
             validated_data["icon"] = plugin_json.get("icon", None)
             validated_data["config_schema"] = plugin_json.get("config", [])
             validated_data["public_jobs"] = plugin_json.get("publicJobs", {})
-            posthog_version = plugin_json.get("posthogVersion", None)
+            insights_version = plugin_json.get("insightsVersion", None)
             validated_data["is_stateless"] = plugin_json.get("stateless", False)
 
             if validated_data["is_stateless"] and len(validated_data["config_schema"]) > 0:
@@ -101,15 +101,15 @@ def update_validated_data_from_url(validated_data: dict[str, Any], url: str) -> 
         ):
             validated_data["plugin_type"] = Plugin.PluginType.CUSTOM
 
-    if posthog_version and not is_cloud():
+    if insights_version and not is_cloud():
         # Legacy: Insights is no longer versioned
         try:
-            spec = SimpleSpec(posthog_version.replace(" ", ""))
+            spec = SimpleSpec(insights_version.replace(" ", ""))
         except ValueError:
-            raise ValidationError(f'Invalid Insights semantic version requirement "{posthog_version}"!')
-        if FROZEN_POSTHOG_VERSION not in spec:
+            raise ValidationError(f'Invalid Insights semantic version requirement "{insights_version}"!')
+        if FROZEN_INSIGHTS_VERSION not in spec:
             raise ValidationError(
-                f'Currently running Insights version {FROZEN_POSTHOG_VERSION} does not match this plugin\'s semantic version requirement "{posthog_version}".'
+                f'Currently running Insights version {FROZEN_INSIGHTS_VERSION} does not match this plugin\'s semantic version requirement "{insights_version}".'
             )
 
     return plugin_json
@@ -183,9 +183,9 @@ class Plugin(models.Model):
 
     # DEPRECATED: not used for anything, all install and config errors are in PluginConfig.error
     error = models.JSONField(default=None, null=True, blank=True)
-    # DEPRECATED: this was used when syncing posthog.json with the db on app start
+    # DEPRECATED: this was used when syncing insights.json with the db on app start
     from_json = models.BooleanField(default=False)
-    # DEPRECATED: this was used when syncing posthog.json with the db on app start
+    # DEPRECATED: this was used when syncing insights.json with the db on app start
     from_web = models.BooleanField(default=False)
     # DEPRECATED: using PluginSourceFile model instead
     source = models.TextField(blank=True, null=True)
@@ -296,7 +296,7 @@ class PluginStorage(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["plugin_config_id", "key"],
-                name="posthog_unique_plugin_storage_key",
+                name="insights_unique_plugin_storage_key",
             )
         ]
 

@@ -21,12 +21,12 @@ from insights.models.instance_setting import get_instance_setting
 from products.web_analytics.dags.web_preaggregated_utils import check_for_concurrent_runs
 
 STALE_WEB_QUERIES_GAUGE = Gauge(
-    "posthog_cache_warming_stale_web_query_gauge",
+    "insights_cache_warming_stale_web_query_gauge",
     "Number of stale web queries present",
     ["team_id"],
 )
 PRIORITY_WEB_QUERIES_COUNTER = Counter(
-    "posthog_cache_warming_priority_web_queries",
+    "insights_cache_warming_priority_web_queries",
     "Number of priority web queries warmed",
     ["team_id", "normalized_query_hash", "is_cached"],
 )
@@ -109,7 +109,7 @@ def queries_to_keep_fresh(
 
 @dagster.op()
 def get_teams_for_warming_op(
-    context: dagster.OpExecutionContext, posthoganalytics: InsightsAnalyticsResource
+    context: dagster.OpExecutionContext, hanzoanalytics: InsightsAnalyticsResource
 ) -> list[int]:
     team_ids = get_teams_enabled_for_web_analytics_cache_warming()
 

@@ -78,7 +78,7 @@ pub fn diff_endpoints(args: &DiffArgs) -> Result<()> {
             new_count += 1;
             has_differences = true;
             println!(
-                "  {}  {} (not in PostHog)",
+                "  {}  {} (not in Insights)",
                 "NEW".green().bold(),
                 local.name.bold()
             );
@@ -110,7 +110,7 @@ pub fn diff_endpoints(args: &DiffArgs) -> Result<()> {
         println!();
         println!(
             "{}",
-            "Run 'posthog-cli exp endpoints push <path>' to apply changes.".dimmed()
+            "Run 'insights-cli exp endpoints push <path>' to apply changes.".dimmed()
         );
     }
 
@@ -180,13 +180,13 @@ fn print_change_with_labels(change: &Change) {
         }
         Change::Query { from, to } => {
             println!("    {}:", "Query".bold());
-            println!("      {} {}", "---".red(), "remote (PostHog)".red());
+            println!("      {} {}", "---".red(), "remote (Insights)".red());
             println!("      {} {}", "+++".green(), "local (YAML)".green());
             print_diff(from, to, "      ");
         }
         Change::QueryDefinition { from, to } => {
             println!("    {}:", "Query definition".bold());
-            println!("      {} {}", "---".red(), "remote (PostHog)".red());
+            println!("      {} {}", "---".red(), "remote (Insights)".red());
             println!("      {} {}", "+++".green(), "local (YAML)".green());
             print_diff(from, to, "      ");
         }

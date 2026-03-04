@@ -15,7 +15,7 @@ class Command(BaseCommand):
     help = "Start a background deletion task for a model with team_id field"
 
     def add_arguments(self, parser):
-        parser.add_argument("model_name", type=str, help="Django model name (e.g., 'posthog.Person', 'posthog.Event')")
+        parser.add_argument("model_name", type=str, help="Django model name (e.g., 'insights.Person', 'insights.Event')")
         parser.add_argument("--team-id", type=int, required=True, help="Team ID to filter records for deletion")
         parser.add_argument(
             "--batch-size", type=int, default=10000, help="Number of rows to delete per batch (default: 10000)"

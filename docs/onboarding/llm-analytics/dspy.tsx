@@ -21,7 +21,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install posthog
+                            pip install insights
                         `}
                     />
                 </>
@@ -54,7 +54,7 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                     <Markdown>
                         Set your Insights project API key and host as environment variables, then configure LLM to
                         use Insights as a callback handler. You can find your API key in [your project
-                        settings](https://app.posthog.com/settings/project).
+                        settings](https://insights.hanzo.ai/settings/project).
                     </Markdown>
 
                     <CodeBlock
@@ -65,12 +65,12 @@ export const getDSPySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                             import llm
 
                             # Set Insights environment variables
-                            os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
-                            os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"
+                            os.environ["INSIGHTS_API_KEY"] = "<ph_project_api_key>"
+                            os.environ["INSIGHTS_API_URL"] = "<ph_client_api_host>"
 
                             # Enable Insights callbacks in LLM
-                            llm.success_callback = ["posthog"]
-                            llm.failure_callback = ["posthog"]
+                            llm.success_callback = ["insights"]
+                            llm.failure_callback = ["insights"]
 
                             # Configure DSPy to use an LLM
                             lm = dspy.LM("openai/gpt-4o-mini", api_key="your_openai_api_key")

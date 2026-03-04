@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { IconBalance, IconInfo, IconPencil, IconPlus, IconTrash } from '@posthog/icons'
+import { IconBalance, IconInfo, IconPencil, IconPlus, IconTrash } from '@hanzo/icons'
 
 import { getSeriesColor } from 'lib/colors'
 import { MAX_EXPERIMENT_VARIANTS } from 'lib/constants'
@@ -470,7 +470,7 @@ export const VariantsPanelCreateFeatureFlag = ({
                 <div className="text-secondary text-sm pl-6 mt-2">
                     This is only relevant if your feature flag is shown to both logged out AND logged in users.{' '}
                     <Link
-                        to="https://posthog.com/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
+                        to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
                         target="_blank"
                     >
                         Learn more

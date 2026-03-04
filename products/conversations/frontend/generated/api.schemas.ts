@@ -1,7 +1,7 @@
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
- *   hogli build:openapi
+ *   insightscli build:openapi
  * Questions or issues? #team-devex on Slack
  *
  * Insights API - generated
@@ -121,7 +121,7 @@ export interface ConversationApi {
      */
     readonly slack_thread_key: string | null
     /**
-     * Slack workspace subdomain (e.g. 'posthog' for posthog.slack.com)
+     * Slack workspace subdomain (e.g. 'insights' for insights.slack.com)
      * @nullable
      */
     readonly slack_workspace_domain: string | null
@@ -230,7 +230,7 @@ export interface PatchedConversationApi {
      */
     readonly slack_thread_key?: string | null
     /**
-     * Slack workspace subdomain (e.g. 'posthog' for posthog.slack.com)
+     * Slack workspace subdomain (e.g. 'insights' for insights.slack.com)
      * @nullable
      */
     readonly slack_workspace_domain?: string | null

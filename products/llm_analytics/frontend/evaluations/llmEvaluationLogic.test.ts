@@ -133,8 +133,8 @@ describe('llmEvaluationLogic', () => {
                 '/api/environments/:teamId/evaluations/:id/': mockEvaluation,
                 '/api/environments/:teamId/llm_analytics/models/': {
                     models: [
-                        { id: 'gpt-5-mini', posthog_available: true },
-                        { id: 'gpt-5', posthog_available: false },
+                        { id: 'gpt-5-mini', insights_available: true },
+                        { id: 'gpt-5', insights_available: false },
                     ],
                 },
             },

@@ -137,7 +137,7 @@ class Integration(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["team", "kind", "integration_id"], name="posthog_integration_kind_id_unique"
+                fields=["team", "kind", "integration_id"], name="insights_integration_kind_id_unique"
             )
         ]
 
@@ -1496,7 +1496,7 @@ class LinearIntegration:
         teams = dot_get(body, "data.teams.nodes")
         return teams
 
-    def create_issue(self, team_id: str, posthog_issue_id: str, config: dict[str, str]):
+    def create_issue(self, team_id: str, insights_issue_id: str, config: dict[str, str]):
         title: str = json.dumps(config.pop("title"))
         description: str = json.dumps(config.pop("description"))
         linear_team_id = config.pop("team_id")
@@ -1505,7 +1505,7 @@ class LinearIntegration:
         body = self.query(issue_create_query)
         linear_issue_id = dot_get(body, "data.issueCreate.issue.identifier")
 
-        attachment_url = f"{settings.SITE_URL}/project/{team_id}/error_tracking/{posthog_issue_id}"
+        attachment_url = f"{settings.SITE_URL}/project/{team_id}/error_tracking/{insights_issue_id}"
         link_attachment_query = f'mutation AttachmentCreate {{ attachmentCreate(input: {{ issueId: "{linear_issue_id}", title: "Insights issue", url: "{attachment_url}" }}) {{ success }} }}'
         self.query(link_attachment_query)
 
@@ -2226,7 +2226,7 @@ class GitLabIntegration:
             {
                 "title": title,
                 "description": description,
-                "labels": "posthog",
+                "labels": "insights",
             },
         )
 

@@ -32,7 +32,7 @@ export const PersonProfiles = memo(({ language = 'javascript', file }: PersonPro
         <>
             <Markdown>
                 By default, for backwards compatibility reasons, events are sent with [person profile
-                processing](https://posthog.com/docs/data/persons) enabled. This means a person profile will be created
+                processing](https://hanzo.ai/docs/data/persons) enabled. This means a person profile will be created
                 for each user who triggers an event.
             </Markdown>
             <Markdown>

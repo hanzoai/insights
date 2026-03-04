@@ -1,5 +1,5 @@
-import { PluginEvent } from '@posthog/plugin-scaffold'
-import { createPageview, resetMeta } from '@posthog/plugin-scaffold/test/utils'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
+import { createPageview, resetMeta } from '@hanzo/plugin-scaffold/test/utils'
 
 import { LegacyTransformationPluginMeta } from '../../types'
 import { processEvent } from './index'
@@ -7,7 +7,7 @@ import { processEvent } from './index'
 const defaultMeta = {
     config: {
         discardIp: 'true',
-        discardLibs: 'posthog-node',
+        discardLibs: 'insights-node',
     },
     logger: {
         log: jest.fn(),
@@ -50,7 +50,7 @@ const createGeoIPPageview = (): PluginEvent => {
         ...event.properties,
         $ip: '13.106.122.3',
         $plugins_succeeded: ['GeoIP (8199)', 'Unduplicates (8303)'],
-        $lib: 'posthog-node',
+        $lib: 'insights-node',
         $set: setGeoIPProps,
         $set_once: setOnceGeoIPProps,
     }
@@ -142,7 +142,7 @@ describe('plugin-advanced-geoip', () => {
         test('ignores GeoIP from $lib CSV', () => {
             const meta = resetMeta({
                 ...defaultMeta,
-                config: { ...defaultMeta.config, discardLibs: 'posthog-ios,posthog-android,posthog-node' },
+                config: { ...defaultMeta.config, discardLibs: 'insights-ios,insights-android,insights-node' },
             }) as LegacyTransformationPluginMeta
             const event = processEvent(createGeoIPPageview(), meta)
             helperVerifyGeoIPIsEmpty(event!)

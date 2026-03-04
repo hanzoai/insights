@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconBrowser, IconDownload } from '@posthog/icons'
-import { LemonTag, Spinner } from '@posthog/lemon-ui'
+import { IconBrowser, IconDownload } from '@hanzo/icons'
+import { LemonTag, Spinner } from '@hanzo/lemon-ui'
 
 import { appEditorUrl } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
 import { HeatmapCanvas } from 'lib/components/heatmaps/HeatmapCanvas'

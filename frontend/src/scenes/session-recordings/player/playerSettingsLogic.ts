@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -158,10 +158,10 @@ export const playerSettingsLogic = kea<playerSettingsLogicType>([
 
     listeners({
         setSpeed: ({ speed }) => {
-            posthog.capture('recording player speed changed', { new_speed: speed })
+            insights.capture('recording player speed changed', { new_speed: speed })
         },
         setSkipInactivitySetting: ({ skipInactivitySetting }) => {
-            posthog.capture('recording player skip inactivity toggled', { skip_inactivity: skipInactivitySetting })
+            insights.capture('recording player skip inactivity toggled', { skip_inactivity: skipInactivitySetting })
         },
     }),
 

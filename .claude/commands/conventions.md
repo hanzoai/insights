@@ -8,8 +8,8 @@ When writing code, follow these Insights coding conventions.
 
 > **Source of truth**: These conventions are maintained at:
 >
-> - https://posthog.com/handbook/engineering/conventions/frontend-coding
-> - https://posthog.com/handbook/engineering/conventions/backend-coding
+> - https://hanzo.ai/handbook/engineering/conventions/frontend-coding
+> - https://hanzo.ai/handbook/engineering/conventions/backend-coding
 >
 > If this file gets out of sync, update it from the source.
 
@@ -71,7 +71,7 @@ Hence the explicit separation between the data and view layers.
 - Testing
   - Write [logic tests](https://keajs.org/docs/intro/testing) for all logic files.
   - If your component is in the `lib/` folder, and has some interactivity, write a [react testing library](https://testing-library.com/docs/react-testing-library/intro/) test for it.
-  - Add all new presentational elements and scenes to [our storybook](https://storybook.posthog.net/). Run `pnpm storybook` locally.
+  - Add all new presentational elements and scenes to [our storybook](https://storybook.insights.net/). Run `pnpm storybook` locally.
 
 ---
 
@@ -107,7 +107,7 @@ logger.debug("event_sent_to_kafka", event_uuid=str(event_uuid), kafka_topic=topi
 will produce:
 
 ```console
-2021-10-28T13:46:40.099007Z [debug] event_sent_to_kafka [posthog.api.capture] event_uuid=017cc727-1662-0000-630c-d35f6a29bae3 kafka_topic=default
+2021-10-28T13:46:40.099007Z [debug] event_sent_to_kafka [insights.api.capture] event_uuid=017cc727-1662-0000-630c-d35f6a29bae3 kafka_topic=default
 ```
 
 As you can see above, the log contains all the information needed to understand the app behaviour.
@@ -154,6 +154,6 @@ A good test should:
 
 ### To ee or not to ee?
 
-We default to open but when adding a new feature we should consider if it should be MIT licensed or Enterprise edition licensed. Everything in the `ee` folder is covered by [a different license](https://github.com/PostHog/posthog/blob/master/ee/LICENSE). It's easy to move things from `ee` to open, but not the other way.
+We default to open but when adding a new feature we should consider if it should be MIT licensed or Enterprise edition licensed. Everything in the `ee` folder is covered by [a different license](https://github.com/Hanzo Insights/insights/blob/master/ee/LICENSE). It's easy to move things from `ee` to open, but not the other way.
 
-All the open source code is copied to [the posthog-foss repo](https://github.com/posthog/posthog-foss) with the `ee` code stripped out. You need to consider whether your code will work if imports to `ee` are unavailable.
+All the open source code is copied to [the insights-foss repo](https://github.com/insights/insights-foss) with the `ee` code stripped out. You need to consider whether your code will work if imports to `ee` are unavailable.

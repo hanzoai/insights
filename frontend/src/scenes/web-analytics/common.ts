@@ -418,7 +418,7 @@ export const getWebAnalyticsBreakdownFilter = (breakdown: WebStatsBreakdown): Br
     }
 }
 
-export const GEOIP_TEMPLATE_IDS = ['template-geoip', 'plugin-posthog-plugin-geoip']
+export const GEOIP_TEMPLATE_IDS = ['template-geoip', 'plugin-insights-plugin-geoip']
 
 export const WEB_ANALYTICS_DATA_COLLECTION_NODE_ID = 'web-analytics'
 

@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconLogomark } from '@posthog/icons'
-import { LemonButton, ProfilePicture } from '@posthog/lemon-ui'
+import { IconLogomark } from '@hanzo/icons'
+import { LemonButton, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { ProjectMenu } from 'lib/components/Account/ProjectMenu'

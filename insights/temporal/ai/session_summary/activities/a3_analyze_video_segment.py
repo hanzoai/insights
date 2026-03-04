@@ -13,7 +13,7 @@ from django.conf import settings
 
 import temporalio
 from google.genai import types
-from posthoganalytics.ai.gemini import genai
+from hanzoanalytics.ai.gemini import genai
 from temporalio.exceptions import ApplicationError
 
 from insights.models import Team
@@ -144,13 +144,13 @@ async def analyze_video_segment_activity(
                 video_analysis_prompt,
             ],
             config=types.GenerateContentConfig(),
-            posthog_distinct_id=inputs.user_distinct_id_to_log,
-            posthog_trace_id=trace_id,
-            posthog_properties={
+            insights_distinct_id=inputs.user_distinct_id_to_log,
+            insights_trace_id=trace_id,
+            insights_properties={
                 "$session_id": inputs.session_id,
                 "segment_index": segment.segment_index,
             },
-            posthog_groups={"project": str(inputs.team_id)},
+            insights_groups={"project": str(inputs.team_id)},
         )
         response_text = (response.text or "").strip()
         temporalio.activity.logger.debug(

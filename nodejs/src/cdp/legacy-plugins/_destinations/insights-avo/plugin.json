@@ -1,9 +1,9 @@
 {
     "name": "Avo Inspector Plugin",
-    "url": "https://github.com/posthog/posthog-avo-plugin",
+    "url": "https://github.com/insights/insights-avo-plugin",
     "description": "Export Insights events to Avo inspector.",
     "main": "index.ts",
-    "posthogVersion": ">= 1.24.0",
+    "insightsVersion": ">= 1.24.0",
     "config": [
         {
             "key": "avoApiKey",

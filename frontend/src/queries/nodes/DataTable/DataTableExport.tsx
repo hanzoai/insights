@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDownload } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@posthog/lemon-ui'
+import { IconDownload } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
 
 import { TriggerExportProps } from 'lib/components/ExportButton/exporter'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -33,7 +33,7 @@ import { ExporterFormat } from '~/types'
 
 import { dataTableLogic } from './dataTableLogic'
 
-// Sync with posthog/insightsql/constants.py
+// Sync with insights/insightsql/constants.py
 export const MAX_SELECT_RETURNED_ROWS = 50000
 
 const columnDisallowList = ['person.$delete', '*']

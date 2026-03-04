@@ -14,10 +14,10 @@ trigger the `reset-db` process in the mprocs UI.
 To run tests against an already-running Insights instance:
 
 ```bash
-LOGIN_USERNAME='my@email.address' LOGIN_PASSWORD="the-password" BASE_URL='http://localhost:8010' pnpm --filter=@posthog/playwright exec playwright test --ui
+LOGIN_USERNAME='my@email.address' LOGIN_PASSWORD="the-password" BASE_URL='http://localhost:8010' pnpm --filter=@hanzo/playwright exec playwright test --ui
 ```
 
-You might need to install Playwright first: `pnpm --filter=@posthog/playwright exec playwright install`
+You might need to install Playwright first: `pnpm --filter=@hanzo/playwright exec playwright install`
 
 ## Writing tests
 

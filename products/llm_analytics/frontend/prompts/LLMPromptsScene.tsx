@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

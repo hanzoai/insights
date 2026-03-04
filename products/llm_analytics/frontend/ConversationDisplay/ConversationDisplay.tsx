@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconChat } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconChat } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { EventType } from '~/types'
 

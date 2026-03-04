@@ -53,8 +53,8 @@ class Command(BaseCommand):
             "repo",
             type=str,
             nargs="?",
-            default="posthog/posthog",
-            help="GitHub repo in owner/name format (default: posthog/posthog)",
+            default="insights/insights",
+            help="GitHub repo in owner/name format (default: insights/insights)",
         )
         parser.add_argument(
             "--token",
@@ -88,7 +88,7 @@ class Command(BaseCommand):
 
         repo = options["repo"]
         if "/" not in repo or len(repo.split("/")) != 2:
-            raise CommandError(f"Invalid repo format: {repo}. Expected owner/name (e.g. posthog/posthog)")
+            raise CommandError(f"Invalid repo format: {repo}. Expected owner/name (e.g. insights/insights)")
 
         output_dir = Path(options["output_dir"]) if options["output_dir"] else OUTPUT_BASE / repo
         output_dir.mkdir(parents=True, exist_ok=True)

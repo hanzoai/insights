@@ -3,18 +3,18 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "fetch-posthog-key": "node scripts/fetch-posthog-key.js",
-        "dev": "pnpm run fetch-posthog-key && next dev",
-        "build": "pnpm run fetch-posthog-key && next build",
+        "fetch-insights-key": "node scripts/fetch-insights-key.js",
+        "dev": "pnpm run fetch-insights-key && next dev",
+        "build": "pnpm run fetch-insights-key && next build",
         "start": "next start",
         "lint": "next lint"
     },
     "dependencies": {
         "next": "14.0.0",
-        "posthog-js": "catalog:",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "uuid": "^9.0.0"
+        "uuid": "^9.0.0",
+        "@hanzo/insights": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "^20",

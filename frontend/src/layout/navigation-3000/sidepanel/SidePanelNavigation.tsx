@@ -1,7 +1,7 @@
 import { Tabs } from '@base-ui/react/tabs'
 import { useActions, useValues } from 'kea'
 
-import { IconSparkles, IconX } from '@posthog/icons'
+import { IconSparkles, IconX } from '@hanzo/icons'
 
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

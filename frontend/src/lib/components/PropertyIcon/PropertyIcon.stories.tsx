@@ -98,7 +98,7 @@ export const FaviconSizeComparison: Story = {
                         <div key={domain} className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                                 <img
-                                    src={`https://app-static-prod.posthog.com/favicons/${domain}`}
+                                    src={`https://app-static-prod.hanzo.ai/favicons/${domain}`}
                                     className="size-[1em]"
                                     alt={`${domain} favicon`}
                                 />

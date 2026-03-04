@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonWidget, Link } from '@posthog/lemon-ui'
+import { LemonWidget, Link } from '@hanzo/lemon-ui'
 
 import { notebookLogic } from './notebookLogic'
 import { notebookSettingsLogic } from './notebookSettingsLogic'

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { IconAI, IconWarning } from '@posthog/icons'
+import { IconAI, IconWarning } from '@hanzo/icons'
 
 import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRecordingButton/ViewRecordingButton'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

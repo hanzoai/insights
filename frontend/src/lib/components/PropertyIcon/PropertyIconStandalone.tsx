@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { Ref, forwardRef } from 'react'
 
-import { IconGearFilled, IconHeadset, IconPhone, IconTabletPortrait } from '@posthog/icons'
+import { IconGearFilled, IconHeadset, IconPhone, IconTabletPortrait } from '@hanzo/icons'
 
 import {
     IconAndroidOS,

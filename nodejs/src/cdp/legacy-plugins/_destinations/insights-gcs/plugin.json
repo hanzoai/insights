@@ -1,9 +1,9 @@
 {
     "name": "GCS Export",
-    "url": "https://github.com/PostHog/posthog-gcs-plugin",
+    "url": "https://github.com/hanzoai/insights-gcs-plugin",
     "description": "Sends events to GCS on ingestion.",
     "main": "index.ts",
-    "posthogVersion": ">= 1.25.0",
+    "insightsVersion": ">= 1.25.0",
     "config": [
         {
             "key": "googleCloudKeyJson",

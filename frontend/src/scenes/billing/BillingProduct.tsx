@@ -2,9 +2,9 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconChevronDown, IconDocument, IconInfo } from '@posthog/icons'
-import { IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconChevronDown, IconDocument, IconInfo } from '@hanzo/icons'
+import { IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
 import { UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
@@ -163,7 +163,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                     {product.subscribed && <p className="m-0">Need to manage your plan?</p>}
                                     <LemonButton
                                         type="primary"
-                                        to="mailto:sales@posthog.com?subject=Enterprise%20plan%20request"
+                                        to="mailto:sales@hanzo.ai?subject=Enterprise%20plan%20request"
                                     >
                                         Get in touch
                                     </LemonButton>
@@ -175,7 +175,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                             <>
                                                 <LemonButton
                                                     fullWidth
-                                                    to="https://posthog.com/docs/billing/estimating-usage-costs#how-to-reduce-your-posthog-costs"
+                                                    to="https://hanzo.ai/docs/billing/estimating-usage-costs#how-to-reduce-your-insights-costs"
                                                 >
                                                     Learn how to reduce your bill
                                                 </LemonButton>
@@ -193,7 +193,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                                     ) : (
                                                         <LemonButton
                                                             fullWidth
-                                                            to="mailto:sales@posthog.com?subject=Custom%20plan%20unsubscribe%20request"
+                                                            to="mailto:sales@hanzo.ai?subject=Custom%20plan%20unsubscribe%20request"
                                                         >
                                                             Contact support to unsubscribe
                                                         </LemonButton>
@@ -375,7 +375,7 @@ export const BillingProduct = ({ product }: { product: BillingProductV2Type }): 
                                     <p className="m-0">
                                         Need additional platform and support (aka enterprise) features like{' '}
                                         <b>SAML SSO</b>, <b>advanced permissioning</b>, and more?{' '}
-                                        <Link to="mailto:sales@posthog.com?subject=Enterprise%20plan%20request">
+                                        <Link to="mailto:sales@hanzo.ai?subject=Enterprise%20plan%20request">
                                             Get in touch
                                         </Link>{' '}
                                         for a quick chat.
@@ -601,7 +601,7 @@ export const FeatureFlagUsageNotice = ({ product }: { product: BillingProductV2T
             <p className="mt-0 ml-0 text-sm text-secondary italic">
                 <IconInfo className="mr-1" />
                 Questions? Here's{' '}
-                <Link to="https://posthog.com/docs/feature-flags/common-questions#billing--usage" className="italic">
+                <Link to="https://hanzo.ai/docs/feature-flags/common-questions#billing--usage" className="italic">
                     how we calculate usage
                 </Link>{' '}
                 for feature flags.

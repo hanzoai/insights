@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useActions, useMountedLogic, useValues } from 'kea'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCornerDownRight } from '@posthog/icons'
+import { IconCornerDownRight } from '@hanzo/icons'
 
 import { Popover } from 'lib/lemon-ui/Popover/Popover'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'

@@ -69,7 +69,7 @@ export const getAPISteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                  curl -X POST "https://us.i.posthog.com/i/v0/e/" \\
+                                  curl -X POST "https://us.i.hanzo.ai/i/v0/e/" \\
                                        -H "Content-Type: application/json" \\
                                        -d '{
                                           "api_key": "<ph_project_api_key>",

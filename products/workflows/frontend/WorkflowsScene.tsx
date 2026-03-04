@@ -1,7 +1,7 @@
 import { actions, kea, path, props, reducers, selectors, useActions, useValues } from 'kea'
 
-import { IconLetter, IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonMenuItems } from '@posthog/lemon-ui'
+import { IconLetter, IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

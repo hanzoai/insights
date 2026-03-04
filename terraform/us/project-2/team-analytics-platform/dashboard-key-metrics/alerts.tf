@@ -1,22 +1,22 @@
 # =============================================================================
-# PostHog Alerts Configuration
+# Insights Alerts Configuration
 # =============================================================================
 #
-# This file configures PostHog alerts with Slack notifications using for_each
+# This file configures Insights alerts with Slack notifications using for_each
 # to avoid duplication across regions and alert types.
 #
 # Prerequisites:
 #   - Set required variables (see variables.tf)
-#   - Configure your Slack integration in PostHog
+#   - Configure your Slack integration in Insights
 #
 # For more information, see:
-#   https://registry.terraform.io/providers/PostHog/posthog/latest/docs/resources/alert
+#   https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/alert
 # =============================================================================
 
 locals {
   regions = {
-    us = posthog_insight.export_successes_and_failures["us"]
-    eu = posthog_insight.export_successes_and_failures["eu"]
+    us = insights_insight.export_successes_and_failures["us"]
+    eu = insights_insight.export_successes_and_failures["eu"]
   }
 
   # Alert configurations (shared across regions)
@@ -65,7 +65,7 @@ locals {
   ]...)
 }
 
-resource "posthog_alert" "export_alert" {
+resource "insights_alert" "export_alert" {
   for_each = local.alerts
 
   name                   = "${each.value.name} (${upper(each.value.region)})"
@@ -81,8 +81,8 @@ resource "posthog_alert" "export_alert" {
   subscribed_users       = var.analytics_platform_alert_subscribed_user_ids
 }
 
-resource "posthog_hog_function" "slack_alert_notification" {
-  for_each = posthog_alert.export_alert
+resource "insights_hog_function" "slack_alert_notification" {
+  for_each = insights_alert.export_alert
 
   name        = "Post to Slack on insight alert firing"
   description = "Post to a Slack channel when this insight alert fires"

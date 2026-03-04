@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDirectedGraph, IconList } from '@posthog/icons'
-import { LemonInput, LemonSegmentedButton, Spinner } from '@posthog/lemon-ui'
+import { IconDirectedGraph, IconList } from '@hanzo/icons'
+import { LemonInput, LemonSegmentedButton, Spinner } from '@hanzo/lemon-ui'
 
 import { dataModelingLogic } from './dataModelingLogic'
 import { GraphView } from './modeling/GraphView'

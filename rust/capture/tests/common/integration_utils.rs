@@ -423,7 +423,7 @@ pub fn validate_single_event_payload(title: &str, got_events: Vec<ProcessedEvent
         "mismatched event.properties.$lib_version in case: {title}",
     );
     assert_eq!(
-        "https://posthog.example.com/testing", props["$current_url"],
+        "https://insights.example.com/testing", props["$current_url"],
         "mismatched event.properties.$current_url in case: {title}",
     );
     assert_eq!(
@@ -771,7 +771,7 @@ pub fn validate_batch_events_payload(title: &str, got_events: Vec<ProcessedEvent
         "mismatched event.properties.$lib_version on $pageview in case: {title}",
     );
     assert_eq!(
-        "https://posthog.example.com/testing", props["$current_url"],
+        "https://insights.example.com/testing", props["$current_url"],
         "mismatched event.properties.$current_url in case: {title}",
     );
     assert_eq!(
@@ -891,7 +891,7 @@ pub fn validate_batch_events_payload(title: &str, got_events: Vec<ProcessedEvent
         "mismatched event.properties.$lib_version on $pageleave in case: {title}",
     );
     assert_eq!(
-        "https://posthog.example.com/testing", props["$current_url"],
+        "https://insights.example.com/testing", props["$current_url"],
         "mismatched event.properties.$current_url in case: {title}",
     );
     assert_eq!(

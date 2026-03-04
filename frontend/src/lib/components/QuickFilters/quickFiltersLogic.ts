@@ -1,6 +1,6 @@
 import { actions, afterMount, kea, key, path, props } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -47,7 +47,7 @@ export const quickFiltersLogic = kea<quickFiltersLogicType>([
                     })
 
                     lemonToast.success('Quick filter created successfully')
-                    posthog.capture(QuickFiltersEvents.QuickFilterCreated, {
+                    insights.capture(QuickFiltersEvents.QuickFilterCreated, {
                         name: payload.name,
                         property_name: payload.property_name,
                         type: payload.type,
@@ -59,7 +59,7 @@ export const quickFiltersLogic = kea<quickFiltersLogicType>([
                 updateFilter: async ({ id, payload }) => {
                     const updatedFilter = await api.quickFilters.update(id, payload)
                     lemonToast.success('Quick filter updated successfully')
-                    posthog.capture(QuickFiltersEvents.QuickFilterUpdated, {
+                    insights.capture(QuickFiltersEvents.QuickFilterUpdated, {
                         ...(payload.name && { name: payload.name }),
                         ...(payload.property_name && { property_name: payload.property_name }),
                         ...(payload.type && { type: payload.type }),

@@ -1,7 +1,7 @@
 import { cloneElement } from 'react'
 
-import { IconChevronDown, IconComment } from '@posthog/icons'
-import { LemonDropdown } from '@posthog/lemon-ui'
+import { IconChevronDown, IconComment } from '@hanzo/icons'
+import { LemonDropdown } from '@hanzo/lemon-ui'
 
 import { SurveyQuestionType } from '~/types'
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { IconTerminal } from '@posthog/icons'
+import { IconTerminal } from '@hanzo/icons'
 
 import { parseGithubRepoURL } from 'lib/utils'
 

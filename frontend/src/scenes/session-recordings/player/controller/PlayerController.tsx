@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCamera, IconPause, IconPlay, IconRewindPlay } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconCamera, IconPause, IconPlay, IconRewindPlay } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { isChristmas, isHalloween } from 'lib/holidays'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
@@ -25,7 +25,7 @@ export function DataPipelinesSources({ action }: { action: JSX.Element }): JSX.E
                     thingName="data source"
                     description="Use data warehouse sources to import data from your external data into Insights."
                     isEmpty={dataWarehouseSources.results.length === 0 && !dataWarehouseSourcesLoading}
-                    docsURL="https://posthog.com/docs/data-warehouse"
+                    docsURL="https://hanzo.ai/docs/data-warehouse"
                     actionElementOverride={action}
                 />
             ) : null}

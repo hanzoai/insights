@@ -324,14 +324,14 @@ Dynamic cohorts define membership via property filters. The service resolves the
 
 ### Static cohorts
 
-Static cohorts have pre-computed membership lists in the `posthog_cohortpeople` table. The service uses a batched query with `unnest` to check membership for multiple cohorts at once:
+Static cohorts have pre-computed membership lists in the `insights_cohortpeople` table. The service uses a batched query with `unnest` to check membership for multiple cohorts at once:
 
 ```sql
 WITH cohort_membership AS (
     SELECT c.cohort_id,
            CASE WHEN pc.cohort_id IS NOT NULL THEN true ELSE false END AS is_member
     FROM unnest($1::integer[]) AS c(cohort_id)
-    LEFT JOIN posthog_cohortpeople AS pc
+    LEFT JOIN insights_cohortpeople AS pc
       ON pc.person_id = $2 AND pc.cohort_id = c.cohort_id
 )
 SELECT cohort_id, is_member FROM cohort_membership

@@ -103,7 +103,7 @@
         "chromium": 2.4,
         "webkit": 2.5
     },
-    "frontend/src/lib/components/HogQLEditor/HogQLEditor.stories.tsx": {
+    "frontend/src/lib/components/InsightsQLEditor/InsightsQLEditor.stories.tsx": {
         "chromium": 12.4,
         "webkit": 2.9
     },
@@ -223,7 +223,7 @@
         "chromium": 8.8,
         "webkit": 2.6
     },
-    "frontend/src/lib/components/hedgehogs.stories.tsx": {
+    "frontend/src/lib/components/mascots.stories.tsx": {
         "chromium": 2.6,
         "webkit": 2.4
     },

@@ -2,7 +2,7 @@ import { actions, events, kea, key, listeners, path, props, reducers, selectors 
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { ActivityDescriber as errorTrackingActivityDescriber } from '@posthog/products-error-tracking/frontend/components/ActivityDescriber'
+import { ActivityDescriber as errorTrackingActivityDescriber } from '@hanzo/products-error-tracking/frontend/components/ActivityDescriber'
 
 import api, { ActivityLogPaginatedResponse } from 'lib/api'
 import { tagActivityDescriber } from 'lib/components/ActivityLog/activityDescriptions/tagActivityDescriber'
@@ -101,7 +101,7 @@ export const activityLogTransforms = {
 
 /**
  * Having this function inside the `humanizeActivity module was causing very weird test errors in other modules
- * see https://github.com/PostHog/posthog/pull/12062
+ * see https://github.com/hanzoai/insights/pull/12062
  * So, we inject the function instead
  * **/
 export const describerFor = (logItem?: ActivityLogItem): Describer | undefined => {

@@ -1,4 +1,4 @@
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { defineKnownException } from '../registry'
 import { KnownExceptionBanner } from './base'
@@ -18,7 +18,7 @@ defineKnownException({
                 </Link>{' '}
                 to see the full description of the error or{' '}
                 <Link
-                    to="https://posthog.com/docs/error-tracking/common-questions#what-is-a-minified-react-error-with-no-stack-traces"
+                    to="https://hanzo.ai/docs/error-tracking/common-questions#what-is-a-minified-react-error-with-no-stack-traces"
                     target="_blank"
                 >
                     read our docs

@@ -18,28 +18,28 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install @posthog/nuxt
+                                    npm install @hanzo/nuxt
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add @posthog/nuxt
+                                    yarn add @hanzo/nuxt
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add @posthog/nuxt
+                                    pnpm add @hanzo/nuxt
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'bun',
                                 code: dedent`
-                                    bun add @posthog/nuxt
+                                    bun add @hanzo/nuxt
                                 `,
                             },
                         ]}
@@ -52,7 +52,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'nuxt.config.ts',
                                 code: dedent`
                                   export default defineNuxtConfig({
-                                    modules: ['@posthog/nuxt'],
+                                    modules: ['@hanzo/nuxt'],
                                     // Enable source maps generation in both vue and nitro
                                     sourcemap: {
                                       client: 'hidden'
@@ -64,9 +64,9 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                         },
                                       },
                                     },
-                                    posthogConfig: {
-                                      publicKey: '<ph_project_api_key>', // Find it in project settings https://app.posthog.com/settings/project
-                                      host: 'https://us.i.posthog.com', // Optional: defaults to https://us.i.posthog.com. Use https://eu.i.posthog.com for EU region
+                                    insightsConfig: {
+                                      publicKey: '<ph_project_api_key>', // Find it in project settings https://insights.hanzo.ai/settings/project
+                                      host: 'https://us.i.hanzo.ai', // Optional: defaults to https://us.i.hanzo.ai. Use https://eu.i.hanzo.ai for EU region
                                       clientConfig: {
                                         capture_exceptions: true, // Enables automatic exception capture on the client side (Vue)
                                       },
@@ -75,8 +75,8 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                       },
                                       sourcemaps: {
                                         enabled: true,
-                                        project: '<ph_project_id>', // Your project ID from Insights settings https://app.posthog.com/settings/environment#variables
-                                        personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings https://app.posthog.com/settings/user-api-keys (requires organization:read and error_tracking:write scopes)
+                                        project: '<ph_project_id>', // Your project ID from Insights settings https://insights.hanzo.ai/settings/environment#variables
+                                        personalApiKey: '<ph_personal_api_key>', // Your personal API key from Insights settings https://insights.hanzo.ai/settings/user-api-keys (requires organization:read and error_tracking:write scopes)
                                         releaseName: 'my-application', // Optional: defaults to git repository name
                                         releaseVersion: '1.0.0', // Optional: defaults to current git commit
                                       },
@@ -121,10 +121,10 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'Vue',
                                 code: dedent`
                                   <script>
-                                    const { $posthog } = useNuxtApp()
-                                    if ($posthog) {
-                                      const posthog = $posthog()
-                                      posthog.captureException(new Error("Important error message"))
+                                    const { $insights } = useNuxtApp()
+                                    if ($insights) {
+                                      const insights = $insights()
+                                      insights.captureException(new Error("Important error message"))
                                     }
                                   </script>
                                 `,
@@ -139,17 +139,17 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'server/api/example.js',
                                 code: dedent`
                                   const runtimeConfig = useRuntimeConfig()
-                                  const posthog = new Insights(
-                                    runtimeConfig.public.posthogPublicKey,
+                                  const insights = new Insights(
+                                    runtimeConfig.public.insightsPublicKey,
                                     {
-                                      host: runtimeConfig.public.posthogHost,
+                                      host: runtimeConfig.public.insightsHost,
                                     }
                                   );
                                   try {
                                     const results = await DB.query.users.findMany()
                                     return results
                                   } catch (error) {
-                                    posthog.captureException(error)
+                                    insights.captureException(error)
                                   }
                                 `,
                             },
@@ -193,7 +193,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
 
                         You can verify the injection is successful by checking your \`.mjs.map\` source map files for \`//# chunkId=\` comments. Make sure to serve these injected files in production, Insights will check for the \`//# chunkId\` comments to display the correct stack traces.
 
-                        [Check symbol sets in Insights](https://app.posthog.com/settings/project-error-tracking#error-tracking-symbol-sets)
+                        [Check symbol sets in Insights](https://insights.hanzo.ai/settings/project-error-tracking#error-tracking-symbol-sets)
                     `}
                 </Markdown>
             ),
@@ -207,7 +207,7 @@ export const getNuxt37Steps = (ctx: OnboardingComponentsContext): StepDefinition
                     {dedent`
                         Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                        [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                        [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                     `}
                 </Markdown>
             ),

@@ -5,8 +5,8 @@ from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 def create_inputs(**kwargs):
     inputs = {
         "apiKey": "apikey12345",
-        "email": "max@posthog.com",
-        "attributes": {"EMAIL": "max@posthog.com", "FIRSTNAME": "Max"},
+        "email": "max@hanzo.ai",
+        "attributes": {"EMAIL": "max@hanzo.ai", "FIRSTNAME": "Max"},
     }
     inputs.update(kwargs)
 
@@ -27,9 +27,9 @@ class TestTemplateBrevo(BaseInsightsFunctionTemplateTest):
                     "Content-Type": "application/json",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "updateEnabled": True,
-                    "attributes": {"EMAIL": "max@posthog.com", "FIRSTNAME": "Max"},
+                    "attributes": {"EMAIL": "max@hanzo.ai", "FIRSTNAME": "Max"},
                 },
             },
         )

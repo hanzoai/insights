@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { Popover, Spinner } from '@posthog/lemon-ui'
+import { Popover, Spinner } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonSelect } from 'lib/lemon-ui/LemonSelect'

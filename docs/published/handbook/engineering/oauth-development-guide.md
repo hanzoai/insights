@@ -47,14 +47,14 @@ After running `generate_demo_data`, a test OAuth application is created with the
 
 You can view and test the OAuth flow from Django admin:
 
-1. Navigate to `http://localhost:8010/admin/posthog/oauthapplication/`
+1. Navigate to `http://localhost:8010/admin/insights/oauthapplication/`
 2. Click "View on site" to see an example authorization URL with PKCE parameters
 
 ## Creating an OAuth Application
 
 ### Via Django Admin
 
-1. Navigate to `http://localhost:8010/admin/posthog/oauthapplication/`
+1. Navigate to `http://localhost:8010/admin/insights/oauthapplication/`
 2. Click "Add OAuth Application"
 3. Configure the application fields (see below)
 
@@ -241,7 +241,7 @@ See [Client Types](#client-types) section for detailed explanation.
 
 OAuth supports all the same scopes as Personal API Keys. Each scope has a `read` and/or `write` action (e.g., `experiment:read`, `experiment:write`).
 
-For a complete list of available scopes, see [frontend/src/lib/scopes.tsx](https://github.com/PostHog/posthog/blob/master/frontend/src/lib/scopes.tsx#L15).
+For a complete list of available scopes, see [frontend/src/lib/scopes.tsx](https://github.com/Hanzo Insights/insights/blob/master/frontend/src/lib/scopes.tsx#L15).
 
 ### OpenID Connect Scopes
 
@@ -267,7 +267,7 @@ If you would like to force the user to pick a single team or an organization you
 
 ### Using the Admin Interface
 
-1. Go to `http://localhost:8010/admin/posthog/oauthapplication/`
+1. Go to `http://localhost:8010/admin/insights/oauthapplication/`
 2. Click your application
 3. Click "View on site" - this generates a test authorization URL with:
    - Proper PKCE code_challenge (using code_verifier="test")
@@ -445,7 +445,7 @@ print(f"Token active: {data.get('active')}")
 ### "Invalid client_id"
 
 - Check the client_id matches exactly
-- Verify the application exists in `https://localhost:8010/admin/posthog/oauthapplication/`
+- Verify the application exists in `https://localhost:8010/admin/insights/oauthapplication/`
 
 ### "Redirect URI mismatch"
 

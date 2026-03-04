@@ -17,7 +17,7 @@ _Please describe._
 ## Environment
 
 - [ ] Insights Cloud
-- [ ] Insights self-hosted with Kubernetes (deprecated, see ["Sunsetting Kubernetes support"](https://posthog.com/blog/sunsetting-helm-support-posthog)), version/commit: [please provide]
+- [ ] Insights self-hosted with Kubernetes (deprecated, see ["Sunsetting Kubernetes support"](https://hanzo.ai/blog/sunsetting-helm-support-insights)), version/commit: [please provide]
 
 ## Additional context
 

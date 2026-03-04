@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import { v4 } from 'uuid'
 
-import { PluginEvent } from '@posthog/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold'
 
 import {
     PipelineResult,

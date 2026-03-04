@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonModal } from '@posthog/lemon-ui'
+import { LemonModal } from '@hanzo/lemon-ui'
 
 export interface StepScreenshotThumbnailProps {
     mediaId: string

@@ -168,7 +168,7 @@ def process_query_model(
             database = Database.create_for(team=team, modifiers=create_default_modifiers_for_team(team))
             context = InsightsQLContext(team_id=team.pk, team=team, database=database)
             result = DatabaseSchemaQueryResponse(
-                tables=database.serialize(context, include_hidden_posthog_tables=True),
+                tables=database.serialize(context, include_hidden_insights_tables=True),
                 joins=[
                     DataWarehouseViewLink.model_validate(
                         {

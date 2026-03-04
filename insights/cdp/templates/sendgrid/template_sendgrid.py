@@ -114,7 +114,7 @@ if (res.status > 300) {
 
 
 class TemplateSendGridMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/sendgrid-plugin"
+    plugin_url = "https://github.com/Hanzo Insights/sendgrid-plugin"
 
     @classmethod
     def migrate(cls, obj):
@@ -155,13 +155,13 @@ class TemplateSendGridMigrator(InsightsFunctionTemplateMigrator):
         if customFields:
             for field in customFields.split(","):
                 if "=" in field:
-                    posthog_prop, sendgrid_field = field.split("=")
+                    insights_prop, sendgrid_field = field.split("=")
                 else:
-                    posthog_prop = sendgrid_field = field.strip()
-                posthog_prop = f"{{person.properties.{posthog_prop}}}"
+                    insights_prop = sendgrid_field = field.strip()
+                insights_prop = f"{{person.properties.{insights_prop}}}"
                 if sendgrid_field in sendgrid_fields:
-                    hf["inputs"]["properties"]["value"][sendgrid_field] = posthog_prop
+                    hf["inputs"]["properties"]["value"][sendgrid_field] = insights_prop
                 else:
-                    hf["inputs"]["custom_fields"]["value"][sendgrid_field] = posthog_prop
+                    hf["inputs"]["custom_fields"]["value"][sendgrid_field] = insights_prop
 
         return hf

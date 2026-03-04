@@ -19,7 +19,7 @@ Different tools use different names for the same concept:
 - **Product** — a self-contained feature area under `products/<name>/`. This is the unit of isolation, ownership, and selective testing.
 - **Django app** — the backend implementation of a product (`products/<name>/backend/`). Registered in `INSTALLED_APPS` via `AppConfig`.
 - **Turbo package** — the build/test unit defined by `package.json`. One product = one Turbo package.
-- **tach module** — the import boundary node in `tach.toml`. Maps 1:1 to a product (core code like `posthog` and `ee` are also tach modules).
+- **tach module** — the import boundary node in `tach.toml`. Maps 1:1 to a product (core code like `insights` and `ee` are also tach modules).
 
 This document uses **"product"** when talking about boundaries and architecture, and **"Django app"** only for Django-specific mechanics (models, migrations, `apps.py`).
 
@@ -359,7 +359,7 @@ visual_review impl       (logic.py, models.py)
 pnpm turbo run backend:test
 
 # Run specific product tests
-pnpm turbo run backend:test --filter=@posthog/products-visual_review
+pnpm turbo run backend:test --filter=@hanzo/products-visual_review
 
 # Run contract checks
 pnpm turbo run backend:contract-check

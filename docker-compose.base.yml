@@ -135,7 +135,7 @@ services:
     datastore:
         #
         # Note: please keep the default version in sync across
-        #       `posthog` and the `charts-clickhouse` repos
+        #       `insights` and the `charts-clickhouse` repos
         #
         image: ${DATASTORE_SERVER_IMAGE:-ghcr.io/hanzoai/datastore:latest}
         restart: on-failure
@@ -195,7 +195,7 @@ services:
             MINIO_ROOT_USER: object_storage_root_user
             MINIO_ROOT_PASSWORD: object_storage_root_password
         entrypoint: sh
-        command: -c 'mkdir -p /data/insights /data/ducklake-dev /data/ai-blobs && minio server --address ":19000" --console-address ":19001" /data' # create the 'posthog', 'ducklake-dev', and 'ai-blobs' buckets before starting the service
+        command: -c 'mkdir -p /data/insights /data/ducklake-dev /data/ai-blobs && minio server --address ":19000" --console-address ":19001" /data' # create the 'insights', 'ducklake-dev', and 'ai-blobs' buckets before starting the service
 
     objectstorage-azure:
         image: mcr.microsoft.com/azure-storage/azurite:3.35.0
@@ -447,7 +447,7 @@ services:
             - DB=postgresql
             - DB_PORT=5432
             - POSTGRES_USER=insights
-            - POSTGRES_PWD=posthog
+            - POSTGRES_PWD=insights
             - POSTGRES_SEEDS=db
             - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
             - ENABLE_ES=true
@@ -513,7 +513,7 @@ services:
         user: '0:0' # have to run as root to read the docker logs
         volumes:
             - ./otel-collector-config.dev.yaml:/etc/otel-collector-config.yaml
-            # mount docker containers dir so we can ship the docker logs to local posthog
+            # mount docker containers dir so we can ship the docker logs to local insights
             - /var/lib/docker/containers:/var/lib/docker/containers:ro
             - /var/run/docker.sock:/var/run/docker.sock:ro
         ports:
@@ -571,16 +571,16 @@ services:
                 echo "Waiting for SeaweedFS to initialize..."
                 while true; do
                     sleep 5
-                    echo "Checking if posthog bucket exists..."
-                    if echo "s3.bucket.list" | /usr/bin/weed shell -master=localhost:9333 2>&1 | grep -q "posthog"; then
-                        echo "Bucket posthog exists!"
+                    echo "Checking if insights bucket exists..."
+                    if echo "s3.bucket.list" | /usr/bin/weed shell -master=localhost:9333 2>&1 | grep -q "insights"; then
+                        echo "Bucket insights exists!"
                         break
                     fi
                     echo "Bucket not found, attempting to create..."
-                    echo "s3.bucket.create -name posthog" | /usr/bin/weed shell -master=localhost:9333 2>&1 || true
+                    echo "s3.bucket.create -name insights" | /usr/bin/weed shell -master=localhost:9333 2>&1 || true
                     echo "Retrying in 5s..."
                 done
-                echo "SeaweedFS ready with posthog bucket"
+                echo "SeaweedFS ready with insights bucket"
                 wait $$WEED_PID
             - --
         command: ['server', '-s3', '-s3.port=8333', '-dir=/data']

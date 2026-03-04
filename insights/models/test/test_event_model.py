@@ -495,7 +495,7 @@ def filter_by_actions_factory(_create_event, _create_person, _get_events_for_act
                 steps_json=[
                     {
                         "event": "$autocapture",
-                        "url": "https://posthog.com/feedback/123",
+                        "url": "https://hanzo.ai/feedback/123",
                         "url_matching": "exact",
                     },
                     {"event": "$autocapture", "href": "/a-url-2"},
@@ -518,7 +518,7 @@ def filter_by_actions_factory(_create_event, _create_person, _get_events_for_act
                 steps_json=[
                     {
                         "event": "$autocapture",
-                        "url": "https://posthog.com/%/123",
+                        "url": "https://hanzo.ai/%/123",
                         "url_matching": "contains",
                     }
                 ],
@@ -540,7 +540,7 @@ def filter_by_actions_factory(_create_event, _create_person, _get_events_for_act
                 event="$autocapture",
                 team=self.team,
                 distinct_id="whatever",
-                properties={"$current_url": "https://posthog.com/feedback/123"},
+                properties={"$current_url": "https://hanzo.ai/feedback/123"},
                 elements=[
                     Element(
                         tag_name="div",

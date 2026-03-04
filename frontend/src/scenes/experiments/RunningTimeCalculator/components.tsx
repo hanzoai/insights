@@ -1,5 +1,5 @@
-import { IconInfo } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { humanFriendlyNumber } from 'lib/utils'
 

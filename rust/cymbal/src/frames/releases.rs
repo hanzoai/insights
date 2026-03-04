@@ -40,8 +40,8 @@ impl ReleaseRecord {
             Self,
             r#"
             SELECT r.id, r.team_id, r.hash_id, r.created_at, r.version, r.project, r.metadata
-            FROM posthog_errortrackingsymbolset ss
-            INNER JOIN posthog_errortrackingrelease r ON ss.release_id = r.id
+            FROM insights_errortrackingsymbolset ss
+            INNER JOIN insights_errortrackingrelease r ON ss.release_id = r.id
             WHERE ss.ref = $1 AND ss.team_id = $2
             "#,
             symbol_set_ref,
@@ -65,8 +65,8 @@ impl ReleaseRecord {
             Self,
             r#"
             SELECT r.id, r.team_id, r.hash_id, r.created_at, r.version, r.project, r.metadata
-            FROM posthog_errortrackingsymbolset ss
-            INNER JOIN posthog_errortrackingrelease r ON ss.release_id = r.id
+            FROM insights_errortrackingsymbolset ss
+            INNER JOIN insights_errortrackingrelease r ON ss.release_id = r.id
             WHERE ss.id = $1 AND ss.team_id = $2
             "#,
             symbol_set_id,

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal, IconX } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconExternal, IconX } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { IntegrationView } from 'lib/integrations/IntegrationView'

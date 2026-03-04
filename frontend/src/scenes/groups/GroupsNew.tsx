@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Form, Group, capitalizeFirstLetter } from 'kea-forms'
 import { router } from 'kea-router'
 
-import { IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { GroupsNewLogicProps, groupsNewLogic } from 'scenes/groups/groupsNewLogic'

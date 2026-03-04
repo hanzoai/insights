@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 
@@ -49,7 +49,7 @@ export const AddonFeatureLossNotice = ({ product }: AddonFeatureLossNoticeProps)
         setIsExpanded(newExpandedState)
 
         if (newExpandedState) {
-            posthog.capture('billing_unsubscribe_feature_list_expanded', {
+            insights.capture('billing_unsubscribe_feature_list_expanded', {
                 product_type: product.type,
                 feature_count: featuresToLose.length,
             })

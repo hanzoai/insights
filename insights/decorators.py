@@ -84,12 +84,12 @@ def cached_by_filters(f: Callable[[U, Request], T]) -> Callable[[U, Request], T]
             if cached_result_package and cached_result_package.get("result"):
                 if not is_stale_filter(team, filter, cached_result_package):
                     cached_result_package["is_cached"] = True
-                    statsd.incr("posthog_cached_function_cache_hit", tags={"route": route})
+                    statsd.incr("insights_cached_function_cache_hit", tags={"route": route})
                     return cached_result_package
                 else:
-                    statsd.incr("posthog_cached_function_cache_stale", tags={"route": route})
+                    statsd.incr("insights_cached_function_cache_stale", tags={"route": route})
             else:
-                statsd.incr("posthog_cached_function_cache_miss", tags={"route": route})
+                statsd.incr("insights_cached_function_cache_miss", tags={"route": route})
 
         # call function being wrapped
         fresh_result_package = cast(T, f(self, request))

@@ -9,7 +9,7 @@ import { teamLogic } from 'scenes/teamLogic'
 export function JSInstallSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Bash}>
-            {['npm install posthog-js', '# OR', 'yarn add posthog-js', '# OR', 'pnpm add posthog-js'].join('\n')}
+            {['npm install insights-js', '# OR', 'yarn add insights-js', '# OR', 'pnpm add insights-js'].join('\n')}
         </CodeSnippet>
     )
 }
@@ -22,9 +22,9 @@ export function JSSetupSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript}>
             {[
-                "import posthog from 'posthog-js'",
+                "import insights from '@hanzo/insights'",
                 '',
-                `posthog.init('${currentTeam?.api_token}',`,
+                `insights.init('${currentTeam?.api_token}',`,
                 `    {`,
                 `        api_host: '${apiHostOrigin()}',`,
                 isPersonProfilesDisabled

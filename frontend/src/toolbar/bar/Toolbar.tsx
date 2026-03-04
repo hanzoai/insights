@@ -2,7 +2,7 @@ import './Toolbar.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { PostHog } from 'posthog-js'
+import { Insights } from '~/lib/insights-browser'
 import { useEffect, useRef, useState } from 'react'
 
 import {
@@ -24,8 +24,8 @@ import {
     IconToggle,
     IconWarning,
     IconX,
-} from '@posthog/icons'
-import { LemonBadge, Spinner } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonBadge, Spinner } from '@hanzo/lemon-ui'
 
 import { AnimatedLogomark } from 'lib/brand/Logomark'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
@@ -47,12 +47,12 @@ import { ScreenshotUploadModal } from '~/toolbar/screenshot-upload/ScreenshotUpl
 import { screenshotUploadLogic } from '~/toolbar/screenshot-upload/screenshotUploadLogic'
 import { HeatmapToolbarMenu } from '~/toolbar/stats/HeatmapToolbarMenu'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
-import { useToolbarFeatureFlag } from '~/toolbar/toolbarPosthogJS'
+import { useToolbarFeatureFlag } from '~/toolbar/toolbarInsightsJS'
 import { WebVitalsToolbarMenu } from '~/toolbar/web-vitals/WebVitalsToolbarMenu'
 
 import { ToolbarButton } from './ToolbarButton'
 
-const HELP_URL = 'https://posthog.com/docs/user-guides/toolbar?utm_medium=in-product&utm_campaign=toolbar-help-button'
+const HELP_URL = 'https://hanzo.ai/docs/user-guides/toolbar?utm_medium=in-product&utm_campaign=toolbar-help-button'
 
 function EnabledStatusItem({ label, value }: { label: string; value: boolean }): JSX.Element {
     return (
@@ -63,12 +63,12 @@ function EnabledStatusItem({ label, value }: { label: string; value: boolean }):
     )
 }
 
-function postHogDebugInfoMenuItem(
-    posthog: PostHog | null,
+function insightsDebugInfoMenuItem(
+    insights: Insights | null,
     loadingSurveys: boolean,
     surveysCount: number
 ): LemonMenuItem {
-    const isAutocaptureEnabled = posthog?.autocapture?.isEnabled
+    const isAutocaptureEnabled = insights?.autocapture?.isEnabled
 
     return {
         icon: <IconStethoscope />,
@@ -78,7 +78,7 @@ function postHogDebugInfoMenuItem(
                 label: (
                     <div className="flex justify-between items-center w-full">
                         <div>version: </div>
-                        <div>{posthog?.version || 'posthog not available'}</div>
+                        <div>{insights?.version || 'insights not available'}</div>
                     </div>
                 ),
             },
@@ -86,7 +86,7 @@ function postHogDebugInfoMenuItem(
                 label: (
                     <div className="flex justify-between items-center w-full">
                         <div>api host: </div>
-                        <div>{posthog?.config.api_host}</div>
+                        <div>{insights?.config.api_host}</div>
                     </div>
                 ),
             },
@@ -94,7 +94,7 @@ function postHogDebugInfoMenuItem(
                 label: (
                     <div className="flex justify-between items-center w-full">
                         <div>ui host: </div>
-                        <div>{posthog?.config.ui_host || 'not set'}</div>
+                        <div>{insights?.config.ui_host || 'not set'}</div>
                     </div>
                 ),
             },
@@ -103,7 +103,7 @@ function postHogDebugInfoMenuItem(
                 label: (
                     <EnabledStatusItem
                         label="rageclicks"
-                        value={!!(isAutocaptureEnabled && posthog?.config.rageclick)}
+                        value={!!(isAutocaptureEnabled && insights?.config.rageclick)}
                     />
                 ),
             },
@@ -111,11 +111,11 @@ function postHogDebugInfoMenuItem(
                 label: (
                     <EnabledStatusItem
                         label="dead clicks"
-                        value={!!posthog?.deadClicksAutocapture?.lazyLoadedDeadClicksAutocapture}
+                        value={!!insights?.deadClicksAutocapture?.lazyLoadedDeadClicksAutocapture}
                     />
                 ),
             },
-            { label: <EnabledStatusItem label="heatmaps" value={!!posthog?.heatmaps?.isEnabled} /> },
+            { label: <EnabledStatusItem label="heatmaps" value={!!insights?.heatmaps?.isEnabled} /> },
             {
                 label: (
                     <div className="flex justify-between items-center w-full">
@@ -126,19 +126,19 @@ function postHogDebugInfoMenuItem(
                     </div>
                 ),
             },
-            { label: <EnabledStatusItem label="session recording" value={!!posthog?.sessionRecording?.started} /> },
+            { label: <EnabledStatusItem label="session recording" value={!!insights?.sessionRecording?.started} /> },
             {
                 label: (
                     <div className="flex justify-between items-center w-full">
                         <div>session recording status: </div>
-                        <div>{posthog?.sessionRecording?.status || 'unknown'}</div>
+                        <div>{insights?.sessionRecording?.status || 'unknown'}</div>
                     </div>
                 ),
             },
             {
                 label: (
                     <div className="flex items-center w-full">
-                        <Link to={posthog?.get_session_replay_url()} target="_blank">
+                        <Link to={insights?.get_session_replay_url()} target="_blank">
                             View current session recording
                         </Link>
                     </div>
@@ -203,7 +203,7 @@ function piiMaskingMenuItem(
 function MoreMenu(): JSX.Element {
     const {
         theme,
-        posthog,
+        insights,
         piiMaskingEnabled,
         piiMaskingColor,
         piiWarning,
@@ -221,11 +221,11 @@ function MoreMenu(): JSX.Element {
     const [surveysCount, setSurveysCount] = useState(0)
 
     useEffect(() => {
-        posthog?.surveys?.getSurveys((surveys: any[]) => {
+        insights?.surveys?.getSurveys((surveys: any[]) => {
             setSurveysCount(surveys.length)
             setLoadingSurveys(false)
         }, false)
-    }, [posthog])
+    }, [insights])
 
     const showScreenshotForEvent = useToolbarFeatureFlag('event-media-previews')
 
@@ -260,7 +260,7 @@ function MoreMenu(): JSX.Element {
                             setPiiMaskingColor,
                             piiWarning
                         ),
-                        postHogDebugInfoMenuItem(posthog, loadingSurveys, surveysCount),
+                        insightsDebugInfoMenuItem(insights, loadingSurveys, surveysCount),
                         {
                             icon: <IconQuestion />,
                             label: 'Help',

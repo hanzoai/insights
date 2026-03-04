@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonTabs } from '@posthog/lemon-ui'
+import { LemonTabs } from '@hanzo/lemon-ui'
 
 import { HumanizedActivityLogItem, humanizeActivity, humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import MonacoDiffEditor from 'lib/components/MonacoDiffEditor'

@@ -10,8 +10,8 @@ import {
     IconPlus,
     IconShare,
     IconSidePanel,
-} from '@posthog/icons'
-import { LemonBanner, Link, Tooltip } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonBanner, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

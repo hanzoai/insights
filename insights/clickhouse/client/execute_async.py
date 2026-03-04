@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 import orjson as json
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from prometheus_client import Histogram
 from pydantic import BaseModel
 from rest_framework.exceptions import APIException, NotFound
@@ -296,7 +296,7 @@ def enqueue_process_query_task(
             existing_query_id = manager.get_running_query_by_cache_key(cache_key)
             if existing_query_id:
                 query_status = get_query_status(team.id, existing_query_id)
-                posthoganalytics.capture(
+                hanzoanalytics.capture(
                     "query duplicate found",
                     distinct_id=user_id,
                     properties={

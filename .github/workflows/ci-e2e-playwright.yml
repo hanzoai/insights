@@ -18,15 +18,15 @@ permissions:
 env:
     SECRET_KEY: '6b01eee4f945ca25045b5aab440b953461faf08693a9abbf1166dc7c6b9772da' # unsafe - for testing only
     REDIS_URL: redis://localhost
-    DATABASE_URL: postgres://posthog:posthog@localhost:5432/posthog_e2e_test
-    PERSONS_DB_WRITER_URL: postgres://posthog:posthog@localhost:5432/posthog_persons_e2e_test
+    DATABASE_URL: postgres://insights:insights@localhost:5432/insights_e2e_test
+    PERSONS_DB_WRITER_URL: postgres://insights:insights@localhost:5432/insights_persons_e2e_test
     KAFKA_HOSTS: kafka:9092
     DISABLE_SECURE_SSL_REDIRECT: 1
     SECURE_COOKIES: 0
     OPT_OUT_CAPTURE: 0
     E2E_TESTING: 1
     SKIP_SERVICE_VERSION_REQUIREMENTS: 1
-    EMAIL_HOST: email.test.posthog.net
+    EMAIL_HOST: email.test.insights.net
     SITE_URL: http://localhost:8000
     NO_RESTART_LOOP: 1
     OBJECT_STORAGE_ENABLED: 1
@@ -39,10 +39,10 @@ env:
     CLICKHOUSE_HOST: 'localhost'
     CLICKHOUSE_SECURE: 'False'
     CLICKHOUSE_VERIFY: 'False'
-    CLICKHOUSE_DATABASE: posthog_test
+    CLICKHOUSE_DATABASE: insights_test
     PGHOST: localhost
-    PGUSER: posthog
-    PGPASSWORD: posthog
+    PGUSER: insights
+    PGPASSWORD: insights
     PGPORT: 5432
     # this is a fake key so this workflow can run for external contributors as they do not have access to secrets (that we don't need here)
     OIDC_RSA_PRIVATE_KEY: ${{ vars.OIDC_RSA_FAKE_PRIVATE_KEY }}
@@ -154,7 +154,7 @@ jobs:
                     if [[ "$IS_TRUSTED" == "true" ]]; then
                       echo "mode=update" >> $GITHUB_OUTPUT
                       echo "::notice::🔄 Trusted bot '$AUTHOR' - running in UPDATE mode"
-                    elif [[ "$AUTHOR" == *"github-actions"* ]] || [[ "$AUTHOR" == *"[bot]"* ]] || [[ "$AUTHOR" == "posthog-bot" ]]; then
+                    elif [[ "$AUTHOR" == *"github-actions"* ]] || [[ "$AUTHOR" == *"[bot]"* ]] || [[ "$AUTHOR" == "insights-bot" ]]; then
                       echo "mode=check" >> $GITHUB_OUTPUT
                       echo "::notice::🔍 Running in CHECK mode - snapshots must match exactly"
                     else
@@ -186,7 +186,7 @@ jobs:
               shell: bash
               run: |
                   export CLICKHOUSE_SERVER_IMAGE=${{ needs.get_clickhouse_versions.outputs.oldest_supported }}
-                  export DOCKER_REGISTRY_PREFIX="us-east1-docker.pkg.dev/posthog-301601/mirror/"
+                  export DOCKER_REGISTRY_PREFIX="us-east1-docker.pkg.dev/insights-301601/mirror/"
                   cp insights/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
 
                   (
@@ -270,8 +270,8 @@ jobs:
             - name: Install plugin_transpiler
               shell: bash
               run: |
-                  pnpm --filter=@posthog/plugin-transpiler... install --frozen-lockfile
-                  bin/turbo --filter=@posthog/plugin-transpiler build
+                  pnpm --filter=@hanzo/plugin-transpiler... install --frozen-lockfile
+                  bin/turbo --filter=@hanzo/plugin-transpiler build
 
             - name: Install Python dependencies
               shell: bash
@@ -321,8 +321,8 @@ jobs:
 
             - name: Install package.json dependencies with pnpm
               run: |
-                  pnpm --filter=@posthog/playwright... install --frozen-lockfile
-                  bin/turbo --filter=@posthog/frontend prepare
+                  pnpm --filter=@hanzo/playwright... install --frozen-lockfile
+                  bin/turbo --filter=@hanzo/frontend prepare
 
             - name: Start Docker services
               run: docker compose -f docker-compose.dev.yml up -d
@@ -332,21 +332,21 @@ jobs:
 
             - name: Build frontend
               run: |
-                  pnpm --filter=@posthog/frontend... install --frozen-lockfile
-                  pnpm --filter=@posthog/frontend build:products
-                  pnpm --filter=@posthog/frontend build
+                  pnpm --filter=@hanzo/frontend... install --frozen-lockfile
+                  pnpm --filter=@hanzo/frontend build:products
+                  pnpm --filter=@hanzo/frontend build
 
             - name: Collect static files
               run: |
                   # KLUDGE: to get the image-bitmap-data-url-worker-*.js.map files into the dist folder
                   # KLUDGE: rrweb thinks they're alongside and the django's collectstatic fails
-                  cp frontend/node_modules/@posthog/rrweb/dist/image-bitmap-data-url-worker-*.js.map frontend/dist/ && python manage.py collectstatic --noinput
+                  cp frontend/node_modules/@hanzo/rrweb/dist/image-bitmap-data-url-worker-*.js.map frontend/dist/ && python manage.py collectstatic --noinput
             - name: Create test database
               run: |
-                  createdb posthog_e2e_test || echo "Database already exists"
+                  createdb insights_e2e_test || echo "Database already exists"
                   # Drop and recreate clickhouse test database
-                  echo 'DROP DATABASE if exists posthog_test' | curl 'http://localhost:8123/' --data-binary @-
-                  echo 'create database posthog_test' | curl 'http://localhost:8123/' --data-binary @-
+                  echo 'DROP DATABASE if exists insights_test' | curl 'http://localhost:8123/' --data-binary @-
+                  echo 'create database insights_test' | curl 'http://localhost:8123/' --data-binary @-
 
             - name: Cache Rust dependencies
               uses: Swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.8.2
@@ -361,11 +361,11 @@ jobs:
             - name: Apply postgres and clickhouse migrations and setup dev
               run: |
                   # Postgres migrations must run first — ClickHouse migration 0026
-                  # depends on the posthog_instancesetting table in Postgres
+                  # depends on the insights_instancesetting table in Postgres
                   python manage.py migrate --noinput
 
                   # Run Rust migrations for persons e2e test database
-                  PERSONS_DATABASE_URL="postgres://posthog:posthog@localhost:5432/posthog_persons_e2e_test"
+                  PERSONS_DATABASE_URL="postgres://insights:insights@localhost:5432/insights_persons_e2e_test"
                   sqlx database create -D "$PERSONS_DATABASE_URL"
                   sqlx migrate run -D "$PERSONS_DATABASE_URL" --source rust/persons_migrations/
 
@@ -385,7 +385,7 @@ jobs:
 
             # Install Playwright browsers while we wait for Insights to be ready
             - name: Install Playwright browsers
-              run: pnpm --filter=@posthog/playwright exec playwright install chromium --with-deps
+              run: pnpm --filter=@hanzo/playwright exec playwright install chromium --with-deps
 
             - name: Wait for Insights to be ready
               uses: iFaxity/wait-on-action@1fe019e0475491e9e8c4f421b6914ccc3ed8f99c # v1.2.1
@@ -407,7 +407,7 @@ jobs:
                   # Note: Playwright's built-in retry (3x per test) handles test flakiness
                   echo "Attempt 1: Running Playwright tests"
                   set -o pipefail
-                  pnpm --filter=@posthog/playwright exec playwright test --workers=4 2>&1 | tee /tmp/playwright-output-attempt-1.log
+                  pnpm --filter=@hanzo/playwright exec playwright test --workers=4 2>&1 | tee /tmp/playwright-output-attempt-1.log
                   EXIT_CODE=$?
                   set +o pipefail
 
@@ -427,7 +427,7 @@ jobs:
                       # Attempt 2: Update snapshots
                       echo "Attempt 2: Running Playwright tests with --update-snapshots"
                       set -o pipefail
-                      pnpm --filter=@posthog/playwright exec playwright test --workers=4 --update-snapshots 2>&1 | tee /tmp/playwright-output-attempt-2.log
+                      pnpm --filter=@hanzo/playwright exec playwright test --workers=4 --update-snapshots 2>&1 | tee /tmp/playwright-output-attempt-2.log
                       EXIT_CODE=$?
                       set +o pipefail
 
@@ -485,7 +485,7 @@ jobs:
             # ── Artifacts on failure / always ─────────────────────────────────────
             - name: Capture docker logs
               if: always()
-              run: docker logs posthog-proxy-1 > playwright/test-results/docker-proxy.log 2>&1 || echo "No proxy container" > playwright/test-results/docker-proxy.log
+              run: docker logs insights-proxy-1 > playwright/test-results/docker-proxy.log 2>&1 || echo "No proxy container" > playwright/test-results/docker-proxy.log
 
             - name: Archive test artifacts
               if: always()
@@ -650,8 +650,8 @@ jobs:
               id: app-token
               uses: getsentry/action-github-app-token@d4b5da6c5e37703f8c3b3e43abb5705b46e159cc # v3.0.0
               with:
-                  app_id: ${{ secrets.GH_APP_POSTHOG_TESTS_APP_ID }}
-                  private_key: ${{ secrets.GH_APP_POSTHOG_TESTS_PRIVATE_KEY }}
+                  app_id: ${{ secrets.GH_APP_INSIGHTS_TESTS_APP_ID }}
+                  private_key: ${{ secrets.GH_APP_INSIGHTS_TESTS_PRIVATE_KEY }}
 
             - uses: actions/checkout@v6
               with:

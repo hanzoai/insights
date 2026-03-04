@@ -152,7 +152,7 @@ class TestErrorTracking(APIBaseTest):
                     },
                     "item_id": str(issue.id),
                     "scope": "ErrorTrackingIssue",
-                    "user": {"email": "user1@posthog.com", "first_name": ""},
+                    "user": {"email": "user1@hanzo.ai", "first_name": ""},
                 }
             ],
         )
@@ -233,7 +233,7 @@ class TestErrorTracking(APIBaseTest):
     def test_can_upload_a_source_map(self) -> None:
         with self.settings(OBJECT_STORAGE_ENABLED=True, OBJECT_STORAGE_ERROR_TRACKING_SOURCE_MAPS_FOLDER=TEST_BUCKET):
             symbol_set = ErrorTrackingSymbolSet.objects.create(
-                ref="https://app-static-prod.posthog.com/static/chunk-BPTF6YBO.js", team=self.team, storage_ptr=None
+                ref="https://app-static-prod.hanzo.ai/static/chunk-BPTF6YBO.js", team=self.team, storage_ptr=None
             )
 
             with open(get_path_to("source.js.map"), "rb") as image:
@@ -250,7 +250,7 @@ class TestErrorTracking(APIBaseTest):
 
     def test_rejects_upload_when_object_storage_is_unavailable(self) -> None:
         symbol_set = ErrorTrackingSymbolSet.objects.create(
-            ref="https://app-static-prod.posthog.com/static/chunk-BPTF6YBO.js", team=self.team, storage_ptr=None
+            ref="https://app-static-prod.hanzo.ai/static/chunk-BPTF6YBO.js", team=self.team, storage_ptr=None
         )
         with override_settings(OBJECT_STORAGE_ENABLED=False):
             fake_big_file = SimpleUploadedFile(name="large_source.js.map", content=b"", content_type="text/plain")
@@ -270,10 +270,10 @@ class TestErrorTracking(APIBaseTest):
         other_team = self.create_team_with_organization(organization=self.organization)
         ErrorTrackingSymbolSet.objects.create(ref="source_1", team=self.team, storage_ptr=None)
         ErrorTrackingSymbolSet.objects.create(
-            ref="source_2", team=self.team, storage_ptr="https://app-static-prod.posthog.com/static/chunk-BPTF6YBO.js"
+            ref="source_2", team=self.team, storage_ptr="https://app-static-prod.hanzo.ai/static/chunk-BPTF6YBO.js"
         )
         ErrorTrackingSymbolSet.objects.create(
-            ref="source_2", team=other_team, storage_ptr="https://app-static-prod.posthog.com/static/chunk-BPTF6YBO.js"
+            ref="source_2", team=other_team, storage_ptr="https://app-static-prod.hanzo.ai/static/chunk-BPTF6YBO.js"
         )
 
         self.assertEqual(ErrorTrackingSymbolSet.objects.count(), 3)
@@ -352,7 +352,7 @@ class TestErrorTracking(APIBaseTest):
                     },
                     "item_id": str(issue.id),
                     "scope": "ErrorTrackingIssue",
-                    "user": {"email": "user1@posthog.com", "first_name": ""},
+                    "user": {"email": "user1@hanzo.ai", "first_name": ""},
                 }
             ],
         )

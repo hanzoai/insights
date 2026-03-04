@@ -29,11 +29,11 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     language: 'dart',
                                     file: 'Dart',
                                     code: dedent`
-                                        import 'package:posthog_flutter/posthog_flutter.dart';
+                                        import 'package:insights_flutter/insights_flutter.dart';
 
                                         MaterialApp(
                                             navigatorObservers: [
-                                                PosthogObserver(),
+                                                InsightsObserver(),
                                             ],
                                             // rest of your app
                                         )

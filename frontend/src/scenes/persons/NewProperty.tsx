@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { LemonInput, LemonLabel, LemonModal, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { LemonInput, LemonLabel, LemonModal, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 

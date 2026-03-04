@@ -56,7 +56,7 @@ class Command(BaseCommand):
                     if row.get("persons_urls"):
                         del row["persons_urls"]
             except Exception as e:
-                url = f"https://us.posthog.com/project/{insight.team_id}/insights/{insight.short_id}/edit"
+                url = f"https://insights.hanzo.ai/project/{insight.team_id}/insights/{insight.short_id}/edit"
                 print(f"LEGACY Insight {url} ({insight.id}). ERROR: {e}")  # noqa: T201
                 print(json.dumps(insight.filters))  # noqa: T201
                 continue
@@ -66,14 +66,14 @@ class Command(BaseCommand):
                 query_runner = get_query_runner(query, insight.team, modifiers=modifiers)
                 insightsql_results = cast(InsightsQLQueryResponse, query_runner.calculate()).results or []
             except Exception as e:
-                url = f"https://us.posthog.com/project/{insight.team_id}/insights/{insight.short_id}/edit"
+                url = f"https://insights.hanzo.ai/project/{insight.team_id}/insights/{insight.short_id}/edit"
                 print(f"InsightsQL Insight {url} ({insight.id}). ERROR: {e}")  # noqa: T201
                 print(json.dumps(insight.filters))  # noqa: T201
                 continue
             try:
                 all_ok = True
                 sorter = lambda x: (
-                    "$$_posthog_breakdown_other_$$" if x.get("breakdown_value") == "Other" else x.get("breakdown_value")
+                    "$$_insights_breakdown_other_$$" if x.get("breakdown_value") == "Other" else x.get("breakdown_value")
                 )
                 sorted_legacy_results = sorted(
                     legacy_results,
@@ -99,12 +99,12 @@ class Command(BaseCommand):
                                 or (
                                     field == "label"
                                     and legacy_value == "Other"
-                                    and insightsql_value == "$$_posthog_breakdown_other_$$"
+                                    and insightsql_value == "$$_insights_breakdown_other_$$"
                                 )
                             ):
                                 continue
                             print(  # noqa: T201
-                                f"Insight https://us.posthog.com/project/{insight.team_id}/insights/{insight.short_id}/edit"
+                                f"Insight https://insights.hanzo.ai/project/{insight.team_id}/insights/{insight.short_id}/edit"
                                 f" ({insight.id}). MISMATCH in {legacy_result.get('status')} row, field {field}"
                             )
                             print("Legacy:", legacy_value)  # noqa: T201
@@ -115,6 +115,6 @@ class Command(BaseCommand):
                 if all_ok:
                     print("ALL OK!")  # noqa: T201
             except Exception as e:
-                url = f"https://us.posthog.com/project/{insight.team_id}/insights/{insight.short_id}/edit"
+                url = f"https://insights.hanzo.ai/project/{insight.team_id}/insights/{insight.short_id}/edit"
                 print(f"Comparison Insight {url} ({insight.id}). ERROR: {e}")  # noqa: T201
                 print(json.dumps(insight.filters))  # noqa: T201

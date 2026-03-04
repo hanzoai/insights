@@ -13,7 +13,7 @@ from .temporal.client import execute_task_processing_workflow_async
 class CreateTaskArgs(BaseModel):
     title: str = Field(description="Title of the task")
     description: str = Field(description="Detailed description of what the task should accomplish")
-    repository: str = Field(description="Repository in format 'org/repo' (e.g., 'posthog/posthog-js')")
+    repository: str = Field(description="Repository in format 'org/repo' (e.g., 'hanzoai/insights-js')")
     run: bool = Field(default=True, description="Whether to immediately run the task after creation")
 
 
@@ -35,7 +35,7 @@ class ListTasksArgs(BaseModel):
     origin_product: str | None = Field(
         default=None, description="Filter by origin product (e.g., 'error_tracking', 'user_created')"
     )
-    repository: str | None = Field(default=None, description="Filter by repository (e.g., 'posthog/posthog-js')")
+    repository: str | None = Field(default=None, description="Filter by repository (e.g., 'hanzoai/insights-js')")
     limit: int = Field(default=10, ge=1, le=50, description="Maximum number of tasks to return")
 
 

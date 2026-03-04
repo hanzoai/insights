@@ -3,7 +3,7 @@ import { Field, Form } from 'kea-forms'
 import { combineUrl, router } from 'kea-router'
 import { useRef } from 'react'
 
-import { IconArrowLeft, IconInfo } from '@posthog/icons'
+import { IconArrowLeft, IconInfo } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -16,7 +16,7 @@ import {
     LemonTextArea,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { NotFound } from 'lib/components/NotFound'
@@ -269,13 +269,13 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                                     }
                                 >
                                     <LemonSelect
-                                        value={selectedKeyId || 'posthog_default'}
+                                        value={selectedKeyId || 'insights_default'}
                                         onChange={(value) =>
-                                            setSelectedKeyId(value === 'posthog_default' ? null : value)
+                                            setSelectedKeyId(value === 'insights_default' ? null : value)
                                         }
                                         options={[
                                             ...(keysForSelectedProvider.length === 0
-                                                ? [{ value: 'posthog_default', label: 'Insights default' }]
+                                                ? [{ value: 'insights_default', label: 'Insights default' }]
                                                 : []),
                                             ...keysForSelectedProvider.map((key) => ({
                                                 value: key.id,
@@ -296,7 +296,7 @@ export function LLMAnalyticsEvaluation(): JSX.Element {
                                                 value: model.id,
                                                 label: model.id,
                                                 disabledReason:
-                                                    !selectedKeyId && !model.posthog_available
+                                                    !selectedKeyId && !model.insights_available
                                                         ? 'Requires API key'
                                                         : undefined,
                                             }))}

@@ -21,7 +21,7 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install posthog
+                            pip install insights
                         `}
                     />
                 </>
@@ -53,7 +53,7 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a Insights OpenAI wrapper and
+                        settings](https://insights.hanzo.ai/settings/project), then create a Insights OpenAI wrapper and
                         pass it to Mirascope's `@call` decorator via the `client` parameter.
                     </Markdown>
 
@@ -61,17 +61,17 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
                         language="python"
                         code={dedent`
                             from mirascope.llm import call
-                            from posthog.ai.openai import OpenAI
-                            from posthog import Posthog
+                            from insights.ai.openai import OpenAI
+                            from insights import Insights
 
-                            posthog = Posthog(
+                            insights = Insights(
                                 "<ph_project_api_key>",
                                 host="<ph_client_api_host>"
                             )
 
                             openai_client = OpenAI(
                                 api_key="your_openai_api_key",
-                                posthog_client=posthog
+                                insights_client=insights
                             )
                         `}
                     />
@@ -105,9 +105,9 @@ export const getMirascopeSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
                             response = recommend_book(
                                 "fantasy",
-                                posthog_distinct_id="user_123",
-                                posthog_trace_id="trace_123",
-                                posthog_properties={"conversation_id": "abc123"},
+                                insights_distinct_id="user_123",
+                                insights_trace_id="trace_123",
+                                insights_properties={"conversation_id": "abc123"},
                             )
 
                             print(response.content)

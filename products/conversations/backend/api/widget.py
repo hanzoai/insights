@@ -1,7 +1,7 @@
 """
 Widget API endpoints for the Conversations product.
 
-These endpoints are public (authenticated via public token) and used by the posthog-js widget.
+These endpoints are public (authenticated via public token) and used by the insights-js widget.
 
 Security model:
 - `widget_session_id`: Random UUID generated client-side, stored in localStorage. Used for ACCESS CONTROL.

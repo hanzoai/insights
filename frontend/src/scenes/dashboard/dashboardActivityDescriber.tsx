@@ -1,7 +1,7 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { DashboardFilter, InsightsQLVariable } from 'src/queries/schema/schema-general'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
 import {
@@ -208,7 +208,7 @@ export function dashboardActivityDescriber(logItem: ActivityLogItem, asNotificat
             }
         } catch (e) {
             console.error('Error while summarizing dashboard update', e)
-            posthog.captureException(e)
+            insights.captureException(e)
         }
 
         if (changes.length) {

@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, LemonCollapse, LemonSkeleton, LemonTag } from '@posthog/lemon-ui'
+import { LemonBanner, LemonCollapse, LemonSkeleton, LemonTag } from '@hanzo/lemon-ui'
 
 import { CATEGORY_ORDER, HEALTH_CATEGORY_CONFIG, categoryForKind } from '../healthCategories'
 import type { HealthIssueCategory } from '../healthCategories'

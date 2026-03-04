@@ -343,10 +343,10 @@ class TestS3Table(BaseTest):
 
     def test_s3_build_function_call_azure(self):
         res = build_function_call(
-            "https://tomposthogtest.blob.core.windows.net/somecontainer/path/to/file.parquet",
+            "https://tominsightstest.blob.core.windows.net/somecontainer/path/to/file.parquet",
             DataWarehouseTable.TableFormat.Parquet,
             None,
-            "tomposthogtest",
+            "tominsightstest",
             "blah",
             "some structure",
             None,
@@ -354,15 +354,15 @@ class TestS3Table(BaseTest):
 
         assert (
             res
-            == "azureBlobStorage('https://tomposthogtest.blob.core.windows.net', 'somecontainer', 'path/to/file.parquet', 'tomposthogtest', 'blah', 'Parquet', 'auto', 'some structure')"
+            == "azureBlobStorage('https://tominsightstest.blob.core.windows.net', 'somecontainer', 'path/to/file.parquet', 'tominsightstest', 'blah', 'Parquet', 'auto', 'some structure')"
         )
 
     def test_s3_build_function_call_azure_without_structure(self):
         res = build_function_call(
-            "https://tomposthogtest.blob.core.windows.net/somecontainer/path/to/file.parquet",
+            "https://tominsightstest.blob.core.windows.net/somecontainer/path/to/file.parquet",
             DataWarehouseTable.TableFormat.Parquet,
             None,
-            "tomposthogtest",
+            "tominsightstest",
             "blah",
             None,
             None,
@@ -370,17 +370,17 @@ class TestS3Table(BaseTest):
 
         assert (
             res
-            == "azureBlobStorage('https://tomposthogtest.blob.core.windows.net', 'somecontainer', 'path/to/file.parquet', 'tomposthogtest', 'blah', 'Parquet', 'auto')"
+            == "azureBlobStorage('https://tominsightstest.blob.core.windows.net', 'somecontainer', 'path/to/file.parquet', 'tominsightstest', 'blah', 'Parquet', 'auto')"
         )
 
     def test_s3_build_function_call_azure_with_context(self):
         self._init_database()
 
         res = build_function_call(
-            "https://tomposthogtest.blob.core.windows.net/somecontainer/path/to/file.parquet",
+            "https://tominsightstest.blob.core.windows.net/somecontainer/path/to/file.parquet",
             DataWarehouseTable.TableFormat.Parquet,
             None,
-            "tomposthogtest",
+            "tominsightstest",
             "blah",
             None,
             self.context,
@@ -402,7 +402,7 @@ class TestS3Table(BaseTest):
             None,
             4000.0,
         )
-        assert res == "s3Cluster('posthog', 'http://url.com', 'key', 'secret', 'Parquet', 'some structure')"
+        assert res == "s3Cluster('insights', 'http://url.com', 'key', 'secret', 'Parquet', 'some structure')"
 
     def test_s3_build_function_call_with_queryable_folder(self):
         res = build_function_call(
@@ -433,7 +433,7 @@ class TestS3Table(BaseTest):
         )
         assert (
             res
-            == "s3Cluster('posthog', 'http://url.com/path/to/table_name__query_12345/**.parquet', 'key', 'secret', 'Parquet', 'some structure')"
+            == "s3Cluster('insights', 'http://url.com/path/to/table_name__query_12345/**.parquet', 'key', 'secret', 'Parquet', 'some structure')"
         )
 
     def test_s3_build_function_call_with_debug_disabled(self):
@@ -452,5 +452,5 @@ class TestS3Table(BaseTest):
             )
             assert (
                 res
-                == "s3Cluster('posthog', 'http://url.com/path/to/table_name__query_12345/**.parquet', 'Parquet', 'some structure')"
+                == "s3Cluster('insights', 'http://url.com/path/to/table_name__query_12345/**.parquet', 'Parquet', 'some structure')"
             )

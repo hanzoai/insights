@@ -10,7 +10,7 @@ class TestTemplateDiscord(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "webhookUrl": "https://discord.com/api/webhooks/00000000000000000/xxxxxxxxxxxxxx",
-            "content": "**max@posthog.com** triggered event: '$pageview'",
+            "content": "**max@hanzo.ai** triggered event: '$pageview'",
         }
         inputs.update(kwargs)
         return inputs
@@ -26,7 +26,7 @@ class TestTemplateDiscord(BaseInsightsFunctionTemplateTest):
                     "Content-Type": "application/json",
                 },
                 "body": {
-                    "content": "**max@posthog.com** triggered event: '$pageview'",
+                    "content": "**max@hanzo.ai** triggered event: '$pageview'",
                 },
             },
         )

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { BurningMoneyHog } from 'lib/components/mascots'
 
@@ -163,7 +163,7 @@ export const CreditCTAHero = (): JSX.Element | null => {
                             </p>
                             <LemonButton
                                 type="primary"
-                                to="mailto:sales@posthog.com?subject=Let's talk enterprise!"
+                                to="mailto:sales@hanzo.ai?subject=Let's talk enterprise!"
                                 className="w-30"
                             >
                                 Talk to sales

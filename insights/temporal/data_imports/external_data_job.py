@@ -6,7 +6,7 @@ import dataclasses
 
 from django.conf import settings
 
-import posthoganalytics
+import hanzoanalytics
 from structlog.contextvars import bind_contextvars
 from temporalio import activity, exceptions, workflow
 from temporalio.common import RetryPolicy, WorkflowIDReusePolicy
@@ -138,7 +138,7 @@ async def update_external_data_job_model(inputs: UpdateExternalDataJobStatusInpu
 
         has_non_retryable_error = any(error in internal_error_normalized for error in non_retryable_errors.keys())
         if has_non_retryable_error:
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=get_machine_id(),
                 event="schema non-retryable error",
                 properties={

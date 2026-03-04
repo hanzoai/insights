@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 

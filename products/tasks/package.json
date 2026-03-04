@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-tasks",
+    "name": "@hanzo/products-tasks",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/tests backend/services -v --tb=short"
     },
@@ -8,7 +8,7 @@
         "@dnd-kit/modifiers": "*",
         "@dnd-kit/sortable": "*",
         "@dnd-kit/utilities": "*",
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/react": "*",
         "@types/react": "*",
         "@types/react-dom": "*",

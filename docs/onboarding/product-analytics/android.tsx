@@ -19,7 +19,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'build.gradle',
                                 code: dedent`
                                     dependencies {
-                                        implementation("com.posthog:posthog-android:3.+")
+                                        implementation("com.insights:insights-android:3.+")
                                     }
                                 `,
                             },
@@ -43,8 +43,8 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     class SampleApp : Application() {
 
                                         companion object {
-                                            const val POSTHOG_API_KEY = "<ph_project_api_key>"
-                                            const val POSTHOG_HOST = "<ph_client_api_host>"
+                                            const val INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            const val INSIGHTS_HOST = "<ph_client_api_host>"
                                         }
 
                                         override fun onCreate() {
@@ -52,8 +52,8 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
                                             // Create a Insights Config with the given API key and host
                                             val config = InsightsAndroidConfig(
-                                                apiKey = POSTHOG_API_KEY,
-                                                host = POSTHOG_HOST
+                                                apiKey = INSIGHTS_API_KEY,
+                                                host = INSIGHTS_HOST
                                             )
 
                                             // Setup Insights with the given Context and Config
@@ -82,7 +82,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'kotlin',
                                 file: 'Kotlin',
                                 code: dedent`
-                                    import com.posthog.Insights
+                                    import com.insights.Insights
 
                                     Insights.capture(
                                         event = "button_clicked",

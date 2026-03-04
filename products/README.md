@@ -6,7 +6,7 @@ This structure ensures product features are self-contained and can evolve indepe
 The **entire product folder** (`products/<product_name>/`) is treated as a **Turborepo package**.
 Backend and frontend are sub-parts of that package.
 
-This is the (future) home for all Insights products ([RFC](https://github.com/PostHog/product-internal/pull/703)).
+This is the (future) home for all Insights products ([RFC](https://github.com/Hanzo Insights/product-internal/pull/703)).
 
 For the detailed architecture rationale (frozen dataclasses, facades, isolated testing), see [architecture.md](./architecture.md).
 
@@ -49,7 +49,7 @@ products/
       generated/            # OpenAPI-generated TypeScript types
 ```
 
-Use `bin/hogli product:bootstrap <name>` to scaffold a new product with this structure.
+Use `bin/insightscli product:bootstrap <name>` to scaffold a new product with this structure.
 
 ## Backend conventions
 
@@ -83,7 +83,7 @@ Use `bin/hogli product:bootstrap <name>` to scaffold a new product with this str
       )
   ```
 
-- ❌ Do **not** import models from `posthog.models` or create re-exports like `products.feature_flags.models`.
+- ❌ Do **not** import models from `insights.models` or create re-exports like `products.feature_flags.models`.
 
 This avoids circular imports and keeps migrations/app labels stable.
 
@@ -113,10 +113,10 @@ Keep shared code minimal to avoid tight coupling.
 
 ## Adding a new product
 
-The easiest way is to use hogli:
+The easiest way is to use insightscli:
 
 ```bash
-bin/hogli product:bootstrap your_product_name
+bin/insightscli product:bootstrap your_product_name
 ```
 
 This creates the full structure with apps.py, package.json, etc.
@@ -124,7 +124,7 @@ This creates the full structure with apps.py, package.json, etc.
 To check your product structure follows conventions:
 
 ```bash
-bin/hogli product:lint your_product_name
+bin/insightscli product:lint your_product_name
 ```
 
 ### Manual setup
@@ -136,7 +136,7 @@ bin/hogli product:lint your_product_name
   - NOTE: we don't copy imports into `products.tsx`. If you add new icons, update the imports manually in `frontend/src/products.tsx`. It only needs to be done once.
   - NOTE: if you want to add a link to the old pre-project-tree navbar, do so manually in `frontend/src/layout/navigation-3000/navigationLogic.tsx`
 - Create a `package.json` file:
-  - Keep the package name as `@posthog/products-your-product-name`. Include `@posthog/products-` in the name.
+  - Keep the package name as `@hanzo/products-your-product-name`. Include `@hanzo/products-` in the name.
   - Update the global `frontend/package.json`: add your new npm package under `dependencies`.
   - If your scenes are linked up with the right paths, things should just work.
   - Each scene can either export a React component as its default export, or define a `export const scene: SceneExport = { logic, component }` object to export both a logic and a component. This way the logic stays mounted when you move away from the page. This is useful if you don't want to reload everything each time the scene is loaded.
@@ -144,25 +144,25 @@ bin/hogli product:lint your_product_name
   - `__init__.py` allows imports like `products.<name>.backend.*`
   - `backend/__init__.py` marks the backend directory as a Python package / Django app.
   - Register the backend as a Django app with an `AppConfig` that sets `label = "<name>"` (not `products.<name>`).
-  - Modify `posthog/settings/web.py` and add your new product under `PRODUCTS_APPS`.
+  - Modify `insights/settings/web.py` and add your new product under `PRODUCTS_APPS`.
   - Modify `tach.toml` and add a new block for your product. We use `tach` to track cross-dependencies between python apps.
-  - Modify `posthog/api/__init__.py` and add your API routes as you normally would (e.g. `import products.early_access_features.backend.api as early_access_feature`)
+  - Modify `insights/api/__init__.py` and add your API routes as you normally would (e.g. `import products.early_access_features.backend.api as early_access_feature`)
   - NOTE: we will automate some of these steps in the future, but for now, please do them manually.
 
 ## Adding or moving backend models and migrations
 
 - Create or move your backend models under the product's `backend/` folder.
 - Use direct imports from the product location (e.g., `from products.experiments.backend.models import Experiment`)
-- Use string-based foreign key references to avoid circular imports (e.g., `models.ForeignKey("posthog.Team", on_delete=models.CASCADE)`)
+- Use string-based foreign key references to avoid circular imports (e.g., `models.ForeignKey("insights.Team", on_delete=models.CASCADE)`)
 - Create a `products/your_product_name/backend/migrations` folder.
 - Run `python manage.py makemigrations your_product_name -n initial_migration`
 - If this is a brand-new model, you're done.
-- If you're moving a model from the old `posthog/models/` folder, there are more things to do:
+- If you're moving a model from the old `insights/models/` folder, there are more things to do:
   - Make sure the model's `Meta` class has `db_table = 'old_table_name'` set along with `managed = True`.
-  - Run `python manage.py makemigrations posthog -n remove_old_product_name`
+  - Run `python manage.py makemigrations insights -n remove_old_product_name`
   - The generated migrations will want to `DROP TABLE` your old model, and `CREATE TABLE` the new one. This is not what we want.
   - Instead, we want to run `migrations.SeparateDatabaseAndState` in both migrations.
-  - Follow the example in `posthog/migrations/0548_migrate_early_access_features.py` and `products/early_access_features/migrations/0001_initial_migration.py`.
+  - Follow the example in `insights/migrations/0548_migrate_early_access_features.py` and `products/early_access_features/migrations/0001_initial_migration.py`.
   - Move all operations into `state_operations = []` and keep the `database_operations = []` empty in both migrations.
   - Run and test this a few times before merging. Data loss is irreversible.
 
@@ -175,7 +175,7 @@ Products use Turborepo for selective testing. Only tests affected by your change
 pnpm turbo run backend:test
 
 # Run specific product tests
-pnpm turbo run backend:test --filter=@posthog/products-visual_review
+pnpm turbo run backend:test --filter=@hanzo/products-visual_review
 
 # Dry-run to see what would execute
 pnpm turbo run backend:test --dry-run=json

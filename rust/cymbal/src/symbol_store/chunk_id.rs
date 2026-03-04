@@ -206,7 +206,7 @@ mod test {
     use chrono::Utc;
     use common_types::ClickHouseEvent;
     use mockall::predicate;
-    use posthog_symbol_data::write_symbol_data;
+    use insights_symbol_data::write_symbol_data;
     use reqwest::Url;
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -246,7 +246,7 @@ mod test {
     }
 
     fn get_symbol_data_bytes() -> Vec<u8> {
-        write_symbol_data(posthog_symbol_data::SourceAndMap {
+        write_symbol_data(insights_symbol_data::SourceAndMap {
             minified_source: String::from_utf8(MINIFIED.to_vec()).unwrap(),
             sourcemap: String::from_utf8(MAP.to_vec()).unwrap(),
         })

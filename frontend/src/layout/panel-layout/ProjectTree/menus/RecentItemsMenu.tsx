@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconClock } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconClock } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { keybindToKeyboardShortcutProps } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

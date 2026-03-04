@@ -6,8 +6,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/tui/steps"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/tui/steps"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 type step int
@@ -43,8 +43,8 @@ type model struct {
 	install  steps.InstallModel
 	complete steps.CompleteModel
 
-	posthogVersion string
-	posthogDomain  string
+	insightsVersion string
+	insightsDomain  string
 }
 
 func initialModel() model {
@@ -82,7 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.advanceStep(msg)
 	case steps.ErrorMsg:
 		m.err = msg.Err
-		m.complete = steps.NewCompleteModel(false, msg.Err.Error(), m.posthogDomain)
+		m.complete = steps.NewCompleteModel(false, msg.Err.Error(), m.insightsDomain)
 		m.step = stepComplete
 		return m, m.complete.Init()
 	}
@@ -137,9 +137,9 @@ func (m model) advanceStep(msg steps.StepCompleteMsg) (tea.Model, tea.Cmd) {
 		return m, m.version.Init()
 
 	case stepVersion:
-		m.posthogVersion = msg.Data.(string)
+		m.insightsVersion = msg.Data.(string)
 		if existingDomain := m.domain.GetExistingDomain(); existingDomain != "" {
-			m.posthogDomain = existingDomain
+			m.insightsDomain = existingDomain
 			m.step = stepChecks
 			m.checks = steps.NewChecksModel()
 			return m, m.checks.Init()
@@ -149,7 +149,7 @@ func (m model) advanceStep(msg steps.StepCompleteMsg) (tea.Model, tea.Cmd) {
 		return m, m.domain.Init()
 
 	case stepDomain:
-		m.posthogDomain = msg.Data.(string)
+		m.insightsDomain = msg.Data.(string)
 		m.step = stepChecks
 		m.checks = steps.NewChecksModel()
 		return m, m.checks.Init()
@@ -157,12 +157,12 @@ func (m model) advanceStep(msg steps.StepCompleteMsg) (tea.Model, tea.Cmd) {
 	case stepChecks:
 		m.step = stepInstall
 		m.install = steps.NewInstallModel()
-		m.install.SetConfig(m.mode == modeUpgrade, m.posthogVersion, m.posthogDomain)
+		m.install.SetConfig(m.mode == modeUpgrade, m.insightsVersion, m.insightsDomain)
 		return m, m.install.Init()
 
 	case stepInstall:
 		m.step = stepComplete
-		m.complete = steps.NewCompleteModel(true, "", m.posthogDomain)
+		m.complete = steps.NewCompleteModel(true, "", m.insightsDomain)
 		return m, m.complete.Init()
 	}
 	return m, nil

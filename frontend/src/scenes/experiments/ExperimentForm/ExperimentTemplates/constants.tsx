@@ -1,4 +1,4 @@
-import { IconBell, IconBox, IconGraph, IconTarget, IconTrending, IconUser } from '@posthog/icons'
+import { IconBell, IconBox, IconGraph, IconTarget, IconTrending, IconUser } from '@hanzo/icons'
 
 export const EXPERIMENT_TEMPLATE_IDS = {
     CHECKOUT_FLOW: 'checkout-flow',

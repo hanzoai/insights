@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Optional
 from django.conf import settings
 
 import openai
-import posthoganalytics
-from posthoganalytics.ai.openai import OpenAI
+import hanzoanalytics
+from hanzoanalytics.ai.openai import OpenAI
 
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.errors import ExposedInsightsQLError
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from insights.models import Team, User
 
 openai_client = (
-    OpenAI(posthog_client=posthoganalytics, base_url=settings.OPENAI_BASE_URL) if os.getenv("OPENAI_API_KEY") else None  # type: ignore
+    OpenAI(analytics_client=hanzoanalytics, base_url=settings.OPENAI_BASE_URL) if os.getenv("OPENAI_API_KEY") else None  # type: ignore
 )
 
 UNCLEAR_PREFIX = "UNCLEAR:"
@@ -228,7 +228,7 @@ def write_sql_from_prompt(prompt: str, *, current_query: Optional[str] = None, t
         raise PromptUnclear(error)
 
 
-def hit_openai(messages, user, posthog_properties=None) -> tuple[str, int, int]:
+def hit_openai(messages, user, insights_properties=None) -> tuple[str, int, int]:
     if not openai_client:
         raise ValueError("OPENAI_API_KEY environment variable not set")
 
@@ -237,7 +237,7 @@ def hit_openai(messages, user, posthog_properties=None) -> tuple[str, int, int]:
         temperature=0,
         messages=messages,
         user=user,  # The user ID is for tracking within OpenAI in case of overuse/abuse
-        posthog_properties=posthog_properties,
+        insights_properties=insights_properties,
     )
 
     content: str = ""
@@ -1101,12 +1101,12 @@ Here is the taxonomy for events:
         "$feature_view": {
             "label": "Feature view",
             "description": "When a user views a feature.",
-            "ignored_in_assistant": True,  # Specific to posthog-js/react, niche
+            "ignored_in_assistant": True,  # Specific to insights-js/react, niche
         },
         "$feature_interaction": {
             "label": "Feature interaction",
             "description": "When a user interacts with a feature.",
-            "ignored_in_assistant": True,  # Specific to posthog-js/react, niche
+            "ignored_in_assistant": True,  # Specific to insights-js/react, niche
         },
         "$feature_enrollment_update": {
             "label": "Feature enrollment",
@@ -1268,7 +1268,7 @@ Here is the taxonomy for event properties:
             "description": "Useful for debugging. The size of the retry queue.",
             "examples": ["100"],
         },
-        "$last_posthog_reset": {
+        "$last_insights_reset": {
             "label": "Timestamp of last call to `Reset` in the web sdk",
             "description": "The timestamp of the last call to `Reset` in the web SDK. This can be useful for debugging.",
             "ignored_in_assistant": True,
@@ -1379,7 +1379,7 @@ Here is the taxonomy for event properties:
         },
         "$session_entry_referrer": {
             "description": "URL of where the user came from. Captured at the start of the session and remains constant for the duration of the session.",
-            "examples": ["https://google.com/search?q=posthog&rlz=1C..."],
+            "examples": ["https://google.com/search?q=insights&rlz=1C..."],
             "label": "Session entry Referrer URL",
         },
         "$session_entry_referring_domain": {
@@ -1453,7 +1453,7 @@ Here is the taxonomy for event properties:
         },
         "$lib_rate_limit_remaining_tokens": {
             "label": "Clientside rate limit remaining tokens",
-            "description": "Remaining rate limit tokens for the posthog-js library client-side rate limiting implementation.",
+            "description": "Remaining rate limit tokens for the insights-js library client-side rate limiting implementation.",
             "examples": ["100"],
         },
         "token": {
@@ -1552,12 +1552,12 @@ Here is the taxonomy for event properties:
         },
         "$exception_capture_endpoint": {
             "label": "Exception capture endpoint",
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": ["/e/"],
         },
         "$exception_capture_endpoint_suffix": {
             "label": "Exception capture endpoint suffix",
-            "description": "Endpoint used by posthog-js exception autocapture.",
+            "description": "Endpoint used by insights-js exception autocapture.",
             "examples": ["/e/"],
         },
         "$exception_capture_enabled_server_side": {
@@ -1589,7 +1589,7 @@ Here is the taxonomy for event properties:
         },
         "$browser_type": {
             "label": "Browser type",
-            "description": "This is only added when posthog-js config.opt_out_useragent_filter is true.",
+            "description": "This is only added when insights-js config.opt_out_useragent_filter is true.",
             "examples": ["browser", "bot"],
         },
         "$device_id": {
@@ -1634,11 +1634,11 @@ Here is the taxonomy for event properties:
         },
         "$session_recording_url_trigger_activated_session": {
             "label": "Session recording URL trigger activated session",
-            "description": "Session recording URL trigger activated session config. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger activated session config. Used by insights-js to track URL activation of session replay.",
         },
         "$session_recording_url_trigger_status": {
             "label": "Session recording URL trigger status",
-            "description": "Session recording URL trigger status. Used by posthog-js to track URL activation of session replay.",
+            "description": "Session recording URL trigger status. Used by insights-js to track URL activation of session replay.",
         },
         "$recording_status": {
             "label": "Session recording status",
@@ -1769,7 +1769,7 @@ Here is the taxonomy for event properties:
         "$app_namespace": {
             "label": "App namespace",
             "description": "The namespace of the app as identified in the app store.",
-            "examples": ["com.posthog.app"],
+            "examples": ["com.insights.app"],
         },
         "$app_version": {
             "label": "App version",
@@ -2024,7 +2024,7 @@ Here is the taxonomy for event properties:
         "$lib": {
             "label": "Library",
             "description": "What library was used to send the event.",
-            "examples": ["web", "posthog-ios"],
+            "examples": ["web", "insights-ios"],
         },
         "$lib_custom_api_host": {
             "label": "Library custom API host",
@@ -2054,7 +2054,7 @@ Here is the taxonomy for event properties:
         "$referrer": {
             "label": "Referrer URL",
             "description": "URL of where the user came from.",
-            "examples": ["https://google.com/search?q=posthog&rlz=1C..."],
+            "examples": ["https://google.com/search?q=insights&rlz=1C..."],
         },
         "$referring_domain": {
             "label": "Referring domain",
@@ -2063,7 +2063,7 @@ Here is the taxonomy for event properties:
         },
         "$user_id": {
             "label": "User ID",
-            "description": "This variable will be set to the distinct ID if you've called `posthog.identify('distinct id')`. If the user is anonymous, it'll be empty.",
+            "description": "This variable will be set to the distinct ID if you've called `insights.identify('distinct id')`. If the user is anonymous, it'll be empty.",
         },
         "$ip": {
             "label": "IP address",
@@ -2261,7 +2261,7 @@ Here is the taxonomy for event properties:
         "referring_application": {
             "label": "Referrer application",
             "description": "The namespace of the app that made the request.",
-            "examples": ["com.posthog.app"],
+            "examples": ["com.insights.app"],
         },
         "version": {
             "label": "App version",
@@ -2365,7 +2365,7 @@ Here is the taxonomy for event properties:
         },
         "$initial_person_info": {
             "label": "Initial person info",
-            "description": "posthog-js initial person information. used in the $set_once flow",
+            "description": "insights-js initial person information. used in the $set_once flow",
             "system": True,
         },
         "revenue": {
@@ -2414,58 +2414,58 @@ Here is the taxonomy for event properties:
         },
         "$prev_pageview_last_scroll": {
             "label": "Previous pageview last scroll",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [0],
         },
         "$prev_pageview_id": {
             "label": "Previous pageview ID",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": ["1"],
             "system": True,
         },
         "$prev_pageview_last_scroll_percentage": {
             "label": "Previous pageview last scroll percentage",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "examples": [0],
         },
         "$prev_pageview_max_scroll": {
             "examples": [0],
             "label": "Previous pageview max scroll",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
         },
         "$prev_pageview_max_scroll_percentage": {
             "examples": [0],
             "label": "Previous pageview max scroll percentage",
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
         },
         "$prev_pageview_last_content": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview last content",
         },
         "$prev_pageview_last_content_percentage": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview last content percentage",
         },
         "$prev_pageview_max_content": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview max content",
         },
         "$prev_pageview_max_content_percentage": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview max content percentage",
         },
         "$prev_pageview_pathname": {
             "examples": ["/pricing", "/about-us/team"],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview pathname",
         },
         "$prev_pageview_duration": {
             "examples": [0],
-            "description": "posthog-js adds these to the page leave event, they are used in web analytics calculations",
+            "description": "insights-js adds these to the page leave event, they are used in web analytics calculations",
             "label": "Previous pageview duration",
         },
         "$surveys_activated": {
@@ -2765,11 +2765,11 @@ Here is the taxonomy for person properties:
         "email": {
             "label": "Email address",
             "description": "The email address of the user.",
-            "examples": ["johnny.appleseed@icloud.com", "sales@posthog.com", "test@example.com"],
+            "examples": ["johnny.appleseed@icloud.com", "sales@hanzo.ai", "test@example.com"],
             "type": "String",
         },
         "$virt_initial_channel_type": {
-            "description": "What type of acquisition channel this user initially came from. Learn more about channels types and how to customise them in [our documentation](https://posthog.com/docs/data/channel-type)",
+            "description": "What type of acquisition channel this user initially came from. Learn more about channels types and how to customise them in [our documentation](https://hanzo.ai/docs/data/channel-type)",
             "examples": ["Paid Search", "Organic Video", "Direct"],
             "label": "Initial channel type",
             "type": "String",

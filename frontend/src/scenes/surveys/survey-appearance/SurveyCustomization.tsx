@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonCheckbox, LemonDialog, LemonDivider, LemonInput } from '@posthog/lemon-ui'
+import { LemonCheckbox, LemonDialog, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'

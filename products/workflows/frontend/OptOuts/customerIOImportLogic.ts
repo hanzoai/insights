@@ -167,7 +167,7 @@ export const customerIOImportLogic = kea<customerIOImportLogicType>([
             }
         },
         uploadCSV: async () => {
-            const CSRF_COOKIE_NAME = 'posthog_csrftoken'
+            const CSRF_COOKIE_NAME = 'insights_csrftoken'
             const file = customerIOImportLogic.values.csvFile
             if (!file) {
                 lemonToast.error('Please select a CSV file')

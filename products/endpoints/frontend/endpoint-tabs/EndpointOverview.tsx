@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton, LemonLabel, LemonTag, ProfilePicture } from '@posthog/lemon-ui'
+import { LemonButton, LemonLabel, LemonTag, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'

@@ -10,7 +10,7 @@ describe('router-utils', () => {
         expect(altered).toEqual('/account/two_factor')
     })
     it('allows project urls to use an API key in place of numeric project id', () => {
-        const altered = addProjectIdIfMissing('/project/phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay', 123)
-        expect(altered).toEqual('/project/phc_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay')
+        const altered = addProjectIdIfMissing('/project/hi_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay', 123)
+        expect(altered).toEqual('/project/hi_gE7SWBNBgFbA4eQ154KPXebyB8KyLJuypR8jg1DSo9Z/replay')
     })
 })

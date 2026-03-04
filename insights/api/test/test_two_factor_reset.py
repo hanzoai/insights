@@ -144,7 +144,7 @@ class TestTwoFactorReset(APIBaseTest):
 
         # Create and set up half-auth for a different user
         other_user = User.objects.create_user(
-            email="other@posthog.com",
+            email="other@hanzo.ai",
             password="other-password",
             first_name="Other",
         )
@@ -238,7 +238,7 @@ class TestTwoFactorReset(APIBaseTest):
 
         # Create and set up half-auth for a different user
         other_user = User.objects.create_user(
-            email="other@posthog.com",
+            email="other@hanzo.ai",
             password="other-password",
             first_name="Other",
         )

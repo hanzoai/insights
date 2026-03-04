@@ -5,7 +5,7 @@ from django.db import transaction
 from django.db.models import QuerySet
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from django_filters import BaseInFilter, CharFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -76,7 +76,7 @@ class InsightsFunctionMinimalSerializer(serializers.ModelSerializer):
             "created_by",
             "updated_at",
             "enabled",
-            "hog",
+            "iql",
             "filters",
             "icon_url",
             "template",
@@ -122,7 +122,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             "updated_at",
             "enabled",
             "deleted",
-            "hog",
+            "iql",
             "bytecode",
             "transpiled",
             "inputs_schema",
@@ -202,7 +202,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             if template_id:
                 template = InsightsFunctionTemplate.objects.get(template_id=data["template_id"])
                 if template:
-                    data["fn"] = data.get("hog") or template.code
+                    data["fn"] = data.get("iql") or template.code
                     data["inputs_schema"] = data.get("inputs_schema") or template.inputs_schema
                     data["inputs"] = data.get("inputs") or {}
                     data["icon_url"] = data.get("icon_url") or template.icon_url
@@ -257,7 +257,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
             if hog_type not in ["site_destination", "destination"]:
                 raise serializers.ValidationError({"mappings": "Mappings are only allowed for destinations."})
 
-        if "hog" in attrs:
+        if "iql" in attrs:
             # First check the raw code size before trying to compile/transpile it
             hog_code_size = len(attrs["fn"].encode("utf-8"))
             if hog_code_size > MAX_SCRIPT_CODE_SIZE_BYTES:
@@ -286,7 +286,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
                 attrs["transpiled"] = None
 
         if is_create:
-            if not attrs.get("hog"):
+            if not attrs.get("iql"):
                 raise serializers.ValidationError({"fn": "Required."})
 
         return attrs
@@ -617,7 +617,7 @@ class InsightsFunctionViewSet(
 
         # Check feature flag for backfill-workflows-destination
         team = Team.objects.get(id=self.team_id)
-        if not posthoganalytics.feature_enabled(
+        if not hanzoanalytics.feature_enabled(
             "backfill-workflows-destination",
             str(team.uuid),
             groups={"organization": str(team.organization.id)},

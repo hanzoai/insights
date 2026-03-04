@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonDivider, LemonLabel, LemonTab, LemonTabs, Link, Tooltip } from '@posthog/lemon-ui'
+import { LemonBanner, LemonDivider, LemonLabel, LemonTab, LemonTabs, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import IngestionControls from 'lib/components/IngestionControls'
 import { IngestionControlsSummary } from 'lib/components/IngestionControls/Summary'
@@ -49,7 +49,7 @@ function LinkedFlagSelector(): JSX.Element | null {
                         tooltip={
                             <>
                                 <p>Record for "any" variant, or only for a specific variant.</p>
-                                <p>Variant targeting requires posthog-js v1.110.0+</p>
+                                <p>Variant targeting requires insights-js v1.110.0+</p>
                             </>
                         }
                     />
@@ -217,7 +217,7 @@ function MinimumDurationSetting(): JSX.Element | null {
                     <>
                         The JS SDK has an in-memory queue. This means that for traditional web apps the minimum duration
                         control is best effort.{' '}
-                        <Link to="https://posthog.com/docs/session-replay/how-to-control-which-sessions-you-record#limitations">
+                        <Link to="https://hanzo.ai/docs/session-replay/how-to-control-which-sessions-you-record#limitations">
                             Read more in our docs
                         </Link>
                     </>
@@ -309,7 +309,7 @@ const RecordingTriggersSummary = ({
             triggers={triggers}
             controlDescription="sessions recorded"
             docsLink={{
-                to: 'https://posthog.com/docs/session-replay/how-to-control-which-sessions-you-record',
+                to: 'https://hanzo.ai/docs/session-replay/how-to-control-which-sessions-you-record',
                 label: 'Read about how to start and stop sessions in our docs.',
             }}
         />

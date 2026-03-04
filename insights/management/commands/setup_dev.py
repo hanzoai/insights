@@ -24,7 +24,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             _, team, user = User.objects.bootstrap(
                 organization_name=ORGANIZATION_NAME,
-                email="test@posthog.com",
+                email="test@hanzo.ai",
                 password="12345678",
                 first_name="Jane Doe",
                 is_staff=True,
@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 export async function onEvent(event, meta) {
                     const ratelimit = await meta.cache.get('ratelimit')
                     if (!ratelimit && event.event !== '$pluginEvent') {
-                        posthog.capture('$pluginEvent', { event: event.event })
+                        insights.capture('$pluginEvent', { event: event.event })
                         await meta.cache.set('ratelimit', 1)
                         await meta.cache.expire('ratelimit', 60)
                     }

@@ -1,5 +1,5 @@
 import { actions, kea, listeners, path, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -39,13 +39,13 @@ export const sidePanelOfframpLogic = kea<sidePanelOfframpLogicType>([
     }),
     listeners({
         showOfframpModal: () => {
-            posthog.capture('offramp modal shown')
+            insights.capture('offramp modal shown')
         },
         hideOfframpModal: ({ action }) => {
-            posthog.capture('offramp modal hidden', { action })
+            insights.capture('offramp modal hidden', { action })
         },
         dismissOfframpModal: () => {
-            posthog.capture('offramp modal hidden', { action: 'dismiss' })
+            insights.capture('offramp modal hidden', { action: 'dismiss' })
         },
     }),
 ])

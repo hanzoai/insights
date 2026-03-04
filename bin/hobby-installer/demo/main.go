@@ -7,9 +7,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/bin/hobby-installer/core"
-	"github.com/posthog/posthog/bin/hobby-installer/tui/steps"
-	"github.com/posthog/posthog/bin/hobby-installer/ui"
+	"github.com/hanzoai/insights/bin/hobby-installer/core"
+	"github.com/hanzoai/insights/bin/hobby-installer/tui/steps"
+	"github.com/hanzoai/insights/bin/hobby-installer/ui"
 )
 
 func main() {
@@ -54,7 +54,7 @@ type checksModel struct {
 
 func runChecksDemo() error {
 	logger := core.GetLogger()
-	logger.WriteString("PostHog Hobby Installer - Checks Demo\n")
+	logger.WriteString("Insights Hobby Installer - Checks Demo\n")
 	logger.WriteString("Starting system checks...\n")
 
 	m := checksModel{checks: steps.NewChecksModel()}

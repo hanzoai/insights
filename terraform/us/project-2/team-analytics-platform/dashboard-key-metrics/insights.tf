@@ -1,23 +1,23 @@
 # =============================================================================
-# PostHog Insights Configuration
+# Insights Insights Configuration
 # =============================================================================
 #
-# This file demonstrates how to manage PostHog insights using Terraform.
+# This file demonstrates how to manage Insights insights using Terraform.
 # Insights can be linked to dashboards via dashboard_ids.
 #
 # For more information, see:
-#   https://registry.terraform.io/providers/PostHog/posthog/latest/docs/resources/insight
+#   https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/insight
 # =============================================================================
 
 locals {
   export_insight_regions = {
     us = {
-      table_name    = "postgres.posthog_exportedasset"
-      dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id, 633001, 567706]
+      table_name    = "postgres.insights_exportedasset"
+      dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id, 633001, 567706]
     }
     eu = {
-      table_name    = "eu_posthog_exportedasset"
-      dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id]
+      table_name    = "eu_insights_exportedasset"
+      dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id]
     }
   }
 
@@ -190,16 +190,16 @@ locals {
   })
 }
 
-# Terraform configuration for PostHog insight
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights insight
+# Compatible with insights provider v1.0
 # Source insight ID: 5089102
 # Short ID: tycwiOT1
 import {
-  to = posthog_insight.shared_dashboard_stats
+  to = insights_insight.shared_dashboard_stats
   id = "5089102"
 }
 
-resource "posthog_insight" "shared_dashboard_stats" {
+resource "insights_insight" "shared_dashboard_stats" {
   name = "Shared Dashboard Stats"
   query_json = jsonencode({
     "kind": "InsightVizNode",
@@ -266,19 +266,19 @@ resource "posthog_insight" "shared_dashboard_stats" {
     "showHeader": true
   })
   tags = ["managed-by:terraform"]
-  dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id]
+  dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id]
 }
 
-# Terraform configuration for PostHog insight
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights insight
+# Compatible with insights provider v1.0
 # Source insight ID: 5088513
 # Short ID: DeafU0xe
 import {
-  to = posthog_insight.dashboards_created_from_template_unique_users
+  to = insights_insight.dashboards_created_from_template_unique_users
   id = "5088513"
 }
 
-resource "posthog_insight" "dashboards_created_from_template_unique_users" {
+resource "insights_insight" "dashboards_created_from_template_unique_users" {
   name = "Dashboards created from template (unique users)"
   query_json = jsonencode({
     "kind": "InsightVizNode",
@@ -329,19 +329,19 @@ resource "posthog_insight" "dashboards_created_from_template_unique_users" {
     }
   })
   tags = ["managed-by:terraform"]
-  dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id, 778670]
+  dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id, 778670]
 }
 
-# Terraform configuration for PostHog insight
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights insight
+# Compatible with insights provider v1.0
 # Source insight ID: 5089292
 # Short ID: lvR7dwxH
 import {
-  to = posthog_insight.created_subscriptions
+  to = insights_insight.created_subscriptions
   id = "5089292"
 }
 
-resource "posthog_insight" "created_subscriptions" {
+resource "insights_insight" "created_subscriptions" {
   name = "Created subscriptions"
   query_json = jsonencode({
     "kind": "InsightVizNode",
@@ -368,10 +368,10 @@ resource "posthog_insight" "created_subscriptions" {
     }
   })
   tags = ["managed-by:terraform"]
-  dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id]
+  dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id]
 }
 
-resource "posthog_insight" "export_successes_and_failures" {
+resource "insights_insight" "export_successes_and_failures" {
   for_each = local.export_insight_regions
 
   name          = "Export Successes and Failures (${upper(each.key)})"
@@ -380,16 +380,16 @@ resource "posthog_insight" "export_successes_and_failures" {
   dashboard_ids = each.value.dashboard_ids
 }
 
-# Terraform configuration for PostHog insight
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights insight
+# Compatible with insights provider v1.0
 # Source insight ID: 3901616
 # Short ID: KUvN6RsQ
 import {
-  to = posthog_insight.usage_by_role
+  to = insights_insight.usage_by_role
   id = "3901616"
 }
 
-resource "posthog_insight" "usage_by_role" {
+resource "insights_insight" "usage_by_role" {
   name = "Usage by role"
   query_json = jsonencode({
     "kind": "InsightVizNode",
@@ -425,19 +425,19 @@ resource "posthog_insight" "usage_by_role" {
     }
   })
   tags = ["managed-by:terraform"]
-  dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id]
+  dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id]
 }
 
-# Terraform configuration for PostHog insight
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights insight
+# Compatible with insights provider v1.0
 # Source insight ID: 5088924
 # Short ID: GhRIGhBU
 import {
-  to = posthog_insight.alert_creation
+  to = insights_insight.alert_creation
   id = "5088924"
 }
 
-resource "posthog_insight" "alert_creation" {
+resource "insights_insight" "alert_creation" {
   name = "Alert creation"
   query_json = jsonencode({
     "kind": "InsightVizNode",
@@ -445,23 +445,23 @@ resource "posthog_insight" "alert_creation" {
       "kind": "TrendsQuery",
       "series": [
         {
-          "id": "postgres.posthog_alertconfiguration",
+          "id": "postgres.insights_alertconfiguration",
           "kind": "DataWarehouseNode",
           "math": "dau",
-          "name": "postgres.posthog_alertconfiguration",
+          "name": "postgres.insights_alertconfiguration",
           "id_field": "id",
-          "table_name": "postgres.posthog_alertconfiguration",
+          "table_name": "postgres.insights_alertconfiguration",
           "custom_name": "Unique users",
           "timestamp_field": "created_at",
           "distinct_id_field": "created_by_id"
         },
         {
-          "id": "postgres.posthog_alertconfiguration",
+          "id": "postgres.insights_alertconfiguration",
           "kind": "DataWarehouseNode",
           "math": "total",
-          "name": "postgres.posthog_alertconfiguration",
+          "name": "postgres.insights_alertconfiguration",
           "id_field": "id",
-          "table_name": "postgres.posthog_alertconfiguration",
+          "table_name": "postgres.insights_alertconfiguration",
           "custom_name": "Total count",
           "timestamp_field": "created_at",
           "distinct_id_field": "created_by_id"
@@ -482,19 +482,19 @@ resource "posthog_insight" "alert_creation" {
     }
   })
   tags = ["managed-by:terraform"]
-  dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id]
+  dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id]
 }
 
-# Terraform configuration for PostHog insight
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights insight
+# Compatible with insights provider v1.0
 # Source insight ID: 5512297
 # Short ID: pfwTATaa
 import {
-  to = posthog_insight.api_calls_originating_from_our_terraform_provider
+  to = insights_insight.api_calls_originating_from_our_terraform_provider
   id = "5512297"
 }
 
-resource "posthog_insight" "api_calls_originating_from_our_terraform_provider" {
+resource "insights_insight" "api_calls_originating_from_our_terraform_provider" {
   name = "API calls originating from our Terraform Provider"
   query_json = jsonencode({
     "kind": "DataVisualizationNode",
@@ -579,5 +579,5 @@ resource "posthog_insight" "api_calls_originating_from_our_terraform_provider" {
     }
   })
   tags = ["managed-by:terraform"]
-  dashboard_ids = [posthog_dashboard.team_analytics_platform_key_metrics.id, 821321]
+  dashboard_ids = [insights_dashboard.team_analytics_platform_key_metrics.id, 821321]
 }

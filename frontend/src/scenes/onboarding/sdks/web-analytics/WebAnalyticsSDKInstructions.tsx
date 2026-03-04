@@ -23,7 +23,7 @@ import {
     WebFinalSteps,
     WebflowInstallation,
     WordpressInstallation,
-} from '@posthog/shared-onboarding/web-analytics'
+} from '@hanzo/shared-onboarding/web-analytics'
 
 import { SDKInstructionsMap, SDKKey } from '~/types'
 

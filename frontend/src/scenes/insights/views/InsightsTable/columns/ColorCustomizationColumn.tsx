@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonColorButton } from '@posthog/lemon-ui'
+import { LemonColorButton } from '@hanzo/lemon-ui'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { trendsDataLogic } from 'scenes/trends/trendsDataLogic'

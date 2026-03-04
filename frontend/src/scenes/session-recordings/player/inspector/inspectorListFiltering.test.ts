@@ -27,7 +27,7 @@ describe('filtering inspector list items', () => {
                         type: 'comment',
                     } as unknown as InspectorListItemComment,
                 ],
-                miniFiltersByKey: { 'events-posthog': { enabled: false } as unknown as SharedListMiniFilter },
+                miniFiltersByKey: { 'events-insights': { enabled: false } as unknown as SharedListMiniFilter },
                 showOnlyMatching: false,
                 allowMatchingEventsFilter: false,
                 trackedWindow: null,

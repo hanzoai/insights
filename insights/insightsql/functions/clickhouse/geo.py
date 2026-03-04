@@ -1,7 +1,7 @@
 from insights.insightsql.ast import ArrayType, FloatType, IntegerType, StringType, TupleType
 from insights.insightsql.functions.core import InsightsQLFunctionMeta
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 GEO_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "greatCircleDistance": InsightsQLFunctionMeta("greatCircleDistance", 4, 4),
     "geoDistance": InsightsQLFunctionMeta("geoDistance", 4, 4),

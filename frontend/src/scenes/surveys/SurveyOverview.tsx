@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconComment, IconGitBranch } from '@posthog/icons'
-import { LemonButton, LemonDivider, Link } from '@posthog/lemon-ui'
+import { IconComment, IconGitBranch } from '@hanzo/icons'
+import { LemonButton, LemonDivider, Link } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { IconAreaChart, IconGridView, IconLink, IconListView } from 'lib/lemon-ui/icons'
@@ -93,7 +93,7 @@ export function SurveyOverview({ onTabChange }: { onTabChange?: (tab: string) =>
                                     <code className="bg-surface-tertiary px-1 rounded">?distinct_id=user123</code> to
                                     the URL.{' '}
                                     <Link
-                                        to="https://posthog.com/docs/surveys/creating-surveys#identifying-respondents-on-hosted-surveys"
+                                        to="https://hanzo.ai/docs/surveys/creating-surveys#identifying-respondents-on-hosted-surveys"
                                         target="_blank"
                                     >
                                         Check more details in the documentation
@@ -187,7 +187,7 @@ export function SurveyOverview({ onTabChange }: { onTabChange?: (tab: string) =>
                                 <Link
                                     data-attr="survey-doc-link"
                                     target="_blank"
-                                    to="https://posthog.com/docs/surveys/implementing-custom-surveys"
+                                    to="https://hanzo.ai/docs/surveys/implementing-custom-surveys"
                                     targetBlankIcon
                                 >
                                     in the docs
