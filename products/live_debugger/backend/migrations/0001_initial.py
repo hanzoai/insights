@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0893_add_ingestion_lane_fields_to_event_ingestion_restriction"),
+        ("insights", "0893_add_ingestion_lane_fields_to_event_ingestion_restriction"),
     ]
 
     operations = [
@@ -30,10 +30,10 @@ class Migration(migrations.Migration):
                 ("condition", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_livedebuggerbreakpoint",
+                "db_table": "insights_livedebuggerbreakpoint",
                 "managed": True,
                 "indexes": [models.Index(fields=["team_id", "repository"], name="live_debug_team_repo_idx")],
             },

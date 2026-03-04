@@ -7,15 +7,15 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0163_insights_favorited_updatedat_tags"),
+        ("insights", "0163_insights_favorited_updatedat_tags"),
     ]
 
     operations = [
         migrations.RunSQL(
             [
                 "SET statement_timeout = 600000000;",
-                "CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_per_team_id_bec4e5_idx ON posthog_person(team_id, id DESC);",
+                "CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_per_team_id_bec4e5_idx ON insights_person(team_id, id DESC);",
             ],
-            reverse_sql='DROP INDEX "posthog_per_team_id_bec4e5_idx";',
+            reverse_sql='DROP INDEX "insights_per_team_id_bec4e5_idx";',
         )
     ]

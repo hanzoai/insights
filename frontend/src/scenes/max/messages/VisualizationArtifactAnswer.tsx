@@ -67,7 +67,7 @@ function InsightSuggestionButton({ tabId }: { tabId: string }): JSX.Element {
     )
 }
 
-const QUERY_CONTEXT_POSTHOG_AI: QueryContext = { limitContext: 'posthog_ai' } as const
+const QUERY_CONTEXT_INSIGHTS_AI: QueryContext = { limitContext: 'insights_ai' } as const
 
 export const VisualizationArtifactAnswer = React.memo(function VisualizationArtifactAnswer({
     message,
@@ -118,7 +118,7 @@ export const VisualizationArtifactAnswer = React.memo(function VisualizationArti
         <MessageTemplate type="ai" className="w-full" wrapperClassName="w-full" boxClassName="flex flex-col w-full">
             {!isCollapsed && (
                 <div className={clsx('flex flex-col overflow-auto', isFunnelsQuery(rawQuery) ? 'h-[580px]' : 'h-96')}>
-                    <Query query={query} readOnly embedded context={QUERY_CONTEXT_POSTHOG_AI} />
+                    <Query query={query} readOnly embedded context={QUERY_CONTEXT_INSIGHTS_AI} />
                 </div>
             )}
             <div className={clsx('flex items-center justify-between', !isCollapsed && 'mt-2')}>

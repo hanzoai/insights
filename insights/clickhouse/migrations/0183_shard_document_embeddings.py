@@ -33,7 +33,7 @@ operations = [
         f"DROP TABLE IF EXISTS {DOCUMENT_EMBEDDING_WRITABLE}",
         node_roles=[NodeRole.INGESTION_SMALL],
     ),
-    # 4. Create new sharded data tables (this function used to create "posthog_document_embeddings" directly, but now creates the sharded_ version)
+    # 4. Create new sharded data tables (this function used to create "insights_document_embeddings" directly, but now creates the sharded_ version)
     run_sql_with_exceptions(
         DOCUMENT_EMBEDDINGS_TABLE_SQL(),
         node_roles=[NodeRole.DATA],

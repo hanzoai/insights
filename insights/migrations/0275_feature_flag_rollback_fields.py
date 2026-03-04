@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0274_add_plugin_icon_and_rewrite_urls"),
+        ("insights", "0274_add_plugin_icon_and_rewrite_urls"),
     ]
 
     operations = [

@@ -5,18 +5,18 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0734_add_links_model"),
+        ("insights", "0734_add_links_model"),
     ]
 
     operations = [
         migrations.RenameIndex(
             model_name="link",
             new_name="domain_short_code_idx",
-            old_name="posthog_lin_short_l_33b439_idx",
+            old_name="insights_lin_short_l_33b439_idx",
         ),
         migrations.RenameIndex(
             model_name="link",
             new_name="team_id_idx",
-            old_name="posthog_lin_team_id_d47d3a_idx",
+            old_name="insights_lin_team_id_d47d3a_idx",
         ),
     ]

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0184_delete_sessionsfilter"),
+        ("insights", "0184_delete_sessionsfilter"),
     ]
 
     operations = [
@@ -30,11 +30,11 @@ class Migration(migrations.Migration):
                 ("finished_at", models.DateTimeField(blank=True, null=True)),
                 ("last_error", models.TextField(blank=True, null=True)),
                 (
-                    "posthog_min_version",
+                    "insights_min_version",
                     models.CharField(blank=True, max_length=20, null=True),
                 ),
                 (
-                    "posthog_max_version",
+                    "insights_max_version",
                     models.CharField(blank=True, max_length=20, null=True),
                 ),
             ],

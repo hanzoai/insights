@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0278_organization_customer_id"),
+        ("insights", "0278_organization_customer_id"),
     ]
 
     operations = [
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="playlist_items",
-                        to="posthog.sessionrecordingplaylist",
+                        to="insights.sessionrecordingplaylist",
                     ),
                 ),
             ],

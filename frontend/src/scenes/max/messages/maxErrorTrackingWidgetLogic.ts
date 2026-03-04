@@ -85,7 +85,7 @@ export const maxErrorTrackingWidgetLogic = kea<maxErrorTrackingWidgetLogicType>(
                         undefined,
                         undefined,
                         false,
-                        'posthog_ai'
+                        'insights_ai'
                     )
                     const results = (response.results ?? []) as any[]
 

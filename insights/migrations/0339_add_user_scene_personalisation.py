@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0338_datawarehouse_saved_query"),
+        ("insights", "0338_datawarehouse_saved_query"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.dashboard",
+                        to="insights.dashboard",
                     ),
                 ),
                 (
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 (
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
             model_name="userscenepersonalisation",
             constraint=models.UniqueConstraint(
                 fields=("team", "user", "scene"),
-                name="posthog_unique_scene_personalisation",
+                name="insights_unique_scene_personalisation",
             ),
         ),
     ]

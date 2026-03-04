@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def forward(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
     Team.objects.filter(name__iexact="Hogflix Demo App").update(is_demo=True)
 
 
@@ -14,7 +14,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0117_merge_20210126_0917"),
+        ("insights", "0117_merge_20210126_0917"),
     ]
 
     operations = [

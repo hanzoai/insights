@@ -64,7 +64,7 @@ class Dashboard(FileSystemSyncMixin, ModelActivityMixin, RootTeamMixin, models.M
     variables = models.JSONField(default=dict, null=True, blank=True)
     breakdown_colors = models.JSONField(default=list, null=True, blank=True)
     data_color_theme = models.ForeignKey(
-        "posthog.DataColorTheme",
+        "insights.DataColorTheme",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -75,7 +75,7 @@ class Dashboard(FileSystemSyncMixin, ModelActivityMixin, RootTeamMixin, models.M
         choices=RestrictionLevel.choices,
     )
     insights = models.ManyToManyField(
-        "posthog.Insight",
+        "insights.Insight",
         related_name="dashboards",
         through="DashboardTile",
         blank=True,

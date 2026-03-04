@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0239_delete_postgres_pluginlogentry"),
+        ("insights", "0239_delete_postgres_pluginlogentry"),
     ]
 
     operations = [

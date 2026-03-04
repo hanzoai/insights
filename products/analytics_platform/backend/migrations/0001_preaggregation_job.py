@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0938_add_redirect_to_dlq_restriction_type"),
+        ("insights", "0938_add_redirect_to_dlq_restriction_type"),
     ]
 
     operations = [
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={

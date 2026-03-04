@@ -19,13 +19,13 @@ class SharePassword(models.Model):
     """
 
     sharing_configuration = models.ForeignKey(
-        "posthog.SharingConfiguration", on_delete=models.CASCADE, related_name="share_passwords"
+        "insights.SharingConfiguration", on_delete=models.CASCADE, related_name="share_passwords"
     )
 
     password_hash = models.CharField(max_length=128)
 
     created_by = models.ForeignKey(
-        "posthog.User", on_delete=models.SET_NULL, null=True, related_name="created_share_passwords"
+        "insights.User", on_delete=models.SET_NULL, null=True, related_name="created_share_passwords"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

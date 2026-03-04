@@ -11,7 +11,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0926_featureflag_bucketing_identifier"),
+        ("insights", "0926_featureflag_bucketing_identifier"),
     ]
 
     operations = [
@@ -85,9 +85,9 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "organization",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.organization"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.organization"),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "ordering": ["-created_at"],
@@ -124,12 +124,12 @@ class Migration(migrations.Migration):
                 ("enabled", models.BooleanField(default=True)),
                 (
                     "organization",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.organization"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.organization"),
                 ),
                 (
                     "team",
                     models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"
+                        blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.team"
                     ),
                 ),
             ],
@@ -164,38 +164,38 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="approvals",
-                        to="posthog.changerequest",
+                        to="insights.changerequest",
                     ),
                 ),
             ],
         ),
         migrations.AddIndex(
             model_name="changerequest",
-            index=models.Index(fields=["team", "state"], name="posthog_cha_team_id_0a5974_idx"),
+            index=models.Index(fields=["team", "state"], name="insights_cha_team_id_0a5974_idx"),
         ),
         migrations.AddIndex(
             model_name="changerequest",
-            index=models.Index(fields=["action_key", "state"], name="posthog_cha_action__2d384d_idx"),
+            index=models.Index(fields=["action_key", "state"], name="insights_cha_action__2d384d_idx"),
         ),
         migrations.AddIndex(
             model_name="changerequest",
-            index=models.Index(fields=["expires_at"], name="posthog_cha_expires_0a6444_idx"),
+            index=models.Index(fields=["expires_at"], name="insights_cha_expires_0a6444_idx"),
         ),
         migrations.AddIndex(
             model_name="changerequest",
-            index=models.Index(fields=["validation_status", "state"], name="posthog_cha_validat_24672f_idx"),
+            index=models.Index(fields=["validation_status", "state"], name="insights_cha_validat_24672f_idx"),
         ),
         migrations.AddIndex(
             model_name="approvalpolicy",
-            index=models.Index(fields=["action_key", "enabled"], name="posthog_app_action__871059_idx"),
+            index=models.Index(fields=["action_key", "enabled"], name="insights_app_action__871059_idx"),
         ),
         migrations.AddIndex(
             model_name="approvalpolicy",
-            index=models.Index(fields=["organization", "enabled"], name="posthog_app_organiz_36e124_idx"),
+            index=models.Index(fields=["organization", "enabled"], name="insights_app_organiz_36e124_idx"),
         ),
         migrations.AddIndex(
             model_name="approvalpolicy",
-            index=models.Index(fields=["team", "enabled"], name="posthog_app_team_id_9f077f_idx"),
+            index=models.Index(fields=["team", "enabled"], name="insights_app_team_id_9f077f_idx"),
         ),
         migrations.AlterUniqueTogether(
             name="approvalpolicy",
@@ -203,7 +203,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="approval",
-            index=models.Index(fields=["change_request", "decision"], name="posthog_app_change__5af5e4_idx"),
+            index=models.Index(fields=["change_request", "decision"], name="insights_app_change__5af5e4_idx"),
         ),
         migrations.AlterUniqueTogether(
             name="approval",

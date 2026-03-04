@@ -18,7 +18,7 @@ class JobOwners(str, Enum):
     TEAM_GROWTH = "team-growth"
     TEAM_INGESTION = "team-ingestion"
     TEAM_LLM_ANALYTICS = "team-llm-analytics"
-    TEAM_POSTHOG_AI = "team-posthog-ai"
+    TEAM_INSIGHTS_AI = "team-insights-ai"
     TEAM_REVENUE_ANALYTICS = "team-revenue-analytics"
     TEAM_WEB_ANALYTICS = "team-web-analytics"
 

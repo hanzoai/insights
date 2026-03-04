@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0376_externaldataschema_last_synced_at"),
+        ("insights", "0376_externaldataschema_last_synced_at"),
     ]
 
     operations = [
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="flatpersonoverride",
-            index=models.Index(fields=["team_id", "override_person_id"], name="posthog_fla_team_id_224253_idx"),
+            index=models.Index(fields=["team_id", "override_person_id"], name="insights_fla_team_id_224253_idx"),
         ),
         migrations.AddConstraint(
             model_name="flatpersonoverride",

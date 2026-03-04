@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("posthog", "0956_team_conversations_enabled_and_more"),
+        ("insights", "0956_team_conversations_enabled_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -71,14 +71,14 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_conversations_ticket",
+                "db_table": "insights_conversations_ticket",
                 "indexes": [
-                    models.Index(fields=["team", "widget_session_id"], name="posthog_con_team_id_cf3e51_idx"),
-                    models.Index(fields=["team", "distinct_id"], name="posthog_con_team_id_943139_idx"),
-                    models.Index(fields=["team", "status"], name="posthog_con_team_id_a21425_idx"),
+                    models.Index(fields=["team", "widget_session_id"], name="insights_con_team_id_cf3e51_idx"),
+                    models.Index(fields=["team", "distinct_id"], name="insights_con_team_id_943139_idx"),
+                    models.Index(fields=["team", "status"], name="insights_con_team_id_a21425_idx"),
                 ],
             },
         ),

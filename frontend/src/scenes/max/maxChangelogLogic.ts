@@ -25,8 +25,8 @@ interface AlertsPayload {
     alerts: AlertEntry[]
 }
 
-const CHANGELOG_STORAGE_KEY = 'posthog_ai_changelog_last_seen'
-const CHANGELOG_DISMISSED_KEY = 'posthog_ai_changelog_dismissed'
+const CHANGELOG_STORAGE_KEY = 'insights_ai_changelog_last_seen'
+const CHANGELOG_DISMISSED_KEY = 'insights_ai_changelog_dismissed'
 
 function generateEntriesHash(entries: ChangelogEntry[]): string {
     const content = entries.map((e) => `${e.title}|${e.description}|${e.tag || ''}`).join('::')
@@ -184,7 +184,7 @@ export const maxChangelogLogic = kea<maxChangelogLogicType>([
                 if (!featureFlags) {
                     return []
                 }
-                const payload = getFeatureFlagPayload(FEATURE_FLAGS.POSTHOG_AI_CHANGELOG)
+                const payload = getFeatureFlagPayload(FEATURE_FLAGS.INSIGHTS_AI_CHANGELOG)
                 return parseChangelogPayload(payload)
             },
         ],
@@ -199,7 +199,7 @@ export const maxChangelogLogic = kea<maxChangelogLogicType>([
                 if (!featureFlags) {
                     return []
                 }
-                const payload = getFeatureFlagPayload(FEATURE_FLAGS.POSTHOG_AI_ALERTS)
+                const payload = getFeatureFlagPayload(FEATURE_FLAGS.INSIGHTS_AI_ALERTS)
                 return parseAlertsPayload(payload)
             },
         ],

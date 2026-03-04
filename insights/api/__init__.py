@@ -71,7 +71,7 @@ from products.llm_analytics.backend.api import (
     LLMProxyViewSet,
 )
 from products.notebooks.backend.api.notebook import NotebookViewSet
-from products.posthog_ai.backend.api import MCPToolsViewSet
+from products.insights_ai.backend.api import MCPToolsViewSet
 from products.product_tours.backend.api import ProductTourViewSet
 from products.signals.backend.views import SignalViewSet
 from products.user_interviews.backend.api import UserInterviewViewSet

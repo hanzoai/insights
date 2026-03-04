@@ -5,7 +5,7 @@ from django.db import migrations
 
 def re_encrypt_models(apps, schema_editor):
     for model in ["ExternalDataSource", "DataWarehouseCredential", "Integration"]:
-        Model = apps.get_model("posthog", model)
+        Model = apps.get_model("insights", model)
 
         items = Model.objects.all()
         for item in items:
@@ -18,7 +18,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0477_datawarehouse_salesforce_order"),
+        ("insights", "0477_datawarehouse_salesforce_order"),
     ]
 
     operations = [

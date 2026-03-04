@@ -9,7 +9,7 @@ import structlog
 def backfill_recording_domains(apps, _):
     logger = structlog.get_logger(__name__)
     logger.info("starting 0258_team_recording_domains")
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     all_teams = Team.objects.all().only("id", "app_urls", "recording_domains")
     num_teams_to_update = len(all_teams)
@@ -46,7 +46,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0258_team_recording_domains"),
+        ("insights", "0258_team_recording_domains"),
     ]
 
     operations = [

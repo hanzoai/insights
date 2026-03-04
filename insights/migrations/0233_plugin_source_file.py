@@ -8,8 +8,8 @@ import insights.models.utils
 
 
 def migrate_plugin_source(apps, schema_editor):
-    Plugin = apps.get_model("posthog", "Plugin")
-    PluginSourceFile = apps.get_model("posthog", "PluginSourceFile")
+    Plugin = apps.get_model("insights", "Plugin")
+    PluginSourceFile = apps.get_model("insights", "PluginSourceFile")
 
     for plugin in Plugin.objects.filter(plugin_type="source"):
         if plugin.source:
@@ -34,7 +34,7 @@ def migrate_plugin_source(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0232_add_team_person_display_name_properties"),
+        ("insights", "0232_add_team_person_display_name_properties"),
     ]
 
     operations = [
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ("source", models.TextField(blank=True, null=True)),
                 (
                     "plugin",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.plugin"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.plugin"),
                 ),
             ],
         ),

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allow concurrent operations
 
     dependencies = [
-        ("posthog", "0457_datawarehousejoin_deleted_at_and_more"),
+        ("insights", "0457_datawarehousejoin_deleted_at_and_more"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 migrations.AlterField(
@@ -39,18 +39,18 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_insightviewed" ALTER COLUMN "team_id" DROP NOT NULL;
+                    ALTER TABLE "insights_insightviewed" ALTER COLUMN "team_id" DROP NOT NULL;
                     """,
                     reverse_sql="""
-                    ALTER TABLE "posthog_insightviewed" ALTER COLUMN "team_id" SET NOT NULL;
+                    ALTER TABLE "insights_insightviewed" ALTER COLUMN "team_id" SET NOT NULL;
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_insightviewed" ALTER COLUMN "user_id" DROP NOT NULL;
+                    ALTER TABLE "insights_insightviewed" ALTER COLUMN "user_id" DROP NOT NULL;
                     """,
                     reverse_sql="""
-                    ALTER TABLE "posthog_insightviewed" ALTER COLUMN "user_id" SET NOT NULL;
+                    ALTER TABLE "insights_insightviewed" ALTER COLUMN "user_id" SET NOT NULL;
                     """,
                 ),
             ],

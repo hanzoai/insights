@@ -12,11 +12,11 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             """
 -- migration-analyzer: safe reason=safe update with very few rows being updated (less than 10k)
-UPDATE posthog_datawarehousetable t
+UPDATE insights_datawarehousetable t
 SET credential_id = NULL
 WHERE t.id IN (
     SELECT distinct table_id
-    FROM posthog_datawarehousesavedquery
+    FROM insights_datawarehousesavedquery
     WHERE table_id is not null
 );
 """,

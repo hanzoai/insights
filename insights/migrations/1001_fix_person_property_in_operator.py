@@ -16,7 +16,7 @@ def fix_person_property_in_operators(apps, schema_editor):
     - 'in' -> 'exact'
     - 'not_in' -> 'is_not'
     """
-    FeatureFlag = apps.get_model("posthog", "FeatureFlag")
+    FeatureFlag = apps.get_model("insights", "FeatureFlag")
 
     flags_to_update = []
 
@@ -51,7 +51,7 @@ def fix_person_property_in_operators(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1000_create_healthissue_table"),
+        ("insights", "1000_create_healthissue_table"),
     ]
 
     operations = [

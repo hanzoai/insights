@@ -5,13 +5,13 @@ from django.db import migrations
 
 
 def set_default_data_attributes(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
     Team.objects.update(data_attributes=["data-attr"])
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0139_dashboard_tagging"),
+        ("insights", "0139_dashboard_tagging"),
     ]
 
     operations = [

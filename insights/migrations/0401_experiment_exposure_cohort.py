@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0400_datawarehousetable_row_count"),
+        ("insights", "0400_datawarehousetable_row_count"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                     model_name="experiment",
                     name="exposure_cohort",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.cohort"
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.cohort"
                     ),
                 )
             ],
@@ -26,19 +26,19 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_experiment" ADD COLUMN "exposure_cohort_id" integer NULL CONSTRAINT "posthog_experiment_exposure_cohort_id_19450b9e_fk_posthog_c" REFERENCES "posthog_cohort"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_experiment_exposure_cohort_id_19450b9e_fk_posthog_c" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_experiment" ADD COLUMN "exposure_cohort_id" integer NULL CONSTRAINT "insights_experiment_exposure_cohort_id_19450b9e_fk_insights_c" REFERENCES "insights_cohort"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_experiment_exposure_cohort_id_19450b9e_fk_insights_c" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_experiment" DROP COLUMN IF EXISTS "exposure_cohort_id";
+                        ALTER TABLE "insights_experiment" DROP COLUMN IF EXISTS "exposure_cohort_id";
                     """,
                 ),
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_experiment_exposure_cohort_id_19450b9e" ON "posthog_experiment" ("exposure_cohort_id");
+                    CREATE INDEX CONCURRENTLY "insights_experiment_exposure_cohort_id_19450b9e" ON "insights_experiment" ("exposure_cohort_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX CONCURRENTLY IF EXISTS "posthog_experiment_exposure_cohort_id_19450b9e";
+                        DROP INDEX CONCURRENTLY IF EXISTS "insights_experiment_exposure_cohort_id_19450b9e";
                     """,
                 ),
             ],

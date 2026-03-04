@@ -10,14 +10,14 @@ BATCH_SIZE = 500
 
 
 def normalize_payloads_to_strings(apps, schema_editor):
-    FeatureFlag = apps.get_model("posthog", "FeatureFlag")
+    FeatureFlag = apps.get_model("insights", "FeatureFlag")
 
     total_updated = 0
     while True:
         flags_with_payloads = list(
             FeatureFlag.objects.raw(f"""
             SELECT f.*
-            FROM posthog_featureflag f,
+            FROM insights_featureflag f,
                  jsonb_each(f.filters->'payloads') AS kv(key, value)
             WHERE f.filters->'payloads' IS NOT NULL
               AND f.filters->'payloads' != '{{}}'::jsonb
@@ -46,7 +46,7 @@ def normalize_payloads_to_strings(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1014_increase_annotation_content_max_length"),
+        ("insights", "1014_increase_annotation_content_max_length"),
     ]
 
     operations = [

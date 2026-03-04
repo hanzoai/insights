@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0135_plugins_on_cloud"),
+        ("insights", "0135_plugins_on_cloud"),
     ]
 
     operations = [
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
-                to="posthog.PluginConfig",
+                to="insights.PluginConfig",
             ),
         ),
     ]

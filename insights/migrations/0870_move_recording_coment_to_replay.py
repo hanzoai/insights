@@ -8,7 +8,7 @@ logger = structlog.get_logger(__name__)
 
 
 def migrate_recording_comments_to_replay_scope(apps, schema_editor):
-    Comment = apps.get_model("posthog", "Comment")
+    Comment = apps.get_model("insights", "Comment")
 
     comments_to_migrate = []
     batch_size = 500
@@ -41,7 +41,7 @@ def migrate_recording_comments_to_replay_scope(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0869_create_cohort_calculation_history"),
+        ("insights", "0869_create_cohort_calculation_history"),
     ]
 
     operations = [

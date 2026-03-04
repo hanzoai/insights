@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0866_add_integration_to_batch_export_destination"),
+        ("insights", "0866_add_integration_to_batch_export_destination"),
     ]
 
     operations = [
@@ -26,11 +26,11 @@ class Migration(migrations.Migration):
                 ),
                 migrations.RunSQL(
                     sql="""
-                    UPDATE posthog_featureflag flag
+                    UPDATE insights_featureflag flag
                     SET updated_at = last_flag_activity.latest_created_at
                     FROM (
                         SELECT log.item_id, log.team_id, MAX(log.created_at) AS latest_created_at
-                        FROM posthog_activitylog log
+                        FROM insights_activitylog log
                         WHERE log.scope = 'FeatureFlag'
                         AND log.activity = 'updated'
                         GROUP BY log.team_id, log.item_id
@@ -38,15 +38,15 @@ class Migration(migrations.Migration):
                     WHERE CAST(flag.id AS VARCHAR) = last_flag_activity.item_id
                     AND flag.team_id = last_flag_activity.team_id;
                     """,
-                    reverse_sql="UPDATE posthog_featureflag SET updated_at = NULL WHERE updated_at IS NOT NULL;",
+                    reverse_sql="UPDATE insights_featureflag SET updated_at = NULL WHERE updated_at IS NOT NULL;",
                 ),
                 migrations.RunSQL(
                     sql="""
-                    UPDATE posthog_featureflag
+                    UPDATE insights_featureflag
                     SET updated_at = created_at
                     WHERE updated_at IS NULL;
                     """,
-                    reverse_sql="UPDATE posthog_featureflag SET updated_at = NULL WHERE updated_at IS NOT NULL;",
+                    reverse_sql="UPDATE insights_featureflag SET updated_at = NULL WHERE updated_at IS NOT NULL;",
                 ),
             ],
         ),

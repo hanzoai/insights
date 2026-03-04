@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0732_teamrevenueanalyticsconfig_notified_first_sync"),
+        ("insights", "0732_teamrevenueanalyticsconfig_notified_first_sync"),
     ]
 
     operations = [
@@ -23,15 +23,15 @@ class Migration(migrations.Migration):
                 ("ref", models.CharField(blank=True, max_length=100, null=True)),
                 ("href", models.TextField(blank=True, null=True)),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now, editable=False)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["team", "user"], name="posthog_fil_team_id_e8b1fe_idx"),
-                    models.Index(models.F("team_id"), models.F("path"), name="posthog_fs_s_team_path"),
+                    models.Index(fields=["team", "user"], name="insights_fil_team_id_e8b1fe_idx"),
+                    models.Index(models.F("team_id"), models.F("path"), name="insights_fs_s_team_path"),
                     models.Index(
-                        models.F("team_id"), models.F("type"), models.F("ref"), name="posthog_fs_s_team_typeref"
+                        models.F("team_id"), models.F("type"), models.F("ref"), name="insights_fs_s_team_typeref"
                     ),
                 ],
             },

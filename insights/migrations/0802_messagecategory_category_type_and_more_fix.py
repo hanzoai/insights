@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0801_messagecategory_category_type_and_more"),
+        ("insights", "0801_messagecategory_category_type_and_more"),
     ]
 
     operations = [
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.messagecategory",
+                        to="insights.messagecategory",
                     ),
                 ),
             ],

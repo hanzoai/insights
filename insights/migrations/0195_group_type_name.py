@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0194_set_property_type_for_time"),
+        ("insights", "0194_set_property_type_for_time"),
     ]
 
     operations = [

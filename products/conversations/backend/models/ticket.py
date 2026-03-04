@@ -37,7 +37,7 @@ class Ticket(UUIDTModel):
     # Dynamic attribute set by TicketViewSet._attach_persons_to_tickets for serialization
     person: "Person | None"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     ticket_number = models.PositiveIntegerField()
     channel_source = models.CharField(max_length=20, choices=Channel.choices, default=Channel.WIDGET)
     widget_session_id = models.CharField(max_length=64, db_index=True)  # Random UUID for access control
@@ -65,7 +65,7 @@ class Ticket(UUIDTModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "posthog_conversations_ticket"
+        db_table = "insights_conversations_ticket"
         indexes = [
             models.Index(fields=["team", "widget_session_id"]),  # Access control queries
             models.Index(fields=["team", "distinct_id"]),  # Person linking queries

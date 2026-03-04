@@ -41,8 +41,8 @@ export function getAlertTagProps(severity: AlertEntry['severity']): {
 }
 
 export function MaxChangelog(): JSX.Element | null {
-    const changelogFlagEnabled = useFeatureFlag('POSTHOG_AI_CHANGELOG')
-    const alertsFlagEnabled = useFeatureFlag('POSTHOG_AI_ALERTS')
+    const changelogFlagEnabled = useFeatureFlag('INSIGHTS_AI_CHANGELOG')
+    const alertsFlagEnabled = useFeatureFlag('INSIGHTS_AI_ALERTS')
     const { entries, alerts, isOpen, hasUnread, hasAlerts, isVisible } = useValues(maxChangelogLogic)
     const { openChangelog, closeChangelog, dismissChangelog } = useActions(maxChangelogLogic)
     const { openSettingsPanel } = useActions(sidePanelSettingsLogic)

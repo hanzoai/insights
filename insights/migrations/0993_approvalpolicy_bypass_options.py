@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0992_drop_approvalpolicy_bypass_roles_column"),
+        ("insights", "0992_drop_approvalpolicy_bypass_roles_column"),
     ]
 
     operations = [

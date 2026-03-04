@@ -31,15 +31,15 @@ class DashboardTileManager(models.Manager):
 
 class DashboardTile(models.Model):
     # Relations
-    dashboard = models.ForeignKey("posthog.Dashboard", on_delete=models.CASCADE, related_name="tiles")
+    dashboard = models.ForeignKey("insights.Dashboard", on_delete=models.CASCADE, related_name="tiles")
     insight = models.ForeignKey(
-        "posthog.Insight",
+        "insights.Insight",
         on_delete=models.CASCADE,
         related_name="dashboard_tiles",
         null=True,
     )
     text = models.ForeignKey(
-        "posthog.Text",
+        "insights.Text",
         on_delete=models.CASCADE,
         related_name="dashboard_tiles",
         null=True,

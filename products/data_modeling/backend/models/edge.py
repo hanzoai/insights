@@ -64,7 +64,7 @@ class Edge(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     properties = models.JSONField(default=dict)
 
     class Meta:
-        db_table = "posthog_datamodelingedge"
+        db_table = "insights_datamodelingedge"
         constraints = [
             models.UniqueConstraint(fields=["dag_id", "source", "target"], name="unique_within_dag"),
         ]

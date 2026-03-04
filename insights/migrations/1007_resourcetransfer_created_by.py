@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1006_resource_transfer_duplicated_resource_id"),
+        ("insights", "1006_resource_transfer_duplicated_resource_id"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
@@ -26,11 +26,11 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_resourcetransfer" ADD COLUMN "created_by_id" integer NULL CONSTRAINT "posthog_resourcetran_created_by_id_cfdd93a0_fk_posthog_u" REFERENCES "posthog_user"("id") DEFERRABLE INITIALLY DEFERRED;  -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_resourcetran_created_by_id_cfdd93a0_fk_posthog_u" IMMEDIATE;  -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_resourcetransfer" ADD COLUMN "created_by_id" integer NULL CONSTRAINT "insights_resourcetran_created_by_id_cfdd93a0_fk_insights_u" REFERENCES "insights_user"("id") DEFERRABLE INITIALLY DEFERRED;  -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_resourcetran_created_by_id_cfdd93a0_fk_insights_u" IMMEDIATE;  -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_resourcetransfer" DROP COLUMN IF EXISTS "created_by_id";
+                        ALTER TABLE "insights_resourcetransfer" DROP COLUMN IF EXISTS "created_by_id";
                     """,
                 ),
             ],

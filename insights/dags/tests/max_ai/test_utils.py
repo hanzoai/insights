@@ -10,7 +10,7 @@ from dagster_aws.s3 import S3Resource
 from fastavro import reader
 from pydantic_avro import AvroBase
 
-from products.posthog_ai.dags.utils import (
+from products.insights_ai.dags.utils import (
     EVALS_S3_BUCKET,
     EVALS_S3_PREFIX,
     EvaluationResults,

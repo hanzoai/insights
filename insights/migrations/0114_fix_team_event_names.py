@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def fix_team_event_names(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
     for team in Team.objects.all():
         old_event_names = team.event_names
         team.event_names = [event for event in old_event_names if isinstance(event, str)]
@@ -21,7 +21,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0113_cohort_is_static"),
+        ("insights", "0113_cohort_is_static"),
     ]
 
     operations = [

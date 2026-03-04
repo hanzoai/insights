@@ -7,14 +7,14 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0217_team_primary_dashboard"),
+        ("insights", "0217_team_primary_dashboard"),
     ]
 
     operations = [
         migrations.RunSQL(
             sql="""
-                DELETE FROM "posthog_taggeditem" T1
-                    USING   "posthog_taggeditem" T2
+                DELETE FROM "insights_taggeditem" T1
+                    USING   "insights_taggeditem" T2
                 WHERE
                     (T1.ctid < T2.ctid AND T1.tag_id = T2.tag_id AND T1.insight_id  = T2.insight_id) OR
                     (T1.ctid < T2.ctid AND T1.tag_id = T2.tag_id AND T1.dashboard_id  = T2.dashboard_id) OR
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                CREATE UNIQUE INDEX CONCURRENTLY "unique_dashboard_tagged_item" ON "posthog_taggeditem" ("tag_id", "dashboard_id")
+                CREATE UNIQUE INDEX CONCURRENTLY "unique_dashboard_tagged_item" ON "insights_taggeditem" ("tag_id", "dashboard_id")
                 WHERE "dashboard_id" is NOT NULL
             """,
             reverse_sql="""
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                CREATE UNIQUE INDEX CONCURRENTLY "unique_insight_tagged_item" ON "posthog_taggeditem" ("tag_id", "insight_id")
+                CREATE UNIQUE INDEX CONCURRENTLY "unique_insight_tagged_item" ON "insights_taggeditem" ("tag_id", "insight_id")
                 WHERE "insight_id" is NOT NULL
             """,
             reverse_sql="""
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                CREATE UNIQUE INDEX CONCURRENTLY "unique_event_definition_tagged_item" ON "posthog_taggeditem" ("tag_id", "event_definition_id")
+                CREATE UNIQUE INDEX CONCURRENTLY "unique_event_definition_tagged_item" ON "insights_taggeditem" ("tag_id", "event_definition_id")
                 WHERE "event_definition_id" is NOT NULL
             """,
             reverse_sql="""
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                CREATE UNIQUE INDEX CONCURRENTLY "unique_property_definition_tagged_item" ON "posthog_taggeditem" ("tag_id", "property_definition_id")
+                CREATE UNIQUE INDEX CONCURRENTLY "unique_property_definition_tagged_item" ON "insights_taggeditem" ("tag_id", "property_definition_id")
                 WHERE "property_definition_id" is NOT NULL
             """,
             reverse_sql="""
@@ -107,7 +107,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                CREATE UNIQUE INDEX CONCURRENTLY "unique_action_tagged_item" ON "posthog_taggeditem" ("tag_id", "action_id")
+                CREATE UNIQUE INDEX CONCURRENTLY "unique_action_tagged_item" ON "insights_taggeditem" ("tag_id", "action_id")
                 WHERE "action_id" is NOT NULL
             """,
             reverse_sql="""

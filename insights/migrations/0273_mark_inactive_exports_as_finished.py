@@ -8,8 +8,8 @@ from django.utils import timezone
 def mark_inactive_exports_as_finished(apps, _):
     migration_start_time = timezone.now()
 
-    ActivityLog = apps.get_model("posthog", "ActivityLog")
-    PluginStorage = apps.get_model("posthog", "PluginStorage")
+    ActivityLog = apps.get_model("insights", "ActivityLog")
+    PluginStorage = apps.get_model("insights", "PluginStorage")
     entries = ActivityLog.objects.filter(
         scope="PluginConfig",
         activity__in=["job_triggered", "export_success", "export_fail"],
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0272_alter_organization_plugins_access_level"),
+        ("insights", "0272_alter_organization_plugins_access_level"),
     ]
 
     operations = [migrations.RunPython(mark_inactive_exports_as_finished, reverse, elidable=True)]

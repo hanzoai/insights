@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0401_experiment_exposure_cohort"),
+        ("insights", "0401_experiment_exposure_cohort"),
     ]
 
     operations = [
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="externaldatajob",
             name="schema",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.externaldataschema"
+                blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.externaldataschema"
             ),
         ),
         migrations.AddField(

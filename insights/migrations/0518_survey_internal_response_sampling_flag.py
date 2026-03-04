@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("posthog", "0517_survey_response_sampling_fields"),
+        ("insights", "0517_survey_response_sampling_fields"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_internal_response_sampling_flag",
                         related_query_name="surveys_internal_response_sampling_flag",
-                        to="posthog.featureflag",
+                        to="insights.featureflag",
                     ),
                 )
             ],
@@ -30,20 +30,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                ALTER TABLE "posthog_survey" ADD COLUMN "internal_response_sampling_flag_id" integer NULL CONSTRAINT "posthog_survey_internal_response_sa_e682f708_fk_posthog_f" REFERENCES "posthog_featureflag"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                SET CONSTRAINTS "posthog_survey_internal_response_sa_e682f708_fk_posthog_f" IMMEDIATE; -- existing-table-constraint-ignore
+                ALTER TABLE "insights_survey" ADD COLUMN "internal_response_sampling_flag_id" integer NULL CONSTRAINT "insights_survey_internal_response_sa_e682f708_fk_insights_f" REFERENCES "insights_featureflag"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                SET CONSTRAINTS "insights_survey_internal_response_sa_e682f708_fk_insights_f" IMMEDIATE; -- existing-table-constraint-ignore
                 """,
                     reverse_sql="""
-                    ALTER TABLE "posthog_survey" DROP COLUMN IF EXISTS "internal_response_sampling_flag_id";
+                    ALTER TABLE "insights_survey" DROP COLUMN IF EXISTS "internal_response_sampling_flag_id";
                 """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_survey_internal_response_sampling_flag_id_e682f708" ON "posthog_survey" ("internal_response_sampling_flag_id")
+                    CREATE INDEX CONCURRENTLY "insights_survey_internal_response_sampling_flag_id_e682f708" ON "insights_survey" ("internal_response_sampling_flag_id")
                     """,
                     reverse_sql="""
-                       DROP INDEX IF EXISTS "posthog_survey_internal_response_sampling_flag_id_e682f708";
+                       DROP INDEX IF EXISTS "insights_survey_internal_response_sampling_flag_id_e682f708";
                    """,
                 ),
             ],
