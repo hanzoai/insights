@@ -1,13 +1,13 @@
-// parser_wasm.cpp - WebAssembly Bindings for HogQL Parser
+// parser_wasm.cpp - WebAssembly Bindings for InsightsQL Parser
 // This file provides JavaScript/WASM bindings for the core parser (parser_core.cpp).
 // It exports functions that can be called from JavaScript.
 
 #include <emscripten/bind.h>
 #include <string>
 
-#include "HogQLLexer.h"
-#include "HogQLParser.h"
-#include "HogQLParserBaseVisitor.h"
+#include "InsightsQLLexer.h"
+#include "InsightsQLParser.h"
+#include "InsightsQLParserBaseVisitor.h"
 
 #include "error.h"
 #include "json.h"
@@ -21,11 +21,11 @@ using namespace emscripten;
 
 // ERROR HANDLING FOR WASM
 
-class HogQLErrorListener : public antlr4::BaseErrorListener {
+class InsightsQLErrorListener : public antlr4::BaseErrorListener {
  public:
   string input;
 
-  explicit HogQLErrorListener(string input) : input(std::move(input)) {}
+  explicit InsightsQLErrorListener(string input) : input(std::move(input)) {}
 
   void syntaxError(
       antlr4::Recognizer* /* recognizer */,
@@ -81,18 +81,18 @@ string buildWASMError(const char* error_type, const string& message, size_t star
 struct ParserContext {
   // Note: Declaration order matters for destruction - parser must be destroyed before stream, stream before lexer etc.
   unique_ptr<antlr4::ANTLRInputStream> input_stream;
-  unique_ptr<HogQLLexer> lexer;
+  unique_ptr<InsightsQLLexer> lexer;
   unique_ptr<antlr4::CommonTokenStream> stream;
-  unique_ptr<HogQLErrorListener> error_listener;
-  unique_ptr<HogQLParser> parser;
+  unique_ptr<InsightsQLErrorListener> error_listener;
+  unique_ptr<InsightsQLParser> parser;
 
   explicit ParserContext(const string& input) {
     input_stream = std::make_unique<antlr4::ANTLRInputStream>(input.c_str(), input.length());
-    lexer = std::make_unique<HogQLLexer>(input_stream.get());
+    lexer = std::make_unique<InsightsQLLexer>(input_stream.get());
     stream = std::make_unique<antlr4::CommonTokenStream>(lexer.get());
-    parser = std::make_unique<HogQLParser>(stream.get());
+    parser = std::make_unique<InsightsQLParser>(stream.get());
     parser->removeErrorListeners();
-    error_listener = std::make_unique<HogQLErrorListener>(input);
+    error_listener = std::make_unique<InsightsQLErrorListener>(input);
     parser->addErrorListener(error_listener.get());
   }
 
@@ -104,9 +104,9 @@ struct ParserContext {
 // WASM EXPORTED FUNCTIONS
 
 /**
- * Parse a HogQL expression and return JSON AST.
+ * Parse a InsightsQL expression and return JSON AST.
  *
- * @param input The HogQL expression string
+ * @param input The InsightsQL expression string
  * @param is_internal If true, omit position information
  * @return JSON string representing the AST or error
  */
@@ -114,14 +114,14 @@ string parse_expr(const string& input, bool is_internal = false) {
   try {
     ParserContext ctx(input);
 
-    HogQLParser::ExprContext* parse_tree;
+    InsightsQLParser::ExprContext* parse_tree;
     try {
       parse_tree = ctx.parser->expr();
     } catch (const antlr4::EmptyStackException& e) {
       return buildWASMError("SyntaxError", "Unmatched curly bracket", 0, input.size());
     }
 
-    HogQLParseTreeJSONConverter converter(is_internal);
+    InsightsQLParseTreeJSONConverter converter(is_internal);
     return converter.visitAsJSONFinal(parse_tree);
   } catch (const SyntaxError& e) {
     return buildWASMError("SyntaxError", e.what(), e.start, e.end);
@@ -141,14 +141,14 @@ string parse_order_expr(const string& input, bool is_internal = false) {
   try {
     ParserContext ctx(input);
 
-    HogQLParser::OrderExprContext* parse_tree;
+    InsightsQLParser::OrderExprContext* parse_tree;
     try {
       parse_tree = ctx.parser->orderExpr();
     } catch (const antlr4::EmptyStackException& e) {
       return buildWASMError("SyntaxError", "Unmatched curly bracket", 0, input.size());
     }
 
-    HogQLParseTreeJSONConverter converter(is_internal);
+    InsightsQLParseTreeJSONConverter converter(is_internal);
     return converter.visitAsJSONFinal(parse_tree);
   } catch (const SyntaxError& e) {
     return buildWASMError("SyntaxError", e.what(), e.start, e.end);
@@ -164,14 +164,14 @@ string parse_select(const string& input, bool is_internal = false) {
   try {
     ParserContext ctx(input);
 
-    HogQLParser::SelectContext* parse_tree;
+    InsightsQLParser::SelectContext* parse_tree;
     try {
       parse_tree = ctx.parser->select();
     } catch (const antlr4::EmptyStackException& /* e */) {
       return buildWASMError("SyntaxError", "Unmatched curly bracket", 0, input.size());
     }
 
-    HogQLParseTreeJSONConverter converter(is_internal);
+    InsightsQLParseTreeJSONConverter converter(is_internal);
     return converter.visitAsJSONFinal(parse_tree);
   } catch (const SyntaxError& e) {
     return buildWASMError("SyntaxError", e.what(), e.start, e.end);
@@ -187,14 +187,14 @@ string parse_full_template_string(const string& input, bool is_internal = false)
   try {
     ParserContext ctx(input);
 
-    HogQLParser::FullTemplateStringContext* parse_tree;
+    InsightsQLParser::FullTemplateStringContext* parse_tree;
     try {
       parse_tree = ctx.parser->fullTemplateString();
     } catch (const antlr4::EmptyStackException& /* e */) {
       return buildWASMError("SyntaxError", "Unmatched curly bracket", 0, input.size());
     }
 
-    HogQLParseTreeJSONConverter converter(is_internal);
+    InsightsQLParseTreeJSONConverter converter(is_internal);
     return converter.visitAsJSONFinal(parse_tree);
   } catch (const SyntaxError& e) {
     return buildWASMError("SyntaxError", e.what(), e.start, e.end);
@@ -210,14 +210,14 @@ string parse_program(const string& input, bool is_internal = false) {
   try {
     ParserContext ctx(input);
 
-    HogQLParser::ProgramContext* parse_tree;
+    InsightsQLParser::ProgramContext* parse_tree;
     try {
       parse_tree = ctx.parser->program();
     } catch (const antlr4::EmptyStackException& /* e */) {
       return buildWASMError("SyntaxError", "Unmatched curly bracket", 0, input.size());
     }
 
-    HogQLParseTreeJSONConverter converter(is_internal);
+    InsightsQLParseTreeJSONConverter converter(is_internal);
     return converter.visitAsJSONFinal(parse_tree);
   } catch (const SyntaxError& e) {
     return buildWASMError("SyntaxError", e.what(), e.start, e.end);

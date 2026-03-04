@@ -1,10 +1,10 @@
 
-// Generated from HogQLParser.g4 by ANTLR 4.13.2
+// Generated from InsightsQLParser.g4 by ANTLR 4.13.2
 
 
-#include "HogQLParserVisitor.h"
+#include "InsightsQLParserVisitor.h"
 
-#include "HogQLParser.h"
+#include "InsightsQLParser.h"
 
 
 using namespace antlrcpp;
@@ -13,18 +13,18 @@ using namespace antlr4;
 
 namespace {
 
-struct HogQLParserStaticData final {
-  HogQLParserStaticData(std::vector<std::string> ruleNames,
+struct InsightsQLParserStaticData final {
+  InsightsQLParserStaticData(std::vector<std::string> ruleNames,
                         std::vector<std::string> literalNames,
                         std::vector<std::string> symbolicNames)
       : ruleNames(std::move(ruleNames)), literalNames(std::move(literalNames)),
         symbolicNames(std::move(symbolicNames)),
         vocabulary(this->literalNames, this->symbolicNames) {}
 
-  HogQLParserStaticData(const HogQLParserStaticData&) = delete;
-  HogQLParserStaticData(HogQLParserStaticData&&) = delete;
-  HogQLParserStaticData& operator=(const HogQLParserStaticData&) = delete;
-  HogQLParserStaticData& operator=(HogQLParserStaticData&&) = delete;
+  InsightsQLParserStaticData(const InsightsQLParserStaticData&) = delete;
+  InsightsQLParserStaticData(InsightsQLParserStaticData&&) = delete;
+  InsightsQLParserStaticData& operator=(const InsightsQLParserStaticData&) = delete;
+  InsightsQLParserStaticData& operator=(InsightsQLParserStaticData&&) = delete;
 
   std::vector<antlr4::dfa::DFA> decisionToDFA;
   antlr4::atn::PredictionContextCache sharedContextCache;
@@ -36,21 +36,21 @@ struct HogQLParserStaticData final {
   std::unique_ptr<antlr4::atn::ATN> atn;
 };
 
-::antlr4::internal::OnceFlag hogqlparserParserOnceFlag;
+::antlr4::internal::OnceFlag insightsqlparserParserOnceFlag;
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
 static thread_local
 #endif
-std::unique_ptr<HogQLParserStaticData> hogqlparserParserStaticData = nullptr;
+std::unique_ptr<InsightsQLParserStaticData> insightsqlparserParserStaticData = nullptr;
 
-void hogqlparserParserInitialize() {
+void insightsqlparserParserInitialize() {
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
-  if (hogqlparserParserStaticData != nullptr) {
+  if (insightsqlparserParserStaticData != nullptr) {
     return;
   }
 #else
-  assert(hogqlparserParserStaticData == nullptr);
+  assert(insightsqlparserParserStaticData == nullptr);
 #endif
-  auto staticData = std::make_unique<HogQLParserStaticData>(
+  auto staticData = std::make_unique<InsightsQLParserStaticData>(
     std::vector<std::string>{
       "program", "declaration", "expression", "varDecl", "identifierList", 
       "statement", "returnStmt", "throwStmt", "catchBlock", "tryCatchStmt", 
@@ -65,8 +65,8 @@ void hogqlparserParserInitialize() {
       "orderExprList", "orderExpr", "ratioExpr", "settingExprList", "settingExpr", 
       "windowExpr", "winPartitionByClause", "winOrderByClause", "winFrameClause", 
       "winFrameExtend", "winFrameBound", "expr", "columnTypeExpr", "columnExprList", 
-      "columnExpr", "columnLambdaExpr", "hogqlxChildElement", "hogqlxText", 
-      "hogqlxTagElement", "hogqlxTagAttribute", "withExprList", "withExpr", 
+      "columnExpr", "columnLambdaExpr", "insightsqlxChildElement", "insightsqlxText", 
+      "insightsqlxTagElement", "insightsqlxTagAttribute", "withExprList", "withExpr", 
       "columnIdentifier", "nestedIdentifier", "tableExpr", "tableFunctionExpr", 
       "tableIdentifier", "tableArgList", "databaseIdentifier", "floatingLiteral", 
       "numberLiteral", "literal", "interval", "keyword", "keywordForAlias", 
@@ -113,7 +113,7 @@ void hogqlparserParserInitialize() {
       "RPAREN", "SEMICOLON", "SLASH", "SLASH_GT", "UNDERSCORE", "MULTI_LINE_COMMENT", 
       "SINGLE_LINE_COMMENT", "WHITESPACE", "STRING_TEXT", "STRING_ESCAPE_TRIGGER", 
       "FULL_STRING_TEXT", "FULL_STRING_ESCAPE_TRIGGER", "TAG_WS", "TAGC_WS", 
-      "HOGQLX_TEXT_TEXT", "HOGQLX_TEXT_WS"
+      "INSIGHTSQLX_TEXT_TEXT", "INSIGHTSQLX_TEXT_WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
@@ -634,77 +634,77 @@ void hogqlparserParserInitialize() {
   for (size_t i = 0; i < count; i++) { 
     staticData->decisionToDFA.emplace_back(staticData->atn->getDecisionState(i), i);
   }
-  hogqlparserParserStaticData = std::move(staticData);
+  insightsqlparserParserStaticData = std::move(staticData);
 }
 
 }
 
-HogQLParser::HogQLParser(TokenStream *input) : HogQLParser(input, antlr4::atn::ParserATNSimulatorOptions()) {}
+InsightsQLParser::InsightsQLParser(TokenStream *input) : InsightsQLParser(input, antlr4::atn::ParserATNSimulatorOptions()) {}
 
-HogQLParser::HogQLParser(TokenStream *input, const antlr4::atn::ParserATNSimulatorOptions &options) : Parser(input) {
-  HogQLParser::initialize();
-  _interpreter = new atn::ParserATNSimulator(this, *hogqlparserParserStaticData->atn, hogqlparserParserStaticData->decisionToDFA, hogqlparserParserStaticData->sharedContextCache, options);
+InsightsQLParser::InsightsQLParser(TokenStream *input, const antlr4::atn::ParserATNSimulatorOptions &options) : Parser(input) {
+  InsightsQLParser::initialize();
+  _interpreter = new atn::ParserATNSimulator(this, *insightsqlparserParserStaticData->atn, insightsqlparserParserStaticData->decisionToDFA, insightsqlparserParserStaticData->sharedContextCache, options);
 }
 
-HogQLParser::~HogQLParser() {
+InsightsQLParser::~InsightsQLParser() {
   delete _interpreter;
 }
 
-const atn::ATN& HogQLParser::getATN() const {
-  return *hogqlparserParserStaticData->atn;
+const atn::ATN& InsightsQLParser::getATN() const {
+  return *insightsqlparserParserStaticData->atn;
 }
 
-std::string HogQLParser::getGrammarFileName() const {
-  return "HogQLParser.g4";
+std::string InsightsQLParser::getGrammarFileName() const {
+  return "InsightsQLParser.g4";
 }
 
-const std::vector<std::string>& HogQLParser::getRuleNames() const {
-  return hogqlparserParserStaticData->ruleNames;
+const std::vector<std::string>& InsightsQLParser::getRuleNames() const {
+  return insightsqlparserParserStaticData->ruleNames;
 }
 
-const dfa::Vocabulary& HogQLParser::getVocabulary() const {
-  return hogqlparserParserStaticData->vocabulary;
+const dfa::Vocabulary& InsightsQLParser::getVocabulary() const {
+  return insightsqlparserParserStaticData->vocabulary;
 }
 
-antlr4::atn::SerializedATNView HogQLParser::getSerializedATN() const {
-  return hogqlparserParserStaticData->serializedATN;
+antlr4::atn::SerializedATNView InsightsQLParser::getSerializedATN() const {
+  return insightsqlparserParserStaticData->serializedATN;
 }
 
 
 //----------------- ProgramContext ------------------------------------------------------------------
 
-HogQLParser::ProgramContext::ProgramContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ProgramContext::ProgramContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ProgramContext::EOF() {
-  return getToken(HogQLParser::EOF, 0);
+tree::TerminalNode* InsightsQLParser::ProgramContext::EOF() {
+  return getToken(InsightsQLParser::EOF, 0);
 }
 
-std::vector<HogQLParser::DeclarationContext *> HogQLParser::ProgramContext::declaration() {
-  return getRuleContexts<HogQLParser::DeclarationContext>();
+std::vector<InsightsQLParser::DeclarationContext *> InsightsQLParser::ProgramContext::declaration() {
+  return getRuleContexts<InsightsQLParser::DeclarationContext>();
 }
 
-HogQLParser::DeclarationContext* HogQLParser::ProgramContext::declaration(size_t i) {
-  return getRuleContext<HogQLParser::DeclarationContext>(i);
-}
-
-
-size_t HogQLParser::ProgramContext::getRuleIndex() const {
-  return HogQLParser::RuleProgram;
+InsightsQLParser::DeclarationContext* InsightsQLParser::ProgramContext::declaration(size_t i) {
+  return getRuleContext<InsightsQLParser::DeclarationContext>(i);
 }
 
 
-std::any HogQLParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ProgramContext::getRuleIndex() const {
+  return InsightsQLParser::RuleProgram;
+}
+
+
+std::any InsightsQLParser::ProgramContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitProgram(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ProgramContext* HogQLParser::program() {
+InsightsQLParser::ProgramContext* InsightsQLParser::program() {
   ProgramContext *_localctx = _tracker.createInstance<ProgramContext>(_ctx, getState());
-  enterRule(_localctx, 0, HogQLParser::RuleProgram);
+  enterRule(_localctx, 0, InsightsQLParser::RuleProgram);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -730,7 +730,7 @@ HogQLParser::ProgramContext* HogQLParser::program() {
       _la = _input->LA(1);
     }
     setState(188);
-    match(HogQLParser::EOF);
+    match(InsightsQLParser::EOF);
    
   }
   catch (RecognitionException &e) {
@@ -744,34 +744,34 @@ HogQLParser::ProgramContext* HogQLParser::program() {
 
 //----------------- DeclarationContext ------------------------------------------------------------------
 
-HogQLParser::DeclarationContext::DeclarationContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::DeclarationContext::DeclarationContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::VarDeclContext* HogQLParser::DeclarationContext::varDecl() {
-  return getRuleContext<HogQLParser::VarDeclContext>(0);
+InsightsQLParser::VarDeclContext* InsightsQLParser::DeclarationContext::varDecl() {
+  return getRuleContext<InsightsQLParser::VarDeclContext>(0);
 }
 
-HogQLParser::StatementContext* HogQLParser::DeclarationContext::statement() {
-  return getRuleContext<HogQLParser::StatementContext>(0);
-}
-
-
-size_t HogQLParser::DeclarationContext::getRuleIndex() const {
-  return HogQLParser::RuleDeclaration;
+InsightsQLParser::StatementContext* InsightsQLParser::DeclarationContext::statement() {
+  return getRuleContext<InsightsQLParser::StatementContext>(0);
 }
 
 
-std::any HogQLParser::DeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::DeclarationContext::getRuleIndex() const {
+  return InsightsQLParser::RuleDeclaration;
+}
+
+
+std::any InsightsQLParser::DeclarationContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitDeclaration(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::DeclarationContext* HogQLParser::declaration() {
+InsightsQLParser::DeclarationContext* InsightsQLParser::declaration() {
   DeclarationContext *_localctx = _tracker.createInstance<DeclarationContext>(_ctx, getState());
-  enterRule(_localctx, 2, HogQLParser::RuleDeclaration);
+  enterRule(_localctx, 2, InsightsQLParser::RuleDeclaration);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -784,131 +784,131 @@ HogQLParser::DeclarationContext* HogQLParser::declaration() {
     setState(192);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::LET: {
+      case InsightsQLParser::LET: {
         enterOuterAlt(_localctx, 1);
         setState(190);
         varDecl();
         break;
       }
 
-      case HogQLParser::ALL:
-      case HogQLParser::AND:
-      case HogQLParser::ANTI:
-      case HogQLParser::ANY:
-      case HogQLParser::ARRAY:
-      case HogQLParser::AS:
-      case HogQLParser::ASCENDING:
-      case HogQLParser::ASOF:
-      case HogQLParser::BETWEEN:
-      case HogQLParser::BOTH:
-      case HogQLParser::BY:
-      case HogQLParser::CASE:
-      case HogQLParser::CAST:
-      case HogQLParser::COHORT:
-      case HogQLParser::COLLATE:
-      case HogQLParser::CROSS:
-      case HogQLParser::CUBE:
-      case HogQLParser::CURRENT:
-      case HogQLParser::DATE:
-      case HogQLParser::DAY:
-      case HogQLParser::DESC:
-      case HogQLParser::DESCENDING:
-      case HogQLParser::DISTINCT:
-      case HogQLParser::ELSE:
-      case HogQLParser::END:
-      case HogQLParser::EXTRACT:
-      case HogQLParser::FINAL:
-      case HogQLParser::FIRST:
-      case HogQLParser::FN:
-      case HogQLParser::FOLLOWING:
-      case HogQLParser::FOR:
-      case HogQLParser::FROM:
-      case HogQLParser::FULL:
-      case HogQLParser::FUN:
-      case HogQLParser::GROUP:
-      case HogQLParser::HAVING:
-      case HogQLParser::HOUR:
-      case HogQLParser::ID:
-      case HogQLParser::IF:
-      case HogQLParser::ILIKE:
-      case HogQLParser::IN:
-      case HogQLParser::INF:
-      case HogQLParser::INNER:
-      case HogQLParser::INTERVAL:
-      case HogQLParser::IS:
-      case HogQLParser::JOIN:
-      case HogQLParser::KEY:
-      case HogQLParser::LAST:
-      case HogQLParser::LEADING:
-      case HogQLParser::LEFT:
-      case HogQLParser::LIKE:
-      case HogQLParser::LIMIT:
-      case HogQLParser::MINUTE:
-      case HogQLParser::MONTH:
-      case HogQLParser::NAN_SQL:
-      case HogQLParser::NOT:
-      case HogQLParser::NULL_SQL:
-      case HogQLParser::NULLS:
-      case HogQLParser::OFFSET:
-      case HogQLParser::ON:
-      case HogQLParser::OR:
-      case HogQLParser::ORDER:
-      case HogQLParser::OUTER:
-      case HogQLParser::OVER:
-      case HogQLParser::PARTITION:
-      case HogQLParser::PRECEDING:
-      case HogQLParser::PREWHERE:
-      case HogQLParser::QUARTER:
-      case HogQLParser::RANGE:
-      case HogQLParser::RECURSIVE:
-      case HogQLParser::RETURN:
-      case HogQLParser::RIGHT:
-      case HogQLParser::ROLLUP:
-      case HogQLParser::ROW:
-      case HogQLParser::ROWS:
-      case HogQLParser::SAMPLE:
-      case HogQLParser::SECOND:
-      case HogQLParser::SELECT:
-      case HogQLParser::SEMI:
-      case HogQLParser::SETTINGS:
-      case HogQLParser::SUBSTRING:
-      case HogQLParser::THEN:
-      case HogQLParser::THROW:
-      case HogQLParser::TIES:
-      case HogQLParser::TIMESTAMP:
-      case HogQLParser::TO:
-      case HogQLParser::TOP:
-      case HogQLParser::TOTALS:
-      case HogQLParser::TRAILING:
-      case HogQLParser::TRIM:
-      case HogQLParser::TRUNCATE:
-      case HogQLParser::TRY:
-      case HogQLParser::UNBOUNDED:
-      case HogQLParser::UNION:
-      case HogQLParser::USING:
-      case HogQLParser::WEEK:
-      case HogQLParser::WHEN:
-      case HogQLParser::WHERE:
-      case HogQLParser::WHILE:
-      case HogQLParser::WINDOW:
-      case HogQLParser::WITH:
-      case HogQLParser::YEAR:
-      case HogQLParser::IDENTIFIER:
-      case HogQLParser::FLOATING_LITERAL:
-      case HogQLParser::OCTAL_LITERAL:
-      case HogQLParser::DECIMAL_LITERAL:
-      case HogQLParser::HEXADECIMAL_LITERAL:
-      case HogQLParser::STRING_LITERAL:
-      case HogQLParser::ASTERISK:
-      case HogQLParser::DASH:
-      case HogQLParser::DOT:
-      case HogQLParser::LBRACE:
-      case HogQLParser::LBRACKET:
-      case HogQLParser::LPAREN:
-      case HogQLParser::LT:
-      case HogQLParser::PLUS:
-      case HogQLParser::QUOTE_SINGLE_TEMPLATE:
-      case HogQLParser::SEMICOLON: {
+      case InsightsQLParser::ALL:
+      case InsightsQLParser::AND:
+      case InsightsQLParser::ANTI:
+      case InsightsQLParser::ANY:
+      case InsightsQLParser::ARRAY:
+      case InsightsQLParser::AS:
+      case InsightsQLParser::ASCENDING:
+      case InsightsQLParser::ASOF:
+      case InsightsQLParser::BETWEEN:
+      case InsightsQLParser::BOTH:
+      case InsightsQLParser::BY:
+      case InsightsQLParser::CASE:
+      case InsightsQLParser::CAST:
+      case InsightsQLParser::COHORT:
+      case InsightsQLParser::COLLATE:
+      case InsightsQLParser::CROSS:
+      case InsightsQLParser::CUBE:
+      case InsightsQLParser::CURRENT:
+      case InsightsQLParser::DATE:
+      case InsightsQLParser::DAY:
+      case InsightsQLParser::DESC:
+      case InsightsQLParser::DESCENDING:
+      case InsightsQLParser::DISTINCT:
+      case InsightsQLParser::ELSE:
+      case InsightsQLParser::END:
+      case InsightsQLParser::EXTRACT:
+      case InsightsQLParser::FINAL:
+      case InsightsQLParser::FIRST:
+      case InsightsQLParser::FN:
+      case InsightsQLParser::FOLLOWING:
+      case InsightsQLParser::FOR:
+      case InsightsQLParser::FROM:
+      case InsightsQLParser::FULL:
+      case InsightsQLParser::FUN:
+      case InsightsQLParser::GROUP:
+      case InsightsQLParser::HAVING:
+      case InsightsQLParser::HOUR:
+      case InsightsQLParser::ID:
+      case InsightsQLParser::IF:
+      case InsightsQLParser::ILIKE:
+      case InsightsQLParser::IN:
+      case InsightsQLParser::INF:
+      case InsightsQLParser::INNER:
+      case InsightsQLParser::INTERVAL:
+      case InsightsQLParser::IS:
+      case InsightsQLParser::JOIN:
+      case InsightsQLParser::KEY:
+      case InsightsQLParser::LAST:
+      case InsightsQLParser::LEADING:
+      case InsightsQLParser::LEFT:
+      case InsightsQLParser::LIKE:
+      case InsightsQLParser::LIMIT:
+      case InsightsQLParser::MINUTE:
+      case InsightsQLParser::MONTH:
+      case InsightsQLParser::NAN_SQL:
+      case InsightsQLParser::NOT:
+      case InsightsQLParser::NULL_SQL:
+      case InsightsQLParser::NULLS:
+      case InsightsQLParser::OFFSET:
+      case InsightsQLParser::ON:
+      case InsightsQLParser::OR:
+      case InsightsQLParser::ORDER:
+      case InsightsQLParser::OUTER:
+      case InsightsQLParser::OVER:
+      case InsightsQLParser::PARTITION:
+      case InsightsQLParser::PRECEDING:
+      case InsightsQLParser::PREWHERE:
+      case InsightsQLParser::QUARTER:
+      case InsightsQLParser::RANGE:
+      case InsightsQLParser::RECURSIVE:
+      case InsightsQLParser::RETURN:
+      case InsightsQLParser::RIGHT:
+      case InsightsQLParser::ROLLUP:
+      case InsightsQLParser::ROW:
+      case InsightsQLParser::ROWS:
+      case InsightsQLParser::SAMPLE:
+      case InsightsQLParser::SECOND:
+      case InsightsQLParser::SELECT:
+      case InsightsQLParser::SEMI:
+      case InsightsQLParser::SETTINGS:
+      case InsightsQLParser::SUBSTRING:
+      case InsightsQLParser::THEN:
+      case InsightsQLParser::THROW:
+      case InsightsQLParser::TIES:
+      case InsightsQLParser::TIMESTAMP:
+      case InsightsQLParser::TO:
+      case InsightsQLParser::TOP:
+      case InsightsQLParser::TOTALS:
+      case InsightsQLParser::TRAILING:
+      case InsightsQLParser::TRIM:
+      case InsightsQLParser::TRUNCATE:
+      case InsightsQLParser::TRY:
+      case InsightsQLParser::UNBOUNDED:
+      case InsightsQLParser::UNION:
+      case InsightsQLParser::USING:
+      case InsightsQLParser::WEEK:
+      case InsightsQLParser::WHEN:
+      case InsightsQLParser::WHERE:
+      case InsightsQLParser::WHILE:
+      case InsightsQLParser::WINDOW:
+      case InsightsQLParser::WITH:
+      case InsightsQLParser::YEAR:
+      case InsightsQLParser::IDENTIFIER:
+      case InsightsQLParser::FLOATING_LITERAL:
+      case InsightsQLParser::OCTAL_LITERAL:
+      case InsightsQLParser::DECIMAL_LITERAL:
+      case InsightsQLParser::HEXADECIMAL_LITERAL:
+      case InsightsQLParser::STRING_LITERAL:
+      case InsightsQLParser::ASTERISK:
+      case InsightsQLParser::DASH:
+      case InsightsQLParser::DOT:
+      case InsightsQLParser::LBRACE:
+      case InsightsQLParser::LBRACKET:
+      case InsightsQLParser::LPAREN:
+      case InsightsQLParser::LT:
+      case InsightsQLParser::PLUS:
+      case InsightsQLParser::QUOTE_SINGLE_TEMPLATE:
+      case InsightsQLParser::SEMICOLON: {
         enterOuterAlt(_localctx, 2);
         setState(191);
         statement();
@@ -931,30 +931,30 @@ HogQLParser::DeclarationContext* HogQLParser::declaration() {
 
 //----------------- ExpressionContext ------------------------------------------------------------------
 
-HogQLParser::ExpressionContext::ExpressionContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ExpressionContext::ExpressionContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ExpressionContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ExpressionContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
 
-size_t HogQLParser::ExpressionContext::getRuleIndex() const {
-  return HogQLParser::RuleExpression;
+size_t InsightsQLParser::ExpressionContext::getRuleIndex() const {
+  return InsightsQLParser::RuleExpression;
 }
 
 
-std::any HogQLParser::ExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ExpressionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitExpression(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::expression() {
+InsightsQLParser::ExpressionContext* InsightsQLParser::expression() {
   ExpressionContext *_localctx = _tracker.createInstance<ExpressionContext>(_ctx, getState());
-  enterRule(_localctx, 4, HogQLParser::RuleExpression);
+  enterRule(_localctx, 4, InsightsQLParser::RuleExpression);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -980,46 +980,46 @@ HogQLParser::ExpressionContext* HogQLParser::expression() {
 
 //----------------- VarDeclContext ------------------------------------------------------------------
 
-HogQLParser::VarDeclContext::VarDeclContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::VarDeclContext::VarDeclContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::VarDeclContext::LET() {
-  return getToken(HogQLParser::LET, 0);
+tree::TerminalNode* InsightsQLParser::VarDeclContext::LET() {
+  return getToken(InsightsQLParser::LET, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::VarDeclContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::VarDeclContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::VarDeclContext::COLON() {
-  return getToken(HogQLParser::COLON, 0);
+tree::TerminalNode* InsightsQLParser::VarDeclContext::COLON() {
+  return getToken(InsightsQLParser::COLON, 0);
 }
 
-tree::TerminalNode* HogQLParser::VarDeclContext::EQ_SINGLE() {
-  return getToken(HogQLParser::EQ_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::VarDeclContext::EQ_SINGLE() {
+  return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::VarDeclContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
-}
-
-
-size_t HogQLParser::VarDeclContext::getRuleIndex() const {
-  return HogQLParser::RuleVarDecl;
+InsightsQLParser::ExpressionContext* InsightsQLParser::VarDeclContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
 
-std::any HogQLParser::VarDeclContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::VarDeclContext::getRuleIndex() const {
+  return InsightsQLParser::RuleVarDecl;
+}
+
+
+std::any InsightsQLParser::VarDeclContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitVarDecl(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::VarDeclContext* HogQLParser::varDecl() {
+InsightsQLParser::VarDeclContext* InsightsQLParser::varDecl() {
   VarDeclContext *_localctx = _tracker.createInstance<VarDeclContext>(_ctx, getState());
-  enterRule(_localctx, 6, HogQLParser::RuleVarDecl);
+  enterRule(_localctx, 6, InsightsQLParser::RuleVarDecl);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1032,18 +1032,18 @@ HogQLParser::VarDeclContext* HogQLParser::varDecl() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(196);
-    match(HogQLParser::LET);
+    match(InsightsQLParser::LET);
     setState(197);
     identifier();
     setState(201);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COLON) {
+    if (_la == InsightsQLParser::COLON) {
       setState(198);
-      match(HogQLParser::COLON);
+      match(InsightsQLParser::COLON);
       setState(199);
-      match(HogQLParser::EQ_SINGLE);
+      match(InsightsQLParser::EQ_SINGLE);
       setState(200);
       expression();
     }
@@ -1060,42 +1060,42 @@ HogQLParser::VarDeclContext* HogQLParser::varDecl() {
 
 //----------------- IdentifierListContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierListContext::IdentifierListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::IdentifierListContext::IdentifierListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::IdentifierListContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::IdentifierListContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::IdentifierListContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::IdentifierListContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::IdentifierListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::IdentifierListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::IdentifierListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::IdentifierListContext::getRuleIndex() const {
-  return HogQLParser::RuleIdentifierList;
+tree::TerminalNode* InsightsQLParser::IdentifierListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::IdentifierListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::IdentifierListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleIdentifierList;
+}
+
+
+std::any InsightsQLParser::IdentifierListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitIdentifierList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::IdentifierListContext* HogQLParser::identifierList() {
+InsightsQLParser::IdentifierListContext* InsightsQLParser::identifierList() {
   IdentifierListContext *_localctx = _tracker.createInstance<IdentifierListContext>(_ctx, getState());
-  enterRule(_localctx, 8, HogQLParser::RuleIdentifierList);
+  enterRule(_localctx, 8, InsightsQLParser::RuleIdentifierList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1116,7 +1116,7 @@ HogQLParser::IdentifierListContext* HogQLParser::identifierList() {
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         setState(204);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         setState(205);
         identifier(); 
       }
@@ -1128,9 +1128,9 @@ HogQLParser::IdentifierListContext* HogQLParser::identifierList() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COMMA) {
+    if (_la == InsightsQLParser::COMMA) {
       setState(211);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
     }
    
   }
@@ -1145,74 +1145,74 @@ HogQLParser::IdentifierListContext* HogQLParser::identifierList() {
 
 //----------------- StatementContext ------------------------------------------------------------------
 
-HogQLParser::StatementContext::StatementContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::StatementContext::StatementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::ReturnStmtContext* HogQLParser::StatementContext::returnStmt() {
-  return getRuleContext<HogQLParser::ReturnStmtContext>(0);
+InsightsQLParser::ReturnStmtContext* InsightsQLParser::StatementContext::returnStmt() {
+  return getRuleContext<InsightsQLParser::ReturnStmtContext>(0);
 }
 
-HogQLParser::ThrowStmtContext* HogQLParser::StatementContext::throwStmt() {
-  return getRuleContext<HogQLParser::ThrowStmtContext>(0);
+InsightsQLParser::ThrowStmtContext* InsightsQLParser::StatementContext::throwStmt() {
+  return getRuleContext<InsightsQLParser::ThrowStmtContext>(0);
 }
 
-HogQLParser::TryCatchStmtContext* HogQLParser::StatementContext::tryCatchStmt() {
-  return getRuleContext<HogQLParser::TryCatchStmtContext>(0);
+InsightsQLParser::TryCatchStmtContext* InsightsQLParser::StatementContext::tryCatchStmt() {
+  return getRuleContext<InsightsQLParser::TryCatchStmtContext>(0);
 }
 
-HogQLParser::IfStmtContext* HogQLParser::StatementContext::ifStmt() {
-  return getRuleContext<HogQLParser::IfStmtContext>(0);
+InsightsQLParser::IfStmtContext* InsightsQLParser::StatementContext::ifStmt() {
+  return getRuleContext<InsightsQLParser::IfStmtContext>(0);
 }
 
-HogQLParser::WhileStmtContext* HogQLParser::StatementContext::whileStmt() {
-  return getRuleContext<HogQLParser::WhileStmtContext>(0);
+InsightsQLParser::WhileStmtContext* InsightsQLParser::StatementContext::whileStmt() {
+  return getRuleContext<InsightsQLParser::WhileStmtContext>(0);
 }
 
-HogQLParser::ForInStmtContext* HogQLParser::StatementContext::forInStmt() {
-  return getRuleContext<HogQLParser::ForInStmtContext>(0);
+InsightsQLParser::ForInStmtContext* InsightsQLParser::StatementContext::forInStmt() {
+  return getRuleContext<InsightsQLParser::ForInStmtContext>(0);
 }
 
-HogQLParser::ForStmtContext* HogQLParser::StatementContext::forStmt() {
-  return getRuleContext<HogQLParser::ForStmtContext>(0);
+InsightsQLParser::ForStmtContext* InsightsQLParser::StatementContext::forStmt() {
+  return getRuleContext<InsightsQLParser::ForStmtContext>(0);
 }
 
-HogQLParser::FuncStmtContext* HogQLParser::StatementContext::funcStmt() {
-  return getRuleContext<HogQLParser::FuncStmtContext>(0);
+InsightsQLParser::FuncStmtContext* InsightsQLParser::StatementContext::funcStmt() {
+  return getRuleContext<InsightsQLParser::FuncStmtContext>(0);
 }
 
-HogQLParser::VarAssignmentContext* HogQLParser::StatementContext::varAssignment() {
-  return getRuleContext<HogQLParser::VarAssignmentContext>(0);
+InsightsQLParser::VarAssignmentContext* InsightsQLParser::StatementContext::varAssignment() {
+  return getRuleContext<InsightsQLParser::VarAssignmentContext>(0);
 }
 
-HogQLParser::BlockContext* HogQLParser::StatementContext::block() {
-  return getRuleContext<HogQLParser::BlockContext>(0);
+InsightsQLParser::BlockContext* InsightsQLParser::StatementContext::block() {
+  return getRuleContext<InsightsQLParser::BlockContext>(0);
 }
 
-HogQLParser::ExprStmtContext* HogQLParser::StatementContext::exprStmt() {
-  return getRuleContext<HogQLParser::ExprStmtContext>(0);
+InsightsQLParser::ExprStmtContext* InsightsQLParser::StatementContext::exprStmt() {
+  return getRuleContext<InsightsQLParser::ExprStmtContext>(0);
 }
 
-HogQLParser::EmptyStmtContext* HogQLParser::StatementContext::emptyStmt() {
-  return getRuleContext<HogQLParser::EmptyStmtContext>(0);
-}
-
-
-size_t HogQLParser::StatementContext::getRuleIndex() const {
-  return HogQLParser::RuleStatement;
+InsightsQLParser::EmptyStmtContext* InsightsQLParser::StatementContext::emptyStmt() {
+  return getRuleContext<InsightsQLParser::EmptyStmtContext>(0);
 }
 
 
-std::any HogQLParser::StatementContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::StatementContext::getRuleIndex() const {
+  return InsightsQLParser::RuleStatement;
+}
+
+
+std::any InsightsQLParser::StatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitStatement(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::StatementContext* HogQLParser::statement() {
+InsightsQLParser::StatementContext* InsightsQLParser::statement() {
   StatementContext *_localctx = _tracker.createInstance<StatementContext>(_ctx, getState());
-  enterRule(_localctx, 10, HogQLParser::RuleStatement);
+  enterRule(_localctx, 10, InsightsQLParser::RuleStatement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1325,38 +1325,38 @@ HogQLParser::StatementContext* HogQLParser::statement() {
 
 //----------------- ReturnStmtContext ------------------------------------------------------------------
 
-HogQLParser::ReturnStmtContext::ReturnStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ReturnStmtContext::ReturnStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ReturnStmtContext::RETURN() {
-  return getToken(HogQLParser::RETURN, 0);
+tree::TerminalNode* InsightsQLParser::ReturnStmtContext::RETURN() {
+  return getToken(InsightsQLParser::RETURN, 0);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::ReturnStmtContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
+InsightsQLParser::ExpressionContext* InsightsQLParser::ReturnStmtContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ReturnStmtContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
-}
-
-
-size_t HogQLParser::ReturnStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleReturnStmt;
+tree::TerminalNode* InsightsQLParser::ReturnStmtContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-std::any HogQLParser::ReturnStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ReturnStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleReturnStmt;
+}
+
+
+std::any InsightsQLParser::ReturnStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitReturnStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ReturnStmtContext* HogQLParser::returnStmt() {
+InsightsQLParser::ReturnStmtContext* InsightsQLParser::returnStmt() {
   ReturnStmtContext *_localctx = _tracker.createInstance<ReturnStmtContext>(_ctx, getState());
-  enterRule(_localctx, 12, HogQLParser::RuleReturnStmt);
+  enterRule(_localctx, 12, InsightsQLParser::RuleReturnStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1368,7 +1368,7 @@ HogQLParser::ReturnStmtContext* HogQLParser::returnStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(228);
-    match(HogQLParser::RETURN);
+    match(InsightsQLParser::RETURN);
     setState(230);
     _errHandler->sync(this);
 
@@ -1388,7 +1388,7 @@ HogQLParser::ReturnStmtContext* HogQLParser::returnStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 7, _ctx)) {
     case 1: {
       setState(232);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
       break;
     }
 
@@ -1408,38 +1408,38 @@ HogQLParser::ReturnStmtContext* HogQLParser::returnStmt() {
 
 //----------------- ThrowStmtContext ------------------------------------------------------------------
 
-HogQLParser::ThrowStmtContext::ThrowStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ThrowStmtContext::ThrowStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ThrowStmtContext::THROW() {
-  return getToken(HogQLParser::THROW, 0);
+tree::TerminalNode* InsightsQLParser::ThrowStmtContext::THROW() {
+  return getToken(InsightsQLParser::THROW, 0);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::ThrowStmtContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
+InsightsQLParser::ExpressionContext* InsightsQLParser::ThrowStmtContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ThrowStmtContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
-}
-
-
-size_t HogQLParser::ThrowStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleThrowStmt;
+tree::TerminalNode* InsightsQLParser::ThrowStmtContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-std::any HogQLParser::ThrowStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ThrowStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleThrowStmt;
+}
+
+
+std::any InsightsQLParser::ThrowStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitThrowStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ThrowStmtContext* HogQLParser::throwStmt() {
+InsightsQLParser::ThrowStmtContext* InsightsQLParser::throwStmt() {
   ThrowStmtContext *_localctx = _tracker.createInstance<ThrowStmtContext>(_ctx, getState());
-  enterRule(_localctx, 14, HogQLParser::RuleThrowStmt);
+  enterRule(_localctx, 14, InsightsQLParser::RuleThrowStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1451,7 +1451,7 @@ HogQLParser::ThrowStmtContext* HogQLParser::throwStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(235);
-    match(HogQLParser::THROW);
+    match(InsightsQLParser::THROW);
     setState(237);
     _errHandler->sync(this);
 
@@ -1471,7 +1471,7 @@ HogQLParser::ThrowStmtContext* HogQLParser::throwStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx)) {
     case 1: {
       setState(239);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
       break;
     }
 
@@ -1491,54 +1491,54 @@ HogQLParser::ThrowStmtContext* HogQLParser::throwStmt() {
 
 //----------------- CatchBlockContext ------------------------------------------------------------------
 
-HogQLParser::CatchBlockContext::CatchBlockContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::CatchBlockContext::CatchBlockContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::CatchBlockContext::CATCH() {
-  return getToken(HogQLParser::CATCH, 0);
+tree::TerminalNode* InsightsQLParser::CatchBlockContext::CATCH() {
+  return getToken(InsightsQLParser::CATCH, 0);
 }
 
-HogQLParser::BlockContext* HogQLParser::CatchBlockContext::block() {
-  return getRuleContext<HogQLParser::BlockContext>(0);
+InsightsQLParser::BlockContext* InsightsQLParser::CatchBlockContext::block() {
+  return getRuleContext<InsightsQLParser::BlockContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::CatchBlockContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::CatchBlockContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::CatchBlockContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::CatchBlockContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::CatchBlockContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::CatchBlockContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::CatchBlockContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::CatchBlockContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::CatchBlockContext::COLON() {
-  return getToken(HogQLParser::COLON, 0);
-}
-
-
-size_t HogQLParser::CatchBlockContext::getRuleIndex() const {
-  return HogQLParser::RuleCatchBlock;
+tree::TerminalNode* InsightsQLParser::CatchBlockContext::COLON() {
+  return getToken(InsightsQLParser::COLON, 0);
 }
 
 
-std::any HogQLParser::CatchBlockContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::CatchBlockContext::getRuleIndex() const {
+  return InsightsQLParser::RuleCatchBlock;
+}
+
+
+std::any InsightsQLParser::CatchBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitCatchBlock(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::CatchBlockContext* HogQLParser::catchBlock() {
+InsightsQLParser::CatchBlockContext* InsightsQLParser::catchBlock() {
   CatchBlockContext *_localctx = _tracker.createInstance<CatchBlockContext>(_ctx, getState());
-  enterRule(_localctx, 16, HogQLParser::RuleCatchBlock);
+  enterRule(_localctx, 16, InsightsQLParser::RuleCatchBlock);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1551,28 +1551,28 @@ HogQLParser::CatchBlockContext* HogQLParser::catchBlock() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(242);
-    match(HogQLParser::CATCH);
+    match(InsightsQLParser::CATCH);
     setState(251);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::LPAREN) {
+    if (_la == InsightsQLParser::LPAREN) {
       setState(243);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(244);
       antlrcpp::downCast<CatchBlockContext *>(_localctx)->catchVar = identifier();
       setState(247);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COLON) {
+      if (_la == InsightsQLParser::COLON) {
         setState(245);
-        match(HogQLParser::COLON);
+        match(InsightsQLParser::COLON);
         setState(246);
         antlrcpp::downCast<CatchBlockContext *>(_localctx)->catchType = identifier();
       }
       setState(249);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
     }
     setState(253);
     antlrcpp::downCast<CatchBlockContext *>(_localctx)->catchStmt = block();
@@ -1589,50 +1589,50 @@ HogQLParser::CatchBlockContext* HogQLParser::catchBlock() {
 
 //----------------- TryCatchStmtContext ------------------------------------------------------------------
 
-HogQLParser::TryCatchStmtContext::TryCatchStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TryCatchStmtContext::TryCatchStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::TryCatchStmtContext::TRY() {
-  return getToken(HogQLParser::TRY, 0);
+tree::TerminalNode* InsightsQLParser::TryCatchStmtContext::TRY() {
+  return getToken(InsightsQLParser::TRY, 0);
 }
 
-std::vector<HogQLParser::BlockContext *> HogQLParser::TryCatchStmtContext::block() {
-  return getRuleContexts<HogQLParser::BlockContext>();
+std::vector<InsightsQLParser::BlockContext *> InsightsQLParser::TryCatchStmtContext::block() {
+  return getRuleContexts<InsightsQLParser::BlockContext>();
 }
 
-HogQLParser::BlockContext* HogQLParser::TryCatchStmtContext::block(size_t i) {
-  return getRuleContext<HogQLParser::BlockContext>(i);
+InsightsQLParser::BlockContext* InsightsQLParser::TryCatchStmtContext::block(size_t i) {
+  return getRuleContext<InsightsQLParser::BlockContext>(i);
 }
 
-std::vector<HogQLParser::CatchBlockContext *> HogQLParser::TryCatchStmtContext::catchBlock() {
-  return getRuleContexts<HogQLParser::CatchBlockContext>();
+std::vector<InsightsQLParser::CatchBlockContext *> InsightsQLParser::TryCatchStmtContext::catchBlock() {
+  return getRuleContexts<InsightsQLParser::CatchBlockContext>();
 }
 
-HogQLParser::CatchBlockContext* HogQLParser::TryCatchStmtContext::catchBlock(size_t i) {
-  return getRuleContext<HogQLParser::CatchBlockContext>(i);
+InsightsQLParser::CatchBlockContext* InsightsQLParser::TryCatchStmtContext::catchBlock(size_t i) {
+  return getRuleContext<InsightsQLParser::CatchBlockContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::TryCatchStmtContext::FINALLY() {
-  return getToken(HogQLParser::FINALLY, 0);
-}
-
-
-size_t HogQLParser::TryCatchStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleTryCatchStmt;
+tree::TerminalNode* InsightsQLParser::TryCatchStmtContext::FINALLY() {
+  return getToken(InsightsQLParser::FINALLY, 0);
 }
 
 
-std::any HogQLParser::TryCatchStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::TryCatchStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTryCatchStmt;
+}
+
+
+std::any InsightsQLParser::TryCatchStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTryCatchStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TryCatchStmtContext* HogQLParser::tryCatchStmt() {
+InsightsQLParser::TryCatchStmtContext* InsightsQLParser::tryCatchStmt() {
   TryCatchStmtContext *_localctx = _tracker.createInstance<TryCatchStmtContext>(_ctx, getState());
-  enterRule(_localctx, 18, HogQLParser::RuleTryCatchStmt);
+  enterRule(_localctx, 18, InsightsQLParser::RuleTryCatchStmt);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1645,13 +1645,13 @@ HogQLParser::TryCatchStmtContext* HogQLParser::tryCatchStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(255);
-    match(HogQLParser::TRY);
+    match(InsightsQLParser::TRY);
     setState(256);
     antlrcpp::downCast<TryCatchStmtContext *>(_localctx)->tryStmt = block();
     setState(260);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::CATCH) {
+    while (_la == InsightsQLParser::CATCH) {
       setState(257);
       catchBlock();
       setState(262);
@@ -1662,9 +1662,9 @@ HogQLParser::TryCatchStmtContext* HogQLParser::tryCatchStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::FINALLY) {
+    if (_la == InsightsQLParser::FINALLY) {
       setState(263);
-      match(HogQLParser::FINALLY);
+      match(InsightsQLParser::FINALLY);
       setState(264);
       antlrcpp::downCast<TryCatchStmtContext *>(_localctx)->finallyStmt = block();
     }
@@ -1681,54 +1681,54 @@ HogQLParser::TryCatchStmtContext* HogQLParser::tryCatchStmt() {
 
 //----------------- IfStmtContext ------------------------------------------------------------------
 
-HogQLParser::IfStmtContext::IfStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::IfStmtContext::IfStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::IfStmtContext::IF() {
-  return getToken(HogQLParser::IF, 0);
+tree::TerminalNode* InsightsQLParser::IfStmtContext::IF() {
+  return getToken(InsightsQLParser::IF, 0);
 }
 
-tree::TerminalNode* HogQLParser::IfStmtContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::IfStmtContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::IfStmtContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
+InsightsQLParser::ExpressionContext* InsightsQLParser::IfStmtContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::IfStmtContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::IfStmtContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-std::vector<HogQLParser::StatementContext *> HogQLParser::IfStmtContext::statement() {
-  return getRuleContexts<HogQLParser::StatementContext>();
+std::vector<InsightsQLParser::StatementContext *> InsightsQLParser::IfStmtContext::statement() {
+  return getRuleContexts<InsightsQLParser::StatementContext>();
 }
 
-HogQLParser::StatementContext* HogQLParser::IfStmtContext::statement(size_t i) {
-  return getRuleContext<HogQLParser::StatementContext>(i);
+InsightsQLParser::StatementContext* InsightsQLParser::IfStmtContext::statement(size_t i) {
+  return getRuleContext<InsightsQLParser::StatementContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::IfStmtContext::ELSE() {
-  return getToken(HogQLParser::ELSE, 0);
-}
-
-
-size_t HogQLParser::IfStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleIfStmt;
+tree::TerminalNode* InsightsQLParser::IfStmtContext::ELSE() {
+  return getToken(InsightsQLParser::ELSE, 0);
 }
 
 
-std::any HogQLParser::IfStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::IfStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleIfStmt;
+}
+
+
+std::any InsightsQLParser::IfStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitIfStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::IfStmtContext* HogQLParser::ifStmt() {
+InsightsQLParser::IfStmtContext* InsightsQLParser::ifStmt() {
   IfStmtContext *_localctx = _tracker.createInstance<IfStmtContext>(_ctx, getState());
-  enterRule(_localctx, 20, HogQLParser::RuleIfStmt);
+  enterRule(_localctx, 20, InsightsQLParser::RuleIfStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1740,13 +1740,13 @@ HogQLParser::IfStmtContext* HogQLParser::ifStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(267);
-    match(HogQLParser::IF);
+    match(InsightsQLParser::IF);
     setState(268);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(269);
     expression();
     setState(270);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
     setState(271);
     statement();
     setState(274);
@@ -1755,7 +1755,7 @@ HogQLParser::IfStmtContext* HogQLParser::ifStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 14, _ctx)) {
     case 1: {
       setState(272);
-      match(HogQLParser::ELSE);
+      match(InsightsQLParser::ELSE);
       setState(273);
       statement();
       break;
@@ -1777,50 +1777,50 @@ HogQLParser::IfStmtContext* HogQLParser::ifStmt() {
 
 //----------------- WhileStmtContext ------------------------------------------------------------------
 
-HogQLParser::WhileStmtContext::WhileStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WhileStmtContext::WhileStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WhileStmtContext::WHILE() {
-  return getToken(HogQLParser::WHILE, 0);
+tree::TerminalNode* InsightsQLParser::WhileStmtContext::WHILE() {
+  return getToken(InsightsQLParser::WHILE, 0);
 }
 
-tree::TerminalNode* HogQLParser::WhileStmtContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::WhileStmtContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::WhileStmtContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
+InsightsQLParser::ExpressionContext* InsightsQLParser::WhileStmtContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WhileStmtContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::WhileStmtContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::StatementContext* HogQLParser::WhileStmtContext::statement() {
-  return getRuleContext<HogQLParser::StatementContext>(0);
+InsightsQLParser::StatementContext* InsightsQLParser::WhileStmtContext::statement() {
+  return getRuleContext<InsightsQLParser::StatementContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WhileStmtContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
-}
-
-
-size_t HogQLParser::WhileStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleWhileStmt;
+tree::TerminalNode* InsightsQLParser::WhileStmtContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-std::any HogQLParser::WhileStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WhileStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWhileStmt;
+}
+
+
+std::any InsightsQLParser::WhileStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWhileStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WhileStmtContext* HogQLParser::whileStmt() {
+InsightsQLParser::WhileStmtContext* InsightsQLParser::whileStmt() {
   WhileStmtContext *_localctx = _tracker.createInstance<WhileStmtContext>(_ctx, getState());
-  enterRule(_localctx, 22, HogQLParser::RuleWhileStmt);
+  enterRule(_localctx, 22, InsightsQLParser::RuleWhileStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -1832,13 +1832,13 @@ HogQLParser::WhileStmtContext* HogQLParser::whileStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(276);
-    match(HogQLParser::WHILE);
+    match(InsightsQLParser::WHILE);
     setState(277);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(278);
     expression();
     setState(279);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
     setState(280);
     statement();
     setState(282);
@@ -1847,7 +1847,7 @@ HogQLParser::WhileStmtContext* HogQLParser::whileStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 15, _ctx)) {
     case 1: {
       setState(281);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
       break;
     }
 
@@ -1867,74 +1867,74 @@ HogQLParser::WhileStmtContext* HogQLParser::whileStmt() {
 
 //----------------- ForStmtContext ------------------------------------------------------------------
 
-HogQLParser::ForStmtContext::ForStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ForStmtContext::ForStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ForStmtContext::FOR() {
-  return getToken(HogQLParser::FOR, 0);
+tree::TerminalNode* InsightsQLParser::ForStmtContext::FOR() {
+  return getToken(InsightsQLParser::FOR, 0);
 }
 
-tree::TerminalNode* HogQLParser::ForStmtContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ForStmtContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ForStmtContext::SEMICOLON() {
-  return getTokens(HogQLParser::SEMICOLON);
+std::vector<tree::TerminalNode *> InsightsQLParser::ForStmtContext::SEMICOLON() {
+  return getTokens(InsightsQLParser::SEMICOLON);
 }
 
-tree::TerminalNode* HogQLParser::ForStmtContext::SEMICOLON(size_t i) {
-  return getToken(HogQLParser::SEMICOLON, i);
+tree::TerminalNode* InsightsQLParser::ForStmtContext::SEMICOLON(size_t i) {
+  return getToken(InsightsQLParser::SEMICOLON, i);
 }
 
-tree::TerminalNode* HogQLParser::ForStmtContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ForStmtContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::StatementContext* HogQLParser::ForStmtContext::statement() {
-  return getRuleContext<HogQLParser::StatementContext>(0);
+InsightsQLParser::StatementContext* InsightsQLParser::ForStmtContext::statement() {
+  return getRuleContext<InsightsQLParser::StatementContext>(0);
 }
 
-std::vector<HogQLParser::VarDeclContext *> HogQLParser::ForStmtContext::varDecl() {
-  return getRuleContexts<HogQLParser::VarDeclContext>();
+std::vector<InsightsQLParser::VarDeclContext *> InsightsQLParser::ForStmtContext::varDecl() {
+  return getRuleContexts<InsightsQLParser::VarDeclContext>();
 }
 
-HogQLParser::VarDeclContext* HogQLParser::ForStmtContext::varDecl(size_t i) {
-  return getRuleContext<HogQLParser::VarDeclContext>(i);
+InsightsQLParser::VarDeclContext* InsightsQLParser::ForStmtContext::varDecl(size_t i) {
+  return getRuleContext<InsightsQLParser::VarDeclContext>(i);
 }
 
-std::vector<HogQLParser::VarAssignmentContext *> HogQLParser::ForStmtContext::varAssignment() {
-  return getRuleContexts<HogQLParser::VarAssignmentContext>();
+std::vector<InsightsQLParser::VarAssignmentContext *> InsightsQLParser::ForStmtContext::varAssignment() {
+  return getRuleContexts<InsightsQLParser::VarAssignmentContext>();
 }
 
-HogQLParser::VarAssignmentContext* HogQLParser::ForStmtContext::varAssignment(size_t i) {
-  return getRuleContext<HogQLParser::VarAssignmentContext>(i);
+InsightsQLParser::VarAssignmentContext* InsightsQLParser::ForStmtContext::varAssignment(size_t i) {
+  return getRuleContext<InsightsQLParser::VarAssignmentContext>(i);
 }
 
-std::vector<HogQLParser::ExpressionContext *> HogQLParser::ForStmtContext::expression() {
-  return getRuleContexts<HogQLParser::ExpressionContext>();
+std::vector<InsightsQLParser::ExpressionContext *> InsightsQLParser::ForStmtContext::expression() {
+  return getRuleContexts<InsightsQLParser::ExpressionContext>();
 }
 
-HogQLParser::ExpressionContext* HogQLParser::ForStmtContext::expression(size_t i) {
-  return getRuleContext<HogQLParser::ExpressionContext>(i);
-}
-
-
-size_t HogQLParser::ForStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleForStmt;
+InsightsQLParser::ExpressionContext* InsightsQLParser::ForStmtContext::expression(size_t i) {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(i);
 }
 
 
-std::any HogQLParser::ForStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ForStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleForStmt;
+}
+
+
+std::any InsightsQLParser::ForStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitForStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ForStmtContext* HogQLParser::forStmt() {
+InsightsQLParser::ForStmtContext* InsightsQLParser::forStmt() {
   ForStmtContext *_localctx = _tracker.createInstance<ForStmtContext>(_ctx, getState());
-  enterRule(_localctx, 24, HogQLParser::RuleForStmt);
+  enterRule(_localctx, 24, InsightsQLParser::RuleForStmt);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1947,9 +1947,9 @@ HogQLParser::ForStmtContext* HogQLParser::forStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(284);
-    match(HogQLParser::FOR);
+    match(InsightsQLParser::FOR);
     setState(285);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(289);
     _errHandler->sync(this);
 
@@ -1976,7 +1976,7 @@ HogQLParser::ForStmtContext* HogQLParser::forStmt() {
       break;
     }
     setState(291);
-    match(HogQLParser::SEMICOLON);
+    match(InsightsQLParser::SEMICOLON);
     setState(293);
     _errHandler->sync(this);
 
@@ -1989,7 +1989,7 @@ HogQLParser::ForStmtContext* HogQLParser::forStmt() {
       antlrcpp::downCast<ForStmtContext *>(_localctx)->condition = expression();
     }
     setState(295);
-    match(HogQLParser::SEMICOLON);
+    match(InsightsQLParser::SEMICOLON);
     setState(299);
     _errHandler->sync(this);
 
@@ -2016,7 +2016,7 @@ HogQLParser::ForStmtContext* HogQLParser::forStmt() {
       break;
     }
     setState(301);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
     setState(302);
     statement();
     setState(304);
@@ -2025,7 +2025,7 @@ HogQLParser::ForStmtContext* HogQLParser::forStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 19, _ctx)) {
     case 1: {
       setState(303);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
       break;
     }
 
@@ -2045,70 +2045,70 @@ HogQLParser::ForStmtContext* HogQLParser::forStmt() {
 
 //----------------- ForInStmtContext ------------------------------------------------------------------
 
-HogQLParser::ForInStmtContext::ForInStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ForInStmtContext::ForInStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::FOR() {
-  return getToken(HogQLParser::FOR, 0);
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::FOR() {
+  return getToken(InsightsQLParser::FOR, 0);
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::LET() {
-  return getToken(HogQLParser::LET, 0);
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::LET() {
+  return getToken(InsightsQLParser::LET, 0);
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::ForInStmtContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::ForInStmtContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ForInStmtContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ForInStmtContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::IN() {
-  return getToken(HogQLParser::IN, 0);
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::IN() {
+  return getToken(InsightsQLParser::IN, 0);
 }
 
-HogQLParser::ExpressionContext* HogQLParser::ForInStmtContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
+InsightsQLParser::ExpressionContext* InsightsQLParser::ForInStmtContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::StatementContext* HogQLParser::ForInStmtContext::statement() {
-  return getRuleContext<HogQLParser::StatementContext>(0);
+InsightsQLParser::StatementContext* InsightsQLParser::ForInStmtContext::statement() {
+  return getRuleContext<InsightsQLParser::StatementContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::COMMA() {
-  return getToken(HogQLParser::COMMA, 0);
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::COMMA() {
+  return getToken(InsightsQLParser::COMMA, 0);
 }
 
-tree::TerminalNode* HogQLParser::ForInStmtContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
-}
-
-
-size_t HogQLParser::ForInStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleForInStmt;
+tree::TerminalNode* InsightsQLParser::ForInStmtContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-std::any HogQLParser::ForInStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ForInStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleForInStmt;
+}
+
+
+std::any InsightsQLParser::ForInStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitForInStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ForInStmtContext* HogQLParser::forInStmt() {
+InsightsQLParser::ForInStmtContext* InsightsQLParser::forInStmt() {
   ForInStmtContext *_localctx = _tracker.createInstance<ForInStmtContext>(_ctx, getState());
-  enterRule(_localctx, 26, HogQLParser::RuleForInStmt);
+  enterRule(_localctx, 26, InsightsQLParser::RuleForInStmt);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2121,29 +2121,29 @@ HogQLParser::ForInStmtContext* HogQLParser::forInStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(306);
-    match(HogQLParser::FOR);
+    match(InsightsQLParser::FOR);
     setState(307);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(308);
-    match(HogQLParser::LET);
+    match(InsightsQLParser::LET);
     setState(309);
     identifier();
     setState(312);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COMMA) {
+    if (_la == InsightsQLParser::COMMA) {
       setState(310);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
       setState(311);
       identifier();
     }
     setState(314);
-    match(HogQLParser::IN);
+    match(InsightsQLParser::IN);
     setState(315);
     expression();
     setState(316);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
     setState(317);
     statement();
     setState(319);
@@ -2152,7 +2152,7 @@ HogQLParser::ForInStmtContext* HogQLParser::forInStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 21, _ctx)) {
     case 1: {
       setState(318);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
       break;
     }
 
@@ -2172,54 +2172,54 @@ HogQLParser::ForInStmtContext* HogQLParser::forInStmt() {
 
 //----------------- FuncStmtContext ------------------------------------------------------------------
 
-HogQLParser::FuncStmtContext::FuncStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::FuncStmtContext::FuncStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::IdentifierContext* HogQLParser::FuncStmtContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::FuncStmtContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::FuncStmtContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::FuncStmtContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::FuncStmtContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::FuncStmtContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::BlockContext* HogQLParser::FuncStmtContext::block() {
-  return getRuleContext<HogQLParser::BlockContext>(0);
+InsightsQLParser::BlockContext* InsightsQLParser::FuncStmtContext::block() {
+  return getRuleContext<InsightsQLParser::BlockContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::FuncStmtContext::FN() {
-  return getToken(HogQLParser::FN, 0);
+tree::TerminalNode* InsightsQLParser::FuncStmtContext::FN() {
+  return getToken(InsightsQLParser::FN, 0);
 }
 
-tree::TerminalNode* HogQLParser::FuncStmtContext::FUN() {
-  return getToken(HogQLParser::FUN, 0);
+tree::TerminalNode* InsightsQLParser::FuncStmtContext::FUN() {
+  return getToken(InsightsQLParser::FUN, 0);
 }
 
-HogQLParser::IdentifierListContext* HogQLParser::FuncStmtContext::identifierList() {
-  return getRuleContext<HogQLParser::IdentifierListContext>(0);
-}
-
-
-size_t HogQLParser::FuncStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleFuncStmt;
+InsightsQLParser::IdentifierListContext* InsightsQLParser::FuncStmtContext::identifierList() {
+  return getRuleContext<InsightsQLParser::IdentifierListContext>(0);
 }
 
 
-std::any HogQLParser::FuncStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::FuncStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleFuncStmt;
+}
+
+
+std::any InsightsQLParser::FuncStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitFuncStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::FuncStmtContext* HogQLParser::funcStmt() {
+InsightsQLParser::FuncStmtContext* InsightsQLParser::funcStmt() {
   FuncStmtContext *_localctx = _tracker.createInstance<FuncStmtContext>(_ctx, getState());
-  enterRule(_localctx, 28, HogQLParser::RuleFuncStmt);
+  enterRule(_localctx, 28, InsightsQLParser::RuleFuncStmt);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2233,9 +2233,9 @@ HogQLParser::FuncStmtContext* HogQLParser::funcStmt() {
     enterOuterAlt(_localctx, 1);
     setState(321);
     _la = _input->LA(1);
-    if (!(_la == HogQLParser::FN
+    if (!(_la == InsightsQLParser::FN
 
-    || _la == HogQLParser::FUN)) {
+    || _la == InsightsQLParser::FUN)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -2245,7 +2245,7 @@ HogQLParser::FuncStmtContext* HogQLParser::funcStmt() {
     setState(322);
     identifier();
     setState(323);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(325);
     _errHandler->sync(this);
 
@@ -2257,7 +2257,7 @@ HogQLParser::FuncStmtContext* HogQLParser::funcStmt() {
       identifierList();
     }
     setState(327);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
     setState(328);
     block();
    
@@ -2273,42 +2273,42 @@ HogQLParser::FuncStmtContext* HogQLParser::funcStmt() {
 
 //----------------- VarAssignmentContext ------------------------------------------------------------------
 
-HogQLParser::VarAssignmentContext::VarAssignmentContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::VarAssignmentContext::VarAssignmentContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::ExpressionContext *> HogQLParser::VarAssignmentContext::expression() {
-  return getRuleContexts<HogQLParser::ExpressionContext>();
+std::vector<InsightsQLParser::ExpressionContext *> InsightsQLParser::VarAssignmentContext::expression() {
+  return getRuleContexts<InsightsQLParser::ExpressionContext>();
 }
 
-HogQLParser::ExpressionContext* HogQLParser::VarAssignmentContext::expression(size_t i) {
-  return getRuleContext<HogQLParser::ExpressionContext>(i);
+InsightsQLParser::ExpressionContext* InsightsQLParser::VarAssignmentContext::expression(size_t i) {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::VarAssignmentContext::COLON() {
-  return getToken(HogQLParser::COLON, 0);
+tree::TerminalNode* InsightsQLParser::VarAssignmentContext::COLON() {
+  return getToken(InsightsQLParser::COLON, 0);
 }
 
-tree::TerminalNode* HogQLParser::VarAssignmentContext::EQ_SINGLE() {
-  return getToken(HogQLParser::EQ_SINGLE, 0);
-}
-
-
-size_t HogQLParser::VarAssignmentContext::getRuleIndex() const {
-  return HogQLParser::RuleVarAssignment;
+tree::TerminalNode* InsightsQLParser::VarAssignmentContext::EQ_SINGLE() {
+  return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
 
-std::any HogQLParser::VarAssignmentContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::VarAssignmentContext::getRuleIndex() const {
+  return InsightsQLParser::RuleVarAssignment;
+}
+
+
+std::any InsightsQLParser::VarAssignmentContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitVarAssignment(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::VarAssignmentContext* HogQLParser::varAssignment() {
+InsightsQLParser::VarAssignmentContext* InsightsQLParser::varAssignment() {
   VarAssignmentContext *_localctx = _tracker.createInstance<VarAssignmentContext>(_ctx, getState());
-  enterRule(_localctx, 30, HogQLParser::RuleVarAssignment);
+  enterRule(_localctx, 30, InsightsQLParser::RuleVarAssignment);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2322,9 +2322,9 @@ HogQLParser::VarAssignmentContext* HogQLParser::varAssignment() {
     setState(330);
     expression();
     setState(331);
-    match(HogQLParser::COLON);
+    match(InsightsQLParser::COLON);
     setState(332);
-    match(HogQLParser::EQ_SINGLE);
+    match(InsightsQLParser::EQ_SINGLE);
     setState(333);
     expression();
    
@@ -2340,34 +2340,34 @@ HogQLParser::VarAssignmentContext* HogQLParser::varAssignment() {
 
 //----------------- ExprStmtContext ------------------------------------------------------------------
 
-HogQLParser::ExprStmtContext::ExprStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ExprStmtContext::ExprStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::ExpressionContext* HogQLParser::ExprStmtContext::expression() {
-  return getRuleContext<HogQLParser::ExpressionContext>(0);
+InsightsQLParser::ExpressionContext* InsightsQLParser::ExprStmtContext::expression() {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ExprStmtContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
-}
-
-
-size_t HogQLParser::ExprStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleExprStmt;
+tree::TerminalNode* InsightsQLParser::ExprStmtContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-std::any HogQLParser::ExprStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ExprStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleExprStmt;
+}
+
+
+std::any InsightsQLParser::ExprStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitExprStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ExprStmtContext* HogQLParser::exprStmt() {
+InsightsQLParser::ExprStmtContext* InsightsQLParser::exprStmt() {
   ExprStmtContext *_localctx = _tracker.createInstance<ExprStmtContext>(_ctx, getState());
-  enterRule(_localctx, 32, HogQLParser::RuleExprStmt);
+  enterRule(_localctx, 32, InsightsQLParser::RuleExprStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2386,7 +2386,7 @@ HogQLParser::ExprStmtContext* HogQLParser::exprStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 23, _ctx)) {
     case 1: {
       setState(336);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
       break;
     }
 
@@ -2406,30 +2406,30 @@ HogQLParser::ExprStmtContext* HogQLParser::exprStmt() {
 
 //----------------- EmptyStmtContext ------------------------------------------------------------------
 
-HogQLParser::EmptyStmtContext::EmptyStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::EmptyStmtContext::EmptyStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::EmptyStmtContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
+tree::TerminalNode* InsightsQLParser::EmptyStmtContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-size_t HogQLParser::EmptyStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleEmptyStmt;
+size_t InsightsQLParser::EmptyStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleEmptyStmt;
 }
 
 
-std::any HogQLParser::EmptyStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::EmptyStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitEmptyStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::EmptyStmtContext* HogQLParser::emptyStmt() {
+InsightsQLParser::EmptyStmtContext* InsightsQLParser::emptyStmt() {
   EmptyStmtContext *_localctx = _tracker.createInstance<EmptyStmtContext>(_ctx, getState());
-  enterRule(_localctx, 34, HogQLParser::RuleEmptyStmt);
+  enterRule(_localctx, 34, InsightsQLParser::RuleEmptyStmt);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2441,7 +2441,7 @@ HogQLParser::EmptyStmtContext* HogQLParser::emptyStmt() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(339);
-    match(HogQLParser::SEMICOLON);
+    match(InsightsQLParser::SEMICOLON);
    
   }
   catch (RecognitionException &e) {
@@ -2455,42 +2455,42 @@ HogQLParser::EmptyStmtContext* HogQLParser::emptyStmt() {
 
 //----------------- BlockContext ------------------------------------------------------------------
 
-HogQLParser::BlockContext::BlockContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::BlockContext::BlockContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::BlockContext::LBRACE() {
-  return getToken(HogQLParser::LBRACE, 0);
+tree::TerminalNode* InsightsQLParser::BlockContext::LBRACE() {
+  return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-tree::TerminalNode* HogQLParser::BlockContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
+tree::TerminalNode* InsightsQLParser::BlockContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
-std::vector<HogQLParser::DeclarationContext *> HogQLParser::BlockContext::declaration() {
-  return getRuleContexts<HogQLParser::DeclarationContext>();
+std::vector<InsightsQLParser::DeclarationContext *> InsightsQLParser::BlockContext::declaration() {
+  return getRuleContexts<InsightsQLParser::DeclarationContext>();
 }
 
-HogQLParser::DeclarationContext* HogQLParser::BlockContext::declaration(size_t i) {
-  return getRuleContext<HogQLParser::DeclarationContext>(i);
-}
-
-
-size_t HogQLParser::BlockContext::getRuleIndex() const {
-  return HogQLParser::RuleBlock;
+InsightsQLParser::DeclarationContext* InsightsQLParser::BlockContext::declaration(size_t i) {
+  return getRuleContext<InsightsQLParser::DeclarationContext>(i);
 }
 
 
-std::any HogQLParser::BlockContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::BlockContext::getRuleIndex() const {
+  return InsightsQLParser::RuleBlock;
+}
+
+
+std::any InsightsQLParser::BlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitBlock(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::BlockContext* HogQLParser::block() {
+InsightsQLParser::BlockContext* InsightsQLParser::block() {
   BlockContext *_localctx = _tracker.createInstance<BlockContext>(_ctx, getState());
-  enterRule(_localctx, 36, HogQLParser::RuleBlock);
+  enterRule(_localctx, 36, InsightsQLParser::RuleBlock);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2503,7 +2503,7 @@ HogQLParser::BlockContext* HogQLParser::block() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(341);
-    match(HogQLParser::LBRACE);
+    match(InsightsQLParser::LBRACE);
     setState(345);
     _errHandler->sync(this);
     _la = _input->LA(1);
@@ -2518,7 +2518,7 @@ HogQLParser::BlockContext* HogQLParser::block() {
       _la = _input->LA(1);
     }
     setState(348);
-    match(HogQLParser::RBRACE);
+    match(InsightsQLParser::RBRACE);
    
   }
   catch (RecognitionException &e) {
@@ -2532,38 +2532,38 @@ HogQLParser::BlockContext* HogQLParser::block() {
 
 //----------------- KvPairContext ------------------------------------------------------------------
 
-HogQLParser::KvPairContext::KvPairContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::KvPairContext::KvPairContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::ExpressionContext *> HogQLParser::KvPairContext::expression() {
-  return getRuleContexts<HogQLParser::ExpressionContext>();
+std::vector<InsightsQLParser::ExpressionContext *> InsightsQLParser::KvPairContext::expression() {
+  return getRuleContexts<InsightsQLParser::ExpressionContext>();
 }
 
-HogQLParser::ExpressionContext* HogQLParser::KvPairContext::expression(size_t i) {
-  return getRuleContext<HogQLParser::ExpressionContext>(i);
+InsightsQLParser::ExpressionContext* InsightsQLParser::KvPairContext::expression(size_t i) {
+  return getRuleContext<InsightsQLParser::ExpressionContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::KvPairContext::COLON() {
-  return getToken(HogQLParser::COLON, 0);
-}
-
-
-size_t HogQLParser::KvPairContext::getRuleIndex() const {
-  return HogQLParser::RuleKvPair;
+tree::TerminalNode* InsightsQLParser::KvPairContext::COLON() {
+  return getToken(InsightsQLParser::COLON, 0);
 }
 
 
-std::any HogQLParser::KvPairContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::KvPairContext::getRuleIndex() const {
+  return InsightsQLParser::RuleKvPair;
+}
+
+
+std::any InsightsQLParser::KvPairContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitKvPair(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::KvPairContext* HogQLParser::kvPair() {
+InsightsQLParser::KvPairContext* InsightsQLParser::kvPair() {
   KvPairContext *_localctx = _tracker.createInstance<KvPairContext>(_ctx, getState());
-  enterRule(_localctx, 38, HogQLParser::RuleKvPair);
+  enterRule(_localctx, 38, InsightsQLParser::RuleKvPair);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2577,7 +2577,7 @@ HogQLParser::KvPairContext* HogQLParser::kvPair() {
     setState(350);
     expression();
     setState(351);
-    match(HogQLParser::COLON);
+    match(InsightsQLParser::COLON);
     setState(352);
     expression();
    
@@ -2593,42 +2593,42 @@ HogQLParser::KvPairContext* HogQLParser::kvPair() {
 
 //----------------- KvPairListContext ------------------------------------------------------------------
 
-HogQLParser::KvPairListContext::KvPairListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::KvPairListContext::KvPairListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::KvPairContext *> HogQLParser::KvPairListContext::kvPair() {
-  return getRuleContexts<HogQLParser::KvPairContext>();
+std::vector<InsightsQLParser::KvPairContext *> InsightsQLParser::KvPairListContext::kvPair() {
+  return getRuleContexts<InsightsQLParser::KvPairContext>();
 }
 
-HogQLParser::KvPairContext* HogQLParser::KvPairListContext::kvPair(size_t i) {
-  return getRuleContext<HogQLParser::KvPairContext>(i);
+InsightsQLParser::KvPairContext* InsightsQLParser::KvPairListContext::kvPair(size_t i) {
+  return getRuleContext<InsightsQLParser::KvPairContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::KvPairListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::KvPairListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::KvPairListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::KvPairListContext::getRuleIndex() const {
-  return HogQLParser::RuleKvPairList;
+tree::TerminalNode* InsightsQLParser::KvPairListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::KvPairListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::KvPairListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleKvPairList;
+}
+
+
+std::any InsightsQLParser::KvPairListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitKvPairList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::KvPairListContext* HogQLParser::kvPairList() {
+InsightsQLParser::KvPairListContext* InsightsQLParser::kvPairList() {
   KvPairListContext *_localctx = _tracker.createInstance<KvPairListContext>(_ctx, getState());
-  enterRule(_localctx, 40, HogQLParser::RuleKvPairList);
+  enterRule(_localctx, 40, InsightsQLParser::RuleKvPairList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2649,7 +2649,7 @@ HogQLParser::KvPairListContext* HogQLParser::kvPairList() {
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         setState(355);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         setState(356);
         kvPair(); 
       }
@@ -2661,9 +2661,9 @@ HogQLParser::KvPairListContext* HogQLParser::kvPairList() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COMMA) {
+    if (_la == InsightsQLParser::COMMA) {
       setState(362);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
     }
    
   }
@@ -2678,46 +2678,46 @@ HogQLParser::KvPairListContext* HogQLParser::kvPairList() {
 
 //----------------- SelectContext ------------------------------------------------------------------
 
-HogQLParser::SelectContext::SelectContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SelectContext::SelectContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::SelectContext::EOF() {
-  return getToken(HogQLParser::EOF, 0);
+tree::TerminalNode* InsightsQLParser::SelectContext::EOF() {
+  return getToken(InsightsQLParser::EOF, 0);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::SelectContext::selectSetStmt() {
-  return getRuleContext<HogQLParser::SelectSetStmtContext>(0);
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::SelectContext::selectSetStmt() {
+  return getRuleContext<InsightsQLParser::SelectSetStmtContext>(0);
 }
 
-HogQLParser::SelectStmtContext* HogQLParser::SelectContext::selectStmt() {
-  return getRuleContext<HogQLParser::SelectStmtContext>(0);
+InsightsQLParser::SelectStmtContext* InsightsQLParser::SelectContext::selectStmt() {
+  return getRuleContext<InsightsQLParser::SelectStmtContext>(0);
 }
 
-HogQLParser::HogqlxTagElementContext* HogQLParser::SelectContext::hogqlxTagElement() {
-  return getRuleContext<HogQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::SelectContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SelectContext::SEMICOLON() {
-  return getToken(HogQLParser::SEMICOLON, 0);
-}
-
-
-size_t HogQLParser::SelectContext::getRuleIndex() const {
-  return HogQLParser::RuleSelect;
+tree::TerminalNode* InsightsQLParser::SelectContext::SEMICOLON() {
+  return getToken(InsightsQLParser::SEMICOLON, 0);
 }
 
 
-std::any HogQLParser::SelectContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SelectContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSelect;
+}
+
+
+std::any InsightsQLParser::SelectContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSelect(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SelectContext* HogQLParser::select() {
+InsightsQLParser::SelectContext* InsightsQLParser::select() {
   SelectContext *_localctx = _tracker.createInstance<SelectContext>(_ctx, getState());
-  enterRule(_localctx, 42, HogQLParser::RuleSelect);
+  enterRule(_localctx, 42, InsightsQLParser::RuleSelect);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -2746,7 +2746,7 @@ HogQLParser::SelectContext* HogQLParser::select() {
 
     case 3: {
       setState(367);
-      hogqlxTagElement();
+      insightsqlxTagElement();
       break;
     }
 
@@ -2757,12 +2757,12 @@ HogQLParser::SelectContext* HogQLParser::select() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::SEMICOLON) {
+    if (_la == InsightsQLParser::SEMICOLON) {
       setState(370);
-      match(HogQLParser::SEMICOLON);
+      match(InsightsQLParser::SEMICOLON);
     }
     setState(373);
-    match(HogQLParser::EOF);
+    match(InsightsQLParser::EOF);
    
   }
   catch (RecognitionException &e) {
@@ -2776,46 +2776,46 @@ HogQLParser::SelectContext* HogQLParser::select() {
 
 //----------------- SelectStmtWithParensContext ------------------------------------------------------------------
 
-HogQLParser::SelectStmtWithParensContext::SelectStmtWithParensContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SelectStmtWithParensContext::SelectStmtWithParensContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::SelectStmtContext* HogQLParser::SelectStmtWithParensContext::selectStmt() {
-  return getRuleContext<HogQLParser::SelectStmtContext>(0);
+InsightsQLParser::SelectStmtContext* InsightsQLParser::SelectStmtWithParensContext::selectStmt() {
+  return getRuleContext<InsightsQLParser::SelectStmtContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtWithParensContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::SelectStmtWithParensContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::SelectStmtWithParensContext::selectSetStmt() {
-  return getRuleContext<HogQLParser::SelectSetStmtContext>(0);
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::SelectStmtWithParensContext::selectSetStmt() {
+  return getRuleContext<InsightsQLParser::SelectSetStmtContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtWithParensContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::SelectStmtWithParensContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::PlaceholderContext* HogQLParser::SelectStmtWithParensContext::placeholder() {
-  return getRuleContext<HogQLParser::PlaceholderContext>(0);
-}
-
-
-size_t HogQLParser::SelectStmtWithParensContext::getRuleIndex() const {
-  return HogQLParser::RuleSelectStmtWithParens;
+InsightsQLParser::PlaceholderContext* InsightsQLParser::SelectStmtWithParensContext::placeholder() {
+  return getRuleContext<InsightsQLParser::PlaceholderContext>(0);
 }
 
 
-std::any HogQLParser::SelectStmtWithParensContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SelectStmtWithParensContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSelectStmtWithParens;
+}
+
+
+std::any InsightsQLParser::SelectStmtWithParensContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSelectStmtWithParens(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SelectStmtWithParensContext* HogQLParser::selectStmtWithParens() {
+InsightsQLParser::SelectStmtWithParensContext* InsightsQLParser::selectStmtWithParens() {
   SelectStmtWithParensContext *_localctx = _tracker.createInstance<SelectStmtWithParensContext>(_ctx, getState());
-  enterRule(_localctx, 44, HogQLParser::RuleSelectStmtWithParens);
+  enterRule(_localctx, 44, InsightsQLParser::RuleSelectStmtWithParens);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2828,26 +2828,26 @@ HogQLParser::SelectStmtWithParensContext* HogQLParser::selectStmtWithParens() {
     setState(381);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::SELECT:
-      case HogQLParser::WITH: {
+      case InsightsQLParser::SELECT:
+      case InsightsQLParser::WITH: {
         enterOuterAlt(_localctx, 1);
         setState(375);
         selectStmt();
         break;
       }
 
-      case HogQLParser::LPAREN: {
+      case InsightsQLParser::LPAREN: {
         enterOuterAlt(_localctx, 2);
         setState(376);
-        match(HogQLParser::LPAREN);
+        match(InsightsQLParser::LPAREN);
         setState(377);
         selectSetStmt();
         setState(378);
-        match(HogQLParser::RPAREN);
+        match(InsightsQLParser::RPAREN);
         break;
       }
 
-      case HogQLParser::LBRACE: {
+      case InsightsQLParser::LBRACE: {
         enterOuterAlt(_localctx, 3);
         setState(380);
         placeholder();
@@ -2870,50 +2870,50 @@ HogQLParser::SelectStmtWithParensContext* HogQLParser::selectStmtWithParens() {
 
 //----------------- SubsequentSelectSetClauseContext ------------------------------------------------------------------
 
-HogQLParser::SubsequentSelectSetClauseContext::SubsequentSelectSetClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SubsequentSelectSetClauseContext::SubsequentSelectSetClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::SelectStmtWithParensContext* HogQLParser::SubsequentSelectSetClauseContext::selectStmtWithParens() {
-  return getRuleContext<HogQLParser::SelectStmtWithParensContext>(0);
+InsightsQLParser::SelectStmtWithParensContext* InsightsQLParser::SubsequentSelectSetClauseContext::selectStmtWithParens() {
+  return getRuleContext<InsightsQLParser::SelectStmtWithParensContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SubsequentSelectSetClauseContext::EXCEPT() {
-  return getToken(HogQLParser::EXCEPT, 0);
+tree::TerminalNode* InsightsQLParser::SubsequentSelectSetClauseContext::EXCEPT() {
+  return getToken(InsightsQLParser::EXCEPT, 0);
 }
 
-tree::TerminalNode* HogQLParser::SubsequentSelectSetClauseContext::UNION() {
-  return getToken(HogQLParser::UNION, 0);
+tree::TerminalNode* InsightsQLParser::SubsequentSelectSetClauseContext::UNION() {
+  return getToken(InsightsQLParser::UNION, 0);
 }
 
-tree::TerminalNode* HogQLParser::SubsequentSelectSetClauseContext::ALL() {
-  return getToken(HogQLParser::ALL, 0);
+tree::TerminalNode* InsightsQLParser::SubsequentSelectSetClauseContext::ALL() {
+  return getToken(InsightsQLParser::ALL, 0);
 }
 
-tree::TerminalNode* HogQLParser::SubsequentSelectSetClauseContext::DISTINCT() {
-  return getToken(HogQLParser::DISTINCT, 0);
+tree::TerminalNode* InsightsQLParser::SubsequentSelectSetClauseContext::DISTINCT() {
+  return getToken(InsightsQLParser::DISTINCT, 0);
 }
 
-tree::TerminalNode* HogQLParser::SubsequentSelectSetClauseContext::INTERSECT() {
-  return getToken(HogQLParser::INTERSECT, 0);
-}
-
-
-size_t HogQLParser::SubsequentSelectSetClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleSubsequentSelectSetClause;
+tree::TerminalNode* InsightsQLParser::SubsequentSelectSetClauseContext::INTERSECT() {
+  return getToken(InsightsQLParser::INTERSECT, 0);
 }
 
 
-std::any HogQLParser::SubsequentSelectSetClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SubsequentSelectSetClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSubsequentSelectSetClause;
+}
+
+
+std::any InsightsQLParser::SubsequentSelectSetClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSubsequentSelectSetClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SubsequentSelectSetClauseContext* HogQLParser::subsequentSelectSetClause() {
+InsightsQLParser::SubsequentSelectSetClauseContext* InsightsQLParser::subsequentSelectSetClause() {
   SubsequentSelectSetClauseContext *_localctx = _tracker.createInstance<SubsequentSelectSetClauseContext>(_ctx, getState());
-  enterRule(_localctx, 46, HogQLParser::RuleSubsequentSelectSetClause);
+  enterRule(_localctx, 46, InsightsQLParser::RuleSubsequentSelectSetClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -2929,37 +2929,37 @@ HogQLParser::SubsequentSelectSetClauseContext* HogQLParser::subsequentSelectSetC
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 30, _ctx)) {
     case 1: {
       setState(383);
-      match(HogQLParser::EXCEPT);
+      match(InsightsQLParser::EXCEPT);
       break;
     }
 
     case 2: {
       setState(384);
-      match(HogQLParser::UNION);
+      match(InsightsQLParser::UNION);
       setState(385);
-      match(HogQLParser::ALL);
+      match(InsightsQLParser::ALL);
       break;
     }
 
     case 3: {
       setState(386);
-      match(HogQLParser::UNION);
+      match(InsightsQLParser::UNION);
       setState(387);
-      match(HogQLParser::DISTINCT);
+      match(InsightsQLParser::DISTINCT);
       break;
     }
 
     case 4: {
       setState(388);
-      match(HogQLParser::INTERSECT);
+      match(InsightsQLParser::INTERSECT);
       break;
     }
 
     case 5: {
       setState(389);
-      match(HogQLParser::INTERSECT);
+      match(InsightsQLParser::INTERSECT);
       setState(390);
-      match(HogQLParser::DISTINCT);
+      match(InsightsQLParser::DISTINCT);
       break;
     }
 
@@ -2981,38 +2981,38 @@ HogQLParser::SubsequentSelectSetClauseContext* HogQLParser::subsequentSelectSetC
 
 //----------------- SelectSetStmtContext ------------------------------------------------------------------
 
-HogQLParser::SelectSetStmtContext::SelectSetStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SelectSetStmtContext::SelectSetStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::SelectStmtWithParensContext* HogQLParser::SelectSetStmtContext::selectStmtWithParens() {
-  return getRuleContext<HogQLParser::SelectStmtWithParensContext>(0);
+InsightsQLParser::SelectStmtWithParensContext* InsightsQLParser::SelectSetStmtContext::selectStmtWithParens() {
+  return getRuleContext<InsightsQLParser::SelectStmtWithParensContext>(0);
 }
 
-std::vector<HogQLParser::SubsequentSelectSetClauseContext *> HogQLParser::SelectSetStmtContext::subsequentSelectSetClause() {
-  return getRuleContexts<HogQLParser::SubsequentSelectSetClauseContext>();
+std::vector<InsightsQLParser::SubsequentSelectSetClauseContext *> InsightsQLParser::SelectSetStmtContext::subsequentSelectSetClause() {
+  return getRuleContexts<InsightsQLParser::SubsequentSelectSetClauseContext>();
 }
 
-HogQLParser::SubsequentSelectSetClauseContext* HogQLParser::SelectSetStmtContext::subsequentSelectSetClause(size_t i) {
-  return getRuleContext<HogQLParser::SubsequentSelectSetClauseContext>(i);
-}
-
-
-size_t HogQLParser::SelectSetStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleSelectSetStmt;
+InsightsQLParser::SubsequentSelectSetClauseContext* InsightsQLParser::SelectSetStmtContext::subsequentSelectSetClause(size_t i) {
+  return getRuleContext<InsightsQLParser::SubsequentSelectSetClauseContext>(i);
 }
 
 
-std::any HogQLParser::SelectSetStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SelectSetStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSelectSetStmt;
+}
+
+
+std::any InsightsQLParser::SelectSetStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSelectSetStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::selectSetStmt() {
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::selectSetStmt() {
   SelectSetStmtContext *_localctx = _tracker.createInstance<SelectSetStmtContext>(_ctx, getState());
-  enterRule(_localctx, 48, HogQLParser::RuleSelectSetStmt);
+  enterRule(_localctx, 48, InsightsQLParser::RuleSelectSetStmt);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -3029,9 +3029,9 @@ HogQLParser::SelectSetStmtContext* HogQLParser::selectSetStmt() {
     setState(399);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::EXCEPT
+    while (_la == InsightsQLParser::EXCEPT
 
-    || _la == HogQLParser::INTERSECT || _la == HogQLParser::UNION) {
+    || _la == InsightsQLParser::INTERSECT || _la == InsightsQLParser::UNION) {
       setState(396);
       subsequentSelectSetClause();
       setState(401);
@@ -3051,114 +3051,114 @@ HogQLParser::SelectSetStmtContext* HogQLParser::selectSetStmt() {
 
 //----------------- SelectStmtContext ------------------------------------------------------------------
 
-HogQLParser::SelectStmtContext::SelectStmtContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SelectStmtContext::SelectStmtContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtContext::SELECT() {
-  return getToken(HogQLParser::SELECT, 0);
+tree::TerminalNode* InsightsQLParser::SelectStmtContext::SELECT() {
+  return getToken(InsightsQLParser::SELECT, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::SelectStmtContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::SelectStmtContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtContext::DISTINCT() {
-  return getToken(HogQLParser::DISTINCT, 0);
+tree::TerminalNode* InsightsQLParser::SelectStmtContext::DISTINCT() {
+  return getToken(InsightsQLParser::DISTINCT, 0);
 }
 
-HogQLParser::TopClauseContext* HogQLParser::SelectStmtContext::topClause() {
-  return getRuleContext<HogQLParser::TopClauseContext>(0);
+InsightsQLParser::TopClauseContext* InsightsQLParser::SelectStmtContext::topClause() {
+  return getRuleContext<InsightsQLParser::TopClauseContext>(0);
 }
 
-HogQLParser::ArrayJoinClauseContext* HogQLParser::SelectStmtContext::arrayJoinClause() {
-  return getRuleContext<HogQLParser::ArrayJoinClauseContext>(0);
+InsightsQLParser::ArrayJoinClauseContext* InsightsQLParser::SelectStmtContext::arrayJoinClause() {
+  return getRuleContext<InsightsQLParser::ArrayJoinClauseContext>(0);
 }
 
-HogQLParser::PrewhereClauseContext* HogQLParser::SelectStmtContext::prewhereClause() {
-  return getRuleContext<HogQLParser::PrewhereClauseContext>(0);
+InsightsQLParser::PrewhereClauseContext* InsightsQLParser::SelectStmtContext::prewhereClause() {
+  return getRuleContext<InsightsQLParser::PrewhereClauseContext>(0);
 }
 
-HogQLParser::GroupByClauseContext* HogQLParser::SelectStmtContext::groupByClause() {
-  return getRuleContext<HogQLParser::GroupByClauseContext>(0);
+InsightsQLParser::GroupByClauseContext* InsightsQLParser::SelectStmtContext::groupByClause() {
+  return getRuleContext<InsightsQLParser::GroupByClauseContext>(0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::SelectStmtContext::WITH() {
-  return getTokens(HogQLParser::WITH);
+std::vector<tree::TerminalNode *> InsightsQLParser::SelectStmtContext::WITH() {
+  return getTokens(InsightsQLParser::WITH);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtContext::WITH(size_t i) {
-  return getToken(HogQLParser::WITH, i);
+tree::TerminalNode* InsightsQLParser::SelectStmtContext::WITH(size_t i) {
+  return getToken(InsightsQLParser::WITH, i);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtContext::TOTALS() {
-  return getToken(HogQLParser::TOTALS, 0);
+tree::TerminalNode* InsightsQLParser::SelectStmtContext::TOTALS() {
+  return getToken(InsightsQLParser::TOTALS, 0);
 }
 
-HogQLParser::HavingClauseContext* HogQLParser::SelectStmtContext::havingClause() {
-  return getRuleContext<HogQLParser::HavingClauseContext>(0);
+InsightsQLParser::HavingClauseContext* InsightsQLParser::SelectStmtContext::havingClause() {
+  return getRuleContext<InsightsQLParser::HavingClauseContext>(0);
 }
 
-HogQLParser::WindowClauseContext* HogQLParser::SelectStmtContext::windowClause() {
-  return getRuleContext<HogQLParser::WindowClauseContext>(0);
+InsightsQLParser::WindowClauseContext* InsightsQLParser::SelectStmtContext::windowClause() {
+  return getRuleContext<InsightsQLParser::WindowClauseContext>(0);
 }
 
-HogQLParser::OrderByClauseContext* HogQLParser::SelectStmtContext::orderByClause() {
-  return getRuleContext<HogQLParser::OrderByClauseContext>(0);
+InsightsQLParser::OrderByClauseContext* InsightsQLParser::SelectStmtContext::orderByClause() {
+  return getRuleContext<InsightsQLParser::OrderByClauseContext>(0);
 }
 
-HogQLParser::LimitByClauseContext* HogQLParser::SelectStmtContext::limitByClause() {
-  return getRuleContext<HogQLParser::LimitByClauseContext>(0);
+InsightsQLParser::LimitByClauseContext* InsightsQLParser::SelectStmtContext::limitByClause() {
+  return getRuleContext<InsightsQLParser::LimitByClauseContext>(0);
 }
 
-HogQLParser::LimitAndOffsetClauseContext* HogQLParser::SelectStmtContext::limitAndOffsetClause() {
-  return getRuleContext<HogQLParser::LimitAndOffsetClauseContext>(0);
+InsightsQLParser::LimitAndOffsetClauseContext* InsightsQLParser::SelectStmtContext::limitAndOffsetClause() {
+  return getRuleContext<InsightsQLParser::LimitAndOffsetClauseContext>(0);
 }
 
-HogQLParser::OffsetOnlyClauseContext* HogQLParser::SelectStmtContext::offsetOnlyClause() {
-  return getRuleContext<HogQLParser::OffsetOnlyClauseContext>(0);
+InsightsQLParser::OffsetOnlyClauseContext* InsightsQLParser::SelectStmtContext::offsetOnlyClause() {
+  return getRuleContext<InsightsQLParser::OffsetOnlyClauseContext>(0);
 }
 
-HogQLParser::SettingsClauseContext* HogQLParser::SelectStmtContext::settingsClause() {
-  return getRuleContext<HogQLParser::SettingsClauseContext>(0);
+InsightsQLParser::SettingsClauseContext* InsightsQLParser::SelectStmtContext::settingsClause() {
+  return getRuleContext<InsightsQLParser::SettingsClauseContext>(0);
 }
 
-HogQLParser::WithClauseContext* HogQLParser::SelectStmtContext::withClause() {
-  return getRuleContext<HogQLParser::WithClauseContext>(0);
+InsightsQLParser::WithClauseContext* InsightsQLParser::SelectStmtContext::withClause() {
+  return getRuleContext<InsightsQLParser::WithClauseContext>(0);
 }
 
-HogQLParser::FromClauseContext* HogQLParser::SelectStmtContext::fromClause() {
-  return getRuleContext<HogQLParser::FromClauseContext>(0);
+InsightsQLParser::FromClauseContext* InsightsQLParser::SelectStmtContext::fromClause() {
+  return getRuleContext<InsightsQLParser::FromClauseContext>(0);
 }
 
-HogQLParser::WhereClauseContext* HogQLParser::SelectStmtContext::whereClause() {
-  return getRuleContext<HogQLParser::WhereClauseContext>(0);
+InsightsQLParser::WhereClauseContext* InsightsQLParser::SelectStmtContext::whereClause() {
+  return getRuleContext<InsightsQLParser::WhereClauseContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtContext::CUBE() {
-  return getToken(HogQLParser::CUBE, 0);
+tree::TerminalNode* InsightsQLParser::SelectStmtContext::CUBE() {
+  return getToken(InsightsQLParser::CUBE, 0);
 }
 
-tree::TerminalNode* HogQLParser::SelectStmtContext::ROLLUP() {
-  return getToken(HogQLParser::ROLLUP, 0);
-}
-
-
-size_t HogQLParser::SelectStmtContext::getRuleIndex() const {
-  return HogQLParser::RuleSelectStmt;
+tree::TerminalNode* InsightsQLParser::SelectStmtContext::ROLLUP() {
+  return getToken(InsightsQLParser::ROLLUP, 0);
 }
 
 
-std::any HogQLParser::SelectStmtContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SelectStmtContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSelectStmt;
+}
+
+
+std::any InsightsQLParser::SelectStmtContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSelectStmt(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
+InsightsQLParser::SelectStmtContext* InsightsQLParser::selectStmt() {
   SelectStmtContext *_localctx = _tracker.createInstance<SelectStmtContext>(_ctx, getState());
-  enterRule(_localctx, 50, HogQLParser::RuleSelectStmt);
+  enterRule(_localctx, 50, InsightsQLParser::RuleSelectStmt);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -3174,19 +3174,19 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::WITH) {
+    if (_la == InsightsQLParser::WITH) {
       setState(402);
       antlrcpp::downCast<SelectStmtContext *>(_localctx)->with = withClause();
     }
     setState(405);
-    match(HogQLParser::SELECT);
+    match(InsightsQLParser::SELECT);
     setState(407);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 33, _ctx)) {
     case 1: {
       setState(406);
-      match(HogQLParser::DISTINCT);
+      match(InsightsQLParser::DISTINCT);
       break;
     }
 
@@ -3212,7 +3212,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::FROM) {
+    if (_la == InsightsQLParser::FROM) {
       setState(413);
       antlrcpp::downCast<SelectStmtContext *>(_localctx)->from = fromClause();
     }
@@ -3229,7 +3229,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::PREWHERE) {
+    if (_la == InsightsQLParser::PREWHERE) {
       setState(419);
       prewhereClause();
     }
@@ -3237,7 +3237,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::WHERE) {
+    if (_la == InsightsQLParser::WHERE) {
       setState(422);
       antlrcpp::downCast<SelectStmtContext *>(_localctx)->where = whereClause();
     }
@@ -3245,7 +3245,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::GROUP) {
+    if (_la == InsightsQLParser::GROUP) {
       setState(425);
       groupByClause();
     }
@@ -3255,12 +3255,12 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 40, _ctx)) {
     case 1: {
       setState(428);
-      match(HogQLParser::WITH);
+      match(InsightsQLParser::WITH);
       setState(429);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::CUBE
+      if (!(_la == InsightsQLParser::CUBE
 
-      || _la == HogQLParser::ROLLUP)) {
+      || _la == InsightsQLParser::ROLLUP)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -3277,17 +3277,17 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::WITH) {
+    if (_la == InsightsQLParser::WITH) {
       setState(432);
-      match(HogQLParser::WITH);
+      match(InsightsQLParser::WITH);
       setState(433);
-      match(HogQLParser::TOTALS);
+      match(InsightsQLParser::TOTALS);
     }
     setState(437);
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::HAVING) {
+    if (_la == InsightsQLParser::HAVING) {
       setState(436);
       havingClause();
     }
@@ -3295,7 +3295,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::WINDOW) {
+    if (_la == InsightsQLParser::WINDOW) {
       setState(439);
       windowClause();
     }
@@ -3303,7 +3303,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::ORDER) {
+    if (_la == InsightsQLParser::ORDER) {
       setState(442);
       orderByClause();
     }
@@ -3323,25 +3323,25 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     setState(450);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::LIMIT: {
+      case InsightsQLParser::LIMIT: {
         setState(448);
         limitAndOffsetClause();
         break;
       }
 
-      case HogQLParser::OFFSET: {
+      case InsightsQLParser::OFFSET: {
         setState(449);
         offsetOnlyClause();
         break;
       }
 
-      case HogQLParser::EOF:
-      case HogQLParser::EXCEPT:
-      case HogQLParser::INTERSECT:
-      case HogQLParser::SETTINGS:
-      case HogQLParser::UNION:
-      case HogQLParser::RPAREN:
-      case HogQLParser::SEMICOLON: {
+      case InsightsQLParser::EOF:
+      case InsightsQLParser::EXCEPT:
+      case InsightsQLParser::INTERSECT:
+      case InsightsQLParser::SETTINGS:
+      case InsightsQLParser::UNION:
+      case InsightsQLParser::RPAREN:
+      case InsightsQLParser::SEMICOLON: {
         break;
       }
 
@@ -3352,7 +3352,7 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::SETTINGS) {
+    if (_la == InsightsQLParser::SETTINGS) {
       setState(452);
       settingsClause();
     }
@@ -3369,38 +3369,38 @@ HogQLParser::SelectStmtContext* HogQLParser::selectStmt() {
 
 //----------------- WithClauseContext ------------------------------------------------------------------
 
-HogQLParser::WithClauseContext::WithClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WithClauseContext::WithClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WithClauseContext::WITH() {
-  return getToken(HogQLParser::WITH, 0);
+tree::TerminalNode* InsightsQLParser::WithClauseContext::WITH() {
+  return getToken(InsightsQLParser::WITH, 0);
 }
 
-HogQLParser::WithExprListContext* HogQLParser::WithClauseContext::withExprList() {
-  return getRuleContext<HogQLParser::WithExprListContext>(0);
+InsightsQLParser::WithExprListContext* InsightsQLParser::WithClauseContext::withExprList() {
+  return getRuleContext<InsightsQLParser::WithExprListContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WithClauseContext::RECURSIVE() {
-  return getToken(HogQLParser::RECURSIVE, 0);
-}
-
-
-size_t HogQLParser::WithClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleWithClause;
+tree::TerminalNode* InsightsQLParser::WithClauseContext::RECURSIVE() {
+  return getToken(InsightsQLParser::RECURSIVE, 0);
 }
 
 
-std::any HogQLParser::WithClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WithClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWithClause;
+}
+
+
+std::any InsightsQLParser::WithClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWithClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WithClauseContext* HogQLParser::withClause() {
+InsightsQLParser::WithClauseContext* InsightsQLParser::withClause() {
   WithClauseContext *_localctx = _tracker.createInstance<WithClauseContext>(_ctx, getState());
-  enterRule(_localctx, 52, HogQLParser::RuleWithClause);
+  enterRule(_localctx, 52, InsightsQLParser::RuleWithClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3412,14 +3412,14 @@ HogQLParser::WithClauseContext* HogQLParser::withClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(455);
-    match(HogQLParser::WITH);
+    match(InsightsQLParser::WITH);
     setState(457);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 48, _ctx)) {
     case 1: {
       setState(456);
-      match(HogQLParser::RECURSIVE);
+      match(InsightsQLParser::RECURSIVE);
       break;
     }
 
@@ -3441,42 +3441,42 @@ HogQLParser::WithClauseContext* HogQLParser::withClause() {
 
 //----------------- TopClauseContext ------------------------------------------------------------------
 
-HogQLParser::TopClauseContext::TopClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TopClauseContext::TopClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::TopClauseContext::TOP() {
-  return getToken(HogQLParser::TOP, 0);
+tree::TerminalNode* InsightsQLParser::TopClauseContext::TOP() {
+  return getToken(InsightsQLParser::TOP, 0);
 }
 
-tree::TerminalNode* HogQLParser::TopClauseContext::DECIMAL_LITERAL() {
-  return getToken(HogQLParser::DECIMAL_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::TopClauseContext::DECIMAL_LITERAL() {
+  return getToken(InsightsQLParser::DECIMAL_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::TopClauseContext::WITH() {
-  return getToken(HogQLParser::WITH, 0);
+tree::TerminalNode* InsightsQLParser::TopClauseContext::WITH() {
+  return getToken(InsightsQLParser::WITH, 0);
 }
 
-tree::TerminalNode* HogQLParser::TopClauseContext::TIES() {
-  return getToken(HogQLParser::TIES, 0);
-}
-
-
-size_t HogQLParser::TopClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleTopClause;
+tree::TerminalNode* InsightsQLParser::TopClauseContext::TIES() {
+  return getToken(InsightsQLParser::TIES, 0);
 }
 
 
-std::any HogQLParser::TopClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::TopClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTopClause;
+}
+
+
+std::any InsightsQLParser::TopClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTopClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TopClauseContext* HogQLParser::topClause() {
+InsightsQLParser::TopClauseContext* InsightsQLParser::topClause() {
   TopClauseContext *_localctx = _tracker.createInstance<TopClauseContext>(_ctx, getState());
-  enterRule(_localctx, 54, HogQLParser::RuleTopClause);
+  enterRule(_localctx, 54, InsightsQLParser::RuleTopClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3488,18 +3488,18 @@ HogQLParser::TopClauseContext* HogQLParser::topClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(461);
-    match(HogQLParser::TOP);
+    match(InsightsQLParser::TOP);
     setState(462);
-    match(HogQLParser::DECIMAL_LITERAL);
+    match(InsightsQLParser::DECIMAL_LITERAL);
     setState(465);
     _errHandler->sync(this);
 
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 49, _ctx)) {
     case 1: {
       setState(463);
-      match(HogQLParser::WITH);
+      match(InsightsQLParser::WITH);
       setState(464);
-      match(HogQLParser::TIES);
+      match(InsightsQLParser::TIES);
       break;
     }
 
@@ -3519,34 +3519,34 @@ HogQLParser::TopClauseContext* HogQLParser::topClause() {
 
 //----------------- FromClauseContext ------------------------------------------------------------------
 
-HogQLParser::FromClauseContext::FromClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::FromClauseContext::FromClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::FromClauseContext::FROM() {
-  return getToken(HogQLParser::FROM, 0);
+tree::TerminalNode* InsightsQLParser::FromClauseContext::FROM() {
+  return getToken(InsightsQLParser::FROM, 0);
 }
 
-HogQLParser::JoinExprContext* HogQLParser::FromClauseContext::joinExpr() {
-  return getRuleContext<HogQLParser::JoinExprContext>(0);
-}
-
-
-size_t HogQLParser::FromClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleFromClause;
+InsightsQLParser::JoinExprContext* InsightsQLParser::FromClauseContext::joinExpr() {
+  return getRuleContext<InsightsQLParser::JoinExprContext>(0);
 }
 
 
-std::any HogQLParser::FromClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::FromClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleFromClause;
+}
+
+
+std::any InsightsQLParser::FromClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitFromClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::FromClauseContext* HogQLParser::fromClause() {
+InsightsQLParser::FromClauseContext* InsightsQLParser::fromClause() {
   FromClauseContext *_localctx = _tracker.createInstance<FromClauseContext>(_ctx, getState());
-  enterRule(_localctx, 56, HogQLParser::RuleFromClause);
+  enterRule(_localctx, 56, InsightsQLParser::RuleFromClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3558,7 +3558,7 @@ HogQLParser::FromClauseContext* HogQLParser::fromClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(467);
-    match(HogQLParser::FROM);
+    match(InsightsQLParser::FROM);
     setState(468);
     joinExpr(0);
    
@@ -3574,46 +3574,46 @@ HogQLParser::FromClauseContext* HogQLParser::fromClause() {
 
 //----------------- ArrayJoinClauseContext ------------------------------------------------------------------
 
-HogQLParser::ArrayJoinClauseContext::ArrayJoinClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ArrayJoinClauseContext::ArrayJoinClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ArrayJoinClauseContext::ARRAY() {
-  return getToken(HogQLParser::ARRAY, 0);
+tree::TerminalNode* InsightsQLParser::ArrayJoinClauseContext::ARRAY() {
+  return getToken(InsightsQLParser::ARRAY, 0);
 }
 
-tree::TerminalNode* HogQLParser::ArrayJoinClauseContext::JOIN() {
-  return getToken(HogQLParser::JOIN, 0);
+tree::TerminalNode* InsightsQLParser::ArrayJoinClauseContext::JOIN() {
+  return getToken(InsightsQLParser::JOIN, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ArrayJoinClauseContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ArrayJoinClauseContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ArrayJoinClauseContext::LEFT() {
-  return getToken(HogQLParser::LEFT, 0);
+tree::TerminalNode* InsightsQLParser::ArrayJoinClauseContext::LEFT() {
+  return getToken(InsightsQLParser::LEFT, 0);
 }
 
-tree::TerminalNode* HogQLParser::ArrayJoinClauseContext::INNER() {
-  return getToken(HogQLParser::INNER, 0);
-}
-
-
-size_t HogQLParser::ArrayJoinClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleArrayJoinClause;
+tree::TerminalNode* InsightsQLParser::ArrayJoinClauseContext::INNER() {
+  return getToken(InsightsQLParser::INNER, 0);
 }
 
 
-std::any HogQLParser::ArrayJoinClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ArrayJoinClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleArrayJoinClause;
+}
+
+
+std::any InsightsQLParser::ArrayJoinClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitArrayJoinClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ArrayJoinClauseContext* HogQLParser::arrayJoinClause() {
+InsightsQLParser::ArrayJoinClauseContext* InsightsQLParser::arrayJoinClause() {
   ArrayJoinClauseContext *_localctx = _tracker.createInstance<ArrayJoinClauseContext>(_ctx, getState());
-  enterRule(_localctx, 58, HogQLParser::RuleArrayJoinClause);
+  enterRule(_localctx, 58, InsightsQLParser::RuleArrayJoinClause);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -3629,14 +3629,14 @@ HogQLParser::ArrayJoinClauseContext* HogQLParser::arrayJoinClause() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::INNER
+    if (_la == InsightsQLParser::INNER
 
-    || _la == HogQLParser::LEFT) {
+    || _la == InsightsQLParser::LEFT) {
       setState(470);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::INNER
+      if (!(_la == InsightsQLParser::INNER
 
-      || _la == HogQLParser::LEFT)) {
+      || _la == InsightsQLParser::LEFT)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -3645,9 +3645,9 @@ HogQLParser::ArrayJoinClauseContext* HogQLParser::arrayJoinClause() {
       }
     }
     setState(473);
-    match(HogQLParser::ARRAY);
+    match(InsightsQLParser::ARRAY);
     setState(474);
-    match(HogQLParser::JOIN);
+    match(InsightsQLParser::JOIN);
     setState(475);
     columnExprList();
    
@@ -3663,78 +3663,78 @@ HogQLParser::ArrayJoinClauseContext* HogQLParser::arrayJoinClause() {
 
 //----------------- WindowClauseContext ------------------------------------------------------------------
 
-HogQLParser::WindowClauseContext::WindowClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WindowClauseContext::WindowClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WindowClauseContext::WINDOW() {
-  return getToken(HogQLParser::WINDOW, 0);
+tree::TerminalNode* InsightsQLParser::WindowClauseContext::WINDOW() {
+  return getToken(InsightsQLParser::WINDOW, 0);
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::WindowClauseContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::WindowClauseContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::WindowClauseContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::WindowClauseContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::WindowClauseContext::AS() {
-  return getTokens(HogQLParser::AS);
+std::vector<tree::TerminalNode *> InsightsQLParser::WindowClauseContext::AS() {
+  return getTokens(InsightsQLParser::AS);
 }
 
-tree::TerminalNode* HogQLParser::WindowClauseContext::AS(size_t i) {
-  return getToken(HogQLParser::AS, i);
+tree::TerminalNode* InsightsQLParser::WindowClauseContext::AS(size_t i) {
+  return getToken(InsightsQLParser::AS, i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::WindowClauseContext::LPAREN() {
-  return getTokens(HogQLParser::LPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::WindowClauseContext::LPAREN() {
+  return getTokens(InsightsQLParser::LPAREN);
 }
 
-tree::TerminalNode* HogQLParser::WindowClauseContext::LPAREN(size_t i) {
-  return getToken(HogQLParser::LPAREN, i);
+tree::TerminalNode* InsightsQLParser::WindowClauseContext::LPAREN(size_t i) {
+  return getToken(InsightsQLParser::LPAREN, i);
 }
 
-std::vector<HogQLParser::WindowExprContext *> HogQLParser::WindowClauseContext::windowExpr() {
-  return getRuleContexts<HogQLParser::WindowExprContext>();
+std::vector<InsightsQLParser::WindowExprContext *> InsightsQLParser::WindowClauseContext::windowExpr() {
+  return getRuleContexts<InsightsQLParser::WindowExprContext>();
 }
 
-HogQLParser::WindowExprContext* HogQLParser::WindowClauseContext::windowExpr(size_t i) {
-  return getRuleContext<HogQLParser::WindowExprContext>(i);
+InsightsQLParser::WindowExprContext* InsightsQLParser::WindowClauseContext::windowExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::WindowExprContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::WindowClauseContext::RPAREN() {
-  return getTokens(HogQLParser::RPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::WindowClauseContext::RPAREN() {
+  return getTokens(InsightsQLParser::RPAREN);
 }
 
-tree::TerminalNode* HogQLParser::WindowClauseContext::RPAREN(size_t i) {
-  return getToken(HogQLParser::RPAREN, i);
+tree::TerminalNode* InsightsQLParser::WindowClauseContext::RPAREN(size_t i) {
+  return getToken(InsightsQLParser::RPAREN, i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::WindowClauseContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::WindowClauseContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::WindowClauseContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::WindowClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleWindowClause;
+tree::TerminalNode* InsightsQLParser::WindowClauseContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::WindowClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WindowClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWindowClause;
+}
+
+
+std::any InsightsQLParser::WindowClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWindowClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WindowClauseContext* HogQLParser::windowClause() {
+InsightsQLParser::WindowClauseContext* InsightsQLParser::windowClause() {
   WindowClauseContext *_localctx = _tracker.createInstance<WindowClauseContext>(_ctx, getState());
-  enterRule(_localctx, 60, HogQLParser::RuleWindowClause);
+  enterRule(_localctx, 60, InsightsQLParser::RuleWindowClause);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -3747,33 +3747,33 @@ HogQLParser::WindowClauseContext* HogQLParser::windowClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(477);
-    match(HogQLParser::WINDOW);
+    match(InsightsQLParser::WINDOW);
     setState(478);
     identifier();
     setState(479);
-    match(HogQLParser::AS);
+    match(InsightsQLParser::AS);
     setState(480);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(481);
     windowExpr();
     setState(482);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
     setState(492);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::COMMA) {
+    while (_la == InsightsQLParser::COMMA) {
       setState(483);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
       setState(484);
       identifier();
       setState(485);
-      match(HogQLParser::AS);
+      match(InsightsQLParser::AS);
       setState(486);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(487);
       windowExpr();
       setState(488);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       setState(494);
       _errHandler->sync(this);
       _la = _input->LA(1);
@@ -3791,34 +3791,34 @@ HogQLParser::WindowClauseContext* HogQLParser::windowClause() {
 
 //----------------- PrewhereClauseContext ------------------------------------------------------------------
 
-HogQLParser::PrewhereClauseContext::PrewhereClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::PrewhereClauseContext::PrewhereClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::PrewhereClauseContext::PREWHERE() {
-  return getToken(HogQLParser::PREWHERE, 0);
+tree::TerminalNode* InsightsQLParser::PrewhereClauseContext::PREWHERE() {
+  return getToken(InsightsQLParser::PREWHERE, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::PrewhereClauseContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
-}
-
-
-size_t HogQLParser::PrewhereClauseContext::getRuleIndex() const {
-  return HogQLParser::RulePrewhereClause;
+InsightsQLParser::ColumnExprContext* InsightsQLParser::PrewhereClauseContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
 
-std::any HogQLParser::PrewhereClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::PrewhereClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RulePrewhereClause;
+}
+
+
+std::any InsightsQLParser::PrewhereClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitPrewhereClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::PrewhereClauseContext* HogQLParser::prewhereClause() {
+InsightsQLParser::PrewhereClauseContext* InsightsQLParser::prewhereClause() {
   PrewhereClauseContext *_localctx = _tracker.createInstance<PrewhereClauseContext>(_ctx, getState());
-  enterRule(_localctx, 62, HogQLParser::RulePrewhereClause);
+  enterRule(_localctx, 62, InsightsQLParser::RulePrewhereClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3830,7 +3830,7 @@ HogQLParser::PrewhereClauseContext* HogQLParser::prewhereClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(495);
-    match(HogQLParser::PREWHERE);
+    match(InsightsQLParser::PREWHERE);
     setState(496);
     columnExpr(0);
    
@@ -3846,34 +3846,34 @@ HogQLParser::PrewhereClauseContext* HogQLParser::prewhereClause() {
 
 //----------------- WhereClauseContext ------------------------------------------------------------------
 
-HogQLParser::WhereClauseContext::WhereClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WhereClauseContext::WhereClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WhereClauseContext::WHERE() {
-  return getToken(HogQLParser::WHERE, 0);
+tree::TerminalNode* InsightsQLParser::WhereClauseContext::WHERE() {
+  return getToken(InsightsQLParser::WHERE, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::WhereClauseContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
-}
-
-
-size_t HogQLParser::WhereClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleWhereClause;
+InsightsQLParser::ColumnExprContext* InsightsQLParser::WhereClauseContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
 
-std::any HogQLParser::WhereClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WhereClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWhereClause;
+}
+
+
+std::any InsightsQLParser::WhereClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWhereClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WhereClauseContext* HogQLParser::whereClause() {
+InsightsQLParser::WhereClauseContext* InsightsQLParser::whereClause() {
   WhereClauseContext *_localctx = _tracker.createInstance<WhereClauseContext>(_ctx, getState());
-  enterRule(_localctx, 64, HogQLParser::RuleWhereClause);
+  enterRule(_localctx, 64, InsightsQLParser::RuleWhereClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -3885,7 +3885,7 @@ HogQLParser::WhereClauseContext* HogQLParser::whereClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(498);
-    match(HogQLParser::WHERE);
+    match(InsightsQLParser::WHERE);
     setState(499);
     columnExpr(0);
    
@@ -3901,54 +3901,54 @@ HogQLParser::WhereClauseContext* HogQLParser::whereClause() {
 
 //----------------- GroupByClauseContext ------------------------------------------------------------------
 
-HogQLParser::GroupByClauseContext::GroupByClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::GroupByClauseContext::GroupByClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::GroupByClauseContext::GROUP() {
-  return getToken(HogQLParser::GROUP, 0);
+tree::TerminalNode* InsightsQLParser::GroupByClauseContext::GROUP() {
+  return getToken(InsightsQLParser::GROUP, 0);
 }
 
-tree::TerminalNode* HogQLParser::GroupByClauseContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::GroupByClauseContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-tree::TerminalNode* HogQLParser::GroupByClauseContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::GroupByClauseContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::GroupByClauseContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::GroupByClauseContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::GroupByClauseContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::GroupByClauseContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::GroupByClauseContext::CUBE() {
-  return getToken(HogQLParser::CUBE, 0);
+tree::TerminalNode* InsightsQLParser::GroupByClauseContext::CUBE() {
+  return getToken(InsightsQLParser::CUBE, 0);
 }
 
-tree::TerminalNode* HogQLParser::GroupByClauseContext::ROLLUP() {
-  return getToken(HogQLParser::ROLLUP, 0);
-}
-
-
-size_t HogQLParser::GroupByClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleGroupByClause;
+tree::TerminalNode* InsightsQLParser::GroupByClauseContext::ROLLUP() {
+  return getToken(InsightsQLParser::ROLLUP, 0);
 }
 
 
-std::any HogQLParser::GroupByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::GroupByClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleGroupByClause;
+}
+
+
+std::any InsightsQLParser::GroupByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitGroupByClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::GroupByClauseContext* HogQLParser::groupByClause() {
+InsightsQLParser::GroupByClauseContext* InsightsQLParser::groupByClause() {
   GroupByClauseContext *_localctx = _tracker.createInstance<GroupByClauseContext>(_ctx, getState());
-  enterRule(_localctx, 66, HogQLParser::RuleGroupByClause);
+  enterRule(_localctx, 66, InsightsQLParser::RuleGroupByClause);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -3961,18 +3961,18 @@ HogQLParser::GroupByClauseContext* HogQLParser::groupByClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(501);
-    match(HogQLParser::GROUP);
+    match(InsightsQLParser::GROUP);
     setState(502);
-    match(HogQLParser::BY);
+    match(InsightsQLParser::BY);
     setState(509);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 52, _ctx)) {
     case 1: {
       setState(503);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::CUBE
+      if (!(_la == InsightsQLParser::CUBE
 
-      || _la == HogQLParser::ROLLUP)) {
+      || _la == InsightsQLParser::ROLLUP)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -3980,11 +3980,11 @@ HogQLParser::GroupByClauseContext* HogQLParser::groupByClause() {
         consume();
       }
       setState(504);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(505);
       columnExprList();
       setState(506);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -4010,34 +4010,34 @@ HogQLParser::GroupByClauseContext* HogQLParser::groupByClause() {
 
 //----------------- HavingClauseContext ------------------------------------------------------------------
 
-HogQLParser::HavingClauseContext::HavingClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::HavingClauseContext::HavingClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::HavingClauseContext::HAVING() {
-  return getToken(HogQLParser::HAVING, 0);
+tree::TerminalNode* InsightsQLParser::HavingClauseContext::HAVING() {
+  return getToken(InsightsQLParser::HAVING, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::HavingClauseContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
-}
-
-
-size_t HogQLParser::HavingClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleHavingClause;
+InsightsQLParser::ColumnExprContext* InsightsQLParser::HavingClauseContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
 
-std::any HogQLParser::HavingClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::HavingClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleHavingClause;
+}
+
+
+std::any InsightsQLParser::HavingClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitHavingClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::HavingClauseContext* HogQLParser::havingClause() {
+InsightsQLParser::HavingClauseContext* InsightsQLParser::havingClause() {
   HavingClauseContext *_localctx = _tracker.createInstance<HavingClauseContext>(_ctx, getState());
-  enterRule(_localctx, 68, HogQLParser::RuleHavingClause);
+  enterRule(_localctx, 68, InsightsQLParser::RuleHavingClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -4049,7 +4049,7 @@ HogQLParser::HavingClauseContext* HogQLParser::havingClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(511);
-    match(HogQLParser::HAVING);
+    match(InsightsQLParser::HAVING);
     setState(512);
     columnExpr(0);
    
@@ -4065,38 +4065,38 @@ HogQLParser::HavingClauseContext* HogQLParser::havingClause() {
 
 //----------------- OrderByClauseContext ------------------------------------------------------------------
 
-HogQLParser::OrderByClauseContext::OrderByClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::OrderByClauseContext::OrderByClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::OrderByClauseContext::ORDER() {
-  return getToken(HogQLParser::ORDER, 0);
+tree::TerminalNode* InsightsQLParser::OrderByClauseContext::ORDER() {
+  return getToken(InsightsQLParser::ORDER, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderByClauseContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::OrderByClauseContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-HogQLParser::OrderExprListContext* HogQLParser::OrderByClauseContext::orderExprList() {
-  return getRuleContext<HogQLParser::OrderExprListContext>(0);
-}
-
-
-size_t HogQLParser::OrderByClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleOrderByClause;
+InsightsQLParser::OrderExprListContext* InsightsQLParser::OrderByClauseContext::orderExprList() {
+  return getRuleContext<InsightsQLParser::OrderExprListContext>(0);
 }
 
 
-std::any HogQLParser::OrderByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::OrderByClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleOrderByClause;
+}
+
+
+std::any InsightsQLParser::OrderByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitOrderByClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::OrderByClauseContext* HogQLParser::orderByClause() {
+InsightsQLParser::OrderByClauseContext* InsightsQLParser::orderByClause() {
   OrderByClauseContext *_localctx = _tracker.createInstance<OrderByClauseContext>(_ctx, getState());
-  enterRule(_localctx, 70, HogQLParser::RuleOrderByClause);
+  enterRule(_localctx, 70, InsightsQLParser::RuleOrderByClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -4108,9 +4108,9 @@ HogQLParser::OrderByClauseContext* HogQLParser::orderByClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(514);
-    match(HogQLParser::ORDER);
+    match(InsightsQLParser::ORDER);
     setState(515);
-    match(HogQLParser::BY);
+    match(InsightsQLParser::BY);
     setState(516);
     orderExprList();
    
@@ -4126,38 +4126,38 @@ HogQLParser::OrderByClauseContext* HogQLParser::orderByClause() {
 
 //----------------- ProjectionOrderByClauseContext ------------------------------------------------------------------
 
-HogQLParser::ProjectionOrderByClauseContext::ProjectionOrderByClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ProjectionOrderByClauseContext::ProjectionOrderByClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ProjectionOrderByClauseContext::ORDER() {
-  return getToken(HogQLParser::ORDER, 0);
+tree::TerminalNode* InsightsQLParser::ProjectionOrderByClauseContext::ORDER() {
+  return getToken(InsightsQLParser::ORDER, 0);
 }
 
-tree::TerminalNode* HogQLParser::ProjectionOrderByClauseContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::ProjectionOrderByClauseContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ProjectionOrderByClauseContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
-}
-
-
-size_t HogQLParser::ProjectionOrderByClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleProjectionOrderByClause;
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ProjectionOrderByClauseContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
 
-std::any HogQLParser::ProjectionOrderByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ProjectionOrderByClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleProjectionOrderByClause;
+}
+
+
+std::any InsightsQLParser::ProjectionOrderByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitProjectionOrderByClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ProjectionOrderByClauseContext* HogQLParser::projectionOrderByClause() {
+InsightsQLParser::ProjectionOrderByClauseContext* InsightsQLParser::projectionOrderByClause() {
   ProjectionOrderByClauseContext *_localctx = _tracker.createInstance<ProjectionOrderByClauseContext>(_ctx, getState());
-  enterRule(_localctx, 72, HogQLParser::RuleProjectionOrderByClause);
+  enterRule(_localctx, 72, InsightsQLParser::RuleProjectionOrderByClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -4169,9 +4169,9 @@ HogQLParser::ProjectionOrderByClauseContext* HogQLParser::projectionOrderByClaus
   try {
     enterOuterAlt(_localctx, 1);
     setState(518);
-    match(HogQLParser::ORDER);
+    match(InsightsQLParser::ORDER);
     setState(519);
-    match(HogQLParser::BY);
+    match(InsightsQLParser::BY);
     setState(520);
     columnExprList();
    
@@ -4187,42 +4187,42 @@ HogQLParser::ProjectionOrderByClauseContext* HogQLParser::projectionOrderByClaus
 
 //----------------- LimitByClauseContext ------------------------------------------------------------------
 
-HogQLParser::LimitByClauseContext::LimitByClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::LimitByClauseContext::LimitByClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::LimitByClauseContext::LIMIT() {
-  return getToken(HogQLParser::LIMIT, 0);
+tree::TerminalNode* InsightsQLParser::LimitByClauseContext::LIMIT() {
+  return getToken(InsightsQLParser::LIMIT, 0);
 }
 
-HogQLParser::LimitExprContext* HogQLParser::LimitByClauseContext::limitExpr() {
-  return getRuleContext<HogQLParser::LimitExprContext>(0);
+InsightsQLParser::LimitExprContext* InsightsQLParser::LimitByClauseContext::limitExpr() {
+  return getRuleContext<InsightsQLParser::LimitExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::LimitByClauseContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::LimitByClauseContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::LimitByClauseContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
-}
-
-
-size_t HogQLParser::LimitByClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleLimitByClause;
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::LimitByClauseContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
 
-std::any HogQLParser::LimitByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::LimitByClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleLimitByClause;
+}
+
+
+std::any InsightsQLParser::LimitByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitLimitByClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::LimitByClauseContext* HogQLParser::limitByClause() {
+InsightsQLParser::LimitByClauseContext* InsightsQLParser::limitByClause() {
   LimitByClauseContext *_localctx = _tracker.createInstance<LimitByClauseContext>(_ctx, getState());
-  enterRule(_localctx, 74, HogQLParser::RuleLimitByClause);
+  enterRule(_localctx, 74, InsightsQLParser::RuleLimitByClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -4234,11 +4234,11 @@ HogQLParser::LimitByClauseContext* HogQLParser::limitByClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(522);
-    match(HogQLParser::LIMIT);
+    match(InsightsQLParser::LIMIT);
     setState(523);
     limitExpr();
     setState(524);
-    match(HogQLParser::BY);
+    match(InsightsQLParser::BY);
     setState(525);
     columnExprList();
    
@@ -4254,54 +4254,54 @@ HogQLParser::LimitByClauseContext* HogQLParser::limitByClause() {
 
 //----------------- LimitAndOffsetClauseContext ------------------------------------------------------------------
 
-HogQLParser::LimitAndOffsetClauseContext::LimitAndOffsetClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::LimitAndOffsetClauseContext::LimitAndOffsetClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::LimitAndOffsetClauseContext::LIMIT() {
-  return getToken(HogQLParser::LIMIT, 0);
+tree::TerminalNode* InsightsQLParser::LimitAndOffsetClauseContext::LIMIT() {
+  return getToken(InsightsQLParser::LIMIT, 0);
 }
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::LimitAndOffsetClauseContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::LimitAndOffsetClauseContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::LimitAndOffsetClauseContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::LimitAndOffsetClauseContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::LimitAndOffsetClauseContext::COMMA() {
-  return getToken(HogQLParser::COMMA, 0);
+tree::TerminalNode* InsightsQLParser::LimitAndOffsetClauseContext::COMMA() {
+  return getToken(InsightsQLParser::COMMA, 0);
 }
 
-tree::TerminalNode* HogQLParser::LimitAndOffsetClauseContext::WITH() {
-  return getToken(HogQLParser::WITH, 0);
+tree::TerminalNode* InsightsQLParser::LimitAndOffsetClauseContext::WITH() {
+  return getToken(InsightsQLParser::WITH, 0);
 }
 
-tree::TerminalNode* HogQLParser::LimitAndOffsetClauseContext::TIES() {
-  return getToken(HogQLParser::TIES, 0);
+tree::TerminalNode* InsightsQLParser::LimitAndOffsetClauseContext::TIES() {
+  return getToken(InsightsQLParser::TIES, 0);
 }
 
-tree::TerminalNode* HogQLParser::LimitAndOffsetClauseContext::OFFSET() {
-  return getToken(HogQLParser::OFFSET, 0);
-}
-
-
-size_t HogQLParser::LimitAndOffsetClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleLimitAndOffsetClause;
+tree::TerminalNode* InsightsQLParser::LimitAndOffsetClauseContext::OFFSET() {
+  return getToken(InsightsQLParser::OFFSET, 0);
 }
 
 
-std::any HogQLParser::LimitAndOffsetClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::LimitAndOffsetClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleLimitAndOffsetClause;
+}
+
+
+std::any InsightsQLParser::LimitAndOffsetClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitLimitAndOffsetClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::LimitAndOffsetClauseContext* HogQLParser::limitAndOffsetClause() {
+InsightsQLParser::LimitAndOffsetClauseContext* InsightsQLParser::limitAndOffsetClause() {
   LimitAndOffsetClauseContext *_localctx = _tracker.createInstance<LimitAndOffsetClauseContext>(_ctx, getState());
-  enterRule(_localctx, 76, HogQLParser::RuleLimitAndOffsetClause);
+  enterRule(_localctx, 76, InsightsQLParser::RuleLimitAndOffsetClause);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -4318,16 +4318,16 @@ HogQLParser::LimitAndOffsetClauseContext* HogQLParser::limitAndOffsetClause() {
     case 1: {
       enterOuterAlt(_localctx, 1);
       setState(527);
-      match(HogQLParser::LIMIT);
+      match(InsightsQLParser::LIMIT);
       setState(528);
       columnExpr(0);
       setState(531);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COMMA) {
+      if (_la == InsightsQLParser::COMMA) {
         setState(529);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         setState(530);
         columnExpr(0);
       }
@@ -4335,11 +4335,11 @@ HogQLParser::LimitAndOffsetClauseContext* HogQLParser::limitAndOffsetClause() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::WITH) {
+      if (_la == InsightsQLParser::WITH) {
         setState(533);
-        match(HogQLParser::WITH);
+        match(InsightsQLParser::WITH);
         setState(534);
-        match(HogQLParser::TIES);
+        match(InsightsQLParser::TIES);
       }
       break;
     }
@@ -4347,21 +4347,21 @@ HogQLParser::LimitAndOffsetClauseContext* HogQLParser::limitAndOffsetClause() {
     case 2: {
       enterOuterAlt(_localctx, 2);
       setState(537);
-      match(HogQLParser::LIMIT);
+      match(InsightsQLParser::LIMIT);
       setState(538);
       columnExpr(0);
       setState(541);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::WITH) {
+      if (_la == InsightsQLParser::WITH) {
         setState(539);
-        match(HogQLParser::WITH);
+        match(InsightsQLParser::WITH);
         setState(540);
-        match(HogQLParser::TIES);
+        match(InsightsQLParser::TIES);
       }
       setState(543);
-      match(HogQLParser::OFFSET);
+      match(InsightsQLParser::OFFSET);
       setState(544);
       columnExpr(0);
       break;
@@ -4383,34 +4383,34 @@ HogQLParser::LimitAndOffsetClauseContext* HogQLParser::limitAndOffsetClause() {
 
 //----------------- OffsetOnlyClauseContext ------------------------------------------------------------------
 
-HogQLParser::OffsetOnlyClauseContext::OffsetOnlyClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::OffsetOnlyClauseContext::OffsetOnlyClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::OffsetOnlyClauseContext::OFFSET() {
-  return getToken(HogQLParser::OFFSET, 0);
+tree::TerminalNode* InsightsQLParser::OffsetOnlyClauseContext::OFFSET() {
+  return getToken(InsightsQLParser::OFFSET, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::OffsetOnlyClauseContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
-}
-
-
-size_t HogQLParser::OffsetOnlyClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleOffsetOnlyClause;
+InsightsQLParser::ColumnExprContext* InsightsQLParser::OffsetOnlyClauseContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
 
-std::any HogQLParser::OffsetOnlyClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::OffsetOnlyClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleOffsetOnlyClause;
+}
+
+
+std::any InsightsQLParser::OffsetOnlyClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitOffsetOnlyClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::OffsetOnlyClauseContext* HogQLParser::offsetOnlyClause() {
+InsightsQLParser::OffsetOnlyClauseContext* InsightsQLParser::offsetOnlyClause() {
   OffsetOnlyClauseContext *_localctx = _tracker.createInstance<OffsetOnlyClauseContext>(_ctx, getState());
-  enterRule(_localctx, 78, HogQLParser::RuleOffsetOnlyClause);
+  enterRule(_localctx, 78, InsightsQLParser::RuleOffsetOnlyClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -4422,7 +4422,7 @@ HogQLParser::OffsetOnlyClauseContext* HogQLParser::offsetOnlyClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(548);
-    match(HogQLParser::OFFSET);
+    match(InsightsQLParser::OFFSET);
     setState(549);
     columnExpr(0);
    
@@ -4438,34 +4438,34 @@ HogQLParser::OffsetOnlyClauseContext* HogQLParser::offsetOnlyClause() {
 
 //----------------- SettingsClauseContext ------------------------------------------------------------------
 
-HogQLParser::SettingsClauseContext::SettingsClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SettingsClauseContext::SettingsClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::SettingsClauseContext::SETTINGS() {
-  return getToken(HogQLParser::SETTINGS, 0);
+tree::TerminalNode* InsightsQLParser::SettingsClauseContext::SETTINGS() {
+  return getToken(InsightsQLParser::SETTINGS, 0);
 }
 
-HogQLParser::SettingExprListContext* HogQLParser::SettingsClauseContext::settingExprList() {
-  return getRuleContext<HogQLParser::SettingExprListContext>(0);
-}
-
-
-size_t HogQLParser::SettingsClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleSettingsClause;
+InsightsQLParser::SettingExprListContext* InsightsQLParser::SettingsClauseContext::settingExprList() {
+  return getRuleContext<InsightsQLParser::SettingExprListContext>(0);
 }
 
 
-std::any HogQLParser::SettingsClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SettingsClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSettingsClause;
+}
+
+
+std::any InsightsQLParser::SettingsClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSettingsClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SettingsClauseContext* HogQLParser::settingsClause() {
+InsightsQLParser::SettingsClauseContext* InsightsQLParser::settingsClause() {
   SettingsClauseContext *_localctx = _tracker.createInstance<SettingsClauseContext>(_ctx, getState());
-  enterRule(_localctx, 80, HogQLParser::RuleSettingsClause);
+  enterRule(_localctx, 80, InsightsQLParser::RuleSettingsClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -4477,7 +4477,7 @@ HogQLParser::SettingsClauseContext* HogQLParser::settingsClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(551);
-    match(HogQLParser::SETTINGS);
+    match(InsightsQLParser::SETTINGS);
     setState(552);
     settingExprList();
    
@@ -4493,132 +4493,132 @@ HogQLParser::SettingsClauseContext* HogQLParser::settingsClause() {
 
 //----------------- JoinExprContext ------------------------------------------------------------------
 
-HogQLParser::JoinExprContext::JoinExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::JoinExprContext::JoinExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::JoinExprContext::getRuleIndex() const {
-  return HogQLParser::RuleJoinExpr;
+size_t InsightsQLParser::JoinExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleJoinExpr;
 }
 
-void HogQLParser::JoinExprContext::copyFrom(JoinExprContext *ctx) {
+void InsightsQLParser::JoinExprContext::copyFrom(JoinExprContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- JoinExprOpContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::JoinExprContext *> HogQLParser::JoinExprOpContext::joinExpr() {
-  return getRuleContexts<HogQLParser::JoinExprContext>();
+std::vector<InsightsQLParser::JoinExprContext *> InsightsQLParser::JoinExprOpContext::joinExpr() {
+  return getRuleContexts<InsightsQLParser::JoinExprContext>();
 }
 
-HogQLParser::JoinExprContext* HogQLParser::JoinExprOpContext::joinExpr(size_t i) {
-  return getRuleContext<HogQLParser::JoinExprContext>(i);
+InsightsQLParser::JoinExprContext* InsightsQLParser::JoinExprOpContext::joinExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::JoinExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::JoinExprOpContext::JOIN() {
-  return getToken(HogQLParser::JOIN, 0);
+tree::TerminalNode* InsightsQLParser::JoinExprOpContext::JOIN() {
+  return getToken(InsightsQLParser::JOIN, 0);
 }
 
-HogQLParser::JoinConstraintClauseContext* HogQLParser::JoinExprOpContext::joinConstraintClause() {
-  return getRuleContext<HogQLParser::JoinConstraintClauseContext>(0);
+InsightsQLParser::JoinConstraintClauseContext* InsightsQLParser::JoinExprOpContext::joinConstraintClause() {
+  return getRuleContext<InsightsQLParser::JoinConstraintClauseContext>(0);
 }
 
-HogQLParser::JoinOpContext* HogQLParser::JoinExprOpContext::joinOp() {
-  return getRuleContext<HogQLParser::JoinOpContext>(0);
+InsightsQLParser::JoinOpContext* InsightsQLParser::JoinExprOpContext::joinOp() {
+  return getRuleContext<InsightsQLParser::JoinOpContext>(0);
 }
 
-HogQLParser::JoinExprOpContext::JoinExprOpContext(JoinExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinExprOpContext::JoinExprOpContext(JoinExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinExprOpContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinExprOpContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinExprOp(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- JoinExprTableContext ------------------------------------------------------------------
 
-HogQLParser::TableExprContext* HogQLParser::JoinExprTableContext::tableExpr() {
-  return getRuleContext<HogQLParser::TableExprContext>(0);
+InsightsQLParser::TableExprContext* InsightsQLParser::JoinExprTableContext::tableExpr() {
+  return getRuleContext<InsightsQLParser::TableExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::JoinExprTableContext::FINAL() {
-  return getToken(HogQLParser::FINAL, 0);
+tree::TerminalNode* InsightsQLParser::JoinExprTableContext::FINAL() {
+  return getToken(InsightsQLParser::FINAL, 0);
 }
 
-HogQLParser::SampleClauseContext* HogQLParser::JoinExprTableContext::sampleClause() {
-  return getRuleContext<HogQLParser::SampleClauseContext>(0);
+InsightsQLParser::SampleClauseContext* InsightsQLParser::JoinExprTableContext::sampleClause() {
+  return getRuleContext<InsightsQLParser::SampleClauseContext>(0);
 }
 
-HogQLParser::JoinExprTableContext::JoinExprTableContext(JoinExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinExprTableContext::JoinExprTableContext(JoinExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinExprTableContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinExprTableContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinExprTable(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- JoinExprParensContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::JoinExprParensContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::JoinExprParensContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::JoinExprContext* HogQLParser::JoinExprParensContext::joinExpr() {
-  return getRuleContext<HogQLParser::JoinExprContext>(0);
+InsightsQLParser::JoinExprContext* InsightsQLParser::JoinExprParensContext::joinExpr() {
+  return getRuleContext<InsightsQLParser::JoinExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::JoinExprParensContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::JoinExprParensContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::JoinExprParensContext::JoinExprParensContext(JoinExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinExprParensContext::JoinExprParensContext(JoinExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinExprParensContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinExprParensContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinExprParens(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- JoinExprCrossOpContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::JoinExprContext *> HogQLParser::JoinExprCrossOpContext::joinExpr() {
-  return getRuleContexts<HogQLParser::JoinExprContext>();
+std::vector<InsightsQLParser::JoinExprContext *> InsightsQLParser::JoinExprCrossOpContext::joinExpr() {
+  return getRuleContexts<InsightsQLParser::JoinExprContext>();
 }
 
-HogQLParser::JoinExprContext* HogQLParser::JoinExprCrossOpContext::joinExpr(size_t i) {
-  return getRuleContext<HogQLParser::JoinExprContext>(i);
+InsightsQLParser::JoinExprContext* InsightsQLParser::JoinExprCrossOpContext::joinExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::JoinExprContext>(i);
 }
 
-HogQLParser::JoinOpCrossContext* HogQLParser::JoinExprCrossOpContext::joinOpCross() {
-  return getRuleContext<HogQLParser::JoinOpCrossContext>(0);
+InsightsQLParser::JoinOpCrossContext* InsightsQLParser::JoinExprCrossOpContext::joinOpCross() {
+  return getRuleContext<InsightsQLParser::JoinOpCrossContext>(0);
 }
 
-HogQLParser::JoinExprCrossOpContext::JoinExprCrossOpContext(JoinExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinExprCrossOpContext::JoinExprCrossOpContext(JoinExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinExprCrossOpContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinExprCrossOpContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinExprCrossOp(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::JoinExprContext* HogQLParser::joinExpr() {
+InsightsQLParser::JoinExprContext* InsightsQLParser::joinExpr() {
    return joinExpr(0);
 }
 
-HogQLParser::JoinExprContext* HogQLParser::joinExpr(int precedence) {
+InsightsQLParser::JoinExprContext* InsightsQLParser::joinExpr(int precedence) {
   ParserRuleContext *parentContext = _ctx;
   size_t parentState = getState();
-  HogQLParser::JoinExprContext *_localctx = _tracker.createInstance<JoinExprContext>(_ctx, parentState);
-  HogQLParser::JoinExprContext *previousContext = _localctx;
+  InsightsQLParser::JoinExprContext *_localctx = _tracker.createInstance<JoinExprContext>(_ctx, parentState);
+  InsightsQLParser::JoinExprContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
   size_t startState = 82;
-  enterRecursionRule(_localctx, 82, HogQLParser::RuleJoinExpr, precedence);
+  enterRecursionRule(_localctx, 82, InsightsQLParser::RuleJoinExpr, precedence);
 
     size_t _la = 0;
 
@@ -4648,7 +4648,7 @@ HogQLParser::JoinExprContext* HogQLParser::joinExpr(int precedence) {
       switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 57, _ctx)) {
       case 1: {
         setState(556);
-        match(HogQLParser::FINAL);
+        match(InsightsQLParser::FINAL);
         break;
       }
 
@@ -4676,11 +4676,11 @@ HogQLParser::JoinExprContext* HogQLParser::joinExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(562);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(563);
       joinExpr(0);
       setState(564);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -4725,14 +4725,14 @@ HogQLParser::JoinExprContext* HogQLParser::joinExpr(int precedence) {
 
           _la = _input->LA(1);
           if ((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 18084835973136666) != 0) || _la == HogQLParser::RIGHT
+            ((1ULL << _la) & 18084835973136666) != 0) || _la == InsightsQLParser::RIGHT
 
-          || _la == HogQLParser::SEMI) {
+          || _la == InsightsQLParser::SEMI) {
             setState(573);
             joinOp();
           }
           setState(576);
-          match(HogQLParser::JOIN);
+          match(InsightsQLParser::JOIN);
           setState(577);
           joinExpr(0);
           setState(578);
@@ -4759,119 +4759,119 @@ HogQLParser::JoinExprContext* HogQLParser::joinExpr(int precedence) {
 
 //----------------- JoinOpContext ------------------------------------------------------------------
 
-HogQLParser::JoinOpContext::JoinOpContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::JoinOpContext::JoinOpContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::JoinOpContext::getRuleIndex() const {
-  return HogQLParser::RuleJoinOp;
+size_t InsightsQLParser::JoinOpContext::getRuleIndex() const {
+  return InsightsQLParser::RuleJoinOp;
 }
 
-void HogQLParser::JoinOpContext::copyFrom(JoinOpContext *ctx) {
+void InsightsQLParser::JoinOpContext::copyFrom(JoinOpContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- JoinOpFullContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::JoinOpFullContext::FULL() {
-  return getToken(HogQLParser::FULL, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpFullContext::FULL() {
+  return getToken(InsightsQLParser::FULL, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpFullContext::OUTER() {
-  return getToken(HogQLParser::OUTER, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpFullContext::OUTER() {
+  return getToken(InsightsQLParser::OUTER, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpFullContext::ALL() {
-  return getToken(HogQLParser::ALL, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpFullContext::ALL() {
+  return getToken(InsightsQLParser::ALL, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpFullContext::ANY() {
-  return getToken(HogQLParser::ANY, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpFullContext::ANY() {
+  return getToken(InsightsQLParser::ANY, 0);
 }
 
-HogQLParser::JoinOpFullContext::JoinOpFullContext(JoinOpContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinOpFullContext::JoinOpFullContext(JoinOpContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinOpFullContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinOpFullContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinOpFull(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- JoinOpInnerContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::JoinOpInnerContext::INNER() {
-  return getToken(HogQLParser::INNER, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpInnerContext::INNER() {
+  return getToken(InsightsQLParser::INNER, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpInnerContext::ALL() {
-  return getToken(HogQLParser::ALL, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpInnerContext::ALL() {
+  return getToken(InsightsQLParser::ALL, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpInnerContext::ANY() {
-  return getToken(HogQLParser::ANY, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpInnerContext::ANY() {
+  return getToken(InsightsQLParser::ANY, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpInnerContext::ASOF() {
-  return getToken(HogQLParser::ASOF, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpInnerContext::ASOF() {
+  return getToken(InsightsQLParser::ASOF, 0);
 }
 
-HogQLParser::JoinOpInnerContext::JoinOpInnerContext(JoinOpContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinOpInnerContext::JoinOpInnerContext(JoinOpContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinOpInnerContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinOpInnerContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinOpInner(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- JoinOpLeftRightContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::LEFT() {
-  return getToken(HogQLParser::LEFT, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::LEFT() {
+  return getToken(InsightsQLParser::LEFT, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::RIGHT() {
-  return getToken(HogQLParser::RIGHT, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::RIGHT() {
+  return getToken(InsightsQLParser::RIGHT, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::OUTER() {
-  return getToken(HogQLParser::OUTER, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::OUTER() {
+  return getToken(InsightsQLParser::OUTER, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::SEMI() {
-  return getToken(HogQLParser::SEMI, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::SEMI() {
+  return getToken(InsightsQLParser::SEMI, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::ALL() {
-  return getToken(HogQLParser::ALL, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::ALL() {
+  return getToken(InsightsQLParser::ALL, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::ANTI() {
-  return getToken(HogQLParser::ANTI, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::ANTI() {
+  return getToken(InsightsQLParser::ANTI, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::ANY() {
-  return getToken(HogQLParser::ANY, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::ANY() {
+  return getToken(InsightsQLParser::ANY, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpLeftRightContext::ASOF() {
-  return getToken(HogQLParser::ASOF, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpLeftRightContext::ASOF() {
+  return getToken(InsightsQLParser::ASOF, 0);
 }
 
-HogQLParser::JoinOpLeftRightContext::JoinOpLeftRightContext(JoinOpContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::JoinOpLeftRightContext::JoinOpLeftRightContext(JoinOpContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::JoinOpLeftRightContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::JoinOpLeftRightContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinOpLeftRight(this);
   else
     return visitor->visitChildren(this);
 }
-HogQLParser::JoinOpContext* HogQLParser::joinOp() {
+InsightsQLParser::JoinOpContext* InsightsQLParser::joinOp() {
   JoinOpContext *_localctx = _tracker.createInstance<JoinOpContext>(_ctx, getState());
-  enterRule(_localctx, 84, HogQLParser::RuleJoinOp);
+  enterRule(_localctx, 84, InsightsQLParser::RuleJoinOp);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -4886,7 +4886,7 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 76, _ctx)) {
     case 1: {
-      _localctx = _tracker.createInstance<HogQLParser::JoinOpInnerContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::JoinOpInnerContext>(_localctx);
       enterOuterAlt(_localctx, 1);
       setState(594);
       _errHandler->sync(this);
@@ -4910,13 +4910,13 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
           }
         }
         setState(588);
-        match(HogQLParser::INNER);
+        match(InsightsQLParser::INNER);
         break;
       }
 
       case 2: {
         setState(589);
-        match(HogQLParser::INNER);
+        match(InsightsQLParser::INNER);
         setState(591);
         _errHandler->sync(this);
 
@@ -4958,7 +4958,7 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
     }
 
     case 2: {
-      _localctx = _tracker.createInstance<HogQLParser::JoinOpLeftRightContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::JoinOpLeftRightContext>(_localctx);
       enterOuterAlt(_localctx, 2);
       setState(610);
       _errHandler->sync(this);
@@ -4969,11 +4969,11 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
 
         _la = _input->LA(1);
         if ((((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 282) != 0) || _la == HogQLParser::SEMI) {
+          ((1ULL << _la) & 282) != 0) || _la == InsightsQLParser::SEMI) {
           setState(596);
           _la = _input->LA(1);
           if (!((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 282) != 0) || _la == HogQLParser::SEMI)) {
+            ((1ULL << _la) & 282) != 0) || _la == InsightsQLParser::SEMI)) {
           _errHandler->recoverInline(this);
           }
           else {
@@ -4983,9 +4983,9 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
         }
         setState(599);
         _la = _input->LA(1);
-        if (!(_la == HogQLParser::LEFT
+        if (!(_la == InsightsQLParser::LEFT
 
-        || _la == HogQLParser::RIGHT)) {
+        || _la == InsightsQLParser::RIGHT)) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -4996,9 +4996,9 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (_la == HogQLParser::OUTER) {
+        if (_la == InsightsQLParser::OUTER) {
           setState(600);
-          match(HogQLParser::OUTER);
+          match(InsightsQLParser::OUTER);
         }
         break;
       }
@@ -5006,9 +5006,9 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
       case 2: {
         setState(603);
         _la = _input->LA(1);
-        if (!(_la == HogQLParser::LEFT
+        if (!(_la == InsightsQLParser::LEFT
 
-        || _la == HogQLParser::RIGHT)) {
+        || _la == InsightsQLParser::RIGHT)) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -5019,20 +5019,20 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (_la == HogQLParser::OUTER) {
+        if (_la == InsightsQLParser::OUTER) {
           setState(604);
-          match(HogQLParser::OUTER);
+          match(InsightsQLParser::OUTER);
         }
         setState(608);
         _errHandler->sync(this);
 
         _la = _input->LA(1);
         if ((((_la & ~ 0x3fULL) == 0) &&
-          ((1ULL << _la) & 282) != 0) || _la == HogQLParser::SEMI) {
+          ((1ULL << _la) & 282) != 0) || _la == InsightsQLParser::SEMI) {
           setState(607);
           _la = _input->LA(1);
           if (!((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 282) != 0) || _la == HogQLParser::SEMI)) {
+            ((1ULL << _la) & 282) != 0) || _la == InsightsQLParser::SEMI)) {
           _errHandler->recoverInline(this);
           }
           else {
@@ -5050,7 +5050,7 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
     }
 
     case 3: {
-      _localctx = _tracker.createInstance<HogQLParser::JoinOpFullContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::JoinOpFullContext>(_localctx);
       enterOuterAlt(_localctx, 3);
       setState(626);
       _errHandler->sync(this);
@@ -5060,14 +5060,14 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (_la == HogQLParser::ALL
+        if (_la == InsightsQLParser::ALL
 
-        || _la == HogQLParser::ANY) {
+        || _la == InsightsQLParser::ANY) {
           setState(612);
           _la = _input->LA(1);
-          if (!(_la == HogQLParser::ALL
+          if (!(_la == InsightsQLParser::ALL
 
-          || _la == HogQLParser::ANY)) {
+          || _la == InsightsQLParser::ANY)) {
           _errHandler->recoverInline(this);
           }
           else {
@@ -5076,41 +5076,41 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
           }
         }
         setState(615);
-        match(HogQLParser::FULL);
+        match(InsightsQLParser::FULL);
         setState(617);
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (_la == HogQLParser::OUTER) {
+        if (_la == InsightsQLParser::OUTER) {
           setState(616);
-          match(HogQLParser::OUTER);
+          match(InsightsQLParser::OUTER);
         }
         break;
       }
 
       case 2: {
         setState(619);
-        match(HogQLParser::FULL);
+        match(InsightsQLParser::FULL);
         setState(621);
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (_la == HogQLParser::OUTER) {
+        if (_la == InsightsQLParser::OUTER) {
           setState(620);
-          match(HogQLParser::OUTER);
+          match(InsightsQLParser::OUTER);
         }
         setState(624);
         _errHandler->sync(this);
 
         _la = _input->LA(1);
-        if (_la == HogQLParser::ALL
+        if (_la == InsightsQLParser::ALL
 
-        || _la == HogQLParser::ANY) {
+        || _la == InsightsQLParser::ANY) {
           setState(623);
           _la = _input->LA(1);
-          if (!(_la == HogQLParser::ALL
+          if (!(_la == InsightsQLParser::ALL
 
-          || _la == HogQLParser::ANY)) {
+          || _la == InsightsQLParser::ANY)) {
           _errHandler->recoverInline(this);
           }
           else {
@@ -5143,38 +5143,38 @@ HogQLParser::JoinOpContext* HogQLParser::joinOp() {
 
 //----------------- JoinOpCrossContext ------------------------------------------------------------------
 
-HogQLParser::JoinOpCrossContext::JoinOpCrossContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::JoinOpCrossContext::JoinOpCrossContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::JoinOpCrossContext::CROSS() {
-  return getToken(HogQLParser::CROSS, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpCrossContext::CROSS() {
+  return getToken(InsightsQLParser::CROSS, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpCrossContext::JOIN() {
-  return getToken(HogQLParser::JOIN, 0);
+tree::TerminalNode* InsightsQLParser::JoinOpCrossContext::JOIN() {
+  return getToken(InsightsQLParser::JOIN, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinOpCrossContext::COMMA() {
-  return getToken(HogQLParser::COMMA, 0);
-}
-
-
-size_t HogQLParser::JoinOpCrossContext::getRuleIndex() const {
-  return HogQLParser::RuleJoinOpCross;
+tree::TerminalNode* InsightsQLParser::JoinOpCrossContext::COMMA() {
+  return getToken(InsightsQLParser::COMMA, 0);
 }
 
 
-std::any HogQLParser::JoinOpCrossContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::JoinOpCrossContext::getRuleIndex() const {
+  return InsightsQLParser::RuleJoinOpCross;
+}
+
+
+std::any InsightsQLParser::JoinOpCrossContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinOpCross(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::JoinOpCrossContext* HogQLParser::joinOpCross() {
+InsightsQLParser::JoinOpCrossContext* InsightsQLParser::joinOpCross() {
   JoinOpCrossContext *_localctx = _tracker.createInstance<JoinOpCrossContext>(_ctx, getState());
-  enterRule(_localctx, 86, HogQLParser::RuleJoinOpCross);
+  enterRule(_localctx, 86, InsightsQLParser::RuleJoinOpCross);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -5187,19 +5187,19 @@ HogQLParser::JoinOpCrossContext* HogQLParser::joinOpCross() {
     setState(633);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::CROSS: {
+      case InsightsQLParser::CROSS: {
         enterOuterAlt(_localctx, 1);
         setState(630);
-        match(HogQLParser::CROSS);
+        match(InsightsQLParser::CROSS);
         setState(631);
-        match(HogQLParser::JOIN);
+        match(InsightsQLParser::JOIN);
         break;
       }
 
-      case HogQLParser::COMMA: {
+      case InsightsQLParser::COMMA: {
         enterOuterAlt(_localctx, 2);
         setState(632);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         break;
       }
 
@@ -5219,46 +5219,46 @@ HogQLParser::JoinOpCrossContext* HogQLParser::joinOpCross() {
 
 //----------------- JoinConstraintClauseContext ------------------------------------------------------------------
 
-HogQLParser::JoinConstraintClauseContext::JoinConstraintClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::JoinConstraintClauseContext::JoinConstraintClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::JoinConstraintClauseContext::ON() {
-  return getToken(HogQLParser::ON, 0);
+tree::TerminalNode* InsightsQLParser::JoinConstraintClauseContext::ON() {
+  return getToken(InsightsQLParser::ON, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::JoinConstraintClauseContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::JoinConstraintClauseContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::JoinConstraintClauseContext::USING() {
-  return getToken(HogQLParser::USING, 0);
+tree::TerminalNode* InsightsQLParser::JoinConstraintClauseContext::USING() {
+  return getToken(InsightsQLParser::USING, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinConstraintClauseContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::JoinConstraintClauseContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::JoinConstraintClauseContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
-}
-
-
-size_t HogQLParser::JoinConstraintClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleJoinConstraintClause;
+tree::TerminalNode* InsightsQLParser::JoinConstraintClauseContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
 
-std::any HogQLParser::JoinConstraintClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::JoinConstraintClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleJoinConstraintClause;
+}
+
+
+std::any InsightsQLParser::JoinConstraintClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitJoinConstraintClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::JoinConstraintClauseContext* HogQLParser::joinConstraintClause() {
+InsightsQLParser::JoinConstraintClauseContext* InsightsQLParser::joinConstraintClause() {
   JoinConstraintClauseContext *_localctx = _tracker.createInstance<JoinConstraintClauseContext>(_ctx, getState());
-  enterRule(_localctx, 88, HogQLParser::RuleJoinConstraintClause);
+  enterRule(_localctx, 88, InsightsQLParser::RuleJoinConstraintClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -5274,7 +5274,7 @@ HogQLParser::JoinConstraintClauseContext* HogQLParser::joinConstraintClause() {
     case 1: {
       enterOuterAlt(_localctx, 1);
       setState(635);
-      match(HogQLParser::ON);
+      match(InsightsQLParser::ON);
       setState(636);
       columnExprList();
       break;
@@ -5283,20 +5283,20 @@ HogQLParser::JoinConstraintClauseContext* HogQLParser::joinConstraintClause() {
     case 2: {
       enterOuterAlt(_localctx, 2);
       setState(637);
-      match(HogQLParser::USING);
+      match(InsightsQLParser::USING);
       setState(638);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(639);
       columnExprList();
       setState(640);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
       setState(642);
-      match(HogQLParser::USING);
+      match(InsightsQLParser::USING);
       setState(643);
       columnExprList();
       break;
@@ -5318,42 +5318,42 @@ HogQLParser::JoinConstraintClauseContext* HogQLParser::joinConstraintClause() {
 
 //----------------- SampleClauseContext ------------------------------------------------------------------
 
-HogQLParser::SampleClauseContext::SampleClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SampleClauseContext::SampleClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::SampleClauseContext::SAMPLE() {
-  return getToken(HogQLParser::SAMPLE, 0);
+tree::TerminalNode* InsightsQLParser::SampleClauseContext::SAMPLE() {
+  return getToken(InsightsQLParser::SAMPLE, 0);
 }
 
-std::vector<HogQLParser::RatioExprContext *> HogQLParser::SampleClauseContext::ratioExpr() {
-  return getRuleContexts<HogQLParser::RatioExprContext>();
+std::vector<InsightsQLParser::RatioExprContext *> InsightsQLParser::SampleClauseContext::ratioExpr() {
+  return getRuleContexts<InsightsQLParser::RatioExprContext>();
 }
 
-HogQLParser::RatioExprContext* HogQLParser::SampleClauseContext::ratioExpr(size_t i) {
-  return getRuleContext<HogQLParser::RatioExprContext>(i);
+InsightsQLParser::RatioExprContext* InsightsQLParser::SampleClauseContext::ratioExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::RatioExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::SampleClauseContext::OFFSET() {
-  return getToken(HogQLParser::OFFSET, 0);
-}
-
-
-size_t HogQLParser::SampleClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleSampleClause;
+tree::TerminalNode* InsightsQLParser::SampleClauseContext::OFFSET() {
+  return getToken(InsightsQLParser::OFFSET, 0);
 }
 
 
-std::any HogQLParser::SampleClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SampleClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSampleClause;
+}
+
+
+std::any InsightsQLParser::SampleClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSampleClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SampleClauseContext* HogQLParser::sampleClause() {
+InsightsQLParser::SampleClauseContext* InsightsQLParser::sampleClause() {
   SampleClauseContext *_localctx = _tracker.createInstance<SampleClauseContext>(_ctx, getState());
-  enterRule(_localctx, 90, HogQLParser::RuleSampleClause);
+  enterRule(_localctx, 90, InsightsQLParser::RuleSampleClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -5365,7 +5365,7 @@ HogQLParser::SampleClauseContext* HogQLParser::sampleClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(646);
-    match(HogQLParser::SAMPLE);
+    match(InsightsQLParser::SAMPLE);
     setState(647);
     ratioExpr();
     setState(650);
@@ -5374,7 +5374,7 @@ HogQLParser::SampleClauseContext* HogQLParser::sampleClause() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 79, _ctx)) {
     case 1: {
       setState(648);
-      match(HogQLParser::OFFSET);
+      match(InsightsQLParser::OFFSET);
       setState(649);
       ratioExpr();
       break;
@@ -5396,42 +5396,42 @@ HogQLParser::SampleClauseContext* HogQLParser::sampleClause() {
 
 //----------------- LimitExprContext ------------------------------------------------------------------
 
-HogQLParser::LimitExprContext::LimitExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::LimitExprContext::LimitExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::LimitExprContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::LimitExprContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::LimitExprContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::LimitExprContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::LimitExprContext::COMMA() {
-  return getToken(HogQLParser::COMMA, 0);
+tree::TerminalNode* InsightsQLParser::LimitExprContext::COMMA() {
+  return getToken(InsightsQLParser::COMMA, 0);
 }
 
-tree::TerminalNode* HogQLParser::LimitExprContext::OFFSET() {
-  return getToken(HogQLParser::OFFSET, 0);
-}
-
-
-size_t HogQLParser::LimitExprContext::getRuleIndex() const {
-  return HogQLParser::RuleLimitExpr;
+tree::TerminalNode* InsightsQLParser::LimitExprContext::OFFSET() {
+  return getToken(InsightsQLParser::OFFSET, 0);
 }
 
 
-std::any HogQLParser::LimitExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::LimitExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleLimitExpr;
+}
+
+
+std::any InsightsQLParser::LimitExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitLimitExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::LimitExprContext* HogQLParser::limitExpr() {
+InsightsQLParser::LimitExprContext* InsightsQLParser::limitExpr() {
   LimitExprContext *_localctx = _tracker.createInstance<LimitExprContext>(_ctx, getState());
-  enterRule(_localctx, 92, HogQLParser::RuleLimitExpr);
+  enterRule(_localctx, 92, InsightsQLParser::RuleLimitExpr);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -5449,14 +5449,14 @@ HogQLParser::LimitExprContext* HogQLParser::limitExpr() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::OFFSET
+    if (_la == InsightsQLParser::OFFSET
 
-    || _la == HogQLParser::COMMA) {
+    || _la == InsightsQLParser::COMMA) {
       setState(653);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::OFFSET
+      if (!(_la == InsightsQLParser::OFFSET
 
-      || _la == HogQLParser::COMMA)) {
+      || _la == InsightsQLParser::COMMA)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -5479,42 +5479,42 @@ HogQLParser::LimitExprContext* HogQLParser::limitExpr() {
 
 //----------------- OrderExprListContext ------------------------------------------------------------------
 
-HogQLParser::OrderExprListContext::OrderExprListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::OrderExprListContext::OrderExprListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::OrderExprContext *> HogQLParser::OrderExprListContext::orderExpr() {
-  return getRuleContexts<HogQLParser::OrderExprContext>();
+std::vector<InsightsQLParser::OrderExprContext *> InsightsQLParser::OrderExprListContext::orderExpr() {
+  return getRuleContexts<InsightsQLParser::OrderExprContext>();
 }
 
-HogQLParser::OrderExprContext* HogQLParser::OrderExprListContext::orderExpr(size_t i) {
-  return getRuleContext<HogQLParser::OrderExprContext>(i);
+InsightsQLParser::OrderExprContext* InsightsQLParser::OrderExprListContext::orderExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::OrderExprContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::OrderExprListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::OrderExprListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::OrderExprListContext::getRuleIndex() const {
-  return HogQLParser::RuleOrderExprList;
+tree::TerminalNode* InsightsQLParser::OrderExprListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::OrderExprListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::OrderExprListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleOrderExprList;
+}
+
+
+std::any InsightsQLParser::OrderExprListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitOrderExprList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::OrderExprListContext* HogQLParser::orderExprList() {
+InsightsQLParser::OrderExprListContext* InsightsQLParser::orderExprList() {
   OrderExprListContext *_localctx = _tracker.createInstance<OrderExprListContext>(_ctx, getState());
-  enterRule(_localctx, 94, HogQLParser::RuleOrderExprList);
+  enterRule(_localctx, 94, InsightsQLParser::RuleOrderExprList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -5531,9 +5531,9 @@ HogQLParser::OrderExprListContext* HogQLParser::orderExprList() {
     setState(662);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::COMMA) {
+    while (_la == InsightsQLParser::COMMA) {
       setState(658);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
       setState(659);
       orderExpr();
       setState(664);
@@ -5553,62 +5553,62 @@ HogQLParser::OrderExprListContext* HogQLParser::orderExprList() {
 
 //----------------- OrderExprContext ------------------------------------------------------------------
 
-HogQLParser::OrderExprContext::OrderExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::OrderExprContext::OrderExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::OrderExprContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::OrderExprContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::NULLS() {
-  return getToken(HogQLParser::NULLS, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::NULLS() {
+  return getToken(InsightsQLParser::NULLS, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::COLLATE() {
-  return getToken(HogQLParser::COLLATE, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::COLLATE() {
+  return getToken(InsightsQLParser::COLLATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::ASCENDING() {
-  return getToken(HogQLParser::ASCENDING, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::ASCENDING() {
+  return getToken(InsightsQLParser::ASCENDING, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::DESCENDING() {
-  return getToken(HogQLParser::DESCENDING, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::DESCENDING() {
+  return getToken(InsightsQLParser::DESCENDING, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::DESC() {
-  return getToken(HogQLParser::DESC, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::DESC() {
+  return getToken(InsightsQLParser::DESC, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::FIRST() {
-  return getToken(HogQLParser::FIRST, 0);
+tree::TerminalNode* InsightsQLParser::OrderExprContext::FIRST() {
+  return getToken(InsightsQLParser::FIRST, 0);
 }
 
-tree::TerminalNode* HogQLParser::OrderExprContext::LAST() {
-  return getToken(HogQLParser::LAST, 0);
-}
-
-
-size_t HogQLParser::OrderExprContext::getRuleIndex() const {
-  return HogQLParser::RuleOrderExpr;
+tree::TerminalNode* InsightsQLParser::OrderExprContext::LAST() {
+  return getToken(InsightsQLParser::LAST, 0);
 }
 
 
-std::any HogQLParser::OrderExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::OrderExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleOrderExpr;
+}
+
+
+std::any InsightsQLParser::OrderExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitOrderExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::OrderExprContext* HogQLParser::orderExpr() {
+InsightsQLParser::OrderExprContext* InsightsQLParser::orderExpr() {
   OrderExprContext *_localctx = _tracker.createInstance<OrderExprContext>(_ctx, getState());
-  enterRule(_localctx, 96, HogQLParser::RuleOrderExpr);
+  enterRule(_localctx, 96, InsightsQLParser::RuleOrderExpr);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -5643,14 +5643,14 @@ HogQLParser::OrderExprContext* HogQLParser::orderExpr() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::NULLS) {
+    if (_la == InsightsQLParser::NULLS) {
       setState(669);
-      match(HogQLParser::NULLS);
+      match(InsightsQLParser::NULLS);
       setState(670);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::FIRST
+      if (!(_la == InsightsQLParser::FIRST
 
-      || _la == HogQLParser::LAST)) {
+      || _la == InsightsQLParser::LAST)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -5662,11 +5662,11 @@ HogQLParser::OrderExprContext* HogQLParser::orderExpr() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COLLATE) {
+    if (_la == InsightsQLParser::COLLATE) {
       setState(673);
-      match(HogQLParser::COLLATE);
+      match(InsightsQLParser::COLLATE);
       setState(674);
-      match(HogQLParser::STRING_LITERAL);
+      match(InsightsQLParser::STRING_LITERAL);
     }
    
   }
@@ -5681,42 +5681,42 @@ HogQLParser::OrderExprContext* HogQLParser::orderExpr() {
 
 //----------------- RatioExprContext ------------------------------------------------------------------
 
-HogQLParser::RatioExprContext::RatioExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::RatioExprContext::RatioExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::PlaceholderContext* HogQLParser::RatioExprContext::placeholder() {
-  return getRuleContext<HogQLParser::PlaceholderContext>(0);
+InsightsQLParser::PlaceholderContext* InsightsQLParser::RatioExprContext::placeholder() {
+  return getRuleContext<InsightsQLParser::PlaceholderContext>(0);
 }
 
-std::vector<HogQLParser::NumberLiteralContext *> HogQLParser::RatioExprContext::numberLiteral() {
-  return getRuleContexts<HogQLParser::NumberLiteralContext>();
+std::vector<InsightsQLParser::NumberLiteralContext *> InsightsQLParser::RatioExprContext::numberLiteral() {
+  return getRuleContexts<InsightsQLParser::NumberLiteralContext>();
 }
 
-HogQLParser::NumberLiteralContext* HogQLParser::RatioExprContext::numberLiteral(size_t i) {
-  return getRuleContext<HogQLParser::NumberLiteralContext>(i);
+InsightsQLParser::NumberLiteralContext* InsightsQLParser::RatioExprContext::numberLiteral(size_t i) {
+  return getRuleContext<InsightsQLParser::NumberLiteralContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::RatioExprContext::SLASH() {
-  return getToken(HogQLParser::SLASH, 0);
-}
-
-
-size_t HogQLParser::RatioExprContext::getRuleIndex() const {
-  return HogQLParser::RuleRatioExpr;
+tree::TerminalNode* InsightsQLParser::RatioExprContext::SLASH() {
+  return getToken(InsightsQLParser::SLASH, 0);
 }
 
 
-std::any HogQLParser::RatioExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::RatioExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleRatioExpr;
+}
+
+
+std::any InsightsQLParser::RatioExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitRatioExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::RatioExprContext* HogQLParser::ratioExpr() {
+InsightsQLParser::RatioExprContext* InsightsQLParser::ratioExpr() {
   RatioExprContext *_localctx = _tracker.createInstance<RatioExprContext>(_ctx, getState());
-  enterRule(_localctx, 98, HogQLParser::RuleRatioExpr);
+  enterRule(_localctx, 98, InsightsQLParser::RuleRatioExpr);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -5729,22 +5729,22 @@ HogQLParser::RatioExprContext* HogQLParser::ratioExpr() {
     setState(683);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::LBRACE: {
+      case InsightsQLParser::LBRACE: {
         enterOuterAlt(_localctx, 1);
         setState(677);
         placeholder();
         break;
       }
 
-      case HogQLParser::INF:
-      case HogQLParser::NAN_SQL:
-      case HogQLParser::FLOATING_LITERAL:
-      case HogQLParser::OCTAL_LITERAL:
-      case HogQLParser::DECIMAL_LITERAL:
-      case HogQLParser::HEXADECIMAL_LITERAL:
-      case HogQLParser::DASH:
-      case HogQLParser::DOT:
-      case HogQLParser::PLUS: {
+      case InsightsQLParser::INF:
+      case InsightsQLParser::NAN_SQL:
+      case InsightsQLParser::FLOATING_LITERAL:
+      case InsightsQLParser::OCTAL_LITERAL:
+      case InsightsQLParser::DECIMAL_LITERAL:
+      case InsightsQLParser::HEXADECIMAL_LITERAL:
+      case InsightsQLParser::DASH:
+      case InsightsQLParser::DOT:
+      case InsightsQLParser::PLUS: {
         enterOuterAlt(_localctx, 2);
         setState(678);
         numberLiteral();
@@ -5754,7 +5754,7 @@ HogQLParser::RatioExprContext* HogQLParser::ratioExpr() {
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 85, _ctx)) {
         case 1: {
           setState(679);
-          match(HogQLParser::SLASH);
+          match(InsightsQLParser::SLASH);
           setState(680);
           numberLiteral();
           break;
@@ -5782,42 +5782,42 @@ HogQLParser::RatioExprContext* HogQLParser::ratioExpr() {
 
 //----------------- SettingExprListContext ------------------------------------------------------------------
 
-HogQLParser::SettingExprListContext::SettingExprListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SettingExprListContext::SettingExprListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::SettingExprContext *> HogQLParser::SettingExprListContext::settingExpr() {
-  return getRuleContexts<HogQLParser::SettingExprContext>();
+std::vector<InsightsQLParser::SettingExprContext *> InsightsQLParser::SettingExprListContext::settingExpr() {
+  return getRuleContexts<InsightsQLParser::SettingExprContext>();
 }
 
-HogQLParser::SettingExprContext* HogQLParser::SettingExprListContext::settingExpr(size_t i) {
-  return getRuleContext<HogQLParser::SettingExprContext>(i);
+InsightsQLParser::SettingExprContext* InsightsQLParser::SettingExprListContext::settingExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::SettingExprContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::SettingExprListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::SettingExprListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::SettingExprListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::SettingExprListContext::getRuleIndex() const {
-  return HogQLParser::RuleSettingExprList;
+tree::TerminalNode* InsightsQLParser::SettingExprListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::SettingExprListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SettingExprListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSettingExprList;
+}
+
+
+std::any InsightsQLParser::SettingExprListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSettingExprList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SettingExprListContext* HogQLParser::settingExprList() {
+InsightsQLParser::SettingExprListContext* InsightsQLParser::settingExprList() {
   SettingExprListContext *_localctx = _tracker.createInstance<SettingExprListContext>(_ctx, getState());
-  enterRule(_localctx, 100, HogQLParser::RuleSettingExprList);
+  enterRule(_localctx, 100, InsightsQLParser::RuleSettingExprList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -5834,9 +5834,9 @@ HogQLParser::SettingExprListContext* HogQLParser::settingExprList() {
     setState(690);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::COMMA) {
+    while (_la == InsightsQLParser::COMMA) {
       setState(686);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
       setState(687);
       settingExpr();
       setState(692);
@@ -5856,38 +5856,38 @@ HogQLParser::SettingExprListContext* HogQLParser::settingExprList() {
 
 //----------------- SettingExprContext ------------------------------------------------------------------
 
-HogQLParser::SettingExprContext::SettingExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::SettingExprContext::SettingExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::IdentifierContext* HogQLParser::SettingExprContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::SettingExprContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::SettingExprContext::EQ_SINGLE() {
-  return getToken(HogQLParser::EQ_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::SettingExprContext::EQ_SINGLE() {
+  return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
-HogQLParser::LiteralContext* HogQLParser::SettingExprContext::literal() {
-  return getRuleContext<HogQLParser::LiteralContext>(0);
-}
-
-
-size_t HogQLParser::SettingExprContext::getRuleIndex() const {
-  return HogQLParser::RuleSettingExpr;
+InsightsQLParser::LiteralContext* InsightsQLParser::SettingExprContext::literal() {
+  return getRuleContext<InsightsQLParser::LiteralContext>(0);
 }
 
 
-std::any HogQLParser::SettingExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::SettingExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleSettingExpr;
+}
+
+
+std::any InsightsQLParser::SettingExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitSettingExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::SettingExprContext* HogQLParser::settingExpr() {
+InsightsQLParser::SettingExprContext* InsightsQLParser::settingExpr() {
   SettingExprContext *_localctx = _tracker.createInstance<SettingExprContext>(_ctx, getState());
-  enterRule(_localctx, 102, HogQLParser::RuleSettingExpr);
+  enterRule(_localctx, 102, InsightsQLParser::RuleSettingExpr);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -5901,7 +5901,7 @@ HogQLParser::SettingExprContext* HogQLParser::settingExpr() {
     setState(693);
     identifier();
     setState(694);
-    match(HogQLParser::EQ_SINGLE);
+    match(InsightsQLParser::EQ_SINGLE);
     setState(695);
     literal();
    
@@ -5917,38 +5917,38 @@ HogQLParser::SettingExprContext* HogQLParser::settingExpr() {
 
 //----------------- WindowExprContext ------------------------------------------------------------------
 
-HogQLParser::WindowExprContext::WindowExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WindowExprContext::WindowExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::WinPartitionByClauseContext* HogQLParser::WindowExprContext::winPartitionByClause() {
-  return getRuleContext<HogQLParser::WinPartitionByClauseContext>(0);
+InsightsQLParser::WinPartitionByClauseContext* InsightsQLParser::WindowExprContext::winPartitionByClause() {
+  return getRuleContext<InsightsQLParser::WinPartitionByClauseContext>(0);
 }
 
-HogQLParser::WinOrderByClauseContext* HogQLParser::WindowExprContext::winOrderByClause() {
-  return getRuleContext<HogQLParser::WinOrderByClauseContext>(0);
+InsightsQLParser::WinOrderByClauseContext* InsightsQLParser::WindowExprContext::winOrderByClause() {
+  return getRuleContext<InsightsQLParser::WinOrderByClauseContext>(0);
 }
 
-HogQLParser::WinFrameClauseContext* HogQLParser::WindowExprContext::winFrameClause() {
-  return getRuleContext<HogQLParser::WinFrameClauseContext>(0);
-}
-
-
-size_t HogQLParser::WindowExprContext::getRuleIndex() const {
-  return HogQLParser::RuleWindowExpr;
+InsightsQLParser::WinFrameClauseContext* InsightsQLParser::WindowExprContext::winFrameClause() {
+  return getRuleContext<InsightsQLParser::WinFrameClauseContext>(0);
 }
 
 
-std::any HogQLParser::WindowExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WindowExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWindowExpr;
+}
+
+
+std::any InsightsQLParser::WindowExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWindowExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WindowExprContext* HogQLParser::windowExpr() {
+InsightsQLParser::WindowExprContext* InsightsQLParser::windowExpr() {
   WindowExprContext *_localctx = _tracker.createInstance<WindowExprContext>(_ctx, getState());
-  enterRule(_localctx, 104, HogQLParser::RuleWindowExpr);
+  enterRule(_localctx, 104, InsightsQLParser::RuleWindowExpr);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -5964,7 +5964,7 @@ HogQLParser::WindowExprContext* HogQLParser::windowExpr() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::PARTITION) {
+    if (_la == InsightsQLParser::PARTITION) {
       setState(697);
       winPartitionByClause();
     }
@@ -5972,7 +5972,7 @@ HogQLParser::WindowExprContext* HogQLParser::windowExpr() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::ORDER) {
+    if (_la == InsightsQLParser::ORDER) {
       setState(700);
       winOrderByClause();
     }
@@ -5980,9 +5980,9 @@ HogQLParser::WindowExprContext* HogQLParser::windowExpr() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::RANGE
+    if (_la == InsightsQLParser::RANGE
 
-    || _la == HogQLParser::ROWS) {
+    || _la == InsightsQLParser::ROWS) {
       setState(703);
       winFrameClause();
     }
@@ -5999,38 +5999,38 @@ HogQLParser::WindowExprContext* HogQLParser::windowExpr() {
 
 //----------------- WinPartitionByClauseContext ------------------------------------------------------------------
 
-HogQLParser::WinPartitionByClauseContext::WinPartitionByClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WinPartitionByClauseContext::WinPartitionByClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WinPartitionByClauseContext::PARTITION() {
-  return getToken(HogQLParser::PARTITION, 0);
+tree::TerminalNode* InsightsQLParser::WinPartitionByClauseContext::PARTITION() {
+  return getToken(InsightsQLParser::PARTITION, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinPartitionByClauseContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::WinPartitionByClauseContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::WinPartitionByClauseContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
-}
-
-
-size_t HogQLParser::WinPartitionByClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleWinPartitionByClause;
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::WinPartitionByClauseContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
 
-std::any HogQLParser::WinPartitionByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WinPartitionByClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWinPartitionByClause;
+}
+
+
+std::any InsightsQLParser::WinPartitionByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWinPartitionByClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WinPartitionByClauseContext* HogQLParser::winPartitionByClause() {
+InsightsQLParser::WinPartitionByClauseContext* InsightsQLParser::winPartitionByClause() {
   WinPartitionByClauseContext *_localctx = _tracker.createInstance<WinPartitionByClauseContext>(_ctx, getState());
-  enterRule(_localctx, 106, HogQLParser::RuleWinPartitionByClause);
+  enterRule(_localctx, 106, InsightsQLParser::RuleWinPartitionByClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -6042,9 +6042,9 @@ HogQLParser::WinPartitionByClauseContext* HogQLParser::winPartitionByClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(706);
-    match(HogQLParser::PARTITION);
+    match(InsightsQLParser::PARTITION);
     setState(707);
-    match(HogQLParser::BY);
+    match(InsightsQLParser::BY);
     setState(708);
     columnExprList();
    
@@ -6060,38 +6060,38 @@ HogQLParser::WinPartitionByClauseContext* HogQLParser::winPartitionByClause() {
 
 //----------------- WinOrderByClauseContext ------------------------------------------------------------------
 
-HogQLParser::WinOrderByClauseContext::WinOrderByClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WinOrderByClauseContext::WinOrderByClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WinOrderByClauseContext::ORDER() {
-  return getToken(HogQLParser::ORDER, 0);
+tree::TerminalNode* InsightsQLParser::WinOrderByClauseContext::ORDER() {
+  return getToken(InsightsQLParser::ORDER, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinOrderByClauseContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::WinOrderByClauseContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-HogQLParser::OrderExprListContext* HogQLParser::WinOrderByClauseContext::orderExprList() {
-  return getRuleContext<HogQLParser::OrderExprListContext>(0);
-}
-
-
-size_t HogQLParser::WinOrderByClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleWinOrderByClause;
+InsightsQLParser::OrderExprListContext* InsightsQLParser::WinOrderByClauseContext::orderExprList() {
+  return getRuleContext<InsightsQLParser::OrderExprListContext>(0);
 }
 
 
-std::any HogQLParser::WinOrderByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WinOrderByClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWinOrderByClause;
+}
+
+
+std::any InsightsQLParser::WinOrderByClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWinOrderByClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WinOrderByClauseContext* HogQLParser::winOrderByClause() {
+InsightsQLParser::WinOrderByClauseContext* InsightsQLParser::winOrderByClause() {
   WinOrderByClauseContext *_localctx = _tracker.createInstance<WinOrderByClauseContext>(_ctx, getState());
-  enterRule(_localctx, 108, HogQLParser::RuleWinOrderByClause);
+  enterRule(_localctx, 108, InsightsQLParser::RuleWinOrderByClause);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -6103,9 +6103,9 @@ HogQLParser::WinOrderByClauseContext* HogQLParser::winOrderByClause() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(710);
-    match(HogQLParser::ORDER);
+    match(InsightsQLParser::ORDER);
     setState(711);
-    match(HogQLParser::BY);
+    match(InsightsQLParser::BY);
     setState(712);
     orderExprList();
    
@@ -6121,38 +6121,38 @@ HogQLParser::WinOrderByClauseContext* HogQLParser::winOrderByClause() {
 
 //----------------- WinFrameClauseContext ------------------------------------------------------------------
 
-HogQLParser::WinFrameClauseContext::WinFrameClauseContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WinFrameClauseContext::WinFrameClauseContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::WinFrameExtendContext* HogQLParser::WinFrameClauseContext::winFrameExtend() {
-  return getRuleContext<HogQLParser::WinFrameExtendContext>(0);
+InsightsQLParser::WinFrameExtendContext* InsightsQLParser::WinFrameClauseContext::winFrameExtend() {
+  return getRuleContext<InsightsQLParser::WinFrameExtendContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WinFrameClauseContext::ROWS() {
-  return getToken(HogQLParser::ROWS, 0);
+tree::TerminalNode* InsightsQLParser::WinFrameClauseContext::ROWS() {
+  return getToken(InsightsQLParser::ROWS, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinFrameClauseContext::RANGE() {
-  return getToken(HogQLParser::RANGE, 0);
-}
-
-
-size_t HogQLParser::WinFrameClauseContext::getRuleIndex() const {
-  return HogQLParser::RuleWinFrameClause;
+tree::TerminalNode* InsightsQLParser::WinFrameClauseContext::RANGE() {
+  return getToken(InsightsQLParser::RANGE, 0);
 }
 
 
-std::any HogQLParser::WinFrameClauseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WinFrameClauseContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWinFrameClause;
+}
+
+
+std::any InsightsQLParser::WinFrameClauseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWinFrameClause(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WinFrameClauseContext* HogQLParser::winFrameClause() {
+InsightsQLParser::WinFrameClauseContext* InsightsQLParser::winFrameClause() {
   WinFrameClauseContext *_localctx = _tracker.createInstance<WinFrameClauseContext>(_ctx, getState());
-  enterRule(_localctx, 110, HogQLParser::RuleWinFrameClause);
+  enterRule(_localctx, 110, InsightsQLParser::RuleWinFrameClause);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -6166,9 +6166,9 @@ HogQLParser::WinFrameClauseContext* HogQLParser::winFrameClause() {
     enterOuterAlt(_localctx, 1);
     setState(714);
     _la = _input->LA(1);
-    if (!(_la == HogQLParser::RANGE
+    if (!(_la == InsightsQLParser::RANGE
 
-    || _la == HogQLParser::ROWS)) {
+    || _la == InsightsQLParser::ROWS)) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -6190,64 +6190,64 @@ HogQLParser::WinFrameClauseContext* HogQLParser::winFrameClause() {
 
 //----------------- WinFrameExtendContext ------------------------------------------------------------------
 
-HogQLParser::WinFrameExtendContext::WinFrameExtendContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WinFrameExtendContext::WinFrameExtendContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::WinFrameExtendContext::getRuleIndex() const {
-  return HogQLParser::RuleWinFrameExtend;
+size_t InsightsQLParser::WinFrameExtendContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWinFrameExtend;
 }
 
-void HogQLParser::WinFrameExtendContext::copyFrom(WinFrameExtendContext *ctx) {
+void InsightsQLParser::WinFrameExtendContext::copyFrom(WinFrameExtendContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- FrameStartContext ------------------------------------------------------------------
 
-HogQLParser::WinFrameBoundContext* HogQLParser::FrameStartContext::winFrameBound() {
-  return getRuleContext<HogQLParser::WinFrameBoundContext>(0);
+InsightsQLParser::WinFrameBoundContext* InsightsQLParser::FrameStartContext::winFrameBound() {
+  return getRuleContext<InsightsQLParser::WinFrameBoundContext>(0);
 }
 
-HogQLParser::FrameStartContext::FrameStartContext(WinFrameExtendContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::FrameStartContext::FrameStartContext(WinFrameExtendContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::FrameStartContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::FrameStartContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitFrameStart(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- FrameBetweenContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::FrameBetweenContext::BETWEEN() {
-  return getToken(HogQLParser::BETWEEN, 0);
+tree::TerminalNode* InsightsQLParser::FrameBetweenContext::BETWEEN() {
+  return getToken(InsightsQLParser::BETWEEN, 0);
 }
 
-std::vector<HogQLParser::WinFrameBoundContext *> HogQLParser::FrameBetweenContext::winFrameBound() {
-  return getRuleContexts<HogQLParser::WinFrameBoundContext>();
+std::vector<InsightsQLParser::WinFrameBoundContext *> InsightsQLParser::FrameBetweenContext::winFrameBound() {
+  return getRuleContexts<InsightsQLParser::WinFrameBoundContext>();
 }
 
-HogQLParser::WinFrameBoundContext* HogQLParser::FrameBetweenContext::winFrameBound(size_t i) {
-  return getRuleContext<HogQLParser::WinFrameBoundContext>(i);
+InsightsQLParser::WinFrameBoundContext* InsightsQLParser::FrameBetweenContext::winFrameBound(size_t i) {
+  return getRuleContext<InsightsQLParser::WinFrameBoundContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::FrameBetweenContext::AND() {
-  return getToken(HogQLParser::AND, 0);
+tree::TerminalNode* InsightsQLParser::FrameBetweenContext::AND() {
+  return getToken(InsightsQLParser::AND, 0);
 }
 
-HogQLParser::FrameBetweenContext::FrameBetweenContext(WinFrameExtendContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::FrameBetweenContext::FrameBetweenContext(WinFrameExtendContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::FrameBetweenContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::FrameBetweenContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitFrameBetween(this);
   else
     return visitor->visitChildren(this);
 }
-HogQLParser::WinFrameExtendContext* HogQLParser::winFrameExtend() {
+InsightsQLParser::WinFrameExtendContext* InsightsQLParser::winFrameExtend() {
   WinFrameExtendContext *_localctx = _tracker.createInstance<WinFrameExtendContext>(_ctx, getState());
-  enterRule(_localctx, 112, HogQLParser::RuleWinFrameExtend);
+  enterRule(_localctx, 112, InsightsQLParser::RuleWinFrameExtend);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -6260,33 +6260,33 @@ HogQLParser::WinFrameExtendContext* HogQLParser::winFrameExtend() {
     setState(723);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::CURRENT:
-      case HogQLParser::INF:
-      case HogQLParser::NAN_SQL:
-      case HogQLParser::UNBOUNDED:
-      case HogQLParser::FLOATING_LITERAL:
-      case HogQLParser::OCTAL_LITERAL:
-      case HogQLParser::DECIMAL_LITERAL:
-      case HogQLParser::HEXADECIMAL_LITERAL:
-      case HogQLParser::DASH:
-      case HogQLParser::DOT:
-      case HogQLParser::PLUS: {
-        _localctx = _tracker.createInstance<HogQLParser::FrameStartContext>(_localctx);
+      case InsightsQLParser::CURRENT:
+      case InsightsQLParser::INF:
+      case InsightsQLParser::NAN_SQL:
+      case InsightsQLParser::UNBOUNDED:
+      case InsightsQLParser::FLOATING_LITERAL:
+      case InsightsQLParser::OCTAL_LITERAL:
+      case InsightsQLParser::DECIMAL_LITERAL:
+      case InsightsQLParser::HEXADECIMAL_LITERAL:
+      case InsightsQLParser::DASH:
+      case InsightsQLParser::DOT:
+      case InsightsQLParser::PLUS: {
+        _localctx = _tracker.createInstance<InsightsQLParser::FrameStartContext>(_localctx);
         enterOuterAlt(_localctx, 1);
         setState(717);
         winFrameBound();
         break;
       }
 
-      case HogQLParser::BETWEEN: {
-        _localctx = _tracker.createInstance<HogQLParser::FrameBetweenContext>(_localctx);
+      case InsightsQLParser::BETWEEN: {
+        _localctx = _tracker.createInstance<InsightsQLParser::FrameBetweenContext>(_localctx);
         enterOuterAlt(_localctx, 2);
         setState(718);
-        match(HogQLParser::BETWEEN);
+        match(InsightsQLParser::BETWEEN);
         setState(719);
         winFrameBound();
         setState(720);
-        match(HogQLParser::AND);
+        match(InsightsQLParser::AND);
         setState(721);
         winFrameBound();
         break;
@@ -6308,50 +6308,50 @@ HogQLParser::WinFrameExtendContext* HogQLParser::winFrameExtend() {
 
 //----------------- WinFrameBoundContext ------------------------------------------------------------------
 
-HogQLParser::WinFrameBoundContext::WinFrameBoundContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WinFrameBoundContext::WinFrameBoundContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::WinFrameBoundContext::CURRENT() {
-  return getToken(HogQLParser::CURRENT, 0);
+tree::TerminalNode* InsightsQLParser::WinFrameBoundContext::CURRENT() {
+  return getToken(InsightsQLParser::CURRENT, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinFrameBoundContext::ROW() {
-  return getToken(HogQLParser::ROW, 0);
+tree::TerminalNode* InsightsQLParser::WinFrameBoundContext::ROW() {
+  return getToken(InsightsQLParser::ROW, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinFrameBoundContext::UNBOUNDED() {
-  return getToken(HogQLParser::UNBOUNDED, 0);
+tree::TerminalNode* InsightsQLParser::WinFrameBoundContext::UNBOUNDED() {
+  return getToken(InsightsQLParser::UNBOUNDED, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinFrameBoundContext::PRECEDING() {
-  return getToken(HogQLParser::PRECEDING, 0);
+tree::TerminalNode* InsightsQLParser::WinFrameBoundContext::PRECEDING() {
+  return getToken(InsightsQLParser::PRECEDING, 0);
 }
 
-tree::TerminalNode* HogQLParser::WinFrameBoundContext::FOLLOWING() {
-  return getToken(HogQLParser::FOLLOWING, 0);
+tree::TerminalNode* InsightsQLParser::WinFrameBoundContext::FOLLOWING() {
+  return getToken(InsightsQLParser::FOLLOWING, 0);
 }
 
-HogQLParser::NumberLiteralContext* HogQLParser::WinFrameBoundContext::numberLiteral() {
-  return getRuleContext<HogQLParser::NumberLiteralContext>(0);
-}
-
-
-size_t HogQLParser::WinFrameBoundContext::getRuleIndex() const {
-  return HogQLParser::RuleWinFrameBound;
+InsightsQLParser::NumberLiteralContext* InsightsQLParser::WinFrameBoundContext::numberLiteral() {
+  return getRuleContext<InsightsQLParser::NumberLiteralContext>(0);
 }
 
 
-std::any HogQLParser::WinFrameBoundContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WinFrameBoundContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWinFrameBound;
+}
+
+
+std::any InsightsQLParser::WinFrameBoundContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWinFrameBound(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WinFrameBoundContext* HogQLParser::winFrameBound() {
+InsightsQLParser::WinFrameBoundContext* InsightsQLParser::winFrameBound() {
   WinFrameBoundContext *_localctx = _tracker.createInstance<WinFrameBoundContext>(_ctx, getState());
-  enterRule(_localctx, 114, HogQLParser::RuleWinFrameBound);
+  enterRule(_localctx, 114, InsightsQLParser::RuleWinFrameBound);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -6367,25 +6367,25 @@ HogQLParser::WinFrameBoundContext* HogQLParser::winFrameBound() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 92, _ctx)) {
     case 1: {
       setState(725);
-      match(HogQLParser::CURRENT);
+      match(InsightsQLParser::CURRENT);
       setState(726);
-      match(HogQLParser::ROW);
+      match(InsightsQLParser::ROW);
       break;
     }
 
     case 2: {
       setState(727);
-      match(HogQLParser::UNBOUNDED);
+      match(InsightsQLParser::UNBOUNDED);
       setState(728);
-      match(HogQLParser::PRECEDING);
+      match(InsightsQLParser::PRECEDING);
       break;
     }
 
     case 3: {
       setState(729);
-      match(HogQLParser::UNBOUNDED);
+      match(InsightsQLParser::UNBOUNDED);
       setState(730);
-      match(HogQLParser::FOLLOWING);
+      match(InsightsQLParser::FOLLOWING);
       break;
     }
 
@@ -6393,7 +6393,7 @@ HogQLParser::WinFrameBoundContext* HogQLParser::winFrameBound() {
       setState(731);
       numberLiteral();
       setState(732);
-      match(HogQLParser::PRECEDING);
+      match(InsightsQLParser::PRECEDING);
       break;
     }
 
@@ -6401,7 +6401,7 @@ HogQLParser::WinFrameBoundContext* HogQLParser::winFrameBound() {
       setState(734);
       numberLiteral();
       setState(735);
-      match(HogQLParser::FOLLOWING);
+      match(InsightsQLParser::FOLLOWING);
       break;
     }
 
@@ -6421,34 +6421,34 @@ HogQLParser::WinFrameBoundContext* HogQLParser::winFrameBound() {
 
 //----------------- ExprContext ------------------------------------------------------------------
 
-HogQLParser::ExprContext::ExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ExprContext::ExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ExprContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ExprContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ExprContext::EOF() {
-  return getToken(HogQLParser::EOF, 0);
-}
-
-
-size_t HogQLParser::ExprContext::getRuleIndex() const {
-  return HogQLParser::RuleExpr;
+tree::TerminalNode* InsightsQLParser::ExprContext::EOF() {
+  return getToken(InsightsQLParser::EOF, 0);
 }
 
 
-std::any HogQLParser::ExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleExpr;
+}
+
+
+std::any InsightsQLParser::ExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ExprContext* HogQLParser::expr() {
+InsightsQLParser::ExprContext* InsightsQLParser::expr() {
   ExprContext *_localctx = _tracker.createInstance<ExprContext>(_ctx, getState());
-  enterRule(_localctx, 116, HogQLParser::RuleExpr);
+  enterRule(_localctx, 116, InsightsQLParser::RuleExpr);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -6462,7 +6462,7 @@ HogQLParser::ExprContext* HogQLParser::expr() {
     setState(739);
     columnExpr(0);
     setState(740);
-    match(HogQLParser::EOF);
+    match(InsightsQLParser::EOF);
    
   }
   catch (RecognitionException &e) {
@@ -6476,185 +6476,185 @@ HogQLParser::ExprContext* HogQLParser::expr() {
 
 //----------------- ColumnTypeExprContext ------------------------------------------------------------------
 
-HogQLParser::ColumnTypeExprContext::ColumnTypeExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ColumnTypeExprContext::ColumnTypeExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::ColumnTypeExprContext::getRuleIndex() const {
-  return HogQLParser::RuleColumnTypeExpr;
+size_t InsightsQLParser::ColumnTypeExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleColumnTypeExpr;
 }
 
-void HogQLParser::ColumnTypeExprContext::copyFrom(ColumnTypeExprContext *ctx) {
+void InsightsQLParser::ColumnTypeExprContext::copyFrom(ColumnTypeExprContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- ColumnTypeExprNestedContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::ColumnTypeExprNestedContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::ColumnTypeExprNestedContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnTypeExprNestedContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnTypeExprNestedContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprNestedContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprNestedContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-std::vector<HogQLParser::ColumnTypeExprContext *> HogQLParser::ColumnTypeExprNestedContext::columnTypeExpr() {
-  return getRuleContexts<HogQLParser::ColumnTypeExprContext>();
+std::vector<InsightsQLParser::ColumnTypeExprContext *> InsightsQLParser::ColumnTypeExprNestedContext::columnTypeExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnTypeExprContext>();
 }
 
-HogQLParser::ColumnTypeExprContext* HogQLParser::ColumnTypeExprNestedContext::columnTypeExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnTypeExprContext>(i);
+InsightsQLParser::ColumnTypeExprContext* InsightsQLParser::ColumnTypeExprNestedContext::columnTypeExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnTypeExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprNestedContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprNestedContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnTypeExprNestedContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnTypeExprNestedContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprNestedContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprNestedContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
-HogQLParser::ColumnTypeExprNestedContext::ColumnTypeExprNestedContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnTypeExprNestedContext::ColumnTypeExprNestedContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnTypeExprNestedContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnTypeExprNestedContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnTypeExprNested(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnTypeExprParamContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnTypeExprParamContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnTypeExprParamContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprParamContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprParamContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprParamContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprParamContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnTypeExprParamContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnTypeExprParamContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-HogQLParser::ColumnTypeExprParamContext::ColumnTypeExprParamContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnTypeExprParamContext::ColumnTypeExprParamContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnTypeExprParamContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnTypeExprParamContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnTypeExprParam(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnTypeExprSimpleContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnTypeExprSimpleContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnTypeExprSimpleContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-HogQLParser::ColumnTypeExprSimpleContext::ColumnTypeExprSimpleContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnTypeExprSimpleContext::ColumnTypeExprSimpleContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnTypeExprSimpleContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnTypeExprSimpleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnTypeExprSimple(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnTypeExprComplexContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnTypeExprComplexContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnTypeExprComplexContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprComplexContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprComplexContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-std::vector<HogQLParser::ColumnTypeExprContext *> HogQLParser::ColumnTypeExprComplexContext::columnTypeExpr() {
-  return getRuleContexts<HogQLParser::ColumnTypeExprContext>();
+std::vector<InsightsQLParser::ColumnTypeExprContext *> InsightsQLParser::ColumnTypeExprComplexContext::columnTypeExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnTypeExprContext>();
 }
 
-HogQLParser::ColumnTypeExprContext* HogQLParser::ColumnTypeExprComplexContext::columnTypeExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnTypeExprContext>(i);
+InsightsQLParser::ColumnTypeExprContext* InsightsQLParser::ColumnTypeExprComplexContext::columnTypeExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnTypeExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprComplexContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprComplexContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnTypeExprComplexContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnTypeExprComplexContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprComplexContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprComplexContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
-HogQLParser::ColumnTypeExprComplexContext::ColumnTypeExprComplexContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnTypeExprComplexContext::ColumnTypeExprComplexContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnTypeExprComplexContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnTypeExprComplexContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnTypeExprComplex(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnTypeExprEnumContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnTypeExprEnumContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnTypeExprEnumContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprEnumContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprEnumContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-std::vector<HogQLParser::EnumValueContext *> HogQLParser::ColumnTypeExprEnumContext::enumValue() {
-  return getRuleContexts<HogQLParser::EnumValueContext>();
+std::vector<InsightsQLParser::EnumValueContext *> InsightsQLParser::ColumnTypeExprEnumContext::enumValue() {
+  return getRuleContexts<InsightsQLParser::EnumValueContext>();
 }
 
-HogQLParser::EnumValueContext* HogQLParser::ColumnTypeExprEnumContext::enumValue(size_t i) {
-  return getRuleContext<HogQLParser::EnumValueContext>(i);
+InsightsQLParser::EnumValueContext* InsightsQLParser::ColumnTypeExprEnumContext::enumValue(size_t i) {
+  return getRuleContext<InsightsQLParser::EnumValueContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprEnumContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprEnumContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnTypeExprEnumContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnTypeExprEnumContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::ColumnTypeExprEnumContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
+tree::TerminalNode* InsightsQLParser::ColumnTypeExprEnumContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
-HogQLParser::ColumnTypeExprEnumContext::ColumnTypeExprEnumContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnTypeExprEnumContext::ColumnTypeExprEnumContext(ColumnTypeExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnTypeExprEnumContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnTypeExprEnumContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnTypeExprEnum(this);
   else
     return visitor->visitChildren(this);
 }
-HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
+InsightsQLParser::ColumnTypeExprContext* InsightsQLParser::columnTypeExpr() {
   ColumnTypeExprContext *_localctx = _tracker.createInstance<ColumnTypeExprContext>(_ctx, getState());
-  enterRule(_localctx, 118, HogQLParser::RuleColumnTypeExpr);
+  enterRule(_localctx, 118, InsightsQLParser::RuleColumnTypeExpr);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -6670,7 +6670,7 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 100, _ctx)) {
     case 1: {
-      _localctx = _tracker.createInstance<HogQLParser::ColumnTypeExprSimpleContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::ColumnTypeExprSimpleContext>(_localctx);
       enterOuterAlt(_localctx, 1);
       setState(742);
       identifier();
@@ -6678,12 +6678,12 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
     }
 
     case 2: {
-      _localctx = _tracker.createInstance<HogQLParser::ColumnTypeExprNestedContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::ColumnTypeExprNestedContext>(_localctx);
       enterOuterAlt(_localctx, 2);
       setState(743);
       identifier();
       setState(744);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(745);
       identifier();
       setState(746);
@@ -6694,7 +6694,7 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
           setState(747);
-          match(HogQLParser::COMMA);
+          match(InsightsQLParser::COMMA);
           setState(748);
           identifier();
           setState(749);
@@ -6708,22 +6708,22 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COMMA) {
+      if (_la == InsightsQLParser::COMMA) {
         setState(756);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
       }
       setState(759);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
     case 3: {
-      _localctx = _tracker.createInstance<HogQLParser::ColumnTypeExprEnumContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::ColumnTypeExprEnumContext>(_localctx);
       enterOuterAlt(_localctx, 3);
       setState(761);
       identifier();
       setState(762);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(763);
       enumValue();
       setState(768);
@@ -6732,7 +6732,7 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
           setState(764);
-          match(HogQLParser::COMMA);
+          match(InsightsQLParser::COMMA);
           setState(765);
           enumValue(); 
         }
@@ -6744,22 +6744,22 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COMMA) {
+      if (_la == InsightsQLParser::COMMA) {
         setState(771);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
       }
       setState(774);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
     case 4: {
-      _localctx = _tracker.createInstance<HogQLParser::ColumnTypeExprComplexContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::ColumnTypeExprComplexContext>(_localctx);
       enterOuterAlt(_localctx, 4);
       setState(776);
       identifier();
       setState(777);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(778);
       columnTypeExpr();
       setState(783);
@@ -6768,7 +6768,7 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
           setState(779);
-          match(HogQLParser::COMMA);
+          match(InsightsQLParser::COMMA);
           setState(780);
           columnTypeExpr(); 
         }
@@ -6780,22 +6780,22 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COMMA) {
+      if (_la == InsightsQLParser::COMMA) {
         setState(786);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
       }
       setState(789);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
     case 5: {
-      _localctx = _tracker.createInstance<HogQLParser::ColumnTypeExprParamContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::ColumnTypeExprParamContext>(_localctx);
       enterOuterAlt(_localctx, 5);
       setState(791);
       identifier();
       setState(792);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(794);
       _errHandler->sync(this);
 
@@ -6808,7 +6808,7 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
         columnExprList();
       }
       setState(796);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -6828,42 +6828,42 @@ HogQLParser::ColumnTypeExprContext* HogQLParser::columnTypeExpr() {
 
 //----------------- ColumnExprListContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprListContext::ColumnExprListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ColumnExprListContext::ColumnExprListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprListContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprListContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprListContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprListContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::ColumnExprListContext::getRuleIndex() const {
-  return HogQLParser::RuleColumnExprList;
+tree::TerminalNode* InsightsQLParser::ColumnExprListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::ColumnExprListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ColumnExprListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleColumnExprList;
+}
+
+
+std::any InsightsQLParser::ColumnExprListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::columnExprList() {
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::columnExprList() {
   ColumnExprListContext *_localctx = _tracker.createInstance<ColumnExprListContext>(_ctx, getState());
-  enterRule(_localctx, 120, HogQLParser::RuleColumnExprList);
+  enterRule(_localctx, 120, InsightsQLParser::RuleColumnExprList);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -6883,7 +6883,7 @@ HogQLParser::ColumnExprListContext* HogQLParser::columnExprList() {
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         setState(801);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         setState(802);
         columnExpr(0); 
       }
@@ -6897,7 +6897,7 @@ HogQLParser::ColumnExprListContext* HogQLParser::columnExprList() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 102, _ctx)) {
     case 1: {
       setState(808);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
       break;
     }
 
@@ -6917,1237 +6917,1237 @@ HogQLParser::ColumnExprListContext* HogQLParser::columnExprList() {
 
 //----------------- ColumnExprContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext::ColumnExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ColumnExprContext::ColumnExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::ColumnExprContext::getRuleIndex() const {
-  return HogQLParser::RuleColumnExpr;
+size_t InsightsQLParser::ColumnExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleColumnExpr;
 }
 
-void HogQLParser::ColumnExprContext::copyFrom(ColumnExprContext *ctx) {
+void InsightsQLParser::ColumnExprContext::copyFrom(ColumnExprContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- ColumnExprTernaryOpContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprTernaryOpContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprTernaryOpContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprTernaryOpContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprTernaryOpContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTernaryOpContext::QUERY() {
-  return getToken(HogQLParser::QUERY, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTernaryOpContext::QUERY() {
+  return getToken(InsightsQLParser::QUERY, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTernaryOpContext::COLON() {
-  return getToken(HogQLParser::COLON, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTernaryOpContext::COLON() {
+  return getToken(InsightsQLParser::COLON, 0);
 }
 
-HogQLParser::ColumnExprTernaryOpContext::ColumnExprTernaryOpContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTernaryOpContext::ColumnExprTernaryOpContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTernaryOpContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTernaryOpContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTernaryOp(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprAliasContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprAliasContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprAliasContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprAliasContext::AS() {
-  return getToken(HogQLParser::AS, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprAliasContext::AS() {
+  return getToken(InsightsQLParser::AS, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprAliasContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprAliasContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprAliasContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprAliasContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-HogQLParser::ColumnExprAliasContext::ColumnExprAliasContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprAliasContext::ColumnExprAliasContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprAliasContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprAliasContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprAlias(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprNegateContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprNegateContext::DASH() {
-  return getToken(HogQLParser::DASH, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNegateContext::DASH() {
+  return getToken(InsightsQLParser::DASH, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprNegateContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprNegateContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-HogQLParser::ColumnExprNegateContext::ColumnExprNegateContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprNegateContext::ColumnExprNegateContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprNegateContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprNegateContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprNegate(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprDictContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprDictContext::LBRACE() {
-  return getToken(HogQLParser::LBRACE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprDictContext::LBRACE() {
+  return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprDictContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprDictContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
-HogQLParser::KvPairListContext* HogQLParser::ColumnExprDictContext::kvPairList() {
-  return getRuleContext<HogQLParser::KvPairListContext>(0);
+InsightsQLParser::KvPairListContext* InsightsQLParser::ColumnExprDictContext::kvPairList() {
+  return getRuleContext<InsightsQLParser::KvPairListContext>(0);
 }
 
-HogQLParser::ColumnExprDictContext::ColumnExprDictContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprDictContext::ColumnExprDictContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprDictContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprDictContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprDict(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprSubqueryContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprSubqueryContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubqueryContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::ColumnExprSubqueryContext::selectSetStmt() {
-  return getRuleContext<HogQLParser::SelectSetStmtContext>(0);
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::ColumnExprSubqueryContext::selectSetStmt() {
+  return getRuleContext<InsightsQLParser::SelectSetStmtContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprSubqueryContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubqueryContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprSubqueryContext::ColumnExprSubqueryContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprSubqueryContext::ColumnExprSubqueryContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprSubqueryContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprSubqueryContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprSubquery(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprLiteralContext ------------------------------------------------------------------
 
-HogQLParser::LiteralContext* HogQLParser::ColumnExprLiteralContext::literal() {
-  return getRuleContext<HogQLParser::LiteralContext>(0);
+InsightsQLParser::LiteralContext* InsightsQLParser::ColumnExprLiteralContext::literal() {
+  return getRuleContext<InsightsQLParser::LiteralContext>(0);
 }
 
-HogQLParser::ColumnExprLiteralContext::ColumnExprLiteralContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprLiteralContext::ColumnExprLiteralContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprLiteral(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprArrayContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprArrayContext::LBRACKET() {
-  return getToken(HogQLParser::LBRACKET, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprArrayContext::LBRACKET() {
+  return getToken(InsightsQLParser::LBRACKET, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprArrayContext::RBRACKET() {
-  return getToken(HogQLParser::RBRACKET, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprArrayContext::RBRACKET() {
+  return getToken(InsightsQLParser::RBRACKET, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnExprArrayContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnExprArrayContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-HogQLParser::ColumnExprArrayContext::ColumnExprArrayContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprArrayContext::ColumnExprArrayContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprArrayContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprArrayContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprArray(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprSubstringContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprSubstringContext::SUBSTRING() {
-  return getToken(HogQLParser::SUBSTRING, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubstringContext::SUBSTRING() {
+  return getToken(InsightsQLParser::SUBSTRING, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprSubstringContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubstringContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprSubstringContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprSubstringContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprSubstringContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprSubstringContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprSubstringContext::FROM() {
-  return getToken(HogQLParser::FROM, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubstringContext::FROM() {
+  return getToken(InsightsQLParser::FROM, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprSubstringContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubstringContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprSubstringContext::FOR() {
-  return getToken(HogQLParser::FOR, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprSubstringContext::FOR() {
+  return getToken(InsightsQLParser::FOR, 0);
 }
 
-HogQLParser::ColumnExprSubstringContext::ColumnExprSubstringContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprSubstringContext::ColumnExprSubstringContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprSubstringContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprSubstringContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprSubstring(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprCastContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprCastContext::CAST() {
-  return getToken(HogQLParser::CAST, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCastContext::CAST() {
+  return getToken(InsightsQLParser::CAST, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCastContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCastContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprCastContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprCastContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCastContext::AS() {
-  return getToken(HogQLParser::AS, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCastContext::AS() {
+  return getToken(InsightsQLParser::AS, 0);
 }
 
-HogQLParser::ColumnTypeExprContext* HogQLParser::ColumnExprCastContext::columnTypeExpr() {
-  return getRuleContext<HogQLParser::ColumnTypeExprContext>(0);
+InsightsQLParser::ColumnTypeExprContext* InsightsQLParser::ColumnExprCastContext::columnTypeExpr() {
+  return getRuleContext<InsightsQLParser::ColumnTypeExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCastContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCastContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprCastContext::ColumnExprCastContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprCastContext::ColumnExprCastContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprCastContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprCastContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprCast(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprOrContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprOrContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprOrContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprOrContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprOrContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprOrContext::OR() {
-  return getToken(HogQLParser::OR, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprOrContext::OR() {
+  return getToken(InsightsQLParser::OR, 0);
 }
 
-HogQLParser::ColumnExprOrContext::ColumnExprOrContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprOrContext::ColumnExprOrContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprOrContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprOrContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprOr(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprNullTupleAccessContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprNullTupleAccessContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprNullTupleAccessContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullTupleAccessContext::NULL_PROPERTY() {
-  return getToken(HogQLParser::NULL_PROPERTY, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullTupleAccessContext::NULL_PROPERTY() {
+  return getToken(InsightsQLParser::NULL_PROPERTY, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullTupleAccessContext::DECIMAL_LITERAL() {
-  return getToken(HogQLParser::DECIMAL_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullTupleAccessContext::DECIMAL_LITERAL() {
+  return getToken(InsightsQLParser::DECIMAL_LITERAL, 0);
 }
 
-HogQLParser::ColumnExprNullTupleAccessContext::ColumnExprNullTupleAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprNullTupleAccessContext::ColumnExprNullTupleAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprNullTupleAccessContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprNullTupleAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprNullTupleAccess(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTypeCastContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprTypeCastContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprTypeCastContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTypeCastContext::DOUBLECOLON() {
-  return getToken(HogQLParser::DOUBLECOLON, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTypeCastContext::DOUBLECOLON() {
+  return getToken(InsightsQLParser::DOUBLECOLON, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprTypeCastContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprTypeCastContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-HogQLParser::ColumnExprTypeCastContext::ColumnExprTypeCastContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTypeCastContext::ColumnExprTypeCastContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTypeCastContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTypeCastContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTypeCast(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprPrecedence1Context ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprPrecedence1Context::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprPrecedence1Context::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprPrecedence1Context::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprPrecedence1Context::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence1Context::ASTERISK() {
-  return getToken(HogQLParser::ASTERISK, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence1Context::ASTERISK() {
+  return getToken(InsightsQLParser::ASTERISK, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence1Context::SLASH() {
-  return getToken(HogQLParser::SLASH, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence1Context::SLASH() {
+  return getToken(InsightsQLParser::SLASH, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence1Context::PERCENT() {
-  return getToken(HogQLParser::PERCENT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence1Context::PERCENT() {
+  return getToken(InsightsQLParser::PERCENT, 0);
 }
 
-HogQLParser::ColumnExprPrecedence1Context::ColumnExprPrecedence1Context(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprPrecedence1Context::ColumnExprPrecedence1Context(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprPrecedence1Context::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprPrecedence1Context::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprPrecedence1(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprPrecedence2Context ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprPrecedence2Context::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprPrecedence2Context::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprPrecedence2Context::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprPrecedence2Context::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence2Context::PLUS() {
-  return getToken(HogQLParser::PLUS, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence2Context::PLUS() {
+  return getToken(InsightsQLParser::PLUS, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence2Context::DASH() {
-  return getToken(HogQLParser::DASH, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence2Context::DASH() {
+  return getToken(InsightsQLParser::DASH, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence2Context::CONCAT() {
-  return getToken(HogQLParser::CONCAT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence2Context::CONCAT() {
+  return getToken(InsightsQLParser::CONCAT, 0);
 }
 
-HogQLParser::ColumnExprPrecedence2Context::ColumnExprPrecedence2Context(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprPrecedence2Context::ColumnExprPrecedence2Context(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprPrecedence2Context::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprPrecedence2Context::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprPrecedence2(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprPrecedence3Context ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprPrecedence3Context::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprPrecedence3Context::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprPrecedence3Context::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprPrecedence3Context::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::IN() {
-  return getToken(HogQLParser::IN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::IN() {
+  return getToken(InsightsQLParser::IN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::EQ_DOUBLE() {
-  return getToken(HogQLParser::EQ_DOUBLE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::EQ_DOUBLE() {
+  return getToken(InsightsQLParser::EQ_DOUBLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::EQ_SINGLE() {
-  return getToken(HogQLParser::EQ_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::EQ_SINGLE() {
+  return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::NOT_EQ() {
-  return getToken(HogQLParser::NOT_EQ, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::NOT_EQ() {
+  return getToken(InsightsQLParser::NOT_EQ, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::LT_EQ() {
-  return getToken(HogQLParser::LT_EQ, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::LT_EQ() {
+  return getToken(InsightsQLParser::LT_EQ, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::LT() {
-  return getToken(HogQLParser::LT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::LT() {
+  return getToken(InsightsQLParser::LT, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::GT_EQ() {
-  return getToken(HogQLParser::GT_EQ, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::GT_EQ() {
+  return getToken(InsightsQLParser::GT_EQ, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::GT() {
-  return getToken(HogQLParser::GT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::GT() {
+  return getToken(InsightsQLParser::GT, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::LIKE() {
-  return getToken(HogQLParser::LIKE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::LIKE() {
+  return getToken(InsightsQLParser::LIKE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::ILIKE() {
-  return getToken(HogQLParser::ILIKE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::ILIKE() {
+  return getToken(InsightsQLParser::ILIKE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::REGEX_SINGLE() {
-  return getToken(HogQLParser::REGEX_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::REGEX_SINGLE() {
+  return getToken(InsightsQLParser::REGEX_SINGLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::REGEX_DOUBLE() {
-  return getToken(HogQLParser::REGEX_DOUBLE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::REGEX_DOUBLE() {
+  return getToken(InsightsQLParser::REGEX_DOUBLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::NOT_REGEX() {
-  return getToken(HogQLParser::NOT_REGEX, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::NOT_REGEX() {
+  return getToken(InsightsQLParser::NOT_REGEX, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::IREGEX_SINGLE() {
-  return getToken(HogQLParser::IREGEX_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::IREGEX_SINGLE() {
+  return getToken(InsightsQLParser::IREGEX_SINGLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::IREGEX_DOUBLE() {
-  return getToken(HogQLParser::IREGEX_DOUBLE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::IREGEX_DOUBLE() {
+  return getToken(InsightsQLParser::IREGEX_DOUBLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::NOT_IREGEX() {
-  return getToken(HogQLParser::NOT_IREGEX, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::NOT_IREGEX() {
+  return getToken(InsightsQLParser::NOT_IREGEX, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::COHORT() {
-  return getToken(HogQLParser::COHORT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::COHORT() {
+  return getToken(InsightsQLParser::COHORT, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPrecedence3Context::NOT() {
-  return getToken(HogQLParser::NOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPrecedence3Context::NOT() {
+  return getToken(InsightsQLParser::NOT, 0);
 }
 
-HogQLParser::ColumnExprPrecedence3Context::ColumnExprPrecedence3Context(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprPrecedence3Context::ColumnExprPrecedence3Context(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprPrecedence3Context::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprPrecedence3Context::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprPrecedence3(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprIntervalContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprIntervalContext::INTERVAL() {
-  return getToken(HogQLParser::INTERVAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprIntervalContext::INTERVAL() {
+  return getToken(InsightsQLParser::INTERVAL, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprIntervalContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprIntervalContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-HogQLParser::IntervalContext* HogQLParser::ColumnExprIntervalContext::interval() {
-  return getRuleContext<HogQLParser::IntervalContext>(0);
+InsightsQLParser::IntervalContext* InsightsQLParser::ColumnExprIntervalContext::interval() {
+  return getRuleContext<InsightsQLParser::IntervalContext>(0);
 }
 
-HogQLParser::ColumnExprIntervalContext::ColumnExprIntervalContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprIntervalContext::ColumnExprIntervalContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprIntervalContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprIntervalContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprInterval(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprCallSelectContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprCallSelectContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprCallSelectContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCallSelectContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCallSelectContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::ColumnExprCallSelectContext::selectSetStmt() {
-  return getRuleContext<HogQLParser::SelectSetStmtContext>(0);
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::ColumnExprCallSelectContext::selectSetStmt() {
+  return getRuleContext<InsightsQLParser::SelectSetStmtContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCallSelectContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCallSelectContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprCallSelectContext::ColumnExprCallSelectContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprCallSelectContext::ColumnExprCallSelectContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprCallSelectContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprCallSelectContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprCallSelect(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprIsNullContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprIsNullContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprIsNullContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprIsNullContext::IS() {
-  return getToken(HogQLParser::IS, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprIsNullContext::IS() {
+  return getToken(InsightsQLParser::IS, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprIsNullContext::NULL_SQL() {
-  return getToken(HogQLParser::NULL_SQL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprIsNullContext::NULL_SQL() {
+  return getToken(InsightsQLParser::NULL_SQL, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprIsNullContext::NOT() {
-  return getToken(HogQLParser::NOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprIsNullContext::NOT() {
+  return getToken(InsightsQLParser::NOT, 0);
 }
 
-HogQLParser::ColumnExprIsNullContext::ColumnExprIsNullContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprIsNullContext::ColumnExprIsNullContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprIsNullContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprIsNullContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprIsNull(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprWinFunctionTargetContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::ColumnExprWinFunctionTargetContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::ColumnExprWinFunctionTargetContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprWinFunctionTargetContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprWinFunctionTargetContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionTargetContext::OVER() {
-  return getToken(HogQLParser::OVER, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionTargetContext::OVER() {
+  return getToken(InsightsQLParser::OVER, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprWinFunctionTargetContext::LPAREN() {
-  return getTokens(HogQLParser::LPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprWinFunctionTargetContext::LPAREN() {
+  return getTokens(InsightsQLParser::LPAREN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionTargetContext::LPAREN(size_t i) {
-  return getToken(HogQLParser::LPAREN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionTargetContext::LPAREN(size_t i) {
+  return getToken(InsightsQLParser::LPAREN, i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprWinFunctionTargetContext::RPAREN() {
-  return getTokens(HogQLParser::RPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprWinFunctionTargetContext::RPAREN() {
+  return getTokens(InsightsQLParser::RPAREN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionTargetContext::RPAREN(size_t i) {
-  return getToken(HogQLParser::RPAREN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionTargetContext::RPAREN(size_t i) {
+  return getToken(InsightsQLParser::RPAREN, i);
 }
 
-std::vector<HogQLParser::ColumnExprListContext *> HogQLParser::ColumnExprWinFunctionTargetContext::columnExprList() {
-  return getRuleContexts<HogQLParser::ColumnExprListContext>();
+std::vector<InsightsQLParser::ColumnExprListContext *> InsightsQLParser::ColumnExprWinFunctionTargetContext::columnExprList() {
+  return getRuleContexts<InsightsQLParser::ColumnExprListContext>();
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnExprWinFunctionTargetContext::columnExprList(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(i);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnExprWinFunctionTargetContext::columnExprList(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionTargetContext::DISTINCT() {
-  return getToken(HogQLParser::DISTINCT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionTargetContext::DISTINCT() {
+  return getToken(InsightsQLParser::DISTINCT, 0);
 }
 
-HogQLParser::ColumnExprWinFunctionTargetContext::ColumnExprWinFunctionTargetContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprWinFunctionTargetContext::ColumnExprWinFunctionTargetContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprWinFunctionTargetContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprWinFunctionTargetContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprWinFunctionTarget(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprNullPropertyAccessContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprNullPropertyAccessContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprNullPropertyAccessContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullPropertyAccessContext::NULL_PROPERTY() {
-  return getToken(HogQLParser::NULL_PROPERTY, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullPropertyAccessContext::NULL_PROPERTY() {
+  return getToken(InsightsQLParser::NULL_PROPERTY, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprNullPropertyAccessContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprNullPropertyAccessContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-HogQLParser::ColumnExprNullPropertyAccessContext::ColumnExprNullPropertyAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprNullPropertyAccessContext::ColumnExprNullPropertyAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprNullPropertyAccessContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprNullPropertyAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprNullPropertyAccess(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprIntervalStringContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprIntervalStringContext::INTERVAL() {
-  return getToken(HogQLParser::INTERVAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprIntervalStringContext::INTERVAL() {
+  return getToken(InsightsQLParser::INTERVAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprIntervalStringContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprIntervalStringContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-HogQLParser::ColumnExprIntervalStringContext::ColumnExprIntervalStringContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprIntervalStringContext::ColumnExprIntervalStringContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprIntervalStringContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprIntervalStringContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprIntervalString(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTrimContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::TRIM() {
-  return getToken(HogQLParser::TRIM, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::TRIM() {
+  return getToken(InsightsQLParser::TRIM, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::StringContext* HogQLParser::ColumnExprTrimContext::string() {
-  return getRuleContext<HogQLParser::StringContext>(0);
+InsightsQLParser::StringContext* InsightsQLParser::ColumnExprTrimContext::string() {
+  return getRuleContext<InsightsQLParser::StringContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::FROM() {
-  return getToken(HogQLParser::FROM, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::FROM() {
+  return getToken(InsightsQLParser::FROM, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprTrimContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprTrimContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::BOTH() {
-  return getToken(HogQLParser::BOTH, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::BOTH() {
+  return getToken(InsightsQLParser::BOTH, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::LEADING() {
-  return getToken(HogQLParser::LEADING, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::LEADING() {
+  return getToken(InsightsQLParser::LEADING, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTrimContext::TRAILING() {
-  return getToken(HogQLParser::TRAILING, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTrimContext::TRAILING() {
+  return getToken(InsightsQLParser::TRAILING, 0);
 }
 
-HogQLParser::ColumnExprTrimContext::ColumnExprTrimContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTrimContext::ColumnExprTrimContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTrimContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTrimContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTrim(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTagElementContext ------------------------------------------------------------------
 
-HogQLParser::HogqlxTagElementContext* HogQLParser::ColumnExprTagElementContext::hogqlxTagElement() {
-  return getRuleContext<HogQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::ColumnExprTagElementContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
 }
 
-HogQLParser::ColumnExprTagElementContext::ColumnExprTagElementContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTagElementContext::ColumnExprTagElementContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTagElementContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTagElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTagElement(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTemplateStringContext ------------------------------------------------------------------
 
-HogQLParser::TemplateStringContext* HogQLParser::ColumnExprTemplateStringContext::templateString() {
-  return getRuleContext<HogQLParser::TemplateStringContext>(0);
+InsightsQLParser::TemplateStringContext* InsightsQLParser::ColumnExprTemplateStringContext::templateString() {
+  return getRuleContext<InsightsQLParser::TemplateStringContext>(0);
 }
 
-HogQLParser::ColumnExprTemplateStringContext::ColumnExprTemplateStringContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTemplateStringContext::ColumnExprTemplateStringContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTemplateStringContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTemplateStringContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTemplateString(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTupleContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprTupleContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTupleContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnExprTupleContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnExprTupleContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTupleContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTupleContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprTupleContext::ColumnExprTupleContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTupleContext::ColumnExprTupleContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTupleContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTupleContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTuple(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprCallContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprCallContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprCallContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCallContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCallContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCallContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCallContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnExprCallContext::columnExprList() {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(0);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnExprCallContext::columnExprList() {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(0);
 }
 
-HogQLParser::ColumnExprCallContext::ColumnExprCallContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprCallContext::ColumnExprCallContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprCallContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprCallContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprCall(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprArrayAccessContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprArrayAccessContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprArrayAccessContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprArrayAccessContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprArrayAccessContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprArrayAccessContext::LBRACKET() {
-  return getToken(HogQLParser::LBRACKET, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprArrayAccessContext::LBRACKET() {
+  return getToken(InsightsQLParser::LBRACKET, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprArrayAccessContext::RBRACKET() {
-  return getToken(HogQLParser::RBRACKET, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprArrayAccessContext::RBRACKET() {
+  return getToken(InsightsQLParser::RBRACKET, 0);
 }
 
-HogQLParser::ColumnExprArrayAccessContext::ColumnExprArrayAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprArrayAccessContext::ColumnExprArrayAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprArrayAccessContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprArrayAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprArrayAccess(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprBetweenContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprBetweenContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprBetweenContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprBetweenContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprBetweenContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprBetweenContext::BETWEEN() {
-  return getToken(HogQLParser::BETWEEN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprBetweenContext::BETWEEN() {
+  return getToken(InsightsQLParser::BETWEEN, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprBetweenContext::AND() {
-  return getToken(HogQLParser::AND, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprBetweenContext::AND() {
+  return getToken(InsightsQLParser::AND, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprBetweenContext::NOT() {
-  return getToken(HogQLParser::NOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprBetweenContext::NOT() {
+  return getToken(InsightsQLParser::NOT, 0);
 }
 
-HogQLParser::ColumnExprBetweenContext::ColumnExprBetweenContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprBetweenContext::ColumnExprBetweenContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprBetweenContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprBetweenContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprBetween(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprPropertyAccessContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprPropertyAccessContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprPropertyAccessContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprPropertyAccessContext::DOT() {
-  return getToken(HogQLParser::DOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprPropertyAccessContext::DOT() {
+  return getToken(InsightsQLParser::DOT, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprPropertyAccessContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprPropertyAccessContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-HogQLParser::ColumnExprPropertyAccessContext::ColumnExprPropertyAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprPropertyAccessContext::ColumnExprPropertyAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprPropertyAccessContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprPropertyAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprPropertyAccess(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprParensContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprParensContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprParensContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprParensContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprParensContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprParensContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprParensContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprParensContext::ColumnExprParensContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprParensContext::ColumnExprParensContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprParensContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprParensContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprParens(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprNullArrayAccessContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprNullArrayAccessContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprNullArrayAccessContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprNullArrayAccessContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprNullArrayAccessContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullArrayAccessContext::NULL_PROPERTY() {
-  return getToken(HogQLParser::NULL_PROPERTY, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullArrayAccessContext::NULL_PROPERTY() {
+  return getToken(InsightsQLParser::NULL_PROPERTY, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullArrayAccessContext::LBRACKET() {
-  return getToken(HogQLParser::LBRACKET, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullArrayAccessContext::LBRACKET() {
+  return getToken(InsightsQLParser::LBRACKET, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullArrayAccessContext::RBRACKET() {
-  return getToken(HogQLParser::RBRACKET, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullArrayAccessContext::RBRACKET() {
+  return getToken(InsightsQLParser::RBRACKET, 0);
 }
 
-HogQLParser::ColumnExprNullArrayAccessContext::ColumnExprNullArrayAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprNullArrayAccessContext::ColumnExprNullArrayAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprNullArrayAccessContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprNullArrayAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprNullArrayAccess(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTimestampContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprTimestampContext::TIMESTAMP() {
-  return getToken(HogQLParser::TIMESTAMP, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTimestampContext::TIMESTAMP() {
+  return getToken(InsightsQLParser::TIMESTAMP, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTimestampContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTimestampContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-HogQLParser::ColumnExprTimestampContext::ColumnExprTimestampContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTimestampContext::ColumnExprTimestampContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTimestampContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTimestampContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTimestamp(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprNullishContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprNullishContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprNullishContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprNullishContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprNullishContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprNullishContext::NULLISH() {
-  return getToken(HogQLParser::NULLISH, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNullishContext::NULLISH() {
+  return getToken(InsightsQLParser::NULLISH, 0);
 }
 
-HogQLParser::ColumnExprNullishContext::ColumnExprNullishContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprNullishContext::ColumnExprNullishContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprNullishContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprNullishContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprNullish(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprAndContext ------------------------------------------------------------------
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprAndContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprAndContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprAndContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprAndContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprAndContext::AND() {
-  return getToken(HogQLParser::AND, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprAndContext::AND() {
+  return getToken(InsightsQLParser::AND, 0);
 }
 
-HogQLParser::ColumnExprAndContext::ColumnExprAndContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprAndContext::ColumnExprAndContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprAndContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprAndContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprAnd(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprTupleAccessContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprTupleAccessContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprTupleAccessContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTupleAccessContext::DOT() {
-  return getToken(HogQLParser::DOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTupleAccessContext::DOT() {
+  return getToken(InsightsQLParser::DOT, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprTupleAccessContext::DECIMAL_LITERAL() {
-  return getToken(HogQLParser::DECIMAL_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprTupleAccessContext::DECIMAL_LITERAL() {
+  return getToken(InsightsQLParser::DECIMAL_LITERAL, 0);
 }
 
-HogQLParser::ColumnExprTupleAccessContext::ColumnExprTupleAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprTupleAccessContext::ColumnExprTupleAccessContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprTupleAccessContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprTupleAccessContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprTupleAccess(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprCaseContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprCaseContext::CASE() {
-  return getToken(HogQLParser::CASE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCaseContext::CASE() {
+  return getToken(InsightsQLParser::CASE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCaseContext::END() {
-  return getToken(HogQLParser::END, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCaseContext::END() {
+  return getToken(InsightsQLParser::END, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprCaseContext::WHEN() {
-  return getTokens(HogQLParser::WHEN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprCaseContext::WHEN() {
+  return getTokens(InsightsQLParser::WHEN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCaseContext::WHEN(size_t i) {
-  return getToken(HogQLParser::WHEN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprCaseContext::WHEN(size_t i) {
+  return getToken(InsightsQLParser::WHEN, i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprCaseContext::THEN() {
-  return getTokens(HogQLParser::THEN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprCaseContext::THEN() {
+  return getTokens(InsightsQLParser::THEN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCaseContext::THEN(size_t i) {
-  return getToken(HogQLParser::THEN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprCaseContext::THEN(size_t i) {
+  return getToken(InsightsQLParser::THEN, i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprCaseContext::ELSE() {
-  return getToken(HogQLParser::ELSE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprCaseContext::ELSE() {
+  return getToken(InsightsQLParser::ELSE, 0);
 }
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::ColumnExprCaseContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::ColumnExprCaseContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprCaseContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprCaseContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-HogQLParser::ColumnExprCaseContext::ColumnExprCaseContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprCaseContext::ColumnExprCaseContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprCaseContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprCaseContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprCase(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprDateContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprDateContext::DATE() {
-  return getToken(HogQLParser::DATE, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprDateContext::DATE() {
+  return getToken(InsightsQLParser::DATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprDateContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprDateContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-HogQLParser::ColumnExprDateContext::ColumnExprDateContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprDateContext::ColumnExprDateContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprDateContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprDateContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprDate(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprNotContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprNotContext::NOT() {
-  return getToken(HogQLParser::NOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprNotContext::NOT() {
+  return getToken(InsightsQLParser::NOT, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnExprNotContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnExprNotContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-HogQLParser::ColumnExprNotContext::ColumnExprNotContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprNotContext::ColumnExprNotContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprNotContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprNotContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprNot(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprWinFunctionContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprWinFunctionContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprWinFunctionContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionContext::OVER() {
-  return getToken(HogQLParser::OVER, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionContext::OVER() {
+  return getToken(InsightsQLParser::OVER, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprWinFunctionContext::LPAREN() {
-  return getTokens(HogQLParser::LPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprWinFunctionContext::LPAREN() {
+  return getTokens(InsightsQLParser::LPAREN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionContext::LPAREN(size_t i) {
-  return getToken(HogQLParser::LPAREN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionContext::LPAREN(size_t i) {
+  return getToken(InsightsQLParser::LPAREN, i);
 }
 
-HogQLParser::WindowExprContext* HogQLParser::ColumnExprWinFunctionContext::windowExpr() {
-  return getRuleContext<HogQLParser::WindowExprContext>(0);
+InsightsQLParser::WindowExprContext* InsightsQLParser::ColumnExprWinFunctionContext::windowExpr() {
+  return getRuleContext<InsightsQLParser::WindowExprContext>(0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprWinFunctionContext::RPAREN() {
-  return getTokens(HogQLParser::RPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprWinFunctionContext::RPAREN() {
+  return getTokens(InsightsQLParser::RPAREN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionContext::RPAREN(size_t i) {
-  return getToken(HogQLParser::RPAREN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionContext::RPAREN(size_t i) {
+  return getToken(InsightsQLParser::RPAREN, i);
 }
 
-std::vector<HogQLParser::ColumnExprListContext *> HogQLParser::ColumnExprWinFunctionContext::columnExprList() {
-  return getRuleContexts<HogQLParser::ColumnExprListContext>();
+std::vector<InsightsQLParser::ColumnExprListContext *> InsightsQLParser::ColumnExprWinFunctionContext::columnExprList() {
+  return getRuleContexts<InsightsQLParser::ColumnExprListContext>();
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnExprWinFunctionContext::columnExprList(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(i);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnExprWinFunctionContext::columnExprList(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprWinFunctionContext::DISTINCT() {
-  return getToken(HogQLParser::DISTINCT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprWinFunctionContext::DISTINCT() {
+  return getToken(InsightsQLParser::DISTINCT, 0);
 }
 
-HogQLParser::ColumnExprWinFunctionContext::ColumnExprWinFunctionContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprWinFunctionContext::ColumnExprWinFunctionContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprWinFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprWinFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprWinFunction(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprLambdaContext ------------------------------------------------------------------
 
-HogQLParser::ColumnLambdaExprContext* HogQLParser::ColumnExprLambdaContext::columnLambdaExpr() {
-  return getRuleContext<HogQLParser::ColumnLambdaExprContext>(0);
+InsightsQLParser::ColumnLambdaExprContext* InsightsQLParser::ColumnExprLambdaContext::columnLambdaExpr() {
+  return getRuleContext<InsightsQLParser::ColumnLambdaExprContext>(0);
 }
 
-HogQLParser::ColumnExprLambdaContext::ColumnExprLambdaContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprLambdaContext::ColumnExprLambdaContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprLambdaContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprLambdaContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprLambda(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprIdentifierContext ------------------------------------------------------------------
 
-HogQLParser::ColumnIdentifierContext* HogQLParser::ColumnExprIdentifierContext::columnIdentifier() {
-  return getRuleContext<HogQLParser::ColumnIdentifierContext>(0);
+InsightsQLParser::ColumnIdentifierContext* InsightsQLParser::ColumnExprIdentifierContext::columnIdentifier() {
+  return getRuleContext<InsightsQLParser::ColumnIdentifierContext>(0);
 }
 
-HogQLParser::ColumnExprIdentifierContext::ColumnExprIdentifierContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprIdentifierContext::ColumnExprIdentifierContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprFunctionContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnExprFunctionContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnExprFunctionContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprFunctionContext::LPAREN() {
-  return getTokens(HogQLParser::LPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprFunctionContext::LPAREN() {
+  return getTokens(InsightsQLParser::LPAREN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprFunctionContext::LPAREN(size_t i) {
-  return getToken(HogQLParser::LPAREN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprFunctionContext::LPAREN(size_t i) {
+  return getToken(InsightsQLParser::LPAREN, i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnExprFunctionContext::RPAREN() {
-  return getTokens(HogQLParser::RPAREN);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnExprFunctionContext::RPAREN() {
+  return getTokens(InsightsQLParser::RPAREN);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprFunctionContext::RPAREN(size_t i) {
-  return getToken(HogQLParser::RPAREN, i);
+tree::TerminalNode* InsightsQLParser::ColumnExprFunctionContext::RPAREN(size_t i) {
+  return getToken(InsightsQLParser::RPAREN, i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprFunctionContext::DISTINCT() {
-  return getToken(HogQLParser::DISTINCT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprFunctionContext::DISTINCT() {
+  return getToken(InsightsQLParser::DISTINCT, 0);
 }
 
-std::vector<HogQLParser::ColumnExprListContext *> HogQLParser::ColumnExprFunctionContext::columnExprList() {
-  return getRuleContexts<HogQLParser::ColumnExprListContext>();
+std::vector<InsightsQLParser::ColumnExprListContext *> InsightsQLParser::ColumnExprFunctionContext::columnExprList() {
+  return getRuleContexts<InsightsQLParser::ColumnExprListContext>();
 }
 
-HogQLParser::ColumnExprListContext* HogQLParser::ColumnExprFunctionContext::columnExprList(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprListContext>(i);
+InsightsQLParser::ColumnExprListContext* InsightsQLParser::ColumnExprFunctionContext::columnExprList(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprListContext>(i);
 }
 
-HogQLParser::ColumnExprFunctionContext::ColumnExprFunctionContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprFunctionContext::ColumnExprFunctionContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprFunction(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- ColumnExprAsteriskContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::ColumnExprAsteriskContext::ASTERISK() {
-  return getToken(HogQLParser::ASTERISK, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprAsteriskContext::ASTERISK() {
+  return getToken(InsightsQLParser::ASTERISK, 0);
 }
 
-HogQLParser::TableIdentifierContext* HogQLParser::ColumnExprAsteriskContext::tableIdentifier() {
-  return getRuleContext<HogQLParser::TableIdentifierContext>(0);
+InsightsQLParser::TableIdentifierContext* InsightsQLParser::ColumnExprAsteriskContext::tableIdentifier() {
+  return getRuleContext<InsightsQLParser::TableIdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnExprAsteriskContext::DOT() {
-  return getToken(HogQLParser::DOT, 0);
+tree::TerminalNode* InsightsQLParser::ColumnExprAsteriskContext::DOT() {
+  return getToken(InsightsQLParser::DOT, 0);
 }
 
-HogQLParser::ColumnExprAsteriskContext::ColumnExprAsteriskContext(ColumnExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::ColumnExprAsteriskContext::ColumnExprAsteriskContext(ColumnExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::ColumnExprAsteriskContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::ColumnExprAsteriskContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnExprAsterisk(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::columnExpr() {
+InsightsQLParser::ColumnExprContext* InsightsQLParser::columnExpr() {
    return columnExpr(0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
+InsightsQLParser::ColumnExprContext* InsightsQLParser::columnExpr(int precedence) {
   ParserRuleContext *parentContext = _ctx;
   size_t parentState = getState();
-  HogQLParser::ColumnExprContext *_localctx = _tracker.createInstance<ColumnExprContext>(_ctx, parentState);
-  HogQLParser::ColumnExprContext *previousContext = _localctx;
+  InsightsQLParser::ColumnExprContext *_localctx = _tracker.createInstance<ColumnExprContext>(_ctx, parentState);
+  InsightsQLParser::ColumnExprContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
   size_t startState = 122;
-  enterRecursionRule(_localctx, 122, HogQLParser::RuleColumnExpr, precedence);
+  enterRecursionRule(_localctx, 122, InsightsQLParser::RuleColumnExpr, precedence);
 
     size_t _la = 0;
 
@@ -8170,7 +8170,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       previousContext = _localctx;
 
       setState(812);
-      match(HogQLParser::CASE);
+      match(InsightsQLParser::CASE);
       setState(814);
       _errHandler->sync(this);
 
@@ -8189,29 +8189,29 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _la = _input->LA(1);
       do {
         setState(816);
-        match(HogQLParser::WHEN);
+        match(InsightsQLParser::WHEN);
         setState(817);
         antlrcpp::downCast<ColumnExprCaseContext *>(_localctx)->whenExpr = columnExpr(0);
         setState(818);
-        match(HogQLParser::THEN);
+        match(InsightsQLParser::THEN);
         setState(819);
         antlrcpp::downCast<ColumnExprCaseContext *>(_localctx)->thenExpr = columnExpr(0);
         setState(823); 
         _errHandler->sync(this);
         _la = _input->LA(1);
-      } while (_la == HogQLParser::WHEN);
+      } while (_la == InsightsQLParser::WHEN);
       setState(827);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::ELSE) {
+      if (_la == InsightsQLParser::ELSE) {
         setState(825);
-        match(HogQLParser::ELSE);
+        match(InsightsQLParser::ELSE);
         setState(826);
         antlrcpp::downCast<ColumnExprCaseContext *>(_localctx)->elseExpr = columnExpr(0);
       }
       setState(829);
-      match(HogQLParser::END);
+      match(InsightsQLParser::END);
       break;
     }
 
@@ -8220,17 +8220,17 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(831);
-      match(HogQLParser::CAST);
+      match(InsightsQLParser::CAST);
       setState(832);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(833);
       columnExpr(0);
       setState(834);
-      match(HogQLParser::AS);
+      match(InsightsQLParser::AS);
       setState(835);
       columnTypeExpr();
       setState(836);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8239,9 +8239,9 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(838);
-      match(HogQLParser::DATE);
+      match(InsightsQLParser::DATE);
       setState(839);
-      match(HogQLParser::STRING_LITERAL);
+      match(InsightsQLParser::STRING_LITERAL);
       break;
     }
 
@@ -8250,9 +8250,9 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(840);
-      match(HogQLParser::INTERVAL);
+      match(InsightsQLParser::INTERVAL);
       setState(841);
-      match(HogQLParser::STRING_LITERAL);
+      match(InsightsQLParser::STRING_LITERAL);
       break;
     }
 
@@ -8261,7 +8261,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(842);
-      match(HogQLParser::INTERVAL);
+      match(InsightsQLParser::INTERVAL);
       setState(843);
       columnExpr(0);
       setState(844);
@@ -8274,27 +8274,27 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(846);
-      match(HogQLParser::SUBSTRING);
+      match(InsightsQLParser::SUBSTRING);
       setState(847);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(848);
       columnExpr(0);
       setState(849);
-      match(HogQLParser::FROM);
+      match(InsightsQLParser::FROM);
       setState(850);
       columnExpr(0);
       setState(853);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::FOR) {
+      if (_la == InsightsQLParser::FOR) {
         setState(851);
-        match(HogQLParser::FOR);
+        match(InsightsQLParser::FOR);
         setState(852);
         columnExpr(0);
       }
       setState(855);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8303,9 +8303,9 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(857);
-      match(HogQLParser::TIMESTAMP);
+      match(InsightsQLParser::TIMESTAMP);
       setState(858);
-      match(HogQLParser::STRING_LITERAL);
+      match(InsightsQLParser::STRING_LITERAL);
       break;
     }
 
@@ -8314,14 +8314,14 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(859);
-      match(HogQLParser::TRIM);
+      match(InsightsQLParser::TRIM);
       setState(860);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(861);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::BOTH
+      if (!(_la == InsightsQLParser::BOTH
 
-      || _la == HogQLParser::LEADING || _la == HogQLParser::TRAILING)) {
+      || _la == InsightsQLParser::LEADING || _la == InsightsQLParser::TRAILING)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -8331,11 +8331,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       setState(862);
       string();
       setState(863);
-      match(HogQLParser::FROM);
+      match(InsightsQLParser::FROM);
       setState(864);
       columnExpr(0);
       setState(865);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8347,7 +8347,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       identifier();
 
       setState(868);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(870);
       _errHandler->sync(this);
 
@@ -8360,21 +8360,21 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         antlrcpp::downCast<ColumnExprWinFunctionContext *>(_localctx)->columnExprs = columnExprList();
       }
       setState(872);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       setState(882);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::LPAREN) {
+      if (_la == InsightsQLParser::LPAREN) {
         setState(874);
-        match(HogQLParser::LPAREN);
+        match(InsightsQLParser::LPAREN);
         setState(876);
         _errHandler->sync(this);
 
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 108, _ctx)) {
         case 1: {
           setState(875);
-          match(HogQLParser::DISTINCT);
+          match(InsightsQLParser::DISTINCT);
           break;
         }
 
@@ -8393,16 +8393,16 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           antlrcpp::downCast<ColumnExprWinFunctionContext *>(_localctx)->columnArgList = columnExprList();
         }
         setState(881);
-        match(HogQLParser::RPAREN);
+        match(InsightsQLParser::RPAREN);
       }
       setState(884);
-      match(HogQLParser::OVER);
+      match(InsightsQLParser::OVER);
       setState(885);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(886);
       windowExpr();
       setState(887);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8414,7 +8414,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       identifier();
 
       setState(890);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(892);
       _errHandler->sync(this);
 
@@ -8427,21 +8427,21 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         antlrcpp::downCast<ColumnExprWinFunctionTargetContext *>(_localctx)->columnExprs = columnExprList();
       }
       setState(894);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       setState(904);
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::LPAREN) {
+      if (_la == InsightsQLParser::LPAREN) {
         setState(896);
-        match(HogQLParser::LPAREN);
+        match(InsightsQLParser::LPAREN);
         setState(898);
         _errHandler->sync(this);
 
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 112, _ctx)) {
         case 1: {
           setState(897);
-          match(HogQLParser::DISTINCT);
+          match(InsightsQLParser::DISTINCT);
           break;
         }
 
@@ -8460,10 +8460,10 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           antlrcpp::downCast<ColumnExprWinFunctionTargetContext *>(_localctx)->columnArgList = columnExprList();
         }
         setState(903);
-        match(HogQLParser::RPAREN);
+        match(InsightsQLParser::RPAREN);
       }
       setState(906);
-      match(HogQLParser::OVER);
+      match(InsightsQLParser::OVER);
       setState(907);
       identifier();
       break;
@@ -8481,7 +8481,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 116, _ctx)) {
       case 1: {
         setState(910);
-        match(HogQLParser::LPAREN);
+        match(InsightsQLParser::LPAREN);
         setState(912);
         _errHandler->sync(this);
 
@@ -8494,7 +8494,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           antlrcpp::downCast<ColumnExprFunctionContext *>(_localctx)->columnExprs = columnExprList();
         }
         setState(914);
-        match(HogQLParser::RPAREN);
+        match(InsightsQLParser::RPAREN);
         break;
       }
 
@@ -8502,14 +8502,14 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         break;
       }
       setState(917);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(919);
       _errHandler->sync(this);
 
       switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 117, _ctx)) {
       case 1: {
         setState(918);
-        match(HogQLParser::DISTINCT);
+        match(InsightsQLParser::DISTINCT);
         break;
       }
 
@@ -8528,7 +8528,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         antlrcpp::downCast<ColumnExprFunctionContext *>(_localctx)->columnArgList = columnExprList();
       }
       setState(924);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8537,7 +8537,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(926);
-      hogqlxTagElement();
+      insightsqlxTagElement();
       break;
     }
 
@@ -8564,7 +8564,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(929);
-      match(HogQLParser::DASH);
+      match(InsightsQLParser::DASH);
       setState(930);
       columnExpr(20);
       break;
@@ -8575,7 +8575,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(931);
-      match(HogQLParser::NOT);
+      match(InsightsQLParser::NOT);
       setState(932);
       columnExpr(14);
       break;
@@ -8595,10 +8595,10 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         setState(933);
         tableIdentifier();
         setState(934);
-        match(HogQLParser::DOT);
+        match(InsightsQLParser::DOT);
       }
       setState(938);
-      match(HogQLParser::ASTERISK);
+      match(InsightsQLParser::ASTERISK);
       break;
     }
 
@@ -8607,11 +8607,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(939);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(940);
       selectSetStmt();
       setState(941);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8620,11 +8620,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(943);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(944);
       columnExpr(0);
       setState(945);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8633,11 +8633,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(947);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(948);
       columnExprList();
       setState(949);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -8646,7 +8646,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(951);
-      match(HogQLParser::LBRACKET);
+      match(InsightsQLParser::LBRACKET);
       setState(953);
       _errHandler->sync(this);
 
@@ -8659,7 +8659,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         columnExprList();
       }
       setState(955);
-      match(HogQLParser::RBRACKET);
+      match(InsightsQLParser::RBRACKET);
       break;
     }
 
@@ -8668,7 +8668,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(956);
-      match(HogQLParser::LBRACE);
+      match(InsightsQLParser::LBRACE);
       setState(958);
       _errHandler->sync(this);
 
@@ -8681,7 +8681,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
         kvPairList();
       }
       setState(960);
-      match(HogQLParser::RBRACE);
+      match(InsightsQLParser::RBRACE);
       break;
     }
 
@@ -8729,21 +8729,21 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           setState(969);
           _errHandler->sync(this);
           switch (_input->LA(1)) {
-            case HogQLParser::ASTERISK: {
+            case InsightsQLParser::ASTERISK: {
               setState(966);
-              antlrcpp::downCast<ColumnExprPrecedence1Context *>(_localctx)->operator_ = match(HogQLParser::ASTERISK);
+              antlrcpp::downCast<ColumnExprPrecedence1Context *>(_localctx)->operator_ = match(InsightsQLParser::ASTERISK);
               break;
             }
 
-            case HogQLParser::SLASH: {
+            case InsightsQLParser::SLASH: {
               setState(967);
-              antlrcpp::downCast<ColumnExprPrecedence1Context *>(_localctx)->operator_ = match(HogQLParser::SLASH);
+              antlrcpp::downCast<ColumnExprPrecedence1Context *>(_localctx)->operator_ = match(InsightsQLParser::SLASH);
               break;
             }
 
-            case HogQLParser::PERCENT: {
+            case InsightsQLParser::PERCENT: {
               setState(968);
-              antlrcpp::downCast<ColumnExprPrecedence1Context *>(_localctx)->operator_ = match(HogQLParser::PERCENT);
+              antlrcpp::downCast<ColumnExprPrecedence1Context *>(_localctx)->operator_ = match(InsightsQLParser::PERCENT);
               break;
             }
 
@@ -8766,21 +8766,21 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           setState(976);
           _errHandler->sync(this);
           switch (_input->LA(1)) {
-            case HogQLParser::PLUS: {
+            case InsightsQLParser::PLUS: {
               setState(973);
-              antlrcpp::downCast<ColumnExprPrecedence2Context *>(_localctx)->operator_ = match(HogQLParser::PLUS);
+              antlrcpp::downCast<ColumnExprPrecedence2Context *>(_localctx)->operator_ = match(InsightsQLParser::PLUS);
               break;
             }
 
-            case HogQLParser::DASH: {
+            case InsightsQLParser::DASH: {
               setState(974);
-              antlrcpp::downCast<ColumnExprPrecedence2Context *>(_localctx)->operator_ = match(HogQLParser::DASH);
+              antlrcpp::downCast<ColumnExprPrecedence2Context *>(_localctx)->operator_ = match(InsightsQLParser::DASH);
               break;
             }
 
-            case HogQLParser::CONCAT: {
+            case InsightsQLParser::CONCAT: {
               setState(975);
-              antlrcpp::downCast<ColumnExprPrecedence2Context *>(_localctx)->operator_ = match(HogQLParser::CONCAT);
+              antlrcpp::downCast<ColumnExprPrecedence2Context *>(_localctx)->operator_ = match(InsightsQLParser::CONCAT);
               break;
             }
 
@@ -8805,43 +8805,43 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 128, _ctx)) {
           case 1: {
             setState(980);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::EQ_DOUBLE);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::EQ_DOUBLE);
             break;
           }
 
           case 2: {
             setState(981);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::EQ_SINGLE);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::EQ_SINGLE);
             break;
           }
 
           case 3: {
             setState(982);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::NOT_EQ);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::NOT_EQ);
             break;
           }
 
           case 4: {
             setState(983);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::LT_EQ);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::LT_EQ);
             break;
           }
 
           case 5: {
             setState(984);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::LT);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::LT);
             break;
           }
 
           case 6: {
             setState(985);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::GT_EQ);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::GT_EQ);
             break;
           }
 
           case 7: {
             setState(986);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::GT);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::GT);
             break;
           }
 
@@ -8850,19 +8850,19 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
             _errHandler->sync(this);
 
             _la = _input->LA(1);
-            if (_la == HogQLParser::NOT) {
+            if (_la == InsightsQLParser::NOT) {
               setState(987);
-              antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::NOT);
+              antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::NOT);
             }
             setState(990);
-            match(HogQLParser::IN);
+            match(InsightsQLParser::IN);
             setState(992);
             _errHandler->sync(this);
 
             switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 126, _ctx)) {
             case 1: {
               setState(991);
-              match(HogQLParser::COHORT);
+              match(InsightsQLParser::COHORT);
               break;
             }
 
@@ -8877,15 +8877,15 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
             _errHandler->sync(this);
 
             _la = _input->LA(1);
-            if (_la == HogQLParser::NOT) {
+            if (_la == InsightsQLParser::NOT) {
               setState(994);
-              antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::NOT);
+              antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::NOT);
             }
             setState(997);
             _la = _input->LA(1);
-            if (!(_la == HogQLParser::ILIKE
+            if (!(_la == InsightsQLParser::ILIKE
 
-            || _la == HogQLParser::LIKE)) {
+            || _la == InsightsQLParser::LIKE)) {
             _errHandler->recoverInline(this);
             }
             else {
@@ -8897,37 +8897,37 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           case 10: {
             setState(998);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::REGEX_SINGLE);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::REGEX_SINGLE);
             break;
           }
 
           case 11: {
             setState(999);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::REGEX_DOUBLE);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::REGEX_DOUBLE);
             break;
           }
 
           case 12: {
             setState(1000);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::NOT_REGEX);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::NOT_REGEX);
             break;
           }
 
           case 13: {
             setState(1001);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::IREGEX_SINGLE);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::IREGEX_SINGLE);
             break;
           }
 
           case 14: {
             setState(1002);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::IREGEX_DOUBLE);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::IREGEX_DOUBLE);
             break;
           }
 
           case 15: {
             setState(1003);
-            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(HogQLParser::NOT_IREGEX);
+            antlrcpp::downCast<ColumnExprPrecedence3Context *>(_localctx)->operator_ = match(InsightsQLParser::NOT_IREGEX);
             break;
           }
 
@@ -8947,7 +8947,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 15))) throw FailedPredicateException(this, "precpred(_ctx, 15)");
           setState(1008);
-          match(HogQLParser::NULLISH);
+          match(InsightsQLParser::NULLISH);
           setState(1009);
           columnExpr(16);
           break;
@@ -8961,7 +8961,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 13))) throw FailedPredicateException(this, "precpred(_ctx, 13)");
           setState(1011);
-          match(HogQLParser::AND);
+          match(InsightsQLParser::AND);
           setState(1012);
           columnExpr(14);
           break;
@@ -8975,7 +8975,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 12))) throw FailedPredicateException(this, "precpred(_ctx, 12)");
           setState(1014);
-          match(HogQLParser::OR);
+          match(InsightsQLParser::OR);
           setState(1015);
           columnExpr(13);
           break;
@@ -8992,16 +8992,16 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (_la == HogQLParser::NOT) {
+          if (_la == InsightsQLParser::NOT) {
             setState(1017);
-            match(HogQLParser::NOT);
+            match(InsightsQLParser::NOT);
           }
           setState(1020);
-          match(HogQLParser::BETWEEN);
+          match(InsightsQLParser::BETWEEN);
           setState(1021);
           columnExpr(0);
           setState(1022);
-          match(HogQLParser::AND);
+          match(InsightsQLParser::AND);
           setState(1023);
           columnExpr(12);
           break;
@@ -9015,11 +9015,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 10))) throw FailedPredicateException(this, "precpred(_ctx, 10)");
           setState(1026);
-          match(HogQLParser::QUERY);
+          match(InsightsQLParser::QUERY);
           setState(1027);
           columnExpr(0);
           setState(1028);
-          match(HogQLParser::COLON);
+          match(InsightsQLParser::COLON);
           setState(1029);
           columnExpr(10);
           break;
@@ -9033,11 +9033,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 32))) throw FailedPredicateException(this, "precpred(_ctx, 32)");
           setState(1032);
-          match(HogQLParser::LPAREN);
+          match(InsightsQLParser::LPAREN);
           setState(1033);
           selectSetStmt();
           setState(1034);
-          match(HogQLParser::RPAREN);
+          match(InsightsQLParser::RPAREN);
           break;
         }
 
@@ -9049,7 +9049,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 31))) throw FailedPredicateException(this, "precpred(_ctx, 31)");
           setState(1037);
-          match(HogQLParser::LPAREN);
+          match(InsightsQLParser::LPAREN);
           setState(1039);
           _errHandler->sync(this);
 
@@ -9062,7 +9062,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
             columnExprList();
           }
           setState(1041);
-          match(HogQLParser::RPAREN);
+          match(InsightsQLParser::RPAREN);
           break;
         }
 
@@ -9074,11 +9074,11 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 27))) throw FailedPredicateException(this, "precpred(_ctx, 27)");
           setState(1043);
-          match(HogQLParser::LBRACKET);
+          match(InsightsQLParser::LBRACKET);
           setState(1044);
           columnExpr(0);
           setState(1045);
-          match(HogQLParser::RBRACKET);
+          match(InsightsQLParser::RBRACKET);
           break;
         }
 
@@ -9090,9 +9090,9 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 26))) throw FailedPredicateException(this, "precpred(_ctx, 26)");
           setState(1048);
-          match(HogQLParser::DOT);
+          match(InsightsQLParser::DOT);
           setState(1049);
-          match(HogQLParser::DECIMAL_LITERAL);
+          match(InsightsQLParser::DECIMAL_LITERAL);
           break;
         }
 
@@ -9104,7 +9104,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 25))) throw FailedPredicateException(this, "precpred(_ctx, 25)");
           setState(1051);
-          match(HogQLParser::DOT);
+          match(InsightsQLParser::DOT);
           setState(1052);
           identifier();
           break;
@@ -9118,13 +9118,13 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 24))) throw FailedPredicateException(this, "precpred(_ctx, 24)");
           setState(1054);
-          match(HogQLParser::NULL_PROPERTY);
+          match(InsightsQLParser::NULL_PROPERTY);
           setState(1055);
-          match(HogQLParser::LBRACKET);
+          match(InsightsQLParser::LBRACKET);
           setState(1056);
           columnExpr(0);
           setState(1057);
-          match(HogQLParser::RBRACKET);
+          match(InsightsQLParser::RBRACKET);
           break;
         }
 
@@ -9136,9 +9136,9 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 23))) throw FailedPredicateException(this, "precpred(_ctx, 23)");
           setState(1060);
-          match(HogQLParser::NULL_PROPERTY);
+          match(InsightsQLParser::NULL_PROPERTY);
           setState(1061);
-          match(HogQLParser::DECIMAL_LITERAL);
+          match(InsightsQLParser::DECIMAL_LITERAL);
           break;
         }
 
@@ -9150,7 +9150,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 22))) throw FailedPredicateException(this, "precpred(_ctx, 22)");
           setState(1063);
-          match(HogQLParser::NULL_PROPERTY);
+          match(InsightsQLParser::NULL_PROPERTY);
           setState(1064);
           identifier();
           break;
@@ -9164,7 +9164,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 21))) throw FailedPredicateException(this, "precpred(_ctx, 21)");
           setState(1066);
-          match(HogQLParser::DOUBLECOLON);
+          match(InsightsQLParser::DOUBLECOLON);
           setState(1067);
           identifier();
           break;
@@ -9178,17 +9178,17 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           if (!(precpred(_ctx, 16))) throw FailedPredicateException(this, "precpred(_ctx, 16)");
           setState(1069);
-          match(HogQLParser::IS);
+          match(InsightsQLParser::IS);
           setState(1071);
           _errHandler->sync(this);
 
           _la = _input->LA(1);
-          if (_la == HogQLParser::NOT) {
+          if (_la == InsightsQLParser::NOT) {
             setState(1070);
-            match(HogQLParser::NOT);
+            match(InsightsQLParser::NOT);
           }
           setState(1073);
-          match(HogQLParser::NULL_SQL);
+          match(InsightsQLParser::NULL_SQL);
           break;
         }
 
@@ -9204,7 +9204,7 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
           switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 132, _ctx)) {
           case 1: {
             setState(1075);
-            match(HogQLParser::AS);
+            match(InsightsQLParser::AS);
             setState(1076);
             identifier();
             break;
@@ -9212,9 +9212,9 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
           case 2: {
             setState(1077);
-            match(HogQLParser::AS);
+            match(InsightsQLParser::AS);
             setState(1078);
-            match(HogQLParser::STRING_LITERAL);
+            match(InsightsQLParser::STRING_LITERAL);
             break;
           }
 
@@ -9243,62 +9243,62 @@ HogQLParser::ColumnExprContext* HogQLParser::columnExpr(int precedence) {
 
 //----------------- ColumnLambdaExprContext ------------------------------------------------------------------
 
-HogQLParser::ColumnLambdaExprContext::ColumnLambdaExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ColumnLambdaExprContext::ColumnLambdaExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::ColumnLambdaExprContext::ARROW() {
-  return getToken(HogQLParser::ARROW, 0);
+tree::TerminalNode* InsightsQLParser::ColumnLambdaExprContext::ARROW() {
+  return getToken(InsightsQLParser::ARROW, 0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnLambdaExprContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnLambdaExprContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::ColumnLambdaExprContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::ColumnLambdaExprContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::ColumnLambdaExprContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::ColumnLambdaExprContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-tree::TerminalNode* HogQLParser::ColumnLambdaExprContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::ColumnLambdaExprContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::ColumnLambdaExprContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::ColumnLambdaExprContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-HogQLParser::BlockContext* HogQLParser::ColumnLambdaExprContext::block() {
-  return getRuleContext<HogQLParser::BlockContext>(0);
+InsightsQLParser::BlockContext* InsightsQLParser::ColumnLambdaExprContext::block() {
+  return getRuleContext<InsightsQLParser::BlockContext>(0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::ColumnLambdaExprContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::ColumnLambdaExprContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::ColumnLambdaExprContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::ColumnLambdaExprContext::getRuleIndex() const {
-  return HogQLParser::RuleColumnLambdaExpr;
+tree::TerminalNode* InsightsQLParser::ColumnLambdaExprContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::ColumnLambdaExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ColumnLambdaExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleColumnLambdaExpr;
+}
+
+
+std::any InsightsQLParser::ColumnLambdaExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnLambdaExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
+InsightsQLParser::ColumnLambdaExprContext* InsightsQLParser::columnLambdaExpr() {
   ColumnLambdaExprContext *_localctx = _tracker.createInstance<ColumnLambdaExprContext>(_ctx, getState());
-  enterRule(_localctx, 124, HogQLParser::RuleColumnLambdaExpr);
+  enterRule(_localctx, 124, InsightsQLParser::RuleColumnLambdaExpr);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -9316,7 +9316,7 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 139, _ctx)) {
     case 1: {
       setState(1086);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(1087);
       identifier();
       setState(1092);
@@ -9325,7 +9325,7 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
           setState(1088);
-          match(HogQLParser::COMMA);
+          match(InsightsQLParser::COMMA);
           setState(1089);
           identifier(); 
         }
@@ -9337,12 +9337,12 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COMMA) {
+      if (_la == InsightsQLParser::COMMA) {
         setState(1095);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
       }
       setState(1098);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -9355,7 +9355,7 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
       while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
         if (alt == 1) {
           setState(1101);
-          match(HogQLParser::COMMA);
+          match(InsightsQLParser::COMMA);
           setState(1102);
           identifier(); 
         }
@@ -9367,18 +9367,18 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
       _errHandler->sync(this);
 
       _la = _input->LA(1);
-      if (_la == HogQLParser::COMMA) {
+      if (_la == InsightsQLParser::COMMA) {
         setState(1108);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
       }
       break;
     }
 
     case 3: {
       setState(1111);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(1112);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -9386,7 +9386,7 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
       break;
     }
     setState(1115);
-    match(HogQLParser::ARROW);
+    match(InsightsQLParser::ARROW);
     setState(1118);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 140, _ctx)) {
@@ -9418,46 +9418,46 @@ HogQLParser::ColumnLambdaExprContext* HogQLParser::columnLambdaExpr() {
 
 //----------------- HogqlxChildElementContext ------------------------------------------------------------------
 
-HogQLParser::HogqlxChildElementContext::HogqlxChildElementContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::HogqlxChildElementContext::HogqlxChildElementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::HogqlxTagElementContext* HogQLParser::HogqlxChildElementContext::hogqlxTagElement() {
-  return getRuleContext<HogQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::HogqlxChildElementContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
 }
 
-HogQLParser::HogqlxTextContext* HogQLParser::HogqlxChildElementContext::hogqlxText() {
-  return getRuleContext<HogQLParser::HogqlxTextContext>(0);
+InsightsQLParser::HogqlxTextContext* InsightsQLParser::HogqlxChildElementContext::insightsqlxText() {
+  return getRuleContext<InsightsQLParser::HogqlxTextContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxChildElementContext::LBRACE() {
-  return getToken(HogQLParser::LBRACE, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxChildElementContext::LBRACE() {
+  return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::HogqlxChildElementContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::HogqlxChildElementContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxChildElementContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
-}
-
-
-size_t HogQLParser::HogqlxChildElementContext::getRuleIndex() const {
-  return HogQLParser::RuleHogqlxChildElement;
+tree::TerminalNode* InsightsQLParser::HogqlxChildElementContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
 
-std::any HogQLParser::HogqlxChildElementContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::HogqlxChildElementContext::getRuleIndex() const {
+  return InsightsQLParser::RuleHogqlxChildElement;
+}
+
+
+std::any InsightsQLParser::HogqlxChildElementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitHogqlxChildElement(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::HogqlxChildElementContext* HogQLParser::hogqlxChildElement() {
+InsightsQLParser::HogqlxChildElementContext* InsightsQLParser::insightsqlxChildElement() {
   HogqlxChildElementContext *_localctx = _tracker.createInstance<HogqlxChildElementContext>(_ctx, getState());
-  enterRule(_localctx, 126, HogQLParser::RuleHogqlxChildElement);
+  enterRule(_localctx, 126, InsightsQLParser::RuleHogqlxChildElement);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -9470,28 +9470,28 @@ HogQLParser::HogqlxChildElementContext* HogQLParser::hogqlxChildElement() {
     setState(1126);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::LT: {
+      case InsightsQLParser::LT: {
         enterOuterAlt(_localctx, 1);
         setState(1120);
-        hogqlxTagElement();
+        insightsqlxTagElement();
         break;
       }
 
-      case HogQLParser::HOGQLX_TEXT_TEXT: {
+      case InsightsQLParser::INSIGHTSQLX_TEXT_TEXT: {
         enterOuterAlt(_localctx, 2);
         setState(1121);
-        hogqlxText();
+        insightsqlxText();
         break;
       }
 
-      case HogQLParser::LBRACE: {
+      case InsightsQLParser::LBRACE: {
         enterOuterAlt(_localctx, 3);
         setState(1122);
-        match(HogQLParser::LBRACE);
+        match(InsightsQLParser::LBRACE);
         setState(1123);
         columnExpr(0);
         setState(1124);
-        match(HogQLParser::RBRACE);
+        match(InsightsQLParser::RBRACE);
         break;
       }
 
@@ -9511,30 +9511,30 @@ HogQLParser::HogqlxChildElementContext* HogQLParser::hogqlxChildElement() {
 
 //----------------- HogqlxTextContext ------------------------------------------------------------------
 
-HogQLParser::HogqlxTextContext::HogqlxTextContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::HogqlxTextContext::HogqlxTextContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTextContext::HOGQLX_TEXT_TEXT() {
-  return getToken(HogQLParser::HOGQLX_TEXT_TEXT, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTextContext::INSIGHTSQLX_TEXT_TEXT() {
+  return getToken(InsightsQLParser::INSIGHTSQLX_TEXT_TEXT, 0);
 }
 
 
-size_t HogQLParser::HogqlxTextContext::getRuleIndex() const {
-  return HogQLParser::RuleHogqlxText;
+size_t InsightsQLParser::HogqlxTextContext::getRuleIndex() const {
+  return InsightsQLParser::RuleHogqlxText;
 }
 
 
-std::any HogQLParser::HogqlxTextContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::HogqlxTextContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitHogqlxText(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::HogqlxTextContext* HogQLParser::hogqlxText() {
+InsightsQLParser::HogqlxTextContext* InsightsQLParser::insightsqlxText() {
   HogqlxTextContext *_localctx = _tracker.createInstance<HogqlxTextContext>(_ctx, getState());
-  enterRule(_localctx, 128, HogQLParser::RuleHogqlxText);
+  enterRule(_localctx, 128, InsightsQLParser::RuleHogqlxText);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -9546,7 +9546,7 @@ HogQLParser::HogqlxTextContext* HogQLParser::hogqlxText() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(1128);
-    match(HogQLParser::HOGQLX_TEXT_TEXT);
+    match(InsightsQLParser::INSIGHTSQLX_TEXT_TEXT);
    
   }
   catch (RecognitionException &e) {
@@ -9560,104 +9560,104 @@ HogQLParser::HogqlxTextContext* HogQLParser::hogqlxText() {
 
 //----------------- HogqlxTagElementContext ------------------------------------------------------------------
 
-HogQLParser::HogqlxTagElementContext::HogqlxTagElementContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::HogqlxTagElementContext::HogqlxTagElementContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::HogqlxTagElementContext::getRuleIndex() const {
-  return HogQLParser::RuleHogqlxTagElement;
+size_t InsightsQLParser::HogqlxTagElementContext::getRuleIndex() const {
+  return InsightsQLParser::RuleHogqlxTagElement;
 }
 
-void HogQLParser::HogqlxTagElementContext::copyFrom(HogqlxTagElementContext *ctx) {
+void InsightsQLParser::HogqlxTagElementContext::copyFrom(HogqlxTagElementContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- HogqlxTagElementClosedContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::HogqlxTagElementClosedContext::LT() {
-  return getToken(HogQLParser::LT, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTagElementClosedContext::LT() {
+  return getToken(InsightsQLParser::LT, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::HogqlxTagElementClosedContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::HogqlxTagElementClosedContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTagElementClosedContext::SLASH_GT() {
-  return getToken(HogQLParser::SLASH_GT, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTagElementClosedContext::SLASH_GT() {
+  return getToken(InsightsQLParser::SLASH_GT, 0);
 }
 
-std::vector<HogQLParser::HogqlxTagAttributeContext *> HogQLParser::HogqlxTagElementClosedContext::hogqlxTagAttribute() {
-  return getRuleContexts<HogQLParser::HogqlxTagAttributeContext>();
+std::vector<InsightsQLParser::HogqlxTagAttributeContext *> InsightsQLParser::HogqlxTagElementClosedContext::insightsqlxTagAttribute() {
+  return getRuleContexts<InsightsQLParser::HogqlxTagAttributeContext>();
 }
 
-HogQLParser::HogqlxTagAttributeContext* HogQLParser::HogqlxTagElementClosedContext::hogqlxTagAttribute(size_t i) {
-  return getRuleContext<HogQLParser::HogqlxTagAttributeContext>(i);
+InsightsQLParser::HogqlxTagAttributeContext* InsightsQLParser::HogqlxTagElementClosedContext::insightsqlxTagAttribute(size_t i) {
+  return getRuleContext<InsightsQLParser::HogqlxTagAttributeContext>(i);
 }
 
-HogQLParser::HogqlxTagElementClosedContext::HogqlxTagElementClosedContext(HogqlxTagElementContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::HogqlxTagElementClosedContext::HogqlxTagElementClosedContext(HogqlxTagElementContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::HogqlxTagElementClosedContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::HogqlxTagElementClosedContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitHogqlxTagElementClosed(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- HogqlxTagElementNestedContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::HogqlxTagElementNestedContext::LT() {
-  return getToken(HogQLParser::LT, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTagElementNestedContext::LT() {
+  return getToken(InsightsQLParser::LT, 0);
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::HogqlxTagElementNestedContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::HogqlxTagElementNestedContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::HogqlxTagElementNestedContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::HogqlxTagElementNestedContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::HogqlxTagElementNestedContext::GT() {
-  return getTokens(HogQLParser::GT);
+std::vector<tree::TerminalNode *> InsightsQLParser::HogqlxTagElementNestedContext::GT() {
+  return getTokens(InsightsQLParser::GT);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTagElementNestedContext::GT(size_t i) {
-  return getToken(HogQLParser::GT, i);
+tree::TerminalNode* InsightsQLParser::HogqlxTagElementNestedContext::GT(size_t i) {
+  return getToken(InsightsQLParser::GT, i);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTagElementNestedContext::LT_SLASH() {
-  return getToken(HogQLParser::LT_SLASH, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTagElementNestedContext::LT_SLASH() {
+  return getToken(InsightsQLParser::LT_SLASH, 0);
 }
 
-std::vector<HogQLParser::HogqlxTagAttributeContext *> HogQLParser::HogqlxTagElementNestedContext::hogqlxTagAttribute() {
-  return getRuleContexts<HogQLParser::HogqlxTagAttributeContext>();
+std::vector<InsightsQLParser::HogqlxTagAttributeContext *> InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxTagAttribute() {
+  return getRuleContexts<InsightsQLParser::HogqlxTagAttributeContext>();
 }
 
-HogQLParser::HogqlxTagAttributeContext* HogQLParser::HogqlxTagElementNestedContext::hogqlxTagAttribute(size_t i) {
-  return getRuleContext<HogQLParser::HogqlxTagAttributeContext>(i);
+InsightsQLParser::HogqlxTagAttributeContext* InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxTagAttribute(size_t i) {
+  return getRuleContext<InsightsQLParser::HogqlxTagAttributeContext>(i);
 }
 
-std::vector<HogQLParser::HogqlxChildElementContext *> HogQLParser::HogqlxTagElementNestedContext::hogqlxChildElement() {
-  return getRuleContexts<HogQLParser::HogqlxChildElementContext>();
+std::vector<InsightsQLParser::HogqlxChildElementContext *> InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxChildElement() {
+  return getRuleContexts<InsightsQLParser::HogqlxChildElementContext>();
 }
 
-HogQLParser::HogqlxChildElementContext* HogQLParser::HogqlxTagElementNestedContext::hogqlxChildElement(size_t i) {
-  return getRuleContext<HogQLParser::HogqlxChildElementContext>(i);
+InsightsQLParser::HogqlxChildElementContext* InsightsQLParser::HogqlxTagElementNestedContext::insightsqlxChildElement(size_t i) {
+  return getRuleContext<InsightsQLParser::HogqlxChildElementContext>(i);
 }
 
-HogQLParser::HogqlxTagElementNestedContext::HogqlxTagElementNestedContext(HogqlxTagElementContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::HogqlxTagElementNestedContext::HogqlxTagElementNestedContext(HogqlxTagElementContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::HogqlxTagElementNestedContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::HogqlxTagElementNestedContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitHogqlxTagElementNested(this);
   else
     return visitor->visitChildren(this);
 }
-HogQLParser::HogqlxTagElementContext* HogQLParser::hogqlxTagElement() {
+InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::insightsqlxTagElement() {
   HogqlxTagElementContext *_localctx = _tracker.createInstance<HogqlxTagElementContext>(_ctx, getState());
-  enterRule(_localctx, 130, HogQLParser::RuleHogqlxTagElement);
+  enterRule(_localctx, 130, InsightsQLParser::RuleHogqlxTagElement);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -9672,10 +9672,10 @@ HogQLParser::HogqlxTagElementContext* HogQLParser::hogqlxTagElement() {
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 145, _ctx)) {
     case 1: {
-      _localctx = _tracker.createInstance<HogQLParser::HogqlxTagElementClosedContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::HogqlxTagElementClosedContext>(_localctx);
       enterOuterAlt(_localctx, 1);
       setState(1130);
-      match(HogQLParser::LT);
+      match(InsightsQLParser::LT);
       setState(1131);
       identifier();
       setState(1135);
@@ -9685,21 +9685,21 @@ HogQLParser::HogqlxTagElementContext* HogQLParser::hogqlxTagElement() {
         ((1ULL << _la) & -5800812384855539714) != 0) || ((((_la - 64) & ~ 0x3fULL) == 0) &&
         ((1ULL << (_la - 64)) & 51668439793663) != 0)) {
         setState(1132);
-        hogqlxTagAttribute();
+        insightsqlxTagAttribute();
         setState(1137);
         _errHandler->sync(this);
         _la = _input->LA(1);
       }
       setState(1138);
-      match(HogQLParser::SLASH_GT);
+      match(InsightsQLParser::SLASH_GT);
       break;
     }
 
     case 2: {
-      _localctx = _tracker.createInstance<HogQLParser::HogqlxTagElementNestedContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::HogqlxTagElementNestedContext>(_localctx);
       enterOuterAlt(_localctx, 2);
       setState(1140);
-      match(HogQLParser::LT);
+      match(InsightsQLParser::LT);
       setState(1141);
       identifier();
       setState(1145);
@@ -9709,30 +9709,30 @@ HogQLParser::HogqlxTagElementContext* HogQLParser::hogqlxTagElement() {
         ((1ULL << _la) & -5800812384855539714) != 0) || ((((_la - 64) & ~ 0x3fULL) == 0) &&
         ((1ULL << (_la - 64)) & 51668439793663) != 0)) {
         setState(1142);
-        hogqlxTagAttribute();
+        insightsqlxTagAttribute();
         setState(1147);
         _errHandler->sync(this);
         _la = _input->LA(1);
       }
       setState(1148);
-      match(HogQLParser::GT);
+      match(InsightsQLParser::GT);
       setState(1152);
       _errHandler->sync(this);
       _la = _input->LA(1);
       while (((((_la - 133) & ~ 0x3fULL) == 0) &&
         ((1ULL << (_la - 133)) & 68719476753) != 0)) {
         setState(1149);
-        hogqlxChildElement();
+        insightsqlxChildElement();
         setState(1154);
         _errHandler->sync(this);
         _la = _input->LA(1);
       }
       setState(1155);
-      match(HogQLParser::LT_SLASH);
+      match(InsightsQLParser::LT_SLASH);
       setState(1156);
       identifier();
       setState(1157);
-      match(HogQLParser::GT);
+      match(InsightsQLParser::GT);
       break;
     }
 
@@ -9752,50 +9752,50 @@ HogQLParser::HogqlxTagElementContext* HogQLParser::hogqlxTagElement() {
 
 //----------------- HogqlxTagAttributeContext ------------------------------------------------------------------
 
-HogQLParser::HogqlxTagAttributeContext::HogqlxTagAttributeContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::HogqlxTagAttributeContext::HogqlxTagAttributeContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::IdentifierContext* HogQLParser::HogqlxTagAttributeContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::HogqlxTagAttributeContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTagAttributeContext::EQ_SINGLE() {
-  return getToken(HogQLParser::EQ_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTagAttributeContext::EQ_SINGLE() {
+  return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
-HogQLParser::StringContext* HogQLParser::HogqlxTagAttributeContext::string() {
-  return getRuleContext<HogQLParser::StringContext>(0);
+InsightsQLParser::StringContext* InsightsQLParser::HogqlxTagAttributeContext::string() {
+  return getRuleContext<InsightsQLParser::StringContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTagAttributeContext::LBRACE() {
-  return getToken(HogQLParser::LBRACE, 0);
+tree::TerminalNode* InsightsQLParser::HogqlxTagAttributeContext::LBRACE() {
+  return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::HogqlxTagAttributeContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::HogqlxTagAttributeContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::HogqlxTagAttributeContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
-}
-
-
-size_t HogQLParser::HogqlxTagAttributeContext::getRuleIndex() const {
-  return HogQLParser::RuleHogqlxTagAttribute;
+tree::TerminalNode* InsightsQLParser::HogqlxTagAttributeContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
 
-std::any HogQLParser::HogqlxTagAttributeContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::HogqlxTagAttributeContext::getRuleIndex() const {
+  return InsightsQLParser::RuleHogqlxTagAttribute;
+}
+
+
+std::any InsightsQLParser::HogqlxTagAttributeContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitHogqlxTagAttribute(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::HogqlxTagAttributeContext* HogQLParser::hogqlxTagAttribute() {
+InsightsQLParser::HogqlxTagAttributeContext* InsightsQLParser::insightsqlxTagAttribute() {
   HogqlxTagAttributeContext *_localctx = _tracker.createInstance<HogqlxTagAttributeContext>(_ctx, getState());
-  enterRule(_localctx, 132, HogQLParser::RuleHogqlxTagAttribute);
+  enterRule(_localctx, 132, InsightsQLParser::RuleHogqlxTagAttribute);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -9813,7 +9813,7 @@ HogQLParser::HogqlxTagAttributeContext* HogQLParser::hogqlxTagAttribute() {
       setState(1161);
       identifier();
       setState(1162);
-      match(HogQLParser::EQ_SINGLE);
+      match(InsightsQLParser::EQ_SINGLE);
       setState(1163);
       string();
       break;
@@ -9824,13 +9824,13 @@ HogQLParser::HogqlxTagAttributeContext* HogQLParser::hogqlxTagAttribute() {
       setState(1165);
       identifier();
       setState(1166);
-      match(HogQLParser::EQ_SINGLE);
+      match(InsightsQLParser::EQ_SINGLE);
       setState(1167);
-      match(HogQLParser::LBRACE);
+      match(InsightsQLParser::LBRACE);
       setState(1168);
       columnExpr(0);
       setState(1169);
-      match(HogQLParser::RBRACE);
+      match(InsightsQLParser::RBRACE);
       break;
     }
 
@@ -9857,42 +9857,42 @@ HogQLParser::HogqlxTagAttributeContext* HogQLParser::hogqlxTagAttribute() {
 
 //----------------- WithExprListContext ------------------------------------------------------------------
 
-HogQLParser::WithExprListContext::WithExprListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WithExprListContext::WithExprListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::WithExprContext *> HogQLParser::WithExprListContext::withExpr() {
-  return getRuleContexts<HogQLParser::WithExprContext>();
+std::vector<InsightsQLParser::WithExprContext *> InsightsQLParser::WithExprListContext::withExpr() {
+  return getRuleContexts<InsightsQLParser::WithExprContext>();
 }
 
-HogQLParser::WithExprContext* HogQLParser::WithExprListContext::withExpr(size_t i) {
-  return getRuleContext<HogQLParser::WithExprContext>(i);
+InsightsQLParser::WithExprContext* InsightsQLParser::WithExprListContext::withExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::WithExprContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::WithExprListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::WithExprListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::WithExprListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::WithExprListContext::getRuleIndex() const {
-  return HogQLParser::RuleWithExprList;
+tree::TerminalNode* InsightsQLParser::WithExprListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::WithExprListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::WithExprListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWithExprList;
+}
+
+
+std::any InsightsQLParser::WithExprListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWithExprList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::WithExprListContext* HogQLParser::withExprList() {
+InsightsQLParser::WithExprListContext* InsightsQLParser::withExprList() {
   WithExprListContext *_localctx = _tracker.createInstance<WithExprListContext>(_ctx, getState());
-  enterRule(_localctx, 134, HogQLParser::RuleWithExprList);
+  enterRule(_localctx, 134, InsightsQLParser::RuleWithExprList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -9913,7 +9913,7 @@ HogQLParser::WithExprListContext* HogQLParser::withExprList() {
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         setState(1175);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         setState(1176);
         withExpr(); 
       }
@@ -9925,9 +9925,9 @@ HogQLParser::WithExprListContext* HogQLParser::withExprList() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COMMA) {
+    if (_la == InsightsQLParser::COMMA) {
       setState(1182);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
     }
    
   }
@@ -9942,76 +9942,76 @@ HogQLParser::WithExprListContext* HogQLParser::withExprList() {
 
 //----------------- WithExprContext ------------------------------------------------------------------
 
-HogQLParser::WithExprContext::WithExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::WithExprContext::WithExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::WithExprContext::getRuleIndex() const {
-  return HogQLParser::RuleWithExpr;
+size_t InsightsQLParser::WithExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleWithExpr;
 }
 
-void HogQLParser::WithExprContext::copyFrom(WithExprContext *ctx) {
+void InsightsQLParser::WithExprContext::copyFrom(WithExprContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- WithExprColumnContext ------------------------------------------------------------------
 
-HogQLParser::ColumnExprContext* HogQLParser::WithExprColumnContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::WithExprColumnContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WithExprColumnContext::AS() {
-  return getToken(HogQLParser::AS, 0);
+tree::TerminalNode* InsightsQLParser::WithExprColumnContext::AS() {
+  return getToken(InsightsQLParser::AS, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::WithExprColumnContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::WithExprColumnContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-HogQLParser::WithExprColumnContext::WithExprColumnContext(WithExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::WithExprColumnContext::WithExprColumnContext(WithExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::WithExprColumnContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::WithExprColumnContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWithExprColumn(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- WithExprSubqueryContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext* HogQLParser::WithExprSubqueryContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::WithExprSubqueryContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WithExprSubqueryContext::AS() {
-  return getToken(HogQLParser::AS, 0);
+tree::TerminalNode* InsightsQLParser::WithExprSubqueryContext::AS() {
+  return getToken(InsightsQLParser::AS, 0);
 }
 
-tree::TerminalNode* HogQLParser::WithExprSubqueryContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::WithExprSubqueryContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::WithExprSubqueryContext::selectSetStmt() {
-  return getRuleContext<HogQLParser::SelectSetStmtContext>(0);
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::WithExprSubqueryContext::selectSetStmt() {
+  return getRuleContext<InsightsQLParser::SelectSetStmtContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::WithExprSubqueryContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::WithExprSubqueryContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::WithExprSubqueryContext::WithExprSubqueryContext(WithExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::WithExprSubqueryContext::WithExprSubqueryContext(WithExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::WithExprSubqueryContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::WithExprSubqueryContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitWithExprSubquery(this);
   else
     return visitor->visitChildren(this);
 }
-HogQLParser::WithExprContext* HogQLParser::withExpr() {
+InsightsQLParser::WithExprContext* InsightsQLParser::withExpr() {
   WithExprContext *_localctx = _tracker.createInstance<WithExprContext>(_ctx, getState());
-  enterRule(_localctx, 136, HogQLParser::RuleWithExpr);
+  enterRule(_localctx, 136, InsightsQLParser::RuleWithExpr);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -10025,28 +10025,28 @@ HogQLParser::WithExprContext* HogQLParser::withExpr() {
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 149, _ctx)) {
     case 1: {
-      _localctx = _tracker.createInstance<HogQLParser::WithExprSubqueryContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::WithExprSubqueryContext>(_localctx);
       enterOuterAlt(_localctx, 1);
       setState(1185);
       identifier();
       setState(1186);
-      match(HogQLParser::AS);
+      match(InsightsQLParser::AS);
       setState(1187);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(1188);
       selectSetStmt();
       setState(1189);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
     case 2: {
-      _localctx = _tracker.createInstance<HogQLParser::WithExprColumnContext>(_localctx);
+      _localctx = _tracker.createInstance<InsightsQLParser::WithExprColumnContext>(_localctx);
       enterOuterAlt(_localctx, 2);
       setState(1191);
       columnExpr(0);
       setState(1192);
-      match(HogQLParser::AS);
+      match(InsightsQLParser::AS);
       setState(1193);
       identifier();
       break;
@@ -10068,42 +10068,42 @@ HogQLParser::WithExprContext* HogQLParser::withExpr() {
 
 //----------------- ColumnIdentifierContext ------------------------------------------------------------------
 
-HogQLParser::ColumnIdentifierContext::ColumnIdentifierContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::ColumnIdentifierContext::ColumnIdentifierContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::PlaceholderContext* HogQLParser::ColumnIdentifierContext::placeholder() {
-  return getRuleContext<HogQLParser::PlaceholderContext>(0);
+InsightsQLParser::PlaceholderContext* InsightsQLParser::ColumnIdentifierContext::placeholder() {
+  return getRuleContext<InsightsQLParser::PlaceholderContext>(0);
 }
 
-HogQLParser::NestedIdentifierContext* HogQLParser::ColumnIdentifierContext::nestedIdentifier() {
-  return getRuleContext<HogQLParser::NestedIdentifierContext>(0);
+InsightsQLParser::NestedIdentifierContext* InsightsQLParser::ColumnIdentifierContext::nestedIdentifier() {
+  return getRuleContext<InsightsQLParser::NestedIdentifierContext>(0);
 }
 
-HogQLParser::TableIdentifierContext* HogQLParser::ColumnIdentifierContext::tableIdentifier() {
-  return getRuleContext<HogQLParser::TableIdentifierContext>(0);
+InsightsQLParser::TableIdentifierContext* InsightsQLParser::ColumnIdentifierContext::tableIdentifier() {
+  return getRuleContext<InsightsQLParser::TableIdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::ColumnIdentifierContext::DOT() {
-  return getToken(HogQLParser::DOT, 0);
-}
-
-
-size_t HogQLParser::ColumnIdentifierContext::getRuleIndex() const {
-  return HogQLParser::RuleColumnIdentifier;
+tree::TerminalNode* InsightsQLParser::ColumnIdentifierContext::DOT() {
+  return getToken(InsightsQLParser::DOT, 0);
 }
 
 
-std::any HogQLParser::ColumnIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::ColumnIdentifierContext::getRuleIndex() const {
+  return InsightsQLParser::RuleColumnIdentifier;
+}
+
+
+std::any InsightsQLParser::ColumnIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitColumnIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::ColumnIdentifierContext* HogQLParser::columnIdentifier() {
+InsightsQLParser::ColumnIdentifierContext* InsightsQLParser::columnIdentifier() {
   ColumnIdentifierContext *_localctx = _tracker.createInstance<ColumnIdentifierContext>(_ctx, getState());
-  enterRule(_localctx, 138, HogQLParser::RuleColumnIdentifier);
+  enterRule(_localctx, 138, InsightsQLParser::RuleColumnIdentifier);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -10116,108 +10116,108 @@ HogQLParser::ColumnIdentifierContext* HogQLParser::columnIdentifier() {
     setState(1204);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::LBRACE: {
+      case InsightsQLParser::LBRACE: {
         enterOuterAlt(_localctx, 1);
         setState(1197);
         placeholder();
         break;
       }
 
-      case HogQLParser::ALL:
-      case HogQLParser::AND:
-      case HogQLParser::ANTI:
-      case HogQLParser::ANY:
-      case HogQLParser::ARRAY:
-      case HogQLParser::AS:
-      case HogQLParser::ASCENDING:
-      case HogQLParser::ASOF:
-      case HogQLParser::BETWEEN:
-      case HogQLParser::BOTH:
-      case HogQLParser::BY:
-      case HogQLParser::CASE:
-      case HogQLParser::CAST:
-      case HogQLParser::COHORT:
-      case HogQLParser::COLLATE:
-      case HogQLParser::CROSS:
-      case HogQLParser::CUBE:
-      case HogQLParser::CURRENT:
-      case HogQLParser::DATE:
-      case HogQLParser::DAY:
-      case HogQLParser::DESC:
-      case HogQLParser::DESCENDING:
-      case HogQLParser::DISTINCT:
-      case HogQLParser::ELSE:
-      case HogQLParser::END:
-      case HogQLParser::EXTRACT:
-      case HogQLParser::FINAL:
-      case HogQLParser::FIRST:
-      case HogQLParser::FOLLOWING:
-      case HogQLParser::FOR:
-      case HogQLParser::FROM:
-      case HogQLParser::FULL:
-      case HogQLParser::GROUP:
-      case HogQLParser::HAVING:
-      case HogQLParser::HOUR:
-      case HogQLParser::ID:
-      case HogQLParser::IF:
-      case HogQLParser::ILIKE:
-      case HogQLParser::IN:
-      case HogQLParser::INNER:
-      case HogQLParser::INTERVAL:
-      case HogQLParser::IS:
-      case HogQLParser::JOIN:
-      case HogQLParser::KEY:
-      case HogQLParser::LAST:
-      case HogQLParser::LEADING:
-      case HogQLParser::LEFT:
-      case HogQLParser::LIKE:
-      case HogQLParser::LIMIT:
-      case HogQLParser::MINUTE:
-      case HogQLParser::MONTH:
-      case HogQLParser::NOT:
-      case HogQLParser::NULLS:
-      case HogQLParser::OFFSET:
-      case HogQLParser::ON:
-      case HogQLParser::OR:
-      case HogQLParser::ORDER:
-      case HogQLParser::OUTER:
-      case HogQLParser::OVER:
-      case HogQLParser::PARTITION:
-      case HogQLParser::PRECEDING:
-      case HogQLParser::PREWHERE:
-      case HogQLParser::QUARTER:
-      case HogQLParser::RANGE:
-      case HogQLParser::RECURSIVE:
-      case HogQLParser::RETURN:
-      case HogQLParser::RIGHT:
-      case HogQLParser::ROLLUP:
-      case HogQLParser::ROW:
-      case HogQLParser::ROWS:
-      case HogQLParser::SAMPLE:
-      case HogQLParser::SECOND:
-      case HogQLParser::SELECT:
-      case HogQLParser::SEMI:
-      case HogQLParser::SETTINGS:
-      case HogQLParser::SUBSTRING:
-      case HogQLParser::THEN:
-      case HogQLParser::TIES:
-      case HogQLParser::TIMESTAMP:
-      case HogQLParser::TO:
-      case HogQLParser::TOP:
-      case HogQLParser::TOTALS:
-      case HogQLParser::TRAILING:
-      case HogQLParser::TRIM:
-      case HogQLParser::TRUNCATE:
-      case HogQLParser::UNBOUNDED:
-      case HogQLParser::UNION:
-      case HogQLParser::USING:
-      case HogQLParser::WEEK:
-      case HogQLParser::WHEN:
-      case HogQLParser::WHERE:
-      case HogQLParser::WINDOW:
-      case HogQLParser::WITH:
-      case HogQLParser::YEAR:
-      case HogQLParser::IDENTIFIER: {
+      case InsightsQLParser::ALL:
+      case InsightsQLParser::AND:
+      case InsightsQLParser::ANTI:
+      case InsightsQLParser::ANY:
+      case InsightsQLParser::ARRAY:
+      case InsightsQLParser::AS:
+      case InsightsQLParser::ASCENDING:
+      case InsightsQLParser::ASOF:
+      case InsightsQLParser::BETWEEN:
+      case InsightsQLParser::BOTH:
+      case InsightsQLParser::BY:
+      case InsightsQLParser::CASE:
+      case InsightsQLParser::CAST:
+      case InsightsQLParser::COHORT:
+      case InsightsQLParser::COLLATE:
+      case InsightsQLParser::CROSS:
+      case InsightsQLParser::CUBE:
+      case InsightsQLParser::CURRENT:
+      case InsightsQLParser::DATE:
+      case InsightsQLParser::DAY:
+      case InsightsQLParser::DESC:
+      case InsightsQLParser::DESCENDING:
+      case InsightsQLParser::DISTINCT:
+      case InsightsQLParser::ELSE:
+      case InsightsQLParser::END:
+      case InsightsQLParser::EXTRACT:
+      case InsightsQLParser::FINAL:
+      case InsightsQLParser::FIRST:
+      case InsightsQLParser::FOLLOWING:
+      case InsightsQLParser::FOR:
+      case InsightsQLParser::FROM:
+      case InsightsQLParser::FULL:
+      case InsightsQLParser::GROUP:
+      case InsightsQLParser::HAVING:
+      case InsightsQLParser::HOUR:
+      case InsightsQLParser::ID:
+      case InsightsQLParser::IF:
+      case InsightsQLParser::ILIKE:
+      case InsightsQLParser::IN:
+      case InsightsQLParser::INNER:
+      case InsightsQLParser::INTERVAL:
+      case InsightsQLParser::IS:
+      case InsightsQLParser::JOIN:
+      case InsightsQLParser::KEY:
+      case InsightsQLParser::LAST:
+      case InsightsQLParser::LEADING:
+      case InsightsQLParser::LEFT:
+      case InsightsQLParser::LIKE:
+      case InsightsQLParser::LIMIT:
+      case InsightsQLParser::MINUTE:
+      case InsightsQLParser::MONTH:
+      case InsightsQLParser::NOT:
+      case InsightsQLParser::NULLS:
+      case InsightsQLParser::OFFSET:
+      case InsightsQLParser::ON:
+      case InsightsQLParser::OR:
+      case InsightsQLParser::ORDER:
+      case InsightsQLParser::OUTER:
+      case InsightsQLParser::OVER:
+      case InsightsQLParser::PARTITION:
+      case InsightsQLParser::PRECEDING:
+      case InsightsQLParser::PREWHERE:
+      case InsightsQLParser::QUARTER:
+      case InsightsQLParser::RANGE:
+      case InsightsQLParser::RECURSIVE:
+      case InsightsQLParser::RETURN:
+      case InsightsQLParser::RIGHT:
+      case InsightsQLParser::ROLLUP:
+      case InsightsQLParser::ROW:
+      case InsightsQLParser::ROWS:
+      case InsightsQLParser::SAMPLE:
+      case InsightsQLParser::SECOND:
+      case InsightsQLParser::SELECT:
+      case InsightsQLParser::SEMI:
+      case InsightsQLParser::SETTINGS:
+      case InsightsQLParser::SUBSTRING:
+      case InsightsQLParser::THEN:
+      case InsightsQLParser::TIES:
+      case InsightsQLParser::TIMESTAMP:
+      case InsightsQLParser::TO:
+      case InsightsQLParser::TOP:
+      case InsightsQLParser::TOTALS:
+      case InsightsQLParser::TRAILING:
+      case InsightsQLParser::TRIM:
+      case InsightsQLParser::TRUNCATE:
+      case InsightsQLParser::UNBOUNDED:
+      case InsightsQLParser::UNION:
+      case InsightsQLParser::USING:
+      case InsightsQLParser::WEEK:
+      case InsightsQLParser::WHEN:
+      case InsightsQLParser::WHERE:
+      case InsightsQLParser::WINDOW:
+      case InsightsQLParser::WITH:
+      case InsightsQLParser::YEAR:
+      case InsightsQLParser::IDENTIFIER: {
         enterOuterAlt(_localctx, 2);
         setState(1201);
         _errHandler->sync(this);
@@ -10227,7 +10227,7 @@ HogQLParser::ColumnIdentifierContext* HogQLParser::columnIdentifier() {
           setState(1198);
           tableIdentifier();
           setState(1199);
-          match(HogQLParser::DOT);
+          match(InsightsQLParser::DOT);
           break;
         }
 
@@ -10255,42 +10255,42 @@ HogQLParser::ColumnIdentifierContext* HogQLParser::columnIdentifier() {
 
 //----------------- NestedIdentifierContext ------------------------------------------------------------------
 
-HogQLParser::NestedIdentifierContext::NestedIdentifierContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::NestedIdentifierContext::NestedIdentifierContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::IdentifierContext *> HogQLParser::NestedIdentifierContext::identifier() {
-  return getRuleContexts<HogQLParser::IdentifierContext>();
+std::vector<InsightsQLParser::IdentifierContext *> InsightsQLParser::NestedIdentifierContext::identifier() {
+  return getRuleContexts<InsightsQLParser::IdentifierContext>();
 }
 
-HogQLParser::IdentifierContext* HogQLParser::NestedIdentifierContext::identifier(size_t i) {
-  return getRuleContext<HogQLParser::IdentifierContext>(i);
+InsightsQLParser::IdentifierContext* InsightsQLParser::NestedIdentifierContext::identifier(size_t i) {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::NestedIdentifierContext::DOT() {
-  return getTokens(HogQLParser::DOT);
+std::vector<tree::TerminalNode *> InsightsQLParser::NestedIdentifierContext::DOT() {
+  return getTokens(InsightsQLParser::DOT);
 }
 
-tree::TerminalNode* HogQLParser::NestedIdentifierContext::DOT(size_t i) {
-  return getToken(HogQLParser::DOT, i);
-}
-
-
-size_t HogQLParser::NestedIdentifierContext::getRuleIndex() const {
-  return HogQLParser::RuleNestedIdentifier;
+tree::TerminalNode* InsightsQLParser::NestedIdentifierContext::DOT(size_t i) {
+  return getToken(InsightsQLParser::DOT, i);
 }
 
 
-std::any HogQLParser::NestedIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::NestedIdentifierContext::getRuleIndex() const {
+  return InsightsQLParser::RuleNestedIdentifier;
+}
+
+
+std::any InsightsQLParser::NestedIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitNestedIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::NestedIdentifierContext* HogQLParser::nestedIdentifier() {
+InsightsQLParser::NestedIdentifierContext* InsightsQLParser::nestedIdentifier() {
   NestedIdentifierContext *_localctx = _tracker.createInstance<NestedIdentifierContext>(_ctx, getState());
-  enterRule(_localctx, 140, HogQLParser::RuleNestedIdentifier);
+  enterRule(_localctx, 140, InsightsQLParser::RuleNestedIdentifier);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -10310,7 +10310,7 @@ HogQLParser::NestedIdentifierContext* HogQLParser::nestedIdentifier() {
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         setState(1207);
-        match(HogQLParser::DOT);
+        match(InsightsQLParser::DOT);
         setState(1208);
         identifier(); 
       }
@@ -10331,142 +10331,142 @@ HogQLParser::NestedIdentifierContext* HogQLParser::nestedIdentifier() {
 
 //----------------- TableExprContext ------------------------------------------------------------------
 
-HogQLParser::TableExprContext::TableExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TableExprContext::TableExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
 
-size_t HogQLParser::TableExprContext::getRuleIndex() const {
-  return HogQLParser::RuleTableExpr;
+size_t InsightsQLParser::TableExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTableExpr;
 }
 
-void HogQLParser::TableExprContext::copyFrom(TableExprContext *ctx) {
+void InsightsQLParser::TableExprContext::copyFrom(TableExprContext *ctx) {
   ParserRuleContext::copyFrom(ctx);
 }
 
 //----------------- TableExprTagContext ------------------------------------------------------------------
 
-HogQLParser::HogqlxTagElementContext* HogQLParser::TableExprTagContext::hogqlxTagElement() {
-  return getRuleContext<HogQLParser::HogqlxTagElementContext>(0);
+InsightsQLParser::HogqlxTagElementContext* InsightsQLParser::TableExprTagContext::insightsqlxTagElement() {
+  return getRuleContext<InsightsQLParser::HogqlxTagElementContext>(0);
 }
 
-HogQLParser::TableExprTagContext::TableExprTagContext(TableExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::TableExprTagContext::TableExprTagContext(TableExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::TableExprTagContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::TableExprTagContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableExprTag(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- TableExprIdentifierContext ------------------------------------------------------------------
 
-HogQLParser::TableIdentifierContext* HogQLParser::TableExprIdentifierContext::tableIdentifier() {
-  return getRuleContext<HogQLParser::TableIdentifierContext>(0);
+InsightsQLParser::TableIdentifierContext* InsightsQLParser::TableExprIdentifierContext::tableIdentifier() {
+  return getRuleContext<InsightsQLParser::TableIdentifierContext>(0);
 }
 
-HogQLParser::TableExprIdentifierContext::TableExprIdentifierContext(TableExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::TableExprIdentifierContext::TableExprIdentifierContext(TableExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::TableExprIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::TableExprIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableExprIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- TableExprPlaceholderContext ------------------------------------------------------------------
 
-HogQLParser::PlaceholderContext* HogQLParser::TableExprPlaceholderContext::placeholder() {
-  return getRuleContext<HogQLParser::PlaceholderContext>(0);
+InsightsQLParser::PlaceholderContext* InsightsQLParser::TableExprPlaceholderContext::placeholder() {
+  return getRuleContext<InsightsQLParser::PlaceholderContext>(0);
 }
 
-HogQLParser::TableExprPlaceholderContext::TableExprPlaceholderContext(TableExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::TableExprPlaceholderContext::TableExprPlaceholderContext(TableExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::TableExprPlaceholderContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::TableExprPlaceholderContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableExprPlaceholder(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- TableExprSubqueryContext ------------------------------------------------------------------
 
-tree::TerminalNode* HogQLParser::TableExprSubqueryContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::TableExprSubqueryContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-HogQLParser::SelectSetStmtContext* HogQLParser::TableExprSubqueryContext::selectSetStmt() {
-  return getRuleContext<HogQLParser::SelectSetStmtContext>(0);
+InsightsQLParser::SelectSetStmtContext* InsightsQLParser::TableExprSubqueryContext::selectSetStmt() {
+  return getRuleContext<InsightsQLParser::SelectSetStmtContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::TableExprSubqueryContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::TableExprSubqueryContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::TableExprSubqueryContext::TableExprSubqueryContext(TableExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::TableExprSubqueryContext::TableExprSubqueryContext(TableExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::TableExprSubqueryContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::TableExprSubqueryContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableExprSubquery(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- TableExprAliasContext ------------------------------------------------------------------
 
-HogQLParser::TableExprContext* HogQLParser::TableExprAliasContext::tableExpr() {
-  return getRuleContext<HogQLParser::TableExprContext>(0);
+InsightsQLParser::TableExprContext* InsightsQLParser::TableExprAliasContext::tableExpr() {
+  return getRuleContext<InsightsQLParser::TableExprContext>(0);
 }
 
-HogQLParser::AliasContext* HogQLParser::TableExprAliasContext::alias() {
-  return getRuleContext<HogQLParser::AliasContext>(0);
+InsightsQLParser::AliasContext* InsightsQLParser::TableExprAliasContext::alias() {
+  return getRuleContext<InsightsQLParser::AliasContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::TableExprAliasContext::AS() {
-  return getToken(HogQLParser::AS, 0);
+tree::TerminalNode* InsightsQLParser::TableExprAliasContext::AS() {
+  return getToken(InsightsQLParser::AS, 0);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::TableExprAliasContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::TableExprAliasContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-HogQLParser::TableExprAliasContext::TableExprAliasContext(TableExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::TableExprAliasContext::TableExprAliasContext(TableExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::TableExprAliasContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::TableExprAliasContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableExprAlias(this);
   else
     return visitor->visitChildren(this);
 }
 //----------------- TableExprFunctionContext ------------------------------------------------------------------
 
-HogQLParser::TableFunctionExprContext* HogQLParser::TableExprFunctionContext::tableFunctionExpr() {
-  return getRuleContext<HogQLParser::TableFunctionExprContext>(0);
+InsightsQLParser::TableFunctionExprContext* InsightsQLParser::TableExprFunctionContext::tableFunctionExpr() {
+  return getRuleContext<InsightsQLParser::TableFunctionExprContext>(0);
 }
 
-HogQLParser::TableExprFunctionContext::TableExprFunctionContext(TableExprContext *ctx) { copyFrom(ctx); }
+InsightsQLParser::TableExprFunctionContext::TableExprFunctionContext(TableExprContext *ctx) { copyFrom(ctx); }
 
 
-std::any HogQLParser::TableExprFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::TableExprFunctionContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableExprFunction(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TableExprContext* HogQLParser::tableExpr() {
+InsightsQLParser::TableExprContext* InsightsQLParser::tableExpr() {
    return tableExpr(0);
 }
 
-HogQLParser::TableExprContext* HogQLParser::tableExpr(int precedence) {
+InsightsQLParser::TableExprContext* InsightsQLParser::tableExpr(int precedence) {
   ParserRuleContext *parentContext = _ctx;
   size_t parentState = getState();
-  HogQLParser::TableExprContext *_localctx = _tracker.createInstance<TableExprContext>(_ctx, parentState);
-  HogQLParser::TableExprContext *previousContext = _localctx;
+  InsightsQLParser::TableExprContext *_localctx = _tracker.createInstance<TableExprContext>(_ctx, parentState);
+  InsightsQLParser::TableExprContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
   size_t startState = 142;
-  enterRecursionRule(_localctx, 142, HogQLParser::RuleTableExpr, precedence);
+  enterRecursionRule(_localctx, 142, InsightsQLParser::RuleTableExpr, precedence);
 
     
 
@@ -10507,11 +10507,11 @@ HogQLParser::TableExprContext* HogQLParser::tableExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(1217);
-      match(HogQLParser::LPAREN);
+      match(InsightsQLParser::LPAREN);
       setState(1218);
       selectSetStmt();
       setState(1219);
-      match(HogQLParser::RPAREN);
+      match(InsightsQLParser::RPAREN);
       break;
     }
 
@@ -10520,7 +10520,7 @@ HogQLParser::TableExprContext* HogQLParser::tableExpr(int precedence) {
       _ctx = _localctx;
       previousContext = _localctx;
       setState(1221);
-      hogqlxTagElement();
+      insightsqlxTagElement();
       break;
     }
 
@@ -10554,19 +10554,19 @@ HogQLParser::TableExprContext* HogQLParser::tableExpr(int precedence) {
         setState(1229);
         _errHandler->sync(this);
         switch (_input->LA(1)) {
-          case HogQLParser::DATE:
-          case HogQLParser::FIRST:
-          case HogQLParser::ID:
-          case HogQLParser::KEY:
-          case HogQLParser::IDENTIFIER: {
+          case InsightsQLParser::DATE:
+          case InsightsQLParser::FIRST:
+          case InsightsQLParser::ID:
+          case InsightsQLParser::KEY:
+          case InsightsQLParser::IDENTIFIER: {
             setState(1226);
             alias();
             break;
           }
 
-          case HogQLParser::AS: {
+          case InsightsQLParser::AS: {
             setState(1227);
-            match(HogQLParser::AS);
+            match(InsightsQLParser::AS);
             setState(1228);
             identifier();
             break;
@@ -10591,42 +10591,42 @@ HogQLParser::TableExprContext* HogQLParser::tableExpr(int precedence) {
 
 //----------------- TableFunctionExprContext ------------------------------------------------------------------
 
-HogQLParser::TableFunctionExprContext::TableFunctionExprContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TableFunctionExprContext::TableFunctionExprContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::IdentifierContext* HogQLParser::TableFunctionExprContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::TableFunctionExprContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::TableFunctionExprContext::LPAREN() {
-  return getToken(HogQLParser::LPAREN, 0);
+tree::TerminalNode* InsightsQLParser::TableFunctionExprContext::LPAREN() {
+  return getToken(InsightsQLParser::LPAREN, 0);
 }
 
-tree::TerminalNode* HogQLParser::TableFunctionExprContext::RPAREN() {
-  return getToken(HogQLParser::RPAREN, 0);
+tree::TerminalNode* InsightsQLParser::TableFunctionExprContext::RPAREN() {
+  return getToken(InsightsQLParser::RPAREN, 0);
 }
 
-HogQLParser::TableArgListContext* HogQLParser::TableFunctionExprContext::tableArgList() {
-  return getRuleContext<HogQLParser::TableArgListContext>(0);
-}
-
-
-size_t HogQLParser::TableFunctionExprContext::getRuleIndex() const {
-  return HogQLParser::RuleTableFunctionExpr;
+InsightsQLParser::TableArgListContext* InsightsQLParser::TableFunctionExprContext::tableArgList() {
+  return getRuleContext<InsightsQLParser::TableArgListContext>(0);
 }
 
 
-std::any HogQLParser::TableFunctionExprContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::TableFunctionExprContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTableFunctionExpr;
+}
+
+
+std::any InsightsQLParser::TableFunctionExprContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableFunctionExpr(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TableFunctionExprContext* HogQLParser::tableFunctionExpr() {
+InsightsQLParser::TableFunctionExprContext* InsightsQLParser::tableFunctionExpr() {
   TableFunctionExprContext *_localctx = _tracker.createInstance<TableFunctionExprContext>(_ctx, getState());
-  enterRule(_localctx, 144, HogQLParser::RuleTableFunctionExpr);
+  enterRule(_localctx, 144, InsightsQLParser::RuleTableFunctionExpr);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -10641,7 +10641,7 @@ HogQLParser::TableFunctionExprContext* HogQLParser::tableFunctionExpr() {
     setState(1236);
     identifier();
     setState(1237);
-    match(HogQLParser::LPAREN);
+    match(InsightsQLParser::LPAREN);
     setState(1239);
     _errHandler->sync(this);
 
@@ -10654,7 +10654,7 @@ HogQLParser::TableFunctionExprContext* HogQLParser::tableFunctionExpr() {
       tableArgList();
     }
     setState(1241);
-    match(HogQLParser::RPAREN);
+    match(InsightsQLParser::RPAREN);
    
   }
   catch (RecognitionException &e) {
@@ -10668,38 +10668,38 @@ HogQLParser::TableFunctionExprContext* HogQLParser::tableFunctionExpr() {
 
 //----------------- TableIdentifierContext ------------------------------------------------------------------
 
-HogQLParser::TableIdentifierContext::TableIdentifierContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TableIdentifierContext::TableIdentifierContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::NestedIdentifierContext* HogQLParser::TableIdentifierContext::nestedIdentifier() {
-  return getRuleContext<HogQLParser::NestedIdentifierContext>(0);
+InsightsQLParser::NestedIdentifierContext* InsightsQLParser::TableIdentifierContext::nestedIdentifier() {
+  return getRuleContext<InsightsQLParser::NestedIdentifierContext>(0);
 }
 
-HogQLParser::DatabaseIdentifierContext* HogQLParser::TableIdentifierContext::databaseIdentifier() {
-  return getRuleContext<HogQLParser::DatabaseIdentifierContext>(0);
+InsightsQLParser::DatabaseIdentifierContext* InsightsQLParser::TableIdentifierContext::databaseIdentifier() {
+  return getRuleContext<InsightsQLParser::DatabaseIdentifierContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::TableIdentifierContext::DOT() {
-  return getToken(HogQLParser::DOT, 0);
-}
-
-
-size_t HogQLParser::TableIdentifierContext::getRuleIndex() const {
-  return HogQLParser::RuleTableIdentifier;
+tree::TerminalNode* InsightsQLParser::TableIdentifierContext::DOT() {
+  return getToken(InsightsQLParser::DOT, 0);
 }
 
 
-std::any HogQLParser::TableIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::TableIdentifierContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTableIdentifier;
+}
+
+
+std::any InsightsQLParser::TableIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TableIdentifierContext* HogQLParser::tableIdentifier() {
+InsightsQLParser::TableIdentifierContext* InsightsQLParser::tableIdentifier() {
   TableIdentifierContext *_localctx = _tracker.createInstance<TableIdentifierContext>(_ctx, getState());
-  enterRule(_localctx, 146, HogQLParser::RuleTableIdentifier);
+  enterRule(_localctx, 146, InsightsQLParser::RuleTableIdentifier);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -10718,7 +10718,7 @@ HogQLParser::TableIdentifierContext* HogQLParser::tableIdentifier() {
       setState(1243);
       databaseIdentifier();
       setState(1244);
-      match(HogQLParser::DOT);
+      match(InsightsQLParser::DOT);
       break;
     }
 
@@ -10740,42 +10740,42 @@ HogQLParser::TableIdentifierContext* HogQLParser::tableIdentifier() {
 
 //----------------- TableArgListContext ------------------------------------------------------------------
 
-HogQLParser::TableArgListContext::TableArgListContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TableArgListContext::TableArgListContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-std::vector<HogQLParser::ColumnExprContext *> HogQLParser::TableArgListContext::columnExpr() {
-  return getRuleContexts<HogQLParser::ColumnExprContext>();
+std::vector<InsightsQLParser::ColumnExprContext *> InsightsQLParser::TableArgListContext::columnExpr() {
+  return getRuleContexts<InsightsQLParser::ColumnExprContext>();
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::TableArgListContext::columnExpr(size_t i) {
-  return getRuleContext<HogQLParser::ColumnExprContext>(i);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::TableArgListContext::columnExpr(size_t i) {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(i);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::TableArgListContext::COMMA() {
-  return getTokens(HogQLParser::COMMA);
+std::vector<tree::TerminalNode *> InsightsQLParser::TableArgListContext::COMMA() {
+  return getTokens(InsightsQLParser::COMMA);
 }
 
-tree::TerminalNode* HogQLParser::TableArgListContext::COMMA(size_t i) {
-  return getToken(HogQLParser::COMMA, i);
-}
-
-
-size_t HogQLParser::TableArgListContext::getRuleIndex() const {
-  return HogQLParser::RuleTableArgList;
+tree::TerminalNode* InsightsQLParser::TableArgListContext::COMMA(size_t i) {
+  return getToken(InsightsQLParser::COMMA, i);
 }
 
 
-std::any HogQLParser::TableArgListContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::TableArgListContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTableArgList;
+}
+
+
+std::any InsightsQLParser::TableArgListContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTableArgList(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TableArgListContext* HogQLParser::tableArgList() {
+InsightsQLParser::TableArgListContext* InsightsQLParser::tableArgList() {
   TableArgListContext *_localctx = _tracker.createInstance<TableArgListContext>(_ctx, getState());
-  enterRule(_localctx, 148, HogQLParser::RuleTableArgList);
+  enterRule(_localctx, 148, InsightsQLParser::RuleTableArgList);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -10796,7 +10796,7 @@ HogQLParser::TableArgListContext* HogQLParser::tableArgList() {
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         setState(1251);
-        match(HogQLParser::COMMA);
+        match(InsightsQLParser::COMMA);
         setState(1252);
         columnExpr(0); 
       }
@@ -10808,9 +10808,9 @@ HogQLParser::TableArgListContext* HogQLParser::tableArgList() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::COMMA) {
+    if (_la == InsightsQLParser::COMMA) {
       setState(1258);
-      match(HogQLParser::COMMA);
+      match(InsightsQLParser::COMMA);
     }
    
   }
@@ -10825,30 +10825,30 @@ HogQLParser::TableArgListContext* HogQLParser::tableArgList() {
 
 //----------------- DatabaseIdentifierContext ------------------------------------------------------------------
 
-HogQLParser::DatabaseIdentifierContext::DatabaseIdentifierContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::DatabaseIdentifierContext::DatabaseIdentifierContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::IdentifierContext* HogQLParser::DatabaseIdentifierContext::identifier() {
-  return getRuleContext<HogQLParser::IdentifierContext>(0);
+InsightsQLParser::IdentifierContext* InsightsQLParser::DatabaseIdentifierContext::identifier() {
+  return getRuleContext<InsightsQLParser::IdentifierContext>(0);
 }
 
 
-size_t HogQLParser::DatabaseIdentifierContext::getRuleIndex() const {
-  return HogQLParser::RuleDatabaseIdentifier;
+size_t InsightsQLParser::DatabaseIdentifierContext::getRuleIndex() const {
+  return InsightsQLParser::RuleDatabaseIdentifier;
 }
 
 
-std::any HogQLParser::DatabaseIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::DatabaseIdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitDatabaseIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::DatabaseIdentifierContext* HogQLParser::databaseIdentifier() {
+InsightsQLParser::DatabaseIdentifierContext* InsightsQLParser::databaseIdentifier() {
   DatabaseIdentifierContext *_localctx = _tracker.createInstance<DatabaseIdentifierContext>(_ctx, getState());
-  enterRule(_localctx, 150, HogQLParser::RuleDatabaseIdentifier);
+  enterRule(_localctx, 150, InsightsQLParser::RuleDatabaseIdentifier);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -10874,46 +10874,46 @@ HogQLParser::DatabaseIdentifierContext* HogQLParser::databaseIdentifier() {
 
 //----------------- FloatingLiteralContext ------------------------------------------------------------------
 
-HogQLParser::FloatingLiteralContext::FloatingLiteralContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::FloatingLiteralContext::FloatingLiteralContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::FloatingLiteralContext::FLOATING_LITERAL() {
-  return getToken(HogQLParser::FLOATING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::FloatingLiteralContext::FLOATING_LITERAL() {
+  return getToken(InsightsQLParser::FLOATING_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::FloatingLiteralContext::DOT() {
-  return getToken(HogQLParser::DOT, 0);
+tree::TerminalNode* InsightsQLParser::FloatingLiteralContext::DOT() {
+  return getToken(InsightsQLParser::DOT, 0);
 }
 
-std::vector<tree::TerminalNode *> HogQLParser::FloatingLiteralContext::DECIMAL_LITERAL() {
-  return getTokens(HogQLParser::DECIMAL_LITERAL);
+std::vector<tree::TerminalNode *> InsightsQLParser::FloatingLiteralContext::DECIMAL_LITERAL() {
+  return getTokens(InsightsQLParser::DECIMAL_LITERAL);
 }
 
-tree::TerminalNode* HogQLParser::FloatingLiteralContext::DECIMAL_LITERAL(size_t i) {
-  return getToken(HogQLParser::DECIMAL_LITERAL, i);
+tree::TerminalNode* InsightsQLParser::FloatingLiteralContext::DECIMAL_LITERAL(size_t i) {
+  return getToken(InsightsQLParser::DECIMAL_LITERAL, i);
 }
 
-tree::TerminalNode* HogQLParser::FloatingLiteralContext::OCTAL_LITERAL() {
-  return getToken(HogQLParser::OCTAL_LITERAL, 0);
-}
-
-
-size_t HogQLParser::FloatingLiteralContext::getRuleIndex() const {
-  return HogQLParser::RuleFloatingLiteral;
+tree::TerminalNode* InsightsQLParser::FloatingLiteralContext::OCTAL_LITERAL() {
+  return getToken(InsightsQLParser::OCTAL_LITERAL, 0);
 }
 
 
-std::any HogQLParser::FloatingLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::FloatingLiteralContext::getRuleIndex() const {
+  return InsightsQLParser::RuleFloatingLiteral;
+}
+
+
+std::any InsightsQLParser::FloatingLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitFloatingLiteral(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::FloatingLiteralContext* HogQLParser::floatingLiteral() {
+InsightsQLParser::FloatingLiteralContext* InsightsQLParser::floatingLiteral() {
   FloatingLiteralContext *_localctx = _tracker.createInstance<FloatingLiteralContext>(_ctx, getState());
-  enterRule(_localctx, 152, HogQLParser::RuleFloatingLiteral);
+  enterRule(_localctx, 152, InsightsQLParser::RuleFloatingLiteral);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -10927,22 +10927,22 @@ HogQLParser::FloatingLiteralContext* HogQLParser::floatingLiteral() {
     setState(1271);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::FLOATING_LITERAL: {
+      case InsightsQLParser::FLOATING_LITERAL: {
         enterOuterAlt(_localctx, 1);
         setState(1263);
-        match(HogQLParser::FLOATING_LITERAL);
+        match(InsightsQLParser::FLOATING_LITERAL);
         break;
       }
 
-      case HogQLParser::DOT: {
+      case InsightsQLParser::DOT: {
         enterOuterAlt(_localctx, 2);
         setState(1264);
-        match(HogQLParser::DOT);
+        match(InsightsQLParser::DOT);
         setState(1265);
         _la = _input->LA(1);
-        if (!(_la == HogQLParser::OCTAL_LITERAL
+        if (!(_la == InsightsQLParser::OCTAL_LITERAL
 
-        || _la == HogQLParser::DECIMAL_LITERAL)) {
+        || _la == InsightsQLParser::DECIMAL_LITERAL)) {
         _errHandler->recoverInline(this);
         }
         else {
@@ -10952,12 +10952,12 @@ HogQLParser::FloatingLiteralContext* HogQLParser::floatingLiteral() {
         break;
       }
 
-      case HogQLParser::DECIMAL_LITERAL: {
+      case InsightsQLParser::DECIMAL_LITERAL: {
         enterOuterAlt(_localctx, 3);
         setState(1266);
-        match(HogQLParser::DECIMAL_LITERAL);
+        match(InsightsQLParser::DECIMAL_LITERAL);
         setState(1267);
-        match(HogQLParser::DOT);
+        match(InsightsQLParser::DOT);
         setState(1269);
         _errHandler->sync(this);
 
@@ -10965,9 +10965,9 @@ HogQLParser::FloatingLiteralContext* HogQLParser::floatingLiteral() {
         case 1: {
           setState(1268);
           _la = _input->LA(1);
-          if (!(_la == HogQLParser::OCTAL_LITERAL
+          if (!(_la == InsightsQLParser::OCTAL_LITERAL
 
-          || _la == HogQLParser::DECIMAL_LITERAL)) {
+          || _la == InsightsQLParser::DECIMAL_LITERAL)) {
           _errHandler->recoverInline(this);
           }
           else {
@@ -10999,58 +10999,58 @@ HogQLParser::FloatingLiteralContext* HogQLParser::floatingLiteral() {
 
 //----------------- NumberLiteralContext ------------------------------------------------------------------
 
-HogQLParser::NumberLiteralContext::NumberLiteralContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::NumberLiteralContext::NumberLiteralContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::FloatingLiteralContext* HogQLParser::NumberLiteralContext::floatingLiteral() {
-  return getRuleContext<HogQLParser::FloatingLiteralContext>(0);
+InsightsQLParser::FloatingLiteralContext* InsightsQLParser::NumberLiteralContext::floatingLiteral() {
+  return getRuleContext<InsightsQLParser::FloatingLiteralContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::OCTAL_LITERAL() {
-  return getToken(HogQLParser::OCTAL_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::OCTAL_LITERAL() {
+  return getToken(InsightsQLParser::OCTAL_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::DECIMAL_LITERAL() {
-  return getToken(HogQLParser::DECIMAL_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::DECIMAL_LITERAL() {
+  return getToken(InsightsQLParser::DECIMAL_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::HEXADECIMAL_LITERAL() {
-  return getToken(HogQLParser::HEXADECIMAL_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::HEXADECIMAL_LITERAL() {
+  return getToken(InsightsQLParser::HEXADECIMAL_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::INF() {
-  return getToken(HogQLParser::INF, 0);
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::INF() {
+  return getToken(InsightsQLParser::INF, 0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::NAN_SQL() {
-  return getToken(HogQLParser::NAN_SQL, 0);
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::NAN_SQL() {
+  return getToken(InsightsQLParser::NAN_SQL, 0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::PLUS() {
-  return getToken(HogQLParser::PLUS, 0);
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::PLUS() {
+  return getToken(InsightsQLParser::PLUS, 0);
 }
 
-tree::TerminalNode* HogQLParser::NumberLiteralContext::DASH() {
-  return getToken(HogQLParser::DASH, 0);
-}
-
-
-size_t HogQLParser::NumberLiteralContext::getRuleIndex() const {
-  return HogQLParser::RuleNumberLiteral;
+tree::TerminalNode* InsightsQLParser::NumberLiteralContext::DASH() {
+  return getToken(InsightsQLParser::DASH, 0);
 }
 
 
-std::any HogQLParser::NumberLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::NumberLiteralContext::getRuleIndex() const {
+  return InsightsQLParser::RuleNumberLiteral;
+}
+
+
+std::any InsightsQLParser::NumberLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitNumberLiteral(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::NumberLiteralContext* HogQLParser::numberLiteral() {
+InsightsQLParser::NumberLiteralContext* InsightsQLParser::numberLiteral() {
   NumberLiteralContext *_localctx = _tracker.createInstance<NumberLiteralContext>(_ctx, getState());
-  enterRule(_localctx, 154, HogQLParser::RuleNumberLiteral);
+  enterRule(_localctx, 154, InsightsQLParser::RuleNumberLiteral);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -11066,14 +11066,14 @@ HogQLParser::NumberLiteralContext* HogQLParser::numberLiteral() {
     _errHandler->sync(this);
 
     _la = _input->LA(1);
-    if (_la == HogQLParser::DASH
+    if (_la == InsightsQLParser::DASH
 
-    || _la == HogQLParser::PLUS) {
+    || _la == InsightsQLParser::PLUS) {
       setState(1273);
       _la = _input->LA(1);
-      if (!(_la == HogQLParser::DASH
+      if (!(_la == InsightsQLParser::DASH
 
-      || _la == HogQLParser::PLUS)) {
+      || _la == InsightsQLParser::PLUS)) {
       _errHandler->recoverInline(this);
       }
       else {
@@ -11092,31 +11092,31 @@ HogQLParser::NumberLiteralContext* HogQLParser::numberLiteral() {
 
     case 2: {
       setState(1277);
-      match(HogQLParser::OCTAL_LITERAL);
+      match(InsightsQLParser::OCTAL_LITERAL);
       break;
     }
 
     case 3: {
       setState(1278);
-      match(HogQLParser::DECIMAL_LITERAL);
+      match(InsightsQLParser::DECIMAL_LITERAL);
       break;
     }
 
     case 4: {
       setState(1279);
-      match(HogQLParser::HEXADECIMAL_LITERAL);
+      match(InsightsQLParser::HEXADECIMAL_LITERAL);
       break;
     }
 
     case 5: {
       setState(1280);
-      match(HogQLParser::INF);
+      match(InsightsQLParser::INF);
       break;
     }
 
     case 6: {
       setState(1281);
-      match(HogQLParser::NAN_SQL);
+      match(InsightsQLParser::NAN_SQL);
       break;
     }
 
@@ -11136,38 +11136,38 @@ HogQLParser::NumberLiteralContext* HogQLParser::numberLiteral() {
 
 //----------------- LiteralContext ------------------------------------------------------------------
 
-HogQLParser::LiteralContext::LiteralContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::LiteralContext::LiteralContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::NumberLiteralContext* HogQLParser::LiteralContext::numberLiteral() {
-  return getRuleContext<HogQLParser::NumberLiteralContext>(0);
+InsightsQLParser::NumberLiteralContext* InsightsQLParser::LiteralContext::numberLiteral() {
+  return getRuleContext<InsightsQLParser::NumberLiteralContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::LiteralContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::LiteralContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::LiteralContext::NULL_SQL() {
-  return getToken(HogQLParser::NULL_SQL, 0);
-}
-
-
-size_t HogQLParser::LiteralContext::getRuleIndex() const {
-  return HogQLParser::RuleLiteral;
+tree::TerminalNode* InsightsQLParser::LiteralContext::NULL_SQL() {
+  return getToken(InsightsQLParser::NULL_SQL, 0);
 }
 
 
-std::any HogQLParser::LiteralContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::LiteralContext::getRuleIndex() const {
+  return InsightsQLParser::RuleLiteral;
+}
+
+
+std::any InsightsQLParser::LiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitLiteral(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::LiteralContext* HogQLParser::literal() {
+InsightsQLParser::LiteralContext* InsightsQLParser::literal() {
   LiteralContext *_localctx = _tracker.createInstance<LiteralContext>(_ctx, getState());
-  enterRule(_localctx, 156, HogQLParser::RuleLiteral);
+  enterRule(_localctx, 156, InsightsQLParser::RuleLiteral);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -11180,32 +11180,32 @@ HogQLParser::LiteralContext* HogQLParser::literal() {
     setState(1287);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::INF:
-      case HogQLParser::NAN_SQL:
-      case HogQLParser::FLOATING_LITERAL:
-      case HogQLParser::OCTAL_LITERAL:
-      case HogQLParser::DECIMAL_LITERAL:
-      case HogQLParser::HEXADECIMAL_LITERAL:
-      case HogQLParser::DASH:
-      case HogQLParser::DOT:
-      case HogQLParser::PLUS: {
+      case InsightsQLParser::INF:
+      case InsightsQLParser::NAN_SQL:
+      case InsightsQLParser::FLOATING_LITERAL:
+      case InsightsQLParser::OCTAL_LITERAL:
+      case InsightsQLParser::DECIMAL_LITERAL:
+      case InsightsQLParser::HEXADECIMAL_LITERAL:
+      case InsightsQLParser::DASH:
+      case InsightsQLParser::DOT:
+      case InsightsQLParser::PLUS: {
         enterOuterAlt(_localctx, 1);
         setState(1284);
         numberLiteral();
         break;
       }
 
-      case HogQLParser::STRING_LITERAL: {
+      case InsightsQLParser::STRING_LITERAL: {
         enterOuterAlt(_localctx, 2);
         setState(1285);
-        match(HogQLParser::STRING_LITERAL);
+        match(InsightsQLParser::STRING_LITERAL);
         break;
       }
 
-      case HogQLParser::NULL_SQL: {
+      case InsightsQLParser::NULL_SQL: {
         enterOuterAlt(_localctx, 3);
         setState(1286);
-        match(HogQLParser::NULL_SQL);
+        match(InsightsQLParser::NULL_SQL);
         break;
       }
 
@@ -11225,58 +11225,58 @@ HogQLParser::LiteralContext* HogQLParser::literal() {
 
 //----------------- IntervalContext ------------------------------------------------------------------
 
-HogQLParser::IntervalContext::IntervalContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::IntervalContext::IntervalContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::SECOND() {
-  return getToken(HogQLParser::SECOND, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::SECOND() {
+  return getToken(InsightsQLParser::SECOND, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::MINUTE() {
-  return getToken(HogQLParser::MINUTE, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::MINUTE() {
+  return getToken(InsightsQLParser::MINUTE, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::HOUR() {
-  return getToken(HogQLParser::HOUR, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::HOUR() {
+  return getToken(InsightsQLParser::HOUR, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::DAY() {
-  return getToken(HogQLParser::DAY, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::DAY() {
+  return getToken(InsightsQLParser::DAY, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::WEEK() {
-  return getToken(HogQLParser::WEEK, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::WEEK() {
+  return getToken(InsightsQLParser::WEEK, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::MONTH() {
-  return getToken(HogQLParser::MONTH, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::MONTH() {
+  return getToken(InsightsQLParser::MONTH, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::QUARTER() {
-  return getToken(HogQLParser::QUARTER, 0);
+tree::TerminalNode* InsightsQLParser::IntervalContext::QUARTER() {
+  return getToken(InsightsQLParser::QUARTER, 0);
 }
 
-tree::TerminalNode* HogQLParser::IntervalContext::YEAR() {
-  return getToken(HogQLParser::YEAR, 0);
-}
-
-
-size_t HogQLParser::IntervalContext::getRuleIndex() const {
-  return HogQLParser::RuleInterval;
+tree::TerminalNode* InsightsQLParser::IntervalContext::YEAR() {
+  return getToken(InsightsQLParser::YEAR, 0);
 }
 
 
-std::any HogQLParser::IntervalContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::IntervalContext::getRuleIndex() const {
+  return InsightsQLParser::RuleInterval;
+}
+
+
+std::any InsightsQLParser::IntervalContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitInterval(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::IntervalContext* HogQLParser::interval() {
+InsightsQLParser::IntervalContext* InsightsQLParser::interval() {
   IntervalContext *_localctx = _tracker.createInstance<IntervalContext>(_ctx, getState());
-  enterRule(_localctx, 158, HogQLParser::RuleInterval);
+  enterRule(_localctx, 158, InsightsQLParser::RuleInterval);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -11312,370 +11312,370 @@ HogQLParser::IntervalContext* HogQLParser::interval() {
 
 //----------------- KeywordContext ------------------------------------------------------------------
 
-HogQLParser::KeywordContext::KeywordContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::KeywordContext::KeywordContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ALL() {
-  return getToken(HogQLParser::ALL, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ALL() {
+  return getToken(InsightsQLParser::ALL, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::AND() {
-  return getToken(HogQLParser::AND, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::AND() {
+  return getToken(InsightsQLParser::AND, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ANTI() {
-  return getToken(HogQLParser::ANTI, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ANTI() {
+  return getToken(InsightsQLParser::ANTI, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ANY() {
-  return getToken(HogQLParser::ANY, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ANY() {
+  return getToken(InsightsQLParser::ANY, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ARRAY() {
-  return getToken(HogQLParser::ARRAY, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ARRAY() {
+  return getToken(InsightsQLParser::ARRAY, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::AS() {
-  return getToken(HogQLParser::AS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::AS() {
+  return getToken(InsightsQLParser::AS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ASCENDING() {
-  return getToken(HogQLParser::ASCENDING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ASCENDING() {
+  return getToken(InsightsQLParser::ASCENDING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ASOF() {
-  return getToken(HogQLParser::ASOF, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ASOF() {
+  return getToken(InsightsQLParser::ASOF, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::BETWEEN() {
-  return getToken(HogQLParser::BETWEEN, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::BETWEEN() {
+  return getToken(InsightsQLParser::BETWEEN, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::BOTH() {
-  return getToken(HogQLParser::BOTH, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::BOTH() {
+  return getToken(InsightsQLParser::BOTH, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::BY() {
-  return getToken(HogQLParser::BY, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::BY() {
+  return getToken(InsightsQLParser::BY, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::CASE() {
-  return getToken(HogQLParser::CASE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::CASE() {
+  return getToken(InsightsQLParser::CASE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::CAST() {
-  return getToken(HogQLParser::CAST, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::CAST() {
+  return getToken(InsightsQLParser::CAST, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::COHORT() {
-  return getToken(HogQLParser::COHORT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::COHORT() {
+  return getToken(InsightsQLParser::COHORT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::COLLATE() {
-  return getToken(HogQLParser::COLLATE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::COLLATE() {
+  return getToken(InsightsQLParser::COLLATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::CROSS() {
-  return getToken(HogQLParser::CROSS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::CROSS() {
+  return getToken(InsightsQLParser::CROSS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::CUBE() {
-  return getToken(HogQLParser::CUBE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::CUBE() {
+  return getToken(InsightsQLParser::CUBE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::CURRENT() {
-  return getToken(HogQLParser::CURRENT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::CURRENT() {
+  return getToken(InsightsQLParser::CURRENT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::DATE() {
-  return getToken(HogQLParser::DATE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::DATE() {
+  return getToken(InsightsQLParser::DATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::DESC() {
-  return getToken(HogQLParser::DESC, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::DESC() {
+  return getToken(InsightsQLParser::DESC, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::DESCENDING() {
-  return getToken(HogQLParser::DESCENDING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::DESCENDING() {
+  return getToken(InsightsQLParser::DESCENDING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::DISTINCT() {
-  return getToken(HogQLParser::DISTINCT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::DISTINCT() {
+  return getToken(InsightsQLParser::DISTINCT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ELSE() {
-  return getToken(HogQLParser::ELSE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ELSE() {
+  return getToken(InsightsQLParser::ELSE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::END() {
-  return getToken(HogQLParser::END, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::END() {
+  return getToken(InsightsQLParser::END, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::EXTRACT() {
-  return getToken(HogQLParser::EXTRACT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::EXTRACT() {
+  return getToken(InsightsQLParser::EXTRACT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::FINAL() {
-  return getToken(HogQLParser::FINAL, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::FINAL() {
+  return getToken(InsightsQLParser::FINAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::FIRST() {
-  return getToken(HogQLParser::FIRST, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::FIRST() {
+  return getToken(InsightsQLParser::FIRST, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::FOR() {
-  return getToken(HogQLParser::FOR, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::FOR() {
+  return getToken(InsightsQLParser::FOR, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::FOLLOWING() {
-  return getToken(HogQLParser::FOLLOWING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::FOLLOWING() {
+  return getToken(InsightsQLParser::FOLLOWING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::FROM() {
-  return getToken(HogQLParser::FROM, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::FROM() {
+  return getToken(InsightsQLParser::FROM, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::FULL() {
-  return getToken(HogQLParser::FULL, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::FULL() {
+  return getToken(InsightsQLParser::FULL, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::GROUP() {
-  return getToken(HogQLParser::GROUP, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::GROUP() {
+  return getToken(InsightsQLParser::GROUP, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::HAVING() {
-  return getToken(HogQLParser::HAVING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::HAVING() {
+  return getToken(InsightsQLParser::HAVING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ID() {
-  return getToken(HogQLParser::ID, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ID() {
+  return getToken(InsightsQLParser::ID, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::IS() {
-  return getToken(HogQLParser::IS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::IS() {
+  return getToken(InsightsQLParser::IS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::IF() {
-  return getToken(HogQLParser::IF, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::IF() {
+  return getToken(InsightsQLParser::IF, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ILIKE() {
-  return getToken(HogQLParser::ILIKE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ILIKE() {
+  return getToken(InsightsQLParser::ILIKE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::IN() {
-  return getToken(HogQLParser::IN, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::IN() {
+  return getToken(InsightsQLParser::IN, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::INNER() {
-  return getToken(HogQLParser::INNER, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::INNER() {
+  return getToken(InsightsQLParser::INNER, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::INTERVAL() {
-  return getToken(HogQLParser::INTERVAL, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::INTERVAL() {
+  return getToken(InsightsQLParser::INTERVAL, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::JOIN() {
-  return getToken(HogQLParser::JOIN, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::JOIN() {
+  return getToken(InsightsQLParser::JOIN, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::KEY() {
-  return getToken(HogQLParser::KEY, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::KEY() {
+  return getToken(InsightsQLParser::KEY, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::LAST() {
-  return getToken(HogQLParser::LAST, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::LAST() {
+  return getToken(InsightsQLParser::LAST, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::LEADING() {
-  return getToken(HogQLParser::LEADING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::LEADING() {
+  return getToken(InsightsQLParser::LEADING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::LEFT() {
-  return getToken(HogQLParser::LEFT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::LEFT() {
+  return getToken(InsightsQLParser::LEFT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::LIKE() {
-  return getToken(HogQLParser::LIKE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::LIKE() {
+  return getToken(InsightsQLParser::LIKE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::LIMIT() {
-  return getToken(HogQLParser::LIMIT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::LIMIT() {
+  return getToken(InsightsQLParser::LIMIT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::NOT() {
-  return getToken(HogQLParser::NOT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::NOT() {
+  return getToken(InsightsQLParser::NOT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::NULLS() {
-  return getToken(HogQLParser::NULLS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::NULLS() {
+  return getToken(InsightsQLParser::NULLS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::OFFSET() {
-  return getToken(HogQLParser::OFFSET, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::OFFSET() {
+  return getToken(InsightsQLParser::OFFSET, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ON() {
-  return getToken(HogQLParser::ON, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ON() {
+  return getToken(InsightsQLParser::ON, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::OR() {
-  return getToken(HogQLParser::OR, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::OR() {
+  return getToken(InsightsQLParser::OR, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ORDER() {
-  return getToken(HogQLParser::ORDER, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ORDER() {
+  return getToken(InsightsQLParser::ORDER, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::OUTER() {
-  return getToken(HogQLParser::OUTER, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::OUTER() {
+  return getToken(InsightsQLParser::OUTER, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::OVER() {
-  return getToken(HogQLParser::OVER, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::OVER() {
+  return getToken(InsightsQLParser::OVER, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::PARTITION() {
-  return getToken(HogQLParser::PARTITION, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::PARTITION() {
+  return getToken(InsightsQLParser::PARTITION, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::PRECEDING() {
-  return getToken(HogQLParser::PRECEDING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::PRECEDING() {
+  return getToken(InsightsQLParser::PRECEDING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::PREWHERE() {
-  return getToken(HogQLParser::PREWHERE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::PREWHERE() {
+  return getToken(InsightsQLParser::PREWHERE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::RANGE() {
-  return getToken(HogQLParser::RANGE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::RANGE() {
+  return getToken(InsightsQLParser::RANGE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::RECURSIVE() {
-  return getToken(HogQLParser::RECURSIVE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::RECURSIVE() {
+  return getToken(InsightsQLParser::RECURSIVE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::RETURN() {
-  return getToken(HogQLParser::RETURN, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::RETURN() {
+  return getToken(InsightsQLParser::RETURN, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::RIGHT() {
-  return getToken(HogQLParser::RIGHT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::RIGHT() {
+  return getToken(InsightsQLParser::RIGHT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ROLLUP() {
-  return getToken(HogQLParser::ROLLUP, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ROLLUP() {
+  return getToken(InsightsQLParser::ROLLUP, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ROW() {
-  return getToken(HogQLParser::ROW, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ROW() {
+  return getToken(InsightsQLParser::ROW, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::ROWS() {
-  return getToken(HogQLParser::ROWS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::ROWS() {
+  return getToken(InsightsQLParser::ROWS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::SAMPLE() {
-  return getToken(HogQLParser::SAMPLE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::SAMPLE() {
+  return getToken(InsightsQLParser::SAMPLE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::SELECT() {
-  return getToken(HogQLParser::SELECT, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::SELECT() {
+  return getToken(InsightsQLParser::SELECT, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::SEMI() {
-  return getToken(HogQLParser::SEMI, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::SEMI() {
+  return getToken(InsightsQLParser::SEMI, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::SETTINGS() {
-  return getToken(HogQLParser::SETTINGS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::SETTINGS() {
+  return getToken(InsightsQLParser::SETTINGS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::SUBSTRING() {
-  return getToken(HogQLParser::SUBSTRING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::SUBSTRING() {
+  return getToken(InsightsQLParser::SUBSTRING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::THEN() {
-  return getToken(HogQLParser::THEN, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::THEN() {
+  return getToken(InsightsQLParser::THEN, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TIES() {
-  return getToken(HogQLParser::TIES, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TIES() {
+  return getToken(InsightsQLParser::TIES, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TIMESTAMP() {
-  return getToken(HogQLParser::TIMESTAMP, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TIMESTAMP() {
+  return getToken(InsightsQLParser::TIMESTAMP, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TOTALS() {
-  return getToken(HogQLParser::TOTALS, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TOTALS() {
+  return getToken(InsightsQLParser::TOTALS, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TRAILING() {
-  return getToken(HogQLParser::TRAILING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TRAILING() {
+  return getToken(InsightsQLParser::TRAILING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TRIM() {
-  return getToken(HogQLParser::TRIM, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TRIM() {
+  return getToken(InsightsQLParser::TRIM, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TRUNCATE() {
-  return getToken(HogQLParser::TRUNCATE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TRUNCATE() {
+  return getToken(InsightsQLParser::TRUNCATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TO() {
-  return getToken(HogQLParser::TO, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TO() {
+  return getToken(InsightsQLParser::TO, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::TOP() {
-  return getToken(HogQLParser::TOP, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::TOP() {
+  return getToken(InsightsQLParser::TOP, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::UNBOUNDED() {
-  return getToken(HogQLParser::UNBOUNDED, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::UNBOUNDED() {
+  return getToken(InsightsQLParser::UNBOUNDED, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::UNION() {
-  return getToken(HogQLParser::UNION, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::UNION() {
+  return getToken(InsightsQLParser::UNION, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::USING() {
-  return getToken(HogQLParser::USING, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::USING() {
+  return getToken(InsightsQLParser::USING, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::WHEN() {
-  return getToken(HogQLParser::WHEN, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::WHEN() {
+  return getToken(InsightsQLParser::WHEN, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::WHERE() {
-  return getToken(HogQLParser::WHERE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::WHERE() {
+  return getToken(InsightsQLParser::WHERE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::WINDOW() {
-  return getToken(HogQLParser::WINDOW, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::WINDOW() {
+  return getToken(InsightsQLParser::WINDOW, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordContext::WITH() {
-  return getToken(HogQLParser::WITH, 0);
+tree::TerminalNode* InsightsQLParser::KeywordContext::WITH() {
+  return getToken(InsightsQLParser::WITH, 0);
 }
 
 
-size_t HogQLParser::KeywordContext::getRuleIndex() const {
-  return HogQLParser::RuleKeyword;
+size_t InsightsQLParser::KeywordContext::getRuleIndex() const {
+  return InsightsQLParser::RuleKeyword;
 }
 
 
-std::any HogQLParser::KeywordContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+std::any InsightsQLParser::KeywordContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitKeyword(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::KeywordContext* HogQLParser::keyword() {
+InsightsQLParser::KeywordContext* InsightsQLParser::keyword() {
   KeywordContext *_localctx = _tracker.createInstance<KeywordContext>(_ctx, getState());
-  enterRule(_localctx, 160, HogQLParser::RuleKeyword);
+  enterRule(_localctx, 160, InsightsQLParser::RuleKeyword);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -11711,42 +11711,42 @@ HogQLParser::KeywordContext* HogQLParser::keyword() {
 
 //----------------- KeywordForAliasContext ------------------------------------------------------------------
 
-HogQLParser::KeywordForAliasContext::KeywordForAliasContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::KeywordForAliasContext::KeywordForAliasContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::KeywordForAliasContext::DATE() {
-  return getToken(HogQLParser::DATE, 0);
+tree::TerminalNode* InsightsQLParser::KeywordForAliasContext::DATE() {
+  return getToken(InsightsQLParser::DATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordForAliasContext::FIRST() {
-  return getToken(HogQLParser::FIRST, 0);
+tree::TerminalNode* InsightsQLParser::KeywordForAliasContext::FIRST() {
+  return getToken(InsightsQLParser::FIRST, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordForAliasContext::ID() {
-  return getToken(HogQLParser::ID, 0);
+tree::TerminalNode* InsightsQLParser::KeywordForAliasContext::ID() {
+  return getToken(InsightsQLParser::ID, 0);
 }
 
-tree::TerminalNode* HogQLParser::KeywordForAliasContext::KEY() {
-  return getToken(HogQLParser::KEY, 0);
-}
-
-
-size_t HogQLParser::KeywordForAliasContext::getRuleIndex() const {
-  return HogQLParser::RuleKeywordForAlias;
+tree::TerminalNode* InsightsQLParser::KeywordForAliasContext::KEY() {
+  return getToken(InsightsQLParser::KEY, 0);
 }
 
 
-std::any HogQLParser::KeywordForAliasContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::KeywordForAliasContext::getRuleIndex() const {
+  return InsightsQLParser::RuleKeywordForAlias;
+}
+
+
+std::any InsightsQLParser::KeywordForAliasContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitKeywordForAlias(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::KeywordForAliasContext* HogQLParser::keywordForAlias() {
+InsightsQLParser::KeywordForAliasContext* InsightsQLParser::keywordForAlias() {
   KeywordForAliasContext *_localctx = _tracker.createInstance<KeywordForAliasContext>(_ctx, getState());
-  enterRule(_localctx, 162, HogQLParser::RuleKeywordForAlias);
+  enterRule(_localctx, 162, InsightsQLParser::RuleKeywordForAlias);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -11781,34 +11781,34 @@ HogQLParser::KeywordForAliasContext* HogQLParser::keywordForAlias() {
 
 //----------------- AliasContext ------------------------------------------------------------------
 
-HogQLParser::AliasContext::AliasContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::AliasContext::AliasContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::AliasContext::IDENTIFIER() {
-  return getToken(HogQLParser::IDENTIFIER, 0);
+tree::TerminalNode* InsightsQLParser::AliasContext::IDENTIFIER() {
+  return getToken(InsightsQLParser::IDENTIFIER, 0);
 }
 
-HogQLParser::KeywordForAliasContext* HogQLParser::AliasContext::keywordForAlias() {
-  return getRuleContext<HogQLParser::KeywordForAliasContext>(0);
-}
-
-
-size_t HogQLParser::AliasContext::getRuleIndex() const {
-  return HogQLParser::RuleAlias;
+InsightsQLParser::KeywordForAliasContext* InsightsQLParser::AliasContext::keywordForAlias() {
+  return getRuleContext<InsightsQLParser::KeywordForAliasContext>(0);
 }
 
 
-std::any HogQLParser::AliasContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::AliasContext::getRuleIndex() const {
+  return InsightsQLParser::RuleAlias;
+}
+
+
+std::any InsightsQLParser::AliasContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitAlias(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::AliasContext* HogQLParser::alias() {
+InsightsQLParser::AliasContext* InsightsQLParser::alias() {
   AliasContext *_localctx = _tracker.createInstance<AliasContext>(_ctx, getState());
-  enterRule(_localctx, 164, HogQLParser::RuleAlias);
+  enterRule(_localctx, 164, InsightsQLParser::RuleAlias);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -11821,17 +11821,17 @@ HogQLParser::AliasContext* HogQLParser::alias() {
     setState(1297);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::IDENTIFIER: {
+      case InsightsQLParser::IDENTIFIER: {
         enterOuterAlt(_localctx, 1);
         setState(1295);
-        match(HogQLParser::IDENTIFIER);
+        match(InsightsQLParser::IDENTIFIER);
         break;
       }
 
-      case HogQLParser::DATE:
-      case HogQLParser::FIRST:
-      case HogQLParser::ID:
-      case HogQLParser::KEY: {
+      case InsightsQLParser::DATE:
+      case InsightsQLParser::FIRST:
+      case InsightsQLParser::ID:
+      case InsightsQLParser::KEY: {
         enterOuterAlt(_localctx, 2);
         setState(1296);
         keywordForAlias();
@@ -11854,38 +11854,38 @@ HogQLParser::AliasContext* HogQLParser::alias() {
 
 //----------------- IdentifierContext ------------------------------------------------------------------
 
-HogQLParser::IdentifierContext::IdentifierContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::IdentifierContext::IdentifierContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::IdentifierContext::IDENTIFIER() {
-  return getToken(HogQLParser::IDENTIFIER, 0);
+tree::TerminalNode* InsightsQLParser::IdentifierContext::IDENTIFIER() {
+  return getToken(InsightsQLParser::IDENTIFIER, 0);
 }
 
-HogQLParser::IntervalContext* HogQLParser::IdentifierContext::interval() {
-  return getRuleContext<HogQLParser::IntervalContext>(0);
+InsightsQLParser::IntervalContext* InsightsQLParser::IdentifierContext::interval() {
+  return getRuleContext<InsightsQLParser::IntervalContext>(0);
 }
 
-HogQLParser::KeywordContext* HogQLParser::IdentifierContext::keyword() {
-  return getRuleContext<HogQLParser::KeywordContext>(0);
-}
-
-
-size_t HogQLParser::IdentifierContext::getRuleIndex() const {
-  return HogQLParser::RuleIdentifier;
+InsightsQLParser::KeywordContext* InsightsQLParser::IdentifierContext::keyword() {
+  return getRuleContext<InsightsQLParser::KeywordContext>(0);
 }
 
 
-std::any HogQLParser::IdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::IdentifierContext::getRuleIndex() const {
+  return InsightsQLParser::RuleIdentifier;
+}
+
+
+std::any InsightsQLParser::IdentifierContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitIdentifier(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::IdentifierContext* HogQLParser::identifier() {
+InsightsQLParser::IdentifierContext* InsightsQLParser::identifier() {
   IdentifierContext *_localctx = _tracker.createInstance<IdentifierContext>(_ctx, getState());
-  enterRule(_localctx, 166, HogQLParser::RuleIdentifier);
+  enterRule(_localctx, 166, InsightsQLParser::RuleIdentifier);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -11898,113 +11898,113 @@ HogQLParser::IdentifierContext* HogQLParser::identifier() {
     setState(1302);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::IDENTIFIER: {
+      case InsightsQLParser::IDENTIFIER: {
         enterOuterAlt(_localctx, 1);
         setState(1299);
-        match(HogQLParser::IDENTIFIER);
+        match(InsightsQLParser::IDENTIFIER);
         break;
       }
 
-      case HogQLParser::DAY:
-      case HogQLParser::HOUR:
-      case HogQLParser::MINUTE:
-      case HogQLParser::MONTH:
-      case HogQLParser::QUARTER:
-      case HogQLParser::SECOND:
-      case HogQLParser::WEEK:
-      case HogQLParser::YEAR: {
+      case InsightsQLParser::DAY:
+      case InsightsQLParser::HOUR:
+      case InsightsQLParser::MINUTE:
+      case InsightsQLParser::MONTH:
+      case InsightsQLParser::QUARTER:
+      case InsightsQLParser::SECOND:
+      case InsightsQLParser::WEEK:
+      case InsightsQLParser::YEAR: {
         enterOuterAlt(_localctx, 2);
         setState(1300);
         interval();
         break;
       }
 
-      case HogQLParser::ALL:
-      case HogQLParser::AND:
-      case HogQLParser::ANTI:
-      case HogQLParser::ANY:
-      case HogQLParser::ARRAY:
-      case HogQLParser::AS:
-      case HogQLParser::ASCENDING:
-      case HogQLParser::ASOF:
-      case HogQLParser::BETWEEN:
-      case HogQLParser::BOTH:
-      case HogQLParser::BY:
-      case HogQLParser::CASE:
-      case HogQLParser::CAST:
-      case HogQLParser::COHORT:
-      case HogQLParser::COLLATE:
-      case HogQLParser::CROSS:
-      case HogQLParser::CUBE:
-      case HogQLParser::CURRENT:
-      case HogQLParser::DATE:
-      case HogQLParser::DESC:
-      case HogQLParser::DESCENDING:
-      case HogQLParser::DISTINCT:
-      case HogQLParser::ELSE:
-      case HogQLParser::END:
-      case HogQLParser::EXTRACT:
-      case HogQLParser::FINAL:
-      case HogQLParser::FIRST:
-      case HogQLParser::FOLLOWING:
-      case HogQLParser::FOR:
-      case HogQLParser::FROM:
-      case HogQLParser::FULL:
-      case HogQLParser::GROUP:
-      case HogQLParser::HAVING:
-      case HogQLParser::ID:
-      case HogQLParser::IF:
-      case HogQLParser::ILIKE:
-      case HogQLParser::IN:
-      case HogQLParser::INNER:
-      case HogQLParser::INTERVAL:
-      case HogQLParser::IS:
-      case HogQLParser::JOIN:
-      case HogQLParser::KEY:
-      case HogQLParser::LAST:
-      case HogQLParser::LEADING:
-      case HogQLParser::LEFT:
-      case HogQLParser::LIKE:
-      case HogQLParser::LIMIT:
-      case HogQLParser::NOT:
-      case HogQLParser::NULLS:
-      case HogQLParser::OFFSET:
-      case HogQLParser::ON:
-      case HogQLParser::OR:
-      case HogQLParser::ORDER:
-      case HogQLParser::OUTER:
-      case HogQLParser::OVER:
-      case HogQLParser::PARTITION:
-      case HogQLParser::PRECEDING:
-      case HogQLParser::PREWHERE:
-      case HogQLParser::RANGE:
-      case HogQLParser::RECURSIVE:
-      case HogQLParser::RETURN:
-      case HogQLParser::RIGHT:
-      case HogQLParser::ROLLUP:
-      case HogQLParser::ROW:
-      case HogQLParser::ROWS:
-      case HogQLParser::SAMPLE:
-      case HogQLParser::SELECT:
-      case HogQLParser::SEMI:
-      case HogQLParser::SETTINGS:
-      case HogQLParser::SUBSTRING:
-      case HogQLParser::THEN:
-      case HogQLParser::TIES:
-      case HogQLParser::TIMESTAMP:
-      case HogQLParser::TO:
-      case HogQLParser::TOP:
-      case HogQLParser::TOTALS:
-      case HogQLParser::TRAILING:
-      case HogQLParser::TRIM:
-      case HogQLParser::TRUNCATE:
-      case HogQLParser::UNBOUNDED:
-      case HogQLParser::UNION:
-      case HogQLParser::USING:
-      case HogQLParser::WHEN:
-      case HogQLParser::WHERE:
-      case HogQLParser::WINDOW:
-      case HogQLParser::WITH: {
+      case InsightsQLParser::ALL:
+      case InsightsQLParser::AND:
+      case InsightsQLParser::ANTI:
+      case InsightsQLParser::ANY:
+      case InsightsQLParser::ARRAY:
+      case InsightsQLParser::AS:
+      case InsightsQLParser::ASCENDING:
+      case InsightsQLParser::ASOF:
+      case InsightsQLParser::BETWEEN:
+      case InsightsQLParser::BOTH:
+      case InsightsQLParser::BY:
+      case InsightsQLParser::CASE:
+      case InsightsQLParser::CAST:
+      case InsightsQLParser::COHORT:
+      case InsightsQLParser::COLLATE:
+      case InsightsQLParser::CROSS:
+      case InsightsQLParser::CUBE:
+      case InsightsQLParser::CURRENT:
+      case InsightsQLParser::DATE:
+      case InsightsQLParser::DESC:
+      case InsightsQLParser::DESCENDING:
+      case InsightsQLParser::DISTINCT:
+      case InsightsQLParser::ELSE:
+      case InsightsQLParser::END:
+      case InsightsQLParser::EXTRACT:
+      case InsightsQLParser::FINAL:
+      case InsightsQLParser::FIRST:
+      case InsightsQLParser::FOLLOWING:
+      case InsightsQLParser::FOR:
+      case InsightsQLParser::FROM:
+      case InsightsQLParser::FULL:
+      case InsightsQLParser::GROUP:
+      case InsightsQLParser::HAVING:
+      case InsightsQLParser::ID:
+      case InsightsQLParser::IF:
+      case InsightsQLParser::ILIKE:
+      case InsightsQLParser::IN:
+      case InsightsQLParser::INNER:
+      case InsightsQLParser::INTERVAL:
+      case InsightsQLParser::IS:
+      case InsightsQLParser::JOIN:
+      case InsightsQLParser::KEY:
+      case InsightsQLParser::LAST:
+      case InsightsQLParser::LEADING:
+      case InsightsQLParser::LEFT:
+      case InsightsQLParser::LIKE:
+      case InsightsQLParser::LIMIT:
+      case InsightsQLParser::NOT:
+      case InsightsQLParser::NULLS:
+      case InsightsQLParser::OFFSET:
+      case InsightsQLParser::ON:
+      case InsightsQLParser::OR:
+      case InsightsQLParser::ORDER:
+      case InsightsQLParser::OUTER:
+      case InsightsQLParser::OVER:
+      case InsightsQLParser::PARTITION:
+      case InsightsQLParser::PRECEDING:
+      case InsightsQLParser::PREWHERE:
+      case InsightsQLParser::RANGE:
+      case InsightsQLParser::RECURSIVE:
+      case InsightsQLParser::RETURN:
+      case InsightsQLParser::RIGHT:
+      case InsightsQLParser::ROLLUP:
+      case InsightsQLParser::ROW:
+      case InsightsQLParser::ROWS:
+      case InsightsQLParser::SAMPLE:
+      case InsightsQLParser::SELECT:
+      case InsightsQLParser::SEMI:
+      case InsightsQLParser::SETTINGS:
+      case InsightsQLParser::SUBSTRING:
+      case InsightsQLParser::THEN:
+      case InsightsQLParser::TIES:
+      case InsightsQLParser::TIMESTAMP:
+      case InsightsQLParser::TO:
+      case InsightsQLParser::TOP:
+      case InsightsQLParser::TOTALS:
+      case InsightsQLParser::TRAILING:
+      case InsightsQLParser::TRIM:
+      case InsightsQLParser::TRUNCATE:
+      case InsightsQLParser::UNBOUNDED:
+      case InsightsQLParser::UNION:
+      case InsightsQLParser::USING:
+      case InsightsQLParser::WHEN:
+      case InsightsQLParser::WHERE:
+      case InsightsQLParser::WINDOW:
+      case InsightsQLParser::WITH: {
         enterOuterAlt(_localctx, 3);
         setState(1301);
         keyword();
@@ -12027,38 +12027,38 @@ HogQLParser::IdentifierContext* HogQLParser::identifier() {
 
 //----------------- EnumValueContext ------------------------------------------------------------------
 
-HogQLParser::EnumValueContext::EnumValueContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::EnumValueContext::EnumValueContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-HogQLParser::StringContext* HogQLParser::EnumValueContext::string() {
-  return getRuleContext<HogQLParser::StringContext>(0);
+InsightsQLParser::StringContext* InsightsQLParser::EnumValueContext::string() {
+  return getRuleContext<InsightsQLParser::StringContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::EnumValueContext::EQ_SINGLE() {
-  return getToken(HogQLParser::EQ_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::EnumValueContext::EQ_SINGLE() {
+  return getToken(InsightsQLParser::EQ_SINGLE, 0);
 }
 
-HogQLParser::NumberLiteralContext* HogQLParser::EnumValueContext::numberLiteral() {
-  return getRuleContext<HogQLParser::NumberLiteralContext>(0);
-}
-
-
-size_t HogQLParser::EnumValueContext::getRuleIndex() const {
-  return HogQLParser::RuleEnumValue;
+InsightsQLParser::NumberLiteralContext* InsightsQLParser::EnumValueContext::numberLiteral() {
+  return getRuleContext<InsightsQLParser::NumberLiteralContext>(0);
 }
 
 
-std::any HogQLParser::EnumValueContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::EnumValueContext::getRuleIndex() const {
+  return InsightsQLParser::RuleEnumValue;
+}
+
+
+std::any InsightsQLParser::EnumValueContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitEnumValue(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::EnumValueContext* HogQLParser::enumValue() {
+InsightsQLParser::EnumValueContext* InsightsQLParser::enumValue() {
   EnumValueContext *_localctx = _tracker.createInstance<EnumValueContext>(_ctx, getState());
-  enterRule(_localctx, 168, HogQLParser::RuleEnumValue);
+  enterRule(_localctx, 168, InsightsQLParser::RuleEnumValue);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -12072,7 +12072,7 @@ HogQLParser::EnumValueContext* HogQLParser::enumValue() {
     setState(1304);
     string();
     setState(1305);
-    match(HogQLParser::EQ_SINGLE);
+    match(InsightsQLParser::EQ_SINGLE);
     setState(1306);
     numberLiteral();
    
@@ -12088,38 +12088,38 @@ HogQLParser::EnumValueContext* HogQLParser::enumValue() {
 
 //----------------- PlaceholderContext ------------------------------------------------------------------
 
-HogQLParser::PlaceholderContext::PlaceholderContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::PlaceholderContext::PlaceholderContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::PlaceholderContext::LBRACE() {
-  return getToken(HogQLParser::LBRACE, 0);
+tree::TerminalNode* InsightsQLParser::PlaceholderContext::LBRACE() {
+  return getToken(InsightsQLParser::LBRACE, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::PlaceholderContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::PlaceholderContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::PlaceholderContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
-}
-
-
-size_t HogQLParser::PlaceholderContext::getRuleIndex() const {
-  return HogQLParser::RulePlaceholder;
+tree::TerminalNode* InsightsQLParser::PlaceholderContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
 
-std::any HogQLParser::PlaceholderContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::PlaceholderContext::getRuleIndex() const {
+  return InsightsQLParser::RulePlaceholder;
+}
+
+
+std::any InsightsQLParser::PlaceholderContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitPlaceholder(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::PlaceholderContext* HogQLParser::placeholder() {
+InsightsQLParser::PlaceholderContext* InsightsQLParser::placeholder() {
   PlaceholderContext *_localctx = _tracker.createInstance<PlaceholderContext>(_ctx, getState());
-  enterRule(_localctx, 170, HogQLParser::RulePlaceholder);
+  enterRule(_localctx, 170, InsightsQLParser::RulePlaceholder);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -12131,11 +12131,11 @@ HogQLParser::PlaceholderContext* HogQLParser::placeholder() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(1308);
-    match(HogQLParser::LBRACE);
+    match(InsightsQLParser::LBRACE);
     setState(1309);
     columnExpr(0);
     setState(1310);
-    match(HogQLParser::RBRACE);
+    match(InsightsQLParser::RBRACE);
    
   }
   catch (RecognitionException &e) {
@@ -12149,34 +12149,34 @@ HogQLParser::PlaceholderContext* HogQLParser::placeholder() {
 
 //----------------- StringContext ------------------------------------------------------------------
 
-HogQLParser::StringContext::StringContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::StringContext::StringContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::StringContext::STRING_LITERAL() {
-  return getToken(HogQLParser::STRING_LITERAL, 0);
+tree::TerminalNode* InsightsQLParser::StringContext::STRING_LITERAL() {
+  return getToken(InsightsQLParser::STRING_LITERAL, 0);
 }
 
-HogQLParser::TemplateStringContext* HogQLParser::StringContext::templateString() {
-  return getRuleContext<HogQLParser::TemplateStringContext>(0);
-}
-
-
-size_t HogQLParser::StringContext::getRuleIndex() const {
-  return HogQLParser::RuleString;
+InsightsQLParser::TemplateStringContext* InsightsQLParser::StringContext::templateString() {
+  return getRuleContext<InsightsQLParser::TemplateStringContext>(0);
 }
 
 
-std::any HogQLParser::StringContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::StringContext::getRuleIndex() const {
+  return InsightsQLParser::RuleString;
+}
+
+
+std::any InsightsQLParser::StringContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitString(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::StringContext* HogQLParser::string() {
+InsightsQLParser::StringContext* InsightsQLParser::string() {
   StringContext *_localctx = _tracker.createInstance<StringContext>(_ctx, getState());
-  enterRule(_localctx, 172, HogQLParser::RuleString);
+  enterRule(_localctx, 172, InsightsQLParser::RuleString);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -12189,14 +12189,14 @@ HogQLParser::StringContext* HogQLParser::string() {
     setState(1314);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::STRING_LITERAL: {
+      case InsightsQLParser::STRING_LITERAL: {
         enterOuterAlt(_localctx, 1);
         setState(1312);
-        match(HogQLParser::STRING_LITERAL);
+        match(InsightsQLParser::STRING_LITERAL);
         break;
       }
 
-      case HogQLParser::QUOTE_SINGLE_TEMPLATE: {
+      case InsightsQLParser::QUOTE_SINGLE_TEMPLATE: {
         enterOuterAlt(_localctx, 2);
         setState(1313);
         templateString();
@@ -12219,42 +12219,42 @@ HogQLParser::StringContext* HogQLParser::string() {
 
 //----------------- TemplateStringContext ------------------------------------------------------------------
 
-HogQLParser::TemplateStringContext::TemplateStringContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::TemplateStringContext::TemplateStringContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::TemplateStringContext::QUOTE_SINGLE_TEMPLATE() {
-  return getToken(HogQLParser::QUOTE_SINGLE_TEMPLATE, 0);
+tree::TerminalNode* InsightsQLParser::TemplateStringContext::QUOTE_SINGLE_TEMPLATE() {
+  return getToken(InsightsQLParser::QUOTE_SINGLE_TEMPLATE, 0);
 }
 
-tree::TerminalNode* HogQLParser::TemplateStringContext::QUOTE_SINGLE() {
-  return getToken(HogQLParser::QUOTE_SINGLE, 0);
+tree::TerminalNode* InsightsQLParser::TemplateStringContext::QUOTE_SINGLE() {
+  return getToken(InsightsQLParser::QUOTE_SINGLE, 0);
 }
 
-std::vector<HogQLParser::StringContentsContext *> HogQLParser::TemplateStringContext::stringContents() {
-  return getRuleContexts<HogQLParser::StringContentsContext>();
+std::vector<InsightsQLParser::StringContentsContext *> InsightsQLParser::TemplateStringContext::stringContents() {
+  return getRuleContexts<InsightsQLParser::StringContentsContext>();
 }
 
-HogQLParser::StringContentsContext* HogQLParser::TemplateStringContext::stringContents(size_t i) {
-  return getRuleContext<HogQLParser::StringContentsContext>(i);
-}
-
-
-size_t HogQLParser::TemplateStringContext::getRuleIndex() const {
-  return HogQLParser::RuleTemplateString;
+InsightsQLParser::StringContentsContext* InsightsQLParser::TemplateStringContext::stringContents(size_t i) {
+  return getRuleContext<InsightsQLParser::StringContentsContext>(i);
 }
 
 
-std::any HogQLParser::TemplateStringContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::TemplateStringContext::getRuleIndex() const {
+  return InsightsQLParser::RuleTemplateString;
+}
+
+
+std::any InsightsQLParser::TemplateStringContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitTemplateString(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::TemplateStringContext* HogQLParser::templateString() {
+InsightsQLParser::TemplateStringContext* InsightsQLParser::templateString() {
   TemplateStringContext *_localctx = _tracker.createInstance<TemplateStringContext>(_ctx, getState());
-  enterRule(_localctx, 174, HogQLParser::RuleTemplateString);
+  enterRule(_localctx, 174, InsightsQLParser::RuleTemplateString);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -12267,13 +12267,13 @@ HogQLParser::TemplateStringContext* HogQLParser::templateString() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(1316);
-    match(HogQLParser::QUOTE_SINGLE_TEMPLATE);
+    match(InsightsQLParser::QUOTE_SINGLE_TEMPLATE);
     setState(1320);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::STRING_TEXT
+    while (_la == InsightsQLParser::STRING_TEXT
 
-    || _la == HogQLParser::STRING_ESCAPE_TRIGGER) {
+    || _la == InsightsQLParser::STRING_ESCAPE_TRIGGER) {
       setState(1317);
       stringContents();
       setState(1322);
@@ -12281,7 +12281,7 @@ HogQLParser::TemplateStringContext* HogQLParser::templateString() {
       _la = _input->LA(1);
     }
     setState(1323);
-    match(HogQLParser::QUOTE_SINGLE);
+    match(InsightsQLParser::QUOTE_SINGLE);
    
   }
   catch (RecognitionException &e) {
@@ -12295,42 +12295,42 @@ HogQLParser::TemplateStringContext* HogQLParser::templateString() {
 
 //----------------- StringContentsContext ------------------------------------------------------------------
 
-HogQLParser::StringContentsContext::StringContentsContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::StringContentsContext::StringContentsContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::StringContentsContext::STRING_ESCAPE_TRIGGER() {
-  return getToken(HogQLParser::STRING_ESCAPE_TRIGGER, 0);
+tree::TerminalNode* InsightsQLParser::StringContentsContext::STRING_ESCAPE_TRIGGER() {
+  return getToken(InsightsQLParser::STRING_ESCAPE_TRIGGER, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::StringContentsContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::StringContentsContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::StringContentsContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
+tree::TerminalNode* InsightsQLParser::StringContentsContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
-tree::TerminalNode* HogQLParser::StringContentsContext::STRING_TEXT() {
-  return getToken(HogQLParser::STRING_TEXT, 0);
-}
-
-
-size_t HogQLParser::StringContentsContext::getRuleIndex() const {
-  return HogQLParser::RuleStringContents;
+tree::TerminalNode* InsightsQLParser::StringContentsContext::STRING_TEXT() {
+  return getToken(InsightsQLParser::STRING_TEXT, 0);
 }
 
 
-std::any HogQLParser::StringContentsContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::StringContentsContext::getRuleIndex() const {
+  return InsightsQLParser::RuleStringContents;
+}
+
+
+std::any InsightsQLParser::StringContentsContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitStringContents(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::StringContentsContext* HogQLParser::stringContents() {
+InsightsQLParser::StringContentsContext* InsightsQLParser::stringContents() {
   StringContentsContext *_localctx = _tracker.createInstance<StringContentsContext>(_ctx, getState());
-  enterRule(_localctx, 176, HogQLParser::RuleStringContents);
+  enterRule(_localctx, 176, InsightsQLParser::RuleStringContents);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -12343,21 +12343,21 @@ HogQLParser::StringContentsContext* HogQLParser::stringContents() {
     setState(1330);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::STRING_ESCAPE_TRIGGER: {
+      case InsightsQLParser::STRING_ESCAPE_TRIGGER: {
         enterOuterAlt(_localctx, 1);
         setState(1325);
-        match(HogQLParser::STRING_ESCAPE_TRIGGER);
+        match(InsightsQLParser::STRING_ESCAPE_TRIGGER);
         setState(1326);
         columnExpr(0);
         setState(1327);
-        match(HogQLParser::RBRACE);
+        match(InsightsQLParser::RBRACE);
         break;
       }
 
-      case HogQLParser::STRING_TEXT: {
+      case InsightsQLParser::STRING_TEXT: {
         enterOuterAlt(_localctx, 2);
         setState(1329);
-        match(HogQLParser::STRING_TEXT);
+        match(InsightsQLParser::STRING_TEXT);
         break;
       }
 
@@ -12377,42 +12377,42 @@ HogQLParser::StringContentsContext* HogQLParser::stringContents() {
 
 //----------------- FullTemplateStringContext ------------------------------------------------------------------
 
-HogQLParser::FullTemplateStringContext::FullTemplateStringContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::FullTemplateStringContext::FullTemplateStringContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::FullTemplateStringContext::QUOTE_SINGLE_TEMPLATE_FULL() {
-  return getToken(HogQLParser::QUOTE_SINGLE_TEMPLATE_FULL, 0);
+tree::TerminalNode* InsightsQLParser::FullTemplateStringContext::QUOTE_SINGLE_TEMPLATE_FULL() {
+  return getToken(InsightsQLParser::QUOTE_SINGLE_TEMPLATE_FULL, 0);
 }
 
-tree::TerminalNode* HogQLParser::FullTemplateStringContext::EOF() {
-  return getToken(HogQLParser::EOF, 0);
+tree::TerminalNode* InsightsQLParser::FullTemplateStringContext::EOF() {
+  return getToken(InsightsQLParser::EOF, 0);
 }
 
-std::vector<HogQLParser::StringContentsFullContext *> HogQLParser::FullTemplateStringContext::stringContentsFull() {
-  return getRuleContexts<HogQLParser::StringContentsFullContext>();
+std::vector<InsightsQLParser::StringContentsFullContext *> InsightsQLParser::FullTemplateStringContext::stringContentsFull() {
+  return getRuleContexts<InsightsQLParser::StringContentsFullContext>();
 }
 
-HogQLParser::StringContentsFullContext* HogQLParser::FullTemplateStringContext::stringContentsFull(size_t i) {
-  return getRuleContext<HogQLParser::StringContentsFullContext>(i);
-}
-
-
-size_t HogQLParser::FullTemplateStringContext::getRuleIndex() const {
-  return HogQLParser::RuleFullTemplateString;
+InsightsQLParser::StringContentsFullContext* InsightsQLParser::FullTemplateStringContext::stringContentsFull(size_t i) {
+  return getRuleContext<InsightsQLParser::StringContentsFullContext>(i);
 }
 
 
-std::any HogQLParser::FullTemplateStringContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::FullTemplateStringContext::getRuleIndex() const {
+  return InsightsQLParser::RuleFullTemplateString;
+}
+
+
+std::any InsightsQLParser::FullTemplateStringContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitFullTemplateString(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::FullTemplateStringContext* HogQLParser::fullTemplateString() {
+InsightsQLParser::FullTemplateStringContext* InsightsQLParser::fullTemplateString() {
   FullTemplateStringContext *_localctx = _tracker.createInstance<FullTemplateStringContext>(_ctx, getState());
-  enterRule(_localctx, 178, HogQLParser::RuleFullTemplateString);
+  enterRule(_localctx, 178, InsightsQLParser::RuleFullTemplateString);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -12425,13 +12425,13 @@ HogQLParser::FullTemplateStringContext* HogQLParser::fullTemplateString() {
   try {
     enterOuterAlt(_localctx, 1);
     setState(1332);
-    match(HogQLParser::QUOTE_SINGLE_TEMPLATE_FULL);
+    match(InsightsQLParser::QUOTE_SINGLE_TEMPLATE_FULL);
     setState(1336);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == HogQLParser::FULL_STRING_TEXT
+    while (_la == InsightsQLParser::FULL_STRING_TEXT
 
-    || _la == HogQLParser::FULL_STRING_ESCAPE_TRIGGER) {
+    || _la == InsightsQLParser::FULL_STRING_ESCAPE_TRIGGER) {
       setState(1333);
       stringContentsFull();
       setState(1338);
@@ -12439,7 +12439,7 @@ HogQLParser::FullTemplateStringContext* HogQLParser::fullTemplateString() {
       _la = _input->LA(1);
     }
     setState(1339);
-    match(HogQLParser::EOF);
+    match(InsightsQLParser::EOF);
    
   }
   catch (RecognitionException &e) {
@@ -12453,42 +12453,42 @@ HogQLParser::FullTemplateStringContext* HogQLParser::fullTemplateString() {
 
 //----------------- StringContentsFullContext ------------------------------------------------------------------
 
-HogQLParser::StringContentsFullContext::StringContentsFullContext(ParserRuleContext *parent, size_t invokingState)
+InsightsQLParser::StringContentsFullContext::StringContentsFullContext(ParserRuleContext *parent, size_t invokingState)
   : ParserRuleContext(parent, invokingState) {
 }
 
-tree::TerminalNode* HogQLParser::StringContentsFullContext::FULL_STRING_ESCAPE_TRIGGER() {
-  return getToken(HogQLParser::FULL_STRING_ESCAPE_TRIGGER, 0);
+tree::TerminalNode* InsightsQLParser::StringContentsFullContext::FULL_STRING_ESCAPE_TRIGGER() {
+  return getToken(InsightsQLParser::FULL_STRING_ESCAPE_TRIGGER, 0);
 }
 
-HogQLParser::ColumnExprContext* HogQLParser::StringContentsFullContext::columnExpr() {
-  return getRuleContext<HogQLParser::ColumnExprContext>(0);
+InsightsQLParser::ColumnExprContext* InsightsQLParser::StringContentsFullContext::columnExpr() {
+  return getRuleContext<InsightsQLParser::ColumnExprContext>(0);
 }
 
-tree::TerminalNode* HogQLParser::StringContentsFullContext::RBRACE() {
-  return getToken(HogQLParser::RBRACE, 0);
+tree::TerminalNode* InsightsQLParser::StringContentsFullContext::RBRACE() {
+  return getToken(InsightsQLParser::RBRACE, 0);
 }
 
-tree::TerminalNode* HogQLParser::StringContentsFullContext::FULL_STRING_TEXT() {
-  return getToken(HogQLParser::FULL_STRING_TEXT, 0);
-}
-
-
-size_t HogQLParser::StringContentsFullContext::getRuleIndex() const {
-  return HogQLParser::RuleStringContentsFull;
+tree::TerminalNode* InsightsQLParser::StringContentsFullContext::FULL_STRING_TEXT() {
+  return getToken(InsightsQLParser::FULL_STRING_TEXT, 0);
 }
 
 
-std::any HogQLParser::StringContentsFullContext::accept(tree::ParseTreeVisitor *visitor) {
-  if (auto parserVisitor = dynamic_cast<HogQLParserVisitor*>(visitor))
+size_t InsightsQLParser::StringContentsFullContext::getRuleIndex() const {
+  return InsightsQLParser::RuleStringContentsFull;
+}
+
+
+std::any InsightsQLParser::StringContentsFullContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<InsightsQLParserVisitor*>(visitor))
     return parserVisitor->visitStringContentsFull(this);
   else
     return visitor->visitChildren(this);
 }
 
-HogQLParser::StringContentsFullContext* HogQLParser::stringContentsFull() {
+InsightsQLParser::StringContentsFullContext* InsightsQLParser::stringContentsFull() {
   StringContentsFullContext *_localctx = _tracker.createInstance<StringContentsFullContext>(_ctx, getState());
-  enterRule(_localctx, 180, HogQLParser::RuleStringContentsFull);
+  enterRule(_localctx, 180, InsightsQLParser::RuleStringContentsFull);
 
 #if __cplusplus > 201703L
   auto onExit = finally([=, this] {
@@ -12501,21 +12501,21 @@ HogQLParser::StringContentsFullContext* HogQLParser::stringContentsFull() {
     setState(1346);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
-      case HogQLParser::FULL_STRING_ESCAPE_TRIGGER: {
+      case InsightsQLParser::FULL_STRING_ESCAPE_TRIGGER: {
         enterOuterAlt(_localctx, 1);
         setState(1341);
-        match(HogQLParser::FULL_STRING_ESCAPE_TRIGGER);
+        match(InsightsQLParser::FULL_STRING_ESCAPE_TRIGGER);
         setState(1342);
         columnExpr(0);
         setState(1343);
-        match(HogQLParser::RBRACE);
+        match(InsightsQLParser::RBRACE);
         break;
       }
 
-      case HogQLParser::FULL_STRING_TEXT: {
+      case InsightsQLParser::FULL_STRING_TEXT: {
         enterOuterAlt(_localctx, 2);
         setState(1345);
-        match(HogQLParser::FULL_STRING_TEXT);
+        match(InsightsQLParser::FULL_STRING_TEXT);
         break;
       }
 
@@ -12533,7 +12533,7 @@ HogQLParser::StringContentsFullContext* HogQLParser::stringContentsFull() {
   return _localctx;
 }
 
-bool HogQLParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
+bool InsightsQLParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
     case 41: return joinExprSempred(antlrcpp::downCast<JoinExprContext *>(context), predicateIndex);
     case 61: return columnExprSempred(antlrcpp::downCast<ColumnExprContext *>(context), predicateIndex);
@@ -12545,7 +12545,7 @@ bool HogQLParser::sempred(RuleContext *context, size_t ruleIndex, size_t predica
   return true;
 }
 
-bool HogQLParser::joinExprSempred(JoinExprContext *_localctx, size_t predicateIndex) {
+bool InsightsQLParser::joinExprSempred(JoinExprContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
     case 0: return precpred(_ctx, 3);
     case 1: return precpred(_ctx, 4);
@@ -12556,7 +12556,7 @@ bool HogQLParser::joinExprSempred(JoinExprContext *_localctx, size_t predicateIn
   return true;
 }
 
-bool HogQLParser::columnExprSempred(ColumnExprContext *_localctx, size_t predicateIndex) {
+bool InsightsQLParser::columnExprSempred(ColumnExprContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
     case 2: return precpred(_ctx, 19);
     case 3: return precpred(_ctx, 18);
@@ -12584,7 +12584,7 @@ bool HogQLParser::columnExprSempred(ColumnExprContext *_localctx, size_t predica
   return true;
 }
 
-bool HogQLParser::tableExprSempred(TableExprContext *_localctx, size_t predicateIndex) {
+bool InsightsQLParser::tableExprSempred(TableExprContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
     case 21: return precpred(_ctx, 3);
 
@@ -12594,10 +12594,10 @@ bool HogQLParser::tableExprSempred(TableExprContext *_localctx, size_t predicate
   return true;
 }
 
-void HogQLParser::initialize() {
+void InsightsQLParser::initialize() {
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
-  hogqlparserParserInitialize();
+  insightsqlparserParserInitialize();
 #else
-  ::antlr4::internal::call_once(hogqlparserParserOnceFlag, hogqlparserParserInitialize);
+  ::antlr4::internal::call_once(insightsqlparserParserOnceFlag, insightsqlparserParserInitialize);
 #endif
 }
