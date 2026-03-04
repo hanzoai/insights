@@ -41,7 +41,7 @@ antlr -Dlanguage=Python3 InsightsQLLexer.g4
 antlr -visitor -Dlanguage=Python3 InsightsQLParser.g4
 ```
 
-Original ClickHouse ANTLR grammar from: https://github.com/ClickHouse/ClickHouse/blob/master/utils/antlr/ClickHouseParser.g4
+Original ClickHouse ANTLR grammar from: https://github.com/hanzoai/datastore/blob/main/utils/antlr/ClickHouseParser.g4
 
 Changes with ClickHouse's grammar:
 

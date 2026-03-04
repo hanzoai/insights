@@ -59,7 +59,7 @@ services:
             - '9440:9440'
             - '9009:9009'
         volumes:
-            # this new entrypoint file is to fix a bug detailed here https://github.com/ClickHouse/ClickHouse/pull/59991
+            # this new entrypoint file is to fix a bug detailed here https://github.com/hanzoai/datastore/pull/59991
             # revert this when we upgrade clickhouse
             - ./docker/clickhouse/entrypoint.sh:/entrypoint.sh
             - ./insights/idl:/idl
@@ -78,7 +78,7 @@ services:
         hostname: clickhouse-coordinator
         <<: *datastore
         volumes:
-            # this new entrypoint file is to fix a bug detailed here https://github.com/ClickHouse/ClickHouse/pull/59991
+            # this new entrypoint file is to fix a bug detailed here https://github.com/hanzoai/datastore/pull/59991
             # revert this when we upgrade clickhouse
             - ./docker/clickhouse/entrypoint.sh:/entrypoint.sh
             - ./insights/idl:/idl

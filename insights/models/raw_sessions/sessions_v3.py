@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
 
     -- Both UInt128 and UUID are imperfect choices here
     -- see https://michcioperz.com/wiki/clickhouse-uuid-ordering/
-    -- but also see https://github.com/ClickHouse/ClickHouse/issues/77226 and hope
+    -- but also see https://github.com/hanzoai/datastore/issues/77226 and hope
     -- right now choose UInt128 as that's the type of events.$session_id_uuid, but in the future we will probably want to switch everything to the new CH UUID type (when it's released)
     session_id_v7 UInt128,
     -- Ideally we would not need to store this separately, as the ID *is* the timestamp
