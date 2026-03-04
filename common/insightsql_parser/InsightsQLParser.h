@@ -1,5 +1,5 @@
 
-// Generated from HogQLParser.g4 by ANTLR 4.13.2
+// Generated from InsightsQLParser.g4 by ANTLR 4.13.2
 
 #pragma once
 
@@ -9,7 +9,7 @@
 
 
 
-class  HogQLParser : public antlr4::Parser {
+class  InsightsQLParser : public antlr4::Parser {
 public:
   enum {
     ALL = 1, AND = 2, ANTI = 3, ANY = 4, ARRAY = 5, AS = 6, ASCENDING = 7, 
@@ -43,8 +43,8 @@ public:
     RBRACKET = 154, RPAREN = 155, SEMICOLON = 156, SLASH = 157, SLASH_GT = 158, 
     UNDERSCORE = 159, MULTI_LINE_COMMENT = 160, SINGLE_LINE_COMMENT = 161, 
     WHITESPACE = 162, STRING_TEXT = 163, STRING_ESCAPE_TRIGGER = 164, FULL_STRING_TEXT = 165, 
-    FULL_STRING_ESCAPE_TRIGGER = 166, TAG_WS = 167, TAGC_WS = 168, HOGQLX_TEXT_TEXT = 169, 
-    HOGQLX_TEXT_WS = 170
+    FULL_STRING_ESCAPE_TRIGGER = 166, TAG_WS = 167, TAGC_WS = 168, INSIGHTSQLX_TEXT_TEXT = 169, 
+    INSIGHTSQLX_TEXT_WS = 170
   };
 
   enum {
@@ -77,11 +77,11 @@ public:
     RuleFullTemplateString = 89, RuleStringContentsFull = 90
   };
 
-  explicit HogQLParser(antlr4::TokenStream *input);
+  explicit InsightsQLParser(antlr4::TokenStream *input);
 
-  HogQLParser(antlr4::TokenStream *input, const antlr4::atn::ParserATNSimulatorOptions &options);
+  InsightsQLParser(antlr4::TokenStream *input, const antlr4::atn::ParserATNSimulatorOptions &options);
 
-  ~HogQLParser() override;
+  ~InsightsQLParser() override;
 
   std::string getGrammarFileName() const override;
 
@@ -317,9 +317,9 @@ public:
 
   class  CatchBlockContext : public antlr4::ParserRuleContext {
   public:
-    HogQLParser::IdentifierContext *catchVar = nullptr;
-    HogQLParser::IdentifierContext *catchType = nullptr;
-    HogQLParser::BlockContext *catchStmt = nullptr;
+    InsightsQLParser::IdentifierContext *catchVar = nullptr;
+    InsightsQLParser::IdentifierContext *catchType = nullptr;
+    InsightsQLParser::BlockContext *catchStmt = nullptr;
     CatchBlockContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *CATCH();
@@ -339,8 +339,8 @@ public:
 
   class  TryCatchStmtContext : public antlr4::ParserRuleContext {
   public:
-    HogQLParser::BlockContext *tryStmt = nullptr;
-    HogQLParser::BlockContext *finallyStmt = nullptr;
+    InsightsQLParser::BlockContext *tryStmt = nullptr;
+    InsightsQLParser::BlockContext *finallyStmt = nullptr;
     TryCatchStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *TRY();
@@ -396,13 +396,13 @@ public:
 
   class  ForStmtContext : public antlr4::ParserRuleContext {
   public:
-    HogQLParser::VarDeclContext *initializerVarDeclr = nullptr;
-    HogQLParser::VarAssignmentContext *initializerVarAssignment = nullptr;
-    HogQLParser::ExpressionContext *initializerExpression = nullptr;
-    HogQLParser::ExpressionContext *condition = nullptr;
-    HogQLParser::VarDeclContext *incrementVarDeclr = nullptr;
-    HogQLParser::VarAssignmentContext *incrementVarAssignment = nullptr;
-    HogQLParser::ExpressionContext *incrementExpression = nullptr;
+    InsightsQLParser::VarDeclContext *initializerVarDeclr = nullptr;
+    InsightsQLParser::VarAssignmentContext *initializerVarAssignment = nullptr;
+    InsightsQLParser::ExpressionContext *initializerExpression = nullptr;
+    InsightsQLParser::ExpressionContext *condition = nullptr;
+    InsightsQLParser::VarDeclContext *incrementVarDeclr = nullptr;
+    InsightsQLParser::VarAssignmentContext *incrementVarAssignment = nullptr;
+    InsightsQLParser::ExpressionContext *incrementExpression = nullptr;
     ForStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *FOR();
@@ -564,7 +564,7 @@ public:
     antlr4::tree::TerminalNode *EOF();
     SelectSetStmtContext *selectSetStmt();
     SelectStmtContext *selectStmt();
-    HogqlxTagElementContext *hogqlxTagElement();
+    HogqlxTagElementContext *insightsqlxTagElement();
     antlr4::tree::TerminalNode *SEMICOLON();
 
 
@@ -626,10 +626,10 @@ public:
 
   class  SelectStmtContext : public antlr4::ParserRuleContext {
   public:
-    HogQLParser::WithClauseContext *with = nullptr;
-    HogQLParser::ColumnExprListContext *columns = nullptr;
-    HogQLParser::FromClauseContext *from = nullptr;
-    HogQLParser::WhereClauseContext *where = nullptr;
+    InsightsQLParser::WithClauseContext *with = nullptr;
+    InsightsQLParser::ColumnExprListContext *columns = nullptr;
+    InsightsQLParser::FromClauseContext *from = nullptr;
+    InsightsQLParser::WhereClauseContext *where = nullptr;
     SelectStmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *SELECT();
@@ -1548,9 +1548,9 @@ public:
   public:
     ColumnExprPrecedence1Context(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprContext *left = nullptr;
+    InsightsQLParser::ColumnExprContext *left = nullptr;
     antlr4::Token *operator_ = nullptr;
-    HogQLParser::ColumnExprContext *right = nullptr;
+    InsightsQLParser::ColumnExprContext *right = nullptr;
     std::vector<ColumnExprContext *> columnExpr();
     ColumnExprContext* columnExpr(size_t i);
     antlr4::tree::TerminalNode *ASTERISK();
@@ -1564,9 +1564,9 @@ public:
   public:
     ColumnExprPrecedence2Context(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprContext *left = nullptr;
+    InsightsQLParser::ColumnExprContext *left = nullptr;
     antlr4::Token *operator_ = nullptr;
-    HogQLParser::ColumnExprContext *right = nullptr;
+    InsightsQLParser::ColumnExprContext *right = nullptr;
     std::vector<ColumnExprContext *> columnExpr();
     ColumnExprContext* columnExpr(size_t i);
     antlr4::tree::TerminalNode *PLUS();
@@ -1580,9 +1580,9 @@ public:
   public:
     ColumnExprPrecedence3Context(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprContext *left = nullptr;
+    InsightsQLParser::ColumnExprContext *left = nullptr;
     antlr4::Token *operator_ = nullptr;
-    HogQLParser::ColumnExprContext *right = nullptr;
+    InsightsQLParser::ColumnExprContext *right = nullptr;
     std::vector<ColumnExprContext *> columnExpr();
     ColumnExprContext* columnExpr(size_t i);
     antlr4::tree::TerminalNode *IN();
@@ -1646,8 +1646,8 @@ public:
   public:
     ColumnExprWinFunctionTargetContext(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprListContext *columnExprs = nullptr;
-    HogQLParser::ColumnExprListContext *columnArgList = nullptr;
+    InsightsQLParser::ColumnExprListContext *columnExprs = nullptr;
+    InsightsQLParser::ColumnExprListContext *columnArgList = nullptr;
     std::vector<IdentifierContext *> identifier();
     IdentifierContext* identifier(size_t i);
     antlr4::tree::TerminalNode *OVER();
@@ -1704,7 +1704,7 @@ public:
   public:
     ColumnExprTagElementContext(ColumnExprContext *ctx);
 
-    HogqlxTagElementContext *hogqlxTagElement();
+    HogqlxTagElementContext *insightsqlxTagElement();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -1848,10 +1848,10 @@ public:
   public:
     ColumnExprCaseContext(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprContext *caseExpr = nullptr;
-    HogQLParser::ColumnExprContext *whenExpr = nullptr;
-    HogQLParser::ColumnExprContext *thenExpr = nullptr;
-    HogQLParser::ColumnExprContext *elseExpr = nullptr;
+    InsightsQLParser::ColumnExprContext *caseExpr = nullptr;
+    InsightsQLParser::ColumnExprContext *whenExpr = nullptr;
+    InsightsQLParser::ColumnExprContext *thenExpr = nullptr;
+    InsightsQLParser::ColumnExprContext *elseExpr = nullptr;
     antlr4::tree::TerminalNode *CASE();
     antlr4::tree::TerminalNode *END();
     std::vector<antlr4::tree::TerminalNode *> WHEN();
@@ -1889,8 +1889,8 @@ public:
   public:
     ColumnExprWinFunctionContext(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprListContext *columnExprs = nullptr;
-    HogQLParser::ColumnExprListContext *columnArgList = nullptr;
+    InsightsQLParser::ColumnExprListContext *columnExprs = nullptr;
+    InsightsQLParser::ColumnExprListContext *columnArgList = nullptr;
     IdentifierContext *identifier();
     antlr4::tree::TerminalNode *OVER();
     std::vector<antlr4::tree::TerminalNode *> LPAREN();
@@ -1927,8 +1927,8 @@ public:
   public:
     ColumnExprFunctionContext(ColumnExprContext *ctx);
 
-    HogQLParser::ColumnExprListContext *columnExprs = nullptr;
-    HogQLParser::ColumnExprListContext *columnArgList = nullptr;
+    InsightsQLParser::ColumnExprListContext *columnExprs = nullptr;
+    InsightsQLParser::ColumnExprListContext *columnArgList = nullptr;
     IdentifierContext *identifier();
     std::vector<antlr4::tree::TerminalNode *> LPAREN();
     antlr4::tree::TerminalNode* LPAREN(size_t i);
@@ -1979,8 +1979,8 @@ public:
   public:
     HogqlxChildElementContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    HogqlxTagElementContext *hogqlxTagElement();
-    HogqlxTextContext *hogqlxText();
+    HogqlxTagElementContext *insightsqlxTagElement();
+    HogqlxTextContext *insightsqlxText();
     antlr4::tree::TerminalNode *LBRACE();
     ColumnExprContext *columnExpr();
     antlr4::tree::TerminalNode *RBRACE();
@@ -1990,20 +1990,20 @@ public:
    
   };
 
-  HogqlxChildElementContext* hogqlxChildElement();
+  HogqlxChildElementContext* insightsqlxChildElement();
 
   class  HogqlxTextContext : public antlr4::ParserRuleContext {
   public:
     HogqlxTextContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *HOGQLX_TEXT_TEXT();
+    antlr4::tree::TerminalNode *INSIGHTSQLX_TEXT_TEXT();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  HogqlxTextContext* hogqlxText();
+  HogqlxTextContext* insightsqlxText();
 
   class  HogqlxTagElementContext : public antlr4::ParserRuleContext {
   public:
@@ -2025,8 +2025,8 @@ public:
     antlr4::tree::TerminalNode *LT();
     IdentifierContext *identifier();
     antlr4::tree::TerminalNode *SLASH_GT();
-    std::vector<HogqlxTagAttributeContext *> hogqlxTagAttribute();
-    HogqlxTagAttributeContext* hogqlxTagAttribute(size_t i);
+    std::vector<HogqlxTagAttributeContext *> insightsqlxTagAttribute();
+    HogqlxTagAttributeContext* insightsqlxTagAttribute(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
@@ -2041,15 +2041,15 @@ public:
     std::vector<antlr4::tree::TerminalNode *> GT();
     antlr4::tree::TerminalNode* GT(size_t i);
     antlr4::tree::TerminalNode *LT_SLASH();
-    std::vector<HogqlxTagAttributeContext *> hogqlxTagAttribute();
-    HogqlxTagAttributeContext* hogqlxTagAttribute(size_t i);
-    std::vector<HogqlxChildElementContext *> hogqlxChildElement();
-    HogqlxChildElementContext* hogqlxChildElement(size_t i);
+    std::vector<HogqlxTagAttributeContext *> insightsqlxTagAttribute();
+    HogqlxTagAttributeContext* insightsqlxTagAttribute(size_t i);
+    std::vector<HogqlxChildElementContext *> insightsqlxChildElement();
+    HogqlxChildElementContext* insightsqlxChildElement(size_t i);
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
-  HogqlxTagElementContext* hogqlxTagElement();
+  HogqlxTagElementContext* insightsqlxTagElement();
 
   class  HogqlxTagAttributeContext : public antlr4::ParserRuleContext {
   public:
@@ -2067,7 +2067,7 @@ public:
    
   };
 
-  HogqlxTagAttributeContext* hogqlxTagAttribute();
+  HogqlxTagAttributeContext* insightsqlxTagAttribute();
 
   class  WithExprListContext : public antlr4::ParserRuleContext {
   public:
@@ -2173,7 +2173,7 @@ public:
   public:
     TableExprTagContext(TableExprContext *ctx);
 
-    HogqlxTagElementContext *hogqlxTagElement();
+    HogqlxTagElementContext *insightsqlxTagElement();
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };

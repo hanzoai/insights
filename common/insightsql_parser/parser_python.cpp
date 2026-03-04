@@ -2,21 +2,21 @@
 #include <Python.h>
 #include <string>
 
-#include "HogQLLexer.h"
-#include "HogQLParser.h"
-#include "HogQLParserBaseVisitor.h"
+#include "InsightsQLLexer.h"
+#include "InsightsQLParser.h"
+#include "InsightsQLParserBaseVisitor.h"
 
 #include "error.h"
 #include "parser_python.h"
 #include "string.h"
 
-#define VISIT(RULE) any visit##RULE(HogQLParser::RULE##Context* ctx) override
+#define VISIT(RULE) any visit##RULE(InsightsQLParser::RULE##Context* ctx) override
 #define VISIT_UNSUPPORTED(RULE)                            \
   VISIT(RULE) {                                            \
     throw NotImplementedError("Unsupported rule: " #RULE); \
   }
 
-#define HANDLE_HOGQL_ERROR(TYPE, OTHER_CLEANUP)                                                         \
+#define HANDLE_INSIGHTSQL_ERROR(TYPE, OTHER_CLEANUP)                                                         \
   (const TYPE& e) {                                                                                     \
     string err_what = e.what();                                                                         \
     PyObject *error_type = NULL, *py_err_args = NULL, *py_err = NULL, *py_start = NULL, *py_end = NULL; \
@@ -95,11 +95,11 @@ PyObject* X_PyList_FromStrings(const vector<string>& items) {
 
 // PARSING AND AST CONVERSION
 
-class HogQLErrorListener : public antlr4::BaseErrorListener {
+class InsightsQLErrorListener : public antlr4::BaseErrorListener {
  public:
   string input;
 
-  HogQLErrorListener(string input) : input(input) {}
+  InsightsQLErrorListener(string input) : input(input) {}
 
   void syntaxError(
       antlr4::Recognizer* recognizer,
@@ -136,7 +136,7 @@ parser_state* get_module_state(PyObject* module) {
   return static_cast<parser_state*>(PyModule_GetState(module));
 }
 
-// Include JSON parser methods (depends on get_module_state and HogQLErrorListener)
+// Include JSON parser methods (depends on get_module_state and InsightsQLErrorListener)
 
 #include "parser_json_python.cpp"
 static PyObject* method_parse_string_literal_text(PyObject* self, PyObject* args) {
@@ -148,7 +148,7 @@ static PyObject* method_parse_string_literal_text(PyObject* self, PyObject* args
   string unquoted_string;
   try {
     unquoted_string = parse_string_literal_text(str);
-  } catch HANDLE_HOGQL_ERROR(SyntaxError, );
+  } catch HANDLE_INSIGHTSQL_ERROR(SyntaxError, );
   return PyUnicode_FromStringAndSize(unquoted_string.data(), unquoted_string.size());
 }
 
@@ -167,7 +167,7 @@ static PyMethodDef parser_methods[] = {
     {.ml_name = "parse_expr_json",
      .ml_meth = (PyCFunction)method_parse_expr_json,
      .ml_flags = METH_VARARGS | METH_KEYWORDS,
-     .ml_doc = "Parse the HogQL expression string into a JSON AST"},
+     .ml_doc = "Parse the InsightsQL expression string into a JSON AST"},
     {.ml_name = "parse_order_expr_json",
      .ml_meth = (PyCFunction)method_parse_order_expr_json,
      .ml_flags = METH_VARARGS | METH_KEYWORDS,
@@ -175,7 +175,7 @@ static PyMethodDef parser_methods[] = {
     {.ml_name = "parse_select_json",
      .ml_meth = (PyCFunction)method_parse_select_json,
      .ml_flags = METH_VARARGS | METH_KEYWORDS,
-     .ml_doc = "Parse the HogQL SELECT statement string into a JSON AST"},
+     .ml_doc = "Parse the InsightsQL SELECT statement string into a JSON AST"},
     {.ml_name = "parse_full_template_string_json",
      .ml_meth = (PyCFunction)method_parse_full_template_string_json,
      .ml_flags = METH_VARARGS | METH_KEYWORDS,

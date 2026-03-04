@@ -92,7 +92,7 @@ class ExceptionContext(TypedDict):
 def exception_reporting(exception: Exception, context: ExceptionContext) -> Optional[str]:
     """
     Determines which exceptions to report and sends them to error tracking.
-    Used through drf-exceptions-hog
+    Used through exceptions_handler (vendored)
     """
     if not isinstance(exception, APIException):
         tags = get_query_tags().model_dump(exclude_none=True)
@@ -110,7 +110,7 @@ def generate_exception_response(
     status_code: int = status.HTTP_400_BAD_REQUEST,
 ) -> JsonResponse:
     """
-    Generates a friendly JSON error response in line with drf-exceptions-hog for endpoints not under DRF.
+    Generates a friendly JSON error response in line with exceptions_handler (vendored) for endpoints not under DRF.
     """
 
     # Importing here because this module is loaded before Django settings are configured,
