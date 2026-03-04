@@ -191,7 +191,7 @@ class TestRevenueExampleDataWarehouseTablesQueryRunner(ClickhouseTestMixin, APIB
         ]
 
     def test_database_query_with_managed_viewsets_ff(self):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             self._create_managed_viewsets()
 
             response = self._run_revenue_example_external_tables_query()

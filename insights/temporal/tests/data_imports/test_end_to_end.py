@@ -20,7 +20,7 @@ import psycopg
 import aioboto3
 import deltalake
 import pytest_asyncio
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import sync_to_async
 from deltalake import DeltaTable
 from dlt.common.configuration.specs.aws_credentials import AwsCredentials
@@ -1278,7 +1278,7 @@ async def test_non_retryable_error(team, zendesk_brands):
         mock.patch(
             "ee.billing.quota_limiting.list_limited_team_attributes",
         ) as mock_list_limited_team_attributes,
-        mock.patch.object(hanzoanalytics, "capture") as capture_mock,
+        mock.patch.object(hanzo_insights, "capture") as capture_mock,
     ):
         mock_list_limited_team_attributes.side_effect = Exception("404 Client Error: Not Found for url")
 
@@ -1330,7 +1330,7 @@ async def test_non_retryable_error_with_special_characters(team, stripe_customer
         mock.patch(
             "ee.billing.quota_limiting.list_limited_team_attributes",
         ) as mock_list_limited_team_attributes,
-        mock.patch.object(hanzoanalytics, "capture") as capture_mock,
+        mock.patch.object(hanzo_insights, "capture") as capture_mock,
     ):
         mock_list_limited_team_attributes.side_effect = Exception(
             "401 Client Error:\nUnauthorized for url: https://api.stripe.com"

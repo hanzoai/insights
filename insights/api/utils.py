@@ -16,7 +16,7 @@ from django.http import HttpRequest
 
 import structlog
 from loginas.utils import is_impersonated_session
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from prometheus_client import Counter
 from requests.adapters import HTTPAdapter
 from rest_framework import request, serializers, status

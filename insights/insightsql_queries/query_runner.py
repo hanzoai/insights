@@ -6,7 +6,7 @@ from types import UnionType
 from typing import Any, Generic, Optional, Protocol, TypeGuard, TypeVar, Union, cast, get_args, get_origin
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from pydantic import BaseModel, ConfigDict
 
 from insights.schema import (
@@ -979,7 +979,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
         refresh_requested: bool = False,
         user: Optional[User] = None,
     ) -> QueryStatus:
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=user.distinct_id if user else str(self.team.uuid),
             event="query async recalculation initiated",
             properties={
@@ -1159,20 +1159,20 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
         start_time = perf_counter()
         cache_key = self.get_cache_key()
 
-        with hanzoanalytics.new_context():
-            hanzoanalytics.tag("cache_key", cache_key)
-            hanzoanalytics.tag("query_type", getattr(self.query, "kind", "Other"))
+        with hanzo_insights.new_context():
+            hanzo_insights.tag("cache_key", cache_key)
+            hanzo_insights.tag("query_type", getattr(self.query, "kind", "Other"))
 
             if insight_id:
-                hanzoanalytics.tag("insight_id", str(insight_id))
+                hanzo_insights.tag("insight_id", str(insight_id))
             if dashboard_id:
-                hanzoanalytics.tag("dashboard_id", str(dashboard_id))
+                hanzo_insights.tag("dashboard_id", str(dashboard_id))
             if tags := getattr(self.query, "tags", None):
                 if tags.productKey:
-                    hanzoanalytics.tag("product_key", tags.productKey)
+                    hanzo_insights.tag("product_key", tags.productKey)
                     tag_queries(product=tags.productKey)
                 if tags.scene:
-                    hanzoanalytics.tag("scene", tags.scene)
+                    hanzo_insights.tag("scene", tags.scene)
                     tag_queries(scene=tags.scene)
 
             # Abort early if the user doesn't have access to the query runner
@@ -1182,7 +1182,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
                 try:
                     self.validate_query_runner_access(user)
                 except UserAccessControlError as error:
-                    hanzoanalytics.capture(
+                    hanzo_insights.capture(
                         distinct_id=user.distinct_id,
                         event="query access control error",
                         properties={
@@ -1245,7 +1245,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
                             "last_refresh": last_refresh.isoformat() if last_refresh else None,
                         }
 
-                    hanzoanalytics.capture(
+                    hanzo_insights.capture(
                         distinct_id=user.distinct_id if user else str(self.team.uuid),
                         event="query executed",
                         properties={
@@ -1316,7 +1316,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
                     target_age=target_age,
                 )
 
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=user.distinct_id if user else str(self.team.uuid),
                 event="query executed",
                 properties={

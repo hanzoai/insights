@@ -43,7 +43,7 @@ class TestSignupAPI(APIBaseTest):
         TEST_clear_instance_license_cache()
 
     @pytest.mark.skip_on_multitenancy
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_api_sign_up(self, mock_capture):
         # Ensure the internal system metrics org doesn't prevent org-creation
         Organization.objects.create(name="Insights Internal Metrics", for_internal_metrics=True)
@@ -116,7 +116,7 @@ class TestSignupAPI(APIBaseTest):
         self.assertTrue(user.check_password(VALID_TEST_PASSWORD))
 
     @pytest.mark.skip_on_multitenancy
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_api_sign_up_with_ai_referral_source(self, mock_capture):
         response = self.client.post(
             "/api/signup/",
@@ -365,7 +365,7 @@ class TestSignupAPI(APIBaseTest):
         pass
 
     @pytest.mark.skip_on_multitenancy
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_signup_minimum_attrs(self, mock_capture):
         response = self.client.post(
             "/api/signup/",
@@ -720,7 +720,7 @@ class TestSignupAPI(APIBaseTest):
             # Check that the user was still created and added to the organization
             self.assertEqual(user.organization, new_org)
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @mock.patch("social_core.backends.base.BaseAuth.request")
     @mock.patch("insights.api.authentication.get_instance_available_sso_providers")
     @mock.patch("insights.tasks.user_identify.identify_task")
@@ -731,7 +731,7 @@ class TestSignupAPI(APIBaseTest):
         self.run_test_for_allowed_domain(mock_sso_providers, mock_request, mock_capture)
 
     @unittest.skip("Skipping until fixed in Python 3.12+")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @mock.patch("ee.billing.billing_manager.BillingManager.update_billing_organization_users")
     @mock.patch("social_core.backends.base.BaseAuth.request")
     @mock.patch("insights.api.authentication.get_instance_available_sso_providers")
@@ -750,7 +750,7 @@ class TestSignupAPI(APIBaseTest):
         mock_update_billing_organization_users.assert_called_once()  # assert fails, error was shadowed in Python <3.12
 
     @unittest.skip("Skipping until fixed in Python 3.12+")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @mock.patch("ee.billing.billing_manager.BillingManager.update_billing_organization_users")
     @mock.patch("social_core.backends.base.BaseAuth.request")
     @mock.patch("insights.api.authentication.get_instance_available_sso_providers")
@@ -769,7 +769,7 @@ class TestSignupAPI(APIBaseTest):
         mock_update_billing_organization_users.assert_called_once()  # assert fails, error was shadowed in Python <3.12
 
     @unittest.skip("Skipping until fixed in Python 3.12+")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @mock.patch("ee.billing.billing_manager.BillingManager.update_billing_organization_users")
     @mock.patch("social_core.backends.base.BaseAuth.request")
     @mock.patch("insights.api.authentication.get_instance_available_sso_providers")
@@ -1456,7 +1456,7 @@ class TestInviteSignupAPI(APIBaseTest):
 
     # Signup (using invite)
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_api_invite_sign_up(self, mock_capture):
         invite: OrganizationInvite = OrganizationInvite.objects.create(
             target_email="test+99@hanzo.ai", organization=self.organization
@@ -1747,7 +1747,7 @@ class TestInviteSignupAPI(APIBaseTest):
 
         self.assertEqual(len(mail.outbox), 0)
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @patch("ee.billing.billing_manager.BillingManager.update_billing_organization_users")
     def test_existing_user_can_sign_up_to_a_new_organization(
         self, mock_update_billing_organization_users, mock_capture
@@ -1821,7 +1821,7 @@ class TestInviteSignupAPI(APIBaseTest):
         # Assert that the org's distinct IDs are sent to billing
         mock_update_billing_organization_users.assert_called_once_with(new_org)
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_cannot_use_claim_invite_endpoint_to_update_user(self, mock_capture):
         """
         Tests that a user cannot use the claim invite endpoint to change their name or password

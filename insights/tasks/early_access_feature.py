@@ -1,7 +1,7 @@
 from typing import Any
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from celery import shared_task
 
 from insights.insightsql import ast
@@ -19,7 +19,7 @@ INSIGHTS_TEAM_ID = 2
 
 # Mostly here to help with mocks for testing
 def capture_event(event: str, *, distinct_id: str, properties: dict[str, Any]) -> None:
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         event,
         distinct_id=distinct_id,
         properties=properties,
@@ -76,4 +76,4 @@ def send_events_for_early_access_feature_stage_change(feature_id: str, from_stag
             },
         )
 
-    hanzoanalytics.flush()
+    hanzo_insights.flush()

@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from django.db.models import Prefetch, Q
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from opentelemetry import trace
 from pydantic import BaseModel, ConfigDict
 
@@ -590,7 +590,7 @@ class Database(BaseModel):
             span.set_attribute("team_id", team.pk)
 
         with timings.measure("feature_flags"):
-            is_managed_viewset_enabled = hanzoanalytics.feature_enabled(
+            is_managed_viewset_enabled = hanzo_insights.feature_enabled(
                 "managed-viewsets",
                 str(team.uuid),
                 groups={

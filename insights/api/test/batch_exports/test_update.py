@@ -814,7 +814,7 @@ def databricks_integration_2(team, user):
 def enable_databricks(team):
     """Enable the Databricks batch exports feature flag to be able to run the test."""
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
+        "insights.batch_exports.http.hanzo_insights.feature_enabled",
         return_value=True,
     ):
         yield

@@ -1,7 +1,7 @@
 import logging
 
 import requests
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 
 logger = logging.getLogger(__name__)
 

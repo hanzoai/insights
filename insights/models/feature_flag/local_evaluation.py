@@ -9,7 +9,7 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 import structlog
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 
 from insights.models.cohort.cohort import Cohort, CohortOrEmpty
 from insights.models.feature_flag import FeatureFlag

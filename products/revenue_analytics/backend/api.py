@@ -1,6 +1,6 @@
 from typing import cast
 
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request

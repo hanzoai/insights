@@ -3,7 +3,7 @@ import itertools
 from collections.abc import Iterator, Sequence
 from typing import Any, Optional
 
-from hanzoanalytics import feature_enabled
+from hanzo_insights import feature_enabled
 
 from insights.schema import (
     ActorsQuery,

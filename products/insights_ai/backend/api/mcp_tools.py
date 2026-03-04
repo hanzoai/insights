@@ -4,7 +4,7 @@ from django.views.generic import View
 
 import pydantic
 from asgiref.sync import async_to_sync
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request

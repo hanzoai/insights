@@ -134,7 +134,7 @@ def receiver_bind_extra_request_metadata(sender, signal, task=None, logger=None)
 
 @worker_process_init.connect
 def on_worker_start(**kwargs) -> None:
-    from hanzoanalytics import setup
+    from hanzo_insights import setup
     from prometheus_client import start_http_server
 
     setup()  # makes sure things like exception autocapture are initialised

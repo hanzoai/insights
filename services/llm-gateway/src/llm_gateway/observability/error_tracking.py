@@ -1,6 +1,6 @@
 from typing import Any
 
-import hanzoanalytics
+import hanzo_insights
 import structlog
 
 from llm_gateway.config import get_settings
@@ -19,7 +19,7 @@ def _ensure_initialized() -> bool:
     if not settings.insights_project_token:
         return False
 
-    hanzoanalytics.api_key = settings.insights_project_token
+    hanzo_insights.api_key = settings.insights_project_token
     _initialized = True
     return True
 
@@ -34,7 +34,7 @@ def capture_exception(
         return
 
     try:
-        hanzoanalytics.capture_exception(
+        hanzo_insights.capture_exception(
             error,
             distinct_id="llm-gateway-service",
             properties=properties if properties else None,

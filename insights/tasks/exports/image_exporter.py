@@ -10,7 +10,7 @@ from urllib.parse import quote
 from django.conf import settings
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.chrome.options import Options
@@ -227,7 +227,7 @@ def _screenshot_asset(
         driver = get_driver()
         driver.set_window_size(screenshot_width, screenshot_height)
         driver.get(url_to_render)
-        hanzoanalytics.tag("url_to_render", url_to_render)
+        hanzo_insights.tag("url_to_render", url_to_render)
 
         timeout = 20
 
@@ -238,11 +238,11 @@ def _screenshot_asset(
         try:
             WebDriverWait(driver, timeout).until(lambda x: x.find_element(By.CSS_SELECTOR, wait_for_css_selector))
         except TimeoutException as e:
-            with hanzoanalytics.new_context():
-                hanzoanalytics.tag("stage", "image_exporter.page_load_timeout")
+            with hanzo_insights.new_context():
+                hanzo_insights.tag("stage", "image_exporter.page_load_timeout")
                 try:
                     driver.save_screenshot(image_path)
-                    hanzoanalytics.tag("image_path", image_path)
+                    hanzo_insights.tag("image_path", image_path)
                 except Exception:
                     pass
                 capture_exception(e)
@@ -253,11 +253,11 @@ def _screenshot_asset(
             # Also wait until nothing is loading
             WebDriverWait(driver, 20).until_not(lambda x: x.find_element(By.CLASS_NAME, "Spinner"))
         except TimeoutException as e:
-            with hanzoanalytics.new_context():
-                hanzoanalytics.tag("stage", "image_exporter.wait_for_spinner_timeout")
+            with hanzo_insights.new_context():
+                hanzo_insights.tag("stage", "image_exporter.wait_for_spinner_timeout")
                 try:
                     driver.save_screenshot(image_path)
-                    hanzoanalytics.tag("image_path", image_path)
+                    hanzo_insights.tag("image_path", image_path)
                 except Exception:
                     pass
                 capture_exception(e)
@@ -374,13 +374,13 @@ def _screenshot_asset(
         driver.save_screenshot(image_path)
     except Exception as e:
         # To help with debugging, add a screenshot and any chrome logs
-        with hanzoanalytics.new_context():
-            hanzoanalytics.tag("url_to_render", url_to_render)
+        with hanzo_insights.new_context():
+            hanzo_insights.tag("url_to_render", url_to_render)
             if driver:
                 # If we encounter issues getting extra info we should silently fail rather than creating a new exception
                 try:
                     driver.save_screenshot(image_path)
-                    hanzoanalytics.tag("image_path", image_path)
+                    hanzo_insights.tag("image_path", image_path)
                 except Exception:
                     pass
         capture_exception(e)
@@ -392,9 +392,9 @@ def _screenshot_asset(
 
 
 def export_image(exported_asset: ExportedAsset, max_height_pixels: Optional[int] = None) -> None:
-    with hanzoanalytics.new_context():
-        hanzoanalytics.tag("team_id", exported_asset.team_id if exported_asset else "unknown")
-        hanzoanalytics.tag("asset_id", exported_asset.id if exported_asset else "unknown")
+    with hanzo_insights.new_context():
+        hanzo_insights.tag("team_id", exported_asset.team_id if exported_asset else "unknown")
+        hanzo_insights.tag("asset_id", exported_asset.id if exported_asset else "unknown")
 
         try:
             # Track cache keys for insights so we can pass them to Chrome for guaranteed cache hits

@@ -7,7 +7,7 @@ import logging
 from typing import Any, Optional
 
 import requests
-from hanzoanalytics import Insights
+from hanzo_insights import Insights
 
 from .utils import get_service_url
 

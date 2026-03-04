@@ -8,7 +8,7 @@ from typing import Any
 from django.conf import settings
 
 import openai
-import hanzoanalytics
+import hanzo_insights
 
 from products.llm_analytics.backend.providers.formatters.openai_formatter import convert_to_openai_messages
 
@@ -51,7 +51,7 @@ class InkeepProvider:
 
         try:
             # Manually track with Insights since Inkeep doesn't have native support
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=distinct_id,
                 event="$ai_generation",
                 properties={

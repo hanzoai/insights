@@ -21,7 +21,7 @@ async def _noop_heartbeater(*args, **kwargs):
     yield
 
 
-FF_PAYLOAD_PATH = "insights.temporal.llm_analytics.team_discovery.hanzoanalytics.get_feature_flag_payload"
+FF_PAYLOAD_PATH = "insights.temporal.llm_analytics.team_discovery.hanzo_insights.get_feature_flag_payload"
 
 
 class TestGetLlmaWorkflowConfig:

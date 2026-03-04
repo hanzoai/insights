@@ -52,7 +52,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @patch("insights.models.user.User.update_billing_organization_users")
     def test_delete_organization_member(self, mock_update_billing_organization_users, mock_capture):
         user = User.objects.create_and_join(self.organization, "test@x.com", None, "X")
@@ -216,7 +216,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response_data["has_keys_active_last_week"], False)
         self.assertEqual(response_data["keys"], [])
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @patch("insights.models.user.User.update_billing_organization_users")
     def test_leave_organization(self, mock_update_billing_organization_users, mock_capture):
         membership_queryset = OrganizationMembership.objects.filter(user=self.user, organization=self.organization)

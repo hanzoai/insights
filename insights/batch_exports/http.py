@@ -10,7 +10,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, mixins, request, response, serializers, status, viewsets
 from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDenied, ValidationError
@@ -639,7 +639,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
             team_id = self.context["team_id"]
             team = Team.objects.get(id=team_id)
 
-            if not hanzoanalytics.feature_enabled(
+            if not hanzo_insights.feature_enabled(
                 "databricks-batch-exports",
                 str(team.uuid),
                 groups={"organization": str(team.organization.id)},
@@ -671,7 +671,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
             team_id = self.context["team_id"]
             team = Team.objects.get(id=team_id)
 
-            if not hanzoanalytics.feature_enabled(
+            if not hanzo_insights.feature_enabled(
                 "azure-blob-batch-exports",
                 str(team.uuid),
                 groups={"organization": str(team.organization.id)},
@@ -738,7 +738,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
             team_id = self.context["team_id"]
             team = Team.objects.get(id=team_id)
 
-            if not hanzoanalytics.feature_enabled(
+            if not hanzo_insights.feature_enabled(
                 "backfill-workflows-destination",
                 str(team.uuid),
                 groups={"organization": str(team.organization.id)},
@@ -762,7 +762,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
         if validated_data["interval"] not in ("hour", "day", "week"):
             team = Team.objects.get(id=team_id)
 
-            if not hanzoanalytics.feature_enabled(
+            if not hanzo_insights.feature_enabled(
                 "high-frequency-batch-exports",
                 str(team.uuid),
                 groups={"organization": str(team.organization.id)},
@@ -1150,7 +1150,7 @@ def create_backfill(
     # Currently, backfills from the beginning of time usually fail due to us hitting ClickHouse memory limits.
     # Therefore, this feature is behind a feature flag while we improve backfilling behavior.
     if start_at_input is None:
-        if not hanzoanalytics.feature_enabled(
+        if not hanzo_insights.feature_enabled(
             "batch-export-earliest-backfill",
             str(team.uuid),
             groups={"organization": str(team.organization.id)},
