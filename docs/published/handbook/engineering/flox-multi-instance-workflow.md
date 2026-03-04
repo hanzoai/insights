@@ -102,14 +102,14 @@ After setup, use the `phw` command for everything:
 #### Create a NEW branch
 
 ```bash
-# creates branch haacked/new-feature and worktree haacked/new-feature off of master
+# creates branch haacked/new-feature and worktree haacked/new-feature off of main
 phw create haacked/new-feature
 # You're now IN the worktree with Flox activated!
 bin/start
 # Access at http://localhost:8000
 
 # Or specify a different base branch
-phw create haacked/new-feature master
+phw create haacked/new-feature main
 ```
 
 #### Work on EXISTING branch
@@ -151,9 +151,9 @@ bin/start    # Start development
 # 10:30 AM - Urgent production bug!
 # Stop current Insights instance first
 # Ctrl+C to stop bin/start
-phw checkout master
+phw checkout main
 # Already in main worktree with Flox activated
-git pull origin master
+git pull origin main
 bin/start    # Start development
 # Fix bug, test at http://localhost:8000
 
@@ -231,7 +231,7 @@ phw remove pr-5678-teammate
 ### Commands
 
 ```bash
-phw create <branch> [base-branch]   # Create new branch & worktree (defaults to master)
+phw create <branch> [base-branch]   # Create new branch & worktree (defaults to main)
 phw checkout <branch>               # Create worktree for existing branch
 phw switch <branch>                 # Switch to existing worktree
 phw pr <number>                     # Checkout PR in worktree
@@ -415,7 +415,7 @@ echo "✅ Setup complete! You can now use 'phw' commands."
 
 After setup, you're ready to use commands like:
 
-- `phw create haacked/feature` (create from master)
+- `phw create haacked/feature` (create from main)
 - `phw create haacked/feature my-branch` (create from my-branch)
 - `phw checkout my-branch`
 - `phw pr 12345`

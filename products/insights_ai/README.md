@@ -17,4 +17,4 @@ insightscli init:skill --product <product> --name <name> --j2  # Scaffold as Jin
 ### Workflow
 
 1. Edit skill sources in `products/*/skills/`
-2. Push to master — CI builds the ZIP and creates a GitHub release (`agent-skills-latest` + versioned)
+2. Push to main — CI builds the ZIP and creates a GitHub release (`agent-skills-latest` + versioned)

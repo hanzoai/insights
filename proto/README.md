@@ -24,7 +24,7 @@ proto/
 Proto changes trigger `.github/workflows/ci-proto.yml`:
 
 - **Lint**: Style and naming conventions
-- **Breaking**: Detects backwards-incompatible changes against `master`
+- **Breaking**: Detects backwards-incompatible changes against `main`
 
 ## Adding a New Proto
 

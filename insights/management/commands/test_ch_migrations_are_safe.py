@@ -105,7 +105,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _check_migration_against_master(new_migration: str) -> None:
-        """Check that new migration number doesn't conflict with migrations on master."""
+        """Check that new migration number doesn't conflict with migrations on main."""
         repo = Repo(os.getcwd())
 
         try:
@@ -114,7 +114,7 @@ class Command(BaseCommand):
             original_ref = repo.head.commit.hexsha
 
         try:
-            repo.git.checkout("master")
+            repo.git.checkout("main")
             master_migrations = os.listdir(MIGRATIONS_DIR)
         finally:
             repo.git.checkout(original_ref)
@@ -135,5 +135,5 @@ class Command(BaseCommand):
 
         collisions = [f"{idx}_{n}" for idx, n in old_migrations if idx == index]
         if collisions:
-            logger.error(f"Migration {index}_{name} conflicts with master: {', '.join(collisions)}")
+            logger.error(f"Migration {index}_{name} conflicts with main: {', '.join(collisions)}")
             sys.exit(1)

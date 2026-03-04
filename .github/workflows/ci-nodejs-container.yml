@@ -6,7 +6,7 @@ on:
     merge_group:
     push:
         branches:
-            - 'master'
+            - 'main'
             - 'main'
 
 concurrency:
@@ -52,7 +52,7 @@ jobs:
             github.event_name == 'workflow_dispatch' ||
             (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && needs.changes.outputs.node_files == 'true') ||
             github.event_name == 'merge_group' ||
-            (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && needs.changes.outputs.node_files == 'true')
+            (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/main') && needs.changes.outputs.node_files == 'true')
         runs-on: hanzo-build
         permissions:
             contents: read

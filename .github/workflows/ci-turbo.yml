@@ -34,8 +34,8 @@ jobs:
                     git fetch origin refs/heads/${GITHUB_BASE_REF}:refs/heads/${GITHUB_BASE_REF} --depth=1
                     echo "TURBO_SCM_BASE=${GITHUB_BASE_REF}" >> $GITHUB_ENV
                   else
-                    git fetch origin refs/heads/master:refs/heads/master --depth=1
-                    echo "TURBO_SCM_BASE=master" >> $GITHUB_ENV
+                    git fetch origin refs/heads/main:refs/heads/main --depth=1
+                    echo "TURBO_SCM_BASE=main" >> $GITHUB_ENV
                   fi
 
             - name: Set up Python

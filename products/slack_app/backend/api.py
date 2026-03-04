@@ -30,7 +30,7 @@ logger = structlog.get_logger(__name__)
 HANDLED_EVENT_TYPES = ["app_mention"]
 
 
-# To support Slack in both Cloud regions, one region acts as the primary, or "master".
+# To support Slack in both Cloud regions, one region acts as the primary.
 # The primary receives all the events from Slack, and decides what to do about each event:
 # 1. If the workspace is connected to any project in the primary region (via Integration), primary handles the event itself;
 # 2. If the workspace is NOT connected to any project in the primary region, primary proxies the event to the secondary.

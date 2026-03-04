@@ -11,7 +11,7 @@ on:
             - 'Dagster CI'
             - 'E2E CI Playwright'
             - 'Rust CI'
-        branches: [master]
+        branches: [main]
         types: [completed]
 
 env:
@@ -24,7 +24,7 @@ permissions:
     actions: write
 
 jobs:
-    check-master-status:
+    check-main-status:
         runs-on: ubuntu-latest
         if: github.event.workflow_run.event == 'push'
         steps:
@@ -33,18 +33,18 @@ jobs:
             - name: Restore incident state
               uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
               with:
-                  path: .master-ci-incident
+                  path: .main-ci-incident
                   # Use prefix matching to get the most recently saved cache
-                  key: master-ci-incident-${{ github.run_id }}
-                  restore-keys: master-ci-incident-
+                  key: main-ci-incident-${{ github.run_id }}
+                  restore-keys: main-ci-incident-
 
             - name: Read incident state
               id: incident
               run: |
-                  if [ -f .master-ci-incident ]; then
+                  if [ -f .main-ci-incident ]; then
                     echo "exists=true" >> $GITHUB_OUTPUT
-                    echo "channel=$(jq -r '.channel // empty' .master-ci-incident)" >> $GITHUB_OUTPUT
-                    echo "ts=$(jq -r '.ts // empty' .master-ci-incident)" >> $GITHUB_OUTPUT
+                    echo "channel=$(jq -r '.channel // empty' .main-ci-incident)" >> $GITHUB_OUTPUT
+                    echo "ts=$(jq -r '.ts // empty' .main-ci-incident)" >> $GITHUB_OUTPUT
                   else
                     echo "exists=false" >> $GITHUB_OUTPUT
                   fi
@@ -54,7 +54,7 @@ jobs:
               uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
               with:
                   script: |
-                      const script = require('./.github/scripts/master-ci-status.js');
+                      const script = require('./.github/scripts/main-ci-status.js');
                       await script({ github, context, core });
 
             - name: Get commit info
@@ -119,8 +119,8 @@ jobs:
                     --arg channel "${{ steps.slack_new.outputs.channel_id }}" \
                     --arg ts "${{ steps.slack_new.outputs.ts }}" \
                     '. + {channel: $channel, ts: $ts}' \
-                    .master-ci-incident > .master-ci-incident.tmp
-                  mv .master-ci-incident.tmp .master-ci-incident
+                    .main-ci-incident > .main-ci-incident.tmp
+                  mv .main-ci-incident.tmp .main-ci-incident
 
             # ============ SLACK: UPDATE ============
 
@@ -243,7 +243,7 @@ jobs:
                   # Delete ALL old incident caches to prevent divergent cache branches
                   # This ensures the new incident cache becomes the single source of truth
                   echo "Deleting old incident caches..."
-                  gh cache list --key master-ci-incident- --json id,key -q '.[] | "\(.id) \(.key)"' | while read id key; do
+                  gh cache list --key main-ci-incident- --json id,key -q '.[] | "\(.id) \(.key)"' | while read id key; do
                     echo "Deleting cache: $key"
                     gh cache delete "$id" || true
                   done
@@ -252,5 +252,5 @@ jobs:
               if: steps.process.outputs.save_cache == 'true'
               uses: actions/cache/save@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
               with:
-                  path: .master-ci-incident
-                  key: master-ci-incident-${{ github.run_id }}
+                  path: .main-ci-incident
+                  key: main-ci-incident-${{ github.run_id }}

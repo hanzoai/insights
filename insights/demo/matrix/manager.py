@@ -30,7 +30,7 @@ from .models import SimEvent, SimPerson
 
 class MatrixManager:
     # ID of the team under which demo data will be pre-saved
-    MASTER_TEAM_ID = 0
+    PRIMARY_TEAM_ID = 0
 
     matrix: Matrix
     use_pre_save: bool
@@ -107,13 +107,13 @@ class MatrixManager:
                 existing_user.save()
             return (existing_user.organization, existing_user.team, existing_user)
 
-    def reset_master(self):
+    def reset_primary(self):
         if self.matrix.is_complete is None:
             if self.print_steps:
                 print(f"Simulating data...")
             self.matrix.simulate()
-        master_team = self._prepare_master_team(ensure_blank_slate=True)
-        self._save_analytics_data(master_team)
+        primary_team = self._prepare_primary_team(ensure_blank_slate=True)
+        self._save_analytics_data(primary_team)
 
     @staticmethod
     def create_team(organization: Organization, **kwargs) -> Team:
@@ -130,7 +130,7 @@ class MatrixManager:
         does_clickhouse_data_need_saving = True
         if self.use_pre_save:
             does_clickhouse_data_need_saving = not self._is_demo_data_pre_saved()
-            source_team = self._prepare_master_team()
+            source_team = self._prepare_primary_team()
         else:
             source_team = team
         if does_clickhouse_data_need_saving:
@@ -140,7 +140,7 @@ class MatrixManager:
                 self.matrix.simulate()
             self._save_analytics_data(source_team)
         if self.use_pre_save:
-            self._copy_analytics_data_from_master_team(team)
+            self._copy_analytics_data_from_primary_team(team)
         self._sync_postgres_with_clickhouse_data(source_team.pk, team.pk)
         self.matrix.set_project_up(team, user)
         if self.print_steps:
@@ -191,45 +191,45 @@ class MatrixManager:
         self._sleep_until_person_data_in_clickhouse(data_team.pk)
 
     @classmethod
-    def _prepare_master_team(cls, *, ensure_blank_slate: bool = False) -> Team:
-        print("Preparing master team...")
-        master_team = Team.objects.filter(id=cls.MASTER_TEAM_ID).first()
-        if master_team is None:
-            master_team = cls._create_master_team()
+    def _prepare_primary_team(cls, *, ensure_blank_slate: bool = False) -> Team:
+        print("Preparing primary team...")
+        primary_team = Team.objects.filter(id=cls.PRIMARY_TEAM_ID).first()
+        if primary_team is None:
+            primary_team = cls._create_primary_team()
         elif ensure_blank_slate:
-            cls._erase_master_team_data()
-        return master_team
+            cls._erase_primary_team_data()
+        return primary_team
 
     @classmethod
-    def _create_master_team(cls) -> Team:
-        organization = Organization.objects.create(id=cls.MASTER_TEAM_ID, name="Insights")
-        return cls.create_team(organization, id=cls.MASTER_TEAM_ID, name="Master")
+    def _create_primary_team(cls) -> Team:
+        organization = Organization.objects.create(id=cls.PRIMARY_TEAM_ID, name="Insights")
+        return cls.create_team(organization, id=cls.PRIMARY_TEAM_ID, name="Primary")
 
     @classmethod
-    def _erase_master_team_data(cls):
+    def _erase_primary_team_data(cls):
         # 2024-05-23 note from Tim:
         # this was absolutely thrashing throughput on clickhouse. Please don't re-enable
         # AsyncEventDeletion().process(
         #     [
         #         AsyncDeletion(
-        #             team_id=cls.MASTER_TEAM_ID,
-        #             key=cls.MASTER_TEAM_ID,
+        #             team_id=cls.PRIMARY_TEAM_ID,
+        #             key=cls.PRIMARY_TEAM_ID,
         #             deletion_type=DeletionType.Team,
         #         )
         #     ]
         # )
-        GroupTypeMapping.objects.filter(project_id=cls.MASTER_TEAM_ID).delete()
+        GroupTypeMapping.objects.filter(project_id=cls.PRIMARY_TEAM_ID).delete()
 
-    def _copy_analytics_data_from_master_team(self, target_team: Team):
+    def _copy_analytics_data_from_primary_team(self, target_team: Team):
         from insights.models.event.sql import COPY_EVENTS_BETWEEN_TEAMS
         from insights.models.group.sql import COPY_GROUPS_BETWEEN_TEAMS
         from insights.models.person.sql import COPY_PERSON_DISTINCT_ID2S_BETWEEN_TEAMS, COPY_PERSONS_BETWEEN_TEAMS
 
         if self.print_steps:
-            print(f"Copying simulated data from master team...")
+            print(f"Copying simulated data from primary team...")
 
         copy_params = {
-            "source_team_id": self.MASTER_TEAM_ID,
+            "source_team_id": self.PRIMARY_TEAM_ID,
             "target_team_id": target_team.pk,
         }
         sync_execute(COPY_PERSONS_BETWEEN_TEAMS, copy_params)
@@ -240,7 +240,7 @@ class MatrixManager:
         GroupTypeMapping.objects.bulk_create(
             (
                 GroupTypeMapping(team_id=target_team.id, project_id=target_team.project_id, **record)
-                for record in GroupTypeMapping.objects.filter(project_id=self.MASTER_TEAM_ID).values(
+                for record in GroupTypeMapping.objects.filter(project_id=self.PRIMARY_TEAM_ID).values(
                     "group_type", "group_type_index", "name_singular", "name_plural"
                 )
             ),
@@ -425,4 +425,4 @@ class MatrixManager:
 
     @classmethod
     def _is_demo_data_pre_saved(cls) -> bool:
-        return Team.objects.filter(pk=cls.MASTER_TEAM_ID).exists()
+        return Team.objects.filter(pk=cls.PRIMARY_TEAM_ID).exists()

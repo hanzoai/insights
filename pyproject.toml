@@ -279,7 +279,7 @@ required-version = "~=0.10.2"
 [tool.uv.sources]
 infi-clickhouse-orm = { git = "https://github.com/hanzoai/infi.clickhouse_orm", rev = "9578c79f29635ee2c1d01b7979e89adab8383de2" }
 insightsql-parser = { path = "common/insightsql_parser" }
-hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "master" }
+hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "main" }
 
 
 [tool.isort]

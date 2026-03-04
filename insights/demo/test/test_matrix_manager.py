@@ -61,10 +61,10 @@ class TestMatrixManager(ClickhouseDestroyTablesMixin):
         )
         cls.matrix.simulate()
 
-    def test_reset_master(self):
+    def test_reset_primary(self):
         manager = MatrixManager(self.matrix)
 
-        manager.reset_master()
+        manager.reset_primary()
 
         # At least one event for each cluster
         assert sync_execute("SELECT count() FROM events WHERE team_id = 0")[0][0] >= 3
