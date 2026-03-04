@@ -156,7 +156,7 @@ class TestInsightsQLQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertIsNotNone(response.cache_target_age)
             self.assertEqual(response.cache_target_age, expected_target_age)
 
-    def test_variables_in_hog_expression(self):
+    def test_variables_in_iql_expression(self):
         variable = InsightVariable.objects.create(team=self.team, name="Foo", code_name="foo", type="Boolean")
         variable_id = str(variable.id)
 
@@ -172,7 +172,7 @@ class TestInsightsQLQueryRunner(ClickhouseTestMixin, APIBaseTest):
         response = runner.calculate()
         self.assertEqual(response.results[0][0], "exists")
 
-    def test_variables_in_hog_expression_sql(self):
+    def test_variables_in_iql_expression_sql(self):
         variable = InsightVariable.objects.create(team=self.team, name="Bar", code_name="bar", type="Boolean")
         variable_id = str(variable.id)
 

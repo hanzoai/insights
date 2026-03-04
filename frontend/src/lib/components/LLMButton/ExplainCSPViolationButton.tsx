@@ -59,7 +59,7 @@ export const ExplainCSPViolationButton = ({
                     {loading ? (
                         <div className="flex items-center justify-center min-h-40 gap-4">
                             <div className="text-l">
-                                <Spinner /> The security hogs are sniffing the violation{' '}
+                                <Spinner /> The security bots are sniffing the violation{' '}
                             </div>
                         </div>
                     ) : (

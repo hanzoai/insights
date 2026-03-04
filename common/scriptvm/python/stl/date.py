@@ -3,30 +3,30 @@ from typing import Optional
 
 import pytz
 
-from common.scriptvm.python.objects import is_hog_date, is_hog_datetime
+from common.scriptvm.python.objects import is_iql_date, is_iql_datetime
 
 
-def to_hog_date(year: int, month: int, day: int):
+def to_iql_date(year: int, month: int, day: int):
     return {
-        "__hogDate__": True,
+        "__iqlDate__": True,
         "year": year,
         "month": month,
         "day": day,
     }
 
 
-def to_hog_datetime(timestamp: int | float | dict, zone: Optional[str] = None):
-    if isinstance(timestamp, dict) and is_hog_date(timestamp):
+def to_iql_datetime(timestamp: int | float | dict, zone: Optional[str] = None):
+    if isinstance(timestamp, dict) and is_iql_date(timestamp):
         dt = datetime.datetime(
             year=timestamp["year"], month=timestamp["month"], day=timestamp["day"], tzinfo=pytz.timezone(zone or "UTC")
         )
         return {
-            "__hogDateTime__": True,
+            "__iqlDateTime__": True,
             "dt": dt.timestamp(),
             "zone": (dt.tzinfo.tzname(None) if dt.tzinfo else None) or "UTC",
         }
     return {
-        "__hogDateTime__": True,
+        "__iqlDateTime__": True,
         "dt": timestamp,
         "zone": zone or "UTC",
     }
@@ -36,13 +36,13 @@ def to_hog_datetime(timestamp: int | float | dict, zone: Optional[str] = None):
 
 
 def now(zone: Optional[str] = None):
-    return to_hog_datetime(datetime.datetime.now().timestamp(), zone)
+    return to_iql_datetime(datetime.datetime.now().timestamp(), zone)
 
 
 def toUnixTimestamp(date, timezone: Optional[str] = None):
-    if isinstance(date, dict) and is_hog_datetime(date):
+    if isinstance(date, dict) and is_iql_datetime(date):
         return date["dt"]
-    if isinstance(date, dict) and is_hog_date(date):
+    if isinstance(date, dict) and is_iql_date(date):
         return datetime.datetime(
             year=date["year"], month=date["month"], day=date["day"], tzinfo=pytz.timezone(timezone or "UTC")
         ).timestamp()
@@ -54,7 +54,7 @@ def toUnixTimestamp(date, timezone: Optional[str] = None):
 
 
 def fromUnixTimestamp(timestamp: int | float):
-    return to_hog_datetime(timestamp)
+    return to_iql_datetime(timestamp)
 
 
 def toUnixTimestampMilli(date, timezone: Optional[str] = None):
@@ -66,7 +66,7 @@ def fromUnixTimestampMilli(timestamp: int):
 
 
 def toTimeZone(date: dict, timezone: str):
-    if not is_hog_datetime(date):
+    if not is_iql_datetime(date):
         raise ValueError("Expected a DateTime")
     return {
         **date,
@@ -80,7 +80,7 @@ def toDate(input):
     else:
         dt = datetime.datetime.fromisoformat(input)
     return {
-        "__hogDate__": True,
+        "__iqlDate__": True,
         "year": dt.year,
         "month": dt.month,
         "day": dt.day,
@@ -93,7 +93,7 @@ def toDateTime(input):
     else:
         dt = datetime.datetime.fromisoformat(input).timestamp()
     return {
-        "__hogDateTime__": True,
+        "__iqlDateTime__": True,
         "dt": dt,
         "zone": "UTC",
     }
@@ -142,7 +142,7 @@ token_translations = {
 
 
 def formatDateTime(input: dict, format: str, zone: Optional[str] = None) -> str:
-    if not is_hog_datetime(input):
+    if not is_iql_datetime(input):
         raise ValueError("Expected a DateTime")
     format_string = ""
     acc = ""

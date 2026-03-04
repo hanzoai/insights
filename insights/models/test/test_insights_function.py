@@ -365,7 +365,7 @@ class TestInsightsFunctionsBackgroundReloading(TestCase, QueryMatchingTest):
         assert transformations.count() == 0
 
     @patch("insights.plugins.plugin_server_api.get_insights_function_templates")
-    def test_geoip_transformation_not_created_when_hog_code_invalid(self, mock_get_templates):
+    def test_geoip_transformation_not_created_when_iql_code_invalid(self, mock_get_templates):
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = [

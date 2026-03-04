@@ -42,7 +42,7 @@ SLACK_SECONDARY_REGION_DOMAIN = "insights.hanzo.ai"
 
 if settings.DEBUG:
     # In local dev, we implicitly test the regional routing by ALWAYS proxying once. When the request first arrives via
-    # SITE_URL (e.g. slackhog.ngrok.dev) we treat that as the primary region with no relevant integration, and proxy
+    # SITE_URL (e.g. slackinsights.ngrok.dev) we treat that as the primary region with no relevant integration, and proxy
     # to localhost:8000, where the actual event handler runs. This way we ensure routing works, and works well.
     SLACK_PRIMARY_REGION_DOMAIN = urlparse(settings.SITE_URL).netloc
     SLACK_SECONDARY_REGION_DOMAIN = "localhost:8000"

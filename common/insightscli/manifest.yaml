@@ -515,7 +515,7 @@ tools:
     tool:iql:
         bin_script: iql
         description: Run InsightsQL interpreter (TypeScript/Python) or compiled bytecode
-    tool:hoge:
+    tool:iqle:
         bin_script: iqle
         description: Compile InsightsQL source to bytecode or JavaScript
     tool:ruff:
@@ -538,7 +538,7 @@ tools:
         description: Generate new ClickHouse migration scaffold
     tool:print-iql-stl:
         cmd: python manage.py print_iql_stl_table
-        description: Print HogSQL standard library definitions for reference
+        description: Print IQLSQL standard library definitions for reference
         hidden: true
     clickhouse:logs:init:
         bin_script: clickhouse-logs-init

@@ -710,7 +710,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         ]
         assert filtered_actual_activities == expected_activities
 
-    def test_generates_hog_bytecode(self, *args):
+    def test_generates_iql_bytecode(self, *args):
         response = self.client.post(
             f"/api/projects/{self.team.id}/insights_functions/",
             data={

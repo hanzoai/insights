@@ -22,21 +22,21 @@ from insights.insightsql.ai import (
 )
 from insights.insightsql.parser import parse_program
 
-from insights.cdp.validation import compile_hog
+from insights.cdp.validation import compile_iql
 
 from products.cdp.backend.prompts import (
     INSIGHTS_FUNCTION_FILTERS_ASSISTANT_ROOT_SYSTEM_PROMPT,
     INSIGHTS_FUNCTION_INPUTS_ASSISTANT_ROOT_SYSTEM_PROMPT,
-    HOG_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
+    IQL_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT,
 )
 
 
 
-class CreateHogTransformationFunctionArgs(BaseModel):
+class CreateIQLTransformationFunctionArgs(BaseModel):
     instructions: str = Field(description="The instructions for what transformation to create.")
 
 
-class HogTransformationOutput(BaseModel):
+class IQLTransformationOutput(BaseModel):
     script_code: str
 
 
@@ -48,12 +48,12 @@ class InsightsFunctionFiltersOutput(BaseModel):
     filters: dict
 
 
-class CreateHogTransformationFunctionTool(MaxTool):
-    name: str = "create_hog_transformation_function"  # Must match a value in AssistantTool enum
+class CreateIQLTransformationFunctionTool(MaxTool):
+    name: str = "create_iql_transformation_function"  # Must match a value in AssistantTool enum
     description: str = "Write or edit the script code to create your desired function and apply it to the current editor"
-    args_schema: type[BaseModel] = CreateHogTransformationFunctionArgs
+    args_schema: type[BaseModel] = CreateIQLTransformationFunctionArgs
     context_prompt_template: str = (
-        HOG_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT
+        IQL_TRANSFORMATION_ASSISTANT_ROOT_SYSTEM_PROMPT
         + "\n\n"
         + TRANSFORMATION_LIMITATIONS_MESSAGE
         + "\n\n"
@@ -109,7 +109,7 @@ class CreateHogTransformationFunctionTool(MaxTool):
             inject_context=False,
         )
 
-    def _parse_output(self, output: str) -> HogTransformationOutput:
+    def _parse_output(self, output: str) -> IQLTransformationOutput:
         match = re.search(r"<script_code>(.*?)</script_code>", output, re.DOTALL)
         if not match:
             # The model may have returned the code without tags, or with markdown
@@ -125,7 +125,7 @@ class CreateHogTransformationFunctionTool(MaxTool):
             )
 
         try:
-            compile_hog(script_code, "transformation")
+            compile_iql(script_code, "transformation")
         except Exception:
             # Try to get a more specific error by parsing directly
             try:
@@ -140,7 +140,7 @@ class CreateHogTransformationFunctionTool(MaxTool):
                 validation_message="The Script code failed to compile.",
             )
 
-        return HogTransformationOutput(script_code=script_code)
+        return IQLTransformationOutput(script_code=script_code)
 
 
 class CreateInsightsFunctionFiltersTool(MaxTool):

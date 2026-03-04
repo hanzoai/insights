@@ -25,10 +25,10 @@ const BOARD_SIZE = 6
 const EMOJIS: Icon[] = ['icon1', 'icon2', 'icon3', 'icon4']
 
 const IMAGE_MAP: Record<Icon, string> = {
-    hog1: '/static/mascot/burning-money-mascot.png',
-    hog2: '/static/mascot/police-mascot.png',
-    hog3: '/static/mascot/sleeping-mascot.png',
-    hog4: '/static/mascot/warning-mascot.png',
+    mascot1: '/static/mascot/burning-money-mascot.png',
+    mascot2: '/static/mascot/police-mascot.png',
+    mascot3: '/static/mascot/sleeping-mascot.png',
+    mascot4: '/static/mascot/warning-mascot.png',
 }
 
 type Board = (Icon | null)[][] // 6×6 grid
@@ -378,14 +378,14 @@ const CritterMatchGame: React.FC = () => {
                                 </LemonButton>
                             </>
                         ) : (
-                            '🎉 All the hogs are safe! Well done you! 🎉'
+                            '🎉 All the mascots are safe! Well done you! 🎉'
                         )
                     ) : (
-                        `${pointsLeft} hogs remaining`
+                        `${pointsLeft} mascots remaining`
                     )}
                     {!gameOver ? (
                         <Tooltip
-                            title="Drag the hogs onto the board. Get 3 in a row to save them. Heavily inspired by 368chickens.com"
+                            title="Drag the mascots onto the board. Get 3 in a row to save them. Heavily inspired by 368chickens.com"
                             delayMs={0}
                         >
                             <IconInfo className="ml-2" />

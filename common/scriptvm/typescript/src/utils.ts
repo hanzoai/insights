@@ -1,4 +1,4 @@
-import { toHogDate, toHogDateTime } from './stl/date'
+import { toIQLDate, toIQLDateTime } from './stl/date'
 
 export class ScriptVMException extends Error {
     constructor(message: string) {
@@ -112,11 +112,11 @@ export function convertJSToHog(x: any, found?: Map<any, any>): any {
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__hogDateTime__) {
-            return toHogDateTime(x.dt, x.zone)
-        } else if (x.__hogDate__) {
-            return toHogDate(x.year, x.month, x.day)
-        } else if (x.__hogClosure__ || x.__hogCallable__) {
+        if (x.__iqlDateTime__) {
+            return toIQLDateTime(x.dt, x.zone)
+        } else if (x.__iqlDate__) {
+            return toIQLDate(x.year, x.month, x.day)
+        } else if (x.__iqlClosure__ || x.__iqlCallable__) {
             return x
         }
         const map = new Map()
@@ -152,7 +152,7 @@ export function convertHogToJS(x: any, found?: Map<any, any>): any {
         found.delete(x)
         return obj
     } else if (typeof x === 'object' && x !== null) {
-        if (x.__hogDateTime__ || x.__hogDate__ || x.__hogClosure__ || x.__hogCallable__) {
+        if (x.__iqlDateTime__ || x.__iqlDate__ || x.__iqlClosure__ || x.__iqlCallable__) {
             return x
         }
         const obj: Record<string, any> = {}

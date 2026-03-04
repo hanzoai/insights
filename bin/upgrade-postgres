@@ -29,23 +29,23 @@ Manual upgrade steps for hobby (large databases):
 For large hobby databases, consider using pg_upgrade for faster in-place migration.
 
 Usage:
-  hogli db:upgrade                  Interactive mode (default)
-  hogli db:upgrade --list           List all PostgreSQL 12 volumes
-  hogli db:upgrade --dump-only      Dump postgres:12 data and exit (verify before restore)
+  insightscli db:upgrade                  Interactive mode (default)
+  insightscli db:upgrade --list           List all PostgreSQL 12 volumes
+  insightscli db:upgrade --dump-only      Dump postgres:12 data and exit (verify before restore)
   ./bin/upgrade-postgres <volume-id>          Migrate specific volume
 
 Examples:
   # Interactive: scan and choose volume
-  hogli db:upgrade
+  insightscli db:upgrade
 
   # Dump only (verify backup before continuing)
-  hogli db:upgrade --dump-only
+  insightscli db:upgrade --dump-only
 
   # Migrate specific volume
   ./bin/upgrade-postgres 6e93806fad73d030739a55dd1c6594bf925833dd1a2ef59b3fb14b54bd6f5d73
 
   # Find orphaned postgres:12 volumes
-  hogli db:upgrade --list
+  insightscli db:upgrade --list
 
 EOF
 }
@@ -200,7 +200,7 @@ migrate_volume() {
         echo "Backup saved at: $BACKUP_FILE"
         echo ""
         echo "Verify the backup, then run:"
-        echo "  ./bin/hogli db:restore $BACKUP_FILE"
+        echo "  ./bin/insightscli db:restore $BACKUP_FILE"
         echo ""
         exit 0
     fi
@@ -217,7 +217,7 @@ migrate_volume() {
 
     echo ""
     echo "Step 5: Restoring data..."
-    ./bin/hogli db:restore "$BACKUP_FILE"
+    ./bin/insightscli db:restore "$BACKUP_FILE"
 
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -308,10 +308,10 @@ case "${1:-}" in
             echo "No PostgreSQL 12 data detected."
             echo ""
             echo "Starting fresh with PostgreSQL 15."
-            echo "Run: hogli start"
+            echo "Run: insightscli start"
             echo ""
             echo "If you have data in an orphaned postgres:12 volume:"
-            echo "  hogli db:upgrade --list              # List all postgres:12 volumes"
+            echo "  insightscli db:upgrade --list              # List all postgres:12 volumes"
             echo "  ./bin/upgrade-postgres <volume-id>   # Migrate specific volume"
             echo ""
         fi

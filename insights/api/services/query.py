@@ -19,7 +19,7 @@ from insights.schema import (
 )
 
 from insights.insightsql.autocomplete import get_insightsql_autocomplete
-from insights.insightsql.compiler.bytecode import execute_hog
+from insights.insightsql.compiler.bytecode import execute_iql
 from insights.insightsql.constants import LimitContext
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.database.database import Database
@@ -147,13 +147,13 @@ def process_query_model(
                 return {"results": "Script queries currently require staff user privileges."}
 
             try:
-                hog_result = execute_hog(query.code or "", team=team)
-                bytecode = hog_result.bytecodes.get("root", None)
+                iql_result = execute_iql(query.code or "", team=team)
+                bytecode = iql_result.bytecodes.get("root", None)
                 result = HogQueryResponse(
-                    results=hog_result.result,
+                    results=iql_result.result,
                     bytecode=bytecode,
                     coloredBytecode=color_bytecode(bytecode) if bytecode else None,
-                    stdout="\n".join(hog_result.stdout),
+                    stdout="\n".join(iql_result.stdout),
                 )
             except Exception as e:
                 result = HogQueryResponse(results=f"ERROR: {str(e)}")

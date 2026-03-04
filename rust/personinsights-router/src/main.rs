@@ -4,7 +4,7 @@ use axum::{routing::get, Router};
 use common_metrics::setup_metrics_routes;
 use envconfig::Envconfig;
 use health::readiness_handler;
-use personinsights_proto::personinsights::service::v1::person_hog_service_server::PersonInsightsServiceServer;
+use personinsights_proto::personinsights::service::v1::person_insights_service_server::PersonInsightsServiceServer;
 use personinsights_router::backend::ReplicaBackend;
 use personinsights_router::config::Config;
 use personinsights_router::middleware::GrpcMetricsLayer;

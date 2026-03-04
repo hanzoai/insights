@@ -139,8 +139,8 @@ class TestPropertyTypes(BaseTest):
         )
         assert printed == self.snapshot
         assert (
-            "SELECT ifNull(equals(toBool(transform(toString(events__group_0.properties___group_boolean), hogvar, hogvar, NULL)), 1), 0), ifNull(equals(toBool(transform(toString(events__group_0.properties___group_boolean), hogvar, hogvar, NULL)), 0), 0), isNull(toBool(transform(toString(events__group_0.properties___group_boolean), hogvar, hogvar, NULL)))"
-            in re.sub(r"%\(insightsql_val_\d+\)s", "hogvar", printed)
+            "SELECT ifNull(equals(toBool(transform(toString(events__group_0.properties___group_boolean), iqlvar, iqlvar, NULL)), 1), 0), ifNull(equals(toBool(transform(toString(events__group_0.properties___group_boolean), iqlvar, iqlvar, NULL)), 0), 0), isNull(toBool(transform(toString(events__group_0.properties___group_boolean), iqlvar, iqlvar, NULL)))"
+            in re.sub(r"%\(insightsql_val_\d+\)s", "iqlvar", printed)
         )
 
     @pytest.mark.usefixtures("unittest_snapshot")

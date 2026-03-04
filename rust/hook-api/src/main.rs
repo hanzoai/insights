@@ -48,7 +48,7 @@ async fn main() {
     let app = handlers::add_routes(
         Router::new(),
         pg_queue,
-        config.hog_mode,
+        config.iql_mode,
         config.max_body_size,
         config.concurrency_limit,
     );

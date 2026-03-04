@@ -515,7 +515,7 @@
                     use_hive_partitioning=0
   '''
 # ---
-# name: TestErrorTrackingQueryRunner.test_hogql_filters
+# name: TestErrorTrackingQueryRunner.test_insightsql_filters
   '''
   SELECT if(not(empty(e__exception_issue_override.issue_id)), e__exception_issue_override.issue_id, accurateCastOrNull(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(e.properties, '$exception_issue_id'), ''), 'null'), '^"|"$', ''), 'UUID')) AS id,
          max(toTimeZone(e.timestamp, 'UTC')) AS last_seen,

@@ -194,7 +194,7 @@ class TestSearchErrorTrackingIssuesTool(ClickhouseTestMixin, NonAtomicBaseTest):
         self.assertIsInstance(artifact, MaxErrorTrackingSearchResponse)
         self.assertEqual(len(artifact.issues), 3)
 
-    @patch("ee.hogai.context.insight.query_executor.process_query_dict")
+    @patch("ee.insightsai.context.insight.query_executor.process_query_dict")
     async def test_search_query_filters_by_text(self, mock_process_query):
         mock_process_query.return_value = {
             "results": [
@@ -223,7 +223,7 @@ class TestSearchErrorTrackingIssuesTool(ClickhouseTestMixin, NonAtomicBaseTest):
         query_dict = call_args[0][1]
         self.assertEqual(query_dict["searchQuery"], "TypeError")
 
-    @patch("ee.hogai.context.insight.query_executor.process_query_dict")
+    @patch("ee.insightsai.context.insight.query_executor.process_query_dict")
     async def test_respects_limit(self, mock_process_query):
         mock_process_query.return_value = {
             "results": [

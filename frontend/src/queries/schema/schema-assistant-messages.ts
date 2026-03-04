@@ -396,7 +396,7 @@ export type AssistantTool =
     | 'search_session_recordings'
     | 'fix_insightsql_query'
     | 'analyze_user_interviews'
-    | 'create_hog_transformation_function'
+    | 'create_iql_transformation_function'
     | 'create_insights_function_filters'
     | 'create_insights_function_inputs'
     | 'create_message_template'
