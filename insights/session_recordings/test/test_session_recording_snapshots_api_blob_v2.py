@@ -290,7 +290,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, ClickhouseTestMixin, QueryMa
         "insights.session_recordings.queries.session_replay_events.SessionReplayEvents.exists",
         return_value=True,
     )
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_get_snapshot_sources_blobby_v2_from_lts(
         self,
         _mock_feature_enabled: MagicMock,
@@ -336,7 +336,7 @@ class TestSessionRecordingSnapshotsAPI(APIBaseTest, ClickhouseTestMixin, QueryMa
         "insights.session_recordings.queries.session_replay_events.SessionReplayEvents.exists",
         return_value=True,
     )
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_get_snapshot_for_lts_source_blobby_v2(
         self,
         _mock_feature_enabled: MagicMock,

@@ -16,12 +16,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 import nh3
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from axes.decorators import axes_dispatch
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
 from nanoid import generate
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from prometheus_client import Counter
 from rest_framework import exceptions, filters, request, serializers, status, viewsets
 from rest_framework.request import Request
@@ -1678,7 +1678,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
         # Short-term Redis cache
         cache.set(cache_key, response_data, timeout=30)
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             event="survey response summarized",
             distinct_id=str(user.distinct_id),
             properties={"survey_id": survey_id, "question_id": question_id, "response_count": response_count},
@@ -1734,7 +1734,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
         survey.headline_response_count = result.get("responses_sampled", 0)
         survey.save(update_fields=["headline_summary", "headline_response_count"])
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             event="survey headline generated",
             distinct_id=str(user.distinct_id),
             properties={
@@ -1899,7 +1899,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
                 }
             )
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             event="survey bulk duplicated",
             distinct_id=str(user.distinct_id),
             properties={

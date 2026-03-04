@@ -166,7 +166,7 @@ class TestOrganizationAPI(APIBaseTest):
         self.assertEqual(self.organization.is_active, True)
         self.assertIsNone(self.organization.is_not_active_reason)
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_enforce_2fa_for_everyone(self, mock_capture):
         # Only admins should be able to enforce 2fa
         response = self.client.patch(f"/api/organizations/{self.organization.id}/", {"enforce_2fa": True})
@@ -197,7 +197,7 @@ class TestOrganizationAPI(APIBaseTest):
             groups={"instance": ANY, "organization": str(self.organization.id)},
         )
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_ai_data_processing_consent_capture_event(self, mock_capture):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()

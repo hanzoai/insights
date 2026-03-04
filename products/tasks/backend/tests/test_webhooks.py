@@ -67,7 +67,7 @@ class TestGitHubPRWebhook(TestCase):
         )
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzo_insights.capture")
     def test_pr_merged_webhook(self, mock_capture, mock_get_secret):
         """Test that a PR merged webhook creates a log entry and analytics event."""
         mock_get_secret.return_value = self.webhook_secret
@@ -93,7 +93,7 @@ class TestGitHubPRWebhook(TestCase):
         self.assertEqual(call_kwargs["properties"]["run_id"], str(self.task_run.id))
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzo_insights.capture")
     def test_pr_closed_without_merge_webhook(self, mock_capture, mock_get_secret):
         """Test that a PR closed (not merged) webhook creates correct events."""
         mock_get_secret.return_value = self.webhook_secret
@@ -116,7 +116,7 @@ class TestGitHubPRWebhook(TestCase):
         self.assertEqual(call_kwargs["event"], "pr_closed")
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzo_insights.capture")
     def test_pr_opened_webhook(self, mock_capture, mock_get_secret):
         """Test that a PR opened webhook creates correct events."""
         mock_get_secret.return_value = self.webhook_secret
@@ -173,7 +173,7 @@ class TestGitHubPRWebhook(TestCase):
         self.assertEqual(response.status_code, 403)
 
     @patch("products.tasks.backend.webhooks.get_github_webhook_secret")
-    @patch("products.tasks.backend.webhooks.hanzoanalytics.capture")
+    @patch("products.tasks.backend.webhooks.hanzo_insights.capture")
     def test_unknown_pr_url_returns_200(self, mock_capture, mock_get_secret):
         """Test that webhooks for unknown PR URLs return 200 but don't emit events."""
         mock_get_secret.return_value = self.webhook_secret

@@ -379,7 +379,7 @@ async def test_ducklake_copy_workflow_skips_when_feature_flag_disabled(monkeypat
         call_counts["copy"] += 1
 
     monkeypatch.setattr(
-        ducklake_module.hanzoanalytics,
+        ducklake_module.hanzo_insights,
         "feature_enabled",
         lambda *args, **kwargs: False,
     )
@@ -861,7 +861,7 @@ async def test_ducklake_copy_workflow_runs_when_feature_flag_enabled(monkeypatch
         return []
 
     monkeypatch.setattr(
-        ducklake_module.hanzoanalytics,
+        ducklake_module.hanzo_insights,
         "feature_enabled",
         lambda *args, **kwargs: True,
     )

@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from django.conf import settings
 
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from typing_extensions import TypeIs
 
 from insights.schema import (

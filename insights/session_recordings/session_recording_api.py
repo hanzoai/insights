@@ -19,7 +19,7 @@ from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 
 import requests
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import async_to_sync
 from clickhouse_driver.errors import ServerException
 from drf_spectacular.utils import extend_schema
@@ -548,7 +548,7 @@ class SessionRecordingViewSet(
                 except Exception as e:
                     # if this fails, we don't want to fail the request
                     # so we log it and continue
-                    hanzoanalytics.capture_exception(
+                    hanzo_insights.capture_exception(
                         e, distinct_id=user_distinct_id or "unknown", properties={"while": "setting tracing attributes"}
                     )
 
@@ -588,7 +588,7 @@ class SessionRecordingViewSet(
             if isinstance(e, ServerException) and "CHQueryErrorTimeoutExceeded" in str(e):
                 raise Throttled(detail="Query timeout exceeded. Try again later.")
 
-            hanzoanalytics.capture_exception(
+            hanzo_insights.capture_exception(
                 e,
                 distinct_id=user_distinct_id,
                 properties={
@@ -1013,7 +1013,7 @@ class SessionRecordingViewSet(
             SNAPSHOTS_BY_PERSONAL_API_KEY_COUNTER.labels(key_label=used_key.label, source=source_log_label).inc()
             # we want to track personal api key usage of this endpoint
             # with better visibility than just the token in a counter
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=self._distinct_id_from_request(request),
                 event="snapshots_api_called_with_personal_api_key",
                 properties={
@@ -1074,7 +1074,7 @@ class SessionRecordingViewSet(
                 status=status.HTTP_410_GONE,
             )
         except Exception as e:
-            hanzoanalytics.capture_exception(
+            hanzo_insights.capture_exception(
                 e,
                 distinct_id=self._distinct_id_from_request(request),
                 properties={
@@ -1197,7 +1197,7 @@ class SessionRecordingViewSet(
     def _determine_video_based_summarization_enabled(self, user: User) -> bool:
         """Check if video-based summarization is enabled (uses video as base instead of events)."""
         return (
-            hanzoanalytics.feature_enabled(
+            hanzo_insights.feature_enabled(
                 "max-session-summarization-video-as-base",
                 str(user.distinct_id),
                 groups={"organization": str(self.team.organization_id)},
@@ -1255,9 +1255,9 @@ class SessionRecordingViewSet(
         has_openai_api_key = bool(os.environ.get("OPENAI_API_KEY"))
         if not environment_is_allowed or not has_openai_api_key:
             raise exceptions.ValidationError("session summary is only supported in Insights Cloud")
-        if not hanzoanalytics.feature_enabled(
+        if not hanzo_insights.feature_enabled(
             "ai-session-summary", str(user.distinct_id)
-        ) and not hanzoanalytics.feature_enabled(
+        ) and not hanzo_insights.feature_enabled(
             "max-session-summarization",
             str(user.distinct_id),
             groups={"organization": str(self.team.organization_id)},
@@ -1313,7 +1313,7 @@ class SessionRecordingViewSet(
             with (
                 tracer.start_as_current_span("list_blocks__stream_lts_blob_v2_to_client_async"),
             ):
-                hanzoanalytics.tag("lts_v2_blob_key", blob_key)
+                hanzo_insights.tag("lts_v2_blob_key", blob_key)
                 storage_client = file_storage.file_storage()
                 content: str | bytes
                 if decompress:
@@ -1709,7 +1709,7 @@ def list_recordings_from_query(
     if should_query_clickhouse:
         with (
             timer("load_recordings_from_insightsql"),
-            hanzoanalytics.new_context(),
+            hanzo_insights.new_context(),
             tracer.start_as_current_span("load_recordings_from_insightsql"),
         ):
             # Create a copy of the query without session_recording_id for the main query

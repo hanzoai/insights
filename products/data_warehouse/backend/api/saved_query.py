@@ -8,7 +8,7 @@ from django.db.models import OuterRef, Prefetch, Q, Subquery, TextField
 from django.db.models.functions import Cast
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import async_to_sync
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
@@ -490,7 +490,7 @@ class DataWarehouseSavedQueryViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewS
         )
 
         # Detect whether we should include managed views in the queryset
-        is_managed_viewset_enabled = hanzoanalytics.feature_enabled(
+        is_managed_viewset_enabled = hanzo_insights.feature_enabled(
             "managed-viewsets",
             str(self.team.uuid),
             groups={

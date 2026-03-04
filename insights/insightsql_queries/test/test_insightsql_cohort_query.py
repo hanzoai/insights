@@ -8,7 +8,7 @@ from insights.models import Cohort
 class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
     """Tests for InsightsQLCohortQuery, particularly the optimization for multiple person property filters."""
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_multiple_person_properties_optimization(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that multiple person property filters in an AND group are combined into a single query.
@@ -62,7 +62,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
             query_str,
         )
 
-    @patch("hanzoanalytics.feature_enabled", return_value=False)
+    @patch("hanzo_insights.feature_enabled", return_value=False)
     def test_optimization_disabled_when_feature_flag_off(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that the optimization is disabled when the feature flag is off.
@@ -105,7 +105,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # With the feature flag off, should use INTERSECT DISTINCT
         self.assertIn("INTERSECT DISTINCT", query_str)
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_optimization_skipped_for_mixed_property_types(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that the optimization is skipped when mixing person and behavioral properties.
@@ -150,7 +150,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # Should use INTERSECT DISTINCT because properties are mixed
         self.assertIn("INTERSECT DISTINCT", query_str)
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_optimization_skipped_for_properties_with_negation(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that the optimization is skipped when any property has negation.
@@ -193,7 +193,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # Should use EXCEPT because one property is negated
         self.assertIn("EXCEPT", query_str)
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_multiple_person_properties_or_optimization(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that multiple person property filters in an OR group are combined into a single query.
@@ -253,7 +253,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # Should have OR logic in the WHERE clause
         self.assertIn("or(", query_str)
 
-    @patch("hanzoanalytics.feature_enabled", return_value=False)
+    @patch("hanzo_insights.feature_enabled", return_value=False)
     def test_or_optimization_disabled_when_feature_flag_off(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that the OR optimization is disabled when the feature flag is off.
@@ -296,7 +296,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # With the feature flag off, should use UNION DISTINCT
         self.assertIn("UNION DISTINCT", query_str)
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_or_optimization_skipped_for_mixed_property_types(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that the OR optimization is skipped when mixing person and behavioral properties.
@@ -341,7 +341,7 @@ class TestInsightsQLCohortQuery(ClickhouseTestMixin, APIBaseTest):
         # Should use UNION DISTINCT because properties are mixed
         self.assertIn("UNION DISTINCT", query_str)
 
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_or_optimization_skipped_for_properties_with_negation(self, mock_feature_enabled: MagicMock) -> None:
         """
         Test that the OR optimization is skipped when properties have negation.

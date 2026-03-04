@@ -21,7 +21,7 @@ from django.conf import settings
 from django.db import connection
 
 import structlog
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from prometheus_client import Counter, Gauge
 
 from insights.metrics import pushed_metrics_registry

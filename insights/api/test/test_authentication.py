@@ -176,7 +176,7 @@ class TestLoginAPI(APIBaseTest):
     CONFIG_AUTO_LOGIN = False
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_logs_in_with_email_and_password(self, mock_capture, mock_identify):
         self.user.is_email_verified = True
         self.user.save()
@@ -261,7 +261,7 @@ class TestLoginAPI(APIBaseTest):
         # Assert the email was sent.
         mock_send_email_verification.assert_called_once_with(self.user)
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_cant_login_with_incorrect_password(self, mock_capture):
         invalid_passwords = ["1234", "abcdefgh", "testpassword1234", "😈😈😈"]
 
@@ -278,7 +278,7 @@ class TestLoginAPI(APIBaseTest):
         # Events never get reported
         mock_capture.assert_not_called()
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_cant_login_with_incorrect_email(self, mock_capture):
         response = self.client.post(
             "/api/login",
@@ -1114,7 +1114,7 @@ class TestPasswordResetAPI(APIBaseTest):
     # Password reset request
 
     @freeze_time("2021-10-05T12:00:00")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_anonymous_user_can_request_password_reset(self, mock_capture):
         set_instance_setting("EMAIL_HOST", "localhost")
 
@@ -1307,7 +1307,7 @@ class TestPasswordResetAPI(APIBaseTest):
     # Password reset completion
 
     @patch("insights.tasks.user_identify.identify_task")
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_user_can_reset_password(self, mock_capture, mock_identify):
         self.client.logout()  # extra precaution to test login
 

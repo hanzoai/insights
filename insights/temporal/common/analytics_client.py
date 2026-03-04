@@ -2,7 +2,7 @@ from dataclasses import is_dataclass
 from typing import Any, Optional
 
 import temporalio.exceptions
-from hanzoanalytics import api_key, capture_exception
+from hanzo_insights import api_key, capture_exception
 from temporalio import activity, workflow
 from temporalio.worker import (
     ActivityInboundInterceptor,

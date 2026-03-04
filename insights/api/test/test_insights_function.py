@@ -893,7 +893,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
             "bytecode": ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "email", 32, "properties", 32, "person", 1, 3],
         }
 
-    @patch("insights.permissions.hanzoanalytics.feature_enabled", return_value=True)
+    @patch("insights.permissions.hanzo_insights.feature_enabled", return_value=True)
     def test_loads_status_when_enabled_and_available(self, *args):
         with patch("insights.plugins.plugin_server_api.requests.get") as mock_get:
             mock_get.return_value.status_code = status.HTTP_200_OK
@@ -2210,7 +2210,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         assert len(response.json()["results"]) == 50, "With limit=50 and offset=100, should return last 50 items"
         assert response.json()["count"] == 150, "Total count should still be 150"
 
-    @patch("insights.api.insights_function.hanzoanalytics.feature_enabled", return_value=False)
+    @patch("insights.api.insights_function.hanzo_insights.feature_enabled", return_value=False)
     def test_enable_backfills_blocked_without_feature_flag(self, mock_feature_enabled):
         """Test that enable_backfills is blocked when the feature flag is disabled."""
         # Create a custom function

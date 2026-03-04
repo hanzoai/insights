@@ -14,7 +14,7 @@ import requests
 from dateutil.relativedelta import relativedelta
 from drf_spectacular.utils import extend_schema
 from loginas.utils import is_impersonated_session
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from rest_framework import renderers, request, serializers, status, viewsets
 from rest_framework.decorators import renderer_classes
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError

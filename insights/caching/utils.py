@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any, Optional, Union
 
-import hanzoanalytics
+import hanzo_insights
 from dateutil.parser import isoparse, parser
 
 from insights.clickhouse.client import sync_execute
@@ -81,7 +81,7 @@ def active_teams() -> set[int]:
 def stale_cache_invalidation_disabled(team: Team) -> bool:
     """Can be disabled temporarly to help in cases of service degradation."""
     if is_cloud():  # on Insights Cloud, use the feature flag
-        return not hanzoanalytics.feature_enabled(
+        return not hanzo_insights.feature_enabled(
             "stale-cache-invalidation-enabled",
             str(team.uuid),
             groups={"organization": str(team.organization.id)},

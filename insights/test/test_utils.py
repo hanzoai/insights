@@ -368,8 +368,8 @@ class TestLoadDataFromRequest(TestCase):
         post_request = rf.post("/e/?ver=1.20.0", "content", "text/plain", False, **headers)
         return post_request
 
-    @patch("hanzoanalytics.tag")
-    @patch("hanzoanalytics.new_context")
+    @patch("hanzo_insights.tag")
+    @patch("hanzo_insights.new_context")
     def test_pushes_debug_information_into_context_from_origin_header(self, patched_context, patched_tag):
         origin = "potato.io"
         referer = "https://" + origin
@@ -388,8 +388,8 @@ class TestLoadDataFromRequest(TestCase):
             ]
         )
 
-    @patch("hanzoanalytics.tag")
-    @patch("hanzoanalytics.new_context")
+    @patch("hanzo_insights.tag")
+    @patch("hanzo_insights.new_context")
     def test_pushes_debug_information_into_context_when_origin_header_not_present(self, patched_context, patched_tag):
         origin = "potato.io"
         referer = "https://" + origin
@@ -408,8 +408,8 @@ class TestLoadDataFromRequest(TestCase):
             ]
         )
 
-    @patch("hanzoanalytics.tag")
-    @patch("hanzoanalytics.new_context")
+    @patch("hanzo_insights.tag")
+    @patch("hanzo_insights.new_context")
     def test_still_tags_context_even_when_debug_signal_is_not_available(self, patched_context, patched_tag):
         rf = RequestFactory()
         post_request = rf.post("/s/", "content", "text/plain")

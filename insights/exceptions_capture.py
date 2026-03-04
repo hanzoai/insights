@@ -15,7 +15,7 @@ def celery_properties() -> dict:
 
 def capture_exception(error=None, additional_properties=None):
     import structlog
-    from hanzoanalytics import (
+    from hanzo_insights import (
         api_key,
         capture_exception as insights_capture_exception,
     )
