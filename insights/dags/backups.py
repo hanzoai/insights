@@ -167,7 +167,7 @@ class Backup:
         backup_settings = {
             "async": "1",
             "max_backup_bandwidth": get_max_backup_bandwidth(),
-            # There is a CH issue that makes bandwith be half than what is configured: https://github.com/ClickHouse/ClickHouse/issues/78213
+            # There is a CH issue that makes bandwith be half than what is configured: https://github.com/hanzoai/datastore/issues/78213
             "s3_disable_checksum": "1",
             # According to CH docs, disabling this is safe enough as checksums are already made: https://clickhouse.com/docs/operations/settings/settings#s3_disable_checksum
         }
