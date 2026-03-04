@@ -342,7 +342,7 @@ class TestTable(BaseTest):
             "`map_nullable` Nullable(Map(String, String))"
         )
 
-    def assert_raises_with_invalid_hog_column_type(self, column_type):
+    def assert_raises_with_invalid_iql_column_type(self, column_type):
         credential = DataWarehouseCredential.objects.create(access_key="test", access_secret="test", team=self.team)
         table = DataWarehouseTable.objects.create(
             name="bla",

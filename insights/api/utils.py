@@ -23,7 +23,7 @@ from rest_framework import request, serializers, status
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import Field
-from statshog.defaults.django import statsd
+from statsiql.defaults.django import statsd
 from urllib3 import HTTPConnectionPool, HTTPSConnectionPool, PoolManager
 
 from insights.schema import QueryTiming

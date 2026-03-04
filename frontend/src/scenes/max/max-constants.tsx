@@ -529,7 +529,7 @@ export const TOOL_DEFINITIONS: Record<AssistantTool, ToolDefinition> = {
             return 'Setting up function filters...'
         },
     },
-    create_hog_transformation_function: {
+    create_iql_transformation_function: {
         name: 'Write and tweak Custom code',
         description: 'Write and tweak Custom code of transformations',
         product: Scene.Transformations,

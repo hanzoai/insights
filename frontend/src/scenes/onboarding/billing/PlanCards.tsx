@@ -8,7 +8,7 @@ import { IconCheck, IconX } from '@hanzo/icons'
 import { LemonButton } from '@hanzo/lemon-ui'
 
 import { BillingUpgradeCTA } from 'lib/components/BillingUpgradeCTA'
-import { HeartHog } from 'lib/components/mascots'
+import { HeartMascot } from 'lib/components/mascots'
 import { pluralize } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -48,10 +48,10 @@ type PlanCardProps = {
     planData: PlanData
     product: BillingProductV2Type
     highlight?: boolean
-    hogPosition?: 'top-right' | 'top-left'
+    mascotPosition?: 'top-right' | 'top-left'
 }
 
-export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight, hogPosition = 'top-right' }) => {
+export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight, mascotPosition = 'top-right' }) => {
     const { billing } = useValues(billingLogic)
     const { billingProductLoading } = useValues(billingProductLogic({ product }))
     const { reportOnboardingStepCompleted } = useActions(eventUsageLogic)
@@ -85,17 +85,17 @@ export const PlanCard: React.FC<PlanCardProps> = ({ planData, product, highlight
         ...planData.features,
     ]
 
-    const hogPositionClass = hogPosition === 'top-right' ? 'CheekyHogTopRight' : 'CheekyHogTopLeft'
+    const mascotPositionClass = mascotPosition === 'top-right' ? 'CheekyHogTopRight' : 'CheekyHogTopLeft'
 
     return (
         <div className="relative" onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => setIsHovering(false)}>
-            <HeartHog
+            <HeartMascot
                 width="100"
                 height="100"
                 className={clsx(
-                    hogPositionClass,
-                    isHovering === true && `${hogPositionClass}--peek`,
-                    isHovering === false && `${hogPositionClass}--hide`
+                    mascotPositionClass,
+                    isHovering === true && `${mascotPositionClass}--peek`,
+                    isHovering === false && `${mascotPositionClass}--hide`
                 )}
             />
             <div
@@ -227,7 +227,7 @@ export const PlanCards: React.FC<{ product: BillingProductV2Type }> = ({ product
                             planData={planData}
                             product={product}
                             highlight={planData.plan === Plan.RIDICULOUSLY_CHEAP}
-                            hogPosition={index === 0 ? 'top-left' : 'top-right'}
+                            mascotPosition={index === 0 ? 'top-left' : 'top-right'}
                         />
                     ))}
                 </div>

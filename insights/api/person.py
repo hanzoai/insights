@@ -21,7 +21,7 @@ from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework_csv import renderers as csvrenderers
-from statshog.defaults.django import statsd
+from statsiql.defaults.django import statsd
 
 from insights.schema import ProductKey
 

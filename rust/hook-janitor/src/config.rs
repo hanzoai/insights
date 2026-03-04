@@ -27,7 +27,7 @@ pub struct Config {
     pub mode: String,
 
     #[envconfig(default = "false")]
-    pub hog_mode: bool,
+    pub iql_mode: bool,
 
     #[envconfig(default = "clickhouse_app_metrics")]
     pub app_metrics_topic: String,

@@ -13,7 +13,7 @@ export interface VMState {
     /** Stack of the VM */
     stack: any[]
     /** Values hoisted from the stack */
-    upvalues: HogUpValue[]
+    upvalues: IQLUpValue[]
     /** Call stack of the VM */
     callStack: CallFrame[] // [number, number, number][]
     /** Throw stack of the VM */
@@ -87,7 +87,7 @@ export interface ExecResult {
 }
 
 export interface CallFrame {
-    closure: HogClosure
+    closure: IQLClosure
     ip: number
     chunk: string
     stackStart: number
@@ -100,29 +100,29 @@ export interface ThrowFrame {
     catchIp: number
 }
 
-export interface HogDate {
-    __hogDate__: true
+export interface IQLDate {
+    __iqlDate__: true
     year: number
     month: number
     day: number
 }
 
-export interface HogDateTime {
-    __hogDateTime__: true
+export interface IQLDateTime {
+    __iqlDateTime__: true
     /** Timestamp float in seconds */
     dt: number
     zone: string
 }
 
-export interface HogError {
-    __hogError__: true
+export interface IQLError {
+    __iqlError__: true
     type: string
     message: string
     payload?: Record<string, any>
 }
 
-export interface HogCallable {
-    __hogCallable__: 'local' | 'stl' | 'async'
+export interface IQLCallable {
+    __iqlCallable__: 'local' | 'stl' | 'async'
     name?: string
     argCount: number
     upvalueCount: number
@@ -130,22 +130,22 @@ export interface HogCallable {
     chunk: string
 }
 
-export interface HogUpValue {
-    __hogUpValue__: true
+export interface IQLUpValue {
+    __iqlUpValue__: true
     id: number
     location: number
     closed: boolean
     value: any
 }
 
-export interface HogClosure {
-    __hogClosure__: true
-    callable: HogCallable
+export interface IQLClosure {
+    __iqlClosure__: true
+    callable: IQLCallable
     upvalues: number[]
 }
 
-export interface HogInterval {
-    __hogInterval__: true
+export interface IQLInterval {
+    __iqlInterval__: true
     value: number
     unit: string
 }

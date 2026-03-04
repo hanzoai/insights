@@ -6,8 +6,8 @@
 mod common;
 
 use common::{TestContext, TestPerson};
-use personinsights_proto::personinsights::replica::v1::person_hog_replica_client::PersonInsightsReplicaClient;
-use personinsights_proto::personinsights::replica::v1::person_hog_replica_server::PersonInsightsReplicaServer;
+use personinsights_proto::personinsights::replica::v1::person_insights_replica_client::PersonInsightsReplicaClient;
+use personinsights_proto::personinsights::replica::v1::person_insights_replica_server::PersonInsightsReplicaServer;
 use personinsights_proto::personinsights::types::v1::{
     GetPersonByUuidRequest, GetPersonRequest, GetPersonsByDistinctIdsInTeamRequest,
 };

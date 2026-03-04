@@ -413,8 +413,8 @@ def register_core_file_system_types() -> None:
     register_post_delete_hook("cohort", _cohort_post_delete)
     register_post_restore_hook("cohort", _cohort_post_restore)
 
-    for hog_type in INSIGHTS_FUNCTION_TYPES:
-        type_string = f"insights_function/{hog_type}"
+    for iql_type in INSIGHTS_FUNCTION_TYPES:
+        type_string = f"insights_function/{iql_type}"
         register_file_system_type(
             type_string,
             "insights",
