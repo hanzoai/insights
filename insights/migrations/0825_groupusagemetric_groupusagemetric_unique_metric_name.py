@@ -7,7 +7,7 @@ import insights.models.utils
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0824_team_session_recording_retention_period")]
+    dependencies = [("insights", "0824_team_session_recording_retention_period")]
 
     operations = [
         migrations.CreateModel(
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                 ("filters", models.JSONField()),
                 ("bytecode", models.JSONField()),
                 ("bytecode_error", models.TextField()),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
         migrations.AddConstraint(

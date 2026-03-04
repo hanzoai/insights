@@ -33,10 +33,10 @@ interface BillingCalculations {
     billedCredits: number
 }
 
-export function usePosthogAIBillingCalculations(enrichedTree: EnrichedTraceTreeNode[] | null): BillingCalculations {
+export function useInsightsAIBillingCalculations(enrichedTree: EnrichedTraceTreeNode[] | null): BillingCalculations {
     const { featureFlags } = useValues(featureFlagLogic)
 
-    const showBillingInfo = !!featureFlags[FEATURE_FLAGS.POSTHOG_AI_BILLING_DISPLAY]
+    const showBillingInfo = !!featureFlags[FEATURE_FLAGS.INSIGHTS_AI_BILLING_DISPLAY]
 
     // Compute total billed USD across billed generations in the tree
     const totalCostUsd = useMemo(() => {

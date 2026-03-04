@@ -142,8 +142,8 @@ class Organization(ModelActivityMixin, UUIDTModel):
         FREQUENTIST = "frequentist", "Frequentist"
 
     members = models.ManyToManyField(
-        "posthog.User",
-        through="posthog.OrganizationMembership",
+        "insights.User",
+        through="insights.OrganizationMembership",
         related_name="organizations",
         related_query_name="organization",
     )
@@ -151,7 +151,7 @@ class Organization(ModelActivityMixin, UUIDTModel):
     # General settings
     name = models.CharField(max_length=64)
     slug: LowercaseSlugField = LowercaseSlugField(unique=True, max_length=MAX_SLUG_LENGTH)
-    logo_media = models.ForeignKey("posthog.UploadedMedia", on_delete=models.SET_NULL, null=True, blank=True)
+    logo_media = models.ForeignKey("insights.UploadedMedia", on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(
@@ -330,13 +330,13 @@ class OrganizationMembership(ModelActivityMixin, UUIDTModel):
         OWNER = 15, "owner"
 
     organization = models.ForeignKey(
-        "posthog.Organization",
+        "insights.Organization",
         on_delete=models.CASCADE,
         related_name="memberships",
         related_query_name="membership",
     )
     user = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.CASCADE,
         related_name="organization_memberships",
         related_query_name="organization_membership",

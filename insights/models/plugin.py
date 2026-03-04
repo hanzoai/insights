@@ -153,7 +153,7 @@ class Plugin(models.Model):
 
     # DEPRECATED: plugin-server will own all plugin code, org relations don't make sense
     organization = models.ForeignKey(
-        "posthog.Organization",
+        "insights.Organization",
         on_delete=models.CASCADE,
         related_name="plugins",
         related_query_name="plugin",
@@ -251,7 +251,7 @@ class PluginConfig(models.Model):
 
     # DEPRECATED - this never actually got used - filters is the way to go
     match_action = models.ForeignKey(
-        "posthog.Action",
+        "insights.Action",
         on_delete=models.SET_NULL,
         related_name="plugin_configs",
         blank=True,

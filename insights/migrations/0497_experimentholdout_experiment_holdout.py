@@ -9,7 +9,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0496_team_person_processing_opt_out"),
+        ("insights", "0496_team_person_processing_opt_out"),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                         null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
         migrations.SeparateDatabaseAndState(
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
                     model_name="experiment",
                     name="holdout",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.experimentholdout"
+                        null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.experimentholdout"
                     ),
                 ),
             ],
@@ -45,20 +45,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_experiment" ADD COLUMN "holdout_id" integer NULL CONSTRAINT "posthog_experiment_holdout_id_ffd173dd_fk_posthog_e" REFERENCES "posthog_experimentholdout"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_experiment_holdout_id_ffd173dd_fk_posthog_e" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_experiment" ADD COLUMN "holdout_id" integer NULL CONSTRAINT "insights_experiment_holdout_id_ffd173dd_fk_insights_e" REFERENCES "insights_experimentholdout"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_experiment_holdout_id_ffd173dd_fk_insights_e" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_experiment" DROP COLUMN IF EXISTS "holdout_id";
+                        ALTER TABLE "insights_experiment" DROP COLUMN IF EXISTS "holdout_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_experiment_holdout_id_ffd173dd_fk_posthog_e" ON "posthog_experiment" ("holdout_id");
+                    CREATE INDEX CONCURRENTLY "insights_experiment_holdout_id_ffd173dd_fk_insights_e" ON "insights_experiment" ("holdout_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_experiment_holdout_id_ffd173dd_fk_posthog_e";
+                        DROP INDEX IF EXISTS "insights_experiment_holdout_id_ffd173dd_fk_insights_e";
                     """,
                 ),
             ],

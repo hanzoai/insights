@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0344_add_new_export_type"),
+        ("insights", "0344_add_new_export_type"),
     ]
 
     operations = [
@@ -53,12 +53,12 @@ class Migration(migrations.Migration):
                     "saved_query",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.datawarehousesavedquery",
+                        to="insights.datawarehousesavedquery",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={

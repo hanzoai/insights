@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1002_experiment_exposure_preaggregation_enabled"),
+        ("insights", "1002_experiment_exposure_preaggregation_enabled"),
         ("llm_analytics", "0013_add_openrouter_provider"),
     ]
 
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         related_name="clustering_config",
                         serialize=False,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 ("event_filters", models.JSONField(blank=True, default=list)),

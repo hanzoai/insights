@@ -7,12 +7,12 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0120_organization_personalization"),
+        ("insights", "0120_organization_personalization"),
     ]
 
     operations = [
         migrations.RunSQL(
-            "CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_person_email ON posthog_person((properties->>'email'));",
-            reverse_sql='DROP INDEX "posthog_person_email";',
+            "CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_person_email ON insights_person((properties->>'email'));",
+            reverse_sql='DROP INDEX "insights_person_email";',
         )
     ]

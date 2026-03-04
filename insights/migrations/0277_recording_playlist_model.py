@@ -10,7 +10,7 @@ import insights.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0276_organization_usage"),
+        ("insights", "0276_organization_usage"),
     ]
 
     operations = [
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={

@@ -14,8 +14,8 @@ class UserGroup(UUIDTModel):
     created_at = models.DateTimeField(auto_now_add=True)
 
     members = models.ManyToManyField(
-        "posthog.User",
-        through="posthog.UserGroupMembership",
+        "insights.User",
+        through="insights.UserGroupMembership",
     )
 
 

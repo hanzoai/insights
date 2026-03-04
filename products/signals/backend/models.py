@@ -13,7 +13,7 @@ class SignalReport(UUIDModel):
         READY = "ready"
         FAILED = "failed"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.POTENTIAL)
 
     total_weight = models.FloatField(default=0.0)
@@ -55,7 +55,7 @@ class SignalReportArtefact(UUIDModel):
         SAFETY_JUDGMENT = "safety_judgment"
         ACTIONABILITY_JUDGMENT = "actionability_judgment"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     report = models.ForeignKey(SignalReport, on_delete=models.CASCADE, related_name="artefacts")
     type = models.CharField(max_length=100, choices=ArtefactType.choices)
     content = models.TextField()

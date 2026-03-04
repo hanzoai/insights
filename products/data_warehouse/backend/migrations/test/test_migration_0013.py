@@ -30,7 +30,7 @@ class DeletingCredentialsMigrationTest(NonAtomicTestMigrations):
         # Migrate from both data_warehouse 0012 AND posthog 0955 (which includes default_anonymize_ips)
         migrate_from = [
             ("data_warehouse", self.migrate_from),
-            ("posthog", "0955_alter_organization_is_ai_data_processing_approved"),
+            ("insights", "0955_alter_organization_is_ai_data_processing_approved"),
         ]
         migrate_to = [("data_warehouse", self.migrate_to)]
 
@@ -50,9 +50,9 @@ class DeletingCredentialsMigrationTest(NonAtomicTestMigrations):
         self.apps = executor.loader.project_state(migrate_to).apps
 
     def setUpBeforeMigration(self, apps: Any) -> None:
-        Organization = apps.get_model("posthog", "Organization")
-        Project = apps.get_model("posthog", "Project")
-        Team = apps.get_model("posthog", "Team")
+        Organization = apps.get_model("insights", "Organization")
+        Project = apps.get_model("insights", "Project")
+        Team = apps.get_model("insights", "Team")
         DataWarehouseTable: DataWarehouseTableModel = apps.get_model("data_warehouse", "DataWarehouseTable")
         DataWarehouseCredential: DataWarehouseCredentialModel = apps.get_model(
             "data_warehouse", "DataWarehouseCredential"

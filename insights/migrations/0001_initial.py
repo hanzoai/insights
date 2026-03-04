@@ -161,7 +161,7 @@ class Migration(migrations.Migration):
                 ("ip", models.GenericIPAddressField()),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
                 ),
             ],
         ),

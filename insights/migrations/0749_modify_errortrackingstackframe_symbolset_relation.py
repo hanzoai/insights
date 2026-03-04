@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0748_update_featureflag_super_groups"),
+        ("insights", "0748_update_featureflag_super_groups"),
     ]
 
     operations = [
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="errortrackingstackframe",
             name="symbol_set",
             field=models.ForeignKey(
-                null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.errortrackingsymbolset"
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.errortrackingsymbolset"
             ),
         ),
     ]

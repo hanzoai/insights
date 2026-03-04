@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0930_user_shortcut_position"),
+        ("insights", "0930_user_shortcut_position"),
     ]
 
     operations = [
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="materialized_column_slots",
                         related_query_name="materialized_column_slot",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 (
@@ -49,7 +49,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="materialized_column_slots",
                         related_query_name="materialized_column_slot",
-                        to="posthog.propertydefinition",
+                        to="insights.propertydefinition",
                     ),
                 ),
                 (
@@ -108,27 +108,27 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="materializedcolumnslot",
-            index=models.Index(fields=["team", "state"], name="posthog_mat_team_st_idx"),
+            index=models.Index(fields=["team", "state"], name="insights_mat_team_st_idx"),
         ),
         migrations.AddIndex(
             model_name="materializedcolumnslot",
             index=models.Index(
                 fields=["team", "property_definition"],
-                name="posthog_mat_team_pr_idx",
+                name="insights_mat_team_pr_idx",
             ),
         ),
         migrations.AddIndex(
             model_name="materializedcolumnslot",
             index=models.Index(
                 fields=["team", "property_type", "slot_index"],
-                name="posthog_mat_team_ty_idx",
+                name="insights_mat_team_ty_idx",
             ),
         ),
         migrations.AddIndex(
             model_name="materializedcolumnslot",
             index=models.Index(
                 fields=["backfill_temporal_workflow_id"],
-                name="posthog_mat_backfi_idx",
+                name="insights_mat_backfi_idx",
             ),
         ),
     ]

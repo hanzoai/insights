@@ -27,11 +27,11 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql="""
-                        ALTER TABLE "posthog_conversations_ticket"
+                        ALTER TABLE "insights_conversations_ticket"
                             ADD CONSTRAINT "unique_ticket_number_per_team"
                             UNIQUE USING INDEX "unique_ticket_number_per_team";
                     """,
-                    reverse_sql='ALTER TABLE "posthog_conversations_ticket" DROP CONSTRAINT IF EXISTS "unique_ticket_number_per_team";',
+                    reverse_sql='ALTER TABLE "insights_conversations_ticket" DROP CONSTRAINT IF EXISTS "unique_ticket_number_per_team";',
                 ),
             ],
         ),

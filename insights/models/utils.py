@@ -149,7 +149,7 @@ def uuid7(unix_ms_time: Optional[Union[int, str]] = None, random: Optional[Union
 
 
 class CreatedMetaFields(models.Model):
-    created_by = models.ForeignKey("posthog.User", on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey("insights.User", on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

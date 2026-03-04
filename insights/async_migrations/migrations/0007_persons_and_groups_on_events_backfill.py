@@ -72,8 +72,8 @@ class Migration(AsyncMigrationDefinition):
 
     depends_on = "0006_persons_and_groups_on_events_backfill"
 
-    posthog_min_version = "1.40.0"
-    posthog_max_version = "1.41.99"
+    insights_min_version = "1.40.0"
+    insights_max_version = "1.41.99"
 
     parameters = {
         "PERSON_DICT_CACHE_SIZE": (

@@ -67,13 +67,13 @@ def postgres_config(host: str) -> dict:
 
 if TEST or DEBUG:
     PG_HOST: str = os.getenv("PGHOST", "localhost")
-    PG_USER: str = os.getenv("PGUSER", "posthog")
-    PG_PASSWORD: str = os.getenv("PGPASSWORD", "posthog")
+    PG_USER: str = os.getenv("PGUSER", "insights")
+    PG_PASSWORD: str = os.getenv("PGPASSWORD", "insights")
     PG_PORT: str = os.getenv("PGPORT", "5432")
     PG_DATABASE: str = os.getenv(
         "PGDATABASE",
         # AI evals get their own database, as they fully reuse the DB between runs and only reset once per day, for perf
-        "posthog_ai_eval" if IN_EVAL_TESTING else "posthog",
+        "insights_ai_eval" if IN_EVAL_TESTING else "insights",
     )
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL",

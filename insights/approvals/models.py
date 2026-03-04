@@ -32,8 +32,8 @@ class ChangeRequest(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     action_key = models.CharField(max_length=128)
     action_version = models.IntegerField(default=1)
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    organization = models.ForeignKey("posthog.Organization", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
+    organization = models.ForeignKey("insights.Organization", on_delete=models.CASCADE)
     resource_type = models.CharField(max_length=64)
     resource_id = models.CharField(max_length=128, null=True, blank=True)
 
@@ -57,7 +57,7 @@ class ChangeRequest(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     )
 
     applied_by = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -146,11 +146,11 @@ class ApprovalPolicy(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     """Defines when an action requires approval and who can approve"""
 
     organization = models.ForeignKey(
-        "posthog.Organization",
+        "insights.Organization",
         on_delete=models.CASCADE,
     )
     team = models.ForeignKey(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         null=True,
         blank=True,

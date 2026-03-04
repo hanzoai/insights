@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0853_create_index_populate_updated_at_flags"),
+        ("insights", "0853_create_index_populate_updated_at_flags"),
     ]
 
     operations = [
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql=[
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_detail_gin_path_ops ON posthog_activitylog USING GIN (detail jsonb_path_ops);"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_detail_gin_path_ops ON insights_activitylog USING GIN (detail jsonb_path_ops);"
                     ],
                     reverse_sql=["DROP INDEX IF EXISTS idx_alog_detail_gin_path_ops;"],
                 ),

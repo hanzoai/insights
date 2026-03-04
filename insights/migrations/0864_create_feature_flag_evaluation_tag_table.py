@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0863_experimentmetricresult"),
+        ("insights", "0863_experimentmetricresult"),
     ]
 
     operations = [
@@ -20,13 +20,13 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="evaluation_tags",
-                        to="posthog.featureflag",
+                        to="insights.featureflag",
                     ),
                 ),
                 (
                     "tag",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="evaluation_flags", to="posthog.tag"
+                        on_delete=django.db.models.deletion.CASCADE, related_name="evaluation_flags", to="insights.tag"
                     ),
                 ),
             ],

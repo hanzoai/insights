@@ -44,7 +44,7 @@ class BreakpointHit:
 
 
 class LiveDebuggerBreakpoint(UUIDModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "PostHog/posthog")
     filename = models.TextField()
     line_number = models.PositiveIntegerField()
@@ -54,7 +54,7 @@ class LiveDebuggerBreakpoint(UUIDModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "posthog_livedebuggerbreakpoint"
+        db_table = "insights_livedebuggerbreakpoint"
         managed = True
         constraints = [
             models.UniqueConstraint(

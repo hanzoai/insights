@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0994_user_requested_2fa_reset_at"),
+        ("insights", "0994_user_requested_2fa_reset_at"),
     ]
 
     operations = [

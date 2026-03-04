@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("posthog", "0885_migrate_notebooks_models"),
+        ("insights", "0885_migrate_notebooks_models"),
     ]
 
     database_operations: list[migrations.RunSQL] = [
@@ -61,10 +61,10 @@ class Migration(migrations.Migration):
                         to=settings.AUTH_USER_MODEL,
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_notebook",
+                "db_table": "insights_notebook",
             },
         ),
         migrations.CreateModel(
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "posthog_resourcenotebook",
+                "db_table": "insights_resourcenotebook",
             },
         ),
         migrations.AddConstraint(

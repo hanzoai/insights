@@ -5,14 +5,14 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0749_modify_errortrackingstackframe_symbolset_relation"),
+        ("insights", "0749_modify_errortrackingstackframe_symbolset_relation"),
     ]
 
     operations = [
         migrations.RunSQL(
             sql=[
                 """
-                 UPDATE posthog_externaldataschema
+                 UPDATE insights_externaldataschema
                  SET status = 'Failed'
                  WHERE status = 'Error'
                  """
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql=[
                 """
-                 UPDATE posthog_externaldataschema
+                 UPDATE insights_externaldataschema
                  SET status = 'BillingLimitReached'
                  WHERE status = 'Cancelled'
                  """
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql=[
                 """
-                 UPDATE posthog_externaldatajob
+                 UPDATE insights_externaldatajob
                  SET status = 'BillingLimitReached'
                  WHERE status = 'Cancelled'
                  """

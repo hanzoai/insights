@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0687_remove_taxonomy_team_only_constraints"),
+        ("insights", "0687_remove_taxonomy_team_only_constraints"),
     ]
 
     operations = [
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-            UPDATE posthog_featureflag
+            UPDATE insights_featureflag
             SET version = 1
             WHERE version IS NULL OR version = 0
             """,

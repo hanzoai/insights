@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("posthog", "1003_clean_up_stale_alert_subscriptions"),
+        ("insights", "1003_clean_up_stale_alert_subscriptions"),
         ("data_modeling", "0006_backfill_nodes_edges_from_saved_queries"),
     ]
 
@@ -42,11 +42,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={
-                "db_table": "posthog_datamodelingdag",
+                "db_table": "insights_datamodelingdag",
             },
         ),
         migrations.AddConstraint(

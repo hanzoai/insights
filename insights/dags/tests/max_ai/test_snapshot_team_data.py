@@ -16,7 +16,7 @@ from insights.schema import (
 from insights.models import GroupTypeMapping, Organization, Project, Team
 from insights.models.property_definition import PropertyDefinition
 
-from products.posthog_ai.dags.snapshot_team_data import (
+from products.insights_ai.dags.snapshot_team_data import (
     SnapshotUnrecoverableError,
     snapshot_actors_property_taxonomy,
     snapshot_clickhouse_team_data,
@@ -66,7 +66,7 @@ def team():
 
 @pytest.fixture
 def mock_dump():
-    with patch("products.posthog_ai.dags.snapshot_team_data.dump_model") as mock_dump_model:
+    with patch("products.insights_ai.dags.snapshot_team_data.dump_model") as mock_dump_model:
         mock_dump_context = MagicMock()
         mock_dump_function = MagicMock()
         mock_dump_context.__enter__ = MagicMock(return_value=mock_dump_function)
@@ -75,8 +75,8 @@ def mock_dump():
         yield mock_dump_function
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.compose_postgres_dump_path")
-@patch("products.posthog_ai.dags.snapshot_team_data.check_dump_exists")
+@patch("products.insights_ai.dags.snapshot_team_data.compose_postgres_dump_path")
+@patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
 def test_snapshot_postgres_model_skips_when_file_exists(
     mock_check_dump_exists, mock_compose_path, mock_context, mock_s3
 ):
@@ -107,8 +107,8 @@ def test_snapshot_postgres_model_skips_when_file_exists(
     mock_context.log.info.assert_called_once_with(f"Skipping {file_key} because it already exists")
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.compose_postgres_dump_path")
-@patch("products.posthog_ai.dags.snapshot_team_data.check_dump_exists")
+@patch("products.insights_ai.dags.snapshot_team_data.compose_postgres_dump_path")
+@patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
 def test_snapshot_postgres_model_dumps_when_file_not_exists(
     mock_check_dump_exists, mock_compose_path, mock_context, mock_s3, mock_dump
 ):
@@ -143,7 +143,7 @@ def test_snapshot_postgres_model_dumps_when_file_not_exists(
     mock_dump.assert_called_once_with(mock_serialized_data)
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.snapshot_postgres_model")
+@patch("products.insights_ai.dags.snapshot_team_data.snapshot_postgres_model")
 def test_snapshot_postgres_team_data_exports_all_models(mock_snapshot_postgres_model, mock_s3):
     """Test that snapshot_postgres_team_data exports all expected models."""
     # Setup
@@ -173,7 +173,7 @@ def test_snapshot_postgres_team_data_exports_all_models(mock_snapshot_postgres_m
 
 
 @pytest.mark.django_db
-@patch("products.posthog_ai.dags.snapshot_team_data.call_query_runner")
+@patch("products.insights_ai.dags.snapshot_team_data.call_query_runner")
 def test_snapshot_properties_taxonomy(mock_call_query_runner, mock_context, mock_s3, team, mock_dump):
     """Test that snapshot_properties_taxonomy correctly processes events and dumps results."""
     # Setup
@@ -198,7 +198,7 @@ def test_snapshot_properties_taxonomy(mock_call_query_runner, mock_context, mock
     mock_dump.assert_called_once()
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.snapshot_postgres_model")
+@patch("products.insights_ai.dags.snapshot_team_data.snapshot_postgres_model")
 def test_snapshot_postgres_team_data_raises_failure_on_missing_team(mock_snapshot_postgres_model, mock_s3):
     mock_snapshot_postgres_model.side_effect = Team.DoesNotExist()
 
@@ -223,7 +223,7 @@ def test_snapshot_clickhouse_team_data_raises_failure_on_missing_team(mock_s3):
 
 
 @pytest.mark.django_db
-@patch("products.posthog_ai.dags.snapshot_team_data.snapshot_events_taxonomy")
+@patch("products.insights_ai.dags.snapshot_team_data.snapshot_events_taxonomy")
 def test_snapshot_clickhouse_team_data_raises_failure_on_unrecoverable_error(
     mock_snapshot_events_taxonomy, mock_s3, team
 ):
@@ -236,9 +236,9 @@ def test_snapshot_clickhouse_team_data_raises_failure_on_unrecoverable_error(
     assert getattr(exc.value, "allow_retries", None) is False
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.check_dump_exists")
-@patch("products.posthog_ai.dags.snapshot_team_data.EventTaxonomyQueryRunner.run")
-@patch("products.posthog_ai.dags.snapshot_team_data.TeamTaxonomyQueryRunner.run")
+@patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
+@patch("products.insights_ai.dags.snapshot_team_data.EventTaxonomyQueryRunner.run")
+@patch("products.insights_ai.dags.snapshot_team_data.TeamTaxonomyQueryRunner.run")
 @pytest.mark.django_db
 def test_snapshot_events_taxonomy(
     mock_team_taxonomy_query_runner,
@@ -276,7 +276,7 @@ def test_snapshot_events_taxonomy(
     assert mock_dump.call_count == 2
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.check_dump_exists")
+@patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
 @pytest.mark.django_db
 def test_snapshot_events_taxonomy_can_be_skipped(mock_check_dump_exists, mock_context, mock_s3, team, mock_dump):
     """est that snapshot_events_taxonomy can be skipped when file already exists."""
@@ -289,7 +289,7 @@ def test_snapshot_events_taxonomy_can_be_skipped(mock_check_dump_exists, mock_co
     assert mock_dump.call_count == 0
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.check_dump_exists")
+@patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
 @pytest.mark.django_db
 def test_snapshot_actors_property_taxonomy_can_be_skipped(
     mock_check_dump_exists, mock_context, mock_s3, team, mock_dump
@@ -311,8 +311,8 @@ def test_snapshot_actors_property_taxonomy_can_be_skipped(
     )
 
 
-@patch("products.posthog_ai.dags.snapshot_team_data.check_dump_exists")
-@patch("products.posthog_ai.dags.snapshot_team_data.call_query_runner")
+@patch("products.insights_ai.dags.snapshot_team_data.check_dump_exists")
+@patch("products.insights_ai.dags.snapshot_team_data.call_query_runner")
 @pytest.mark.django_db(databases=["default", "persons_db_writer"])
 def test_snapshot_actors_property_taxonomy_dumps_with_group_type_mapping(
     mock_call_query_runner, mock_check_dump_exists, mock_context, mock_s3, team, mock_dump

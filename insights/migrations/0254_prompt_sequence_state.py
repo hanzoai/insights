@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0253_add_async_migration_parameters"),
+        ("insights", "0253_add_async_migration_parameters"),
     ]
 
     operations = [
@@ -33,11 +33,11 @@ class Migration(migrations.Migration):
                 ("dismissed", models.BooleanField(default=False)),
                 (
                     "person",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.person"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.person"),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),

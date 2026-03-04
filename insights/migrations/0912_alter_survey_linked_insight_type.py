@@ -8,7 +8,7 @@ from django.db import migrations, models
 # CI checks are very restrictive :(
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0911_surveyresponsearchive_and_more"),
+        ("insights", "0911_surveyresponsearchive_and_more"),
     ]
 
     operations = [
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_linked_insight",
                         related_query_name="survey_linked_insight",
-                        to="posthog.insight",
+                        to="insights.insight",
                         db_index=False,
                         db_constraint=False,  # Don't create constraint yet
                     ),

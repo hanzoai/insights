@@ -194,9 +194,9 @@ class SkillRenderer:
     """Renders skill source files to final markdown via Jinja2."""
 
     def __init__(self) -> None:
-        from products.posthog_ai.scripts.insightsql_example import render_insightsql_example
-        from products.posthog_ai.scripts.insightsql_functions import insightsql_functions
-        from products.posthog_ai.scripts.pydantic_schema import pydantic_schema
+        from products.insights_ai.scripts.insightsql_example import render_insightsql_example
+        from products.insights_ai.scripts.insightsql_functions import insightsql_functions
+        from products.insights_ai.scripts.pydantic_schema import pydantic_schema
 
         self.env = _create_jinja_env(
             pydantic_schema=pydantic_schema,
@@ -532,7 +532,7 @@ def main() -> None:
     args = parser.parse_args()
 
     products_dir = REPO_ROOT / "products"
-    output_dir = REPO_ROOT / "products" / "posthog_ai"
+    output_dir = REPO_ROOT / "products" / "insights_ai"
     builder = SkillBuilder(REPO_ROOT, products_dir, output_dir)
 
     if args.init:

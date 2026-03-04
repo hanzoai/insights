@@ -7,8 +7,8 @@ CHUNK_SIZE = 500
 
 
 def migrate_recording_annotations(apps, schema_editor):
-    Annotation = apps.get_model("posthog", "Annotation")
-    Comment = apps.get_model("posthog", "Comment")
+    Annotation = apps.get_model("insights", "Annotation")
+    Comment = apps.get_model("insights", "Comment")
 
     recording_annotations = Annotation.objects.filter(scope="recording", deleted=False)
 
@@ -50,7 +50,7 @@ def migrate_recording_annotations(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0802_messagecategory_category_type_and_more_fix"),
+        ("insights", "0802_messagecategory_category_type_and_more_fix"),
     ]
 
     operations = [

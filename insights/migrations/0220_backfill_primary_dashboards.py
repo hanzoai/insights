@@ -7,7 +7,7 @@ def backfill_primary_dashboards(apps, _):
     logger = structlog.get_logger(__name__)
     logger.info("starting 0220_set_primary_dashboard")
 
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     team_dashboards = []
     with connection.cursor() as cursor:
@@ -19,25 +19,25 @@ def backfill_primary_dashboards(apps, _):
         # - We ignore teams that already have a primary dashboard set
         cursor.execute(
             """
-            SELECT posthog_team.id,
+            SELECT insights_team.id,
                 COALESCE(
                     MIN(
                         CASE
-                            WHEN posthog_dashboard.pinned THEN posthog_dashboard.id
+                            WHEN insights_dashboard.pinned THEN insights_dashboard.id
                             ELSE NULL
                         END
                     ),
                     MIN(
                         CASE
-                            WHEN NOT posthog_dashboard.pinned THEN posthog_dashboard.id
+                            WHEN NOT insights_dashboard.pinned THEN insights_dashboard.id
                             ELSE NULL
                         END
                     )
                 ) AS primary_dashboard_id
-            FROM posthog_team
-            INNER JOIN posthog_dashboard ON posthog_dashboard.team_id = posthog_team.id
-            WHERE posthog_team.primary_dashboard_id IS NULL
-            GROUP BY posthog_team.id
+            FROM insights_team
+            INNER JOIN insights_dashboard ON insights_dashboard.team_id = insights_team.id
+            WHERE insights_team.primary_dashboard_id IS NULL
+            GROUP BY insights_team.id
             """
         )
         team_dashboards = cursor.fetchall()
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0219_migrate_tags_v2"),
+        ("insights", "0219_migrate_tags_v2"),
     ]
 
     operations = [migrations.RunPython(backfill_primary_dashboards, reverse, elidable=True)]

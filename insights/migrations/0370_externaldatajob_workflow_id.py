@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0369_user_theme_mode"),
+        ("insights", "0369_user_theme_mode"),
     ]
 
     operations = [

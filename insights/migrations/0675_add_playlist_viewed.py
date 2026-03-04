@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0674_experiment_exposure_criteria"),
+        ("insights", "0674_experiment_exposure_criteria"),
     ]
 
     operations = [
@@ -19,16 +19,16 @@ class Migration(migrations.Migration):
                 (
                     "playlist",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="posthog.sessionrecordingplaylist"
+                        on_delete=django.db.models.deletion.CASCADE, to="insights.sessionrecordingplaylist"
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 ("user", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["playlist"], name="posthog_ses_playlis_9e7475_idx"),
-                    models.Index(fields=["playlist", "viewed_at"], name="posthog_ses_playlis_5051b6_idx"),
+                    models.Index(fields=["playlist"], name="insights_ses_playlis_9e7475_idx"),
+                    models.Index(fields=["playlist", "viewed_at"], name="insights_ses_playlis_5051b6_idx"),
                 ],
                 "unique_together": {("user", "playlist", "viewed_at")},
             },

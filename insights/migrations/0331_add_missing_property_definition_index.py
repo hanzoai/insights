@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0330_add_autocapture_exceptions_events_to_ignore"),
+        ("insights", "0330_add_autocapture_exceptions_events_to_ignore"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             model_name="propertydefinition",
             index=models.Index(
                 fields=["team_id", "type", "is_numerical"],
-                name="posthog_pro_team_id_eac36d_idx",
+                name="insights_pro_team_id_eac36d_idx",
             ),
         ),
     ]

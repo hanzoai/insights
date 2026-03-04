@@ -10,7 +10,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0890_add_campaign_name_mappings"),
+        ("insights", "0890_add_campaign_name_mappings"),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ("viewed_at", models.DateTimeField(default=django.utils.timezone.now)),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
                 (
                     "user",
@@ -37,15 +37,15 @@ class Migration(migrations.Migration):
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["team", "user", "-viewed_at"], name="posthog_fsvl_recent_user_views"),
-                    models.Index(fields=["team", "type", "ref", "-viewed_at"], name="posthog_fsvl_recent_item_views"),
+                    models.Index(fields=["team", "user", "-viewed_at"], name="insights_fsvl_recent_user_views"),
+                    models.Index(fields=["team", "type", "ref", "-viewed_at"], name="insights_fsvl_recent_item_views"),
                 ],
             },
         ),
         migrations.AddConstraint(
             model_name="filesystemviewlog",
             constraint=models.UniqueConstraint(
-                fields=("team", "user", "type", "ref"), name="posthog_fsvl_unique_user_item"
+                fields=("team", "user", "type", "ref"), name="insights_fsvl_unique_user_item"
             ),
         ),
     ]

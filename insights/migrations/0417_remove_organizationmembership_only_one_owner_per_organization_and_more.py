@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def backfill_invite_level(apps, schema_editor):
-    OrganizationInvite = apps.get_model("posthog", "organizationinvite")
+    OrganizationInvite = apps.get_model("insights", "organizationinvite")
     for invite in OrganizationInvite.objects.all():
         invite.level = 1
         invite.save()
@@ -12,7 +12,7 @@ def backfill_invite_level(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0416_survey_internal_targeting_flag"),
+        ("insights", "0416_survey_internal_targeting_flag"),
     ]
 
     operations = [
@@ -28,12 +28,12 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunSQL(
-            "update posthog_organizationinvite set level = 1",
-            reverse_sql="update posthog_organizationinvite set level = NULL",
+            "update insights_organizationinvite set level = 1",
+            reverse_sql="update insights_organizationinvite set level = NULL",
         ),
         migrations.RunSQL(
-            "ALTER TABLE posthog_organizationinvite ALTER COLUMN level SET NOT NULL -- existing-table-constraint-ignore",
-            reverse_sql="ALTER TABLE posthog_organizationinvite ALTER COLUMN level DROP NOT NULL",
+            "ALTER TABLE insights_organizationinvite ALTER COLUMN level SET NOT NULL -- existing-table-constraint-ignore",
+            reverse_sql="ALTER TABLE insights_organizationinvite ALTER COLUMN level DROP NOT NULL",
         ),
         migrations.AlterField(
             model_name="organizationinvite",

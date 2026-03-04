@@ -63,7 +63,7 @@ export interface QueryContext<Q extends QuerySchema = QuerySchema> {
     /** Base currency for formatting monetary values */
     baseCurrency?: CurrencyCode
     /** Limit context sent to the /query endpoint */
-    limitContext?: 'posthog_ai'
+    limitContext?: 'insights_ai'
 }
 
 export type QueryContextColumnTitleComponent = ComponentType<{

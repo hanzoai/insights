@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allows these schema changes (DDL) without holding a transaction the whole time
 
     dependencies = [
-        ("posthog", "0689_survey_enable_partial_responses"),
+        ("insights", "0689_survey_enable_partial_responses"),
     ]
 
     operations = [
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                     model_name="cohortpeople",
                     name="person",
                     field=models.ForeignKey(
-                        to="posthog.person",
+                        to="insights.person",
                         on_delete=models.CASCADE,
                     ),
                 ),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                     model_name="featureflaghashkeyoverride",
                     name="person",
                     field=models.ForeignKey(
-                        to="posthog.person",
+                        to="insights.person",
                         on_delete=models.CASCADE,
                     ),
                 ),
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                     model_name="persondistinctid",
                     name="person",
                     field=models.ForeignKey(
-                        to="posthog.person",
+                        to="insights.person",
                         on_delete=models.CASCADE,
                     ),
                 ),
@@ -61,32 +61,32 @@ class Migration(migrations.Migration):
                 migrations.RunSQL(
                     sql="""
                         -- Drop old FK constraints if they exist
-                        ALTER TABLE "posthog_cohortpeople"
-                            DROP CONSTRAINT IF EXISTS "posthog_cohortpeople_person_id_33da7d3f_fk";
-                        ALTER TABLE "posthog_featureflaghashkeyoverride"
-                            DROP CONSTRAINT IF EXISTS "posthog_featureflaghashkeyoverride_person_id_7e517f7c_fk";
-                        ALTER TABLE "posthog_persondistinctid"
-                            DROP CONSTRAINT IF EXISTS "posthog_persondistinctid_person_id_5d655bba_fk";
+                        ALTER TABLE "insights_cohortpeople"
+                            DROP CONSTRAINT IF EXISTS "insights_cohortpeople_person_id_33da7d3f_fk";
+                        ALTER TABLE "insights_featureflaghashkeyoverride"
+                            DROP CONSTRAINT IF EXISTS "insights_featureflaghashkeyoverride_person_id_7e517f7c_fk";
+                        ALTER TABLE "insights_persondistinctid"
+                            DROP CONSTRAINT IF EXISTS "insights_persondistinctid_person_id_5d655bba_fk";
 
                         -- Convert columns to bigint
-                        ALTER TABLE "posthog_person"
+                        ALTER TABLE "insights_person"
                             ALTER COLUMN "id" TYPE bigint USING "id"::bigint;
-                        ALTER SEQUENCE IF EXISTS "posthog_person_id_seq" AS bigint;
+                        ALTER SEQUENCE IF EXISTS "insights_person_id_seq" AS bigint;
 
-                        ALTER TABLE "posthog_cohortpeople"
+                        ALTER TABLE "insights_cohortpeople"
                             ALTER COLUMN "person_id" TYPE bigint USING "person_id"::bigint;
-                        ALTER TABLE "posthog_featureflaghashkeyoverride"
+                        ALTER TABLE "insights_featureflaghashkeyoverride"
                             ALTER COLUMN "person_id" TYPE bigint USING "person_id"::bigint;
-                        ALTER TABLE "posthog_persondistinctid"
+                        ALTER TABLE "insights_persondistinctid"
                             ALTER COLUMN "person_id" TYPE bigint USING "person_id"::bigint;
 
-                        ALTER TABLE "posthog_persondistinctid"
+                        ALTER TABLE "insights_persondistinctid"
                             ALTER COLUMN "id" TYPE bigint USING "id"::bigint;
-                        ALTER SEQUENCE IF EXISTS "posthog_persondistinctid_id_seq" AS bigint;
+                        ALTER SEQUENCE IF EXISTS "insights_persondistinctid_id_seq" AS bigint;
 
-                        ALTER TABLE "posthog_eventproperty"
+                        ALTER TABLE "insights_eventproperty"
                             ALTER COLUMN "id" TYPE bigint USING "id"::bigint;
-                        ALTER SEQUENCE IF EXISTS "posthog_eventproperty_id_seq" AS bigint;
+                        ALTER SEQUENCE IF EXISTS "insights_eventproperty_id_seq" AS bigint;
                     """,
                     reverse_sql=migrations.RunSQL.noop,
                 ),
@@ -98,9 +98,9 @@ class Migration(migrations.Migration):
         #
         migrations.RunSQL(
             sql="""
-                ALTER TABLE "posthog_cohortpeople" ADD CONSTRAINT "posthog_cohortpeople_person_id_33da7d3f_fk" FOREIGN KEY ("person_id") REFERENCES "posthog_person" ("id") NOT VALID; -- existing-table-constraint-ignore
-                ALTER TABLE "posthog_featureflaghashkeyoverride" ADD CONSTRAINT "posthog_featureflaghashkeyoverride_person_id_7e517f7c_fk" FOREIGN KEY ("person_id") REFERENCES "posthog_person" ("id") NOT VALID; -- existing-table-constraint-ignore
-                ALTER TABLE "posthog_persondistinctid" ADD CONSTRAINT "posthog_persondistinctid_person_id_5d655bba_fk" FOREIGN KEY ("person_id") REFERENCES "posthog_person" ("id") NOT VALID; -- existing-table-constraint-ignore
+                ALTER TABLE "insights_cohortpeople" ADD CONSTRAINT "insights_cohortpeople_person_id_33da7d3f_fk" FOREIGN KEY ("person_id") REFERENCES "insights_person" ("id") NOT VALID; -- existing-table-constraint-ignore
+                ALTER TABLE "insights_featureflaghashkeyoverride" ADD CONSTRAINT "insights_featureflaghashkeyoverride_person_id_7e517f7c_fk" FOREIGN KEY ("person_id") REFERENCES "insights_person" ("id") NOT VALID; -- existing-table-constraint-ignore
+                ALTER TABLE "insights_persondistinctid" ADD CONSTRAINT "insights_persondistinctid_person_id_5d655bba_fk" FOREIGN KEY ("person_id") REFERENCES "insights_person" ("id") NOT VALID; -- existing-table-constraint-ignore
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),
@@ -109,9 +109,9 @@ class Migration(migrations.Migration):
         #
         migrations.RunSQL(
             sql="""
-                ALTER TABLE "posthog_cohortpeople" VALIDATE CONSTRAINT "posthog_cohortpeople_person_id_33da7d3f_fk";
-                ALTER TABLE "posthog_featureflaghashkeyoverride" VALIDATE CONSTRAINT "posthog_featureflaghashkeyoverride_person_id_7e517f7c_fk";
-                ALTER TABLE "posthog_persondistinctid" VALIDATE CONSTRAINT "posthog_persondistinctid_person_id_5d655bba_fk";
+                ALTER TABLE "insights_cohortpeople" VALIDATE CONSTRAINT "insights_cohortpeople_person_id_33da7d3f_fk";
+                ALTER TABLE "insights_featureflaghashkeyoverride" VALIDATE CONSTRAINT "insights_featureflaghashkeyoverride_person_id_7e517f7c_fk";
+                ALTER TABLE "insights_persondistinctid" VALIDATE CONSTRAINT "insights_persondistinctid_person_id_5d655bba_fk";
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),

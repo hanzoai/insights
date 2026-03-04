@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0925_team_business_model"),
+        ("insights", "0925_team_business_model"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("data_modeling", "0001_initial"),
     ]
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                         default=insights.models.utils.uuid7, editable=False, primary_key=True, serialize=False
                     ),
                 ),
-                ("dag_id", models.TextField(db_index=True, default="posthog", editable=False, max_length=256)),
+                ("dag_id", models.TextField(db_index=True, default="insights", editable=False, max_length=256)),
                 ("properties", models.JSONField(default=dict)),
                 (
                     "created_by",
@@ -54,11 +54,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={
-                "db_table": "posthog_datamodelingedge",
+                "db_table": "insights_datamodelingedge",
             },
         ),
         migrations.AddConstraint(

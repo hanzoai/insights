@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0770_alter_insightsflow_conversion_and_more"),
+        ("insights", "0770_alter_insightsflow_conversion_and_more"),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         # These hack around the fact Django removes the default for no reason
         # so let's force it back
         migrations.RunSQL(
-            sql='ALTER TABLE "posthog_teamrevenueanalyticsconfig" ALTER COLUMN "filter_test_accounts" SET DEFAULT false;',
+            sql='ALTER TABLE "insights_teamrevenueanalyticsconfig" ALTER COLUMN "filter_test_accounts" SET DEFAULT false;',
             reverse_sql="",  # noop
         ),
     ]

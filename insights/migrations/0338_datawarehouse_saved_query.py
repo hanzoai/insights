@@ -11,7 +11,7 @@ import products.data_warehouse.backend.models.datawarehouse_saved_query
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0337_more_session_recording_fields"),
+        ("insights", "0337_more_session_recording_fields"),
     ]
 
     operations = [
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),
@@ -70,7 +70,7 @@ class Migration(migrations.Migration):
             model_name="datawarehousesavedquery",
             constraint=models.UniqueConstraint(
                 fields=("team", "name"),
-                name="posthog_datawarehouse_saved_query_unique_name",
+                name="insights_datawarehouse_saved_query_unique_name",
             ),
         ),
     ]

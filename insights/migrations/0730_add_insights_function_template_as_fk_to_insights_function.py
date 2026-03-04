@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0729_sessionrecordingplaylist_type"),
+        ("insights", "0729_sessionrecordingplaylist_type"),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="insights_functions",
-                        to="posthog.customfunctiontemplate",
+                        to="insights.customfunctiontemplate",
                     ),
                 ),
             ],
@@ -30,8 +30,8 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "insights_function" ADD COLUMN "insights_function_template_id" uuid NULL CONSTRAINT "insights_function_insights_function_templat_3dc757e7_fk_posthog_h" REFERENCES "insights_function_template"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "insights_function_insights_function_templat_3dc757e7_fk_posthog_h" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_function" ADD COLUMN "insights_function_template_id" uuid NULL CONSTRAINT "insights_function_insights_function_templat_3dc757e7_fk_insights_h" REFERENCES "insights_function_template"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_function_insights_function_templat_3dc757e7_fk_insights_h" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_function" DROP COLUMN IF EXISTS "insights_function_template_id";

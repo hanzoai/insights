@@ -24,13 +24,13 @@ class InsightCachingState(UUIDTModel):
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
 
     insight = models.ForeignKey(
-        "posthog.Insight",
+        "insights.Insight",
         on_delete=models.CASCADE,
         related_name="caching_states",
         null=False,
     )
     dashboard_tile = models.ForeignKey(
-        "posthog.DashboardTile",
+        "insights.DashboardTile",
         on_delete=models.CASCADE,
         related_name="caching_states",
         null=True,

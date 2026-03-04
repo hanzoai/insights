@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0127_stricter_team_data"),
+        ("insights", "0127_stricter_team_data"),
     ]
 
     operations = [
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="teams",
                 related_query_name="team",
-                to="posthog.Organization",
+                to="insights.Organization",
             ),
         ),
     ]

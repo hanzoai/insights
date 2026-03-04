@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False  # Required for AddIndexConcurrently
 
     dependencies = [
-        ("posthog", "0981_batchexport_interval_offset_batchexport_timezone"),
+        ("insights", "0981_batchexport_interval_offset_batchexport_timezone"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             model_name="comment",
             index=models.Index(
                 fields=["team_id", "scope", "item_id", "deleted", "-created_at"],
-                name="posthog_comment_convo_idx",
+                name="insights_comment_convo_idx",
             ),
         ),
     ]

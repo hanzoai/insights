@@ -69,7 +69,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         MANAGED_VIEWSET = DataWarehouseSavedQueryOrigin.MANAGED_VIEWSET
 
     name = models.CharField(max_length=128, validators=[validate_saved_query_name])
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     latest_error = models.TextField(default=None, null=True, blank=True)
     columns = models.JSONField(
         default=dict,
@@ -115,7 +115,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
                 name="posthog_datawarehouse_saved_query_unique_name",
             )
         ]
-        db_table = "posthog_datawarehousesavedquery"
+        db_table = "insights_datawarehousesavedquery"
 
     @property
     def name_chain(self) -> list[str]:

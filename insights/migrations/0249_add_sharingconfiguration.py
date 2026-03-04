@@ -7,8 +7,8 @@ import insights.models.sharing_configuration
 
 
 def create_sharing_configurations(apps, _) -> None:
-    Dashboard = apps.get_model("posthog", "Dashboard")
-    SharingConfiguration = apps.get_model("posthog", "SharingConfiguration")
+    Dashboard = apps.get_model("insights", "Dashboard")
+    SharingConfiguration = apps.get_model("insights", "SharingConfiguration")
     dashboards = Dashboard.objects.filter(is_shared=True).values("id", "team_id", "is_shared", "share_token").all()
 
     batch_size = 1_000
@@ -30,7 +30,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0248_add_context_for_csv_exports"),
+        ("insights", "0248_add_context_for_csv_exports"),
     ]
 
     operations = [
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.dashboard",
+                        to="insights.dashboard",
                     ),
                 ),
                 (
@@ -71,12 +71,12 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.insight",
+                        to="insights.insight",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),

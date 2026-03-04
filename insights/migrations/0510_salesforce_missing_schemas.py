@@ -8,11 +8,11 @@ from insights.temporal.data_imports.sources.salesforce.settings import INCREMENT
 def salesforce_schemas(apps, schema_editor):
     with connection.cursor() as cursor:
         cursor.execute(
-            "SELECT id, team_id FROM posthog_externaldatasource where source_type = 'Salesforce' and deleted is not true"
+            "SELECT id, team_id FROM insights_externaldatasource where source_type = 'Salesforce' and deleted is not true"
         )
         salesforce_sources = cursor.fetchall()
 
-    ExternalDataSchema = apps.get_model("posthog", "ExternalDataSchema")
+    ExternalDataSchema = apps.get_model("insights", "ExternalDataSchema")
     for source in salesforce_sources:
         schemas = list(ExternalDataSchema.objects.filter(source_id=source[0]))
 
@@ -35,7 +35,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0509_errortrackingsymbolset_failure_reason"),
+        ("insights", "0509_errortrackingsymbolset_failure_reason"),
     ]
 
     operations = [

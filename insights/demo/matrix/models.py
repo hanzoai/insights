@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 if TYPE_CHECKING:
     from insights.demo.matrix.matrix import Cluster, Matrix
 
-# Refer to https://github.com/PostHog/posthog-ai-costs-app/tree/main/src/ai-cost-data for missing models
+# Refer to https://github.com/PostHog/insights-ai-costs-app/tree/main/src/ai-cost-data for missing models
 LLM_COSTS_BY_MODEL = {
     "gpt-4o": {"prompt_token": 2.5 / 1e6, "completion_token": 10 / 1e6},
     "gpt-4o-mini": {"prompt_token": 0.15 / 1e6, "completion_token": 0.6 / 1e6},

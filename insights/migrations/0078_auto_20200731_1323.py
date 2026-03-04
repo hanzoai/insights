@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0077_cohortpeople_id_to_bigautofield"),
+        ("insights", "0077_cohortpeople_id_to_bigautofield"),
     ]
 
     operations = [
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="items",
-                to="posthog.Dashboard",
+                to="insights.Dashboard",
             ),
         ),
     ]

@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def forward(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for dashboard_item in DashboardItem.objects.filter(filters__insight="FUNNELS", filters__display="FUNNELS"):
         dashboard_item.filters.update({"display": "FunnelViz"})
         dashboard_item.save()
@@ -16,7 +16,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0125_longer_webhook_url"),
+        ("insights", "0125_longer_webhook_url"),
     ]
 
     operations = [

@@ -17,7 +17,7 @@ class ProductTour(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     team = models.ForeignKey(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         related_name="product_tours",
         related_query_name="product_tour",
@@ -27,7 +27,7 @@ class ProductTour(models.Model):
     description = models.TextField(blank=True, default="")
 
     internal_targeting_flag = models.ForeignKey(
-        "posthog.FeatureFlag",
+        "insights.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -36,7 +36,7 @@ class ProductTour(models.Model):
     )
 
     linked_flag = models.ForeignKey(
-        "posthog.FeatureFlag",
+        "insights.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -46,7 +46,7 @@ class ProductTour(models.Model):
     )
 
     linked_surveys = models.ManyToManyField(
-        "posthog.Survey",
+        "insights.Survey",
         blank=True,
         related_name="product_tours",
         related_query_name="product_tour",
@@ -62,7 +62,7 @@ class ProductTour(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

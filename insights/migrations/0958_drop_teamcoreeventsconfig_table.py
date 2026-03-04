@@ -6,12 +6,12 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0957_refactor_core_events_to_table"),
+        ("insights", "0957_refactor_core_events_to_table"),
     ]
 
     operations = [
         migrations.RunSQL(
-            sql="DROP TABLE IF EXISTS posthog_teamcoreeventsconfig;",
+            sql="DROP TABLE IF EXISTS insights_teamcoreeventsconfig;",
             reverse_sql="",  # No reverse - table is obsolete
         ),
     ]

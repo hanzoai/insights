@@ -5,13 +5,13 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0747_alter_externaldatasource_source_type"),
+        ("insights", "0747_alter_externaldatasource_source_type"),
     ]
 
     operations = [
         migrations.RunSQL(
             """
-            UPDATE posthog_featureflag
+            UPDATE insights_featureflag
             SET
                 filters = jsonb_set(
                     filters,

@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def forward(apps, schema_editor):
-    User = apps.get_model("posthog", "User")
+    User = apps.get_model("insights", "User")
     for user in User.objects.exclude(toolbar_mode="toolbar"):
         user.toolbar_mode = "toolbar"
         user.save()
@@ -16,7 +16,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0087_fix_annotation_created_at"),
+        ("insights", "0087_fix_annotation_created_at"),
     ]
 
     operations = [
