@@ -293,7 +293,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
             if clickhouse_type.startswith("Nullable("):
                 clickhouse_type = clickhouse_type.replace("Nullable(", "")[:-1]
 
-            # TODO: remove when addressed https://github.com/ClickHouse/ClickHouse/issues/37594
+            # TODO: remove when addressed https://github.com/hanzoai/datastore/issues/37594
             if clickhouse_type.startswith("Array("):
                 clickhouse_type = remove_named_tuples(clickhouse_type)
 

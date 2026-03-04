@@ -115,7 +115,7 @@ class TestFunnelTimeToConvert(ClickhouseTestMixin, APIBaseTest):
         )
 
     def test_auto_bin_count_single_step_duplicate_events(self):
-        # Test for CH bug that used to haunt us: https://github.com/ClickHouse/ClickHouse/issues/26580
+        # Test for CH bug that used to haunt us: https://github.com/hanzoai/datastore/issues/26580
 
         _create_person(distinct_ids=["user a"], team=self.team)
         _create_person(distinct_ids=["user b"], team=self.team)

@@ -53,7 +53,7 @@ Sources:
 
 - [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#insert_quorum)
 - [Replication docs](https://clickhouse.com/docs/engines/table-engines/mergetree-family/replication)
-- [auto quorum PR #39970](https://github.com/ClickHouse/ClickHouse/pull/39970)
+- [auto quorum PR #39970](https://github.com/hanzoai/datastore/pull/39970)
 
 ### `insert_quorum_parallel` (INSERT setting)
 
@@ -74,16 +74,16 @@ Controls whether multiple concurrent quorum INSERTs can proceed in parallel on t
 
 Two concurrent lazy computation INSERTs can execute their heavy SELECT (step 1) simultaneously. They only contend if both reach step 3 within the same ~100ms window. At high INSERT throughput (see [README.md](./README.md) for load context), this is a real concern — with a ~100ms lock hold time, the lock can sustain at most ~10 non-overlapping INSERTs per second to the same table. Beyond that, INSERTs start failing with immediate errors. The executor's retry logic handles these errors (they're retryable), but at high throughput the retry rate would be significant.
 
-**Why parallel was made the default**: the sequential mode was "significantly less convenient to use" because it serialized all writes to a replicated table when quorum was enabled. See [PR #17567](https://github.com/ClickHouse/ClickHouse/pull/17567) and [issue #3950](https://github.com/ClickHouse/ClickHouse/issues/3950).
+**Why parallel was made the default**: the sequential mode was "significantly less convenient to use" because it serialized all writes to a replicated table when quorum was enabled. See [PR #17567](https://github.com/hanzoai/datastore/pull/17567) and [issue #3950](https://github.com/hanzoai/datastore/issues/3950).
 
-**Why we might still need `0`**: `select_sequential_consistency=1` does NOT work correctly with `insert_quorum_parallel=1`. The `quorum/last_part` ZK node can't meaningfully track "the last quorum-committed part" when multiple parts are in-flight simultaneously. ClickHouse does not warn about this — it silently gives incorrect results. See [issue #47926](https://github.com/ClickHouse/ClickHouse/issues/47926).
+**Why we might still need `0`**: `select_sequential_consistency=1` does NOT work correctly with `insert_quorum_parallel=1`. The `quorum/last_part` ZK node can't meaningfully track "the last quorum-committed part" when multiple parts are in-flight simultaneously. ClickHouse does not warn about this — it silently gives incorrect results. See [issue #47926](https://github.com/hanzoai/datastore/issues/47926).
 
 Sources:
 
 - [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#insert_quorum_parallel)
-- [Parallel quorum PR #17567](https://github.com/ClickHouse/ClickHouse/pull/17567)
-- [Original feature request #3950](https://github.com/ClickHouse/ClickHouse/issues/3950)
-- [Broken with select_sequential_consistency #47926](https://github.com/ClickHouse/ClickHouse/issues/47926)
+- [Parallel quorum PR #17567](https://github.com/hanzoai/datastore/pull/17567)
+- [Original feature request #3950](https://github.com/hanzoai/datastore/issues/3950)
+- [Broken with select_sequential_consistency #47926](https://github.com/hanzoai/datastore/issues/47926)
 
 ### `select_sequential_consistency=1` (SELECT setting)
 
@@ -105,9 +105,9 @@ Sources:
 
 - [ClickHouse settings docs](https://clickhouse.com/docs/operations/settings/settings#select_sequential_consistency)
 - [Read consistency KB](https://clickhouse.com/docs/knowledgebase/read_consistency)
-- [Implementation PR #2863](https://github.com/ClickHouse/ClickHouse/pull/2863)
-- [Latency with degraded ZK #22068](https://github.com/ClickHouse/ClickHouse/issues/22068)
-- [Bug with empty parts cleanup #44972](https://github.com/ClickHouse/ClickHouse/issues/44972)
+- [Implementation PR #2863](https://github.com/hanzoai/datastore/pull/2863)
+- [Latency with degraded ZK #22068](https://github.com/hanzoai/datastore/issues/22068)
+- [Bug with empty parts cleanup #44972](https://github.com/hanzoai/datastore/issues/44972)
 - [Sentry blog: stronger consistency](https://blog.sentry.io/how-to-get-stronger-consistency-out-of-a-datastore/)
 
 ### `insert_quorum_timeout` (INSERT setting)
@@ -153,7 +153,7 @@ Sources:
 
 An alternative to `select_sequential_consistency`. Waits for the local replica to catch up on data-movement replication entries (GET_PART, ATTACH_PART, DROP_RANGE) — ignores merges and mutations.
 
-- **Available since**: ClickHouse v23.5 ([PR #48085](https://github.com/ClickHouse/ClickHouse/pull/48085))
+- **Available since**: ClickHouse v23.5 ([PR #48085](https://github.com/hanzoai/datastore/pull/48085))
 - **Latency**: if replica is caught up, returns in milliseconds. Otherwise waits for part fetches to complete.
 - **ZK/Keeper load**: reads the replication queue (no writes)
 - **Blocks other queries**: no (blocks only the calling connection)
@@ -170,13 +170,13 @@ Insights already uses `SYSTEM SYNC REPLICA STRICT` in `insights/dags/common/over
 Sources:
 
 - [SYSTEM SYNC REPLICA docs](https://clickhouse.com/docs/sql-reference/statements/system#sync-replica)
-- [Faster SYNC REPLICA issue #47794](https://github.com/ClickHouse/ClickHouse/issues/47794)
-- [LIGHTWEIGHT PR #48085](https://github.com/ClickHouse/ClickHouse/pull/48085)
-- [FROM modifier PR #58393](https://github.com/ClickHouse/ClickHouse/pull/58393)
+- [Faster SYNC REPLICA issue #47794](https://github.com/hanzoai/datastore/issues/47794)
+- [LIGHTWEIGHT PR #48085](https://github.com/hanzoai/datastore/pull/48085)
+- [FROM modifier PR #58393](https://github.com/hanzoai/datastore/pull/58393)
 
 ## Can we verify an INSERT has been replicated?
 
-**Short answer: no, not per-INSERT.** ClickHouse does not return a write token or part name from INSERT statements — there is no `INSERT RETURNING` ([feature request #21697](https://github.com/ClickHouse/ClickHouse/issues/21697)).
+**Short answer: no, not per-INSERT.** ClickHouse does not return a write token or part name from INSERT statements — there is no `INSERT RETURNING` ([feature request #21697](https://github.com/hanzoai/datastore/issues/21697)).
 
 System tables that get close but aren't sufficient:
 
@@ -191,7 +191,7 @@ Sources:
 - [system.parts docs](https://clickhouse.com/docs/operations/system-tables/parts)
 - [system.replication_queue docs](https://clickhouse.com/docs/operations/system-tables/replication_queue)
 - [system.replicas docs](https://clickhouse.com/docs/operations/system-tables/replicas)
-- [INSERT RETURNING feature request #21697](https://github.com/ClickHouse/ClickHouse/issues/21697)
+- [INSERT RETURNING feature request #21697](https://github.com/hanzoai/datastore/issues/21697)
 
 ## Approaches considered
 
