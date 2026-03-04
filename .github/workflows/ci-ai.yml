@@ -87,7 +87,7 @@ jobs:
               run: sudo echo "127.0.0.1 kafka clickhouse" | sudo tee -a /etc/hosts
 
             - name: Run LLM evals
-              run: echo "ee/hogai evals removed - skipping"
+              run: echo "ee/insightsai evals removed - skipping"
               env:
                   EVAL_MODE: ci
                   EXPORT_EVAL_RESULTS: true

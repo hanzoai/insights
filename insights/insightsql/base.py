@@ -23,8 +23,8 @@ class AST:
 
         # NOTE: Sync with ./test/test_visitor.py#test_insightsql_visitor_naming_exceptions
         replacements = {
-            "hog_qlxtag": "insightsqlx_tag",
-            "hog_qlxattribute": "insightsqlx_attribute",
+            "iql_xtag": "insightsqlx_tag",
+            "iql_xattribute": "insightsqlx_attribute",
             "uuidtype": "uuid_type",
             "string_jsontype": "string_json_type",
         }

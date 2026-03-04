@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from loginas.utils import is_impersonated_session
 from rest_framework.request import Request
 from rest_framework.response import Response
-from statshog.defaults.django import statsd
+from statsiql.defaults.django import statsd
 
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.caching.utils import is_stale_filter

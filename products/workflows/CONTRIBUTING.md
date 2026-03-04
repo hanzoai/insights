@@ -103,7 +103,7 @@ Action nodes shown in the "Build" toolbar come from:
 - Built-ins in products/workflows/frontend/Workflows/insightsflows/panel/InsightsFlowEditorPanelBuild.tsx
 - Registered categories from products/workflows/frontend/Workflows/insightsflows/registry/actions/actionNodeRegistry.ts
 
-Each category contains one or more `CreateActionType` nodes (see type in products/workflows/frontend/Workflows/insightsflows/hogFlowEditorLogic.tsx).
+Each category contains one or more `CreateActionType` nodes (see type in products/workflows/frontend/Workflows/insightsflows/insightsFlowEditorLogic.tsx).
 
 ### 1) Add an action node category
 
@@ -182,14 +182,14 @@ Guidelines:
 
 ### 2) Register it in the templates index
 
-Templates are exported from a central list. Add an import and include it in `HOG_FUNCTION_TEMPLATES_DESTINATIONS`:
+Templates are exported from a central list. Add an import and include it in `IQL_FUNCTION_TEMPLATES_DESTINATIONS`:
 
 - nodejs/src/cdp/templates/index.ts
 
 Reference for how existing workflows templates are added:
 
-- Imports: `insightsGetTicketTemplate`, `insightsUpdateTicketTemplate`, `insightsSetHogflowVariableTemplate`
-- List: `HOG_FUNCTION_TEMPLATES_DESTINATIONS`
+- Imports: `insightsGetTicketTemplate`, `insightsUpdateTicketTemplate`, `insightsSetInsightsflowVariableTemplate`
+- List: `IQL_FUNCTION_TEMPLATES_DESTINATIONS`
 
 ## Backend: adding an async function
 

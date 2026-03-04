@@ -10,10 +10,10 @@ INSERT INTO
         target
     )
 VALUES
-    -- team:1, hogFunctionId:2, completed in hour 20
+    -- team:1, insightsFunctionId:2, completed in hour 20
     (
         NULL,
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -21,10 +21,10 @@ VALUES
         'completed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, completed in hour 20 (purposeful duplicate)
+    -- team:1, insightsFunctionId:2, completed in hour 20 (purposeful duplicate)
     (
         NULL,
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -32,10 +32,10 @@ VALUES
         'completed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, completed in hour 21 (different hour)
+    -- team:1, insightsFunctionId:2, completed in hour 21 (different hour)
     (
         NULL,
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 21:01:18.799371+00',
         '2023-12-19 21:01:18.799371+00',
         '{}',
@@ -43,10 +43,10 @@ VALUES
         'completed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:3, completed in hour 20 (different hogFunctionId)
+    -- team:1, insightsFunctionId:3, completed in hour 20 (different insightsFunctionId)
     (
         NULL,
-        '{"teamId": 1, "hogFunctionId": "3"}',
+        '{"teamId": 1, "insightsFunctionId": "3"}',
         '2023-12-19 20:01:18.80335+00',
         '2023-12-19 20:01:18.80335+00',
         '{}',
@@ -54,10 +54,10 @@ VALUES
         'completed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, completed but in a different queue
+    -- team:1, insightsFunctionId:2, completed but in a different queue
     (
         NULL,
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -65,10 +65,10 @@ VALUES
         'completed',
         'https://myhost/endpoint'
     ),
-    -- team:2, hogFunctionId:4, completed in hour 20 (different team)
+    -- team:2, insightsFunctionId:4, completed in hour 20 (different team)
     (
         NULL,
-        '{"teamId": 2, "hogFunctionId": "4"}',
+        '{"teamId": 2, "insightsFunctionId": "4"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -76,10 +76,10 @@ VALUES
         'completed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, failed in hour 20
+    -- team:1, insightsFunctionId:2, failed in hour 20
     (
         ARRAY ['{"type":"TimeoutError","details":{"error":{"name":"Timeout"}}}'::jsonb],
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -87,10 +87,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, failed in hour 20 (purposeful duplicate)
+    -- team:1, insightsFunctionId:2, failed in hour 20 (purposeful duplicate)
     (
         ARRAY ['{"type":"TimeoutError","details":{"error":{"name":"Timeout"}}}'::jsonb],
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -98,10 +98,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, failed in hour 20 (different error)
+    -- team:1, insightsFunctionId:2, failed in hour 20 (different error)
     (
         ARRAY ['{"type":"ConnectionError","details":{"error":{"name":"Connection Error"}}}'::jsonb],
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -109,10 +109,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, failed in hour 21 (different hour)
+    -- team:1, insightsFunctionId:2, failed in hour 21 (different hour)
     (
         ARRAY ['{"type":"TimeoutError","details":{"error":{"name":"Timeout"}}}'::jsonb],
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 21:01:18.799371+00',
         '2023-12-19 21:01:18.799371+00',
         '{}',
@@ -120,10 +120,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:3, failed in hour 20 (different hogFunctionId)
+    -- team:1, insightsFunctionId:3, failed in hour 20 (different insightsFunctionId)
     (
         ARRAY ['{"type":"TimeoutError","details":{"error":{"name":"Timeout"}}}'::jsonb],
-        '{"teamId": 1, "hogFunctionId": "3"}',
+        '{"teamId": 1, "insightsFunctionId": "3"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -131,10 +131,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, failed but in a different queue
+    -- team:1, insightsFunctionId:2, failed but in a different queue
     (
         ARRAY ['{"type":"TimeoutError","details":{"error":{"name":"Timeout"}}}'::jsonb],
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -142,10 +142,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:2, hogFunctionId:4, failed in hour 20 (purposeful duplicate)
+    -- team:2, insightsFunctionId:4, failed in hour 20 (purposeful duplicate)
     (
         ARRAY ['{"type":"TimeoutError","details":{"error":{"name":"Timeout"}}}'::jsonb],
-        '{"teamId": 2, "hogFunctionId": "4"}',
+        '{"teamId": 2, "insightsFunctionId": "4"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{}',
@@ -153,10 +153,10 @@ VALUES
         'failed',
         'https://myhost/endpoint'
     ),
-    -- team:1, hogFunctionId:2, available
+    -- team:1, insightsFunctionId:2, available
     (
         NULL,
-        '{"teamId": 1, "hogFunctionId": "2"}',
+        '{"teamId": 1, "insightsFunctionId": "2"}',
         '2023-12-19 20:01:18.799371+00',
         '2023-12-19 20:01:18.799371+00',
         '{"body": "hello world", "headers": {}, "method": "POST", "url": "https://myhost/endpoint"}',
