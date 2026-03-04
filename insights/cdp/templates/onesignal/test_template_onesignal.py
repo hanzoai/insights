@@ -4,7 +4,7 @@ from freezegun import freeze_time
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from insights.cdp.templates.onesignal.template_onesignal import template as template_onesignal
 
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 class TestTemplateOneSignal(BaseInsightsFunctionTemplateTest):
@@ -50,7 +50,7 @@ class TestTemplateOneSignal(BaseInsightsFunctionTemplateTest):
         self.fetch_responses = {
             "https://api.onesignal.com/apps/my-app-id/custom_events": {"status": 400, "body": {"error": "error"}}
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(
                 inputs={
                     "appId": "my-app-id",

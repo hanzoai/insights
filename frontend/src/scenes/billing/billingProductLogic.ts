@@ -77,7 +77,7 @@ export interface BillingProductLogicProps {
     product: BillingProductV2Type | BillingProductV2AddonType
     productRef?: React.MutableRefObject<HTMLDivElement | null>
     billingLimitInputRef?: React.MutableRefObject<HTMLInputElement | null>
-    hogfettiTrigger?: () => void
+    confettiTrigger?: () => void
 }
 
 export const billingProductLogic = kea<billingProductLogicType>([
@@ -767,7 +767,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
         },
         triggerConfetti: async (_, breakpoint) => {
             for (let i = 0; i < 5; i++) {
-                props.hogfettiTrigger?.()
+                props.confettiTrigger?.()
                 await breakpoint(200)
             }
         },

@@ -6210,7 +6210,7 @@ segments:
           title: Blank mascot page then escape to homepage
           start_time: 00:06
           end_time: 00:36
-          description: Hedgehog page blank; user moved to homepage
+          description: Mascot page blank; user moved to homepage
           success: false
           failure_detected: true
           confusion_detected: false

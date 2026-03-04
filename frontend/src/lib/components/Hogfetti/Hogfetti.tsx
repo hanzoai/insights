@@ -65,19 +65,19 @@ interface Particle {
     opacity: number
 }
 
-interface HogfettiOptions {
+interface ConfettiOptions {
     count?: number
     power?: number
     duration?: number
     maxSize?: number
 }
 
-interface HogfettiHook {
+interface ConfettiHook {
     trigger: () => void
-    HogfettiComponent: React.FC
+    ConfettiComponent: React.FC
 }
 
-export const useHogfetti = (options: HogfettiOptions = {}): HogfettiHook => {
+export const useConfetti = (options: ConfettiOptions = {}): ConfettiHook => {
     const [particleSets, setParticleSets] = useState<Particle[][]>([])
     const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight })
 
@@ -137,7 +137,7 @@ export const useHogfetti = (options: HogfettiOptions = {}): HogfettiHook => {
         requestAnimationFrame(animationFrame)
     }, [count, power, duration, maxSize, dimensions]) // oxlint-disable-line react-hooks/exhaustive-deps
 
-    const HogfettiComponent: React.FC = () =>
+    const ConfettiComponent: React.FC = () =>
         particleSets.length === 0 ? null : (
             // eslint-disable-next-line react/forbid-dom-props
             <div className="fixed top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 9999 }}>
@@ -164,5 +164,5 @@ export const useHogfetti = (options: HogfettiOptions = {}): HogfettiHook => {
             </div>
         )
 
-    return { trigger, HogfettiComponent }
+    return { trigger, ConfettiComponent }
 }

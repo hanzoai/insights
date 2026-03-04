@@ -2,15 +2,15 @@ import { Meta } from '@storybook/react'
 
 import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
-import { useHogfetti } from './Hogfetti'
+import { useConfetti } from './Confetti'
 
 const meta: Meta = {
-    title: 'Components/Hogfetti',
+    title: 'Components/Confetti',
 }
 export default meta
 
-export function Hogfetti(): JSX.Element {
-    const { trigger, HogfettiComponent } = useHogfetti()
+export function Confetti(): JSX.Element {
+    const { trigger, ConfettiComponent } = useConfetti()
 
     const handleClick = (): void => {
         trigger()
@@ -18,9 +18,9 @@ export function Hogfetti(): JSX.Element {
 
     return (
         <>
-            <HogfettiComponent />
+            <ConfettiComponent />
             <LemonButton type="secondary" onClick={handleClick}>
-                Trigger Hogfetti
+                Trigger Confetti
             </LemonButton>
             <LemonBanner type="warning" className="mt-4">
                 The rendering in Storybook is not the same as in the app so it may appear laggy here but it should be
