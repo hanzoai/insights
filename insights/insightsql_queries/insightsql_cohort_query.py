@@ -4,7 +4,7 @@ from datetime import datetime
 from numbers import Number
 from typing import Literal, Optional, Union, cast
 
-import hanzoanalytics
+import hanzo_insights
 from rest_framework.exceptions import ValidationError
 
 from insights.schema import (
@@ -443,7 +443,7 @@ class InsightsQLCohortQuery:
             raise ValueError(f"Invalid property type for Cohort queries: {prop.type}")
 
     def _should_combine_person_properties_and(self) -> bool:
-        return hanzoanalytics.feature_enabled(
+        return hanzo_insights.feature_enabled(
             "insightsql-cohort-combine-person-properties",
             str(self.team.uuid),
             groups={
@@ -463,7 +463,7 @@ class InsightsQLCohortQuery:
         )
 
     def _should_combine_person_properties_or(self) -> bool:
-        return hanzoanalytics.feature_enabled(
+        return hanzo_insights.feature_enabled(
             "insightsql-cohort-combine-person-properties-or",
             str(self.team.uuid),
             groups={

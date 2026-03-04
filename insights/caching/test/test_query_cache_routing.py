@@ -22,7 +22,7 @@ class TestQueryCacheRouting(BaseTest):
             QUERY_CACHE_ALIAS: {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
         }
     )
-    @patch("insights.caching.query_cache_routing.hanzoanalytics.feature_enabled", return_value=True)
+    @patch("insights.caching.query_cache_routing.hanzo_insights.feature_enabled", return_value=True)
     def test_returns_cluster_cache_when_flag_enabled(self, _mock_flag):
         result = get_query_cache(self.team.pk)
         self.assertIsNot(result, cache)
@@ -33,7 +33,7 @@ class TestQueryCacheRouting(BaseTest):
             QUERY_CACHE_ALIAS: {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
         }
     )
-    @patch("insights.caching.query_cache_routing.hanzoanalytics.feature_enabled", return_value=False)
+    @patch("insights.caching.query_cache_routing.hanzo_insights.feature_enabled", return_value=False)
     def test_returns_default_cache_when_flag_disabled(self, _mock_flag):
         result = get_query_cache(self.team.pk)
         self.assertIs(result, cache)
@@ -44,7 +44,7 @@ class TestQueryCacheRouting(BaseTest):
             QUERY_CACHE_ALIAS: {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
         }
     )
-    @patch("insights.caching.query_cache_routing.hanzoanalytics.feature_enabled", side_effect=[True, False])
+    @patch("insights.caching.query_cache_routing.hanzo_insights.feature_enabled", side_effect=[True, False])
     def test_routes_back_to_default_cache_when_flag_flips_off(self, mock_flag):
         cluster_cache = get_query_cache(self.team.pk)
         default_cache = get_query_cache(self.team.pk)

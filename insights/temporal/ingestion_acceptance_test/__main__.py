@@ -4,7 +4,7 @@ import sys
 import logging
 from concurrent.futures import ThreadPoolExecutor
 
-import hanzoanalytics
+import hanzo_insights
 
 from insights.temporal.ingestion_acceptance_test.client import InsightsClient
 from insights.temporal.ingestion_acceptance_test.config import Config
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     config = Config()
 
-    insights_sdk = hanzoanalytics.Insights(
+    insights_sdk = hanzo_insights.Insights(
         config.project_api_key,
         host=config.api_host,
         debug=True,

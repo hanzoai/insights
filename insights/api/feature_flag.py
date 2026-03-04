@@ -11,7 +11,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Prefetch, Q, QuerySet, deletion
 
-import hanzoanalytics
+import hanzo_insights
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse
 from prometheus_client import Counter
@@ -281,7 +281,7 @@ class EvaluationTagsChecker:
 
         # Check FLAG_EVALUATION_TAGS feature flag
         try:
-            return hanzoanalytics.feature_enabled(
+            return hanzo_insights.feature_enabled(
                 "flag-evaluation-tags",
                 request.user.distinct_id,
                 groups={"organization": str(request.user.organization.id)},

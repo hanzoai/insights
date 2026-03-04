@@ -109,7 +109,7 @@ def queries_to_keep_fresh(
 
 @dagster.op()
 def get_teams_for_warming_op(
-    context: dagster.OpExecutionContext, hanzoanalytics: InsightsAnalyticsResource
+    context: dagster.OpExecutionContext, hanzo_insights: InsightsAnalyticsResource
 ) -> list[int]:
     team_ids = get_teams_enabled_for_web_analytics_cache_warming()
 

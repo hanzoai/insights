@@ -9,7 +9,7 @@ from django.db.models import Q, QuerySet
 from django.utils.timezone import now
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from django_filters.rest_framework import DjangoFilterBackend
 from loginas.utils import is_impersonated_session
 from rest_framework import request, response, serializers, viewsets
@@ -265,7 +265,7 @@ class SessionRecordingPlaylistSerializer(serializers.ModelSerializer, UserAccess
                     recordings_counts["saved_filters"] = count_saved_filters(playlist, user, team)
 
         except Exception as e:
-            hanzoanalytics.capture_exception(e)
+            hanzo_insights.capture_exception(e)
 
         return recordings_counts
 

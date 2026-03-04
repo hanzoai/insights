@@ -15,7 +15,7 @@ from insights.models.feature_flag.feature_flag import FeatureFlag
 from insights.redis import get_client, redis
 
 if TYPE_CHECKING:
-    from hanzoanalytics import Insights
+    from hanzo_insights import Insights
 
 REDIS_LOCK_TOKEN = "insights:decide_analytics:lock"
 CACHE_BUCKET_SIZE = 60 * 2  # duration in seconds

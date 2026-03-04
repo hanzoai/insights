@@ -16,7 +16,7 @@ from django.db.models.signals import post_delete, post_save
 
 import pytz
 import pydantic
-import hanzoanalytics
+import hanzo_insights
 
 from insights.clickhouse.query_tagging import tag_queries
 from insights.cloud_utils import is_cloud
@@ -672,7 +672,7 @@ class Team(UUIDTClassicModel):
 
         # on Insights Cloud, use the feature flag
         if is_cloud():
-            return hanzoanalytics.feature_enabled(
+            return hanzo_insights.feature_enabled(
                 "persons-on-events-person-id-no-override-properties-on-events",
                 str(self.uuid),
                 groups={"project": str(self.id)},
@@ -697,7 +697,7 @@ class Team(UUIDTClassicModel):
 
         # on Insights Cloud, use the feature flag
         if is_cloud():
-            return hanzoanalytics.feature_enabled(
+            return hanzo_insights.feature_enabled(
                 "persons-on-events-v2-reads-enabled",
                 str(self.uuid),
                 groups={"organization": str(self.organization_id)},

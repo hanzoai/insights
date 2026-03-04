@@ -749,7 +749,7 @@ class TestPersonalAPIKeyAPIAccess(APIBaseTest):
 
 
 class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
-    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzo_insights.feature_enabled")
     def test_create_llm_gateway_scope_blocked_when_flag_disabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = False
 
@@ -766,7 +766,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         }
         mock_feature_enabled.assert_called_once()
 
-    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzo_insights.feature_enabled")
     def test_create_llm_gateway_scope_allowed_when_flag_enabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = True
 
@@ -778,7 +778,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         assert response.json()["scopes"] == ["llm_gateway:read"]
         mock_feature_enabled.assert_called_once()
 
-    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzo_insights.feature_enabled")
     def test_update_existing_key_with_llm_gateway_scope_allowed_when_flag_disabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = False
 
@@ -798,7 +798,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         assert response.json()["scopes"] == ["llm_gateway:read"]
         mock_feature_enabled.assert_not_called()
 
-    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzo_insights.feature_enabled")
     def test_update_adding_llm_gateway_scope_blocked_when_flag_disabled(self, mock_feature_enabled):
         mock_feature_enabled.return_value = False
 
@@ -822,7 +822,7 @@ class TestPersonalAPIKeyLLMGatewayFeatureFlag(APIBaseTest):
         }
         mock_feature_enabled.assert_called_once()
 
-    @patch("insights.api.personal_api_key.hanzoanalytics.feature_enabled")
+    @patch("insights.api.personal_api_key.hanzo_insights.feature_enabled")
     def test_create_other_scopes_unaffected_by_flag(self, mock_feature_enabled):
         response = self.client.post(
             "/api/personal_api_keys",

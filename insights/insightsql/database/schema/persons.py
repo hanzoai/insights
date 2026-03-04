@@ -1,6 +1,6 @@
 from typing import Optional, Self, cast
 
-import hanzoanalytics
+import hanzo_insights
 
 from insights.schema import PersonsArgMaxVersion
 
@@ -249,7 +249,7 @@ def join_with_persons_table(
         raise ResolutionError("Organization is required to join with persons table")
     # TODO: @raquelmsmith: Remove flag check and use left join for all once deletes are caught up
     use_inner_join = (
-        hanzoanalytics.feature_enabled(
+        hanzo_insights.feature_enabled(
             "personless-events-not-supported",
             str(context.team.uuid),
             groups={"organization": str(organization.id)},

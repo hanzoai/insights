@@ -497,7 +497,7 @@ def test_report_heartbeat_timeout_heartbeat_not_within_timeout(team):
                 return_value=mock_info,
             ) as mock_activity_info,
             mock.patch(
-                "insights.temporal.data_imports.pipelines.common.extract.hanzoanalytics.capture"
+                "insights.temporal.data_imports.pipelines.common.extract.hanzo_insights.capture"
             ) as mock_analytics_capture,
         ):
             from insights.temporal.data_imports.pipelines.common.extract import report_heartbeat_timeout

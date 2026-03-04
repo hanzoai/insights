@@ -39,7 +39,7 @@ import pytz
 import orjson
 import lzstring
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import async_to_sync
 from celery.result import AsyncResult
 from celery.schedules import crontab
@@ -415,8 +415,8 @@ def get_context_for_template(
         context["js_insights_ui_host"] = "https://insights.hanzo.ai"
 
     elif settings.SELF_CAPTURE:
-        if hanzoanalytics.api_key:
-            context["js_insights_api_key"] = hanzoanalytics.api_key
+        if hanzo_insights.api_key:
+            context["js_insights_api_key"] = hanzo_insights.api_key
             context["js_insights_host"] = ""  # Becomes location.origin in the frontend
     else:
         context["js_insights_api_key"] = "sTMFPsFhdP1Ssg"
@@ -542,7 +542,7 @@ def get_context_for_template(
                     "created_at": user.organization.created_at.isoformat(),
                 }
 
-        feature_flags = hanzoanalytics.get_all_flags(
+        feature_flags = hanzo_insights.get_all_flags(
             insights_distinct_id,
             only_evaluate_locally=True,
             person_properties=person_properties,
@@ -590,7 +590,7 @@ def render_template(
 
 async def initialize_self_capture_api_token():
     """
-    Configures `hanzoanalytics` for self-capture, in an ASGI-compatible, async way.
+    Configures `hanzo_insights` for self-capture, in an ASGI-compatible, async way.
     """
 
     User = apps.get_model("insights", "User")
@@ -612,11 +612,11 @@ async def initialize_self_capture_api_token():
     except (User.DoesNotExist, Team.DoesNotExist, ProgrammingError):
         local_api_key = None
 
-    # This is running _after_ InsightsConfig.ready(), so we re-enable hanzoanalytics while setting the params
+    # This is running _after_ InsightsConfig.ready(), so we re-enable hanzo_insights while setting the params
     if local_api_key is not None:
-        hanzoanalytics.disabled = False
-        hanzoanalytics.api_key = local_api_key
-        hanzoanalytics.host = settings.SITE_URL
+        hanzo_insights.disabled = False
+        hanzo_insights.api_key = local_api_key
+        hanzo_insights.host = settings.SITE_URL
 
 
 def get_default_event_info(team: "Team") -> dict:
@@ -931,16 +931,16 @@ def load_data_from_request(request):
             KLUDGES_COUNTER.labels(kludge="data_in_get_param").inc()
 
     # add the data in the scope in case there's an exception
-    with hanzoanalytics.new_context():
+    with hanzo_insights.new_context():
         if isinstance(data, dict):
-            hanzoanalytics.tag("data", data)
-        hanzoanalytics.tag(
+            hanzo_insights.tag("data", data)
+        hanzo_insights.tag(
             "origin",
             request.headers.get("origin", request.headers.get("remote_host", "unknown")),
         )
-        hanzoanalytics.tag("referer", request.headers.get("referer", "unknown"))
+        hanzo_insights.tag("referer", request.headers.get("referer", "unknown"))
         # since version 1.20.0 insights-js adds its version to the `ver` query parameter as a debug signal here
-        hanzoanalytics.tag("library.version", request.GET.get("ver", "unknown"))
+        hanzo_insights.tag("library.version", request.GET.get("ver", "unknown"))
 
         compression = (
             request.GET.get("compression")

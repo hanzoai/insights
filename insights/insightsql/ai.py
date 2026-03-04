@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Optional
 from django.conf import settings
 
 import openai
-import hanzoanalytics
-from hanzoanalytics.ai.openai import OpenAI
+import hanzo_insights
+from hanzo_insights.ai.openai import OpenAI
 
 from insights.insightsql.context import InsightsQLContext
 from insights.insightsql.errors import ExposedInsightsQLError
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from insights.models import Team, User
 
 openai_client = (
-    OpenAI(analytics_client=hanzoanalytics, base_url=settings.OPENAI_BASE_URL) if os.getenv("OPENAI_API_KEY") else None  # type: ignore
+    OpenAI(analytics_client=hanzo_insights, base_url=settings.OPENAI_BASE_URL) if os.getenv("OPENAI_API_KEY") else None  # type: ignore
 )
 
 UNCLEAR_PREFIX = "UNCLEAR:"

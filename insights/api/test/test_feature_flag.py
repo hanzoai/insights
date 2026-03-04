@@ -8776,7 +8776,7 @@ class TestFeatureFlagEvaluationTags(APIBaseTest):
         cache.clear()
 
         # Mock FLAG_EVALUATION_TAGS feature flag to be enabled by default
-        self.feature_flag_patcher = patch("hanzoanalytics.feature_enabled")
+        self.feature_flag_patcher = patch("hanzo_insights.feature_enabled")
         self.mock_feature_enabled = self.feature_flag_patcher.start()
         self.mock_feature_enabled.return_value = True
 

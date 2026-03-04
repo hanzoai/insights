@@ -19,7 +19,7 @@ from django.utils.module_loading import import_string
 
 import requests
 import css_inline
-import hanzoanalytics
+import hanzo_insights
 from celery import shared_task
 from lxml import html as lxml_html
 
@@ -174,7 +174,7 @@ def _send_via_http(
 
                 provider_response = response.json()
 
-                hanzoanalytics.capture(
+                hanzo_insights.capture(
                     distinct_id=dest.get("distinct_id") or dest["raw_email"],
                     event="transactional email triggered",
                     properties={

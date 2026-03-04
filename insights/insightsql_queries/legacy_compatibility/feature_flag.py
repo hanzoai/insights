@@ -1,13 +1,13 @@
 from typing import Literal
 
-import hanzoanalytics
+import hanzo_insights
 from rest_framework.request import Request
 
 from insights.models import Team
 
 
 def insightsql_insights_replace_filters(team: Team) -> bool:
-    return hanzoanalytics.feature_enabled(
+    return hanzo_insights.feature_enabled(
         "insightsql-insights-replace-filters",
         str(team.uuid),
         groups={
@@ -31,7 +31,7 @@ def insight_api_use_legacy_queries(team: Team) -> bool:
     """
     Use the legacy implementation of insight api calculation endpoints.
     """
-    return hanzoanalytics.feature_enabled(
+    return hanzo_insights.feature_enabled(
         "insight-api-use-legacy-queries",
         str(team.uuid),
         groups={

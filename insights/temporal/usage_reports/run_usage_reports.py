@@ -53,9 +53,9 @@ async def query_usage_reports(
     inputs: QueryUsageReportsInputs,
 ) -> None:
     async with Heartbeater():
-        import hanzoanalytics
+        import hanzo_insights
 
-        are_usage_reports_disabled = hanzoanalytics.feature_enabled(
+        are_usage_reports_disabled = hanzo_insights.feature_enabled(
             "disable-usage-reports", "internal_billing_events"
         )
         if are_usage_reports_disabled:

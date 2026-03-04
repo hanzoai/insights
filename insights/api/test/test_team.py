@@ -447,7 +447,7 @@ def team_api_test_factory():
 
         @patch("insights.api.project.delete_project_data_and_notify_task")
         @patch("insights.tasks.tasks.delete_project_data_and_notify_task")
-        @patch("hanzoanalytics.capture")
+        @patch("hanzo_insights.capture")
         def test_delete_team_own_second(
             self,
             mock_capture: MagicMock,
@@ -1768,7 +1768,7 @@ def team_api_test_factory():
             assert response.status_code == expected_status, response.json()
             return response
 
-        @patch("hanzoanalytics.capture_exception")
+        @patch("hanzo_insights.capture_exception")
         def test_access_control_field_deprecated_on_update(self, mock_capture_exception):
             """Test that access_control field is deprecated and cannot be used when updating a team."""
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -1791,7 +1791,7 @@ def team_api_test_factory():
             self.assertEqual(call_args[1]["properties"]["value"], "False")
             self.assertEqual(call_args[1]["properties"]["user_id"], self.user.id)
 
-        @patch("hanzoanalytics.capture_exception")
+        @patch("hanzo_insights.capture_exception")
         def test_access_control_field_deprecated_on_partial_update(self, mock_capture_exception):
             """Test that access_control field is deprecated and cannot be used when partially updating a team."""
             self.organization_membership.level = OrganizationMembership.Level.ADMIN
@@ -1814,7 +1814,7 @@ def team_api_test_factory():
             self.assertEqual(call_args[1]["properties"]["value"], "True")
             self.assertEqual(call_args[1]["properties"]["user_id"], self.user.id)
 
-        @patch("hanzoanalytics.capture_exception")
+        @patch("hanzo_insights.capture_exception")
         def test_access_control_field_deprecated_with_other_valid_fields(self, mock_capture_exception):
             """Test that access_control field is deprecated even when other valid fields are provided."""
             self.organization_membership.level = OrganizationMembership.Level.ADMIN

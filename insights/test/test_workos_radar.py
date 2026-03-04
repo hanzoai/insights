@@ -146,7 +146,7 @@ class TestRadarApiCall(TestCase):
 
 
 class TestRadarEventLogging(TestCase):
-    @patch("insights.workos_radar.hanzoanalytics.capture")
+    @patch("insights.workos_radar.hanzo_insights.capture")
     def test_log_radar_event_captures_insights_event(self, mock_capture):
         _log_radar_event(
             email="test@example.com",
@@ -171,7 +171,7 @@ class TestRadarEventLogging(TestCase):
         assert props["would_block"] is False
         assert props["radar_api_duration_ms"] == 123.45
 
-    @patch("insights.workos_radar.hanzoanalytics.capture")
+    @patch("insights.workos_radar.hanzo_insights.capture")
     def test_log_radar_event_with_challenge_verdict(self, mock_capture):
         _log_radar_event(
             email="test@example.com",
@@ -191,7 +191,7 @@ class TestRadarEventLogging(TestCase):
         assert props["would_challenge"] is True
         assert props["would_block"] is False
 
-    @patch("insights.workos_radar.hanzoanalytics.capture")
+    @patch("insights.workos_radar.hanzo_insights.capture")
     def test_log_radar_event_with_block_verdict(self, mock_capture):
         _log_radar_event(
             email="test@example.com",
