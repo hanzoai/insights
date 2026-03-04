@@ -41,7 +41,7 @@ describe('insightsFunctionHclExporter test', () => {
                 description: 'A test custom function',
                 type: 'internal_destination',
                 enabled: true,
-                hog: 'print("Hello World")',
+                iql: 'print("Hello World")',
                 inputs: { channel: { value: '#general' } },
                 filters: {
                     events: [{ id: '$insight_alert_firing', type: 'events' }],
@@ -58,7 +58,7 @@ describe('insightsFunctionHclExporter test', () => {
             expect(hcl).toContain('description = "A test custom function"')
             expect(hcl).toContain('type = "internal_destination"')
             expect(hcl).toContain('enabled = true')
-            expect(hcl).toContain('hog = "print(\\"Hello World\\")"')
+            expect(hcl).toContain('iql = "print(\\"Hello World\\")"')
             expect(hcl).toContain('icon_url = "https://example.com/icon.png"')
 
             expect(hcl).toContain(`inputs_json = jsonencode({
@@ -371,14 +371,14 @@ describe('insightsFunctionHclExporter test', () => {
             it('preserves other fields like secret and templating', () => {
                 const inputs: Record<string, CyclotronJobInputType> = {
                     api_key: { value: 'secret', secret: true, bytecode: ['_H'], order: 0 },
-                    template: { value: '{event.name}', templating: 'hog', bytecode: ['_H', 2], order: 1 },
+                    template: { value: '{event.name}', templating: 'iql', bytecode: ['_H', 2], order: 1 },
                 }
 
                 const result = stripInputsServerFields(inputs)
 
                 expect(result).toEqual({
                     api_key: { value: 'secret', secret: true },
-                    template: { value: '{event.name}', templating: 'hog' },
+                    template: { value: '{event.name}', templating: 'iql' },
                 })
             })
 

@@ -14,16 +14,16 @@
     explicit NAME(const char* message);                                  \
   };
 
-ERROR_CLASS_DEFINITION(HogQLError, std::runtime_error)
+ERROR_CLASS_DEFINITION(InsightsQLError, std::runtime_error)
 
-// The input does not conform to HogQL syntax.
-ERROR_CLASS_DEFINITION(SyntaxError, HogQLError)
+// The input does not conform to InsightsQL syntax.
+ERROR_CLASS_DEFINITION(SyntaxError, InsightsQLError)
 
-// This feature isn't implemented in HogQL (yet).
-ERROR_CLASS_DEFINITION(NotImplementedError, HogQLError)
+// This feature isn't implemented in InsightsQL (yet).
+ERROR_CLASS_DEFINITION(NotImplementedError, InsightsQLError)
 
 // An internal problem in the parser layer.
-ERROR_CLASS_DEFINITION(ParsingError, HogQLError)
+ERROR_CLASS_DEFINITION(ParsingError, InsightsQLError)
 
 // Python runtime errored out somewhere - this means we must use the error it's already raised.
 class PyInternalError : public std::exception {

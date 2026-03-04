@@ -23,7 +23,7 @@ export function InsightsFlowEditorPanelMetrics(): JSX.Element | null {
         return actionId ? ([TRIGGER_NODE_ID, EXIT_NODE_ID].includes(actionId) ? '' : actionId) : undefined
     }, [actionId])
 
-    const logicKey = `hog-flow-metrics-${workflow.id}`
+    const logicKey = `fn-flow-metrics-${workflow.id}`
 
     const metricName = useMemo(() => {
         return actionId === TRIGGER_NODE_ID
