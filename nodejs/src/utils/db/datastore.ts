@@ -1,4 +1,5 @@
-import { ClickHouseClient as DatastoreNativeClient, createClient as createDatastoreNativeClient } from '@clickhouse/client'
+import { DatastoreNativeClient, createDatastoreNativeClient } from './datastore-client'
+export type { DatastoreNativeClient } from './datastore-client'
 
 import { withSpan } from '~/common/tracing/tracing-utils'
 
