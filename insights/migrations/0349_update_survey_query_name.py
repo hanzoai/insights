@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0348_alter_datawarehousetable_format"),
+        ("insights", "0348_alter_datawarehousetable_format"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="surveys_linked_flag",
                 related_query_name="survey_linked_flag",
-                to="posthog.featureflag",
+                to="insights.featureflag",
             ),
         ),
         migrations.AlterField(
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="surveys_targeting_flag",
                 related_query_name="survey_targeting_flag",
-                to="posthog.featureflag",
+                to="insights.featureflag",
             ),
         ),
     ]

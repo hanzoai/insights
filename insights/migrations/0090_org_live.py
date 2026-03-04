@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0089_auto_20201015_1031"),
+        ("insights", "0089_auto_20201015_1031"),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="personal_api_keys+",
-                to="posthog.Team",
+                to="insights.Team",
             ),
         ),
         migrations.AlterField(

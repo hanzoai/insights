@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0391_alter_batchexportbackfill_status_and_more"),
+        ("insights", "0391_alter_batchexportbackfill_status_and_more"),
     ]
 
     operations = [

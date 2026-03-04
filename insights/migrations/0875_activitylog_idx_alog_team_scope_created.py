@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0874_activitylog_idx_alog_org_created_at_and_more"),
+        ("insights", "0874_activitylog_idx_alog_org_created_at_and_more"),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql=[
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_team_scope_created ON posthog_activitylog (team_id, scope, created_at DESC) WHERE (NOT was_impersonated) AND (NOT is_system);"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_team_scope_created ON insights_activitylog (team_id, scope, created_at DESC) WHERE (NOT was_impersonated) AND (NOT is_system);"
                     ],
                     reverse_sql=["DROP INDEX CONCURRENTLY IF EXISTS idx_alog_team_scope_created;"],
                 ),
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql=[
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_team_act_scope_usr ON posthog_activitylog (team_id, activity, scope, user_id) WHERE (NOT was_impersonated) AND (NOT is_system);"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_team_act_scope_usr ON insights_activitylog (team_id, activity, scope, user_id) WHERE (NOT was_impersonated) AND (NOT is_system);"
                     ],
                     reverse_sql=["DROP INDEX CONCURRENTLY IF EXISTS idx_alog_team_act_scope_usr;"],
                 ),

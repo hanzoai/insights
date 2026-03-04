@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0901_add_object_property_type"),
+        ("insights", "0901_add_object_property_type"),
     ]
 
     operations = [
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 (
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
             model_name="userhomesettings",
             constraint=models.UniqueConstraint(
                 fields=("team", "user"),
-                name="posthog_unique_user_home_settings",
+                name="insights_unique_user_home_settings",
             ),
         ),
     ]

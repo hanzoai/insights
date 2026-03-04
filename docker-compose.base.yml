@@ -112,11 +112,11 @@ services:
         image: ghcr.io/hanzoai/sql:latest
         restart: on-failure
         environment:
-            POSTGRES_USER: posthog
-            POSTGRES_DB: posthog
-            POSTGRES_PASSWORD: posthog
+            POSTGRES_USER: insights
+            POSTGRES_DB: insights
+            POSTGRES_PASSWORD: insights
         healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U posthog']
+            test: ['CMD-SHELL', 'pg_isready -U insights']
             interval: 5s
             timeout: 30s
         volumes:
@@ -195,7 +195,7 @@ services:
             MINIO_ROOT_USER: object_storage_root_user
             MINIO_ROOT_PASSWORD: object_storage_root_password
         entrypoint: sh
-        command: -c 'mkdir -p /data/posthog /data/ducklake-dev /data/ai-blobs && minio server --address ":19000" --console-address ":19001" /data' # create the 'posthog', 'ducklake-dev', and 'ai-blobs' buckets before starting the service
+        command: -c 'mkdir -p /data/insights /data/ducklake-dev /data/ai-blobs && minio server --address ":19000" --console-address ":19001" /data' # create the 'posthog', 'ducklake-dev', and 'ai-blobs' buckets before starting the service
 
     objectstorage-azure:
         image: mcr.microsoft.com/azure-storage/azurite:3.35.0
@@ -229,9 +229,9 @@ services:
             OTEL_SDK_DISABLED: 'true'
             DISABLE_SECURE_SSL_REDIRECT: 'true'
             IS_BEHIND_PROXY: 'true'
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
             DATASTORE_HOST: 'datastore'
-            DATASTORE_DATABASE: 'posthog'
+            DATASTORE_DATABASE: 'insights'
             DATASTORE_SECURE: 'false'
             DATASTORE_VERIFY: 'false'
             DATASTORE_API_USER: 'api'
@@ -242,8 +242,8 @@ services:
             KAFKA_HOSTS: 'kafka'
             REDIS_URL: 'redis://kv:6379/'
             PGHOST: db
-            PGUSER: posthog
-            PGPASSWORD: posthog
+            PGUSER: insights
+            PGPASSWORD: insights
             DEPLOYMENT: hobby
             CDP_API_URL: 'http://plugins:6738'
             FLAGS_REDIS_ENABLED: false
@@ -331,7 +331,7 @@ services:
                 BIN: property-defs-rs
         restart: on-failure
         environment:
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
             KAFKA_HOSTS: 'kafka:9092'
             SKIP_WRITES: 'false'
             SKIP_READS: 'false'
@@ -353,10 +353,10 @@ services:
         volumes:
             - ./share:/share
         environment:
-            WRITE_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            READ_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            PERSONS_WRITE_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            PERSONS_READ_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            WRITE_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            READ_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            PERSONS_WRITE_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            PERSONS_READ_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
             MAXMIND_DB_PATH: '/share/GeoLite2-City.mmdb'
             # Shared Redis for non-critical path (analytics, billing, cookieless)
             REDIS_URL: 'redis://kv:6379/'
@@ -378,13 +378,13 @@ services:
         command: node nodejs/dist/index.js
         restart: on-failure
         environment:
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            PERSONS_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
-            BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://posthog:posthog@db:5432/posthog'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            PERSONS_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
+            BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://insights:insights@db:5432/insights'
             KAFKA_HOSTS: 'kafka:9092'
             REDIS_URL: 'redis://kv:6379/'
             DATASTORE_HOST: 'datastore'
-            DATASTORE_DATABASE: 'posthog'
+            DATASTORE_DATABASE: 'insights'
             DATASTORE_SECURE: 'false'
             DATASTORE_VERIFY: 'false'
             COOKIELESS_REDIS_HOST: kv
@@ -446,7 +446,7 @@ services:
         environment:
             - DB=postgresql
             - DB_PORT=5432
-            - POSTGRES_USER=posthog
+            - POSTGRES_USER=insights
             - POSTGRES_PWD=posthog
             - POSTGRES_SEEDS=db
             - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
@@ -498,7 +498,7 @@ services:
                 BIN: cyclotron-janitor
         restart: on-failure
         environment:
-            DATABASE_URL: 'postgres://posthog:posthog@db:5432/cyclotron'
+            DATABASE_URL: 'postgres://insights:insights@db:5432/cyclotron'
             KAFKA_HOSTS: 'kafka:9092'
             KAFKA_TOPIC: 'datastore_app_metrics2'
         depends_on:

@@ -28,7 +28,7 @@ class HostDefinition(UUIDTModel):
     last_seen_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        db_table = "posthog_hostdefinition"
+        db_table = "insights_hostdefinition"
         indexes = [
             models.Index(fields=["project", "host"], name="hostdefinition_project_idx"),
             models.Index(fields=["team", "host"], name="hostdefinition_team_idx"),

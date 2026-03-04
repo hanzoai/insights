@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0502_team_session_recording_url_blocklist_config"),
+        ("insights", "0502_team_session_recording_url_blocklist_config"),
     ]
 
     operations = [
@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                         null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
         migrations.CreateModel(
@@ -37,10 +37,10 @@ class Migration(migrations.Migration):
                 ("metadata", models.JSONField(default=dict)),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("experiment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.experiment")),
+                ("experiment", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.experiment")),
                 (
                     "saved_metric",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.experimentsavedmetric"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.experimentsavedmetric"),
                 ),
             ],
         ),
@@ -50,8 +50,8 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 related_name="experiments",
-                through="posthog.ExperimentToSavedMetric",
-                to="posthog.experimentsavedmetric",
+                through="insights.ExperimentToSavedMetric",
+                to="insights.experimentsavedmetric",
             ),
         ),
     ]

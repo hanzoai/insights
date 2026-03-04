@@ -6,7 +6,7 @@ from django.db import migrations
 # Some funnels accidentally had breakdown values which broke displaying them in the old funnel values
 # Resetting these as from this migration forward we'll have funnels that _do_ support breakdowns
 def remove_breakdowns(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for obj in DashboardItem.objects.filter(filters__insight="FUNNELS", filters__breakdown__isnull=False):
         if obj.filters.get("breakdown"):
             del obj.filters["breakdown"]
@@ -17,7 +17,7 @@ def remove_breakdowns(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0158_new_token_format"),
+        ("insights", "0158_new_token_format"),
     ]
 
     operations = [

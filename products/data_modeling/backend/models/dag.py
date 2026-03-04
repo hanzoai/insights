@@ -10,7 +10,7 @@ class DAG(UUIDModel, CreatedMetaFields, UpdatedMetaFields):
     description = models.TextField(blank=True, default="")
 
     class Meta:
-        db_table = "posthog_datamodelingdag"
+        db_table = "insights_datamodelingdag"
         constraints = [
             models.UniqueConstraint(
                 name="name_unique_within_team",

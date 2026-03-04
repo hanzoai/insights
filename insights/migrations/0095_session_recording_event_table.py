@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0094_description_on_dashboard_items"),
+        ("insights", "0094_description_on_dashboard_items"),
     ]
 
     operations = [
@@ -37,19 +37,19 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.Team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.Team"),
                 ),
             ],
         ),
         migrations.AddIndex(
             model_name="sessionrecordingevent",
-            index=models.Index(fields=["team_id", "session_id"], name="posthog_ses_team_id_265946_idx"),
+            index=models.Index(fields=["team_id", "session_id"], name="insights_ses_team_id_265946_idx"),
         ),
         migrations.AddIndex(
             model_name="sessionrecordingevent",
             index=models.Index(
                 fields=["team_id", "distinct_id", "timestamp", "session_id"],
-                name="posthog_ses_team_id_46392f_idx",
+                name="insights_ses_team_id_46392f_idx",
             ),
         ),
     ]

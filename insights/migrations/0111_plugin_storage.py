@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0110_sessionrecordingeventbyteamandtimestamp"),
+        ("insights", "0110_sessionrecordingeventbyteamandtimestamp"),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                     "plugin_config",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.PluginConfig",
+                        to="insights.PluginConfig",
                     ),
                 ),
             ],
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
             model_name="pluginstorage",
             constraint=models.UniqueConstraint(
                 fields=("plugin_config_id", "key"),
-                name="posthog_unique_plugin_storage_key",
+                name="insights_unique_plugin_storage_key",
             ),
         ),
     ]

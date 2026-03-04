@@ -64,7 +64,7 @@ const PLACEHOLDER_OPTIONS = [
 
 const PLACEHOLDER_CYCLE_INTERVAL = 3000
 
-const ASK_AI_ITEM_ID = '__ask_posthog_ai__'
+const ASK_AI_ITEM_ID = '__ask_insights_ai__'
 
 // ============================================================================
 // Hooks

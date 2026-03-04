@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0485_alter_datawarehousesavedquery_status"),
+        ("insights", "0485_alter_datawarehousesavedquery_status"),
     ]
 
     operations = [

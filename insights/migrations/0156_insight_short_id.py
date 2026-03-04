@@ -6,19 +6,19 @@ import insights.models.insight
 
 
 def create_short_ids(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for obj in DashboardItem.objects.all():
         obj.short_id = insights.utils.generate_short_id()
         obj.save()
 
 
 class Migration(migrations.Migration):
-    # This avoids: "cannot ALTER TABLE "posthog_dashboarditem" because it has pending trigger events"
+    # This avoids: "cannot ALTER TABLE "insights_dashboarditem" because it has pending trigger events"
     # Basically, we can't alter a table and change its data inside one transaction
     atomic = False
 
     dependencies = [
-        ("posthog", "0155_organization_available_features"),
+        ("insights", "0155_organization_available_features"),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0408_team_modifiers"),
+        ("insights", "0408_team_modifiers"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             model_name="actionstep",
             name="action",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, related_name="action_steps", to="posthog.action"
+                on_delete=django.db.models.deletion.CASCADE, related_name="action_steps", to="insights.action"
             ),
         ),
     ]

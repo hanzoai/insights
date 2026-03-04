@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0774_batchimport_display_status_message"),
+        ("insights", "0774_batchimport_display_status_message"),
     ]
 
     operations = [

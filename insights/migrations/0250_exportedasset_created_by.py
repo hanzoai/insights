@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0249_add_sharingconfiguration"),
+        ("insights", "0249_add_sharingconfiguration"),
     ]
 
     operations = [

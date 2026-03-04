@@ -14,12 +14,12 @@ EMBEDDING_MODEL_TOKEN_LIMIT = 8192
 
 class AgentMemory(UUIDModel):
     team = models.ForeignKey(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         related_name="agent_memories",
     )
     user = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -52,7 +52,7 @@ class AgentMemory(UUIDModel):
         return emit_embedding_request(
             content=self.contents,
             team_id=self.team_id,
-            product="posthog-ai",
+            product="insights-ai",
             document_type="memory",
             rendering="plaintext",
             document_id=str(self.id),

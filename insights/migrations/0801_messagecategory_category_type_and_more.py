@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0800_add_sharing_token_rotation_fields"),
+        ("insights", "0800_add_sharing_token_rotation_fields"),
     ]
 
     operations = [
@@ -28,17 +28,17 @@ class Migration(migrations.Migration):
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.messagecategory",
+                        to="insights.messagecategory",
                     ),
                 ),
             ],
             state_operations=[
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_messagetemplate_message_category_id_3a1fda4d" ON "posthog_messagetemplate" ("message_category_id");
+                    CREATE INDEX CONCURRENTLY "insights_messagetemplate_message_category_id_3a1fda4d" ON "insights_messagetemplate" ("message_category_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_messagetemplate_message_category_id_3a1fda4d";
+                        DROP INDEX IF EXISTS "insights_messagetemplate_message_category_id_3a1fda4d";
                     """,
                 ),
             ],

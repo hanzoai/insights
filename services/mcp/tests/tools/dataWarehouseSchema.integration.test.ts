@@ -10,7 +10,7 @@ import {
     setActiveProjectAndOrg,
     validateEnvironmentVariables,
 } from '@/shared/test-utils'
-import readDataWarehouseSchemaTool from '@/tools/posthogAiTools/readDataWarehouseSchema'
+import readDataWarehouseSchemaTool from '@/tools/insightsAiTools/readDataWarehouseSchema'
 import type { Context } from '@/tools/types'
 
 describe('read-data-warehouse-schema', { concurrent: false }, () => {

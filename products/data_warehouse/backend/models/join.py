@@ -18,7 +18,7 @@ from products.data_warehouse.backend.models.datawarehouse_saved_query import Dat
 
 class DataWarehouseViewLink(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
     class Meta:
-        db_table = "posthog_datawarehouseviewlink"
+        db_table = "insights_datawarehouseviewlink"
 
     """Deprecated model, use DataWarehouseJoin instead"""
 
@@ -32,7 +32,7 @@ class DataWarehouseViewLink(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         warn("DataWarehouseViewLink is deprecated, use DataWarehouseJoin", DeprecationWarning, stacklevel=2)
         super().__init__(*args, **kwargs)
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     table = models.CharField(max_length=128)
     from_join_key = models.CharField(max_length=400)
     saved_query = models.ForeignKey(DataWarehouseSavedQuery, on_delete=models.CASCADE)
@@ -40,7 +40,7 @@ class DataWarehouseViewLink(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
 
 class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     source_table_name = models.CharField(max_length=400)
     source_table_key = models.CharField(max_length=400)
     joining_table_name = models.CharField(max_length=400)
@@ -49,7 +49,7 @@ class DataWarehouseJoin(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
     configuration = models.JSONField(default=dict, null=True)
 
     class Meta:
-        db_table = "posthog_datawarehousejoin"
+        db_table = "insights_datawarehousejoin"
 
     @property
     def joining_table_name_chain(self) -> list[str | int]:

@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0386_add_session_replay_config_to_team"),
+        ("insights", "0386_add_session_replay_config_to_team"),
     ]
 
     operations = [

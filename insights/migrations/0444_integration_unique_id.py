@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0443_externaldatajob_workflow_run_id"),
+        ("insights", "0443_externaldatajob_workflow_run_id"),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 migrations.AddConstraint(
                     model_name="integration",
                     constraint=models.UniqueConstraint(
-                        fields=("team", "kind", "integration_id"), name="posthog_integration_kind_id_unique"
+                        fields=("team", "kind", "integration_id"), name="insights_integration_kind_id_unique"
                     ),
                 ),
             ],
@@ -32,12 +32,12 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_integration" ADD COLUMN "integration_id" text NULL;
-                    ALTER TABLE "posthog_integration" ADD CONSTRAINT "posthog_integration_kind_id_unique" UNIQUE ("team_id", "kind", "integration_id"); -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_integration" ADD COLUMN "integration_id" text NULL;
+                    ALTER TABLE "insights_integration" ADD CONSTRAINT "insights_integration_kind_id_unique" UNIQUE ("team_id", "kind", "integration_id"); -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_integration" DROP COLUMN IF EXISTS "integration_id";
-                        ALTER TABLE "posthog_integration" DROP CONSTRAINT IF EXISTS "posthog_integration_kind_id_unique"; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_integration" DROP COLUMN IF EXISTS "integration_id";
+                        ALTER TABLE "insights_integration" DROP CONSTRAINT IF EXISTS "insights_integration_kind_id_unique"; -- existing-table-constraint-ignore
                     """,
                 ),
             ],

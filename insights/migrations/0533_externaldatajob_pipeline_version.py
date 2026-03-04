@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0532_taxonomy_unique_on_project"),
+        ("insights", "0532_taxonomy_unique_on_project"),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-                UPDATE posthog_externaldatajob
+                UPDATE insights_externaldatajob
                 SET pipeline_version = 'v1-dlt-sync'
                 WHERE pipeline_version is null
             """,

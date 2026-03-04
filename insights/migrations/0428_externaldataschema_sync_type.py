@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0427_customfunction_icon_url_customfunction_template_id"),
+        ("insights", "0427_customfunction_icon_url_customfunction_template_id"),
     ]
 
     operations = [
@@ -21,9 +21,9 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-        UPDATE posthog_externaldataschema AS schema
+        UPDATE insights_externaldataschema AS schema
         SET sync_type = 'incremental'
-        FROM posthog_externaldatasource AS source
+        FROM insights_externaldatasource AS source
         WHERE schema.source_id = source.id AND source.source_type = 'Stripe' AND schema.name = 'Invoice'
             """,
             reverse_sql=migrations.RunSQL.noop,

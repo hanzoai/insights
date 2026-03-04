@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0411_eventproperty_indexes"),
+        ("insights", "0411_eventproperty_indexes"),
     ]
 
     operations = [
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="proxy_records",
-                        to="posthog.organization",
+                        to="insights.organization",
                     ),
                 ),
             ],

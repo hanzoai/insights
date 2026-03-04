@@ -8,7 +8,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0266_add_is_system_field_to_activity_log"),
+        ("insights", "0266_add_is_system_field_to_activity_log"),
     ]
 
     operations = [
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="dashboard_tiles",
-                to="posthog.insight",
+                to="insights.insight",
             ),
         ),
         migrations.AddField(
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="text",
             name="team",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
         ),
         migrations.AddField(
             model_name="dashboardtile",
@@ -75,7 +75,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="dashboard_tiles",
-                to="posthog.text",
+                to="insights.text",
             ),
         ),
         # dashboard insight pair must be unique if insight is present

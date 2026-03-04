@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0224_saml_multitenant"),
+        ("insights", "0224_saml_multitenant"),
     ]
 
     operations = [
@@ -28,12 +28,12 @@ class Migration(migrations.Migration):
                     "insight",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.insight",
+                        to="insights.insight",
                     ),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
                 (
                     "user",
@@ -48,11 +48,11 @@ class Migration(migrations.Migration):
             model_name="insightviewed",
             index=models.Index(
                 fields=["team_id", "user_id", "-last_viewed_at"],
-                name="posthog_ins_team_id_339ee0_idx",
+                name="insights_ins_team_id_339ee0_idx",
             ),
         ),
         migrations.AddConstraint(
             model_name="insightviewed",
-            constraint=models.UniqueConstraint(fields=("team", "user", "insight"), name="posthog_unique_insightviewed"),
+            constraint=models.UniqueConstraint(fields=("team", "user", "insight"), name="insights_unique_insightviewed"),
         ),
     ]

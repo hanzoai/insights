@@ -6,7 +6,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0097_invite_emails"),
+        ("insights", "0097_invite_emails"),
     ]
 
     operations = [

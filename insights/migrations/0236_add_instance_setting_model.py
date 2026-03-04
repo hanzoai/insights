@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def populate_instance_settings(apps, schema_editor):
     try:
-        InstanceSetting = apps.get_model("posthog", "InstanceSetting")
+        InstanceSetting = apps.get_model("insights", "InstanceSetting")
         with connection.cursor() as cursor:
             cursor.execute("SELECT key, value FROM constance_config")
             for key, pickled_value in cursor.fetchall():
@@ -20,14 +20,14 @@ def populate_instance_settings(apps, schema_editor):
                 value = pickle.loads(b64decode(pickled_value.encode())) if pickled_value is not None else None
                 InstanceSetting.objects.create(key=key, raw_value=json.dumps(value))
     except utils.ProgrammingError:
-        logger.info("constance_config table did not exist, skipping populating posthog_instance_setting table")
+        logger.info("constance_config table did not exist, skipping populating insights_instance_setting table")
 
 
 class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0235_plugin_source_transpilation"),
+        ("insights", "0235_plugin_source_transpilation"),
     ]
 
     operations = [

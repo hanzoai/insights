@@ -6,13 +6,13 @@ from django.db import migrations
 # check out 0415_pluginconfig_match_action for a similar migration in non-blocking way
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("posthog", "0739_teamrevenueanalyticsconfig__goals")]
+    dependencies = [("insights", "0739_teamrevenueanalyticsconfig__goals")]
 
     operations = [
         migrations.RunSQL(
             sql=(
-                "CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_dashboarditem_query_gin ON posthog_dashboarditem USING GIN (query jsonb_ops);"
+                "CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_dashboarditem_query_gin ON insights_dashboarditem USING GIN (query jsonb_ops);"
             ),
-            reverse_sql=("DROP INDEX CONCURRENTLY IF EXISTS posthog_dashboarditem_query_gin;"),
+            reverse_sql=("DROP INDEX CONCURRENTLY IF EXISTS insights_dashboarditem_query_gin;"),
         ),
     ]

@@ -44,7 +44,7 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
 
     const handleTicketCreated = useCallback(
         (ticketId: string): void => {
-            posthog.capture('posthog_ai_support_ticket_created', {
+            posthog.capture('insights_ai_support_ticket_created', {
                 $ai_conversation_id: conversationId,
                 $ai_session_id: conversationId,
                 $ai_trace_id: traceId,
@@ -84,7 +84,7 @@ export function TicketPrompt({ conversationId, traceId, summary, initialText }: 
             target_area: 'max-ai',
             severity_level: 'low',
             message: messageContent,
-            tags: ['raised_from_posthog_ai_chat'],
+            tags: ['raised_from_insights_ai_chat'],
         })
         setIsSupportModalOpen(true)
     }

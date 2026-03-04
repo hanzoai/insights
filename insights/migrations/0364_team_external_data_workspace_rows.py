@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0363_add_replay_payload_capture_config"),
+        ("insights", "0363_add_replay_payload_capture_config"),
     ]
 
     operations = [

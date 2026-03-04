@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def update_stickiness(apps, schema_editor):
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for dash in DashboardItem.objects.filter(filters__insight="TRENDS", filters__shown_as="Stickiness"):
         dash.filters["insight"] = "STICKINESS"
         dash.save()
@@ -12,7 +12,7 @@ def update_stickiness(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0146_eventproperty_sync"),
+        ("insights", "0146_eventproperty_sync"),
     ]
 
     operations = [
