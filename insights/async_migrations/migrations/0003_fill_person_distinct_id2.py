@@ -33,9 +33,9 @@ class Migration(AsyncMigrationDefinition):
 
     depends_on = "0002_events_sample_by"
 
-    posthog_min_version = "1.33.0"
+    insights_min_version = "1.33.0"
     # After releasing this version we can remove code related to `person_distinct_id` table
-    posthog_max_version = "1.33.9"
+    insights_max_version = "1.33.9"
 
     def is_required(self):
         rows = sync_execute(

@@ -35,7 +35,7 @@ class ExpectedView:
 
 
 class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     kind = models.CharField(max_length=64, choices=DataWarehouseManagedViewSetKind.choices)
 
     class Meta:
@@ -45,7 +45,7 @@ class DataWarehouseManagedViewSet(CreatedMetaFields, UpdatedMetaFields, UUIDTMod
                 name="datawarehouse_unique_managed_viewset_team_kind",
             )
         ]
-        db_table = "posthog_datawarehousemanagedviewset"
+        db_table = "insights_datawarehousemanagedviewset"
 
     class UnsupportedViewsetKind(ValueError):
         kind: DataWarehouseManagedViewSetKind

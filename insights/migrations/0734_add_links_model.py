@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0733_file_system_shortcut"),
+        ("insights", "0733_file_system_shortcut"),
     ]
 
     operations = [
@@ -47,14 +47,14 @@ class Migration(migrations.Migration):
                     models.ForeignKey(
                         help_text="Team that owns this link",
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["short_link_domain", "short_code"], name="posthog_lin_short_l_33b439_idx"),
-                    models.Index(fields=["team_id"], name="posthog_lin_team_id_d47d3a_idx"),
+                    models.Index(fields=["short_link_domain", "short_code"], name="insights_lin_short_l_33b439_idx"),
+                    models.Index(fields=["team_id"], name="insights_lin_team_id_d47d3a_idx"),
                 ],
             },
         ),

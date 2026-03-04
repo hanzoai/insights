@@ -10,7 +10,7 @@ If users ran the old version of this, they will be ok to run 0002, if not, they 
 class Migration(AsyncMigrationDefinition):
     description = "Test migration"
 
-    posthog_max_version = "1.33.9"
+    insights_max_version = "1.33.9"
 
     operations: list[AsyncMigrationOperation] = []
 

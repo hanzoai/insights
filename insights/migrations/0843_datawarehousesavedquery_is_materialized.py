@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0842_alter_externaldatasourcerevenueanalyticsconfig_external_data_source"),
+        ("insights", "0842_alter_externaldatasourcerevenueanalyticsconfig_external_data_source"),
     ]
 
     operations = [
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             """
-            UPDATE posthog_datawarehousesavedquery
+            UPDATE insights_datawarehousesavedquery
             SET is_materialized = CASE
                 WHEN table_id is not null and (status is not null or last_run_at is not null) THEN true
                 ELSE false

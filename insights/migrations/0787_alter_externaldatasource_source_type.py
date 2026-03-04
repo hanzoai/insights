@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0786_add_is_emoji_to_annotation"),
+        ("insights", "0786_add_is_emoji_to_annotation"),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0839_alter_integration_kind"),
+        ("insights", "0839_alter_integration_kind"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         primary_key=True,
                         serialize=False,
-                        to="posthog.externaldatasource",
+                        to="insights.externaldatasource",
                     ),
                 ),
                 ("enabled", models.BooleanField(default=True)),
@@ -30,13 +30,13 @@ class Migration(migrations.Migration):
         # so let's set it manually.
         migrations.RunSQL(
             """
-            ALTER TABLE posthog_externaldatasourcerevenueanalyticsconfig ALTER COLUMN enabled SET DEFAULT true;
+            ALTER TABLE insights_externaldatasourcerevenueanalyticsconfig ALTER COLUMN enabled SET DEFAULT true;
             """.strip(),
             reverse_sql=migrations.RunSQL.noop,
         ),
         migrations.RunSQL(
             """
-            ALTER TABLE posthog_externaldatasourcerevenueanalyticsconfig ALTER COLUMN include_invoiceless_charges SET DEFAULT true;
+            ALTER TABLE insights_externaldatasourcerevenueanalyticsconfig ALTER COLUMN include_invoiceless_charges SET DEFAULT true;
             """.strip(),
             reverse_sql=migrations.RunSQL.noop,
         ),

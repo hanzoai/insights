@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0392_alter_exportedasset_export_format"),
+        ("insights", "0392_alter_exportedasset_export_format"),
     ]
 
     operations = [
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                 ("deleted", models.BooleanField(blank=True, null=True)),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
                 ("source_table_name", models.CharField(max_length=400)),
                 ("joining_table_name", models.CharField(max_length=400)),

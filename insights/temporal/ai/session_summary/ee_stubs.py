@@ -178,7 +178,7 @@ class SessionGroupSummary(models.Model):
     extra_summary_context = models.JSONField(default=dict, null=True)
     run_metadata = models.JSONField(default=dict, null=True)
     created_by = models.ForeignKey(
-        "posthog.User", on_delete=models.SET_NULL, null=True, blank=True
+        "insights.User", on_delete=models.SET_NULL, null=True, blank=True
     )
 
     class Meta:

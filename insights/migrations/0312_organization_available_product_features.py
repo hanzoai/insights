@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0311_dashboard_template_scope"),
+        ("insights", "0311_dashboard_template_scope"),
     ]
 
     operations = [

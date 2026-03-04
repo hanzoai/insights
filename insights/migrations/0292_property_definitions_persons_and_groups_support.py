@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0291_create_person_override_model"),
+        ("insights", "0291_create_person_override_model"),
     ]
 
     operations = [
@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
             field=models.PositiveSmallIntegerField(null=True),
         ),
         migrations.RunSQL(
-            'ALTER TABLE "posthog_propertydefinition" ADD COLUMN "type" smallint DEFAULT 1 NOT NULL CHECK ("type" >= 0) -- not-null-ignore',
-            'ALTER TABLE "posthog_propertydefinition" DROP COLUMN "type"',
+            'ALTER TABLE "insights_propertydefinition" ADD COLUMN "type" smallint DEFAULT 1 NOT NULL CHECK ("type" >= 0) -- not-null-ignore',
+            'ALTER TABLE "insights_propertydefinition" DROP COLUMN "type"',
             state_operations=[
                 migrations.AddField(
                     model_name="propertydefinition",
@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
             constraint=insights.models.utils.UniqueConstraintByExpression(
                 concurrently=True,
                 expression="(team_id, name, type, coalesce(group_type_index, -1))",
-                name="posthog_propertydefinition_uniq",
+                name="insights_propertydefinition_uniq",
             ),
         ),
     ]

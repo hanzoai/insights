@@ -7,14 +7,14 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0285_capture_performance_opt_in"),
+        ("insights", "0285_capture_performance_opt_in"),
     ]
 
     operations = [
         migrations.RunSQL(
             sql="""
             -- not-null-ignore
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_insightcachingstate_lookup ON posthog_insightcachingstate (
+            CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_insightcachingstate_lookup ON insights_insightcachingstate (
                 last_refresh DESC NULLS LAST,
                 last_refresh_queued_at DESC NULLS LAST,
                 target_cache_age_seconds,
@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
             )
             WHERE (target_cache_age_seconds IS NOT NULL) AND (refresh_attempt < 2)
             """,
-            reverse_sql='DROP INDEX CONCURRENTLY IF EXISTS "posthog_insightcachingstate_lookup"',
+            reverse_sql='DROP INDEX CONCURRENTLY IF EXISTS "insights_insightcachingstate_lookup"',
         )
     ]

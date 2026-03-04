@@ -8,12 +8,12 @@ from insights.sync import database_sync_to_async
 class DataWarehouseCredential(CreatedMetaFields, UUIDTModel):
     access_key = EncryptedTextField(max_length=500)
     access_secret = EncryptedTextField(max_length=500)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     __repr__ = sane_repr("access_key")
 
     class Meta:
-        db_table = "posthog_datawarehousecredential"
+        db_table = "insights_datawarehousecredential"
 
 
 @database_sync_to_async

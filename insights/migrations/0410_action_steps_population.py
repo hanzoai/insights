@@ -41,7 +41,7 @@ def copy_action_steps_to_json(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0409_action_steps_json_alter_actionstep_action"),
+        ("insights", "0409_action_steps_json_alter_actionstep_action"),
     ]
 
     operations = [

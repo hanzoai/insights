@@ -39,7 +39,7 @@ class ExternalDataSource(ModelActivityMixin, CreatedMetaFields, UpdatedMetaField
     source_id = models.CharField(max_length=400)
     connection_id = models.CharField(max_length=400)
     destination_id = models.CharField(max_length=400, null=True, blank=True)
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
 
     # Deprecated, use `ExternalDataSchema.sync_frequency_interval`
     sync_frequency = models.CharField(
@@ -62,7 +62,7 @@ class ExternalDataSource(ModelActivityMixin, CreatedMetaFields, UpdatedMetaField
     __repr__ = sane_repr("id", "source_id", "connection_id", "destination_id", "team_id")
 
     class Meta:
-        db_table = "posthog_externaldatasource"
+        db_table = "insights_externaldatasource"
 
     @property
     def revenue_analytics_config_safe(self):

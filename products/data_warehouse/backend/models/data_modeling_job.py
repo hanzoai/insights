@@ -11,7 +11,7 @@ class DataModelingJob(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
         FAILED = "Failed", "Failed"
         CANCELLED = "Cancelled", "Cancelled"
 
-    team = models.ForeignKey("posthog.Team", on_delete=models.SET_NULL, null=True)
+    team = models.ForeignKey("insights.Team", on_delete=models.SET_NULL, null=True)
     saved_query = models.ForeignKey("data_warehouse.DataWarehouseSavedQuery", on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=400, choices=Status.choices, default=Status.RUNNING)
     rows_materialized = models.IntegerField(default=0)
@@ -23,4 +23,4 @@ class DataModelingJob(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
     storage_delta_mib = models.FloatField(null=True, blank=True, default=0)
 
     class Meta:
-        db_table = "posthog_datamodelingjob"
+        db_table = "insights_datamodelingjob"

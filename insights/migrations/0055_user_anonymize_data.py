@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0054_dashboard_item_color"),
+        ("insights", "0054_dashboard_item_color"),
     ]
 
     operations = [

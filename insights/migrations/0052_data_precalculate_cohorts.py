@@ -16,7 +16,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0051_precalculate_cohorts"),
+        ("insights", "0051_precalculate_cohorts"),
     ]
 
     operations = [migrations.RunPython(migrate_calculate_cohorts, backwards, elidable=True)]

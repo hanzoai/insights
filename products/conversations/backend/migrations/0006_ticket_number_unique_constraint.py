@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
                 CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "unique_ticket_number_per_team"
-                ON "posthog_conversations_ticket" ("team_id", "ticket_number");
+                ON "insights_conversations_ticket" ("team_id", "ticket_number");
             """,
             reverse_sql='DROP INDEX CONCURRENTLY IF EXISTS "unique_ticket_number_per_team";',
         ),

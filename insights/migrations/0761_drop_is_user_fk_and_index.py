@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0760_alter_person_is_user"),
+        ("insights", "0760_alter_person_is_user"),
     ]
 
     operations = [
@@ -18,9 +18,9 @@ class Migration(migrations.Migration):
                 IF EXISTS (
                     SELECT 1
                     FROM pg_constraint
-                    WHERE conname = 'posthog_person_is_user_id_cfc91ae7_fk_posthog_user_id'
+                    WHERE conname = 'insights_person_is_user_id_cfc91ae7_fk_insights_user_id'
                 ) THEN
-                    ALTER TABLE posthog_person DROP CONSTRAINT posthog_person_is_user_id_cfc91ae7_fk_posthog_user_id;
+                    ALTER TABLE insights_person DROP CONSTRAINT insights_person_is_user_id_cfc91ae7_fk_insights_user_id;
                 END IF;
             END$$;
             """,
@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-            DROP INDEX CONCURRENTLY IF EXISTS posthog_person_is_user_id_cfc91ae7;
+            DROP INDEX CONCURRENTLY IF EXISTS insights_person_is_user_id_cfc91ae7;
             """,
             reverse_sql="""
             """,

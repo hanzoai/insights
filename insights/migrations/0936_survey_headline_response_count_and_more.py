@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0935_cohortcalculationhistory_error_code"),
+        ("insights", "0935_cohortcalculationhistory_error_code"),
     ]
 
     operations = [

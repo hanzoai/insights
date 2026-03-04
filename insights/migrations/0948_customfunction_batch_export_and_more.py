@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0947_insightviewed_null_unique_index")]
+    dependencies = [("insights", "0947_insightviewed_null_unique_index")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
                     model_name="customfunction",
                     name="batch_export",
                     field=models.ForeignKey(
-                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.batchexport"
+                        blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.batchexport"
                     ),
                 ),
                 # No-op in database (just Django state for choices validation)
@@ -42,8 +42,8 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                        ALTER TABLE "insights_function" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "insights_function_batch_export_id_d64c3403_fk_posthog_b" REFERENCES "posthog_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                        SET CONSTRAINTS "insights_function_batch_export_id_d64c3403_fk_posthog_b" IMMEDIATE; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_function" ADD COLUMN "batch_export_id" uuid NULL CONSTRAINT "insights_function_batch_export_id_d64c3403_fk_insights_b" REFERENCES "insights_batchexport"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                        SET CONSTRAINTS "insights_function_batch_export_id_d64c3403_fk_insights_b" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
                         ALTER TABLE "insights_function" DROP COLUMN IF EXISTS "batch_export_id";

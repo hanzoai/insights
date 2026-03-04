@@ -6,7 +6,7 @@ from insights.models.personal_api_key import hash_key_value
 
 
 def hash_all_keys(apps, schema_editor):
-    PersonalAPIKey = apps.get_model("posthog", "PersonalAPIKey")
+    PersonalAPIKey = apps.get_model("insights", "PersonalAPIKey")
     updated_instances = PersonalAPIKey.objects.all()
     for instance in updated_instances:
         instance.secure_value = hash_key_value(instance.value)
@@ -16,7 +16,7 @@ def hash_all_keys(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0259_backfill_team_recording_domains"),
+        ("insights", "0259_backfill_team_recording_domains"),
     ]
 
     operations = [

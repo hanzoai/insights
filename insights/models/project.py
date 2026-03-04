@@ -37,7 +37,7 @@ class ProjectManager(models.Manager):
 class Project(models.Model):
     id = models.BigIntegerField(primary_key=True, verbose_name="ID")  # Same as Team.id field
     organization = models.ForeignKey(
-        "posthog.Organization",
+        "insights.Organization",
         on_delete=models.CASCADE,
         related_name="projects",
         related_query_name="project",

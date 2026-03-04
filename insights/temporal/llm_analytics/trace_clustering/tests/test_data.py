@@ -152,7 +152,7 @@ class TestFetchItemEmbeddingsForClustering:
         ]
         mock_execute.return_value = mock_result
 
-        event_filters = [{"key": "ai_product", "value": "posthog_ai", "operator": "exact"}]
+        event_filters = [{"key": "ai_product", "value": "insights_ai", "operator": "exact"}]
 
         item_ids, embeddings_map, batch_run_ids = fetch_item_embeddings_for_clustering(
             team=mock_team,

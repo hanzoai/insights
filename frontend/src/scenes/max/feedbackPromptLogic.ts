@@ -35,7 +35,7 @@ export interface FeedbackConfig {
     cancelThreshold: number
 }
 
-const STORAGE_KEY = 'posthog_ai_feedback_last_shown'
+const STORAGE_KEY = 'insights_ai_feedback_last_shown'
 
 export interface FeedbackPromptLogicProps {
     conversationId: string
@@ -115,10 +115,10 @@ export const feedbackPromptLogic = kea<feedbackPromptLogicType>([
         feedbackConfig: [
             () => [],
             (): FeedbackConfig | null => {
-                const payload = getFeatureFlagPayload(FEATURE_FLAGS.POSTHOG_AI_CONVERSATION_FEEDBACK_CONFIG)
+                const payload = getFeatureFlagPayload(FEATURE_FLAGS.INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG)
                 if (!payload || typeof payload !== 'object') {
                     posthog.captureException(
-                        new Error('POSTHOG_AI_CONVERSATION_FEEDBACK_CONFIG feature flag is not set'),
+                        new Error('INSIGHTS_AI_CONVERSATION_FEEDBACK_CONFIG feature flag is not set'),
                         { tags: { product: 'max_ai' } }
                     )
                     return null

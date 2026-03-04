@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelTable(
             name="earlyaccessfeature",
-            table="posthog_earlyaccessfeature",
+            table="insights_earlyaccessfeature",
         ),
     ]
 

@@ -9,7 +9,7 @@ def set_created_at(apps, schema_editor):
     except ImportError:
         sync_execute = None
 
-    EventDefinition = apps.get_model("posthog", "EventDefinition")
+    EventDefinition = apps.get_model("insights", "EventDefinition")
     for instance in EventDefinition.objects.filter(created_at=None):
         created_at = None
         result = None
@@ -31,7 +31,7 @@ def set_created_at(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0186_insight_refresh_attempt"),
+        ("insights", "0186_insight_refresh_attempt"),
     ]
 
     operations = [

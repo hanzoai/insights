@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "1004_resource_transfer"),
+        ("insights", "1004_resource_transfer"),
     ]
 
     operations = [
@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="media_previews",
-                        to="posthog.eventdefinition",
+                        to="insights.eventdefinition",
                     ),
                 ),
                 (
@@ -48,10 +48,10 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="object_previews",
-                        to="posthog.exportedasset",
+                        to="insights.exportedasset",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "uploaded_media",
                     models.ForeignKey(
@@ -59,12 +59,12 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="object_previews",
-                        to="posthog.uploadedmedia",
+                        to="insights.uploadedmedia",
                     ),
                 ),
             ],
             options={
-                "indexes": [models.Index(fields=["team", "event_definition"], name="posthog_obj_team_id_e93ae8_idx")],
+                "indexes": [models.Index(fields=["team", "event_definition"], name="insights_obj_team_id_e93ae8_idx")],
             },
         ),
         migrations.AddConstraint(

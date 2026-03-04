@@ -25,7 +25,7 @@ class ProxyRecord(UUIDTModel):
     )
 
     created_by = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         null=True,
     )

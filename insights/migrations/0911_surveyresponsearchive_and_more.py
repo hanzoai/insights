@@ -8,7 +8,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0910_userproductlist_reason_text"),
+        ("insights", "0910_userproductlist_reason_text"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="response_archives",
                         related_query_name="response_archive",
-                        to="posthog.survey",
+                        to="insights.survey",
                     ),
                 ),
                 (
@@ -41,14 +41,14 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="survey_response_archives",
                         related_query_name="survey_response_archive",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["survey", "team"], name="posthog_sur_survey__f78fc7_idx"),
-                    models.Index(fields=["team", "response_uuid"], name="posthog_sur_team_id_2c59a2_idx"),
+                    models.Index(fields=["survey", "team"], name="insights_sur_survey__f78fc7_idx"),
+                    models.Index(fields=["team", "response_uuid"], name="insights_sur_team_id_2c59a2_idx"),
                 ],
             },
         ),

@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def set_history_default(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     teams = Team.objects.all()
     for team in teams:
@@ -18,7 +18,7 @@ def backwards(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0062_team_anonymize_ips"),
+        ("insights", "0062_team_anonymize_ips"),
     ]
 
     operations = [

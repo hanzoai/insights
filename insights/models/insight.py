@@ -109,7 +109,7 @@ class Insight(RootTeamMixin, FileSystemSyncMixin, models.Model):
     objects_including_soft_deleted: models.Manager["Insight"] = RootTeamManager()
 
     class Meta:
-        db_table = "posthog_dashboarditem"
+        db_table = "insights_dashboarditem"
         unique_together = ("team", "short_id")
         indexes = [
             GinIndex(

@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0261_team_capture_console_log_opt_in"),
+        ("insights", "0261_team_capture_console_log_opt_in"),
     ]
 
     operations = [
@@ -38,6 +38,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name="notificationviewed",
-            constraint=models.UniqueConstraint(fields=("user",), name="posthog_user_unique_viewed_date"),
+            constraint=models.UniqueConstraint(fields=("user",), name="insights_user_unique_viewed_date"),
         ),
     ]

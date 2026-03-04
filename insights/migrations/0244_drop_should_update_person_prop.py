@@ -3,7 +3,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0243_unpack_plugin_source_files"),
+        ("insights", "0243_unpack_plugin_source_files"),
     ]
 
     operations = [

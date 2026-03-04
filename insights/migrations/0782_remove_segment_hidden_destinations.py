@@ -7,8 +7,8 @@ def remove_segment_hidden_destinations(apps, schema_editor):
     """
     Mark old destinations as deleted which have the status hidden and where the template id starts with segment-
     """
-    InsightsFunction = apps.get_model("posthog", "InsightsFunction")
-    InsightsFunctionTemplate = apps.get_model("posthog", "InsightsFunctionTemplate")
+    InsightsFunction = apps.get_model("insights", "InsightsFunction")
+    InsightsFunctionTemplate = apps.get_model("insights", "InsightsFunctionTemplate")
 
     hidden_segment_templates = InsightsFunctionTemplate.objects.filter(
         template_id__startswith="segment-", status="hidden"
@@ -30,7 +30,7 @@ def reverse_remove_segment_hidden_destinations(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0781_alter_externaldatasource_source_type"),
+        ("insights", "0781_alter_externaldatasource_source_type"),
     ]
 
     operations = [

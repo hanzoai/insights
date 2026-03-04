@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0712_add_message_template_table"),
+        ("insights", "0712_add_message_template_table"),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 ("disabled_data", models.JSONField(blank=True, null=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                 (
                     "user",
                     models.ForeignKey(
@@ -37,11 +37,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "user_group",
-                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
+                    models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
                 ),
             ],
             options={
-                "indexes": [models.Index(fields=["team_id"], name="posthog_err_team_id_9da78b_idx")],
+                "indexes": [models.Index(fields=["team_id"], name="insights_err_team_id_9da78b_idx")],
             },
         ),
     ]

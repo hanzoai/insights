@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0448_add_mysql_externaldatasource_source_type"),
+        ("insights", "0448_add_mysql_externaldatasource_source_type"),
     ]
 
     operations = [
@@ -21,23 +21,23 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="plugins",
                         related_query_name="plugin",
-                        to="posthog.organization",
+                        to="insights.organization",
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "posthog_plugin_organization_id_d040b9a9_fk_posthog_o" IMMEDIATE; -- existing-table-constraint-ignore
-                    ALTER TABLE "posthog_plugin" DROP CONSTRAINT "posthog_plugin_organization_id_d040b9a9_fk_posthog_o"; -- existing-table-constraint-ignore
-                    ALTER TABLE "posthog_plugin" ALTER COLUMN "organization_id" DROP NOT NULL;
-                    ALTER TABLE "posthog_plugin" ADD CONSTRAINT "posthog_plugin_organization_id_d040b9a9_fk_posthog_o" FOREIGN KEY ("organization_id") REFERENCES "posthog_organization" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_plugin_organization_id_d040b9a9_fk_insights_o" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_plugin" DROP CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o"; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_plugin" ALTER COLUMN "organization_id" DROP NOT NULL;
+                    ALTER TABLE "insights_plugin" ADD CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o" FOREIGN KEY ("organization_id") REFERENCES "insights_organization" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "posthog_plugin_organization_id_d040b9a9_fk_posthog_o" IMMEDIATE; -- existing-table-constraint-ignore
-                        ALTER TABLE "posthog_plugin" DROP CONSTRAINT "posthog_plugin_organization_id_d040b9a9_fk_posthog_o"; -- existing-table-constraint-ignore
-                        ALTER TABLE "posthog_plugin" ALTER COLUMN "organization_id" SET NOT NULL;
-                        ALTER TABLE "posthog_plugin" ADD CONSTRAINT "posthog_plugin_organization_id_d040b9a9_fk_posthog_o" FOREIGN KEY ("organization_id") REFERENCES "posthog_organization" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                        SET CONSTRAINTS "insights_plugin_organization_id_d040b9a9_fk_insights_o" IMMEDIATE; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_plugin" DROP CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o"; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_plugin" ALTER COLUMN "organization_id" SET NOT NULL;
+                        ALTER TABLE "insights_plugin" ADD CONSTRAINT "insights_plugin_organization_id_d040b9a9_fk_insights_o" FOREIGN KEY ("organization_id") REFERENCES "insights_organization" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                         """,
                 ),
             ],
@@ -70,19 +70,19 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_plugin" ADD CONSTRAINT "posthog_plugin_url_bccac89d_uniq" UNIQUE ("url");  -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_plugin" ADD CONSTRAINT "insights_plugin_url_bccac89d_uniq" UNIQUE ("url");  -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_plugin" DROP CONSTRAINT IF EXISTS "posthog_plugin_url_bccac89d_uniq";
+                        ALTER TABLE "insights_plugin" DROP CONSTRAINT IF EXISTS "insights_plugin_url_bccac89d_uniq";
                     """,
                 ),
                 # We add the index seperately
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_plugin_url_bccac89d_like" ON "posthog_plugin" ("url" varchar_pattern_ops);
+                    CREATE INDEX CONCURRENTLY "insights_plugin_url_bccac89d_like" ON "insights_plugin" ("url" varchar_pattern_ops);
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_plugin_url_bccac89d_like";
+                        DROP INDEX IF EXISTS "insights_plugin_url_bccac89d_like";
                     """,
                 ),
             ],

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0321_add_exception_autocapture_optin"),
+        ("insights", "0321_add_exception_autocapture_optin"),
     ]
 
     operations = [
@@ -28,14 +28,14 @@ class Migration(migrations.Migration):
                     "dashboard",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.dashboard",
+                        to="insights.dashboard",
                     ),
                 ),
                 (
                     "feature_flag",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.featureflag",
+                        to="insights.featureflag",
                     ),
                 ),
             ],
@@ -46,8 +46,8 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 related_name="analytics_dashboards",
                 related_query_name="analytics_dashboard",
-                through="posthog.FeatureFlagDashboards",
-                to="posthog.Dashboard",
+                through="insights.FeatureFlagDashboards",
+                to="insights.Dashboard",
             ),
         ),
         migrations.AddConstraint(

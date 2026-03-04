@@ -6,8 +6,8 @@ logger = structlog.get_logger(__name__)
 
 
 def backfill_revenue_analytics_config(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
-    TeamRevenueAnalyticsConfig = apps.get_model("posthog", "TeamRevenueAnalyticsConfig")
+    Team = apps.get_model("insights", "Team")
+    TeamRevenueAnalyticsConfig = apps.get_model("insights", "TeamRevenueAnalyticsConfig")
 
     # Get all teams that have revenue_tracking_config
     teams_with_config = Team.objects.exclude(revenue_tracking_config__isnull=True).iterator()
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0715_teamrevenueanalyticsconfig"),
+        ("insights", "0715_teamrevenueanalyticsconfig"),
     ]
 
     operations = [

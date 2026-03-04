@@ -7,8 +7,8 @@ def migrate_revenue_base_currency(apps, schema_editor):
     """
     Set team base_currency from revenue analytics config if it exists.
     """
-    Team = apps.get_model("posthog", "Team")
-    TeamRevenueAnalyticsConfig = apps.get_model("posthog", "TeamRevenueAnalyticsConfig")
+    Team = apps.get_model("insights", "Team")
+    TeamRevenueAnalyticsConfig = apps.get_model("insights", "TeamRevenueAnalyticsConfig")
 
     teams_updated = 0
 
@@ -29,7 +29,7 @@ def migrate_revenue_base_currency(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0762_team_base_currency"),
+        ("insights", "0762_team_base_currency"),
     ]
 
     operations = [

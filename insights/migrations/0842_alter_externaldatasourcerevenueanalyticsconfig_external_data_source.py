@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0841_backfill_eds_revenue_analytics_config"),
+        ("insights", "0841_backfill_eds_revenue_analytics_config"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 primary_key=True,
                 related_name="revenue_analytics_config",
                 serialize=False,
-                to="posthog.externaldatasource",
+                to="insights.externaldatasource",
             ),
         ),
     ]

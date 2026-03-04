@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0984_clear_temporary_tokens"),
+        ("insights", "0984_clear_temporary_tokens"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             ],
             database_operations=[
                 migrations.RunSQL(
-                    sql="ALTER TABLE posthog_columnconfiguration DROP CONSTRAINT IF EXISTS unique_team_context_key",
+                    sql="ALTER TABLE insights_columnconfiguration DROP CONSTRAINT IF EXISTS unique_team_context_key",
                     #  No reverse_sql, as if the constraint is dropped and new data comes in violating it, we won't be
                     #  able to re-add it.
                 ),

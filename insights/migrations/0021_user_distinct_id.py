@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 
 def forwards_func(apps, schema_editor):
-    User = apps.get_model("posthog", "User")
+    User = apps.get_model("insights", "User")
     users = User.objects.all()
     for user in users:
         user.distinct_id = secrets.token_urlsafe(32)
@@ -19,7 +19,7 @@ def reverse_func(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0020_auto_20200210_0212"),
+        ("insights", "0020_auto_20200210_0212"),
     ]
 
     operations = [

@@ -12,11 +12,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="edge",
             name="dag_id_text",
-            field=models.TextField(default="posthog", editable=False, max_length=256),
+            field=models.TextField(default="insights", editable=False, max_length=256),
         ),
         migrations.AddField(
             model_name="node",
             name="dag_id_text",
-            field=models.TextField(default="posthog", max_length=256),
+            field=models.TextField(default="insights", max_length=256),
         ),
     ]

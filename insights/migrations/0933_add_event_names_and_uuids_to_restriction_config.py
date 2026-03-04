@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0932_add_session_ids_to_restriction_config"),
+        ("insights", "0932_add_session_ids_to_restriction_config"),
     ]
 
     operations = [

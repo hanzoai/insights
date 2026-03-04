@@ -9,55 +9,55 @@ from django.db.models.functions.comparison import Coalesce
 
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
-    dependencies = [("posthog", "0527_project_name_sync")]
+    dependencies = [("insights", "0527_project_name_sync")]
 
     operations = [
         migrations.RunSQL(
             """
             -- Add field project to eventdefinition
-            ALTER TABLE "posthog_eventdefinition" ADD COLUMN "project_id" bigint NULL CONSTRAINT "posthog_eventdefinit_project_id_f93fcbb0_fk_posthog_p" REFERENCES "posthog_project"("id") DEFERRABLE INITIALLY DEFERRED;
-            SET CONSTRAINTS "posthog_eventdefinit_project_id_f93fcbb0_fk_posthog_p" IMMEDIATE;
+            ALTER TABLE "insights_eventdefinition" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_eventdefinit_project_id_f93fcbb0_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
+            SET CONSTRAINTS "insights_eventdefinit_project_id_f93fcbb0_fk_insights_p" IMMEDIATE;
             -- Add field project to eventproperty
-            ALTER TABLE "posthog_eventproperty" ADD COLUMN "project_id" bigint NULL CONSTRAINT "posthog_eventproperty_project_id_dd2337d2_fk_posthog_project_id" REFERENCES "posthog_project"("id") DEFERRABLE INITIALLY DEFERRED;
-            SET CONSTRAINTS "posthog_eventproperty_project_id_dd2337d2_fk_posthog_project_id" IMMEDIATE;
+            ALTER TABLE "insights_eventproperty" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_eventproperty_project_id_dd2337d2_fk_insights_project_id" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
+            SET CONSTRAINTS "insights_eventproperty_project_id_dd2337d2_fk_insights_project_id" IMMEDIATE;
             -- Add field project to propertydefinition
-            ALTER TABLE "posthog_propertydefinition" ADD COLUMN "project_id" bigint NULL CONSTRAINT "posthog_propertydefi_project_id_d3eb982d_fk_posthog_p" REFERENCES "posthog_project"("id") DEFERRABLE INITIALLY DEFERRED;
-            SET CONSTRAINTS "posthog_propertydefi_project_id_d3eb982d_fk_posthog_p" IMMEDIATE;""",
+            ALTER TABLE "insights_propertydefinition" ADD COLUMN "project_id" bigint NULL CONSTRAINT "insights_propertydefi_project_id_d3eb982d_fk_insights_p" REFERENCES "insights_project"("id") DEFERRABLE INITIALLY DEFERRED;
+            SET CONSTRAINTS "insights_propertydefi_project_id_d3eb982d_fk_insights_p" IMMEDIATE;""",
             reverse_sql="""
-            ALTER TABLE "posthog_eventdefinition" DROP COLUMN IF EXISTS "project_id";
-            ALTER TABLE "posthog_eventproperty" DROP COLUMN IF EXISTS "project_id";
-            ALTER TABLE "posthog_propertydefinition" DROP COLUMN IF EXISTS "project_id";""",
+            ALTER TABLE "insights_eventdefinition" DROP COLUMN IF EXISTS "project_id";
+            ALTER TABLE "insights_eventproperty" DROP COLUMN IF EXISTS "project_id";
+            ALTER TABLE "insights_propertydefinition" DROP COLUMN IF EXISTS "project_id";""",
             state_operations=[
                 migrations.AddField(
                     model_name="eventdefinition",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
                     ),
                 ),
                 migrations.AddField(
                     model_name="eventproperty",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
                     ),
                 ),
                 migrations.AddField(
                     model_name="propertydefinition",
                     name="project",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.project"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.project"
                     ),
                 ),
             ],
         ),
         AddIndexConcurrently(
             model_name="eventdefinition",
-            index=models.Index(fields=["project"], name="posthog_eve_proj_id_f93fcbb0"),
+            index=models.Index(fields=["project"], name="insights_eve_proj_id_f93fcbb0"),
         ),
         AddIndexConcurrently(
             model_name="propertydefinition",
-            index=models.Index(fields=["project"], name="posthog_prop_proj_id_d3eb982d"),
+            index=models.Index(fields=["project"], name="insights_prop_proj_id_d3eb982d"),
         ),
         AddIndexConcurrently(
             model_name="propertydefinition",
@@ -72,18 +72,18 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="propertydefinition",
-            index=models.Index(fields=["project_id", "type", "is_numerical"], name="posthog_pro_project_3583d2_idx"),
+            index=models.Index(fields=["project_id", "type", "is_numerical"], name="insights_pro_project_3583d2_idx"),
         ),
         AddIndexConcurrently(
             model_name="eventproperty",
-            index=models.Index(fields=["project"], name="posthog_eve_proj_id_dd2337d2"),
+            index=models.Index(fields=["project"], name="insights_eve_proj_id_dd2337d2"),
         ),
         AddIndexConcurrently(
             model_name="eventproperty",
-            index=models.Index(fields=["project", "event"], name="posthog_eve_proj_id_22de03_idx"),
+            index=models.Index(fields=["project", "event"], name="insights_eve_proj_id_22de03_idx"),
         ),
         AddIndexConcurrently(
             model_name="eventproperty",
-            index=models.Index(fields=["project", "property"], name="posthog_eve_proj_id_26dbfb_idx"),
+            index=models.Index(fields=["project", "property"], name="insights_eve_proj_id_26dbfb_idx"),
         ),
     ]

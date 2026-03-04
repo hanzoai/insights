@@ -9,14 +9,14 @@ def remove_presorted_events_modifier(apps, schema_editor):
     with schema_editor.connection.cursor() as cursor:
         # Remove from query->modifiers atomically
         cursor.execute("""
-            UPDATE posthog_dashboarditem
+            UPDATE insights_dashboarditem
             SET query = query #- '{modifiers,usePresortedEventsTable}'
             WHERE query->'modifiers' ? 'usePresortedEventsTable'
         """)
 
         # Remove from query->source->modifiers atomically
         cursor.execute("""
-            UPDATE posthog_dashboarditem
+            UPDATE insights_dashboarditem
             SET query = jsonb_set(
                 query,
                 '{source}',
@@ -32,7 +32,7 @@ def reverse_noop(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0998_team_proactive_tasks_enabled"),
+        ("insights", "0998_team_proactive_tasks_enabled"),
     ]
 
     operations = [

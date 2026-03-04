@@ -7,7 +7,7 @@ from products.data_warehouse.backend.types import ExternalDataSourceType
 
 
 def forwards(apps, schema_editor):
-    ExternalDataSource: ExternalDataSourceModel = apps.get_model("posthog", "ExternalDataSource")
+    ExternalDataSource: ExternalDataSourceModel = apps.get_model("insights", "ExternalDataSource")
     all_sources = ExternalDataSource.objects.all()
 
     for source in all_sources:
@@ -150,7 +150,7 @@ def forwards(apps, schema_editor):
 
 
 def reverse(apps, schema_editor):
-    ExternalDataSource: ExternalDataSourceModel = apps.get_model("posthog", "ExternalDataSource")
+    ExternalDataSource: ExternalDataSourceModel = apps.get_model("insights", "ExternalDataSource")
     sources = ExternalDataSource.objects.filter(job_inputs__has_key="pre_migration_job_inputs")
 
     for source in sources:
@@ -161,7 +161,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0806_scheduledchange_failure_count_and_more"),
+        ("insights", "0806_scheduledchange_failure_count_and_more"),
     ]
 
     operations = [migrations.RunPython(forwards, reverse)]

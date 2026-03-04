@@ -49,7 +49,7 @@ class InviteExpiredException(exceptions.ValidationError):
 
 class OrganizationInvite(ModelActivityMixin, UUIDTModel):
     organization = models.ForeignKey(
-        "posthog.Organization",
+        "insights.Organization",
         on_delete=models.CASCADE,
         related_name="invites",
         related_query_name="invite",
@@ -57,7 +57,7 @@ class OrganizationInvite(ModelActivityMixin, UUIDTModel):
     target_email = models.EmailField(null=True, db_index=True)
     first_name = models.CharField(max_length=30, blank=True, default="")
     created_by = models.ForeignKey(
-        "posthog.User",
+        "insights.User",
         on_delete=models.SET_NULL,
         related_name="organization_invites",
         related_query_name="organization_invite",

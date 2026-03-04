@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0430_batchexport_model"),
+        ("insights", "0430_batchexport_model"),
     ]
 
     operations = [
@@ -26,18 +26,18 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(  # Update Stripe schemas
             sql="""
-                UPDATE posthog_externaldataschema AS schema
+                UPDATE insights_externaldataschema AS schema
                 SET sync_type_config = '{"incremental_field": "created"}'
-                FROM posthog_externaldatasource AS source
+                FROM insights_externaldatasource AS source
                 WHERE schema.source_id = source.id AND source.source_type = 'Stripe' AND schema.sync_type = 'incremental'
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),
         migrations.RunSQL(  # Update Zendesk schemas
             sql="""
-                UPDATE posthog_externaldataschema AS schema
+                UPDATE insights_externaldataschema AS schema
                 SET sync_type_config = '{"incremental_field": "generated_timestamp"}'
-                FROM posthog_externaldatasource AS source
+                FROM insights_externaldatasource AS source
                 WHERE schema.source_id = source.id AND source.source_type = 'Zendesk' AND schema.sync_type = 'incremental'
             """,
             reverse_sql=migrations.RunSQL.noop,

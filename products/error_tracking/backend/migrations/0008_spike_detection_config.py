@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         related_name="error_tracking_spike_detection_config",
                         serialize=False,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
                 ("snooze_duration_minutes", models.IntegerField(default=10)),
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ("threshold", models.IntegerField(default=500)),
             ],
             options={
-                "db_table": "posthog_errortrackingspikedetectionconfig",
+                "db_table": "insights_errortrackingspikedetectionconfig",
             },
         ),
     ]

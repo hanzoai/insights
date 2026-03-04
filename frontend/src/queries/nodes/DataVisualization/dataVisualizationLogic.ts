@@ -89,7 +89,7 @@ export interface DataVisualizationLogicProps {
     loadPriority?: number
     /** Dashboard variables to override the ones in the query */
     variablesOverride?: Record<string, InsightsQLVariable> | null
-    limitContext?: 'posthog_ai'
+    limitContext?: 'insights_ai'
 }
 
 export interface SelectedYAxis {

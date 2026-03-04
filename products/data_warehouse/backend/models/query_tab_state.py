@@ -4,7 +4,7 @@ from insights.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTMod
 
 
 class QueryTabState(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
-    team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
+    team = models.ForeignKey("insights.Team", on_delete=models.CASCADE)
     state = models.JSONField(
         default=dict,
         null=True,
@@ -19,4 +19,4 @@ class QueryTabState(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["team", "created_by"], name="unique_team_created_by")]
-        db_table = "posthog_querytabstate"
+        db_table = "insights_querytabstate"

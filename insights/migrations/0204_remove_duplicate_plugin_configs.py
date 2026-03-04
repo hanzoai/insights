@@ -3,12 +3,12 @@ from django.db import migrations
 
 
 def remove_duplicate_plugin_configs(apps, schema_editor):
-    PluginConfig = apps.get_model("posthog", "PluginConfig")
+    PluginConfig = apps.get_model("insights", "PluginConfig")
     configs = PluginConfig.objects.raw(
         """
-        select * from posthog_pluginconfig ou
+        select * from insights_pluginconfig ou
         where (
-            select count(*) from posthog_pluginconfig inr
+            select count(*) from insights_pluginconfig inr
             where
                 inr.team_id = ou.team_id and
                 inr.plugin_id = ou.plugin_id
@@ -24,7 +24,7 @@ def remove_duplicate_plugin_configs(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0203_dashboard_permissions"),
+        ("insights", "0203_dashboard_permissions"),
     ]
 
     operations = [

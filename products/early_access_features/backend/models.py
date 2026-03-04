@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class EarlyAccessFeature(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     class Meta:
-        db_table = "posthog_earlyaccessfeature"
+        db_table = "insights_earlyaccessfeature"
         managed = True
 
     class Stage(models.TextChoices):
@@ -27,13 +27,13 @@ class EarlyAccessFeature(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
     ReleaseStage = [Stage.CONCEPT, Stage.ALPHA, Stage.BETA, Stage.GENERAL_AVAILABILITY]
 
     team = models.ForeignKey(
-        "posthog.Team",
+        "insights.Team",
         on_delete=models.CASCADE,
         related_name="features",
         related_query_name="feature",
     )
     feature_flag = models.ForeignKey(
-        "posthog.FeatureFlag",
+        "insights.FeatureFlag",
         null=True,
         blank=True,
         on_delete=models.PROTECT,

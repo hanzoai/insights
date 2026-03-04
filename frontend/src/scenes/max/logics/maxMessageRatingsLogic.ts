@@ -28,7 +28,7 @@ export const maxMessageRatingsLogic = kea<maxMessageRatingsLogicType>([
     reducers({
         ratingsByTraceId: [
             {} as Record<string, MaxMessageRating>,
-            { persist: true, storageKey: 'posthog_ai_ratings' },
+            { persist: true, storageKey: 'insights_ai_ratings' },
             {
                 setRatingForTraceId: (state, { traceId, rating }) => ({
                     ...state,

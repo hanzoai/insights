@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0449_alter_plugin_organization_alter_plugin_plugin_type_and_more"),
+        ("insights", "0449_alter_plugin_organization_alter_plugin_plugin_type_and_more"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                UPDATE posthog_externaldataschema
+                UPDATE insights_externaldataschema
                 SET sync_frequency_interval = interval '24 hour'
                 WHERE sync_frequency = 'day';
             """,
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                UPDATE posthog_externaldataschema
+                UPDATE insights_externaldataschema
                 SET sync_frequency_interval = interval '7 day'
                 WHERE sync_frequency = 'week';
             """,
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RunSQL(
             sql="""
-                UPDATE posthog_externaldataschema
+                UPDATE insights_externaldataschema
                 SET sync_frequency_interval = interval '30 day'
                 WHERE sync_frequency = 'month';
             """,

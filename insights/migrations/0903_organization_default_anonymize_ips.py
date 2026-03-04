@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0902_user_pinned_scene_tabs"),
+        ("insights", "0902_user_pinned_scene_tabs"),
     ]
 
     operations = [

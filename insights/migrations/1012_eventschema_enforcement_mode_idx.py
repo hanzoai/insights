@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "1011_eventschema_enforcement_mode"),
+        ("insights", "1011_eventschema_enforcement_mode"),
     ]
 
     operations = [
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             model_name="eventdefinition",
             index=models.Index(
                 fields=["team_id"],
-                name="posthog_eventdef_enforce_idx",
+                name="insights_eventdef_enforce_idx",
                 condition=models.Q(enforcement_mode="reject"),
             ),
         ),

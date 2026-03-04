@@ -6,13 +6,13 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0361_add_plugin_config_ui_fields"),
+        ("insights", "0361_add_plugin_config_ui_fields"),
     ]
 
     operations = [
         migrations.AlterField(
             model_name="experiment",
             name="feature_flag",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to="posthog.featureflag"),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to="insights.featureflag"),
         ),
     ]

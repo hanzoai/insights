@@ -7,7 +7,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0850_add_activitylog_org_scope_created_at"),
+        ("insights", "0850_add_activitylog_org_scope_created_at"),
     ]
 
     operations = [
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql=[
-                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_org_detail_exists ON posthog_activitylog (organization_id) WHERE detail IS NOT NULL AND jsonb_typeof(detail) = 'object';"
+                        "CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_alog_org_detail_exists ON insights_activitylog (organization_id) WHERE detail IS NOT NULL AND jsonb_typeof(detail) = 'object';"
                     ],
                     reverse_sql=["DROP INDEX IF EXISTS idx_alog_org_detail_exists;"],
                 ),
