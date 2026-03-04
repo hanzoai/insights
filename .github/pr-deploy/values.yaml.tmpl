@@ -31,12 +31,12 @@ kafka:
 postgresql:
   persistence:
     size: 10Gi
-  master:
+  main:
     nodeSelector:
       kubernetes.io/arch: amd64
 
 redis:
-  master:
+  main:
     persistence:
       size: 1Gi
     nodeSelector:

@@ -145,7 +145,7 @@ class Command(BaseCommand):
             entries[(google_domain, EntryKind.source)] = SourceEntry("Search", "Paid Search", "Organic Search")
 
         # add bing domains to this, selectively picked from
-        # https://github.com/v2fly/domain-list-community/blob/master/data/bing
+        # https://github.com/v2fly/domain-list-community/blob/main/data/bing
         for bing_domain in ("bing.com", "bing.com.cn", "bing.net", "bingworld.com"):
             entries[(bing_domain, EntryKind.source)] = SourceEntry("Search", "Paid Search", "Organic Search")
 

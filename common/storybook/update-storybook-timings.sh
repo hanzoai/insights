@@ -4,7 +4,7 @@ set -euo pipefail
 # Regenerate storybook-timings.json from JUnit artifacts of a CI run.
 #
 # Usage:
-#   ./update-storybook-timings.sh              # uses latest successful master run
+#   ./update-storybook-timings.sh              # uses latest successful main run
 #   ./update-storybook-timings.sh <run-id>     # uses a specific run
 #
 # Requires: gh CLI (authenticated), python3
@@ -18,16 +18,16 @@ if [ -n "${1:-}" ]; then
     RUN_ID="$1"
     echo "Using run $RUN_ID..."
 else
-    echo "Finding latest successful storybook CI run on master..."
+    echo "Finding latest successful storybook CI run on main..."
     RUN_ID=$(gh run list \
         -w ci-storybook.yml \
         -s completed \
         --json databaseId,conclusion,headBranch \
         -L 20 \
-        --jq '[.[] | select(.conclusion == "success" and .headBranch == "master")][0].databaseId')
+        --jq '[.[] | select(.conclusion == "success" and .headBranch == "main")][0].databaseId')
 
     if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
-        echo "ERROR: No successful master run found" >&2
+        echo "ERROR: No successful main run found" >&2
         exit 1
     fi
     echo "Found run $RUN_ID"

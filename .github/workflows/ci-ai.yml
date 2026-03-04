@@ -4,7 +4,7 @@ on:
         types: [opened, synchronize, reopened, labeled, unlabeled]
     push:
         branches:
-            - master
+            - main
         paths:
             - '.github/workflows/ci-ai.yml'
 
@@ -31,8 +31,8 @@ jobs:
         steps:
             - uses: actions/checkout@v6
               with:
-                  # Check out the actual branch instead of merge commit with master,
-                  # because we want the Braintrust experiment to have accurate git metadata (on master it's empty)
+                  # Check out the actual branch instead of merge commit with main,
+                  # because we want the Braintrust experiment to have accurate git metadata (on main it's empty)
                   ref: ${{ github.event.pull_request.head.ref }}
                   fetch-depth: 0
                   filter: blob:none
@@ -61,7 +61,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install python dependencies
               shell: bash
@@ -78,7 +78,7 @@ jobs:
               with:
                   shared-key: 'v2-rust-backend'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               run: cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked

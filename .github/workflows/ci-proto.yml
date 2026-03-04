@@ -2,7 +2,7 @@ name: Proto CI
 on:
     workflow_dispatch:
     push:
-        branches: [master]
+        branches: [main]
     pull_request:
     merge_group:
 
@@ -67,7 +67,7 @@ jobs:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Check for breaking changes
-              run: buf breaking proto/ --against 'https://github.com/hanzoai/insights.git#branch=master,subdir=proto'
+              run: buf breaking proto/ --against 'https://github.com/hanzoai/insights.git#branch=main,subdir=proto'
 
     proto_checks:
         needs: [changes, lint, breaking]

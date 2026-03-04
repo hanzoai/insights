@@ -157,7 +157,7 @@ jobs:
 
                       This keeps pytest-split sharding balanced.
                   branch: chore/update-test-timings
-                  base: master
+                  base: main
                   delete-branch: true
                   reviewers: |
                       Insights/team-devex

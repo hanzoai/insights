@@ -2,7 +2,7 @@ name: Rust CI
 on:
     workflow_dispatch:
     push:
-        branches: [master, main]
+        branches: [main, main]
     pull_request:
     merge_group:
 
@@ -27,13 +27,13 @@ jobs:
             matrix: ${{ steps.shards.outputs.matrix }}
         steps:
             # For pull requests it's not necessary to checkout the code, but we
-            # also want this to run on master so we need to checkout
+            # also want this to run on main so we need to checkout
             - uses: actions/checkout@v6
               with:
                   clean: false
             - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
               id: filter
-              if: github.event_name != 'push' # Run all tests on master push
+              if: github.event_name != 'push' # Run all tests on main push
               with:
                   filters: |
                       rust:
@@ -257,7 +257,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install SAML (python3-saml) dependencies
               if: steps.setup-uv.outputs.cache-hit != 'true'

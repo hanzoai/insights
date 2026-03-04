@@ -1548,7 +1548,7 @@ export interface SavedFunnel extends InsightHistory {
 
 export type BinCountValue = number | typeof BIN_COUNT_AUTO
 
-// https://github.com/hanzoai/insights/blob/master/insights/constants.py#L106
+// https://github.com/hanzoai/insights/blob/main/insights/constants.py#L106
 export enum StepOrderValue {
     STRICT = 'strict',
     UNORDERED = 'unordered',
@@ -3044,7 +3044,7 @@ export interface FunnelConversionWindow {
     funnelWindowInterval?: number
 }
 
-// https://github.com/hanzoai/insights/blob/master/insights/models/filters/mixins/funnel.py#L100
+// https://github.com/hanzoai/insights/blob/main/insights/models/filters/mixins/funnel.py#L100
 export enum FunnelConversionWindowTimeUnit {
     Second = 'second',
     Minute = 'minute',

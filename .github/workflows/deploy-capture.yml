@@ -2,7 +2,7 @@ name: Deploy Hanzo Insights Capture
 
 on:
   push:
-    branches: [master, main]
+    branches: [main, main]
     paths:
       - 'rust/capture/**'
       - 'rust/Cargo.toml'

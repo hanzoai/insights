@@ -243,7 +243,7 @@ def spawn_evaluation_container(
             "spawn_evaluation_container": EvaluationConfig(
                 evaluation_module="eval/offline/",
                 image_name="insights-ai-evals",
-                image_tag="master",
+                image_tag="main",
             ),
         }
     ),

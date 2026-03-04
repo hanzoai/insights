@@ -2,9 +2,9 @@ const fs = require('fs')
 
 jest.mock('fs')
 
-const masterCiStatus = require('./master-ci-status')
+const masterCiStatus = require('./main-ci-status')
 
-const STATE_FILE = '.master-ci-incident'
+const STATE_FILE = '.main-ci-incident'
 
 // Timestamps for testing (in order: T1 < T2 < T3 < T4)
 const T1 = 1700000000000 // oldest
@@ -51,7 +51,7 @@ function createGithubMock(commitTs) {
     }
 }
 
-describe('master-ci-status', () => {
+describe('main-ci-status', () => {
     beforeEach(() => {
         jest.clearAllMocks()
         fs.existsSync.mockReturnValue(false)

@@ -101,7 +101,7 @@
     'insights.tasks.tasks.delete_expired_exported_assets',
     'insights.tasks.tasks.delete_organization_data_and_notify_task',
     'insights.tasks.tasks.delete_project_data_and_notify_task',
-    'insights.tasks.tasks.demo_reset_master_team',
+    'insights.tasks.tasks.demo_reset_primary_team',
     'insights.tasks.tasks.find_flags_with_enriched_analytics',
     'insights.tasks.tasks.ingestion_lag',
     'insights.tasks.tasks.pg_plugin_server_query_timing',
