@@ -572,12 +572,12 @@ services:
                 while true; do
                     sleep 5
                     echo "Checking if insights bucket exists..."
-                    if echo "s3.bucket.list" | /usr/bin/weed shell -master=localhost:9333 2>&1 | grep -q "insights"; then
+                    if echo "s3.bucket.list" | /usr/bin/weed shell -main=localhost:9333 2>&1 | grep -q "insights"; then
                         echo "Bucket insights exists!"
                         break
                     fi
                     echo "Bucket not found, attempting to create..."
-                    echo "s3.bucket.create -name insights" | /usr/bin/weed shell -master=localhost:9333 2>&1 || true
+                    echo "s3.bucket.create -name insights" | /usr/bin/weed shell -main=localhost:9333 2>&1 || true
                     echo "Retrying in 5s..."
                 done
                 echo "SeaweedFS ready with insights bucket"

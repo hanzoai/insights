@@ -96,14 +96,14 @@ runs:
           uses: astral-sh/setup-uv@61cb8a9741eeb8a550a1b8544337180c0fc8476b # v7.2.0
           with:
               enable-cache: true
-              save-cache: ${{ github.ref == 'refs/heads/master' }}
+              save-cache: ${{ github.ref == 'refs/heads/main' }}
 
-        - name: Determine if insightsql-parser has changed compared to master
+        - name: Determine if insightsql-parser has changed compared to main
           shell: bash
           id: insightsql-parser-diff
           run: |
-              git fetch --no-tags --prune --depth=1 origin master
-              changed=$(git diff --quiet HEAD origin/master -- common/insightsql_parser/ && echo "false" || echo "true")
+              git fetch --no-tags --prune --depth=1 origin main
+              changed=$(git diff --quiet HEAD origin/main -- common/insightsql_parser/ && echo "false" || echo "true")
               echo "changed=$changed" >> $GITHUB_OUTPUT
 
         - name: Install SAML (python3-saml) dependencies
@@ -174,7 +174,7 @@ runs:
           with:
               shared-key: 'v2-rust-backend'
               workspaces: rust
-              save-if: ${{ github.ref == 'refs/heads/master' }}
+              save-if: ${{ github.ref == 'refs/heads/main' }}
 
         - name: Install sqlx-cli
           shell: bash

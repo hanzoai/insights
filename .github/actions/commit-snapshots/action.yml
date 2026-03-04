@@ -110,7 +110,7 @@ runs:
               The new commit will trigger its own snapshot update workflow.
 
               **If you expected this workflow to succeed:** This can happen due to concurrent commits. To get a fresh workflow run, either:
-              - Merge master into your branch, or
+              - Merge main into your branch, or
               - Push an empty commit: \`git commit --allow-empty -m 'trigger CI' && git push\`"
 
         - name: Count and commit changes

@@ -4,7 +4,7 @@ on:
     pull_request:
     push:
         branches:
-            - master
+            - main
         paths:
             - 'products/*/skills/**'
             - 'products/insights_ai/scripts/**'
@@ -63,7 +63,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install python dependencies
               run: UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
@@ -79,7 +79,7 @@ jobs:
               with:
                   shared-key: 'v2-rust-skills'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               run: cargo install sqlx-cli --version 0.8.0 --features postgres --no-default-features --locked
@@ -120,7 +120,7 @@ jobs:
         name: Release agent skills
         runs-on: ubuntu-latest
         needs: check-skills
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         permissions:
             contents: write
 

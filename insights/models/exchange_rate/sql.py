@@ -23,7 +23,7 @@ from .currencies import SUPPORTED_CURRENCY_CODES
 #
 # This is easily achieved by: `amount` B = `amount` A * `rate_A` / `rate_B`
 #
-# This CSV was originally downloaded from https://github.com/xriss/freechange/blob/master/csv/usd_to_xxx_by_day.csv
+# This CSV was originally downloaded from https://github.com/xriss/freechange/blob/main/csv/usd_to_xxx_by_day.csv
 # and then slightly optimized:
 # 1. Remove all dates older than 2000-01-01
 # 2. Truncate all rates to 4 decimal places

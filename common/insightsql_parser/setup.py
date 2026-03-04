@@ -37,7 +37,7 @@ module = Extension(
 setup(
     name="insightsql_parser",
     version="1.3.14",
-    url="https://github.com/hanzoai/insights/tree/master/common/insightsql_parser",
+    url="https://github.com/hanzoai/insights/tree/main/common/insightsql_parser",
     description="InsightsQL parser for Hanzo Insights",
     author="Hanzo AI Inc.",
     author_email="eng@hanzo.ai",

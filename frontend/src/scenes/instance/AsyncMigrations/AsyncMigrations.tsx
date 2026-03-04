@@ -78,7 +78,7 @@ export function AsyncMigrations(): JSX.Element {
         title: 'Migration',
         render: function Render(_, asyncMigration: AsyncMigration): JSX.Element {
             const link =
-                'https://github.com/hanzoai/insights/blob/master/insights/async_migrations/migrations/' +
+                'https://github.com/hanzoai/insights/blob/main/insights/async_migrations/migrations/' +
                 asyncMigration.name +
                 '.py'
             return <LemonTableLink to={link} title={asyncMigration.name} description={asyncMigration.description} />

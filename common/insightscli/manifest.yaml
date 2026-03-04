@@ -423,7 +423,7 @@ db:
             \ artifact...\"\nRUN_ID=$(gh api 'repos/Insights/insights/actions/artifacts?name=migrated-schema&per_page=10'\
             \ --jq '[.artifacts[] | select(.expired == false and .size_in_bytes > 10000)]\
             \ | .[0].workflow_run.id')\nif [ -z \"$RUN_ID\" ]; then\n    echo \"\u274C No\
-            \ migrated-schema artifact found. Has CI run on master yet?\"\n    exit 1\n\
+            \ migrated-schema artifact found. Has CI run on main yet?\"\n    exit 1\n\
             fi\necho \"Downloading from run $RUN_ID...\"\ngh run download \"$RUN_ID\" --name\
             \ migrated-schema -R Insights/insights -D /tmp/migrated-schema-dl\nmv /tmp/migrated-schema-dl/schema.sql.gz\
             \ .postgres-backups/schema-latest.sql.gz\nrm -rf /tmp/migrated-schema-dl\necho\

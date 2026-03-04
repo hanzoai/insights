@@ -39,7 +39,7 @@ AGENT_SERVER_PORT = 8080  # Modal connect tokens require port 8080
 
 @lru_cache(maxsize=2)
 def _get_sandbox_image_reference(image: str = SANDBOX_IMAGE) -> str:
-    """Modal caches sandbox images indefinitely. This function resolves the digest of the master tag
+    """Modal caches sandbox images indefinitely. This function resolves the digest of the main tag
     so Modal fetches the correct version. Queries GHCR once per deployment.
     """
     image_repo = image.replace("ghcr.io/", "")
@@ -50,15 +50,15 @@ def _get_sandbox_image_reference(image: str = SANDBOX_IMAGE) -> str:
         )
         if token_resp.status_code != 200:
             logger.warning(f"Failed to get GHCR token: status={token_resp.status_code}")
-            return f"{image}:master"
+            return f"{image}:main"
 
         token = token_resp.json().get("token")
         if not token:
             logger.warning("GHCR token response missing token field")
-            return f"{image}:master"
+            return f"{image}:main"
 
         manifest_resp = requests.get(
-            f"https://ghcr.io/v2/{image_repo}/manifests/master",
+            f"https://ghcr.io/v2/{image_repo}/manifests/main",
             headers={
                 "Accept": "application/vnd.oci.image.index.v1+json",
                 "Authorization": f"Bearer {token}",
@@ -74,7 +74,7 @@ def _get_sandbox_image_reference(image: str = SANDBOX_IMAGE) -> str:
     except Exception as e:
         logger.warning(f"Failed to fetch sandbox image digest: {e}")
 
-    return f"{image}:master"
+    return f"{image}:main"
 
 
 def _get_template_image(template: SandboxTemplate) -> modal.Image:

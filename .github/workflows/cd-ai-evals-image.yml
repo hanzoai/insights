@@ -8,7 +8,7 @@ name: AI Evals Container Images CD
 on:
     push:
         branches:
-            - master
+            - main
         paths-ignore:
             - 'rust/**'
             - 'livestream/**'
@@ -61,6 +61,6 @@ jobs:
                   file: ./Dockerfile.ai-evals
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('{0}/insights-ai-evals:master,{0}/insights-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) || format('{0}/insights-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/main' && format('{0}/insights-ai-evals:main,{0}/insights-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) || format('{0}/insights-ai-evals:{1}', steps.aws-ecr.outputs.registry, github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}

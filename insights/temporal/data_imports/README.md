@@ -24,7 +24,7 @@ On rare occasions, OOMs can be caused by tables that have too wide data - that i
 
 The `ExternalDataSchema` model stores partitioning settings in the `sync_type_config` json column. We have all the possible settings listed at `insights/warehouse/models/external_data_schema.py#L57`.
 
-More info on what partitioning options and the different modes can be found here: https://github.com/Hanzo Insights/insights/blob/master/insights/temporal/data_imports/sources/README.md#partitioning
+More info on what partitioning options and the different modes can be found here: https://github.com/Hanzo Insights/insights/blob/main/insights/temporal/data_imports/sources/README.md#partitioning
 
 If a table has the `partition_mode` set to `datetime`, then you'll likely see that `partition_format` is set to either `month` or `None` (which means `month`). To repartition by `day`, you'll want to update this value to `day` and then perform a resync below.
 

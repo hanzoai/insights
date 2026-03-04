@@ -52,7 +52,7 @@ For other Linux distros, adjust the steps as needed (e.g. use `dnf` or `pacman` 
 
 Windows isn't supported natively. But, Windows users can run a Linux virtual machine. The latest Ubuntu LTS Desktop is recommended. (Ubuntu Server is not recommended as debugging the frontend will require a browser that can access localhost.)
 
-In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Hanzo Insights/hanzo.ai/blob/master/contents/handbook/engineering/developing-locally.md)!
+In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Hanzo Insights/hanzo.ai/blob/main/contents/handbook/engineering/developing-locally.md)!
 
 ## Option 1: Developing locally
 
@@ -136,7 +136,7 @@ To get Insights running in a dev environment:
 
 This is it – you should be seeing the Insights app at <a href="http://localhost:8010" target="_blank">http://localhost:8010</a>.
 
-You can now change Insights in any way you want. See [Project structure](./project-structure) for an intro to the repository's contents. To commit changes, create a new branch based on `master` for your intended change, and develop away.
+You can now change Insights in any way you want. See [Project structure](./project-structure) for an intro to the repository's contents. To commit changes, create a new branch based on `main` for your intended change, and develop away.
 
 ### Customizing which services run
 
@@ -310,7 +310,7 @@ Backend side flags are only evaluated locally, which requires the `INSIGHTS_PERS
 
 ## Extra: Debugging with VS Code
 
-The Insights repository includes [VS Code launch options for debugging](https://github.com/Hanzo Insights/insights/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
+The Insights repository includes [VS Code launch options for debugging](https://github.com/Hanzo Insights/insights/blob/main/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
 
 > **Note:** You can debug all services using the main "Insights" launch option. If you are running most services with `insightscli start` and only want to debug one (e.g. the backend), use `insightscli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
 

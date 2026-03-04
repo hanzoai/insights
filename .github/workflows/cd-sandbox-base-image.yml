@@ -3,7 +3,7 @@ name: Tasks Sandbox Container Image CD
 on:
     push:
         branches:
-            - master
+            - main
     pull_request:
     workflow_dispatch:
 
@@ -73,7 +73,7 @@ jobs:
                   file: ./products/tasks/backend/sandbox/images/Dockerfile.sandbox-base
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('ghcr.io/hanzoai/insights-sandbox-base:master,ghcr.io/hanzoai/insights-sandbox-base:{0}', github.sha) || format('ghcr.io/hanzoai/insights-sandbox-base:{0}', github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/main' && format('ghcr.io/hanzoai/insights-sandbox-base:main,ghcr.io/hanzoai/insights-sandbox-base:{0}', github.sha) || format('ghcr.io/hanzoai/insights-sandbox-base:{0}', github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}
 
@@ -84,6 +84,6 @@ jobs:
                   file: ./products/tasks/backend/sandbox/images/Dockerfile.sandbox-notebook
                   buildx-fallback: false # the fallback is so slow it's better to just fail
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('ghcr.io/hanzoai/insights-sandbox-notebook:master,ghcr.io/hanzoai/insights-sandbox-notebook:{0}', github.sha) || format('ghcr.io/hanzoai/insights-sandbox-notebook:{0}', github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/main' && format('ghcr.io/hanzoai/insights-sandbox-notebook:main,ghcr.io/hanzoai/insights-sandbox-notebook:{0}', github.sha) || format('ghcr.io/hanzoai/insights-sandbox-notebook:{0}', github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}

@@ -154,7 +154,7 @@ chmod +x insights-hobby
 
 ## Release process
 
-The hobby installer binary is automatically built and released when changes are pushed to `master` in the `bin/hobby-installer/` directory.
+The hobby installer binary is automatically built and released when changes are pushed to `main` in the `bin/hobby-installer/` directory.
 
 The GitHub workflow (`.github/workflows/build-hobby-installer.yml`) does the following:
 
