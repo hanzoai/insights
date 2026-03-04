@@ -65,7 +65,7 @@ def test_create_batch_export_with_interval_schedule(client: HttpClient, temporal
     client.force_login(user)
 
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
+        "insights.batch_exports.http.hanzo_insights.feature_enabled",
         return_value=True,
     ) as feature_enabled:
         response = create_batch_export(
@@ -223,7 +223,7 @@ def test_create_batch_export_with_different_intervals_timezones_and_interval_off
 
     # ensure high-frequency-batch-exports feature flag is enabled
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
+        "insights.batch_exports.http.hanzo_insights.feature_enabled",
         return_value=True,
     ):
         response = create_batch_export(
@@ -393,7 +393,7 @@ def test_cannot_create_a_batch_export_with_higher_frequencies_if_not_enabled(
 
     client.force_login(user)
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
+        "insights.batch_exports.http.hanzo_insights.feature_enabled",
         return_value=False,
     ) as feature_enabled:
         response = create_batch_export(
@@ -1004,7 +1004,7 @@ def databricks_integration(team, user):
 @pytest.fixture
 def enable_databricks(team):
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True
+        "insights.batch_exports.http.hanzo_insights.feature_enabled", return_value=True
     ) as feature_enabled:
         yield
         feature_enabled.assert_any_call(
@@ -1301,7 +1301,7 @@ def test_creating_azure_blob_batch_export_fails_if_feature_flag_is_not_enabled(
     client.force_login(user)
 
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
+        "insights.batch_exports.http.hanzo_insights.feature_enabled",
         return_value=False,
     ):
         response = create_batch_export(
@@ -1351,7 +1351,7 @@ def test_creating_azure_blob_batch_export_using_integration(
     client.force_login(user)
 
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
+        "insights.batch_exports.http.hanzo_insights.feature_enabled",
         return_value=True,
     ):
         response = create_batch_export(
@@ -1521,7 +1521,7 @@ def test_creating_batch_export_with_filters(
 @pytest.fixture
 def enable_backfilling_workflows(team):
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True
+        "insights.batch_exports.http.hanzo_insights.feature_enabled", return_value=True
     ) as feature_enabled:
         yield
 

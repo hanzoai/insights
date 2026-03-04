@@ -754,7 +754,7 @@ class TestSecretAlertRelayIntegration(APIBaseTest):
 
 class TestSecretAlertRegionTracking(APIBaseTest):
     @patch("insights.api.github.verify_github_signature")
-    @patch("insights.api.github.hanzoanalytics.capture")
+    @patch("insights.api.github.hanzo_insights.capture")
     @patch("insights.api.github.get_instance_region")
     @patch("insights.api.github.send_project_secret_api_key_exposed")
     def test_local_find_sets_key_found_region_to_current_region(
@@ -793,7 +793,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
 
     @patch("insights.api.github.verify_github_signature")
     @patch("insights.api.github.relay_to_eu")
-    @patch("insights.api.github.hanzoanalytics.capture")
+    @patch("insights.api.github.hanzo_insights.capture")
     @patch("insights.api.github.get_instance_region")
     def test_eu_find_sets_key_found_region_to_eu(self, mock_get_region, mock_capture, mock_relay, mock_verify):
         """When key is found by EU relay, key_found_region should be 'EU'."""
@@ -832,7 +832,7 @@ class TestSecretAlertRegionTracking(APIBaseTest):
 
     @patch("insights.api.github.verify_github_signature")
     @patch("insights.api.github.relay_to_eu")
-    @patch("insights.api.github.hanzoanalytics.capture")
+    @patch("insights.api.github.hanzo_insights.capture")
     def test_not_found_has_no_key_found_region(self, mock_capture, mock_relay, mock_verify):
         """When key is not found anywhere, key_found_region should not be set."""
         mock_verify.return_value = None

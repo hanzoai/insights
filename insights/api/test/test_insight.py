@@ -85,7 +85,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         ]
     )
     def test_legacy_insight_endpoints_blocked_with_feature_flag(self, _name: str, path: str) -> None:
-        with patch("insights.api.insight.hanzoanalytics.feature_enabled", return_value=True) as mock_feature_enabled:
+        with patch("insights.api.insight.hanzo_insights.feature_enabled", return_value=True) as mock_feature_enabled:
             response = self.client.get(path.format(team_id=self.team.id))
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -149,7 +149,7 @@ class TestInsight(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         self.assertEqual({insight["id"] for insight in response_env_current["results"]}, {insight_a.id, insight_b.id})
         self.assertEqual({insight["id"] for insight in response_env_other["results"]}, {insight_a.id, insight_b.id})
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_created_updated_and_last_modified(self, mock_capture: mock.Mock) -> None:
         alt_user = User.objects.create_and_join(self.organization, "team2@hanzo.ai", None)
         self_user_basic_serialized = {

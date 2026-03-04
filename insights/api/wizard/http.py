@@ -6,15 +6,15 @@ import hashlib
 from django.core.cache import cache
 from django.utils.crypto import get_random_string
 
-import hanzoanalytics
+import hanzo_insights
 from google.genai.types import GenerateContentConfig, Schema
 from openai.types.chat import (
     ChatCompletionMessageParam,
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
 )
-from hanzoanalytics.ai.gemini import genai
-from hanzoanalytics.ai.openai import OpenAI
+from hanzo_insights.ai.gemini import genai
+from hanzo_insights.ai.openai import OpenAI
 from rest_framework import exceptions, response, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed
@@ -195,7 +195,7 @@ class SetupWizardViewSet(viewsets.ViewSet):
 
             trace_id = request.headers.get("X-Insights-Trace-Id") or hashlib.sha256(distinct_id.encode()).hexdigest()
 
-        analytics_client = hanzoanalytics.default_client
+        analytics_client = hanzo_insights.default_client
 
         if not analytics_client:
             raise exceptions.ValidationError("Insights client not found")

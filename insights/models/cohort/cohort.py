@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 
 from insights.clickhouse.client import sync_execute
 from insights.constants import PropertyOperatorType
@@ -489,7 +489,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
             flush_persons_and_events()
 
         # Check feature flag once for the entire import process
-        use_clickhouse = hanzoanalytics.feature_enabled(
+        use_clickhouse = hanzo_insights.feature_enabled(
             "cohort-email-lookup-clickhouse",
             str(team_id),
             groups={"project": str(team_id)},

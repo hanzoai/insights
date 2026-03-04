@@ -128,7 +128,7 @@ MIDDLEWARE = [
     "insights.middleware.CHQueries",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
     "insights.middleware.InsightsTokenCookieMiddleware",
-    "hanzoanalytics.integrations.django.InsightsContextMiddleware",
+    "hanzo_insights.integrations.django.InsightsContextMiddleware",
 ]
 
 DJANGO_STRUCTLOG_CELERY_ENABLED = True

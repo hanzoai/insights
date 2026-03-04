@@ -49,7 +49,7 @@ tracing = "0.1.41"
 uuid = { version = "1.16.0", features = ["v7"] }
 thiserror = "2.0.12"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-insights-rs = { package = "posthog-rs", git = "https://github.com/hanzoai/insights-rs", default-features = false } # crate name in fork not yet renamed
+insights-rs = { git = "https://github.com/hanzoai/insights-rs", default-features = false }
 sha2 = "0.10.9"
 urlencoding = "2.1.3"
 rayon = "1.11.0"

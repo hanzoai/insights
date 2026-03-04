@@ -588,12 +588,12 @@ class TeamSerializer(serializers.ModelSerializer, UserPermissionsSerializerMixin
     def validate_access_control(self, value) -> None:
         """Validate that access_control field is not being used as it's deprecated."""
         if value is not None:
-            import hanzoanalytics
+            import hanzo_insights
 
             request = self.context.get("request")
             user = request.user if request else None
 
-            hanzoanalytics.capture_exception(
+            hanzo_insights.capture_exception(
                 Exception("Deprecated access control field used"),
                 properties={
                     "field": "access_control",

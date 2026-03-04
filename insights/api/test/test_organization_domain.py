@@ -82,7 +82,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
     # Create domains
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_create_domain(self, mock_capture):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization.available_product_features = [
@@ -453,7 +453,7 @@ class TestOrganizationDomainsAPI(APIBaseTest):
 
     # Delete domains
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     def test_admin_can_delete_domain(self, mock_capture):
         self.organization_membership.level = OrganizationMembership.Level.ADMIN
         self.organization_membership.save()

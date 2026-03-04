@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 from django.db.models import Prefetch
 
-import hanzoanalytics
+import hanzo_insights
 from structlog.contextvars import bind_contextvars
 from structlog.typing import FilteringBoundLogger
 from temporalio import activity
@@ -188,7 +188,7 @@ async def _is_pipeline_v3_enabled(team_id: int, logger: FilteringBoundLogger) ->
         return False
 
     try:
-        enabled = await database_sync_to_async_pool(hanzoanalytics.feature_enabled)(
+        enabled = await database_sync_to_async_pool(hanzo_insights.feature_enabled)(
             WAREHOUSE_PIPELINES_V3_FLAG,
             str(team.uuid),
             groups={

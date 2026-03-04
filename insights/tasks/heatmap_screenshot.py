@@ -1,5 +1,5 @@
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from celery import shared_task
 from playwright.sync_api import (
     Page,
@@ -175,9 +175,9 @@ def generate_heatmap_screenshot(screenshot_id: str) -> None:
         logger.exception("heatmap_screenshot.not_found", screenshot_id=screenshot_id)
         return
 
-    with hanzoanalytics.new_context():
-        hanzoanalytics.tag("team_id", screenshot.team_id)
-        hanzoanalytics.tag("screenshot_id", screenshot.id)
+    with hanzo_insights.new_context():
+        hanzo_insights.tag("team_id", screenshot.team_id)
+        hanzo_insights.tag("screenshot_id", screenshot.id)
 
         try:
             ok, err = is_url_allowed(screenshot.url)

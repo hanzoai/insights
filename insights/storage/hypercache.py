@@ -8,7 +8,7 @@ from django.conf import settings
 from django.core.cache import cache, caches
 
 import structlog
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from prometheus_client import Counter, Histogram
 
 from insights.models.team.team import Team

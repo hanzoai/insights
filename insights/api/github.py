@@ -7,7 +7,7 @@ from django.db.models import Q
 
 import requests
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -69,14 +69,14 @@ def relay_to_eu(raw_body: str, kid: str, sig: str) -> list[dict] | None:
             timeout=15,
         )
         resp.raise_for_status()
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=None,
             event="github_secret_alert_relay_success",
         )
         return resp.json()
     except Exception as e:
         logger.warning("Failed to relay GitHub secret alert to EU", error=str(e))
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=None,
             event="github_secret_alert_relay_failure",
             properties={"error": str(e)},
@@ -193,7 +193,7 @@ class SecretAlert(APIView):
         try:
             verify_github_signature(raw_body, kid, sig)
         except SignatureVerificationError:
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=None,
                 event="github_secret_alert_invalid_signature",
                 properties={
@@ -367,7 +367,7 @@ class SecretAlert(APIView):
                 elif event_data["found"]:
                     event_data["key_found_region"] = get_instance_region()
 
-                hanzoanalytics.capture(
+                hanzo_insights.capture(
                     distinct_id=None,
                     event="github_secret_alert",
                     properties=event_data,

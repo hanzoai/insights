@@ -4,9 +4,9 @@ from django.apps import AppConfig
 from django.conf import settings
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import async_to_sync
-from hanzoanalytics.client import Client
+from hanzo_insights.client import Client
 
 from insights.git import get_git_branch, get_git_commit_short
 from insights.tasks.tasks import sync_all_organization_available_product_features
@@ -22,33 +22,33 @@ class InsightsConfig(AppConfig):
 
     def ready(self):
         self._setup_lazy_admin()
-        hanzoanalytics.api_key = "sTMFPsFhdP1Ssg"
-        hanzoanalytics.personal_api_key = os.environ.get("INSIGHTS_PERSONAL_API_KEY")
-        hanzoanalytics.poll_interval = 90
-        hanzoanalytics.enable_exception_autocapture = True
-        hanzoanalytics.log_captured_exceptions = True
-        hanzoanalytics.super_properties = {
+        hanzo_insights.api_key = "sTMFPsFhdP1Ssg"
+        hanzo_insights.personal_api_key = os.environ.get("INSIGHTS_PERSONAL_API_KEY")
+        hanzo_insights.poll_interval = 90
+        hanzo_insights.enable_exception_autocapture = True
+        hanzo_insights.log_captured_exceptions = True
+        hanzo_insights.super_properties = {
             "region": get_instance_region(),
             "service": settings.OTEL_SERVICE_NAME,
             "environment": os.getenv("OTEL_SERVICE_ENVIRONMENT"),
         }
 
         if str_to_bool(os.environ.get("TEMPORAL_DISABLE_EXCEPTION_VARIABLE_CAPTURE", "false")):
-            hanzoanalytics.capture_exception_code_variables = False
+            hanzo_insights.capture_exception_code_variables = False
         else:
-            hanzoanalytics.capture_exception_code_variables = True
+            hanzo_insights.capture_exception_code_variables = True
 
         if settings.E2E_TESTING:
-            hanzoanalytics.api_key = "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
-            hanzoanalytics.personal_api_key = None
+            hanzo_insights.api_key = "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
+            hanzo_insights.personal_api_key = None
         elif settings.TEST or os.environ.get("OPT_OUT_CAPTURE", False):
-            hanzoanalytics.disabled = True
+            hanzo_insights.disabled = True
         elif settings.DEBUG:
             # In dev, analytics is by default turned to self-capture, i.e. data going into this very instance of Insights
             # Due to ASGI's workings, we can't query for the right project API key in this `ready()` method
             # Instead, we configure self-capture with `self_capture_wrapper()` in insights/asgi.py - see that file
             # Self-capture for WSGI is initialized here
-            hanzoanalytics.disabled = True
+            hanzo_insights.disabled = True
             logger.info(
                 "insights_config_ready",
                 settings_debug=settings.DEBUG,
@@ -63,7 +63,7 @@ class InsightsConfig(AppConfig):
                 sync_all_organization_available_product_features()
 
                 # NOTE: This has to be created as a separate client so that the "capture" call doesn't lock in the properties
-                phcloud_client = Client(hanzoanalytics.api_key)
+                phcloud_client = Client(hanzo_insights.api_key)
 
                 phcloud_client.capture(
                     distinct_id=get_machine_id(),
@@ -71,8 +71,8 @@ class InsightsConfig(AppConfig):
                     properties={"git_rev": get_git_commit_short(), "git_branch": get_git_branch()},
                 )
         # load feature flag definitions if not already loaded
-        if not hanzoanalytics.disabled and hanzoanalytics.feature_flag_definitions() is None:
-            hanzoanalytics.load_feature_flags()
+        if not hanzo_insights.disabled and hanzo_insights.feature_flag_definitions() is None:
+            hanzo_insights.load_feature_flags()
 
         from insights.async_migrations.setup import setup_async_migrations
 
