@@ -2779,15 +2779,17 @@ wheels = [
 ]
 
 [[package]]
-name = "hanzoanalytics"
-version = "7.9.0"
-source = { directory = "common/hanzoanalytics" }
+name = "hanzo-insights"
+version = "7.9.7"
+source = { git = "https://github.com/hanzoai/insights-python?branch=master#98a2ca443c541b80b7d6ca221ffb89da41ad25d2" }
 dependencies = [
-    { name = "posthoganalytics" },
+    { name = "backoff" },
+    { name = "distro" },
+    { name = "python-dateutil" },
+    { name = "requests" },
+    { name = "six" },
+    { name = "typing-extensions" },
 ]
-
-[package.metadata]
-requires-dist = [{ name = "posthoganalytics", specifier = ">=7.0.0" }]
 
 [[package]]
 name = "hf-xet"
@@ -3087,7 +3089,7 @@ dependencies = [
     { name = "granian", extra = ["pname", "reload", "uvloop"] },
     { name = "grimp" },
     { name = "gspread" },
-    { name = "hanzoanalytics" },
+    { name = "hanzo-insights" },
     { name = "hogql-parser" },
     { name = "infi-clickhouse-orm" },
     { name = "jsonref" },
@@ -3351,7 +3353,7 @@ requires-dist = [
     { name = "granian", extras = ["uvloop", "reload", "pname"], specifier = "==2.5.5" },
     { name = "grimp", specifier = "==3.13" },
     { name = "gspread", specifier = "==6.2.1" },
-    { name = "hanzoanalytics", directory = "common/hanzoanalytics" },
+    { name = "hanzo-insights", git = "https://github.com/hanzoai/insights-python?branch=master" },
     { name = "hogql-parser", specifier = "==1.3.14" },
     { name = "infi-clickhouse-orm", git = "https://github.com/hanzoai/infi.clickhouse_orm?rev=9578c79f29635ee2c1d01b7979e89adab8383de2" },
     { name = "jsonref", specifier = "==1.1.0" },
@@ -5345,23 +5347,6 @@ wheels = [
 ]
 
 [[package]]
-name = "posthoganalytics"
-version = "7.9.7"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "backoff" },
-    { name = "distro" },
-    { name = "python-dateutil" },
-    { name = "requests" },
-    { name = "six" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/fb/98/c204f8f6d09c449747c1922735b6be614eb0013309f162a1cedaf357b039/posthoganalytics-7.9.7.tar.gz", hash = "sha256:8fe98f35e1a1d50ad6a6d651049dc94d649dfa16e2e0acc19d2c54f021462da0", size = 175260, upload-time = "2026-03-05T22:10:07.457Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/e0/471f1504697e48ac2489f2a28c7b389baa478c9f68a981c5694739581469/posthoganalytics-7.9.7-py3-none-any.whl", hash = "sha256:33b05b3b094f588563a6b1c6c8d44290f5fb5c01fee8344b9308ed23b81b2c53", size = 201822, upload-time = "2026-03-05T22:10:05.48Z" },
-]
-
-[[package]]
 name = "pprintpp"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -7101,7 +7086,7 @@ name = "tbb"
 version = "2022.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "tcmlib" },
+    { name = "tcmlib", marker = "sys_platform != 'emscripten'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/08/59/8d381a2cfe8d36c4f4ff9f94769ff2809bfc16014d888360b0e24c7e5c6b/tbb-2022.3.1-py2.py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:534c089eca6bcf148408684c156229d5f09c01d323b685b15739f41985b529d7", size = 4178630, upload-time = "2026-01-22T05:30:20.589Z" },

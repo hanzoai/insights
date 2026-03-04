@@ -2,7 +2,7 @@ from collections.abc import Iterable
 from datetime import timedelta
 from typing import Optional, cast
 
-import hanzoanalytics
+import hanzo_insights
 
 from insights.schema import (
     ActionsNode,
@@ -106,7 +106,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
         # with a bad experience filtering out 60% of results incorrectly
         # We use a feature flag to control this behavior for safe rollout.
 
-        remove_order_by = hanzoanalytics.feature_enabled(
+        remove_order_by = hanzo_insights.feature_enabled(
             "remove-order-by-for-event-subquery",
             str(self._team.organization.id),
             send_feature_flag_events=False,
@@ -137,7 +137,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
         This solves the "late identification problem" where filtering by person properties
         in standard PoE mode only finds sessions where those properties existed at event time.
         """
-        return hanzoanalytics.feature_enabled(
+        return hanzo_insights.feature_enabled(
             "enable-hybrid-poe-replay-filtering",
             str(self._team.id),
             send_feature_flag_events=False,
@@ -345,7 +345,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
                 p.key for p in person_properties if hasattr(p, "key") and p.key not in HYBRID_QUERY_ELIGIBLE_PROPERTIES
             ]
 
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=str(self._team.id),
                 event="hybrid_poe_replay_query_executed",
                 properties={
@@ -371,7 +371,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
                 span.set_attribute("replay.hybrid_query.person_id_limit", person_id_limit)
 
         except Exception as e:
-            hanzoanalytics.capture_exception(e, properties={"context": "hybrid_query_monitoring"})
+            hanzo_insights.capture_exception(e, properties={"context": "hybrid_query_monitoring"})
 
         # Build the three-stage query using Pure AST
         # Stage 1: Find person_ids from persons table
@@ -674,7 +674,7 @@ class ReplayFiltersEventsSubQuery(SessionRecordingsListingBaseQuery):
 
             return events_that_have_the_property, property_to_expr(p, team=team, scope="replay")
         except Exception as e:
-            hanzoanalytics.capture_exception(e, properties={"replay_feature": "with_team_events_added"})
+            hanzo_insights.capture_exception(e, properties={"replay_feature": "with_team_events_added"})
             # we can return this transformation here because this is what was always run in the past
             # so if _that_ is going to fail nothing this method can do could change it
             return [], property_to_expr(p, team=team, scope="replay")

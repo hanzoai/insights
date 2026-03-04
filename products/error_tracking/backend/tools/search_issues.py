@@ -6,7 +6,7 @@ from typing import Literal, cast
 from django.utils import timezone
 
 import structlog
-from hanzoanalytics import capture_exception
+from hanzo_insights import capture_exception
 from pydantic import BaseModel, Field
 
 from insights.schema import (

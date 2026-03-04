@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 
 from insights.async_migrations.definition import AsyncMigrationOperation
 from insights.async_migrations.setup import DEPENDENCY_TO_ASYNC_MIGRATION
@@ -34,13 +34,13 @@ SLEEP_TIME_SECONDS = 20 if not TEST else 1
 
 
 def send_analytics_to_insights(event, data):
-    hanzoanalytics.project_api_key = "sTMFPsFhdP1Ssg"
+    hanzo_insights.project_api_key = "sTMFPsFhdP1Ssg"
     user = User.objects.filter(is_active=True).first()
     groups = {"instance": settings.SITE_URL}
     if user and user.current_organization:
         data["organization_name"] = user.current_organization.name
         groups["organization"] = str(user.current_organization.id)
-    hanzoanalytics.capture(distinct_id=get_machine_id(), event=event, properties=data, groups=groups)
+    hanzo_insights.capture(distinct_id=get_machine_id(), event=event, properties=data, groups=groups)
 
 
 def execute_op(op: AsyncMigrationOperation, uuid: str, rollback: bool = False):

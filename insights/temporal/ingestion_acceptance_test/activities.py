@@ -4,7 +4,7 @@ import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 import temporalio.activity
 
 from insights.temporal.ingestion_acceptance_test.client import InsightsClient
@@ -44,7 +44,7 @@ async def run_ingestion_acceptance_tests() -> dict:
         project_id=config.project_id,
     )
 
-    insights_sdk = hanzoanalytics.Insights(
+    insights_sdk = hanzo_insights.Insights(
         config.project_api_key,
         host=config.api_host,
         debug=True,

@@ -217,7 +217,7 @@ class TestPersonsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(response.results[0], (Decimal("350.42"), Decimal("350.42")))
 
     def test_get_revenue_for_events_with_managed_viewsets_ff(self):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             self.setup_events()
 
             self.team.revenue_analytics_config.events = [
@@ -277,7 +277,7 @@ class TestPersonsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
                 )
 
     def test_get_revenue_for_schema_source_for_id_join_with_managed_viewsets_ff(self):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             self.setup_schema_sources()
 
             self.join.source_table_key = "id"
@@ -472,7 +472,7 @@ class TestPersonsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_query_revenue_analytics_table_sources_with_managed_viewsets_ff(self):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             self.setup_schema_sources()
             self.join.source_table_key = "id"
             self.join.save()
@@ -536,7 +536,7 @@ class TestPersonsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
             )
 
     def test_query_revenue_analytics_table_events_with_managed_viewsets_ff(self):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             self.setup_events_with_subscriptions()
 
             self.team.revenue_analytics_config.events = [
@@ -603,7 +603,7 @@ class TestPersonsRevenueAnalytics(ClickhouseTestMixin, APIBaseTest):
 
     @parameterized.expand([e.value for e in PersonsOnEventsMode])
     def test_virtual_property_in_trend_with_managed_viewsets_ff(self, mode):
-        with patch("hanzoanalytics.feature_enabled", return_value=True):
+        with patch("hanzo_insights.feature_enabled", return_value=True):
             self.setup_events()
 
             self.team.revenue_analytics_config.events = [

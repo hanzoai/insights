@@ -9,10 +9,10 @@ from typing import Any
 from django.conf import settings
 
 import openai
-import hanzoanalytics
+import hanzo_insights
 from openai.types import CompletionUsage, ReasoningEffort
 from openai.types.chat import ChatCompletionDeveloperMessageParam, ChatCompletionSystemMessageParam
-from hanzoanalytics.ai.openai import OpenAI
+from hanzo_insights.ai.openai import OpenAI
 from pydantic import BaseModel
 
 from products.llm_analytics.backend.llm.errors import (
@@ -84,7 +84,7 @@ class OpenAIAdapter:
 
         default_headers = self._get_default_headers()
 
-        analytics_client = hanzoanalytics.default_client
+        analytics_client = hanzo_insights.default_client
         client: Any
         if analytics.capture and analytics_client:
             client = OpenAI(
@@ -220,7 +220,7 @@ Return ONLY the JSON object, no other text or markdown formatting."""
 
         default_headers = self._get_default_headers()
 
-        analytics_client = hanzoanalytics.default_client
+        analytics_client = hanzo_insights.default_client
         client: Any
         if analytics.capture and analytics_client:
             client = OpenAI(

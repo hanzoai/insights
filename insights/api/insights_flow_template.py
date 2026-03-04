@@ -3,7 +3,7 @@ from typing import Optional, cast
 from django.db.models import Q
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from loginas.utils import is_impersonated_session
 from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS, BasePermission
@@ -293,7 +293,7 @@ class InsightsFlowTemplateViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, viewset
             edges_count = len(serializer.instance.edges) if serializer.instance.edges else 0
             actions_count = len(serializer.instance.actions) if serializer.instance.actions else 0
 
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 distinct_id=str(serializer.context["request"].user.distinct_id),
                 event="insights_flow_template_created",
                 properties={

@@ -9,9 +9,9 @@ from django.db.models import OuterRef, Subquery
 from django.utils import timezone
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from celery import shared_task
-from hanzoanalytics import new_context, tag
+from hanzo_insights import new_context, tag
 
 from insights.batch_exports.models import BatchExportRun
 from insights.caching.login_device_cache import check_and_cache_login_device
@@ -302,7 +302,7 @@ def send_email_verification(user_id: int, token: str, next_url: str | None = Non
     )
     message.add_user_recipient(user, email_override=user.pending_email)
     message.send(send_async=False)
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=str(user.distinct_id),
         event="verification email sent",
         groups={"organization": str(user.current_organization.id)},  # type: ignore
@@ -330,7 +330,7 @@ def send_email_mfa_link(user_id: int, token: str) -> None:
     )
     message.add_user_recipient(user)
     message.send(send_async=False)
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=str(user.distinct_id),
         event="email mfa link sent",
         groups={"organization": str(user.current_organization.id)},  # type: ignore
@@ -676,7 +676,7 @@ def login_from_new_device_notification(
     elif user.current_organization is None:
         enabled = False
     else:
-        enabled = hanzoanalytics.feature_enabled(
+        enabled = hanzo_insights.feature_enabled(
             key="login-from-new-device-notification",
             distinct_id=str(user.distinct_id),
             groups={"organization": str(user.current_organization.id)},

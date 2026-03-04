@@ -96,7 +96,7 @@ dependencies = [
     "paramiko==3.4.0",
     "phonenumberslite==8.13.6",
     "pillow==12.1.1",
-    "hanzoanalytics",
+    "hanzo_insights",
     "polars==1.37.1",
     "psutil==6.0.0",
     "psycopg2-binary==2.9.10",
@@ -280,7 +280,7 @@ required-version = "~=0.10.2"
 [tool.uv.sources]
 infi-clickhouse-orm = { git = "https://github.com/hanzoai/infi.clickhouse_orm", rev = "9578c79f29635ee2c1d01b7979e89adab8383de2" }
 insightsql-parser = { path = "common/insightsql_parser" }
-hanzoanalytics = { path = "common/hanzoanalytics" }
+hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "master" }
 
 
 [tool.isort]

@@ -11,7 +11,7 @@ from typing import Optional
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from playwright.sync_api import (
     Browser,
     Page,
@@ -769,10 +769,10 @@ def record_replay_to_file(
             shutil.move(temp_output_path, opts.image_path)
         return result.inactivity_periods
     except Exception as e:
-        with hanzoanalytics.new_context():
-            hanzoanalytics.tag("url_to_render", opts.url_to_render)
-            hanzoanalytics.tag("video_target_path", opts.image_path)
-            hanzoanalytics.capture_exception(e)
+        with hanzo_insights.new_context():
+            hanzo_insights.tag("url_to_render", opts.url_to_render)
+            hanzo_insights.tag("video_target_path", opts.image_path)
+            hanzo_insights.capture_exception(e)
         raise
     finally:
         if temp_dir_ctx:

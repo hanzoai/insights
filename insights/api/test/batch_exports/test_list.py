@@ -134,7 +134,7 @@ def test_list_is_partitioned_by_team(client: HttpClient, organization, team, use
 @pytest.fixture
 def enable_backfilling_workflows(team):
     with mock.patch(
-        "insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True
+        "insights.batch_exports.http.hanzo_insights.feature_enabled", return_value=True
     ) as feature_enabled:
         yield
 

@@ -85,7 +85,7 @@ class TestEmail(BaseTest):
                 in message.html_body
             )
 
-    @patch("hanzoanalytics.capture")
+    @patch("hanzo_insights.capture")
     @patch("requests.post")
     def test_send_via_http_success(self, mock_post, mock_capture) -> None:
         mock_response = MagicMock()

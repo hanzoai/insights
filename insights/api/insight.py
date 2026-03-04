@@ -11,7 +11,7 @@ from django.utils.text import slugify
 from django.utils.timezone import now
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema_view
@@ -164,7 +164,7 @@ def log_and_report_insight_activity(
         organization = Organization.objects.get(id=organization_id)
         team = Team.objects.get(id=team_id)
         if not was_impersonated and user.distinct_id:
-            hanzoanalytics.capture(
+            hanzo_insights.capture(
                 f"insight {activity}",
                 distinct_id=user.distinct_id,
                 properties={"insight_id": insight_short_id, **properties},
@@ -177,7 +177,7 @@ def is_legacy_insight_endpoint_blocked(user: Any, team: Team) -> bool:
     if not distinct_id:
         return False
 
-    return hanzoanalytics.feature_enabled(
+    return hanzo_insights.feature_enabled(
         LEGACY_INSIGHT_ENDPOINTS_BLOCKED_FLAG,
         str(distinct_id),
         groups={
@@ -208,7 +208,7 @@ def capture_legacy_api_call(request: request.Request, team: Team) -> None:
             "user_agent": request.headers.get("user-agent"),
         }
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             event, distinct_id=distinct_id, properties=properties, groups=(groups(team.organization, team))
         )
     except Exception as e:

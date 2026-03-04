@@ -233,7 +233,7 @@ def test_create_external_job_activity_emit_signals_respects_ai_consent(
     inputs = CreateExternalDataJobModelActivityInputs(
         team_id=team.id, source_id=new_source.pk, schema_id=schema.id, billable=True
     )
-    with mock.patch("hanzoanalytics.feature_enabled", return_value=True):
+    with mock.patch("hanzo_insights.feature_enabled", return_value=True):
         result = activity_environment.run(create_external_data_job_model_activity, inputs)
     assert result.emit_signals_enabled is expected
 

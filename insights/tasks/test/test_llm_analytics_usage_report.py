@@ -466,7 +466,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report.get_ph_client")
-    @patch("hanzoanalytics.feature_enabled", return_value=False)
+    @patch("hanzo_insights.feature_enabled", return_value=False)
     def test_send_llm_analytics_usage_reports(
         self,
         mock_feature_enabled: MagicMock,
@@ -838,7 +838,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report.get_ph_client")
-    @patch("hanzoanalytics.feature_enabled", return_value=False)
+    @patch("hanzo_insights.feature_enabled", return_value=False)
     def test_send_llm_analytics_usage_reports_dry_run(
         self,
         mock_feature_enabled: MagicMock,
@@ -860,8 +860,8 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report._get_all_llm_analytics_reports")
-    @patch("hanzoanalytics.capture_exception")
-    @patch("hanzoanalytics.feature_enabled", return_value=True)
+    @patch("hanzo_insights.capture_exception")
+    @patch("hanzo_insights.feature_enabled", return_value=True)
     def test_send_llm_analytics_usage_reports_disabled_by_feature_flag(
         self,
         mock_feature_enabled: MagicMock,
@@ -887,7 +887,7 @@ class TestLLMAnalyticsUsageReport(APIBaseTest, ClickhouseTestMixin, ClickhouseDe
 
     @patch("insights.tasks.llm_analytics_usage_report.capture_llm_analytics_report")
     @patch("insights.tasks.llm_analytics_usage_report.get_ph_client")
-    @patch("hanzoanalytics.feature_enabled", return_value=False)
+    @patch("hanzo_insights.feature_enabled", return_value=False)
     def test_send_llm_analytics_usage_reports_with_at_parameter(
         self,
         mock_feature_enabled: MagicMock,

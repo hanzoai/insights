@@ -1,6 +1,6 @@
 from typing import cast
 
-import hanzoanalytics
+import hanzo_insights
 
 from insights.schema import (
     ActionsNode,
@@ -1038,7 +1038,7 @@ class TrendsQueryBuilder(DataWarehouseInsightQueryMixin):
         )
 
     def _team_flag_fewer_array_ops(self) -> bool:
-        return hanzoanalytics.feature_enabled(
+        return hanzo_insights.feature_enabled(
             "trends-breakdown-fewer-array-ops",
             str(self.team.uuid),
             groups={

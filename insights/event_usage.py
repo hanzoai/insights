@@ -4,7 +4,7 @@ Module to centralize event reporting on the server-side.
 
 from typing import Optional
 
-import hanzoanalytics
+import hanzo_insights
 
 from insights.models import Organization, User
 from insights.models.team import Team
@@ -52,7 +52,7 @@ def report_user_signed_up(
             props[f"org__{k}"] = v
 
     props = {**props, "$set": {**props, **user.get_analytics_metadata()}}
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="user signed up",
         properties=props,
@@ -67,7 +67,7 @@ def report_user_verified_email(current_user: User) -> None:
     if not current_user.distinct_id:
         return
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=current_user.distinct_id,
         event="user verified email",
         properties={
@@ -80,7 +80,7 @@ def alias_invite_id(user: User, invite_id: str) -> None:
     if not user.distinct_id:
         return
 
-    hanzoanalytics.alias(user.distinct_id, f"invite_{invite_id}")
+    hanzo_insights.alias(user.distinct_id, f"invite_{invite_id}")
 
 
 def report_user_joined_organization(organization: Organization, current_user: User) -> None:
@@ -90,7 +90,7 @@ def report_user_joined_organization(organization: Organization, current_user: Us
     if not current_user.distinct_id:
         return
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=current_user.distinct_id,
         event="user joined organization",
         properties={
@@ -115,7 +115,7 @@ def report_user_logged_in(
     if not user.distinct_id:
         return
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="user logged in",
         properties={"social_provider": social_provider},
@@ -131,7 +131,7 @@ def report_user_updated(user: User, updated_attrs: list[str]) -> None:
         return
 
     updated_attrs.sort()
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="user updated",
         properties={"updated_attrs": updated_attrs, "$set": user.get_analytics_metadata()},
@@ -146,7 +146,7 @@ def report_user_password_reset(user: User) -> None:
     if not user.distinct_id:
         return
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="user password reset",
         groups=groups(user.current_organization, user.current_team),
@@ -185,7 +185,7 @@ def report_team_member_invited(
 
     # Report for inviting user
     if inviting_user.distinct_id:
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=inviting_user.distinct_id,
             event="team member invited",
             properties=inviting_user_properties,
@@ -193,7 +193,7 @@ def report_team_member_invited(
         )
 
     # Report for invitee
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=f"invite_{invite_id}",  # see `alias_invite_id` too
         event="user invited",
         properties=properties,
@@ -217,7 +217,7 @@ def report_bulk_invited(
     if not user.distinct_id:
         return
 
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="bulk invite executed",
         properties={
@@ -244,7 +244,7 @@ def report_user_organization_membership_level_changed(
     """
     if not user.distinct_id:
         return
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="membership level changed",
         properties={
@@ -261,7 +261,7 @@ def report_user_action(user: User, event: str, properties: Optional[dict] = None
         return
     if properties is None:
         properties = {}
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event=event,
         properties=properties,
@@ -272,7 +272,7 @@ def report_user_action(user: User, event: str, properties: Optional[dict] = None
 def report_organization_deleted(user: User, organization: Organization):
     if not user.distinct_id:
         return
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="organization deleted",
         properties=organization.get_analytics_metadata(),
@@ -283,12 +283,12 @@ def report_organization_deleted(user: User, organization: Organization):
 def report_user_deleted_account(user: User):
     if not user.distinct_id:
         return
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=user.distinct_id,
         event="user account deleted",
         properties=user.get_analytics_metadata(),
     )
-    hanzoanalytics.flush()
+    hanzo_insights.flush()
 
 
 def groups(organization: Optional[Organization] = None, team: Optional[Team] = None):
@@ -316,10 +316,10 @@ def report_team_action(
     """
     if properties is None:
         properties = {}
-    hanzoanalytics.capture(distinct_id=str(team.uuid), event=event, properties=properties, groups=groups(team=team))
+    hanzo_insights.capture(distinct_id=str(team.uuid), event=event, properties=properties, groups=groups(team=team))
 
     if group_properties:
-        hanzoanalytics.group_identify("team", str(team.id), properties=group_properties)
+        hanzo_insights.group_identify("team", str(team.id), properties=group_properties)
 
 
 def report_organization_action(
@@ -333,7 +333,7 @@ def report_organization_action(
     """
     if properties is None:
         properties = {}
-    hanzoanalytics.capture(
+    hanzo_insights.capture(
         distinct_id=str(organization.id),
         event=event,
         properties=properties,
@@ -341,4 +341,4 @@ def report_organization_action(
     )
 
     if group_properties:
-        hanzoanalytics.group_identify("organization", str(organization.id), properties=group_properties)
+        hanzo_insights.group_identify("organization", str(organization.id), properties=group_properties)

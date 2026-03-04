@@ -21,7 +21,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator>=7.0.0",
     "structlog>=24.4.0",
     "httpx>=0.28.0",
-    "hanzoanalytics>=3.0.0",
+    "hanzo_insights>=3.0.0",
     "cachetools>=5.5.0",
     "python-multipart>=0.0.9",
 ]
@@ -98,4 +98,4 @@ warn_unused_ignores = true
 managed = true
 
 [tool.uv.sources]
-hanzoanalytics = { path = "../../common/hanzoanalytics" }
+hanzo_insights = { git = "https://github.com/hanzoai/insights-python", branch = "master" }

@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from django.conf import settings
 
-import hanzoanalytics
+import hanzo_insights
 from rest_framework import filters, request, response, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -89,7 +89,7 @@ class NodePagination(PageNumberPagination):
 
 
 def _is_v2_backend_enabled(user: User, team: Team) -> bool:
-    return hanzoanalytics.feature_enabled(
+    return hanzo_insights.feature_enabled(
         "data-modeling-backend-v2",
         str(user.distinct_id),
         groups={

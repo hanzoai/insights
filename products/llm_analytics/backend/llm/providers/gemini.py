@@ -8,11 +8,11 @@ from typing import Any
 
 from django.conf import settings
 
-import hanzoanalytics
+import hanzo_insights
 from google import genai
 from google.genai.errors import APIError
 from google.genai.types import GenerateContentConfig, HttpOptions
-from hanzoanalytics.ai.gemini import genai as insights_genai
+from hanzo_insights.ai.gemini import genai as insights_genai
 from pydantic import BaseModel
 
 from products.llm_analytics.backend.llm.errors import (
@@ -67,7 +67,7 @@ class GeminiAdapter:
         """Non-streaming completion with optional structured output."""
         effective_api_key = api_key or self._get_default_api_key()
 
-        analytics_client = hanzoanalytics.default_client
+        analytics_client = hanzo_insights.default_client
         http_options = HttpOptions(timeout=GeminiConfig.TIMEOUT)
         client: Any
         if analytics.capture and analytics_client:
@@ -144,7 +144,7 @@ class GeminiAdapter:
         effective_api_key = api_key or self._get_default_api_key()
         model_id = request.model
 
-        analytics_client = hanzoanalytics.default_client
+        analytics_client = hanzo_insights.default_client
         http_options = HttpOptions(timeout=GeminiConfig.TIMEOUT)
         client: Any
         if analytics.capture and analytics_client:

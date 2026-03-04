@@ -12,7 +12,7 @@ from django.utils.timezone import now
 
 import structlog
 import pydantic_core
-import hanzoanalytics
+import hanzo_insights
 from asgiref.sync import sync_to_async
 from drf_spectacular.utils import extend_schema
 from opentelemetry import trace
@@ -592,7 +592,7 @@ class DashboardSerializer(DashboardMetadataSerializer):
         self.user_permissions.set_preloaded_dashboard_tiles(list(tiles))
 
         team = self.context["get_team"]()
-        chained_tile_refresh_enabled = hanzoanalytics.feature_enabled(
+        chained_tile_refresh_enabled = hanzo_insights.feature_enabled(
             "chained_dashboard_tile_refresh",
             str(team.organization_id),
             groups={"organization": str(team.organization_id)},

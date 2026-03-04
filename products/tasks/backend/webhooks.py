@@ -6,7 +6,7 @@ from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 
 from insights.models.instance_setting import get_instance_setting
 
@@ -143,7 +143,7 @@ def github_pr_webhook(request: HttpRequest) -> HttpResponse:
             str(task_run.task.created_by.distinct_id) if task_run.task.created_by else f"team_{task_run.team_id}"
         )
 
-        hanzoanalytics.capture(
+        hanzo_insights.capture(
             distinct_id=distinct_id,
             event=analytics_event,
             properties={

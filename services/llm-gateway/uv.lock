@@ -428,6 +428,19 @@ wheels = [
 ]
 
 [[package]]
+name = "hanzo-insights"
+version = "7.9.7"
+source = { git = "https://github.com/hanzoai/insights-python?branch=master#98a2ca443c541b80b7d6ca221ffb89da41ad25d2" }
+dependencies = [
+    { name = "backoff" },
+    { name = "distro" },
+    { name = "python-dateutil" },
+    { name = "requests" },
+    { name = "six" },
+    { name = "typing-extensions" },
+]
+
+[[package]]
 name = "hanzo-llm"
 version = "1.81.15"
 source = { registry = "https://pypi.org/simple" }
@@ -449,17 +462,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/03/33/7464f7ce2376374ac
 wheels = [
     { url = "https://files.pythonhosted.org/packages/37/15/3cd25b2908b6ec404d073ca57bbe1580e332a0ee094d0a33c36cd32d2e22/hanzo_llm-1.81.15-py3-none-any.whl", hash = "sha256:be3849567dc6a59b711a34f85bff1a74ad417df322cc38f3aebd16f9fa29823c", size = 14677430, upload-time = "2026-02-26T04:25:46.164Z" },
 ]
-
-[[package]]
-name = "hanzoanalytics"
-version = "7.9.0"
-source = { directory = "../../common/hanzoanalytics" }
-dependencies = [
-    { name = "posthoganalytics" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "posthoganalytics", specifier = ">=7.0.0" }]
 
 [[package]]
 name = "hf-xet"
@@ -693,8 +695,8 @@ dependencies = [
     { name = "cachetools" },
     { name = "fastapi" },
     { name = "gunicorn" },
+    { name = "hanzo-insights" },
     { name = "hanzo-llm" },
-    { name = "hanzoanalytics" },
     { name = "httpx" },
     { name = "orjson" },
     { name = "prometheus-client" },
@@ -729,8 +731,8 @@ requires-dist = [
     { name = "cachetools", specifier = ">=5.5.0" },
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "gunicorn", specifier = ">=23.0.0" },
+    { name = "hanzo-insights", git = "https://github.com/hanzoai/insights-python?branch=master" },
     { name = "hanzo-llm", specifier = ">=1.81.0" },
-    { name = "hanzoanalytics", directory = "../../common/hanzoanalytics" },
     { name = "httpx", specifier = ">=0.28.0" },
     { name = "orjson", specifier = ">=3.10.0" },
     { name = "prometheus-client", specifier = ">=0.21.0" },
@@ -952,23 +954,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz", hash = "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3", size = 69412, upload-time = "2025-05-15T12:30:07.975Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z" },
-]
-
-[[package]]
-name = "posthoganalytics"
-version = "7.9.7"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "backoff" },
-    { name = "distro" },
-    { name = "python-dateutil" },
-    { name = "requests" },
-    { name = "six" },
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/fb/98/c204f8f6d09c449747c1922735b6be614eb0013309f162a1cedaf357b039/posthoganalytics-7.9.7.tar.gz", hash = "sha256:8fe98f35e1a1d50ad6a6d651049dc94d649dfa16e2e0acc19d2c54f021462da0", size = 175260, upload-time = "2026-03-05T22:10:07.457Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/e0/471f1504697e48ac2489f2a28c7b389baa478c9f68a981c5694739581469/posthoganalytics-7.9.7-py3-none-any.whl", hash = "sha256:33b05b3b094f588563a6b1c6c8d44290f5fb5c01fee8344b9308ed23b81b2c53", size = 201822, upload-time = "2026-03-05T22:10:05.48Z" },
 ]
 
 [[package]]

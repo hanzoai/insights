@@ -4,7 +4,7 @@ from datetime import datetime
 from django.core.cache import cache
 
 import structlog
-import hanzoanalytics
+import hanzo_insights
 from prometheus_client import Counter
 
 from insights.session_recordings.models.metadata import RecordingBlockListing
@@ -35,7 +35,7 @@ def listing_cache_key(recording: SessionRecording) -> str | None:
         # and `team.id` can trigger a database query, and the Django ORM is synchronous
         return f"@insights/v2-blob-snapshots/v1/recording_block_listing_{recording.team_id}_{recording.session_id}"
     except Exception as e:
-        hanzoanalytics.capture_exception(
+        hanzo_insights.capture_exception(
             e,
             properties={
                 "location": "session_recording_v2_service.listing_cache_key",
