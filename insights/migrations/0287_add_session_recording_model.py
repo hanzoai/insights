@@ -9,8 +9,8 @@ import insights.models.utils
 
 
 def migrate_playlist_item_recording_relations(apps, _) -> None:
-    Recording = apps.get_model("posthog", "SessionRecording")
-    PlaylistItem = apps.get_model("posthog", "SessionRecordingPlaylistItem")
+    Recording = apps.get_model("insights", "SessionRecording")
+    PlaylistItem = apps.get_model("insights", "SessionRecordingPlaylistItem")
 
     # Hard delete all deleted playlist items
     PlaylistItem.objects.filter(deleted=True).delete()
@@ -42,13 +42,13 @@ def migrate_playlist_item_recording_relations(apps, _) -> None:
 
 
 def reverse(apps, _) -> None:
-    Recording = apps.get_model("posthog", "SessionRecording")
+    Recording = apps.get_model("insights", "SessionRecording")
     Recording.objects.all().delete()
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0286_index_insightcachingstate_lookup"),
+        ("insights", "0286_index_insightcachingstate_lookup"),
     ]
 
     operations = [
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
                 ("created_at", models.DateTimeField(auto_now_add=True, null=True)),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
             options={
@@ -99,7 +99,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="playlist_items",
-                to="posthog.sessionrecording",
+                to="insights.sessionrecording",
                 to_field="session_id",
             ),
         ),

@@ -5,10 +5,10 @@ from django.db import connection, migrations
 
 def insert_salesforce_order_schemas(apps, schema_editor):
     with connection.cursor() as cursor:
-        cursor.execute("SELECT id, team_id FROM posthog_externaldatasource where source_type = 'Salesforce'")
+        cursor.execute("SELECT id, team_id FROM insights_externaldatasource where source_type = 'Salesforce'")
         salesforce_sources = cursor.fetchall()
 
-    ExternalDataSchema = apps.get_model("posthog", "ExternalDataSchema")
+    ExternalDataSchema = apps.get_model("insights", "ExternalDataSchema")
     for source in salesforce_sources:
         schema = ExternalDataSchema.objects.create(
             name="Order",
@@ -27,7 +27,7 @@ def reverse(apps, _):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0476_alter_integration_sensitive_config"),
+        ("insights", "0476_alter_integration_sensitive_config"),
     ]
 
     operations = [

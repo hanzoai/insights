@@ -1,7 +1,7 @@
 import dagster
 from dagster_docker import PipesDockerClient
 
-from products.posthog_ai.dags.run_evaluation import run_evaluation
+from products.insights_ai.dags.run_evaluation import run_evaluation
 
 from . import resources
 

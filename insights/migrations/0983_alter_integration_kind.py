@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0982_comment_conversations_index"),
+        ("insights", "0982_comment_conversations_index"),
     ]
 
     operations = [

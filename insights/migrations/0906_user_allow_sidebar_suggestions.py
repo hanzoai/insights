@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 def backfill_allow_sidebar_suggestions(apps, schema_editor):
-    User = apps.get_model("posthog", "User")
+    User = apps.get_model("insights", "User")
     batch_size = 1000
 
     # Using batch approach to avoid updating `updated_at` field on every user
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0905_alter_person_table"),
+        ("insights", "0905_alter_person_table"),
     ]
 
     operations = [

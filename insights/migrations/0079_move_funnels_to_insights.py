@@ -4,9 +4,9 @@ from django.db import migrations
 
 
 def forward(apps, schema_editor):
-    Funnel = apps.get_model("posthog", "Funnel")
-    Action = apps.get_model("posthog", "Action")
-    DashboardItem = apps.get_model("posthog", "DashboardItem")
+    Funnel = apps.get_model("insights", "Funnel")
+    Action = apps.get_model("insights", "Action")
+    DashboardItem = apps.get_model("insights", "DashboardItem")
     for item in Funnel.objects.all():
         filters = item.filters
         filters["insight"] = "FUNNELS"
@@ -40,7 +40,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0078_auto_20200731_1323"),
+        ("insights", "0078_auto_20200731_1323"),
     ]
 
     operations = [migrations.RunPython(forward, reverse, elidable=True)]

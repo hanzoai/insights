@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0976_copy_evaluation_contexts_data"),
+        ("insights", "0976_copy_evaluation_contexts_data"),
     ]
 
     operations = [
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="default_evaluation_contexts",
-                to="posthog.team",
+                to="insights.team",
             ),
         ),
     ]

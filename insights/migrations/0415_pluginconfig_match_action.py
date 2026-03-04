@@ -13,8 +13,8 @@ from django.db import migrations, models
 ### --
 ### -- Add field match_action to pluginconfig
 ### --
-### ALTER TABLE "posthog_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "posthog_pluginconfig_match_action_id_1cbf8562_fk_posthog_a" REFERENCES "posthog_action"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS "posthog_pluginconfig_match_action_id_1cbf8562_fk_posthog_a" IMMEDIATE;
-### CREATE INDEX "posthog_pluginconfig_match_action_id_1cbf8562" ON "posthog_pluginconfig" ("match_action_id");
+### ALTER TABLE "insights_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" REFERENCES "insights_action"("id") DEFERRABLE INITIALLY DEFERRED; SET CONSTRAINTS "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" IMMEDIATE;
+### CREATE INDEX "insights_pluginconfig_match_action_id_1cbf8562" ON "insights_pluginconfig" ("match_action_id");
 ### COMMIT;
 # and then modify the migration from the below commented version to a safe non-blocking version
 
@@ -22,7 +22,7 @@ from django.db import migrations, models
 # # ORIGINAL migration
 # class Migration(migrations.Migration):
 #     dependencies = [
-#         ("posthog", "0411_eventproperty_indexes"),
+#         ("insights", "0411_eventproperty_indexes"),
 #     ]
 
 #     operations = [
@@ -34,7 +34,7 @@ from django.db import migrations, models
 #                 null=True,
 #                 on_delete=django.db.models.deletion.SET_NULL,
 #                 related_name="plugin_configs",
-#                 to="posthog.action",
+#                 to="insights.action",
 #             ),
 #         ),
 #     ]
@@ -43,7 +43,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0414_personalapikey_mask_value"),
+        ("insights", "0414_personalapikey_mask_value"),
     ]
 
     operations = [
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="plugin_configs",
-                        to="posthog.action",
+                        to="insights.action",
                     ),
                 )
             ],
@@ -65,20 +65,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "posthog_pluginconfig_match_action_id_1cbf8562_fk_posthog_a" REFERENCES "posthog_action"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_pluginconfig_match_action_id_1cbf8562_fk_posthog_a" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_pluginconfig" ADD COLUMN "match_action_id" integer NULL CONSTRAINT "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" REFERENCES "insights_action"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_pluginconfig_match_action_id_1cbf8562_fk_insights_a" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_pluginconfig" DROP COLUMN IF EXISTS "match_action_id";
+                        ALTER TABLE "insights_pluginconfig" DROP COLUMN IF EXISTS "match_action_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_pluginconfig_match_action_id_1cbf8562" ON "posthog_pluginconfig" ("match_action_id");
+                    CREATE INDEX CONCURRENTLY "insights_pluginconfig_match_action_id_1cbf8562" ON "insights_pluginconfig" ("match_action_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_pluginconfig_match_action_id_1cbf8562";
+                        DROP INDEX IF EXISTS "insights_pluginconfig_match_action_id_1cbf8562";
                     """,
                 ),
             ],

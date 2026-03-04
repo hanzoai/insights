@@ -33,7 +33,7 @@ class GenericEmails:
 
 
 def forward(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     for team in Team.objects.all():
         filters = [
@@ -73,7 +73,7 @@ def reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0131_add_plugins_updated_created_at"),
+        ("insights", "0131_add_plugins_updated_created_at"),
     ]
 
     operations = [

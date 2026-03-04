@@ -7,13 +7,13 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0109_fix_retention_filters"),
+        ("insights", "0109_fix_retention_filters"),
     ]
 
     operations = [
         migrations.RunSQL(
-            "CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_ses_team_id_0409c4_idx ON posthog_sessionrecordingevent(team_id, timestamp);",
-            reverse_sql='DROP INDEX "posthog_ses_team_id_0409c4_idx";',
+            "CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_ses_team_id_0409c4_idx ON insights_sessionrecordingevent(team_id, timestamp);",
+            reverse_sql='DROP INDEX "insights_ses_team_id_0409c4_idx";',
             elidable=True,  # This table no longer exists
         )
     ]

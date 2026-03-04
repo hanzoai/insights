@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0813_alter_messagecategory_category_type_and_more"),
+        ("insights", "0813_alter_messagecategory_category_type_and_more"),
     ]
 
     operations = [
@@ -47,10 +47,10 @@ class Migration(migrations.Migration):
                         help_text="Original saved query this draft is editing (optional)",
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
-                        to="posthog.datawarehousesavedquery",
+                        to="insights.datawarehousesavedquery",
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "abstract": False,

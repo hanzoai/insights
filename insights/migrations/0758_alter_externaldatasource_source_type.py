@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0757_organization_session_cookie_age"),
+        ("insights", "0757_organization_session_cookie_age"),
     ]
 
     operations = [

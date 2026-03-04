@@ -39,7 +39,7 @@ class SavedHeatmap(UUIDTModel):
     deleted = models.BooleanField(default=False)
 
     class Meta:
-        db_table = "posthog_heatmapsaved"
+        db_table = "insights_heatmapsaved"
         indexes = [
             models.Index(fields=["team", "url"]),
             models.Index(fields=["status"]),

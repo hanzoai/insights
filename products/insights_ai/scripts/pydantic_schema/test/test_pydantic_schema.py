@@ -11,7 +11,7 @@ import pytest
 
 from pydantic import BaseModel, Field
 
-from products.posthog_ai.scripts.pydantic_schema import json_schema_type_label, pydantic_schema
+from products.insights_ai.scripts.pydantic_schema import json_schema_type_label, pydantic_schema
 
 
 @pytest.mark.parametrize(

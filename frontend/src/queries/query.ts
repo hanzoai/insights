@@ -169,7 +169,7 @@ async function executeQuery<N extends DataNode>(
      * This is important in shared contexts, where we cannot create arbitrary queries via POST – we can only GET.
      */
     pollOnly = false,
-    limitContext?: 'posthog_ai'
+    limitContext?: 'insights_ai'
 ): Promise<NonNullable<N['response']>> {
     if (!pollOnly) {
         // Determine the refresh type based on the query node type and refresh parameter
@@ -227,7 +227,7 @@ export async function performQuery<N extends DataNode>(
     filtersOverride?: DashboardFilter | null,
     variablesOverride?: Record<string, InsightsQLVariable> | null,
     pollOnly = false,
-    limitContext?: 'posthog_ai'
+    limitContext?: 'insights_ai'
 ): Promise<NonNullable<N['response']>> {
     let response: NonNullable<N['response']>
     const logParams: Record<string, any> = {}

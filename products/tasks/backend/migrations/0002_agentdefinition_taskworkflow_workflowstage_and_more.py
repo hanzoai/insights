@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0858_datamodelingjob_storage_delta_mib_and_more"),
+        ("insights", "0858_datamodelingjob_storage_delta_mib_and_more"),
         ("tasks", "0001_initial"),
     ]
 
@@ -36,10 +36,10 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True, help_text="Whether this agent is available for use")),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_agent_definition",
+                "db_table": "insights_agent_definition",
                 "ordering": ["name"],
                 "unique_together": {("team", "name")},
             },
@@ -58,10 +58,10 @@ class Migration(migrations.Migration):
                 ("version", models.IntegerField(default=1, help_text="Version number for tracking workflow changes")),
                 ("created_at", models.DateTimeField(default=django.utils.timezone.now)),
                 ("updated_at", models.DateTimeField(auto_now=True)),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
-                "db_table": "posthog_task_workflow",
+                "db_table": "insights_task_workflow",
                 "ordering": ["name"],
                 "unique_together": {("team", "name")},
             },
@@ -104,7 +104,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "posthog_workflow_stage",
+                "db_table": "insights_workflow_stage",
                 "ordering": ["position"],
                 "unique_together": {("workflow", "key"), ("workflow", "position")},
             },
@@ -189,7 +189,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "db_table": "posthog_workflow_transition",
+                "db_table": "insights_workflow_transition",
                 "ordering": ["from_stage__position", "to_stage__position"],
                 "unique_together": {("workflow", "from_stage", "to_stage")},
             },

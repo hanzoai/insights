@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0378_alter_user_theme_mode"),
+        ("insights", "0378_alter_user_theme_mode"),
     ]
 
     operations = [
@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         ),
         AddIndexConcurrently(
             model_name="scheduledchange",
-            index=models.Index(fields=["scheduled_at", "executed_at"], name="posthog_sch_schedul_c3687e_idx"),
+            index=models.Index(fields=["scheduled_at", "executed_at"], name="insights_sch_schedul_c3687e_idx"),
         ),
     ]

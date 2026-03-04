@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0694_fix_revenue_tracking_config"),
+        ("insights", "0694_fix_revenue_tracking_config"),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             model_name="experiment",
             name="exposure_cohort",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.cohort"
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.cohort"
             ),
         ),
         migrations.AlterField(
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             model_name="experiment",
             name="holdout",
             field=models.ForeignKey(
-                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="posthog.experimentholdout"
+                blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to="insights.experimentholdout"
             ),
         ),
         migrations.AlterField(

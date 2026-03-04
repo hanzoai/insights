@@ -15,13 +15,13 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from insights.dags.common import JobOwners
 
 from products.llm_analytics.backend.models import Dataset, DatasetItem
-from products.posthog_ai.dags.snapshot_team_data import (
+from products.insights_ai.dags.snapshot_team_data import (
     ClickhouseTeamDataSnapshot,
     PostgresTeamDataSnapshot,
     snapshot_clickhouse_team_data,
     snapshot_postgres_team_data,
 )
-from products.posthog_ai.dags.utils import EvaluationResults, format_results
+from products.insights_ai.dags.utils import EvaluationResults, format_results
 
 
 
@@ -224,7 +224,7 @@ def spawn_evaluation_container(
                 "report": dagster.MarkdownMetadataValue(formatted_markdown),
             },
             tags={
-                "owner": JobOwners.TEAM_POSTHOG_AI.value,
+                "owner": JobOwners.TEAM_INSIGHTS_AI.value,
             },
         )
     )
@@ -233,7 +233,7 @@ def spawn_evaluation_container(
 @dagster.job(
     description="Runs an AI evaluation",
     tags={
-        "owner": JobOwners.TEAM_POSTHOG_AI.value,
+        "owner": JobOwners.TEAM_INSIGHTS_AI.value,
         "dagster/max_runtime": 60 * 60,  # 1 hour
     },
     executor_def=dagster.multiprocess_executor.configured({"max_concurrent": 4}),
@@ -242,7 +242,7 @@ def spawn_evaluation_container(
             "prepare_dataset": PrepareDatasetConfig(dataset_id=""),
             "spawn_evaluation_container": EvaluationConfig(
                 evaluation_module="eval/offline/",
-                image_name="posthog-ai-evals",
+                image_name="insights-ai-evals",
                 image_tag="master",
             ),
         }

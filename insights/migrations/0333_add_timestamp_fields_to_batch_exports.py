@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0332_featureflag_has_enriched_analytics"),
+        ("insights", "0332_featureflag_has_enriched_analytics"),
     ]
 
     operations = [

@@ -38,7 +38,7 @@ def fix_contenttype_duplicates(apps, schema_editor):
 
     try:
         # Get both ContentType entries
-        old_ct = ContentType.objects.get(app_label="posthog", model="earlyaccessfeature")
+        old_ct = ContentType.objects.get(app_label="insights", model="earlyaccessfeature")
         new_ct = ContentType.objects.get(app_label="early_access_features", model="earlyaccessfeature")
 
         # Sanity check: ensure no permissions are assigned to users/groups
@@ -54,7 +54,7 @@ def fix_contenttype_duplicates(apps, schema_editor):
             cursor.execute(
                 """
                 SELECT COUNT(*)
-                FROM posthog_user_user_permissions uup
+                FROM insights_user_user_permissions uup
                 JOIN auth_permission p ON uup.permission_id = p.id
                 WHERE p.content_type_id IN (%s, %s)
             """,

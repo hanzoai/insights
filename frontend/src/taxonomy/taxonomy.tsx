@@ -48,7 +48,7 @@ const BILLING_PRODUCTS = [
     'llm_analytics',
     'logs',
     'platform_and_support',
-    'posthog_ai',
+    'insights_ai',
     'product_analytics',
     'realtime_destinations',
     'session_replay',

@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0951_insightsflowtemplate"),
+        ("insights", "0951_insightsflowtemplate"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("customer_analytics", "0001_team_customer_analytics_config"),
     ]
@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "abstract": False,

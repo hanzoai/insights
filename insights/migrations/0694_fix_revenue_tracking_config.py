@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def fix_revenue_tracking_config(apps, schema_editor):
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
     for team in Team.objects.all():
         if team.revenue_tracking_config:
             team.revenue_tracking_config[
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allows these changes to be made without holding a transaction the whole time
 
     dependencies = [
-        ("posthog", "0693_grouptypemapping_default_columns"),
+        ("insights", "0693_grouptypemapping_default_columns"),
     ]
 
     operations = [

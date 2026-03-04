@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0417_remove_organizationmembership_only_one_owner_per_organization_and_more"),
+        ("insights", "0417_remove_organizationmembership_only_one_owner_per_organization_and_more"),
     ]
 
     operations = [

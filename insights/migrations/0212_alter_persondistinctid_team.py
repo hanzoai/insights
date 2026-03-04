@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
     atomic = False  # DROP INDEX CONCURRENTLY cannot be run in a transaction
 
     dependencies = [
-        ("posthog", "0211_async_migrations_errors_length"),
+        ("insights", "0211_async_migrations_errors_length"),
     ]
 
     operations = [
@@ -36,9 +36,9 @@ class Migration(migrations.Migration):
         # --
         # -- Alter field team on persondistinctid
         # --
-        # SET CONSTRAINTS "posthog_persondistinctid_team_id_46330ec9_fk_posthog_team_id" IMMEDIATE; ALTER TABLE "posthog_persondistinctid" DROP CONSTRAINT "posthog_persondistinctid_team_id_46330ec9_fk_posthog_team_id";
-        # DROP INDEX IF EXISTS "posthog_persondistinctid_team_id_46330ec9";
-        # ALTER TABLE "posthog_persondistinctid" ADD CONSTRAINT "posthog_persondistinctid_team_id_46330ec9_fk_posthog_team_id" FOREIGN KEY ("team_id") REFERENCES "posthog_team" ("id") DEFERRABLE INITIALLY DEFERRED;
+        # SET CONSTRAINTS "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id" IMMEDIATE; ALTER TABLE "insights_persondistinctid" DROP CONSTRAINT "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id";
+        # DROP INDEX IF EXISTS "insights_persondistinctid_team_id_46330ec9";
+        # ALTER TABLE "insights_persondistinctid" ADD CONSTRAINT "insights_persondistinctid_team_id_46330ec9_fk_insights_team_id" FOREIGN KEY ("team_id") REFERENCES "insights_team" ("id") DEFERRABLE INITIALLY DEFERRED;
         # COMMIT;
         #
         #
@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                     field=models.ForeignKey(
                         db_index=False,
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 )
             ],
@@ -60,8 +60,8 @@ class Migration(migrations.Migration):
                 # but this appears to only work with explicit indices rather
                 # than indicies from `ForeignKey` as far as I can tell.
                 migrations.RunSQL(
-                    sql='DROP INDEX CONCURRENTLY IF EXISTS "posthog_persondistinctid_team_id_46330ec9";',
-                    reverse_sql="CREATE INDEX posthog_persondistinctid_team_id_46330ec9 ON public.posthog_persondistinctid USING btree (team_id);",
+                    sql='DROP INDEX CONCURRENTLY IF EXISTS "insights_persondistinctid_team_id_46330ec9";',
+                    reverse_sql="CREATE INDEX insights_persondistinctid_team_id_46330ec9 ON public.insights_persondistinctid USING btree (team_id);",
                 )
             ],
         )

@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     atomic = False  # Allow non-atomic migration for concurrent operations
 
     dependencies = [
-        ("posthog", "0742_exportedasset_exception"),
+        ("insights", "0742_exportedasset_exception"),
     ]
 
     operations = [
@@ -30,19 +30,19 @@ class Migration(migrations.Migration):
                         ("version", models.TextField()),
                         ("project", models.TextField()),
                         ("metadata", models.JSONField(null=True)),
-                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                        ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
                     ],
                 ),
                 migrations.AddField(
                     model_name="errortrackingsymbolset",
                     name="release",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.errortrackingrelease"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.errortrackingrelease"
                     ),
                 ),
                 migrations.AddIndex(
                     model_name="errortrackingrelease",
-                    index=models.Index(fields=["team_id", "hash_id"], name="posthog_err_team_id_e9f6b2_idx"),
+                    index=models.Index(fields=["team_id", "hash_id"], name="insights_err_team_id_e9f6b2_idx"),
                 ),
                 migrations.AddConstraint(
                     model_name="errortrackingrelease",
@@ -54,40 +54,40 @@ class Migration(migrations.Migration):
             database_operations=[
                 migrations.RunSQL(
                     sql="""
-                    CREATE TABLE "posthog_errortrackingrelease" (
+                    CREATE TABLE "insights_errortrackingrelease" (
                         "id" uuid NOT NULL PRIMARY KEY,
                         "hash_id" text NOT NULL,
                         "created_at" timestamp with time zone NOT NULL,
                         "version" text NOT NULL,
                         "project" text NOT NULL,
                         "metadata" jsonb NULL,
-                        "team_id" integer NOT NULL REFERENCES "posthog_team" ("id") DEFERRABLE INITIALLY DEFERRED
+                        "team_id" integer NOT NULL REFERENCES "insights_team" ("id") DEFERRABLE INITIALLY DEFERRED
                     );
                     """,
-                    reverse_sql='DROP TABLE IF EXISTS "posthog_errortrackingrelease";',
+                    reverse_sql='DROP TABLE IF EXISTS "insights_errortrackingrelease";',
                 ),
                 migrations.RunSQL(
                     sql="""
-                    CREATE UNIQUE INDEX CONCURRENTLY "posthog_err_team_id_e9f6b2_idx"
-                    ON "posthog_errortrackingrelease" ("team_id", "hash_id");
+                    CREATE UNIQUE INDEX CONCURRENTLY "insights_err_team_id_e9f6b2_idx"
+                    ON "insights_errortrackingrelease" ("team_id", "hash_id");
                     """,
-                    reverse_sql='DROP INDEX IF EXISTS "posthog_err_team_id_e9f6b2_idx";',
+                    reverse_sql='DROP INDEX IF EXISTS "insights_err_team_id_e9f6b2_idx";',
                 ),
                 migrations.RunSQL(
                     sql="""
-                    ALTER TABLE "posthog_errortrackingsymbolset" ADD COLUMN "release_id" uuid NULL CONSTRAINT "posthog_errortrackingsymbolset_release_id_fk" REFERENCES "posthog_errortrackingrelease" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_errortrackingsymbolset_release_id_fk" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_errortrackingsymbolset" ADD COLUMN "release_id" uuid NULL CONSTRAINT "insights_errortrackingsymbolset_release_id_fk" REFERENCES "insights_errortrackingrelease" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_errortrackingsymbolset_release_id_fk" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                    ALTER TABLE "posthog_errortrackingsymbolset" DROP COLUMN IF EXISTS "release_id";
+                    ALTER TABLE "insights_errortrackingsymbolset" DROP COLUMN IF EXISTS "release_id";
                     """,
                 ),
                 migrations.RunSQL(
                     sql="""
-                    CREATE INDEX CONCURRENTLY "posthog_errortrackingsymbolset_release_id_idx"
-                    ON "posthog_errortrackingsymbolset" ("release_id");
+                    CREATE INDEX CONCURRENTLY "insights_errortrackingsymbolset_release_id_idx"
+                    ON "insights_errortrackingsymbolset" ("release_id");
                     """,
-                    reverse_sql='DROP INDEX IF EXISTS "posthog_errortrackingsymbolset_release_id_idx";',
+                    reverse_sql='DROP INDEX IF EXISTS "insights_errortrackingsymbolset_release_id_idx";',
                 ),
             ],
         ),

@@ -1003,7 +1003,7 @@ class QueryRunner(ABC, Generic[Q, R, CR]):
             cache_key=cache_manager.cache_key,
             refresh_requested=refresh_requested,
             is_query_service=self.is_query_service,
-            is_posthog_ai=self.limit_context == LimitContext.POSTHOG_AI,
+            is_insights_ai=self.limit_context == LimitContext.INSIGHTS_AI,
         )
 
     def get_async_query_status(self, *, cache_key: str) -> Optional[QueryStatus]:

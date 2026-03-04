@@ -10,12 +10,12 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("posthog", "0991_remove_approvalpolicy_bypass_roles"),
+        ("insights", "0991_remove_approvalpolicy_bypass_roles"),
     ]
 
     operations = [
         migrations.RunSQL(
-            sql="ALTER TABLE posthog_approvalpolicy DROP COLUMN IF EXISTS bypass_roles;",
-            reverse_sql="ALTER TABLE posthog_approvalpolicy ADD COLUMN IF NOT EXISTS bypass_roles jsonb DEFAULT '[]'::jsonb;",
+            sql="ALTER TABLE insights_approvalpolicy DROP COLUMN IF EXISTS bypass_roles;",
+            reverse_sql="ALTER TABLE insights_approvalpolicy ADD COLUMN IF NOT EXISTS bypass_roles jsonb DEFAULT '[]'::jsonb;",
         ),
     ]

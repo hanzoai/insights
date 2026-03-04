@@ -9,7 +9,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0319_user_requested_password_reset_at"),
+        ("insights", "0319_user_requested_password_reset_at"),
     ]
 
     operations = [
@@ -65,7 +65,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_linked_flag",
                         related_query_name="survey",
-                        to="posthog.featureflag",
+                        to="insights.featureflag",
                     ),
                 ),
                 (
@@ -76,7 +76,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_targeting_flag",
                         related_query_name="survey",
-                        to="posthog.featureflag",
+                        to="insights.featureflag",
                     ),
                 ),
                 (
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="surveys",
                         related_query_name="survey",
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0246_integrations"),
+        ("insights", "0246_integrations"),
     ]
 
     operations = [
@@ -31,11 +31,11 @@ class Migration(migrations.Migration):
                 ("hash_key", models.CharField(max_length=400)),
                 (
                     "person",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.person"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.person"),
                 ),
                 (
                     "team",
-                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team"),
+                    models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team"),
                 ),
             ],
         ),

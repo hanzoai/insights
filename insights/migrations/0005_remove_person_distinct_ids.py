@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0004_auto_20200125_0415"),
+        ("insights", "0004_auto_20200125_0415"),
     ]
 
     operations = [

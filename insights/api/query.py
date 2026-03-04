@@ -142,8 +142,8 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
             self._tag_client_query_id(client_query_id)
             query_dict = query.model_dump()
 
-            if data.limit_context == SchemaLimitContext.POSTHOG_AI:
-                limit_context: LimitContext | None = LimitContext.POSTHOG_AI
+            if data.limit_context == SchemaLimitContext.INSIGHTS_AI:
+                limit_context: LimitContext | None = LimitContext.INSIGHTS_AI
             elif (
                 is_insight_query(query_dict)
                 or is_insight_actors_query(query_dict)

@@ -107,7 +107,7 @@ class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
     masking = models.JSONField(null=True, blank=True)
     template_id = models.CharField(max_length=400, null=True, blank=True)
     insights_function_template = models.ForeignKey(
-        "posthog.InsightsFunctionTemplate",
+        "insights.InsightsFunctionTemplate",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -116,7 +116,7 @@ class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
     execution_order = models.PositiveSmallIntegerField(null=True, blank=True)
 
     batch_export = models.ForeignKey(
-        "posthog.BatchExport",
+        "insights.BatchExport",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

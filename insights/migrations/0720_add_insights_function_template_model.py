@@ -7,7 +7,7 @@ import insights.models.utils
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0719_replace_person_with_person_display_name_in_live_events_columns"),
+        ("insights", "0719_replace_person_with_person_display_name_in_live_events_columns"),
     ]
 
     operations = [
@@ -43,10 +43,10 @@ class Migration(migrations.Migration):
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["template_id", "sha"], name="posthog_hog_templat_55950b_idx"),
-                    models.Index(fields=["type", "status"], name="posthog_hog_type_8cac9a_idx"),
-                    models.Index(fields=["created_at"], name="posthog_hog_created_6a9df3_idx"),
-                    models.Index(fields=["template_id", "created_at"], name="posthog_hog_templat_d1778e_idx"),
+                    models.Index(fields=["template_id", "sha"], name="insights_hog_templat_55950b_idx"),
+                    models.Index(fields=["type", "status"], name="insights_hog_type_8cac9a_idx"),
+                    models.Index(fields=["created_at"], name="insights_hog_created_6a9df3_idx"),
+                    models.Index(fields=["template_id", "created_at"], name="insights_hog_templat_d1778e_idx"),
                 ],
                 "unique_together": {("template_id", "sha")},
             },

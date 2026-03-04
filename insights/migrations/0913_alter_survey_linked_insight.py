@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0912_alter_survey_linked_insight_type"),
+        ("insights", "0912_alter_survey_linked_insight_type"),
     ]
 
     operations = [
@@ -22,17 +22,17 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="surveys_linked_insight",
                         related_query_name="survey_linked_insight",
-                        to="posthog.insight",
+                        to="insights.insight",
                     ),
                 ),
             ],
             database_operations=[
                 migrations.RunSQL(
                     sql="""
-                        ALTER TABLE "posthog_survey" ADD CONSTRAINT "posthog_survey_linked_insight_id_586524f3_fk_posthog_d" FOREIGN KEY ("linked_insight_id") REFERENCES "posthog_dashboarditem" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID; -- existing-table-constraint-ignore
+                        ALTER TABLE "insights_survey" ADD CONSTRAINT "insights_survey_linked_insight_id_586524f3_fk_insights_d" FOREIGN KEY ("linked_insight_id") REFERENCES "insights_dashboarditem" ("id") DEFERRABLE INITIALLY DEFERRED NOT VALID; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_survey" DROP CONSTRAINT IF EXISTS "posthog_survey_linked_insight_id_586524f3_fk_posthog_d";
+                        ALTER TABLE "insights_survey" DROP CONSTRAINT IF EXISTS "insights_survey_linked_insight_id_586524f3_fk_insights_d";
                     """,
                 ),
             ],

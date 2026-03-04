@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0514_errortrackingstackframe_context")]
+    dependencies = [("insights", "0514_errortrackingstackframe_context")]
 
     operations = [
         migrations.SeparateDatabaseAndState(
@@ -20,19 +20,19 @@ class Migration(migrations.Migration):
                 # indexes CONCURRENTLY in the preceding grouptypemapping_project_backfill migration.
                 # We signal safety here with `-- existing-table-constraint-ignore`
                 migrations.RunSQL(
-                    sql='ALTER TABLE "posthog_grouptypemapping" ADD CONSTRAINT "unique group types for project" UNIQUE ("project_id", "group_type"); -- existing-table-constraint-ignore',
-                    reverse_sql='ALTER TABLE "posthog_grouptypemapping" DROP CONSTRAINT "unique group types for project";',
+                    sql='ALTER TABLE "insights_grouptypemapping" ADD CONSTRAINT "unique group types for project" UNIQUE ("project_id", "group_type"); -- existing-table-constraint-ignore',
+                    reverse_sql='ALTER TABLE "insights_grouptypemapping" DROP CONSTRAINT "unique group types for project";',
                 ),
                 migrations.RunSQL(
-                    sql='ALTER TABLE "posthog_grouptypemapping" ADD CONSTRAINT "unique event column indexes for project" UNIQUE ("project_id", "group_type_index"); -- existing-table-constraint-ignore',
-                    reverse_sql='ALTER TABLE "posthog_grouptypemapping" DROP CONSTRAINT "unique event column indexes for project";',
+                    sql='ALTER TABLE "insights_grouptypemapping" ADD CONSTRAINT "unique event column indexes for project" UNIQUE ("project_id", "group_type_index"); -- existing-table-constraint-ignore',
+                    reverse_sql='ALTER TABLE "insights_grouptypemapping" DROP CONSTRAINT "unique event column indexes for project";',
                 ),
             ],
             state_operations=[
                 migrations.AlterField(
                     model_name="grouptypemapping",
                     name="project",
-                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.project"),
+                    field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.project"),
                 ),
                 migrations.AddConstraint(
                     model_name="grouptypemapping",

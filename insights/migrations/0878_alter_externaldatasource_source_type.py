@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0877_delete_named_query_from_state"),
+        ("insights", "0877_delete_named_query_from_state"),
     ]
 
     operations = [

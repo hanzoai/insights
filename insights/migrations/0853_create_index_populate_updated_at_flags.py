@@ -5,7 +5,7 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0852_alter_integration_kind"),
+        ("insights", "0852_alter_integration_kind"),
     ]
 
     atomic = False
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             """
             CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_activitylog_featureflag_updates
-            ON posthog_activitylog (team_id, item_id, created_at DESC)
+            ON insights_activitylog (team_id, item_id, created_at DESC)
             WHERE scope = 'FeatureFlag' AND activity = 'updated';
             """,
             reverse_sql="DROP INDEX IF EXISTS idx_activitylog_featureflag_updates;",

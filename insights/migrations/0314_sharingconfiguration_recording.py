@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0313_early_access_feature"),
+        ("insights", "0313_early_access_feature"),
     ]
 
     operations = [
@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="sharing_configurations",
-                to="posthog.sessionrecording",
+                to="insights.sessionrecording",
                 to_field="session_id",
             ),
         ),

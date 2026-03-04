@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("posthog", "0741_experimentsavedmetric_metadata")]
+    dependencies = [("insights", "0741_experimentsavedmetric_metadata")]
 
     operations = [
         migrations.AddField(

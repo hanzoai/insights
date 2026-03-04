@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0395_alter_batchexportbackfill_end_at"),
+        ("insights", "0395_alter_batchexportbackfill_end_at"),
     ]
 
     operations = [
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="projects",
                         related_query_name="project",
-                        to="posthog.organization",
+                        to="insights.organization",
                     ),
                 ),
             ],
@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 related_name="teams",
                 related_query_name="team",
-                to="posthog.project",
+                to="insights.project",
             ),
         ),
     ]

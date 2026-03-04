@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0191_rename_specialmigration_asyncmigration"),
+        ("insights", "0191_rename_specialmigration_asyncmigration"),
     ]
 
     operations = [
@@ -29,24 +29,24 @@ class Migration(migrations.Migration):
                     "team",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        to="posthog.team",
+                        to="insights.team",
                     ),
                 ),
             ],
         ),
         migrations.AddIndex(
             model_name="eventproperty",
-            index=models.Index(fields=["team", "event"], name="posthog_eve_team_id_22de03_idx"),
+            index=models.Index(fields=["team", "event"], name="insights_eve_team_id_22de03_idx"),
         ),
         migrations.AddIndex(
             model_name="eventproperty",
-            index=models.Index(fields=["team", "property"], name="posthog_eve_team_id_26dbfb_idx"),
+            index=models.Index(fields=["team", "property"], name="insights_eve_team_id_26dbfb_idx"),
         ),
         migrations.AddConstraint(
             model_name="eventproperty",
             constraint=models.UniqueConstraint(
                 fields=("team", "event", "property"),
-                name="posthog_event_property_unique_team_event_property",
+                name="insights_event_property_unique_team_event_property",
             ),
         ),
     ]

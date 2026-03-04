@@ -9,7 +9,7 @@ import insights.helpers.encrypted_fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0550_migrate_action_webhooks_to_destinations"),
+        ("insights", "0550_migrate_action_webhooks_to_destinations"),
     ]
 
     operations = [
@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ("state", models.JSONField(blank=True, null=True)),
                 ("import_config", models.JSONField()),
                 ("secrets", insights.helpers.encrypted_fields.EncryptedJSONStringField()),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
             options={
                 "abstract": False,

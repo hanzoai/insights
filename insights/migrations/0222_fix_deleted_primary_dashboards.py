@@ -12,7 +12,7 @@ def fix_for_deleted_primary_dashboards(apps, _):
     logger = structlog.get_logger(__name__)
     logger.info("starting 0222_fix_deleted_primary_dashboards")
 
-    Team = apps.get_model("posthog", "Team")
+    Team = apps.get_model("insights", "Team")
 
     expected_team_dashboards = []
     with connection.cursor() as cursor:
@@ -25,25 +25,25 @@ def fix_for_deleted_primary_dashboards(apps, _):
         # - Remove deleted dashboards
         cursor.execute(
             """
-            SELECT posthog_team.id,
+            SELECT insights_team.id,
                 COALESCE(
                     MIN(
                         CASE
-                            WHEN posthog_dashboard.pinned THEN posthog_dashboard.id
+                            WHEN insights_dashboard.pinned THEN insights_dashboard.id
                             ELSE NULL
                         END
                     ),
                     MIN(
                         CASE
-                            WHEN NOT posthog_dashboard.pinned THEN posthog_dashboard.id
+                            WHEN NOT insights_dashboard.pinned THEN insights_dashboard.id
                             ELSE NULL
                         END
                     )
                 ) AS primary_dashboard_id
-            FROM posthog_team
-            INNER JOIN posthog_dashboard ON posthog_dashboard.team_id = posthog_team.id
-            WHERE NOT posthog_dashboard.deleted
-            GROUP BY posthog_team.id
+            FROM insights_team
+            INNER JOIN insights_dashboard ON insights_dashboard.team_id = insights_team.id
+            WHERE NOT insights_dashboard.deleted
+            GROUP BY insights_team.id
             """
         )
         expected_team_dashboards = cursor.fetchall()
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("posthog", "0221_add_activity_log_model"),
+        ("insights", "0221_add_activity_log_model"),
     ]
 
     operations = [migrations.RunPython(fix_for_deleted_primary_dashboards, reverse, elidable=True)]

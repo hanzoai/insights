@@ -10,7 +10,7 @@ import insights.models.utils
 class Migration(migrations.Migration):
     atomic = False  # Added to support concurrent index creation
     dependencies = [
-        ("posthog", "0887_drop_named_query"),
+        ("insights", "0887_drop_named_query"),
     ]
 
     operations = [
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                         blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
                     ),
                 ),
-                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="posthog.team")),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="insights.team")),
             ],
         ),
         migrations.AddConstraint(
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="saved_queries",
-                        to="posthog.datawarehousemanagedviewset",
+                        to="insights.datawarehousemanagedviewset",
                     ),
                 ),
             ],
@@ -59,20 +59,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_datawarehousesavedquery" ADD COLUMN "managed_viewset_id" uuid NULL CONSTRAINT "posthog_datawarehousesavedquery_managed_viewset_id_1cbf8562_fk_posthog_a" REFERENCES "posthog_datawarehousemanagedviewset"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_datawarehousesavedquery_managed_viewset_id_1cbf8562_fk_posthog_a" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_datawarehousesavedquery" ADD COLUMN "managed_viewset_id" uuid NULL CONSTRAINT "insights_datawarehousesavedquery_managed_viewset_id_1cbf8562_fk_insights_a" REFERENCES "insights_datawarehousemanagedviewset"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_datawarehousesavedquery_managed_viewset_id_1cbf8562_fk_insights_a" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_datawarehousesavedquery" DROP COLUMN IF EXISTS "managed_viewset_id";
+                        ALTER TABLE "insights_datawarehousesavedquery" DROP COLUMN IF EXISTS "managed_viewset_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_datawarehousesavedquery_managed_viewset_id_1cbf8562" ON "posthog_datawarehousesavedquery" ("managed_viewset_id");
+                    CREATE INDEX CONCURRENTLY "insights_datawarehousesavedquery_managed_viewset_id_1cbf8562" ON "insights_datawarehousesavedquery" ("managed_viewset_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_datawarehousesavedquery_managed_viewset_id_1cbf8562";
+                        DROP INDEX IF EXISTS "insights_datawarehousesavedquery_managed_viewset_id_1cbf8562";
                     """,
                 ),
             ],

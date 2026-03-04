@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0804_add_rich_content_json_to_comment"),
+        ("insights", "0804_add_rich_content_json_to_comment"),
     ]
 
     operations = [

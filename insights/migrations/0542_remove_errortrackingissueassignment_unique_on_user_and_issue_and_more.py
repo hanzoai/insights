@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
+        ("insights", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
     ]
 
     operations = [
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                     model_name="errortrackingissueassignment",
                     name="user_group",
                     field=models.ForeignKey(
-                        null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"
+                        null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"
                     ),
                 ),
                 migrations.AlterField(
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                     field=models.OneToOneField(
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="assignment",
-                        to="posthog.errortrackingissue",
+                        to="insights.errortrackingissue",
                     ),
                 ),
                 migrations.AlterField(
@@ -45,51 +45,51 @@ class Migration(migrations.Migration):
                 # Remove constraint unique_on_user_and_issue from model errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_errortrackingissueassignment" DROP CONSTRAINT "unique_on_user_and_issue";
+                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "unique_on_user_and_issue";
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_errortrackingissueassignment" ADD CONSTRAINT "unique_on_user_and_issue" UNIQUE ("issue_id", "user_id");
+                        ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "unique_on_user_and_issue" UNIQUE ("issue_id", "user_id");
                     """,
                 ),
                 # Add field user_group to errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_errortrackingissueassignment" ADD COLUMN "user_group_id" uuid NULL CONSTRAINT "posthog_errortrackin_user_group_id_459a0006_fk_posthog_u" REFERENCES "posthog_usergroup"("id") DEFERRABLE INITIALLY DEFERRED;
-                    SET CONSTRAINTS "posthog_errortrackin_user_group_id_459a0006_fk_posthog_u" IMMEDIATE;
+                    ALTER TABLE "insights_errortrackingissueassignment" ADD COLUMN "user_group_id" uuid NULL CONSTRAINT "insights_errortrackin_user_group_id_459a0006_fk_insights_u" REFERENCES "insights_usergroup"("id") DEFERRABLE INITIALLY DEFERRED;
+                    SET CONSTRAINTS "insights_errortrackin_user_group_id_459a0006_fk_insights_u" IMMEDIATE;
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_errortrackingissueassignment" DROP COLUMN "user_group_id" CASCADE;
+                        ALTER TABLE "insights_errortrackingissueassignment" DROP COLUMN "user_group_id" CASCADE;
                     """,
                 ),
                 # Alter field issue on errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "posthog_errortrackin_issue_id_d9cce9cb_fk_posthog_e" IMMEDIATE;
-                    ALTER TABLE "posthog_errortrackingissueassignment" DROP CONSTRAINT "posthog_errortrackin_issue_id_d9cce9cb_fk_posthog_e";
-                    DROP INDEX IF EXISTS "posthog_errortrackingissueassignment_issue_id_d9cce9cb";
-                    ALTER TABLE "posthog_errortrackingissueassignment" ADD CONSTRAINT "posthog_errortrackingissueassignment_issue_id_d9cce9cb_uniq" UNIQUE ("issue_id"); -- existing-table-constraint-ignore
-                    ALTER TABLE "posthog_errortrackingissueassignment" ADD CONSTRAINT "posthog_errortrackin_issue_id_d9cce9cb_fk_posthog_e" FOREIGN KEY ("issue_id") REFERENCES "posthog_errortrackingissue" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" IMMEDIATE;
+                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e";
+                    DROP INDEX IF EXISTS "insights_errortrackingissueassignment_issue_id_d9cce9cb";
+                    ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackingissueassignment_issue_id_d9cce9cb_uniq" UNIQUE ("issue_id"); -- existing-table-constraint-ignore
+                    ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" FOREIGN KEY ("issue_id") REFERENCES "insights_errortrackingissue" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "posthog_errortrackin_issue_id_d9cce9cb_fk_posthog_e" IMMEDIATE;
-                        ALTER TABLE "posthog_errortrackingissueassignment" DROP CONSTRAINT "posthog_errortrackin_issue_id_d9cce9cb_fk_posthog_e";
-                        CREATE INDEX "posthog_errortrackingissueassignment_issue_id_d9cce9cb" ON "posthog_errortrackingissueassignment" ("issue_id");
-                        ALTER TABLE "posthog_errortrackingissueassignment" ADD CONSTRAINT "posthog_errortrackin_issue_id_d9cce9cb_fk_posthog_e" FOREIGN KEY ("issue_id") REFERENCES "posthog_errortrackingissue" ("id") DEFERRABLE INITIALLY DEFERRED;
+                        SET CONSTRAINTS "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" IMMEDIATE;
+                        ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e";
+                        CREATE INDEX "insights_errortrackingissueassignment_issue_id_d9cce9cb" ON "insights_errortrackingissueassignment" ("issue_id");
+                        ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_issue_id_d9cce9cb_fk_insights_e" FOREIGN KEY ("issue_id") REFERENCES "insights_errortrackingissue" ("id") DEFERRABLE INITIALLY DEFERRED;
                     """,
                 ),
                 # Alter field user on errortrackingissueassignment
                 migrations.RunSQL(
                     """
-                    SET CONSTRAINTS "posthog_errortrackin_user_id_83f2e696_fk_posthog_u" IMMEDIATE;
-                    ALTER TABLE "posthog_errortrackingissueassignment" DROP CONSTRAINT "posthog_errortrackin_user_id_83f2e696_fk_posthog_u";
-                    ALTER TABLE "posthog_errortrackingissueassignment" ALTER COLUMN "user_id" DROP NOT NULL;
-                    ALTER TABLE "posthog_errortrackingissueassignment" ADD CONSTRAINT "posthog_errortrackin_user_id_83f2e696_fk_posthog_u" FOREIGN KEY ("user_id") REFERENCES "posthog_user" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "insights_errortrackin_user_id_83f2e696_fk_insights_u" IMMEDIATE;
+                    ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u";
+                    ALTER TABLE "insights_errortrackingissueassignment" ALTER COLUMN "user_id" DROP NOT NULL;
+                    ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u" FOREIGN KEY ("user_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        SET CONSTRAINTS "posthog_errortrackin_user_id_83f2e696_fk_posthog_u" IMMEDIATE;
-                        ALTER TABLE "posthog_errortrackingissueassignment" DROP CONSTRAINT "posthog_errortrackin_user_id_83f2e696_fk_posthog_u";
-                        ALTER TABLE "posthog_errortrackingissueassignment" ALTER COLUMN "user_id" SET NOT NULL;
-                        ALTER TABLE "posthog_errortrackingissueassignment" ADD CONSTRAINT "posthog_errortrackin_user_id_83f2e696_fk_posthog_u" FOREIGN KEY ("user_id") REFERENCES "posthog_user" ("id") DEFERRABLE INITIALLY DEFERRED;
+                        SET CONSTRAINTS "insights_errortrackin_user_id_83f2e696_fk_insights_u" IMMEDIATE;
+                        ALTER TABLE "insights_errortrackingissueassignment" DROP CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u";
+                        ALTER TABLE "insights_errortrackingissueassignment" ALTER COLUMN "user_id" SET NOT NULL;
+                        ALTER TABLE "insights_errortrackingissueassignment" ADD CONSTRAINT "insights_errortrackin_user_id_83f2e696_fk_insights_u" FOREIGN KEY ("user_id") REFERENCES "insights_user" ("id") DEFERRABLE INITIALLY DEFERRED;
                     """,
                 ),
             ],
@@ -100,7 +100,7 @@ class Migration(migrations.Migration):
 # ORIGINAL MIGRATION
 # class Migration(migrations.Migration):
 #     dependencies = [
-#         ("posthog", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
+#         ("insights", "0541_usergroup_usergroupmembership_usergroup_members_and_more"),
 #     ]
 
 #     operations = [
@@ -111,13 +111,13 @@ class Migration(migrations.Migration):
 #         migrations.AddField(
 #             model_name="errortrackingissueassignment",
 #             name="user_group",
-#             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="posthog.usergroup"),
+#             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to="insights.usergroup"),
 #         ),
 #         migrations.AlterField(
 #             model_name="errortrackingissueassignment",
 #             name="issue",
 #             field=models.OneToOneField(
-#                 on_delete=django.db.models.deletion.CASCADE, related_name="assignment", to="posthog.errortrackingissue"
+#                 on_delete=django.db.models.deletion.CASCADE, related_name="assignment", to="insights.errortrackingissue"
 #             ),
 #         ),
 #         migrations.AlterField(

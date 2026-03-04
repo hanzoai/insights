@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("posthog", "0822_person_properties_size_constraint"),
+        ("insights", "0822_person_properties_size_constraint"),
     ]
 
     operations = [

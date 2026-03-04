@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
     atomic = False
     dependencies = [
-        ("posthog", "0752_organization_members_can_invite"),
+        ("insights", "0752_organization_members_can_invite"),
     ]
 
     operations = [
         migrations.RunSQL(
-            "DROP INDEX CONCURRENTLY IF EXISTS posthog_person_email;",
-            reverse_sql="CREATE INDEX CONCURRENTLY IF NOT EXISTS posthog_person_email ON posthog_person((properties->>'email'));",
+            "DROP INDEX CONCURRENTLY IF EXISTS insights_person_email;",
+            reverse_sql="CREATE INDEX CONCURRENTLY IF NOT EXISTS insights_person_email ON insights_person((properties->>'email'));",
         )
     ]

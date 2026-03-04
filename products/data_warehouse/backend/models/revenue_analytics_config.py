@@ -24,7 +24,7 @@ class ExternalDataSourceRevenueAnalyticsConfig(models.Model):
     include_invoiceless_charges = field_access_control(models.BooleanField(default=True), "revenue_analytics", "editor")
 
     class Meta:
-        db_table = "posthog_externaldatasourcerevenueanalyticsconfig"
+        db_table = "insights_externaldatasourcerevenueanalyticsconfig"
 
 
 # This is best effort, we always attempt to create the config manually
