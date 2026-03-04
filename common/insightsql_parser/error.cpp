@@ -8,10 +8,10 @@ using namespace std;
   NAME::NAME(const string& message) : BASE(message), start(0), end(0) {}                                 \
   NAME::NAME(const char* message) : BASE(message), start(0), end(0) {}
 
-ERROR_CLASS_IMPLEMENTATION(HogQLError, runtime_error)
+ERROR_CLASS_IMPLEMENTATION(InsightsQLError, runtime_error)
 
-ERROR_CLASS_IMPLEMENTATION(SyntaxError, HogQLError)
-ERROR_CLASS_IMPLEMENTATION(NotImplementedError, HogQLError)
-ERROR_CLASS_IMPLEMENTATION(ParsingError, HogQLError)
+ERROR_CLASS_IMPLEMENTATION(SyntaxError, InsightsQLError)
+ERROR_CLASS_IMPLEMENTATION(NotImplementedError, InsightsQLError)
+ERROR_CLASS_IMPLEMENTATION(ParsingError, InsightsQLError)
 
 PyInternalError::PyInternalError() : exception() {}
