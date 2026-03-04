@@ -704,11 +704,11 @@ def find_flags_with_enriched_analytics() -> None:
 
 
 @shared_task(ignore_result=True)
-def demo_reset_master_team() -> None:
-    from insights.tasks.demo_reset_master_team import demo_reset_master_team
+def demo_reset_primary_team() -> None:
+    from insights.tasks.demo_reset_primary_team import demo_reset_primary_team
 
     if is_cloud() or settings.DEMO:
-        demo_reset_master_team()
+        demo_reset_primary_team()
 
 
 @shared_task(ignore_result=True)

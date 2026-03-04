@@ -112,7 +112,7 @@ export function processEvent(event: PluginEvent, { global, logger }: UserAgentMe
     }
 
     // The special Insights property names are retrieved from:
-    // https://github.com/hanzoai/insights/blob/master/frontend/src/lib/components/PropertyKeyInfo.tsx
+    // https://github.com/hanzoai/insights/blob/main/frontend/src/lib/components/PropertyKeyInfo.tsx
     properties['$device'] = device
     properties['$device_type'] = deviceType
 

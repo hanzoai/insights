@@ -79,7 +79,7 @@ You can mix and match `parse_expr` and `ast` nodes as you please. The example ab
 
 The InsightsQL database schema is in flux. You will soon be able to explore it in the [Insights app itself](https://github.com/Hanzo Insights/insights/pull/14591).
 
-The most up to date resource is [insightsql/database.py](https://github.com/Hanzo Insights/insights/blob/master/insights/insightsql/database.py) on Github. At the time of writing, these tables were available:
+The most up to date resource is [insightsql/database.py](https://github.com/Hanzo Insights/insights/blob/main/insights/insightsql/database.py) on Github. At the time of writing, these tables were available:
 
 ```python
 class Database(BaseModel):

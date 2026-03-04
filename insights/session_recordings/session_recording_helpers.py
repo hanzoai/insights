@@ -18,7 +18,7 @@ FULL_SNAPSHOT = 2
 ARBITRARY_LOOP_LIMIT = 10
 
 # NOTE: For reference here are some helpful enum mappings from rrweb
-# https://github.com/rrweb-io/rrweb/blob/master/packages/rrweb/src/types.ts
+# https://github.com/rrweb-io/rrweb/blob/main/packages/rrweb/src/types.ts
 
 # event.type
 

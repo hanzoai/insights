@@ -34,7 +34,7 @@ export const commonActionFilterProps = {
     ],
 }
 
-// Forked from https://github.com/hanzoai/insights/blob/master/frontend/src/scenes/insights/filters/AggregationSelect.tsx
+// Forked from https://github.com/hanzoai/insights/blob/main/frontend/src/scenes/insights/filters/AggregationSelect.tsx
 export function FunnelAggregationSelect({
     value,
     onChange,
@@ -116,7 +116,7 @@ export function FunnelAggregationSelect({
     )
 }
 
-// Forked from https://github.com/hanzoai/insights/blob/master/frontend/src/scenes/insights/views/Funnels/FunnelConversionWindowFilter.tsx
+// Forked from https://github.com/hanzoai/insights/blob/main/frontend/src/scenes/insights/views/Funnels/FunnelConversionWindowFilter.tsx
 export function FunnelConversionWindowFilter({
     funnelWindowInterval,
     funnelWindowIntervalUnit,
@@ -172,7 +172,7 @@ export function FunnelConversionWindowFilter({
     )
 }
 
-// Forked from https://github.com/hanzoai/insights/blob/master/frontend/src/scenes/insights/EditorFilters/AttributionFilter.tsx
+// Forked from https://github.com/hanzoai/insights/blob/main/frontend/src/scenes/insights/EditorFilters/AttributionFilter.tsx
 export function FunnelAttributionSelect({
     value,
     onChange,

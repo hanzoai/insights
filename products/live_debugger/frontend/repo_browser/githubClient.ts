@@ -1,7 +1,7 @@
 // Default repository configuration
 export const DEFAULT_OWNER = 'Insights'
 export const DEFAULT_REPO = 'insights'
-export const DEFAULT_BRANCH = 'master'
+export const DEFAULT_BRANCH = 'main'
 
 export interface RepositoryConfig {
     owner: string

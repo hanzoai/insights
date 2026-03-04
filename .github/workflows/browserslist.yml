@@ -46,12 +46,12 @@ jobs:
                   GH_TOKEN: ${{ steps.app-token.outputs.token }}
               run: |
                   if git ls-remote --heads origin browserslist-update | grep browserslist-update; then
-                    echo "Resetting stale browserslist-update branch to master to avoid rebase conflicts"
+                    echo "Resetting stale browserslist-update branch to main to avoid rebase conflicts"
                     git fetch origin browserslist-update
                     git checkout -b browserslist-update origin/browserslist-update
-                    git reset --hard origin/master
+                    git reset --hard origin/main
                     git push origin browserslist-update --force
-                    git checkout master
+                    git checkout main
                   fi
 
             - name: Update Browserslist database and create PR if applies

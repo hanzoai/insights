@@ -25,5 +25,5 @@ See https://github.com/pymssql/pymssql/issues/769 for a full set of debugging op
 For Apple Silicon machines running into the error consistently, the following command may resolve it.
 
 ```bash
-uv add git+https://github.com/pymssql/pymssql@master
+uv add git+https://github.com/pymssql/pymssql@main
 ```

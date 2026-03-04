@@ -2,7 +2,7 @@ name: MCP CI
 
 on:
     push:
-        branches: [master]
+        branches: [main]
     pull_request:
 
 concurrency:
@@ -26,7 +26,7 @@ jobs:
             # Not only the MCP folder but any file that generates schema for the mcp folder
             - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
               id: filter
-              if: github.event_name != 'push' # Run all tests on master push
+              if: github.event_name != 'push' # Run all tests on main push
               with:
                   filters: |
                       mcp:
@@ -55,7 +55,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install Python dependencies
               run: UV_PROJECT_ENVIRONMENT=$pythonLocation uv sync --frozen --dev
@@ -199,7 +199,7 @@ jobs:
               with:
                   version: '0.10.2' # pinned: unpinned setup-uv calls GH API on every job, exhausts rate limit
                   enable-cache: true
-                  save-cache: ${{ github.ref == 'refs/heads/master' }}
+                  save-cache: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install SAML (python3-saml) dependencies
               shell: bash
@@ -245,7 +245,7 @@ jobs:
               with:
                   shared-key: 'v2-rust-mcp'
                   workspaces: rust
-                  save-if: ${{ github.ref == 'refs/heads/master' }}
+                  save-if: ${{ github.ref == 'refs/heads/main' }}
 
             - name: Install sqlx-cli
               run: |

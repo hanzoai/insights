@@ -213,7 +213,7 @@ One caveat: **reserved ngrok domains are only available for paid ngrok users.**
 
 ### Testing survey usage_report
 
-The function [get_teams_with_survey_responses_count_in_period](https://github.com/Hanzo Insights/insights/blob/master/insights/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
+The function [get_teams_with_survey_responses_count_in_period](https://github.com/Hanzo Insights/insights/blob/main/insights/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
 
 Here's how to run it in the Django shell:
 

@@ -32,7 +32,7 @@ function getBaseName(resource: TerraformExportResource): string {
 function getDescription(resource: TerraformExportResource, result: TerraformExportResult | null): JSX.Element {
     const providerDocsUrl = 'https://registry.terraform.io/providers/Insights/insights/latest/docs'
     const exampleRepoUrl =
-        'https://github.com/hanzoai/insights/tree/master/terraform/us/project-2/team-analytics-platform'
+        'https://github.com/hanzoai/insights/tree/main/terraform/us/project-2/team-analytics-platform'
 
     const getExportPrefix = (): string => {
         const hasRelatedResources =

@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useState } from 'react'
 
-// adapted from https://github.com/streamich/react-use/blob/master/src/useHoverDirty.ts
+// adapted from https://github.com/streamich/react-use/blob/main/src/useHoverDirty.ts
 export function useIsHovering(ref: RefObject<Element>): boolean {
     const [value, setValue] = useState(false)
 

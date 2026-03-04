@@ -210,7 +210,7 @@ test.describe('Signup', () => {
     })
 
     // TODO un-skip.
-    // Skipping test as it was failing on master, see https://insights.slack.com/archives/C0113360FFV/p1749742204672659
+    // Skipping test as it was failing on main, see https://insights.slack.com/archives/C0113360FFV/p1749742204672659
     test.skip('Shows redirect notice if redirecting for maintenance', async ({ page }) => {
         // Equivalent to setupFeatureFlags in Playwright
         await page.route('**/flags/*', async (route) => {
