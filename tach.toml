@@ -29,7 +29,7 @@ depends_on = []
 utility = true
 
 [[modules]]
-path = "common.hogvm.python"
+path = "common.scriptvm.python"
 depends_on = [
     "insights",
 ]

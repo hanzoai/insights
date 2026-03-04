@@ -200,10 +200,10 @@ export const enum Operation {
     CLOSE_UPVALUE = 57
 }
 export const operations: string[];
-export class HogVMException extends Error {
+export class ScriptVMException extends Error {
     constructor(message: string);
 }
-export class UncaughtHogVMException extends HogVMException {
+export class UncaughtScriptVMException extends ScriptVMException {
     type: any;
     payload: any;
     constructor(type: string, message: string, payload?: any);

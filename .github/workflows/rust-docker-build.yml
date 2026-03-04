@@ -52,10 +52,10 @@ jobs:
                     - image: kafka-deduplicator
                       dockerfile: ./rust/Dockerfile
                       project: vznmbshh6q
-                    - image: personhog-replica
+                    - image: personinsights-replica
                       dockerfile: ./rust/Dockerfile
                       project: vq4lxdfdv2
-                    - image: personhog-router
+                    - image: personinsights-router
                       dockerfile: ./rust/Dockerfile
                       project: wqvvpmzgbk
         runs-on: ubuntu-22.04
@@ -79,8 +79,8 @@ jobs:
             feature-flags_digest: ${{ steps.digest.outputs.feature-flags_digest }}
             capture-logs_digest: ${{ steps.digest.outputs.capture-logs_digest }}
             kafka-deduplicator_digest: ${{ steps.digest.outputs.kafka-deduplicator_digest }}
-            personhog-replica_digest: ${{ steps.digest.outputs.personhog-replica_digest }}
-            personhog-router_digest: ${{ steps.digest.outputs.personhog-router_digest }}
+            personinsights-replica_digest: ${{ steps.digest.outputs.personinsights-replica_digest }}
+            personinsights-router_digest: ${{ steps.digest.outputs.personinsights-router_digest }}
         defaults:
             run:
                 working-directory: rust
@@ -211,7 +211,7 @@ jobs:
                       values:
                           image:
                               sha: '${{ needs.build.outputs.embedding-worker_digest }}'
-                    - release: hoghooks
+                    - release: insightshooks
                       values:
                           api_image:
                               sha: '${{ needs.build.outputs.hook-api_digest }}'
@@ -233,14 +233,14 @@ jobs:
                       values:
                           image:
                               sha: '${{ needs.build.outputs.sqlx-migrate_digest }}'
-                    - release: personhog-replica
+                    - release: personinsights-replica
                       values:
                           image:
-                              sha: '${{ needs.build.outputs.personhog-replica_digest }}'
-                    - release: personhog-router
+                              sha: '${{ needs.build.outputs.personinsights-replica_digest }}'
+                    - release: personinsights-router
                       values:
                           image:
-                              sha: '${{ needs.build.outputs.personhog-router_digest }}'
+                              sha: '${{ needs.build.outputs.personinsights-router_digest }}'
         steps:
             - name: get deployer token
               id: deployer

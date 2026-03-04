@@ -267,7 +267,7 @@ async fn process_batch<'a>(
     let results = join_all(futures).await;
 
     if hog_mode
-        && push_hoghook_results_to_kafka(
+        && push_insightshook_results_to_kafka(
             results,
             metadata_vec,
             kafka_producer,
@@ -284,7 +284,7 @@ async fn process_batch<'a>(
     });
 }
 
-async fn push_hoghook_results_to_kafka(
+async fn push_insightshook_results_to_kafka(
     results: Vec<Result<WebhookResult, WorkerError>>,
     metadata_vec: Vec<Value>,
     kafka_producer: FutureProducer<KafkaContext>,
@@ -294,7 +294,7 @@ async fn push_hoghook_results_to_kafka(
     for (result, mut metadata) in iter::zip(results, metadata_vec) {
         match result {
             Ok(result) => {
-                if let Some(payload) = create_hoghook_kafka_payload(result, &mut metadata).await {
+                if let Some(payload) = create_insightshook_kafka_payload(result, &mut metadata).await {
                     match kafka_producer.send_result(FutureRecord {
                         topic: cdp_function_callbacks_topic,
                         payload: Some(&payload),
@@ -365,7 +365,7 @@ async fn push_hoghook_results_to_kafka(
     Ok(())
 }
 
-async fn create_hoghook_kafka_payload(
+async fn create_insightshook_kafka_payload(
     result: WebhookResult,
     metadata: &mut Value,
 ) -> Option<String> {
@@ -914,13 +914,13 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn test_hoghook_sends_kafka_payload_for_success(db: PgPool) {
+    async fn test_insightshook_sends_kafka_payload_for_success(db: PgPool) {
         use httpmock::prelude::*;
         use rdkafka::consumer::{Consumer, StreamConsumer};
         use rdkafka::{ClientConfig, Message};
 
         let worker_id = worker_id();
-        let queue_name = "test_hoghook_sends_kafka_payload".to_string();
+        let queue_name = "test_insightshook_sends_kafka_payload".to_string();
         let queue = PgQueue::new_from_pool(&queue_name, db).await;
         let topic = "cdp_function_callbacks";
 
@@ -1030,13 +1030,13 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn test_hoghook_sends_kafka_payload_for_bad_response(db: PgPool) {
+    async fn test_insightshook_sends_kafka_payload_for_bad_response(db: PgPool) {
         use httpmock::prelude::*;
         use rdkafka::consumer::{Consumer, StreamConsumer};
         use rdkafka::{ClientConfig, Message};
 
         let worker_id = worker_id();
-        let queue_name = "test_hoghook_sends_kafka_payload".to_string();
+        let queue_name = "test_insightshook_sends_kafka_payload".to_string();
         let queue = PgQueue::new_from_pool(&queue_name, db).await;
         let topic = "cdp_function_callbacks";
 
@@ -1146,11 +1146,11 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn test_hoghook_drops_large_payloads(db: PgPool) {
+    async fn test_insightshook_drops_large_payloads(db: PgPool) {
         use httpmock::prelude::*;
 
         let worker_id = worker_id();
-        let queue_name = "test_hoghook_drops_large_payloads".to_string();
+        let queue_name = "test_insightshook_drops_large_payloads".to_string();
         let queue = PgQueue::new_from_pool(&queue_name, db).await;
         let topic = "cdp_function_callbacks";
 

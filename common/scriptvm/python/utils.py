@@ -4,11 +4,11 @@ from typing import Any
 COST_PER_UNIT = 8
 
 
-class HogVMException(Exception):
+class ScriptVMException(Exception):
     pass
 
 
-class UncaughtHogVMException(HogVMException):
+class UncaughtScriptVMException(ScriptVMException):
     type: str
     message: str
     payload: Any
@@ -24,8 +24,8 @@ class UncaughtHogVMException(HogVMException):
         return f"{self.type}('{msg}')"
 
 
-class HogVMRuntimeExceededException(HogVMException):
-    """Exception thrown when HogVM code exceeds its runtime limit"""
+class ScriptVMRuntimeExceededException(ScriptVMException):
+    """Exception thrown when ScriptVM code exceeds its runtime limit"""
 
     def __init__(self, timeout_seconds: float, ops_performed: int):
         self.timeout_seconds = timeout_seconds
@@ -33,8 +33,8 @@ class HogVMRuntimeExceededException(HogVMException):
         super().__init__(f"Runtime exceeded {timeout_seconds} seconds after {ops_performed} operations")
 
 
-class HogVMMemoryExceededException(HogVMException):
-    """Exception thrown when HogVM code exceeds its memory limit"""
+class ScriptVMMemoryExceededException(ScriptVMException):
+    """Exception thrown when ScriptVM code exceeds its memory limit"""
 
     def __init__(self, memory_limit: int, attempted_memory: int):
         self.memory_limit = memory_limit
@@ -56,7 +56,7 @@ def get_nested_value(obj, chain, nullish=False) -> Any:
             return None
         if isinstance(key, int):
             if key == 0:
-                raise HogVMException(f"Script arrays start from index 1")
+                raise ScriptVMException(f"Script arrays start from index 1")
             elif key > 0:
                 if key > len(obj):
                     return None
@@ -83,12 +83,12 @@ def set_nested_value(obj, chain, value) -> Any:
         obj[chain[-1]] = value
     elif isinstance(obj, list):
         if not isinstance(chain[-1], int):
-            raise HogVMException(f"Invalid index: {chain[-1]}")
+            raise ScriptVMException(f"Invalid index: {chain[-1]}")
         if chain[-1] <= 0:
-            raise HogVMException(f"Script arrays start from index 1")
+            raise ScriptVMException(f"Script arrays start from index 1")
         obj[chain[-1] - 1] = value
     else:
-        raise HogVMException(f'Can not set property "{chain[-1]}" on object of type "{type(obj).__name__}"')
+        raise ScriptVMException(f'Can not set property "{chain[-1]}" on object of type "{type(obj).__name__}"')
 
     return obj
 

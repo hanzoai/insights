@@ -1,0 +1,45 @@
+syntax = "proto3";
+package personinsights.service.v1;
+
+import "personinsights/types/v1/person.proto";
+import "personinsights/types/v1/group.proto";
+import "personinsights/types/v1/cohort.proto";
+import "personinsights/types/v1/feature_flag.proto";
+
+// PersonInsightsService is the public API exposed by the router.
+// Clients call this service; the router handles backend selection and routing.
+service PersonInsightsService {
+  // Person lookups by ID
+  rpc GetPerson(personinsights.types.v1.GetPersonRequest) returns (personinsights.types.v1.GetPersonResponse);
+  rpc GetPersons(personinsights.types.v1.GetPersonsRequest) returns (personinsights.types.v1.PersonsResponse);
+  rpc GetPersonByUuid(personinsights.types.v1.GetPersonByUuidRequest) returns (personinsights.types.v1.GetPersonResponse);
+  rpc GetPersonsByUuids(personinsights.types.v1.GetPersonsByUuidsRequest) returns (personinsights.types.v1.PersonsResponse);
+
+  // Person lookups by distinct ID
+  rpc GetPersonByDistinctId(personinsights.types.v1.GetPersonByDistinctIdRequest) returns (personinsights.types.v1.GetPersonResponse);
+  rpc GetPersonsByDistinctIdsInTeam(personinsights.types.v1.GetPersonsByDistinctIdsInTeamRequest) returns (personinsights.types.v1.PersonsByDistinctIdsInTeamResponse);
+  rpc GetPersonsByDistinctIds(personinsights.types.v1.GetPersonsByDistinctIdsRequest) returns (personinsights.types.v1.PersonsByDistinctIdsResponse);
+
+  // Distinct ID operations
+  rpc GetDistinctIdsForPerson(personinsights.types.v1.GetDistinctIdsForPersonRequest) returns (personinsights.types.v1.GetDistinctIdsForPersonResponse);
+  rpc GetDistinctIdsForPersons(personinsights.types.v1.GetDistinctIdsForPersonsRequest) returns (personinsights.types.v1.GetDistinctIdsForPersonsResponse);
+
+  // Feature flag hash key override support
+  rpc GetHashKeyOverrideContext(personinsights.types.v1.GetHashKeyOverrideContextRequest) returns (personinsights.types.v1.GetHashKeyOverrideContextResponse);
+  rpc UpsertHashKeyOverrides(personinsights.types.v1.UpsertHashKeyOverridesRequest) returns (personinsights.types.v1.UpsertHashKeyOverridesResponse);
+  rpc DeleteHashKeyOverridesByTeams(personinsights.types.v1.DeleteHashKeyOverridesByTeamsRequest) returns (personinsights.types.v1.DeleteHashKeyOverridesByTeamsResponse);
+
+  // Cohort membership
+  rpc CheckCohortMembership(personinsights.types.v1.CheckCohortMembershipRequest) returns (personinsights.types.v1.CohortMembershipResponse);
+
+  // Groups
+  rpc GetGroup(personinsights.types.v1.GetGroupRequest) returns (personinsights.types.v1.GetGroupResponse);
+  rpc GetGroups(personinsights.types.v1.GetGroupsRequest) returns (personinsights.types.v1.GroupsResponse);
+  rpc GetGroupsBatch(personinsights.types.v1.GetGroupsBatchRequest) returns (personinsights.types.v1.GetGroupsBatchResponse);
+
+  // Group type mappings
+  rpc GetGroupTypeMappingsByTeamId(personinsights.types.v1.GetGroupTypeMappingsByTeamIdRequest) returns (personinsights.types.v1.GroupTypeMappingsResponse);
+  rpc GetGroupTypeMappingsByTeamIds(personinsights.types.v1.GetGroupTypeMappingsByTeamIdsRequest) returns (personinsights.types.v1.GroupTypeMappingsBatchResponse);
+  rpc GetGroupTypeMappingsByProjectId(personinsights.types.v1.GetGroupTypeMappingsByProjectIdRequest) returns (personinsights.types.v1.GroupTypeMappingsResponse);
+  rpc GetGroupTypeMappingsByProjectIds(personinsights.types.v1.GetGroupTypeMappingsByProjectIdsRequest) returns (personinsights.types.v1.GroupTypeMappingsBatchResponse);
+}
