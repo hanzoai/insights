@@ -47,7 +47,7 @@ locals {
           "properties": [
             {
               "key": "export_context is not null or content_location is not null",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -65,7 +65,7 @@ locals {
           "properties": [
             {
               "key": "exception is not null",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -83,7 +83,7 @@ locals {
           "properties": [
             {
               "key": "failure_type = 'user'",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -101,7 +101,7 @@ locals {
           "properties": [
             {
               "key": "failure_type = 'system'",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -119,7 +119,7 @@ locals {
           "properties": [
             {
               "key": "failure_type = 'timeout_generation'",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -137,7 +137,7 @@ locals {
           "properties": [
             {
               "key": "failure_type = 'unknown'",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -155,7 +155,7 @@ locals {
           "properties": [
             {
               "key": "exception is null and export_context is null and content_location is null and timestamp < now() - interval 10 minute",
-              "type": "hogql",
+              "type": "insightsql",
               "value": null
             }
           ],
@@ -499,7 +499,7 @@ resource "insights_insight" "api_calls_originating_from_our_terraform_provider" 
   query_json = jsonencode({
     "kind": "DataVisualizationNode",
     "source": {
-      "kind": "HogQLQuery",
+      "kind": "InsightsQLQuery",
       "query": "SELECT \n    extract(properties.$user_agent, 'version: ([0-9\\\\.\\\\-a-zA-Z]+)') as version,\n    person.properties.email as email,\n    person.properties.org__name as organization,\n    count() as api_calls,\n    min(timestamp) as first_call,\n    max(timestamp) as last_call\nFROM events\nWHERE \n    properties.$user_agent LIKE '%terraform-provider%'\n    AND timestamp >= now() - INTERVAL 7 DAY\nGROUP BY version, email, organization\nORDER BY api_calls DESC"
     },
     "display": "ActionsTable",

@@ -183,7 +183,7 @@ export const storiesMap: storyGroup[] = [
                 type: StoryType.Video,
             },
             {
-                id: 'changelog-hog-templating',
+                id: 'changelog-fn-templating',
                 title: 'Changelog',
                 description: 'In-app templating',
                 thumbnailUrl: 'https://res.cloudinary.com/dmukukwp6/image/upload/hoggie_phone_9f7523e1a8.png',

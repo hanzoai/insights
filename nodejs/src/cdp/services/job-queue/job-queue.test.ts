@@ -360,7 +360,7 @@ describe('getProducerMapping', () => {
             },
         ],
         [
-            '*:kafka:0.5,hog:kafka:1,customflow:postgres:0.1',
+            '*:kafka:0.5,iql:kafka:1,customflow:postgres:0.1',
             {
                 '*': { target: 'kafka', percentage: 0.5 },
                 script: { target: 'kafka', percentage: 1 },
@@ -373,16 +373,16 @@ describe('getProducerMapping', () => {
 
     it.each([
         ['*:kafkatypo', 'Invalid mapping: *:kafkatypo - target kafkatypo must be one of postgres, kafka'],
-        ['hog:kafkatypo', 'Invalid mapping: script:kafkatypo - target kafkatypo must be one of postgres, kafka'],
+        ['script:kafkatypo', 'Invalid mapping: script:kafkatypo - target kafkatypo must be one of postgres, kafka'],
         [
-            'hog:kafka,customflow:postgres,*:kafkatypo',
+            'script:kafka,customflow:postgres,*:kafkatypo',
             'Invalid mapping: *:kafkatypo - target kafkatypo must be one of postgres, kafka',
         ],
         [
             'wrong_queue:kafka',
-            'Invalid mapping: wrong_queue:kafka - queue wrong_queue must be one of *, hog, scriptoverflow, customflow',
+            'Invalid mapping: wrong_queue:kafka - queue wrong_queue must be one of *, script, scriptoverflow, customflow',
         ],
-        ['hog:kafka:1.1', 'Invalid mapping: script:kafka:1.1 - percentage 1.1 must be 0 < x <= 1'],
+        ['script:kafka:1.1', 'Invalid mapping: script:kafka:1.1 - percentage 1.1 must be 0 < x <= 1'],
         ['fn:kafka', 'No mapping for the default queue for example: *:postgres'],
     ])('should throw for bad values for %s', (mapping, error) => {
         expect(() => getProducerMapping(mapping)).toThrow(error)

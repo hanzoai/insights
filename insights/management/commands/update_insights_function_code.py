@@ -65,9 +65,9 @@ class Command(BaseCommand):
             )
 
             for destination in page.object_list:
-                if destination.iql and replaceOption["from_string"] in destination.hog:
-                    destination.iql = destination.hog.replace(replaceOption["from_string"], replaceOption["to_string"])
-                    destination.bytecode = compile_script(destination.hog, destination.type)
+                if destination.iql and replaceOption["from_string"] in destination.iql:
+                    destination.iql = destination.iql.replace(replaceOption["from_string"], replaceOption["to_string"])
+                    destination.bytecode = compile_script(destination.iql, destination.type)
                     updated_count += 1
                     if not dry_run:
                         destination.save(update_fields=["iql", "bytecode"])

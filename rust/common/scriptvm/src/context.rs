@@ -19,7 +19,7 @@ pub struct ExecutionContext {
     pub max_heap_size: usize,
     pub max_steps: usize,
     native_fns: HashMap<String, NativeFunction>,
-    symbol_table: HashMap<Symbol, ExportedFunction>, // Flattened symbol table of all imported hog modules
+    symbol_table: HashMap<Symbol, ExportedFunction>, // Flattened symbol table of all imported iql modules
 }
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
@@ -174,8 +174,8 @@ impl std::fmt::Display for Symbol {
     }
 }
 
-/// Walk a HogValue and its children recursively to ensure all indexable types (arrays and objects) are heap allocated,
-/// and then return the now-properly-allocated value. This is useful if, for example, you've constructed a HogValue
+/// Walk an IQLValue and its children recursively to ensure all indexable types (arrays and objects) are heap allocated,
+/// and then return the now-properly-allocated value. This is useful if, for example, you've constructed an IQLValue
 /// from a JSON object without mutable access to a VM's heap, and now need to push it into the VM's memory space for the
 /// program to use.
 ///

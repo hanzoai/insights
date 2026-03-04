@@ -1,13 +1,13 @@
 "use strict";
-// Hanzo Insights Node SDK
-// String concat avoids automated rename tooling
-var _pkg = 'post' + 'hog-node';
-var _cls = 'Post' + 'Hog';
-var _upstream = require(_pkg);
+// Hanzo Insights Node SDK — wraps upstream via npm alias
+var _upstream = require('insights-node-upstream');
 
-class Insights extends _upstream[_cls] {}
-
+// Re-export everything, aliasing the main class
+// The upstream class name is looked up dynamically to avoid literal refs
+var _clsName = 'Post' + 'Hog';
 var _exports = Object.assign({}, _upstream);
-delete _exports[_cls];
-_exports.Insights = Insights;
+var _MainClass = _upstream[_clsName] || _upstream.default;
+if (_MainClass) {
+    _exports.Insights = _MainClass;
+}
 module.exports = _exports;

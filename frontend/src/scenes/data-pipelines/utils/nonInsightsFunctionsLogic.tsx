@@ -58,7 +58,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             updated_at: pluginConfig.updated_at,
                             enabled: pluginConfig.enabled,
                             execution_order: undefined,
-                            hog: '',
+                            iql: '',
                             icon_url: iconUrl,
                         })
                     }
@@ -106,7 +106,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             updated_at: pluginConfig.updated_at,
                             enabled: pluginConfig.enabled,
                             execution_order: undefined,
-                            hog: '',
+                            iql: '',
                             icon_url: iconUrl,
                         })
                     }
@@ -135,7 +135,7 @@ export const nonInsightsFunctionsLogic = kea<nonInsightsFunctionsLogicType>([
                             created_at: batchExport.created_at,
                             updated_at: batchExport.created_at,
                             enabled: !batchExport.paused,
-                            hog: '',
+                            iql: '',
                             icon_url: BATCH_EXPORT_ICON_MAP[batchExport.destination.type],
                             execution_order: undefined,
                         })

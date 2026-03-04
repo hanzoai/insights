@@ -273,7 +273,7 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
                     attrs["transpiled"] = get_transpiled_function(
                         InsightsFunction(
                             team=team,
-                            hog=attrs["fn"],
+                            script=attrs["fn"],
                             filters=attrs["filters"],
                             inputs=attrs["inputs"],
                         )

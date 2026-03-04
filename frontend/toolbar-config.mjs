@@ -5,7 +5,7 @@ import { isDev } from '@hanzo/esbuilder'
 const deniedPaths = [
     '~/lib/hooks/useUploadFiles',
     '~/queries/nodes/InsightViz/InsightViz',
-    'lib/hog',
+    'lib/iql',
     'scenes/activity/explore/EventDetails',
     'scenes/web-analytics/WebAnalyticsDashboard',
     'scenes/session-recordings/player/snapshot-processing/DecompressionWorkerManager.ts',

@@ -28,25 +28,25 @@ class FixSubTemplateIdsToTemplateIdsMigrationTest(NonAtomicTestMigrations):
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-slack-error-tracking-issue-created",
-            hog="return event",
+            script="return event",
         )
         self.hf_discord = InsightsFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-discord-survey-response",
-            hog="return event",
+            script="return event",
         )
         self.hf_webhook = InsightsFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-webhook-error-tracking-issue-reopened",
-            hog="return event",
+            script="return event",
         )
         self.hf_teams = InsightsFunction.objects.create(
             id=uuid.uuid4(),
             team=self.team,
             template_id="template-microsoft-teams-error-tracking-issue-created",
-            hog="return event",
+            script="return event",
         )
 
     def test_migration(self):

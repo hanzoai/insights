@@ -21,7 +21,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
                 type="destination",
                 template_id="template-linkedin-ads",
                 description="Test LinkedIn Function 1",
-                hog="const headers = {'LinkedIn-Version': '202409'}; return event;",
+                iql="const headers = {'LinkedIn-Version': '202409'}; return event;",
                 enabled=True,
             )
 
@@ -32,7 +32,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
                 type="destination",
                 template_id="template-linkedin-ads",
                 description="Test LinkedIn Function 2",
-                hog="const headers = {'LinkedIn-Version': '202508'}; return event;",
+                iql="const headers = {'LinkedIn-Version': '202508'}; return event;",
                 enabled=True,
             )
 
@@ -43,7 +43,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
                 type="destination",
                 template_id="template-other",
                 description="Test Other Function",
-                hog="const headers = {'LinkedIn-Version': '202409'}; return event;",
+                iql="const headers = {'LinkedIn-Version': '202409'}; return event;",
                 enabled=True,
             )
 
@@ -54,7 +54,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
                 type="destination",
                 template_id="template-linkedin-ads",
                 description="Test Deleted Function",
-                hog="const headers = {'LinkedIn-Version': '202409'}; return event;",
+                iql="const headers = {'LinkedIn-Version': '202409'}; return event;",
                 enabled=True,
                 deleted=True,
             )
@@ -72,7 +72,7 @@ class TestUpdateInsightsFunctionCode(BaseTest):
 
         # Check that no functions were actually updated
         self.linkedin_function1.refresh_from_db()
-        assert "'LinkedIn-Version': '202409'" in self.linkedin_function1.hog
+        assert "'LinkedIn-Version': '202409'" in self.linkedin_function1.iql
 
         output = out.getvalue()
         self.assertIn("DRY RUN - No changes will be made", output)
@@ -93,12 +93,12 @@ class TestUpdateInsightsFunctionCode(BaseTest):
 
         # Check that functions were actually updated
         self.linkedin_function1.refresh_from_db()
-        assert "'LinkedIn-Version': '202508'" in self.linkedin_function1.hog
+        assert "'LinkedIn-Version': '202508'" in self.linkedin_function1.iql
 
         # Check that functions that didn't need updating weren't changed
         self.linkedin_function2.refresh_from_db()
-        assert "'LinkedIn-Version': '202409'" not in self.linkedin_function2.hog
-        assert "'LinkedIn-Version': '202508'" in self.linkedin_function2.hog
+        assert "'LinkedIn-Version': '202409'" not in self.linkedin_function2.iql
+        assert "'LinkedIn-Version': '202508'" in self.linkedin_function2.iql
 
         output = out.getvalue()
         self.assertIn("Found 2 destinations to process", output)

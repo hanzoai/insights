@@ -34,7 +34,7 @@ describe('scriptvm utils', () => {
         const obj: any = { a: null, b: true }
         obj.a = obj
         const iql = convertJSToHog(obj)
-        expect(hog.get('a') === hog).toBe(true)
+        expect(vm.get('a') === vm).toBe(true)
     })
 
     test('convertHogToJs preserves circular references', () => {

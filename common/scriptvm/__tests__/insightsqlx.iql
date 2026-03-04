@@ -45,4 +45,4 @@ let query3b := (
 printQ(query3a)
 printQ(query3b)
 -- Filter must be expanded
-print('HogQLXAttribute' in jsonStringify(query3b) ? 'FAILED' : 'PASSED')
+print('InsightsQLXAttribute' in jsonStringify(query3b) ? 'FAILED' : 'PASSED')

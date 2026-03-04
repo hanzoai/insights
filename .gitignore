@@ -35,8 +35,8 @@ a11y/
 build-storybook.log
 celerybeat-schedule
 celerybeat.pid
-common/hogvm/typescript/.parcel-cache
-common/hogvm/typescript/dist
+common/scriptvm/typescript/.parcel-cache
+common/scriptvm/typescript/dist
 common/plugin_transpiler/dist
 common/storybook/dist
 coverage-*.xml

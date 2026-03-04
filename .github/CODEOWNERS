@@ -15,8 +15,8 @@
 # ClickHouse team owns Clickhouse migrations
 insights/clickhouse/migrations/** @hanzoai/clickhouse
 
-# HogQL team owns HogQL changes
-insights/hogql/** @hanzoai/hogql
+# InsightsQL team owns InsightsQL changes
+insights/insightsql/** @hanzoai/insightsql
 
 # Being open source brings us unwanted problems because Github Actions are untrusted and inherently unsafe
 # so we have to be extra careful with changes here. Let's have the security team own these checks.

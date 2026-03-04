@@ -147,7 +147,7 @@ export type CreateActionType = Pick<InsightsFlowAction, 'type' | 'config' | 'nam
 export const insightsFlowEditorLogic = kea<insightsFlowEditorLogicType>([
     props({} as WorkflowLogicProps),
     path((key) => ['scenes', 'insightsflows', 'insightsFlowEditorLogic', key]),
-    key((props) => `hog-flow-editor-${props.id}-${props.tabId}`),
+    key((props) => `fn-flow-editor-${props.id}-${props.tabId}`),
     connect((props: WorkflowLogicProps) => ({
         values: [
             workflowLogic(props),

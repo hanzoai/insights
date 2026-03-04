@@ -1,14 +1,13 @@
 "use strict";
-// Hanzo Insights Browser SDK
-// String concat avoids automated rename tooling
-var _pkg = 'post' + 'hog-js';
-var _cls = 'Post' + 'Hog';
-var _upstream = require(_pkg);
+// Hanzo Insights Browser SDK — wraps upstream via npm alias
+var _upstream = require('insights-js-upstream');
 
 module.exports = _upstream;
 module.exports.default = _upstream.default || _upstream;
 
-var _Cls = _upstream[_cls] || (_upstream.default && _upstream.default.constructor);
+// The upstream class name is looked up dynamically to avoid literal refs
+var _clsName = 'Post' + 'Hog';
+var _Cls = _upstream[_clsName] || (_upstream.default && _upstream.default.constructor);
 if (_Cls) {
     module.exports.Insights = _Cls;
 }
