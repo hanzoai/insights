@@ -44,11 +44,11 @@ class GroupTypeMapping(RootTeamMixin, models.Model):
         indexes = [
             models.Index(
                 fields=("project", "group_type"),
-                name="posthog_group_type_proj_idx",
+                name="insights_group_type_proj_idx",
             ),
             models.Index(
                 fields=("project", "group_type_index"),
-                name="posthog_group_type_i_proj_idx",
+                name="insights_group_type_i_proj_idx",
             ),
         ]
         constraints = [

@@ -29,7 +29,7 @@ from products.data_warehouse.backend.types import ExternalDataSourceType
 
 
 def build_destination_table_prefix(schema_id: str | None) -> str:
-    return f"__posthog_import_{schema_id.replace('-', '_') if schema_id else ''}"
+    return f"__insights_import_{schema_id.replace('-', '_') if schema_id else ''}"
 
 
 @SourceRegistry.register
@@ -187,7 +187,7 @@ class BigQuerySource(SimpleSource[BigQuerySourceConfig]):
         return SourceConfig(
             name=SchemaExternalDataSourceType.BIG_QUERY,
             iconPath="/static/services/bigquery.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/bigquery",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/bigquery",
             fields=cast(
                 list[FieldType],
                 [

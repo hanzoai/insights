@@ -12,7 +12,7 @@ export const getMoEngageSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             content: (
                 <Markdown>
                     MoEngage is a customer engagement platform. Follow the [MoEngage Insights integration
-                    guide](https://posthog.com/docs/libraries/moengage) to set up the connection.
+                    guide](https://hanzo.ai/docs/libraries/moengage) to set up the connection.
                 </Markdown>
             ),
         },

@@ -29,6 +29,6 @@ class ProjectAdmin(admin.ModelAdmin):
     def organization_link(self, project: Project):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_organization_change", args=[project.organization.pk]),
+            reverse("admin:insights_organization_change", args=[project.organization.pk]),
             project.organization.name,
         )

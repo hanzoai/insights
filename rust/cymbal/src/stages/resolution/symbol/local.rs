@@ -357,13 +357,13 @@ mod test {
         let resolved_1 = resolver.resolve_raw_frame(0, &frame).await.unwrap();
 
         // Check there's only 1 symbol set row, and only one frame row
-        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM posthog_errortrackingsymbolset")
+        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM insights_errortrackingsymbolset")
             .fetch_one(&pool)
             .await
             .unwrap();
         assert_eq!(count, 1);
 
-        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM posthog_errortrackingstackframe")
+        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM insights_errortrackingstackframe")
             .fetch_one(&pool)
             .await
             .unwrap();

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonButton, LemonDialog, LemonInput, LemonSelect, LemonTable, LemonTag, lemonToast } from '@posthog/lemon-ui'
+import { LemonButton, LemonDialog, LemonInput, LemonSelect, LemonTable, LemonTag, lemonToast } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { TZLabel } from 'lib/components/TZLabel'

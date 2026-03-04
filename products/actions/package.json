@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-actions",
+    "name": "@hanzo/products-actions",
     "dependencies": {
         "kea": "catalog:",
         "kea-forms": "catalog:",
@@ -8,7 +8,7 @@
         "kea-subscriptions": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/react": "*",
         "@types/react": "*",
         "clsx": "*",

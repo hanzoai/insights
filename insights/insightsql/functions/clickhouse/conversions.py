@@ -16,7 +16,7 @@ from insights.insightsql.base import UnknownType
 from ..core import InsightsQLFunctionMeta
 
 # type conversions
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 TYPE_CONVERSION_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "hex": InsightsQLFunctionMeta("hex", 1, 1),
     "unhex": InsightsQLFunctionMeta("unhex", 1, 1),
@@ -95,7 +95,7 @@ TYPE_CONVERSION_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # Date conversion functions (that overlap with type conversions)
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 DATE_CONVERSION_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     **{
         name: InsightsQLFunctionMeta(
@@ -150,7 +150,7 @@ DATE_CONVERSION_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     ),
 }
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 NULLABILITY_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "isnull": InsightsQLFunctionMeta("isNull", 1, 1, case_sensitive=False),
     "isNotNull": InsightsQLFunctionMeta("isNotNull", 1, 1),

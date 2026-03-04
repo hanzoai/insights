@@ -29,9 +29,9 @@ class TestLLMAnalyticsAccessControl(APIBaseTest):
         ]
         self.organization.save()
 
-        self.viewer_user = User.objects.create_and_join(self.organization, "viewer@posthog.com", "testtest")
-        self.editor_user = User.objects.create_and_join(self.organization, "editor@posthog.com", "testtest")
-        self.no_access_user = User.objects.create_and_join(self.organization, "noaccess@posthog.com", "testtest")
+        self.viewer_user = User.objects.create_and_join(self.organization, "viewer@hanzo.ai", "testtest")
+        self.editor_user = User.objects.create_and_join(self.organization, "editor@hanzo.ai", "testtest")
+        self.no_access_user = User.objects.create_and_join(self.organization, "noaccess@hanzo.ai", "testtest")
 
         self.evaluation = Evaluation.objects.create(
             team=self.team,

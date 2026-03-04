@@ -12,8 +12,8 @@ import {
     IconInfo,
     IconStethoscope,
     IconTerminal,
-} from '@posthog/icons'
-import { LemonButton, LemonInput, SideAction, Tooltip } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, LemonInput, SideAction, Tooltip } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { IconUnverifiedEvent } from 'lib/lemon-ui/icons'

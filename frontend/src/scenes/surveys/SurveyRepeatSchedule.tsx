@@ -2,8 +2,8 @@ import './EditSurvey.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonInput, LemonSnack, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonInput, LemonSnack, Link } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { LemonRadio } from 'lib/lemon-ui/LemonRadio'
@@ -95,7 +95,7 @@ function SurveyIterationOptions(): JSX.Element {
     return (
         <>
             <LemonField.Pure
-                info="Showing a survey every time the display conditions are met requires at least version 1.234.11 of posthog-js"
+                info="Showing a survey every time the display conditions are met requires at least version 1.234.11 of insights-js"
                 label={<h3 className="mb-0">How often should we show this survey to a person?</h3>}
             >
                 <LemonRadio

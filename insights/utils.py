@@ -39,7 +39,7 @@ import pytz
 import orjson
 import lzstring
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from asgiref.sync import async_to_sync
 from celery.result import AsyncResult
 from celery.schedules import crontab
@@ -410,29 +410,29 @@ def get_context_for_template(
 
     if settings.E2E_TESTING:
         context["e2e_testing"] = True
-        context["js_posthog_api_key"] = "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
-        context["js_posthog_host"] = "https://internal-j.posthog.com"
-        context["js_posthog_ui_host"] = "https://us.posthog.com"
+        context["js_insights_api_key"] = "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpiciRKQQXGGTYQO"
+        context["js_insights_host"] = "https://internal-j.hanzo.ai"
+        context["js_insights_ui_host"] = "https://insights.hanzo.ai"
 
     elif settings.SELF_CAPTURE:
-        if posthoganalytics.api_key:
-            context["js_posthog_api_key"] = posthoganalytics.api_key
-            context["js_posthog_host"] = ""  # Becomes location.origin in the frontend
+        if hanzoanalytics.api_key:
+            context["js_insights_api_key"] = hanzoanalytics.api_key
+            context["js_insights_host"] = ""  # Becomes location.origin in the frontend
     else:
-        context["js_posthog_api_key"] = "sTMFPsFhdP1Ssg"
-        context["js_posthog_host"] = "https://internal-j.posthog.com"
-        context["js_posthog_ui_host"] = "https://us.posthog.com"
+        context["js_insights_api_key"] = "sTMFPsFhdP1Ssg"
+        context["js_insights_host"] = "https://internal-j.hanzo.ai"
+        context["js_insights_ui_host"] = "https://insights.hanzo.ai"
 
     context["js_capture_time_to_see_data"] = settings.CAPTURE_TIME_TO_SEE_DATA
     context["js_url"] = get_js_url(request)
 
-    posthog_app_context: dict[str, Any] = {
+    insights_app_context: dict[str, Any] = {
         "persisted_feature_flags": settings.PERSISTED_FEATURE_FLAGS,
         "anonymous": not request.user or not request.user.is_authenticated,
     }
 
-    posthog_bootstrap: dict[str, Any] = {}
-    posthog_distinct_id: Optional[str] = None
+    insights_bootstrap: dict[str, Any] = {}
+    insights_distinct_id: Optional[str] = None
 
     # Set the frontend app context
     if not request.GET.get("no-preloaded-app-context"):
@@ -446,7 +446,7 @@ def get_context_for_template(
         from insights.user_permissions import UserPermissions
         from insights.views import preflight_check
 
-        posthog_app_context = {
+        insights_app_context = {
             "current_user": None,
             "current_project": None,
             "current_team": None,
@@ -457,12 +457,12 @@ def get_context_for_template(
             "suggested_users_with_access": getattr(request, "suggested_users_with_access", None),
             "commit_sha": context["git_rev"],
             "livestream_host": settings.LIVESTREAM_HOST,
-            **posthog_app_context,
+            **insights_app_context,
         }
 
         if team_for_public_context:
             # This allows for refreshing shared insights and dashboards
-            posthog_app_context["current_team"] = TeamPublicSerializer(
+            insights_app_context["current_team"] = TeamPublicSerializer(
                 team_for_public_context, context={"request": request}, many=False
             ).data
         elif request.user.pk:
@@ -470,11 +470,11 @@ def get_context_for_template(
 
             user_permissions = UserPermissions(user=user, team=user.team)
             user_access_control = UserAccessControl(user=user, team=user.team)
-            posthog_app_context["effective_resource_access_control"] = {
+            insights_app_context["effective_resource_access_control"] = {
                 resource: user_access_control.effective_access_level_for_resource(resource)
                 for resource in ACCESS_CONTROL_RESOURCES
             }
-            posthog_app_context["resource_access_control"] = {
+            insights_app_context["resource_access_control"] = {
                 resource: user_access_control.access_level_for_resource(resource)
                 for resource in ACCESS_CONTROL_RESOURCES
             }
@@ -488,8 +488,8 @@ def get_context_for_template(
                 },
                 many=False,
             )
-            posthog_app_context["current_user"] = user_serialized.data
-            posthog_distinct_id = user_serialized.data.get("distinct_id")
+            insights_app_context["current_user"] = user_serialized.data
+            insights_distinct_id = user_serialized.data.get("distinct_id")
 
             if user.team:
                 team_serialized = TeamSerializer(
@@ -501,19 +501,19 @@ def get_context_for_template(
                     },
                     many=False,
                 )
-                posthog_app_context["current_team"] = team_serialized.data
+                insights_app_context["current_team"] = team_serialized.data
 
                 project_serialized = ProjectSerializer(
                     user.team.project,
                     context={"request": request, "user_permissions": user_permissions},
                     many=False,
                 )
-                posthog_app_context["current_project"] = project_serialized.data
-                posthog_app_context["frontend_apps"] = get_frontend_apps(user.team.pk)
+                insights_app_context["current_project"] = project_serialized.data
+                insights_app_context["frontend_apps"] = get_frontend_apps(user.team.pk)
                 event_info = get_default_event_info(user.team)
-                posthog_app_context["default_event_name"] = event_info["default_event_name"]
-                posthog_app_context["has_pageview"] = event_info["has_pageview"]
-                posthog_app_context["has_screen"] = event_info["has_screen"]
+                insights_app_context["default_event_name"] = event_info["default_event_name"]
+                insights_app_context["has_pageview"] = event_info["has_pageview"]
+                insights_app_context["has_screen"] = event_info["has_screen"]
 
                 user_product_list = UserProductListSerializer(
                     UserProductList.objects.filter(team=user.team, user=user, enabled=True).order_by(
@@ -521,13 +521,13 @@ def get_context_for_template(
                     ),
                     many=True,
                 )
-                posthog_app_context["custom_products"] = user_product_list.data
+                insights_app_context["custom_products"] = user_product_list.data
 
     # JSON dumps here since there may be objects like Queries
     # that are not serializable by Django's JSON serializer
-    context["posthog_app_context"] = json.dumps(posthog_app_context, default=json_uuid_convert)
+    context["insights_app_context"] = json.dumps(insights_app_context, default=json_uuid_convert)
 
-    if posthog_distinct_id:
+    if insights_distinct_id:
         groups = {}
         group_properties = {}
         person_properties = {}
@@ -542,22 +542,22 @@ def get_context_for_template(
                     "created_at": user.organization.created_at.isoformat(),
                 }
 
-        feature_flags = posthoganalytics.get_all_flags(
-            posthog_distinct_id,
+        feature_flags = hanzoanalytics.get_all_flags(
+            insights_distinct_id,
             only_evaluate_locally=True,
             person_properties=person_properties,
             groups=groups,
             group_properties=group_properties,
         )
-        # don't forcefully set distinctID, as this breaks the link for anonymous users coming from `posthog.com`.
-        posthog_bootstrap["featureFlags"] = feature_flags
+        # don't forcefully set distinctID, as this breaks the link for anonymous users coming from `hanzo.ai`.
+        insights_bootstrap["featureFlags"] = feature_flags
 
     # This allows immediate flag availability on the frontend, atleast for flags
     # that don't depend on any person properties. To get these flags, add person properties to the
     # `get_all_flags` call above.
-    context["posthog_bootstrap"] = json.dumps(posthog_bootstrap)
+    context["insights_bootstrap"] = json.dumps(insights_bootstrap)
 
-    context["posthog_js_uuid_version"] = settings.POSTHOG_JS_UUID_VERSION
+    context["insights_js_uuid_version"] = settings.INSIGHTS_JS_UUID_VERSION
 
     return context
 
@@ -590,7 +590,7 @@ def render_template(
 
 async def initialize_self_capture_api_token():
     """
-    Configures `posthoganalytics` for self-capture, in an ASGI-compatible, async way.
+    Configures `hanzoanalytics` for self-capture, in an ASGI-compatible, async way.
     """
 
     User = apps.get_model("insights", "User")
@@ -612,11 +612,11 @@ async def initialize_self_capture_api_token():
     except (User.DoesNotExist, Team.DoesNotExist, ProgrammingError):
         local_api_key = None
 
-    # This is running _after_ InsightsConfig.ready(), so we re-enable posthoganalytics while setting the params
+    # This is running _after_ InsightsConfig.ready(), so we re-enable hanzoanalytics while setting the params
     if local_api_key is not None:
-        posthoganalytics.disabled = False
-        posthoganalytics.api_key = local_api_key
-        posthoganalytics.host = settings.SITE_URL
+        hanzoanalytics.disabled = False
+        hanzoanalytics.api_key = local_api_key
+        hanzoanalytics.host = settings.SITE_URL
 
 
 def get_default_event_info(team: "Team") -> dict:
@@ -826,7 +826,7 @@ def generate_cache_key(team_pk: int, stringified: str) -> str:
 
 
 def get_celery_heartbeat() -> Union[str, int]:
-    last_heartbeat = get_client().get("POSTHOG_HEARTBEAT")
+    last_heartbeat = get_client().get("INSIGHTS_HEARTBEAT")
     worker_heartbeat = int(time.time()) - int(last_heartbeat) if last_heartbeat else -1
 
     if 0 <= worker_heartbeat < 300:
@@ -931,16 +931,16 @@ def load_data_from_request(request):
             KLUDGES_COUNTER.labels(kludge="data_in_get_param").inc()
 
     # add the data in the scope in case there's an exception
-    with posthoganalytics.new_context():
+    with hanzoanalytics.new_context():
         if isinstance(data, dict):
-            posthoganalytics.tag("data", data)
-        posthoganalytics.tag(
+            hanzoanalytics.tag("data", data)
+        hanzoanalytics.tag(
             "origin",
             request.headers.get("origin", request.headers.get("remote_host", "unknown")),
         )
-        posthoganalytics.tag("referer", request.headers.get("referer", "unknown"))
-        # since version 1.20.0 posthog-js adds its version to the `ver` query parameter as a debug signal here
-        posthoganalytics.tag("library.version", request.GET.get("ver", "unknown"))
+        hanzoanalytics.tag("referer", request.headers.get("referer", "unknown"))
+        # since version 1.20.0 insights-js adds its version to the `ver` query parameter as a debug signal here
+        hanzoanalytics.tag("library.version", request.GET.get("ver", "unknown"))
 
         compression = (
             request.GET.get("compression")
@@ -1040,7 +1040,7 @@ def is_plugin_server_alive() -> bool:
 
 
 def get_plugin_server_job_queues() -> Optional[list[str]]:
-    cache_key_value = get_client().get("@posthog-plugin-server/enabled-job-queues")
+    cache_key_value = get_client().get("@insights-plugin-server/enabled-job-queues")
     if cache_key_value:
         qs = cache_key_value.decode("utf-8").replace('"', "")
         return qs.split(",")
@@ -1220,7 +1220,7 @@ def is_valid_regex(value: Any) -> bool:
 
 def get_absolute_path(to: str) -> str:
     """
-    Returns an absolute path in the FS based on posthog/posthog (back-end root folder)
+    Returns an absolute path in the FS based on insights/insights (back-end root folder)
     """
     return os.path.join(__location__, to)
 

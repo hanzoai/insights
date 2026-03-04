@@ -1,5 +1,5 @@
-import { IconArrowLeft, IconArrowRight, IconEllipsis, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonMenu } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconArrowRight, IconEllipsis, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonMenu } from '@hanzo/lemon-ui'
 
 import { ResizableElement } from 'lib/components/ResizeElement/ResizeElement'
 import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'

@@ -5,7 +5,7 @@ from semantic_version.base import SimpleSpec
 
 from insights.async_migrations.definition import AsyncMigrationDefinition
 from insights.async_migrations.setup import (
-    FROZEN_POSTHOG_VERSION,
+    FROZEN_INSIGHTS_VERSION,
     get_async_migration_definition,
     get_async_migration_dependency,
 )
@@ -14,7 +14,7 @@ from insights.async_migrations.utils import (
     execute_op,
     mark_async_migration_as_running,
     process_error,
-    send_analytics_to_posthog,
+    send_analytics_to_insights,
     trigger_migration,
     update_async_migration,
 )
@@ -34,7 +34,7 @@ logger = structlog.get_logger(__name__)
 
 def start_async_migration(
     migration_name: str,
-    ignore_posthog_version=False,
+    ignore_insights_version=False,
     migration_definition: Optional[AsyncMigrationDefinition] = None,
 ) -> bool:
     """
@@ -50,7 +50,7 @@ def start_async_migration(
     6. The migration's healthcheck passes
     7. The migration's dependency has been completed
     """
-    send_analytics_to_posthog("Async migration start", {"name": migration_name})
+    send_analytics_to_insights("Async migration start", {"name": migration_name})
 
     migration_instance = AsyncMigration.objects.get(name=migration_name)
     over_concurrent_migrations_limit = get_all_running_async_migrations().count() >= MAX_CONCURRENT_ASYNC_MIGRATIONS
@@ -64,10 +64,10 @@ def start_async_migration(
         return False
 
     if not (
-        ignore_posthog_version
-        or is_posthog_version_compatible(
-            migration_instance.posthog_min_version,
-            migration_instance.posthog_max_version,
+        ignore_insights_version
+        or is_insights_version_compatible(
+            migration_instance.insights_min_version,
+            migration_instance.insights_max_version,
         )
     ):
         process_error(
@@ -259,16 +259,16 @@ def attempt_migration_rollback(migration_instance: AsyncMigration):
     )
 
 
-def is_posthog_version_compatible(posthog_min_version, posthog_max_version):
-    return get_instance_setting("ASYNC_MIGRATIONS_IGNORE_POSTHOG_VERSION") or FROZEN_POSTHOG_VERSION in SimpleSpec(
-        f">={posthog_min_version},<={posthog_max_version}"
+def is_insights_version_compatible(insights_min_version, insights_max_version):
+    return get_instance_setting("ASYNC_MIGRATIONS_IGNORE_INSIGHTS_VERSION") or FROZEN_INSIGHTS_VERSION in SimpleSpec(
+        f">={insights_min_version},<={insights_max_version}"
     )
 
 
 def run_next_migration(candidate: str):
     migration_instance = AsyncMigration.objects.get(name=candidate)
-    migration_in_range = is_posthog_version_compatible(
-        migration_instance.posthog_min_version, migration_instance.posthog_max_version
+    migration_in_range = is_insights_version_compatible(
+        migration_instance.insights_min_version, migration_instance.insights_max_version
     )
 
     dependency_ok, _ = is_migration_dependency_fulfilled(candidate)

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCard } from '@posthog/lemon-ui'
+import { LemonCard } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 
@@ -64,16 +64,16 @@ export const OnboardingErrorTrackingSourceMapsStep: OnboardingStepComponentType 
                     <div className="mt-4 space-y-4">
                         <div>
                             <p className="text-sm mb-2">
-                                The <code>posthog-cli</code> handles this process. You will need to install it.
+                                The <code>insights-cli</code> handles this process. You will need to install it.
                             </p>
                             <CodeSnippet language={Language.Bash}>
                                 {[
-                                    "curl --proto '=https' --tlsv1.2 -LsSf https://github.com/PostHog/posthog/releases/download/posthog-cli-v0.0.2/posthog-cli-installer.sh | sh",
-                                    'posthog-cli-update',
+                                    "curl --proto '=https' --tlsv1.2 -LsSf https://github.com/hanzoai/insights/releases/download/insights-cli-v0.0.2/insights-cli-installer.sh | sh",
+                                    'insights-cli-update',
                                 ].join('\n')}
                             </CodeSnippet>
                             <p className="text-sm my-2">And complete the necessary authentication.</p>
-                            <CodeSnippet language={Language.Bash}>posthog-cli login</CodeSnippet>
+                            <CodeSnippet language={Language.Bash}>insights-cli login</CodeSnippet>
                         </div>
                         <div>
                             <p className="text-sm mb-2">
@@ -83,7 +83,7 @@ export const OnboardingErrorTrackingSourceMapsStep: OnboardingStepComponentType 
                                 by running the respective sourcemap commands.
                             </p>
                             <CodeSnippet language={Language.Bash}>
-                                posthog-cli sourcemap process --directory ./path/to/assets
+                                insights-cli sourcemap process --directory ./path/to/assets
                             </CodeSnippet>
                         </div>
                     </div>

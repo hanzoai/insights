@@ -1,4 +1,4 @@
-CREATE TABLE posthog_errortrackingrelease (
+CREATE TABLE insights_errortrackingrelease (
     id UUID PRIMARY KEY,
     team_id INTEGER NOT NULL,
     hash_id VARCHAR(255) NOT NULL,

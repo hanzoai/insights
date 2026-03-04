@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { sceneLayoutLogic } from '~/layout/scenes/sceneLayoutLogic'
 

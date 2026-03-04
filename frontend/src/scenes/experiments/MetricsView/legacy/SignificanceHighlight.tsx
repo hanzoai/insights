@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { IconMinus, IconTrending } from '@posthog/icons'
-import { LemonTagType, Tooltip } from '@posthog/lemon-ui'
+import { IconMinus, IconTrending } from '@hanzo/icons'
+import { LemonTagType, Tooltip } from '@hanzo/lemon-ui'
 
 import { experimentLogic } from '../../experimentLogic'
 

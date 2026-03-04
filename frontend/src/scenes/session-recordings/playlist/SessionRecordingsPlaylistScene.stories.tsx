@@ -29,7 +29,7 @@ const playlistWithRecordings: SessionRecordingPlaylistType = {
         uuid: '01896512-b4e6-0000-3add-7143ff5174c5',
         distinct_id: 'test-user-distinct-id',
         first_name: 'Test User',
-        email: 'test@posthog.com',
+        email: 'test@hanzo.ai',
         is_email_verified: true,
     },
     deleted: false,
@@ -53,7 +53,7 @@ const playlistWithRecordings: SessionRecordingPlaylistType = {
         uuid: '01896512-b4e6-0000-3add-7143ff5174c5',
         distinct_id: 'test-user-distinct-id',
         first_name: 'Test User',
-        email: 'test@posthog.com',
+        email: 'test@hanzo.ai',
         is_email_verified: true,
     },
     recordings_counts: {
@@ -174,10 +174,10 @@ const meta: Meta = {
                                     'Desktop',
                                     'Mac OS X',
                                     '',
-                                    'posthog.com',
+                                    'hanzo.ai',
                                     'England',
                                     'London',
-                                    'https://posthog.com/entry-page',
+                                    'https://hanzo.ai/entry-page',
                                 ]),
                             })
                         )

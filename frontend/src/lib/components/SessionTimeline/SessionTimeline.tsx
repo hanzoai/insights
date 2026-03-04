@@ -1,7 +1,7 @@
 import { cva } from 'cva'
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-import { Link, Spinner } from '@posthog/lemon-ui'
+import { Link, Spinner } from '@hanzo/lemon-ui'
 
 import { Dayjs } from 'lib/dayjs'
 import { useAsyncCallback } from 'lib/hooks/useAsyncCallback'

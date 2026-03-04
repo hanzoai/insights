@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LemonLabel, LemonSkeleton, SpinnerOverlay } from '@posthog/lemon-ui'
+import { LemonLabel, LemonSkeleton, SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { formatPercentageDiff, humanFriendlyNumber } from 'lib/utils'
 

@@ -27,6 +27,6 @@ class OrganizationIntegration(UUIDModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["organization", "kind", "integration_id"],
-                name="posthog_organization_integration_kind_id_unique",
+                name="insights_organization_integration_kind_id_unique",
             )
         ]

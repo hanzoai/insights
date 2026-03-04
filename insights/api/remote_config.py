@@ -28,7 +28,7 @@ class BaseRemoteConfigAPIView(APIView):
     permission_classes = []
 
     def check_token(self, token: str):
-        # Most tokens are hi_xxx but there are some older ones (phc_xxx) that are random strings including underscores and dashes
+        # Most tokens are hi_xxx but there are some older ones (hi_xxx) that are random strings including underscores and dashes
         if len(token) > 200 or not re.match(r"^[a-zA-Z0-9_-]+$", token):
             raise ValidationError("Invalid token")
         return token

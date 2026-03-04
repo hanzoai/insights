@@ -14,7 +14,7 @@ import {
     CyclotronManager,
     CyclotronShadowManager,
     CyclotronWorker,
-} from '@insights/cyclotron'
+} from '@hanzo/cyclotron'
 
 import { CyclotronInvocationQueueParametersType } from '~/schema/cyclotron'
 

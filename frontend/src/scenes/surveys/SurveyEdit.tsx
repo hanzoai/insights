@@ -6,7 +6,7 @@ import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconGitBranch, IconInfo, IconPlus, IconTrash } from '@posthog/icons'
+import { IconGitBranch, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCalendarSelect,
@@ -20,7 +20,7 @@ import {
     LemonTag,
     Link,
     Popover,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { FlagSelector } from 'lib/components/FlagSelector'
@@ -411,7 +411,7 @@ export default function SurveyEdit({ id }: { id: string }): JSX.Element {
                                                             active={value === SurveyType.ExternalSurvey}
                                                             onClick={() => onChange(SurveyType.ExternalSurvey)}
                                                             title={SURVEY_TYPE_LABEL_MAP[SurveyType.ExternalSurvey]}
-                                                            description="Collect responses via an external link, hosted on Insights. If you are already using surveys, make sure to upgrade posthog-js to at least v1.258.1."
+                                                            description="Collect responses via an external link, hosted on Insights. If you are already using surveys, make sure to upgrade insights-js to at least v1.258.1."
                                                             value={SurveyType.ExternalSurvey}
                                                         >
                                                             <LemonTag type="warning">BETA</LemonTag>
@@ -448,15 +448,15 @@ export default function SurveyEdit({ id }: { id: string }): JSX.Element {
                                                                     </code>{' '}
                                                                     query parameter to the URL. Here's an example:{'\n'}
                                                                     <Link
-                                                                        to={`https://us.posthog.com/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}
+                                                                        to={`https://insights.hanzo.ai/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}
                                                                         target="_blank"
-                                                                    >{`https://us.posthog.com/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}</Link>
+                                                                    >{`https://insights.hanzo.ai/external_surveys/01984280-fc8a-0000-28a5-01078e2d553f?distinct_id=${user?.email ?? 'john@acme.co'}`}</Link>
                                                                 </li>
                                                                 <li>
                                                                     • Check more details about identifying respondents
                                                                     in the{' '}
                                                                     <Link
-                                                                        to="https://posthog.com/docs/surveys/creating-surveys#identifying-respondents-on-hosted-surveys"
+                                                                        to="https://hanzo.ai/docs/surveys/creating-surveys#identifying-respondents-on-hosted-surveys"
                                                                         target="_blank"
                                                                     >
                                                                         documentation
@@ -936,7 +936,7 @@ export default function SurveyEdit({ id }: { id: string }): JSX.Element {
                                                               <LemonField.Pure
                                                                   label="Link to a specific flag variant"
                                                                   info="Choose which variant of the feature flag to link to this survey.
-                                                              Requires posthog-js v1.259.0 or greater or posthog-react-native v4.4.0 or greater"
+                                                              Requires insights-js v1.259.0 or greater or insights-react-native v4.4.0 or greater"
                                                               >
                                                                   <div className="flex flex-col gap-2">
                                                                       <LemonSegmentedButton
@@ -977,7 +977,7 @@ export default function SurveyEdit({ id }: { id: string }): JSX.Element {
                                                                       <LemonField.Pure
                                                                           label="URL targeting"
                                                                           error={urlMatchTypeValidationError}
-                                                                          info="Targeting by regex or exact match requires at least version 1.82 of posthog-js"
+                                                                          info="Targeting by regex or exact match requires at least version 1.82 of insights-js"
                                                                       >
                                                                           <div className="flex flex-row gap-2 items-center">
                                                                               URL
@@ -1008,7 +1008,7 @@ export default function SurveyEdit({ id }: { id: string }): JSX.Element {
                                                                                           url: urlVal,
                                                                                       })
                                                                                   }
-                                                                                  placeholder="ex: https://app.posthog.com"
+                                                                                  placeholder="ex: https://insights.hanzo.ai"
                                                                                   fullWidth
                                                                               />
                                                                           </div>
@@ -1022,11 +1022,11 @@ export default function SurveyEdit({ id }: { id: string }): JSX.Element {
                                                                                   survey on. Possible values: 'Desktop',
                                                                                   'Mobile', 'Tablet'. For the full list
                                                                                   and caveats,{' '}
-                                                                                  <Link to="https://posthog.com/docs/surveys/creating-surveys#display-conditions">
+                                                                                  <Link to="https://hanzo.ai/docs/surveys/creating-surveys#display-conditions">
                                                                                       check the documentation here
                                                                                   </Link>
                                                                                   . Requires at least version 1.214 of
-                                                                                  posthog-js
+                                                                                  insights-js
                                                                               </>
                                                                           }
                                                                       >

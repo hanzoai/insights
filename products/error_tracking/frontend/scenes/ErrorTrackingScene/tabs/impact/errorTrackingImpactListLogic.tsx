@@ -3,7 +3,7 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { Params } from 'scenes/sceneTypes'
@@ -92,7 +92,7 @@ export const errorTrackingImpactListLogic = kea<errorTrackingImpactListLogicType
             }
         },
         setEvents: () => {
-            posthog.capture('error_tracking_impact_event_selected')
+            insights.capture('error_tracking_impact_event_selected')
             if (values.events && values.events.length > 0) {
                 actions.loadIssues()
             }

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonButton, LemonModal, LemonSegmentedButton } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal, LemonSegmentedButton } from '@hanzo/lemon-ui'
 
 import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'
@@ -72,7 +72,7 @@ Insights issue: ${issueUrl}
 
     const handleCopy = (): void => {
         void copyToClipboard(generatePrompt(), 'LLM prompt')
-        posthog.capture('error_tracking_prompt_copied', { mode })
+        insights.capture('error_tracking_prompt_copied', { mode })
         onClose()
     }
 

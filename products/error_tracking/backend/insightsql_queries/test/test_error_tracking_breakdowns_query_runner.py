@@ -148,7 +148,7 @@ class TestErrorTrackingBreakdownsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert browser_data.values[0].value == "Chrome"
         assert browser_data.values[0].count == 5
 
-        assert browser_data.values[1].value == "$$_posthog_breakdown_null_$$"
+        assert browser_data.values[1].value == "$$_insights_breakdown_null_$$"
         assert browser_data.values[1].count == 3
 
     @freeze_time("2024-01-10T12:00:00Z")

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconLock } from '@posthog/icons'
-import { LemonButton, LemonButtonProps } from '@posthog/lemon-ui'
+import { IconLock } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps } from '@hanzo/lemon-ui'
 
 import { paymentEntryLogic } from 'scenes/billing/paymentEntryLogic'
 
@@ -73,7 +73,7 @@ export const PayGateIcon = ({
         feature,
         currentUsage,
         onClick: (ev) => {
-            posthog.capture('pay gate icon clicked', {
+            insights.capture('pay gate icon clicked', {
                 product_key: productWithFeature?.type,
                 feature: feature,
                 gate_variant: gateVariant,

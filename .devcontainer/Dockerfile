@@ -35,7 +35,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends \
     # Add in useful db debugging tools
     "postgresql-client=15+*" \
-    # needed for posthog to run
+    # needed for insights to run
     netcat-openbsd brotli curl \
     && rm -rf /var/lib/apt/lists/*
 

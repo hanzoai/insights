@@ -166,7 +166,7 @@ class EventQuery(metaclass=ABCMeta):
             return
 
         # :KLUDGE: The following is mostly making sure if cohorts are included as well.
-        # Can be simplified significantly after https://github.com/PostHog/posthog/issues/5854
+        # Can be simplified significantly after https://github.com/Hanzo Insights/insights/issues/5854
         # Properties timeline never needs to join persons, as it's purely event-based
         if not isinstance(self._filter, PropertiesTimelineFilter) and any(
             self._should_property_join_persons(prop) for prop in self._filter.property_groups.flat

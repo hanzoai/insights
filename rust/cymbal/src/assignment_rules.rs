@@ -43,7 +43,7 @@ impl NewAssignment {
         let assignment = sqlx::query_as!(
             Assignment,
             r#"
-                INSERT INTO posthog_errortrackingissueassignment (id, issue_id, user_id, role_id, created_at)
+                INSERT INTO insights_errortrackingissueassignment (id, issue_id, user_id, role_id, created_at)
                 VALUES ($1, $2, $3, $4, NOW())
                 ON CONFLICT (issue_id) DO UPDATE SET issue_id = $2 -- no-op to get a returned row
                 RETURNING id, issue_id, user_id, role_id, created_at
@@ -116,7 +116,7 @@ impl AssignmentRule {
             AssignmentRule,
             r#"
                 SELECT id, team_id, user_id, role_id, order_key, bytecode, created_at, updated_at
-                FROM posthog_errortrackingassignmentrule
+                FROM insights_errortrackingassignmentrule
                 WHERE team_id = $1 AND disabled_data IS NULL
             "#,
             team_id
@@ -150,7 +150,7 @@ impl AssignmentRule {
 
         sqlx::query!(
             r#"
-                UPDATE posthog_errortrackingassignmentrule
+                UPDATE insights_errortrackingassignmentrule
                 SET disabled_data = $1, updated_at = NOW()
                 WHERE id = $2
             "#,

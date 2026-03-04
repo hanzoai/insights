@@ -320,10 +320,10 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
             team=self.team,
             properties={
                 "$ai_latency": 10.5,
-                "$ai_provider": "posthog",
+                "$ai_provider": "insights",
                 "$ai_model": "hog-destroyer",
                 "$ai_http_status": 200,
-                "$ai_base_url": "https://us.posthog.com",
+                "$ai_base_url": "https://insights.hanzo.ai",
             },
         )
 
@@ -337,10 +337,10 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
         self.assertLess(
             {
                 "$ai_latency": 10.5,
-                "$ai_provider": "posthog",
+                "$ai_provider": "insights",
                 "$ai_model": "hog-destroyer",
                 "$ai_http_status": 200,
-                "$ai_base_url": "https://us.posthog.com",
+                "$ai_base_url": "https://insights.hanzo.ai",
             }.items(),
             response.results[0].events[0].properties.items(),
         )
@@ -348,7 +348,7 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
     @freeze_time("2025-01-01T00:00:00Z")
     def test_person_properties(self):
         """Test that person data is not loaded server-side (frontend handles it via lazy loader)."""
-        _create_person(distinct_ids=["person1"], team=self.team, properties={"email": "test@posthog.com"})
+        _create_person(distinct_ids=["person1"], team=self.team, properties={"email": "test@hanzo.ai"})
         _create_ai_generation_event(
             distinct_id="person1",
             trace_id="trace1",

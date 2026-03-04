@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import React, { Children, ReactNode, createContext, isValidElement, useContext, useMemo } from 'react'
 
-import { StepProps, StepsProps } from '@posthog/shared-onboarding/steps'
-import { StepDefinition, StepModifier } from '@posthog/shared-onboarding/steps'
+import { StepProps, StepsProps } from '@hanzo/shared-onboarding/steps'
+import { StepDefinition, StepModifier } from '@hanzo/shared-onboarding/steps'
 
 import { CodeSnippet, getLanguage } from 'lib/components/CodeSnippet'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'

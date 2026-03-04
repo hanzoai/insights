@@ -6,7 +6,7 @@ export const OverridePropertiesSnippet = memo(({ language = 'javascript' }: { la
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            posthog.setPersonPropertiesForFlags({'property1': 'value', property2: 'value2'})
+            insights.setPersonPropertiesForFlags({'property1': 'value', property2: 'value2'})
         `,
         'node.js': dedent`
             await client.getFeatureFlag(
@@ -32,7 +32,7 @@ export const OverridePropertiesSnippet = memo(({ language = 'javascript' }: { la
             )
         `,
         python: dedent`
-            posthog.get_feature_flag(
+            insights.get_feature_flag(
                 'flag-key',
                 'distinct_id_of_the_user',
                 person_properties={'property_name': 'value'},
@@ -63,7 +63,7 @@ export const OverridePropertiesSnippet = memo(({ language = 'javascript' }: { la
             )
         `,
         ruby: dedent`
-            posthog.get_feature_flag(
+            insights.get_feature_flag(
                 'flag-key',
                 'distinct_id_of_the_user',
                 person_properties: {
@@ -88,10 +88,10 @@ export const OverridePropertiesSnippet = memo(({ language = 'javascript' }: { la
                 FeatureFlagPayload{
                     Key:        "flag-key",
                     DistinctId: "distinct_id_of_the_user",
-                    Groups: posthog.NewGroups().
+                    Groups: insights.NewGroups().
                         Set("your_group_type", "your_group_id").
                         Set("another_group_type", "your_group_id"),
-                    PersonProperties: posthog.NewProperties().
+                    PersonProperties: insights.NewProperties().
                         Set("property_name", "value"),
                     GroupProperties: map[string]map[string]interface{}{
                         "your_group_type": {

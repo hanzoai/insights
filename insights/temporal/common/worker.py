@@ -13,7 +13,7 @@ from insights.temporal.common.client import connect
 from insights.temporal.common.combined_metrics_server import CombinedMetricsServer
 from insights.temporal.common.liveness_tracker import LivenessInterceptor
 from insights.temporal.common.logger import get_write_only_logger
-from insights.temporal.common.posthog_client import InsightsClientInterceptor
+from insights.temporal.common.analytics_client import InsightsClientInterceptor
 from insights.temporal.llm_analytics.metrics import EvalsMetricsInterceptor
 from insights.temporal.llm_analytics.sentiment.metrics import (
     SENTIMENT_LATENCY_HISTOGRAM_BUCKETS,

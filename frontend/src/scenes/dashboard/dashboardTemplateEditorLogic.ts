@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

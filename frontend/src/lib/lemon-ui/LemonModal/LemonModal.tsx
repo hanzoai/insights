@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState } from 'react'
 import Modal from 'react-modal'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { useFloatingContainer } from 'lib/hooks/useFloatingContainerContext'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

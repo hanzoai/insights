@@ -3,8 +3,8 @@
 Adding a new source should be pretty simple. We've refactored the sources so that you need to only add your source logic and update a small number of other files. Simply copy the source template file and address all the TODOs in that file in order.
 
 ```sh
-mkdir -p posthog/temporal/data_imports/sources/{SOURCE_NAME}
-cp posthog/temporal/data_imports/sources/source.template posthog/temporal/data_imports/sources/{SOURCE_NAME}/source.py
+mkdir -p insights/temporal/data_imports/sources/{SOURCE_NAME}
+cp insights/temporal/data_imports/sources/source.template insights/temporal/data_imports/sources/{SOURCE_NAME}/source.py
 ```
 
 ## Source fields
@@ -13,7 +13,7 @@ The fields shown on the frontend are all backend driven. We have a collection of
 
 The frontend logic for rendering the below fields can be found in `frontend/src/scenes/data-warehouse/external/forms/SourceForm.tsx`.
 
-All of the below are defined in `posthog/schema.py` with a union of them defined as `FieldType` in `posthog/temporal/data_imports/sources/common/base.py`. Check out the other sources for examples of how we implement these.
+All of the below are defined in `insights/schema.py` with a union of them defined as `FieldType` in `insights/temporal/data_imports/sources/common/base.py`. Check out the other sources for examples of how we implement these.
 
 #### `SourceFieldInputConfig`
 
@@ -53,7 +53,7 @@ We have a bunch of examples already in the sources directory of how we build up 
 - It's okay to yield items one at a time if that's how the source logic is handled (excluding pyarrow tables). The pipeline will buffer the incoming items until it has a reasonable amount before running the pipeline over the dataset
 - If you are returning a `pyarrow.Table` object, then please make sure that there is a reasonable limit on how many rows that get held in memory. For most of our sources, we limit this to either 200 MiB or 5,000 rows.
 
-We have some helper methods for returning a `pyarrow.Table` from the source, such as `table_from_iterator()` and `table_from_py_list()` from `posthog/temporal/data_imports/pipelines/pipeline/utils.py`. The pipeline will ultimately convert everything to a `pyarrow.Table` using these methods
+We have some helper methods for returning a `pyarrow.Table` from the source, such as `table_from_iterator()` and `table_from_py_list()` from `insights/temporal/data_imports/pipelines/pipeline/utils.py`. The pipeline will ultimately convert everything to a `pyarrow.Table` using these methods
 
 #### `primary_keys`
 
@@ -101,14 +101,14 @@ If your source uses OAuth (SourceFieldOauthConfig):
    YOUR_SOURCE_CLIENT_SECRET=your_client_secret
    ```
 
-   **If your integration doesn't exist yet**, add it to `posthog/settings/integrations.py`:
+   **If your integration doesn't exist yet**, add it to `insights/settings/integrations.py`:
 
    ```python
    YOUR_SOURCE_CLIENT_ID = get_from_env("YOUR_SOURCE_CLIENT_ID", "")
    YOUR_SOURCE_CLIENT_SECRET = get_from_env("YOUR_SOURCE_CLIENT_SECRET", "")
    ```
 
-2. **Integration Kind**: Add your integration to `posthog/models/integration.py`:
+2. **Integration Kind**: Add your integration to `insights/models/integration.py`:
 
    **a) Add to `IntegrationKind` enum:**
 
@@ -168,7 +168,7 @@ If your source uses OAuth (SourceFieldOauthConfig):
 
 ## Mixins
 
-We have a handful of mixins available for your source classes. Add these to your inherited classes to get some extra functionality for handling certain fields. These can be found `posthog/temporal/data_imports/sources/common/mixins.py`
+We have a handful of mixins available for your source classes. Add these to your inherited classes to get some extra functionality for handling certain fields. These can be found `insights/temporal/data_imports/sources/common/mixins.py`
 
 #### `SSHTunnelMixin`
 

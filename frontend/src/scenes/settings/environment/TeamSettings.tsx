@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconRefresh } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonLabel, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonLabel, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -173,7 +173,7 @@ export function TeamVariables(): JSX.Element {
                     {currentTeam?.api_token || ''}
                 </CodeSnippet>
                 <p className="text-muted text-xs mb-0">
-                    Write-only key for use in <Link to="https://posthog.com/docs/libraries">client libraries</Link>.
+                    Write-only key for use in <Link to="https://hanzo.ai/docs/libraries">client libraries</Link>.
                     Safe to use in public apps.
                 </p>
             </div>
@@ -185,7 +185,7 @@ export function TeamVariables(): JSX.Element {
                         {String(currentTeam?.id || '')}
                     </CodeSnippet>
                     <p className="text-muted text-xs mb-0">
-                        Use this ID in the <Link to="https://posthog.com/docs/api">Insights API</Link>.
+                        Use this ID in the <Link to="https://hanzo.ai/docs/api">Insights API</Link>.
                     </p>
                 </div>
                 {region ? (

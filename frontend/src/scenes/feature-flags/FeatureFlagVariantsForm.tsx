@@ -1,7 +1,7 @@
 import 'kea'
 
-import { IconBalance, IconMessage, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput } from '@posthog/lemon-ui'
+import { IconBalance, IconMessage, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'

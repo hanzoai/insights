@@ -73,7 +73,7 @@ class PropertyDefinition(UUIDTModel):
     class Meta:
         indexes = [
             # Index on project_id foreign key
-            models.Index(fields=["project"], name="posthog_prop_proj_id_d3eb982d"),
+            models.Index(fields=["project"], name="insights_prop_proj_id_d3eb982d"),
             # This indexes the query in api/property_definition.py
             # :KLUDGE: django ORM typing is off here
             models.Index(
@@ -99,7 +99,7 @@ class PropertyDefinition(UUIDTModel):
                 Coalesce(F("project_id"), F("team_id")),
                 F("type"),
                 F("is_numerical"),
-                name="posthog_pro_project_3583d2_idx",
+                name="insights_pro_project_3583d2_idx",
             ),
             GinIndex(
                 name="index_property_definition_name",
@@ -118,7 +118,7 @@ class PropertyDefinition(UUIDTModel):
             ),
             UniqueConstraintByExpression(
                 concurrently=True,
-                name="posthog_propdef_proj_uniq",
+                name="insights_propdef_proj_uniq",
                 expression="(coalesce(project_id, team_id), name, type, coalesce(group_type_index, -1))",
             ),
         ]

@@ -39,7 +39,7 @@ Two paths for provider detection:
 
 ## Architecture
 
-### Backend (`posthog/domain_connect.py`)
+### Backend (`insights/domain_connect.py`)
 
 Single module with all Domain Connect logic:
 
@@ -50,7 +50,7 @@ Single module with all Domain Connect logic:
 - **Context resolvers**: `resolve_email_context()` / `resolve_proxy_context()` — extracts template variables from the relevant Insights resource
 - **Provider allowlist**: `DOMAIN_CONNECT_PROVIDERS` dict — empty until providers accept our templates
 
-### API endpoints (`posthog/api/integration.py`)
+### API endpoints (`insights/api/integration.py`)
 
 Two endpoints on `IntegrationViewSet`:
 
@@ -68,7 +68,7 @@ Two endpoints on `IntegrationViewSet`:
 
 ### Settings
 
-Two env vars in `posthog/settings/web.py`:
+Two env vars in `insights/settings/web.py`:
 
 - `DOMAIN_CONNECT_PRIVATE_KEY` — PEM-encoded RSA private key for signing apply URLs
 - `DOMAIN_CONNECT_KEY_ID` — Key identifier published via DNS (default: `_dcpubkeyv1`)
@@ -100,8 +100,8 @@ Each instance gets its own keyed logic — no state sharing between banners.
 To use Domain Connect for a new feature:
 
 1. Create a template JSON in `templates/` and submit it to [Domain-Connect/Templates](https://github.com/Domain-Connect/Templates).
-2. Add a `resolve_<context>_context()` function in `posthog/domain_connect.py` returning `(domain, service_id, variables)`.
-3. Add the context branch in the `domain_connect_apply_url` endpoint in `posthog/api/integration.py`.
+2. Add a `resolve_<context>_context()` function in `insights/domain_connect.py` returning `(domain, service_id, variables)`.
+3. Add the context branch in the `domain_connect_apply_url` endpoint in `insights/api/integration.py`.
 4. Add the context value to the `context` prop type in `domainConnectLogic.ts`.
 5. Mount `<DomainConnectBanner>` with the new context in your UI.
 
@@ -109,8 +109,8 @@ To use Domain Connect for a new feature:
 
 1. Submit our templates to [Domain-Connect/Templates](https://github.com/Domain-Connect/Templates).
 2. Contact the provider to register the templates in their store.
-3. Once confirmed, add their `_domainconnect` TXT endpoint to `DOMAIN_CONNECT_PROVIDERS` in `posthog/domain_connect.py`.
-4. Add the provider name to `DomainConnectProviderName` in `frontend/src/queries/schema/schema-general.ts` and run `hogli build:schema`.
+3. Once confirmed, add their `_domainconnect` TXT endpoint to `DOMAIN_CONNECT_PROVIDERS` in `insights/domain_connect.py`.
+4. Add the provider name to `DomainConnectProviderName` in `frontend/src/queries/schema/schema-general.ts` and run `insightscli build:schema`.
 5. Add their logo SVG to `assets/` and register it in `PROVIDER_LOGOS` in `DomainConnectBanner.tsx`.
 
 ## Templates
@@ -122,12 +122,12 @@ canonical definitions live alongside the code.
 
 | File                                     | Purpose                |
 | ---------------------------------------- | ---------------------- |
-| `posthog.com.email-verification-us.json` | Email DNS records (US) |
-| `posthog.com.email-verification-eu.json` | Email DNS records (EU) |
-| `posthog.com.reverse-proxy-us.json`      | Proxy CNAME (US)       |
-| `posthog.com.reverse-proxy-eu.json`      | Proxy CNAME (EU)       |
+| `hanzo.ai.email-verification-us.json` | Email DNS records (US) |
+| `hanzo.ai.email-verification-eu.json` | Email DNS records (EU) |
+| `hanzo.ai.reverse-proxy-us.json`      | Proxy CNAME (US)       |
+| `hanzo.ai.reverse-proxy-eu.json`      | Proxy CNAME (EU)       |
 
 ## Tests
 
-Backend tests live at `posthog/test/test_domain_connect.py` (25 tests covering domain
+Backend tests live at `insights/test/test_domain_connect.py` (25 tests covering domain
 parsing, region mapping, URL building, signing, discovery, and provider listing).

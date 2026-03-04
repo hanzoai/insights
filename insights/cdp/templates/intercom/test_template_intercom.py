@@ -18,7 +18,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                 "access_token": "ACCESS_TOKEN",
                 "app.region": "US",
             },
-            "email": "max@posthog.com",
+            "email": "max@hanzo.ai",
             "include_all_properties": False,
             "properties": {
                 "name": "Max AI",
@@ -53,7 +53,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                     "Accept": "application/json",
                     "Authorization": "Bearer ACCESS_TOKEN",
                 },
-                "body": {"query": {"field": "email", "operator": "=", "value": "max@posthog.com"}},
+                "body": {"query": {"field": "email", "operator": "=", "value": "max@hanzo.ai"}},
             },
         )
 
@@ -68,7 +68,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer ACCESS_TOKEN",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "custom_attributes": {},
                     "name": "Max AI",
                     "phone": "+1234567890",
@@ -106,7 +106,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer ACCESS_TOKEN",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "custom_attributes": {
                         "custom_property": "custom_value",
                     },
@@ -138,7 +138,7 @@ class TestTemplateIntercom(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer ACCESS_TOKEN",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "custom_attributes": {},
                     "name": "Max AI",
                     "phone": "+1234567890",
@@ -203,7 +203,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                 "access_token": "ACCESS_TOKEN",
                 "app.region": "US",
             },
-            "email": "max@posthog.com",
+            "email": "max@hanzo.ai",
             "eventName": "purchase",
             "eventTime": "1234567890",
             "include_all_properties": False,
@@ -244,7 +244,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                     "Accept": "application/json",
                     "Authorization": "Bearer ACCESS_TOKEN",
                 },
-                "body": {"query": {"field": "email", "operator": "=", "value": "max@posthog.com"}},
+                "body": {"query": {"field": "email", "operator": "=", "value": "max@hanzo.ai"}},
             },
         )
 
@@ -263,7 +263,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                 "body": {
                     "event_name": "purchase",
                     "created_at": "1234567890",
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "metadata": {"revenue": "50", "currency": "USD"},
                 },
             },
@@ -298,7 +298,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                 "body": {
                     "event_name": "purchase",
                     "created_at": "1234567890",
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "metadata": {"revenue": "50", "currency": "USD"},
                 },
             },
@@ -327,7 +327,7 @@ class TestTemplateIntercomEvent(BaseInsightsFunctionTemplateTest):
                 "body": {
                     "event_name": "purchase",
                     "created_at": "1234567890",
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "metadata": {
                         "revenue": "50",
                         "currency": "USD",

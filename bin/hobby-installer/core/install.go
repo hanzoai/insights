@@ -54,15 +54,15 @@ func GetInstallSteps() []InstallStep {
 			},
 		},
 		{
-			Name: "Clone/update PostHog repository",
+			Name: "Clone/update Insights repository",
 			Run: func(cfg InstallConfig) InstallResult {
-				if DirExists("posthog") {
-					if err := UpdatePostHog(); err != nil {
+				if DirExists("insights") {
+					if err := UpdateInsights(); err != nil {
 						return InstallResult{Err: err}
 					}
 					return InstallResult{Detail: "updated"}
 				}
-				if err := ClonePostHog(); err != nil {
+				if err := CloneInsights(); err != nil {
 					return InstallResult{Err: err}
 				}
 				return InstallResult{Detail: "cloned"}
@@ -189,7 +189,7 @@ func GetInstallSteps() []InstallStep {
 			},
 		},
 		{
-			Name: "Start PostHog stack",
+			Name: "Start Insights stack",
 			Run: func(cfg InstallConfig) InstallResult {
 				_ = DockerComposeStop()
 				if err := DockerComposeUpWithRetry(3); err != nil {
@@ -199,12 +199,12 @@ func GetInstallSteps() []InstallStep {
 			},
 		},
 		{
-			Name: "Wait for PostHog to be ready",
+			Name: "Wait for Insights to be ready",
 			Run: func(cfg InstallConfig) InstallResult {
 				if err := WaitForHealth(45 * time.Minute); err != nil {
 					return InstallResult{Err: err}
 				}
-				return InstallResult{Detail: "PostHog is up!"}
+				return InstallResult{Detail: "Insights is up!"}
 			},
 		},
 		{

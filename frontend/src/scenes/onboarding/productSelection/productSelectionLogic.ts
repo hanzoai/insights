@@ -350,7 +350,7 @@ export const productSelectionLogic = kea<productSelectionLogicType>([
             })
 
             // Analytics
-            window.posthog?.capture('onboarding_products_confirmed', {
+            window.insights?.capture('onboarding_products_confirmed', {
                 recommendation_source: values.recommendationSource,
                 selected_products: values.selectedProducts,
                 first_product: values.firstProductOnboarding,

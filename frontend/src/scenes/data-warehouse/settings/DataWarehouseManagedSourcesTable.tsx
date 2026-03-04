@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall } from '@posthog/icons'
+import { IconPlusSmall } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDialog,
@@ -10,7 +10,7 @@ import {
     LemonTag,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -208,7 +208,7 @@ export function DataWarehouseManagedSourcesTable(): JSX.Element {
     )
 }
 
-const DOCS_BASE_URL = 'https://posthog.com/docs/cdp/sources/'
+const DOCS_BASE_URL = 'https://hanzo.ai/docs/cdp/sources/'
 
 export function getDataWarehouseSourceUrl(service: string): string {
     switch (service) {

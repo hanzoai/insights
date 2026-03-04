@@ -629,7 +629,7 @@ def stickiness_test_factory(stickiness, event_factory, person_factory, action_fa
             person_factory(
                 team_id=self.team.id,
                 distinct_ids=["ph"],
-                properties={"email": "test@posthog.com"},
+                properties={"email": "test@hanzo.ai"},
             )
             event_factory(
                 team=self.team,

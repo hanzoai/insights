@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status, viewsets
 from rest_framework.exceptions import ValidationError
@@ -28,7 +28,7 @@ from products.error_tracking.backend.models import ErrorTrackingRelease, ErrorTr
 logger = structlog.get_logger(__name__)
 
 ONE_HUNDRED_MEGABYTES = 1024 * 1024 * 100
-JS_DATA_MAGIC = b"posthog_error_tracking"
+JS_DATA_MAGIC = b"insights_error_tracking"
 JS_DATA_VERSION = 1
 JS_DATA_TYPE_SOURCE_AND_MAP = 2
 PRESIGNED_MULTIPLE_UPLOAD_TIMEOUT = 60 * 5
@@ -134,7 +134,7 @@ class ErrorTrackingSymbolSetViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         multipart = request.query_params.get("multipart", False)
         release_id = request.query_params.get("release_id", None)
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             "error_tracking_symbol_set_deprecated_endpoint",
             distinct_id=request.user.pk,
             properties={"team_id": self.team.id, "endpoint": "create"},
@@ -163,7 +163,7 @@ class ErrorTrackingSymbolSetViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         chunk_id = request.query_params.get("chunk_id", None)
         release_id = request.query_params.get("release_id", None)
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             "error_tracking_symbol_set_deprecated_endpoint",
             distinct_id=request.user.pk,
             properties={"team_id": self.team.id, "endpoint": "start_upload"},
@@ -234,14 +234,14 @@ class ErrorTrackingSymbolSetViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
     @action(methods=["POST"], detail=False, parser_classes=[JSONParser])
     def bulk_start_upload(self, request, **kwargs):
         if request.user.pk:
-            posthoganalytics.identify_context(request.user.pk)
+            hanzoanalytics.identify_context(request.user.pk)
         # Earlier ones send a list of chunk IDs, all associated with one release
         # Extract a list of chunk IDs from the request json
         chunk_ids: list[str] = request.data.get("chunk_ids") or []
         # Grab the release ID from the request json
         release_id: str | None = request.data.get("release_id", None)
 
-        _ = posthoganalytics.capture(
+        _ = hanzoanalytics.capture(
             "error_tracking_symbol_set_upload_started",
             properties={"team_id": self.team.id, "endpoint": "bulk_start_upload"},
             groups=groups(self.team.organization, self.team),
@@ -268,7 +268,7 @@ class ErrorTrackingSymbolSetViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
     @action(methods=["POST"], detail=False, parser_classes=[JSONParser])
     def bulk_finish_upload(self, request, **kwargs):
         if request.user.pk:
-            posthoganalytics.identify_context(request.user.pk)
+            hanzoanalytics.identify_context(request.user.pk)
         # Get the map of symbol_set_id:content_hashes
         content_hashes = request.data.get("content_hashes", {})
         if content_hashes is None:
@@ -325,7 +325,7 @@ class ErrorTrackingSymbolSetViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
 
             raise
 
-        _ = posthoganalytics.capture(
+        _ = hanzoanalytics.capture(
             "error_tracking_symbol_set_uploaded",
             groups=groups(self.team.organization, self.team),
         )
@@ -370,7 +370,7 @@ def create_symbol_set(
         return symbol_set
 
 
-@posthoganalytics.scoped()
+@hanzoanalytics.scoped()
 def bulk_create_symbol_sets(
     new_symbol_sets: list[SymbolSetUpload],
     team: Team,

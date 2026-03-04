@@ -9,10 +9,10 @@ from typing import Any
 from django.conf import settings
 
 import openai
-import posthoganalytics
+import hanzoanalytics
 from openai.types import CompletionUsage, ReasoningEffort
 from openai.types.chat import ChatCompletionDeveloperMessageParam, ChatCompletionSystemMessageParam
-from posthoganalytics.ai.openai import OpenAI
+from hanzoanalytics.ai.openai import OpenAI
 from pydantic import BaseModel
 
 from products.llm_analytics.backend.llm.errors import (
@@ -84,12 +84,12 @@ class OpenAIAdapter:
 
         default_headers = self._get_default_headers()
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
         client: Any
-        if analytics.capture and posthog_client:
+        if analytics.capture and analytics_client:
             client = OpenAI(
                 api_key=effective_api_key,
-                posthog_client=posthog_client,
+                analytics_client=analytics_client,
                 base_url=effective_base_url,
                 timeout=OpenAIConfig.TIMEOUT,
                 default_headers=default_headers or None,
@@ -220,12 +220,12 @@ Return ONLY the JSON object, no other text or markdown formatting."""
 
         default_headers = self._get_default_headers()
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
         client: Any
-        if analytics.capture and posthog_client:
+        if analytics.capture and analytics_client:
             client = OpenAI(
                 api_key=effective_api_key,
-                posthog_client=posthog_client,
+                analytics_client=analytics_client,
                 base_url=effective_base_url,
                 timeout=OpenAIConfig.TIMEOUT,
                 default_headers=default_headers or None,
@@ -252,10 +252,10 @@ Return ONLY the JSON object, no other text or markdown formatting."""
                     "stream_options": {"include_usage": True},
                 }
                 if analytics.capture:
-                    common["posthog_distinct_id"] = analytics.distinct_id
-                    common["posthog_trace_id"] = analytics.trace_id or str(uuid.uuid4())
-                    common["posthog_properties"] = analytics.properties or {}
-                    common["posthog_groups"] = analytics.groups or {}
+                    common["insights_distinct_id"] = analytics.distinct_id
+                    common["insights_trace_id"] = analytics.trace_id or str(uuid.uuid4())
+                    common["insights_properties"] = analytics.properties or {}
+                    common["insights_groups"] = analytics.groups or {}
                 if model_id not in OpenAIConfig.SUPPORTED_MODELS_WITH_THINKING:
                     common["temperature"] = effective_temperature
                 if request.max_tokens is not None:
@@ -380,10 +380,10 @@ Return ONLY the JSON object, no other text or markdown formatting."""
     def _build_analytics_kwargs(self, analytics: AnalyticsContext, client) -> dict:
         if analytics.capture and isinstance(client, OpenAI):
             return {
-                "posthog_distinct_id": analytics.distinct_id,
-                "posthog_trace_id": analytics.trace_id or str(uuid.uuid4()),
-                "posthog_properties": analytics.properties or {},
-                "posthog_groups": analytics.groups or {},
+                "insights_distinct_id": analytics.distinct_id,
+                "insights_trace_id": analytics.trace_id or str(uuid.uuid4()),
+                "insights_properties": analytics.properties or {},
+                "insights_groups": analytics.groups or {},
             }
         return {}
 

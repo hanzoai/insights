@@ -23,6 +23,6 @@ class CohortAdmin(admin.ModelAdmin):
     def team_link(self, cohort: Cohort):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[cohort.team.pk]),
+            reverse("admin:insights_team_change", args=[cohort.team.pk]),
             cohort.team.name,
         )

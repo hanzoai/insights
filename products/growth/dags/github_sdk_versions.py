@@ -22,48 +22,48 @@ INITIAL_RETRIES_BACKOFF = 1  # in seconds
 
 SdkTypes = Literal[
     "web",
-    "posthog-ios",
-    "posthog-android",
-    "posthog-node",
-    "posthog-python",
-    "posthog-php",
-    "posthog-ruby",
-    "posthog-go",
-    "posthog-flutter",
-    "posthog-react-native",
-    "posthog-dotnet",
-    "posthog-elixir",
+    "insights-ios",
+    "insights-android",
+    "insights-node",
+    "hanzo-insights",
+    "insights-php",
+    "insights-ruby",
+    "insights-go",
+    "insights-flutter",
+    "insights-react-native",
+    "insights-dotnet",
+    "insights-elixir",
 ]
 SDK_TYPES: list[SdkTypes] = [
     "web",
-    "posthog-ios",
-    "posthog-android",
-    "posthog-node",
-    "posthog-python",
-    "posthog-php",
-    "posthog-ruby",
-    "posthog-go",
-    "posthog-flutter",
-    "posthog-react-native",
-    "posthog-dotnet",
-    "posthog-elixir",
+    "insights-ios",
+    "insights-android",
+    "insights-node",
+    "hanzo-insights",
+    "insights-php",
+    "insights-ruby",
+    "insights-go",
+    "insights-flutter",
+    "insights-react-native",
+    "insights-dotnet",
+    "insights-elixir",
 ]
 
 
 # Using lambda here to be able to define this before defining the functions
 SDK_FETCH_FUNCTIONS: dict[SdkTypes, Callable[[], dict[str, Any]]] = {
     "web": lambda: fetch_web_sdk_data(),
-    "posthog-python": lambda: fetch_python_sdk_data(),
-    "posthog-node": lambda: fetch_node_sdk_data(),
-    "posthog-react-native": lambda: fetch_react_native_sdk_data(),
-    "posthog-flutter": lambda: fetch_flutter_sdk_data(),
-    "posthog-ios": lambda: fetch_ios_sdk_data(),
-    "posthog-android": lambda: fetch_android_sdk_data(),
-    "posthog-go": lambda: fetch_go_sdk_data(),
-    "posthog-php": lambda: fetch_php_sdk_data(),
-    "posthog-ruby": lambda: fetch_ruby_sdk_data(),
-    "posthog-elixir": lambda: fetch_elixir_sdk_data(),
-    "posthog-dotnet": lambda: fetch_dotnet_sdk_data(),
+    "hanzo-insights": lambda: fetch_python_sdk_data(),
+    "insights-node": lambda: fetch_node_sdk_data(),
+    "insights-react-native": lambda: fetch_react_native_sdk_data(),
+    "insights-flutter": lambda: fetch_flutter_sdk_data(),
+    "insights-ios": lambda: fetch_ios_sdk_data(),
+    "insights-android": lambda: fetch_android_sdk_data(),
+    "insights-go": lambda: fetch_go_sdk_data(),
+    "insights-php": lambda: fetch_php_sdk_data(),
+    "insights-ruby": lambda: fetch_ruby_sdk_data(),
+    "insights-elixir": lambda: fetch_elixir_sdk_data(),
+    "insights-dotnet": lambda: fetch_dotnet_sdk_data(),
 }
 
 
@@ -187,34 +187,34 @@ def fetch_releases_from_repo(repo: str, skip_cache: bool = False) -> list[Any]:
 def fetch_web_sdk_data() -> dict[str, Any]:
     """Fetch Web SDK data from GitHub releases API"""
 
-    # Newer versions in `posthog-js` use a monorepo approach where we prefix tags with `posthog-js@`
+    # Newer versions in `insights-js` use a monorepo approach where we prefix tags with `insights-js@`
     # while older versions before the monorepo used simple `v`-prefixed tags
-    return fetch_sdk_data_from_releases("PostHog/posthog-js", tag_prefixes=["posthog-js@", "v"])
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-js", tag_prefixes=["insights-js@", "v"])
 
 
 def fetch_python_sdk_data() -> dict[str, Any]:
     """Fetch Python SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-python", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Hanzo Insights/hanzo-insights", tag_prefixes=["v"])
 
 
 def fetch_node_sdk_data() -> dict[str, Any]:
     """Fetch Node.js SDK data from GitHub releases API"""
 
-    # `posthog-node` was originally developed on the `posthog-js-lite` repo, but was later moved to the `posthog-js` monorepo
+    # `insights-node` was originally developed on the `insights-js-lite` repo, but was later moved to the `insights-js` monorepo
     # We fetch the latest version from both repos and join them together.
-    posthog_js = fetch_sdk_data_from_releases("PostHog/posthog-js", tag_prefixes=["posthog-node@"])
-    posthog_js_lite = fetch_sdk_data_from_releases("PostHog/posthog-js-lite", tag_prefixes=["posthog-node-v"])
+    insights_js = fetch_sdk_data_from_releases("Hanzo Insights/insights-js", tag_prefixes=["insights-node@"])
+    insights_js_lite = fetch_sdk_data_from_releases("Hanzo Insights/insights-js-lite", tag_prefixes=["insights-node-v"])
 
     # Shouldn't happen, but just in case
-    if not posthog_js:
+    if not insights_js:
         return {}
 
-    # The latest date is always from `posthog-js` since this is the only active repo
+    # The latest date is always from `insights-js` since this is the only active repo
     return {
-        "latestVersion": posthog_js["latestVersion"],
+        "latestVersion": insights_js["latestVersion"],
         "releaseDates": {
-            **posthog_js["releaseDates"],
-            **posthog_js_lite.get("releaseDates", {}),
+            **insights_js["releaseDates"],
+            **insights_js_lite.get("releaseDates", {}),
         },
     }
 
@@ -222,21 +222,21 @@ def fetch_node_sdk_data() -> dict[str, Any]:
 def fetch_react_native_sdk_data() -> dict[str, Any]:
     """Fetch React Native SDK data from GitHub releases API"""
 
-    # `posthog-react-native` was originally developed on the `posthog-js-lite` repo, but was later moved to the `posthog-js` monorepo
+    # `insights-react-native` was originally developed on the `insights-js-lite` repo, but was later moved to the `insights-js` monorepo
     # We fetch the latest version from both repos and join them together.
-    posthog_js = fetch_sdk_data_from_releases("PostHog/posthog-js", tag_prefixes=["posthog-react-native@"])
-    posthog_js_lite = fetch_sdk_data_from_releases("PostHog/posthog-js-lite", tag_prefixes=["posthog-react-native-v"])
+    insights_js = fetch_sdk_data_from_releases("Hanzo Insights/insights-js", tag_prefixes=["insights-react-native@"])
+    insights_js_lite = fetch_sdk_data_from_releases("Hanzo Insights/insights-js-lite", tag_prefixes=["insights-react-native-v"])
 
     # Shouldn't happen, but just in case
-    if not posthog_js:
+    if not insights_js:
         return {}
 
-    # The latest date is always from `posthog-js` since this is the only active repo
+    # The latest date is always from `insights-js` since this is the only active repo
     return {
-        "latestVersion": posthog_js["latestVersion"],
+        "latestVersion": insights_js["latestVersion"],
         "releaseDates": {
-            **posthog_js["releaseDates"],
-            **posthog_js_lite.get("releaseDates", {}),
+            **insights_js["releaseDates"],
+            **insights_js_lite.get("releaseDates", {}),
         },
     }
 
@@ -244,42 +244,42 @@ def fetch_react_native_sdk_data() -> dict[str, Any]:
 def fetch_flutter_sdk_data() -> dict[str, Any]:
     """Fetch Flutter SDK data from GitHub releases API"""
     # First attempt to cut the trailing `v` prefix and then just fallback to the full tag
-    return fetch_sdk_data_from_releases("PostHog/posthog-flutter", tag_prefixes=["v", ""])
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-flutter", tag_prefixes=["v", ""])
 
 
 def fetch_ios_sdk_data() -> dict[str, Any]:
     """Fetch iOS SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-ios")
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-ios")
 
 
 def fetch_android_sdk_data() -> dict[str, Any]:
     """Fetch Android SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-android", tag_prefixes=["android-v", re.compile(r"[0-9]")])
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-android", tag_prefixes=["android-v", re.compile(r"[0-9]")])
 
 
 def fetch_go_sdk_data() -> dict[str, Any]:
     """Fetch Go SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-go", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-go", tag_prefixes=["v"])
 
 
 def fetch_php_sdk_data() -> dict[str, Any]:
     """Fetch PHP SDK data from History.md with release dates"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-php")
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-php")
 
 
 def fetch_ruby_sdk_data() -> dict[str, Any]:
     """Fetch Ruby SDK data from CHANGELOG.md with release dates"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-ruby")
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-ruby")
 
 
 def fetch_elixir_sdk_data() -> dict[str, Any]:
     """Fetch Elixir SDK data from CHANGELOG.md with release dates"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-elixir", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-elixir", tag_prefixes=["v"])
 
 
 def fetch_dotnet_sdk_data() -> dict[str, Any]:
     """Fetch .NET SDK data from GitHub releases API"""
-    return fetch_sdk_data_from_releases("PostHog/posthog-dotnet", tag_prefixes=["v"])
+    return fetch_sdk_data_from_releases("Hanzo Insights/insights-dotnet", tag_prefixes=["v"])
 
 
 # ---- Dagster defs

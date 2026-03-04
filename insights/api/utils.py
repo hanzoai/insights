@@ -16,7 +16,7 @@ from django.http import HttpRequest
 
 import structlog
 from loginas.utils import is_impersonated_session
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from prometheus_client import Counter
 from requests.adapters import HTTPAdapter
 from rest_framework import request, serializers, status
@@ -183,7 +183,7 @@ def get_token(data, request) -> Optional[str]:
                 elif data.get("token"):
                     token = data["token"]  # JS reloadFeatures call
                 elif data.get("api_key"):
-                    token = data["api_key"]  # server-side libraries like posthog-python and posthog-ruby
+                    token = data["api_key"]  # server-side libraries like hanzo-insights and insights-ruby
                 elif data.get("properties") and data["properties"].get("token"):
                     token = data["properties"]["token"]  # JS capture call
     return token
@@ -275,7 +275,7 @@ SURROGATES_SUBSTITUTED_COUNTER = Counter(
 )
 
 
-# keep in sync with posthog/plugin-server/src/utils/db/utils.ts::safeClickhouseString
+# keep in sync with insights/plugin-server/src/utils/db/utils.ts::safeClickhouseString
 def safe_clickhouse_string(s: str, with_counter=True) -> str:
     matches = SURROGATE_REGEX.findall(s or "")
     for match in matches:
@@ -463,7 +463,7 @@ def on_permitted_recording_domain(permitted_domains: list[str], request: HttpReq
     # TODO we will match on the app identifier in the origin instead and allow users to auth those
     is_authorized_mobile_client: bool = user_agent is not None and any(
         keyword in user_agent
-        for keyword in ["posthog-android", "posthog-ios", "posthog-react-native", "posthog-flutter"]
+        for keyword in ["insights-android", "insights-ios", "insights-react-native", "insights-flutter"]
     )
 
     return is_authorized_web_client or is_authorized_mobile_client

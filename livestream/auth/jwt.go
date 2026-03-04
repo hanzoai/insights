@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const ExpectedScope = "posthog:livestream"
+const ExpectedScope = "insights:livestream"
 
 func GetAuth(header http.Header) (jwt.MapClaims, error) {
 	authHeader := header.Get("Authorization")

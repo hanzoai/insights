@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { IconServer } from '@posthog/icons'
-import { IconFlutter, IconGo, IconJavascript, IconPHP, IconPython, IconRuby } from '@posthog/icons'
-import { LemonSelect, Link } from '@posthog/lemon-ui'
+import { IconServer } from '@hanzo/icons'
+import { IconFlutter, IconGo, IconJavascript, IconPHP, IconPython, IconRuby } from '@hanzo/icons'
+import { LemonSelect, Link } from '@hanzo/lemon-ui'
 
 import { IconAndroidOS, IconAppleIOS, IconNodeJS } from 'lib/lemon-ui/icons'
 
@@ -28,7 +28,7 @@ interface ExperimentImplementationDetailsProps {
 }
 
 const UTM_TAGS = '?utm_medium=in-product&utm_campaign=experiment'
-const DOC_BASE_URL = 'https://posthog.com/docs/'
+const DOC_BASE_URL = 'https://hanzo.ai/docs/'
 const FF_ANCHOR = '#feature-flags'
 
 export enum LibraryType {

@@ -13,7 +13,7 @@ import {
 } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonDivider, LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonDivider, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'
 import { NotFound } from 'lib/components/NotFound'

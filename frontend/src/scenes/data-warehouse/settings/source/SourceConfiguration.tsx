@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect, useState } from 'react'
 
-import { LemonButton, LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SourceFormComponent } from 'scenes/data-warehouse/external/forms/SourceForm'

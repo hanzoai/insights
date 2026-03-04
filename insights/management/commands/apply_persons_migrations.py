@@ -23,7 +23,7 @@ import psycopg
 from psycopg import sql
 
 # Migrations that must be skipped on hobby deploys.
-# These partition the posthog_person table, which is only needed in production
+# These partition the insights_person table, which is only needed in production
 # where the table is large enough to benefit from hash partitioning.
 HOBBY_SKIP_MIGRATIONS = {
     "20251113000001_add_partitioned_person_table.sql",
@@ -86,8 +86,8 @@ def _ensure_database_exists(db_alias: str) -> None:
             dbname="postgres",
             host=db_settings.get("HOST") or "localhost",
             port=int(db_settings.get("PORT") or 5432),
-            user=db_settings.get("USER") or "posthog",
-            password=db_settings.get("PASSWORD") or "posthog",
+            user=db_settings.get("USER") or "insights",
+            password=db_settings.get("PASSWORD") or "insights",
             autocommit=True,
         ) as conn:
             with conn.cursor() as cur:
@@ -134,7 +134,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--hobby",
             action="store_true",
-            help="Skip partitioning migrations (for hobby deploys where posthog_person is not partitioned).",
+            help="Skip partitioning migrations (for hobby deploys where insights_person is not partitioned).",
         )
         parser.add_argument(
             "--ensure-database",

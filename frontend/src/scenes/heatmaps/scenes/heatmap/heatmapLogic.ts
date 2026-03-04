@@ -92,7 +92,7 @@ export const heatmapLogic = kea<heatmapLogicType>([
                     const desiredWidth = values.widthOverride
                     if (item.status === 'completed' && item.has_content) {
                         actions.setScreenshotUrl(
-                            `/api/environments/${window.POSTHOG_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${item.id}/content/?width=${desiredWidth}`
+                            `/api/environments/${window.INSIGHTS_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${item.id}/content/?width=${desiredWidth}`
                         )
                         // trigger heatmap overlay load
                         actions.loadHeatmap()
@@ -115,7 +115,7 @@ export const heatmapLogic = kea<heatmapLogicType>([
             const w = widthOverride ?? DEFAULT_HEATMAP_WIDTH
             actions.setScreenshotError(null)
             actions.setScreenshotUrl(
-                `/api/environments/${window.POSTHOG_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${values.heatmapId}/content/?width=${w}`
+                `/api/environments/${window.INSIGHTS_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${values.heatmapId}/content/?width=${w}`
             )
         },
         pollScreenshotStatus: async ({ id, width }, breakpoint) => {
@@ -129,7 +129,7 @@ export const heatmapLogic = kea<heatmapLogicType>([
                     if (contentResponse.success) {
                         const w = width ?? DEFAULT_HEATMAP_WIDTH
                         actions.setScreenshotUrl(
-                            `/api/environments/${window.POSTHOG_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${id}/content/?width=${w}`
+                            `/api/environments/${window.INSIGHTS_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${id}/content/?width=${w}`
                         )
                         actions.loadHeatmap()
                         actions.setGeneratingScreenshot(false)
@@ -139,7 +139,7 @@ export const heatmapLogic = kea<heatmapLogicType>([
                         if (screenshot.status === 'completed' && screenshot.has_content) {
                             const w = width ?? DEFAULT_HEATMAP_WIDTH
                             actions.setScreenshotUrl(
-                                `/api/environments/${window.POSTHOG_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${screenshot.id}/content/?width=${w}`
+                                `/api/environments/${window.INSIGHTS_APP_CONTEXT?.current_team?.id}/heatmap_screenshots/${screenshot.id}/content/?width=${w}`
                             )
                             actions.loadHeatmap()
                             actions.setGeneratingScreenshot(false)

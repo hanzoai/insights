@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonTable, LemonTableColumns, LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonTable, LemonTableColumns, LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
@@ -381,7 +381,7 @@ export function SummaryTable({
                     disabledReason={filters.length === 0 ? 'Unable to identify recordings for this metric' : undefined}
                     data-attr="experiment-summary-view-recordings"
                     onClick={() => {
-                        posthog.capture('viewed recordings from experiment', { variant: variantKey })
+                        insights.capture('viewed recordings from experiment', { variant: variantKey })
                     }}
                 />
             )

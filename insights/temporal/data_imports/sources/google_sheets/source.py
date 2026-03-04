@@ -80,7 +80,7 @@ class GoogleSheetsSource(SimpleSource[GoogleSheetsSourceConfig]):
         except PermissionError:
             return (
                 False,
-                "Permissions missing from spreadsheet. View documentation at https://posthog.com/docs/cdp/sources/google-sheets",
+                "Permissions missing from spreadsheet. View documentation at https://hanzo.ai/docs/cdp/sources/google-sheets",
             )
         except Exception as e:
             return False, str(e)
@@ -90,10 +90,10 @@ class GoogleSheetsSource(SimpleSource[GoogleSheetsSourceConfig]):
         return SourceConfig(
             name=SchemaExternalDataSourceType.GOOGLE_SHEETS,
             label="Google Sheets",
-            caption="Ensure you have granted Insights access to your Google Sheet as instructed in the [documentation](https://posthog.com/docs/cdp/sources/google-sheets)",
+            caption="Ensure you have granted Insights access to your Google Sheet as instructed in the [documentation](https://hanzo.ai/docs/cdp/sources/google-sheets)",
             betaSource=True,
             iconPath="/static/services/Google_Sheets.svg",
-            docsUrl="https://posthog.com/docs/cdp/sources/google-sheets",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/google-sheets",
             fields=cast(
                 list[FieldType],
                 [

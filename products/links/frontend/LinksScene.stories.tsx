@@ -25,9 +25,9 @@ const LINKS_RESULT: LinkType[] = [
     },
     {
         id: '0187c22d-06d9-0000-34fe-daa2e2afb503',
-        redirect_url: 'https://www.posthog.com',
+        redirect_url: 'https://www.hanzo.ai',
         short_link_domain: 'phog.gg',
-        short_code: 'posthog',
+        short_code: 'insights',
         description: 'Test link for Insights',
         created_at: '2023-04-27T11:29:30.798968Z',
         updated_at: '2023-04-27T11:29:30.798968Z',

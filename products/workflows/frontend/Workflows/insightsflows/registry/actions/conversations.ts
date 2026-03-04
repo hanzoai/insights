@@ -10,14 +10,14 @@ registerActionNodeCategory({
             type: 'function',
             name: 'Get ticket',
             description: 'Fetch current ticket data into a workflow variable.',
-            config: { template_id: 'template-posthog-get-ticket', inputs: {} },
+            config: { template_id: 'template-insights-get-ticket', inputs: {} },
             output_variable: { key: 'ticket', result_path: null, spread: true },
         },
         {
             type: 'function',
             name: 'Update ticket',
             description: 'Update a conversation ticket status or priority.',
-            config: { template_id: 'template-posthog-update-ticket', inputs: {} },
+            config: { template_id: 'template-insights-update-ticket', inputs: {} },
         },
     ],
 })

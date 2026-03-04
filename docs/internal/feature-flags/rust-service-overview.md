@@ -15,18 +15,18 @@ AWS ALB
   ▼
 Contour / Envoy (path-based routing)
   │
-  ├── /decide/*              ──▶ posthog-feature-flags:3001  (Rust)
-  ├── /flags/?               ──▶ posthog-feature-flags:3001  (Rust)
-  ├── /api/feature_flag/local_evaluation ──▶ posthog-local-evaluation:8000 (Django, dedicated deployment)
-  ├── /api/*                 ──▶ posthog-web-django:8000     (Django, catch-all)
-  └── /*                     ──▶ posthog-web-django:8000     (Django, final catch-all)
+  ├── /decide/*              ──▶ insights-feature-flags:3001  (Rust)
+  ├── /flags/?               ──▶ insights-feature-flags:3001  (Rust)
+  ├── /api/feature_flag/local_evaluation ──▶ insights-local-evaluation:8000 (Django, dedicated deployment)
+  ├── /api/*                 ──▶ insights-web-django:8000     (Django, catch-all)
+  └── /*                     ──▶ insights-web-django:8000     (Django, final catch-all)
 ```
 
 Key routing details:
 
 - The `decide` and `feature-flags` proxy blocks are **included before** the `api` block in Contour, so they match first
 - `/decide` adds an `X-Original-Endpoint: decide` header so the Rust service can adjust response format
-- A **dedicated subdomain** (`us-d.i.posthog.com` / `eu-d.i.posthog.com`) routes only to `decide` + `feature-flags` with no Django fallback
+- A **dedicated subdomain** (`us-d.i.hanzo.ai` / `eu-d.i.hanzo.ai`) routes only to `decide` + `feature-flags` with no Django fallback
 - All flag routes have a **5-second timeout** and 2 retries on `reset`/`cancelled`
 - Canary rollouts are supported via Argo Rollouts adjusting weights on the HTTPProxy resources
 
@@ -215,7 +215,7 @@ All values come from environment variables via the `envconfig` crate. Defined in
 
 | Variable                                  | Default                                             | Purpose                               |
 | ----------------------------------------- | --------------------------------------------------- | ------------------------------------- |
-| `WRITE_DATABASE_URL`                      | `postgres://posthog:posthog@localhost:5432/posthog` | Main database primary                 |
+| `WRITE_DATABASE_URL`                      | `postgres://insights:insights@localhost:5432/insights` | Main database primary                 |
 | `READ_DATABASE_URL`                       | same                                                | Main database replica                 |
 | `PERSONS_WRITE_DATABASE_URL`              | (empty, aliases to main)                            | Persons database primary              |
 | `PERSONS_READ_DATABASE_URL`               | (empty, aliases to main)                            | Persons database replica              |
@@ -242,7 +242,7 @@ All values come from environment variables via the `envconfig` crate. Defined in
 
 | Variable                  | Default     | Purpose                          |
 | ------------------------- | ----------- | -------------------------------- |
-| `OBJECT_STORAGE_BUCKET`   | `posthog`   | S3 bucket name                   |
+| `OBJECT_STORAGE_BUCKET`   | `insights`   | S3 bucket name                   |
 | `OBJECT_STORAGE_REGION`   | `us-east-1` | AWS region                       |
 | `OBJECT_STORAGE_ENDPOINT` | (empty)     | Custom S3 endpoint for local dev |
 
@@ -274,7 +274,7 @@ All values come from environment variables via the `envconfig` crate. Defined in
 | ----------------------------- | ----------------------- | ------------------------------------------------------------------------------------- |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | (disabled)              | OpenTelemetry collector endpoint                                                      |
 | `OTEL_TRACES_SAMPLER_ARG`     | `0.001`                 | Trace sampling rate (0.1%)                                                            |
-| `OTEL_SERVICE_NAME`           | `posthog-feature-flags` | Service name in traces                                                                |
+| `OTEL_SERVICE_NAME`           | `insights-feature-flags` | Service name in traces                                                                |
 | `TEAM_IDS_TO_TRACK`           | `all`                   | Teams to emit detailed metrics for (`all`, `none`, comma-separated, or range `1:100`) |
 
 ### Other

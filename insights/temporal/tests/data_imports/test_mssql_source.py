@@ -11,7 +11,7 @@ OBJECT_STORAGE_ENDPOINT=http://localhost:19000 \
     MSSQL_USER=username \
     MSSQL_PASSWORD=password \
     MSSQL_DATABASE=database_name \
-    pytest posthog/temporal/tests/data_imports/test_mssql_source.py
+    pytest insights/temporal/tests/data_imports/test_mssql_source.py
 ```
 
 (From my testing on Azure, the connection often fails the first time, but waiting for a bit and retrying works.

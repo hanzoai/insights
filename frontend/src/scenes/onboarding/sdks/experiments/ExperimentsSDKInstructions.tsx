@@ -24,7 +24,7 @@ import {
     SvelteInstallation,
     VueInstallation,
     WebflowInstallation,
-} from '@posthog/shared-onboarding/experiments'
+} from '@hanzo/shared-onboarding/experiments'
 import {
     BooleanFlagSnippet,
     FlagPayloadSnippet,
@@ -32,8 +32,8 @@ import {
     OnFeatureFlagsCallbackSnippet,
     OverridePropertiesSnippet,
     ReloadFlagsSnippet,
-} from '@posthog/shared-onboarding/feature-flags'
-import { JSEventCapture, NodeEventCapture, PythonEventCapture } from '@posthog/shared-onboarding/product-analytics'
+} from '@hanzo/shared-onboarding/feature-flags'
+import { JSEventCapture, NodeEventCapture, PythonEventCapture } from '@hanzo/shared-onboarding/product-analytics'
 
 import { SDKInstructionsMap, SDKKey } from '~/types'
 

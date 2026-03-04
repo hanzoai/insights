@@ -9,7 +9,7 @@ import {
     IconGlobe,
     IconLaptop,
     IconPerson,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { SurveyConditionSummary, SurveyConditionType } from 'scenes/surveys/utils'
 

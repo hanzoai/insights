@@ -1,4 +1,4 @@
-import { IconClock } from '@posthog/icons'
+import { IconClock } from '@hanzo/icons'
 
 import { LemonRow } from 'lib/lemon-ui/LemonRow'
 import { Lettermark, LettermarkColor } from 'lib/lemon-ui/Lettermark'

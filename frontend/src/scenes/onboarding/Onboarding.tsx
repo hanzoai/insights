@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonTag, Link, Spinner } from '@posthog/lemon-ui'
+import { LemonBanner, LemonTag, Link, Spinner } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -434,7 +434,7 @@ const WorkflowsInstallHeader = (): JSX.Element => {
                 Workflows is a no-code product - installing an SDK is optional. However, with an SDK installed, any
                 captured or custom event can be used as a{' '}
                 <Link
-                    to="https://posthog.com/docs/workflows/workflow-builder#triggers"
+                    to="https://hanzo.ai/docs/workflows/workflow-builder#triggers"
                     target="_blank"
                     targetBlankIcon={false}
                 >

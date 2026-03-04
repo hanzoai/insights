@@ -10,7 +10,7 @@ import {
     IconNotebook,
     IconSearch,
     IconShuffle,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { IconQuestionAnswer, IconRobot } from 'lib/lemon-ui/icons'
@@ -67,7 +67,7 @@ export interface ToolRegistration extends Pick<ToolDefinition, 'name' | 'descrip
     /** A unique identifier for the tool */
     identifier: keyof typeof TOOL_DEFINITIONS
     /**
-     * Optional specific @posthog/icons icon
+     * Optional specific @hanzo/icons icon
      * @default <IconWrench />
      */
     /** Contextual data to be included for use by the LLM */

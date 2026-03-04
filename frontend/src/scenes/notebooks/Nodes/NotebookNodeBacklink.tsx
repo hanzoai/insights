@@ -18,8 +18,8 @@ import {
     IconPerson,
     IconPlaylist,
     IconRewindPlay,
-} from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { urls } from 'scenes/urls'
@@ -29,7 +29,7 @@ import { QueryBasedInsightModel } from '~/types'
 
 import { notebookLogic } from '../Notebook/notebookLogic'
 import { NotebookNodeType, NotebookTarget } from '../types'
-import { posthogNodePasteRule } from './utils'
+import { insightsNodePasteRule } from './utils'
 
 type BackLinkMapper = {
     regex: RegExp
@@ -223,7 +223,7 @@ export const NotebookNodeBacklink = Node.create({
 
     addPasteRules() {
         return [
-            posthogNodePasteRule({
+            insightsNodePasteRule({
                 find: '(.+)',
                 editor: this.editor,
                 type: this.type,

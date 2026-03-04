@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, lemonToast } from '@posthog/lemon-ui'
+import { IconGear, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, lemonToast } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { FEATURE_FLAGS } from 'lib/constants'

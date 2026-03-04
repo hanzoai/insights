@@ -21,14 +21,14 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'Expo',
                                 code: dedent`
-                                    npx expo install posthog-react-native expo-file-system expo-application expo-device expo-localization posthog-react-native-session-replay
+                                    npx expo install insights-react-native expo-file-system expo-application expo-device expo-localization insights-react-native-session-replay
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize posthog-react-native-session-replay
+                                    yarn add insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize insights-react-native-session-replay
 
                                     # for iOS
                                     cd ios && pod install
@@ -38,7 +38,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm i -s posthog-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize posthog-react-native-session-replay
+                                    npm i -s insights-react-native @react-native-async-storage/async-storage react-native-device-info react-native-localize insights-react-native-session-replay
 
                                     # for iOS
                                     cd ios && pod install
@@ -61,7 +61,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
@@ -82,11 +82,11 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'App.tsx',
                                 code: dedent`
-                                    import { PostHogProvider } from 'posthog-react-native'
+                                    import { InsightsProvider } from 'insights-react-native'
 
                                     export function MyApp() {
                                         return (
-                                            <PostHogProvider
+                                            <InsightsProvider
                                                 apiKey="<ph_project_api_key>"
                                                 options={{
                                                     host: "<ph_client_api_host>",
@@ -120,7 +120,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                                 }}
                                             >
                                                 <RestOfApp />
-                                            </PostHogProvider>
+                                            </InsightsProvider>
                                         )
                                     }
                                 `,
@@ -129,7 +129,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                     />
                     <Markdown>
                         For more configuration options, see the [React Native session replay
-                        docs](https://posthog.com/docs/session-replay/installation?tab=React+Native).
+                        docs](https://hanzo.ai/docs/session-replay/installation?tab=React+Native).
                     </Markdown>
                     <CalloutBox type="fyi" title="Requirements">
                         <Markdown>

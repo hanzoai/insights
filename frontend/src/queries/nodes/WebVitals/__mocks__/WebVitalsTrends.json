@@ -39,7 +39,7 @@
                         "id": "e048a56a-eba8-4e59-ad20-cda77883594c",
                         "key": "utm_source",
                         "op": "exact",
-                        "value": ["substack", "posthog-newsletter"]
+                        "value": ["substack", "insights-newsletter"]
                     }
                 ]
             }

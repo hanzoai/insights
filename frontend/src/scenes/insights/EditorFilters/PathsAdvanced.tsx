@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonInput, LemonSwitch } from '@posthog/lemon-ui'
+import { LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { LemonLabel } from 'lib/lemon-ui/LemonLabel/LemonLabel'

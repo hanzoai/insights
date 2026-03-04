@@ -1,7 +1,7 @@
 import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -181,7 +181,7 @@ export const dataWarehouseSettingsLogic = kea<dataWarehouseSettingsLogicType>([
             actions.loadSources(null)
             actions.sourceLoadingFinished(source)
 
-            posthog.capture('source deleted', { sourceType: source.source_type })
+            insights.capture('source deleted', { sourceType: source.source_type })
         },
         reloadSource: async ({ source }) => {
             // Optimistic UI updates before sending updates to the backend
@@ -210,7 +210,7 @@ export const dataWarehouseSettingsLogic = kea<dataWarehouseSettingsLogicType>([
                 await api.externalDataSources.reload(source.id)
                 actions.loadSources(null)
 
-                posthog.capture('source reloaded', { sourceType: source.source_type })
+                insights.capture('source reloaded', { sourceType: source.source_type })
             } catch (e: any) {
                 if (e.message) {
                     lemonToast.error(e.message)
@@ -221,7 +221,7 @@ export const dataWarehouseSettingsLogic = kea<dataWarehouseSettingsLogicType>([
             actions.sourceLoadingFinished(source)
         },
         updateSchema: (schema) => {
-            posthog.capture('schema updated', { shouldSync: schema.should_sync, syncType: schema.sync_type })
+            insights.capture('schema updated', { shouldSync: schema.should_sync, syncType: schema.sync_type })
         },
         loadSourcesSuccess: () => {
             if (router.values.location.pathname.includes('data-warehouse')) {

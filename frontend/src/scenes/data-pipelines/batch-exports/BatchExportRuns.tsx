@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar, IconRefresh } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonSwitch, LemonTable, Tooltip } from '@posthog/lemon-ui'
+import { IconCalendar, IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonSwitch, LemonTable, Tooltip } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { NotFound } from 'lib/components/NotFound'

@@ -1,4 +1,4 @@
-import { LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 

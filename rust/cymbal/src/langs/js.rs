@@ -171,7 +171,7 @@ impl RawJSFrame {
     pub fn is_suspicious(&self) -> bool {
         self.source_url
             .as_ref()
-            .is_some_and(|s| s.contains("posthog.com/static/"))
+            .is_some_and(|s| s.contains("insights.hanzo.ai/static/"))
     }
 }
 
@@ -184,7 +184,7 @@ impl From<(&RawJSFrame, SourceLocation<'_>)> for Frame {
             // The `$async$` prefix is a Dart/Flutter compiler artifact that appears in
             // JavaScript source maps when Flutter code is compiled to JavaScript (web).
             // This branch normalizes such Flutter-to-JavaScript async function names.
-            // See internal context: https://posthog.slack.com/archives/C07AA937K9A/p1768415443965209
+            // See internal context: https://hanzo.slack.com/archives/C07AA937K9A/p1768415443965209
             ScopeLookupResult::NamedScope(name) => {
                 let scope_name = name.to_string();
                 let resolved = if name.starts_with("$async$") {
@@ -208,7 +208,7 @@ impl From<(&RawJSFrame, SourceLocation<'_>)> for Frame {
             .map(|s| !s.contains("node_modules"))
             .unwrap_or(raw_frame.meta.in_app);
 
-        let suspicious = source.as_ref().is_some_and(|s| s.contains("posthog-js@"));
+        let suspicious = source.as_ref().is_some_and(|s| s.contains("insights-js@"));
 
         let mut res = Self {
             frame_id: FrameId::placeholder(), // We use placeholders here, as they're overriden at the RawFrame level

@@ -11,7 +11,7 @@ from django.utils import timezone
 
 import structlog
 
-from insights.jwt import PosthogJwtAudience, encode_jwt
+from insights.jwt import InsightsJwtAudience, encode_jwt
 from insights.models.insight import Insight
 
 logger = structlog.get_logger(__name__)
@@ -94,7 +94,7 @@ class SharingConfiguration(models.Model):
                 "access_token": self.access_token,  # Include for validation
             },
             expiry_delta=timedelta(hours=24),  # 24-hour session duration
-            audience=PosthogJwtAudience.SHARING_PASSWORD_PROTECTED,
+            audience=InsightsJwtAudience.SHARING_PASSWORD_PROTECTED,
         )
 
     def can_access_object(self, obj: models.Model):

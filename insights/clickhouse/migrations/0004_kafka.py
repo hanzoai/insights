@@ -12,7 +12,7 @@ from insights.models.person.sql import (
 # kafka_events was a Kafka ClickHouse engine table that used Protobuf for
 # serialization. To remove complexity of deployments, Protobuf support has been
 # removed from the Insights app and the Plugin server. See
-# https://github.com/PostHog/posthog/issues/9207 for detail.
+# https://github.com/hanzoai/insights/issues/9207 for detail.
 #
 # These have been superseded by kafka_events_json and events_json_mv. However,
 # we can't simply add a DROP TABLE for the old tables as there may still be

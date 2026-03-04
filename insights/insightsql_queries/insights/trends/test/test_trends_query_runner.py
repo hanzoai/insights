@@ -128,7 +128,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         distinct_ids=[person.distinct_id],
                         properties={
                             "name": person.distinct_id,
-                            **({"email": "test@posthog.com"} if person.distinct_id == "p1" else {}),
+                            **({"email": "test@hanzo.ai"} if person.distinct_id == "p1" else {}),
                         },
                     )
                 )
@@ -2899,7 +2899,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             BreakdownItem(label="Chrome", value="Chrome"),
             BreakdownItem(label="Firefox", value="Firefox"),
             BreakdownItem(label="Edge", value="Edge"),
-            BreakdownItem(label=BREAKDOWN_OTHER_DISPLAY, value="$$_posthog_breakdown_other_$$"),
+            BreakdownItem(label=BREAKDOWN_OTHER_DISPLAY, value="$$_insights_breakdown_other_$$"),
         ]
 
         # multiple breakdowns
@@ -2920,7 +2920,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             BreakdownItem(label="Chrome", value="Chrome"),
             BreakdownItem(label="Firefox", value="Firefox"),
             BreakdownItem(label="Edge", value="Edge"),
-            BreakdownItem(label=BREAKDOWN_OTHER_DISPLAY, value="$$_posthog_breakdown_other_$$"),
+            BreakdownItem(label=BREAKDOWN_OTHER_DISPLAY, value="$$_insights_breakdown_other_$$"),
         ]
 
     def test_to_actors_query_options_breakdowns_boolean(self):
@@ -3399,12 +3399,12 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             ["Chrome", "finance"],
             ["Firefox", "technology"],
             ["Edge", "finance"],
-            ["Safari", "$$_posthog_breakdown_null_$$"],
+            ["Safari", "$$_insights_breakdown_null_$$"],
         ]
         assert response.results[0]["label"] == "Chrome::finance"
         assert response.results[1]["label"] == "Firefox::technology"
         assert response.results[2]["label"] == "Edge::finance"
-        assert response.results[3]["label"] == "Safari::$$_posthog_breakdown_null_$$"
+        assert response.results[3]["label"] == "Safari::$$_insights_breakdown_null_$$"
         assert response.results[0]["count"] == 6
         assert response.results[1]["count"] == 2
         assert response.results[2]["count"] == 1
@@ -3436,14 +3436,14 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert len(breakdown_labels) == 4
         assert breakdown_labels == [
             ["50-249", "finance"],
-            ["$$_posthog_breakdown_null_$$", "finance"],
-            ["$$_posthog_breakdown_null_$$", "technology"],
-            ["$$_posthog_breakdown_null_$$", "$$_posthog_breakdown_null_$$"],
+            ["$$_insights_breakdown_null_$$", "finance"],
+            ["$$_insights_breakdown_null_$$", "technology"],
+            ["$$_insights_breakdown_null_$$", "$$_insights_breakdown_null_$$"],
         ]
         assert response.results[0]["label"] == "50-249::finance"
-        assert response.results[1]["label"] == "$$_posthog_breakdown_null_$$::finance"
-        assert response.results[2]["label"] == "$$_posthog_breakdown_null_$$::technology"
-        assert response.results[3]["label"] == "$$_posthog_breakdown_null_$$::$$_posthog_breakdown_null_$$"
+        assert response.results[1]["label"] == "$$_insights_breakdown_null_$$::finance"
+        assert response.results[2]["label"] == "$$_insights_breakdown_null_$$::technology"
+        assert response.results[3]["label"] == "$$_insights_breakdown_null_$$::$$_insights_breakdown_null_$$"
         assert response.results[0]["count"] == 1
         assert response.results[1]["count"] == 6
         assert response.results[2]["count"] == 2
@@ -3476,16 +3476,16 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert len(breakdown_labels) == 4
         assert breakdown_labels == [
             ["finance", "Hedgebank", "50-249"],
-            ["finance", "Hedgeflix", "$$_posthog_breakdown_null_$$"],
-            ["technology", "Hedgebox", "$$_posthog_breakdown_null_$$"],
-            ["$$_posthog_breakdown_null_$$", "$$_posthog_breakdown_null_$$", "$$_posthog_breakdown_null_$$"],
+            ["finance", "Hedgeflix", "$$_insights_breakdown_null_$$"],
+            ["technology", "Hedgebox", "$$_insights_breakdown_null_$$"],
+            ["$$_insights_breakdown_null_$$", "$$_insights_breakdown_null_$$", "$$_insights_breakdown_null_$$"],
         ]
         assert response.results[0]["label"] == "finance::Hedgebank::50-249"
-        assert response.results[1]["label"] == "finance::Hedgeflix::$$_posthog_breakdown_null_$$"
-        assert response.results[2]["label"] == "technology::Hedgebox::$$_posthog_breakdown_null_$$"
+        assert response.results[1]["label"] == "finance::Hedgeflix::$$_insights_breakdown_null_$$"
+        assert response.results[2]["label"] == "technology::Hedgebox::$$_insights_breakdown_null_$$"
         assert (
             response.results[3]["label"]
-            == "$$_posthog_breakdown_null_$$::$$_posthog_breakdown_null_$$::$$_posthog_breakdown_null_$$"
+            == "$$_insights_breakdown_null_$$::$$_insights_breakdown_null_$$::$$_insights_breakdown_null_$$"
         )
         assert response.results[0]["count"] == 1
         assert response.results[1]["count"] == 6
@@ -3562,7 +3562,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             ],
                         ),
                     ],
-                    properties={"$url": "https://posthog.com/?"},
+                    properties={"$url": "https://hanzo.ai/?"},
                 ),
                 SeriesTestData(
                     distinct_id="p2",
@@ -3578,7 +3578,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             ],
                         ),
                     ],
-                    properties={"$url": "https://posthog.com"},
+                    properties={"$url": "https://hanzo.ai"},
                 ),
                 SeriesTestData(
                     distinct_id="p3",
@@ -3586,7 +3586,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Series(event="$pageview", timestamps=["2020-01-12T12:00:00Z"]),
                         Series(event="$pageleave", timestamps=["2020-01-13T12:00:00Z"]),
                     ],
-                    properties={"$url": "https://posthog.com/foo/bar/#"},
+                    properties={"$url": "https://hanzo.ai/foo/bar/#"},
                 ),
                 SeriesTestData(
                     distinct_id="p4",
@@ -3594,7 +3594,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Series(event="$pageview", timestamps=["2020-01-15T12:00:00Z"]),
                         Series(event="$pageleave", timestamps=["2020-01-16T12:00:00Z"]),
                     ],
-                    properties={"$url": "https://posthog.com/foo/bar/"},
+                    properties={"$url": "https://hanzo.ai/foo/bar/"},
                 ),
             ]
         )
@@ -3617,8 +3617,8 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         assert len(response.results) == 2
         assert len(breakdown_labels) == 2
         assert breakdown_labels == [
-            ["https://posthog.com"],
-            ["https://posthog.com/foo/bar"],
+            ["https://hanzo.ai"],
+            ["https://hanzo.ai/foo/bar"],
         ]
 
         for normalize_url in (False, None):
@@ -6599,7 +6599,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertIn("A", breakdown_to_result)
         self.assertIn("B", breakdown_to_result)
         self.assertIn("C", breakdown_to_result)
-        self.assertIn("$$_posthog_breakdown_other_$$", breakdown_to_result)
+        self.assertIn("$$_insights_breakdown_other_$$", breakdown_to_result)
 
         # Check the sums for known categories
         self.assertEqual(breakdown_to_result["A"]["data"][2], 10000.0)  # 10 * 1000
@@ -6615,7 +6615,7 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         # D max: 2000, E max: 1200 -> total 3200 (incorrect)
         #
         # Or if it takes the overall max across all "Other" values: 2000 (incorrect)
-        other_result = breakdown_to_result["$$_posthog_breakdown_other_$$"]
+        other_result = breakdown_to_result["$$_insights_breakdown_other_$$"]
         self.assertEqual(
             other_result["data"][2],
             5500.0,
@@ -6700,8 +6700,8 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         for result in response.results:
             bv = result["breakdown_value"]
             if (
-                isinstance(bv, list) and "$$_posthog_breakdown_other_$$" in bv
-            ) or bv == "$$_posthog_breakdown_other_$$":
+                isinstance(bv, list) and "$$_insights_breakdown_other_$$" in bv
+            ) or bv == "$$_insights_breakdown_other_$$":
                 other_result = result
                 break
 
@@ -6823,8 +6823,8 @@ class TestTrendsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         for result in response.results:
             bv = result["breakdown_value"]
             if (
-                isinstance(bv, list) and "$$_posthog_breakdown_other_$$" in bv
-            ) or bv == "$$_posthog_breakdown_other_$$":
+                isinstance(bv, list) and "$$_insights_breakdown_other_$$" in bv
+            ) or bv == "$$_insights_breakdown_other_$$":
                 other_result = result
                 break
 

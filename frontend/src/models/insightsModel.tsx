@@ -1,6 +1,6 @@
 import { actions, connect, kea, listeners, path } from 'kea'
 
-import { LemonDialog, LemonInput } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'

@@ -1,5 +1,5 @@
-import { IconCheckCircle } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconCheckCircle } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { IconCancel, IconExclamation, IconRadioButtonUnchecked, IconSync } from 'lib/lemon-ui/icons'
 import { StatusTagSetting } from 'scenes/data-warehouse/utils'

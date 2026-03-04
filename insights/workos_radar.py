@@ -19,7 +19,7 @@ from django.http import HttpRequest
 
 import requests
 import structlog
-import posthoganalytics
+import hanzoanalytics
 
 from insights.utils import get_ip_address, get_short_user_agent
 
@@ -207,7 +207,7 @@ def _log_radar_event(
         "radar_api_duration_ms": round(duration_ms, 2),
     }
 
-    posthoganalytics.capture(
+    hanzoanalytics.capture(
         distinct_id=distinct_id,
         event="workos_radar_attempt",
         properties=properties,

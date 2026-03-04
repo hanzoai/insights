@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import React from 'react'
 
-import { IconFilter, IconLogomark, IconX } from '@posthog/icons'
-import { LemonButton, PopoverReferenceContext } from '@posthog/lemon-ui'
+import { IconFilter, IconLogomark, IconX } from '@hanzo/icons'
+import { LemonButton, PopoverReferenceContext } from '@hanzo/lemon-ui'
 
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
 import { IconWithCount } from 'lib/lemon-ui/icons'

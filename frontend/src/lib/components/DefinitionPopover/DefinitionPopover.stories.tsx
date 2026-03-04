@@ -27,7 +27,7 @@ const mockUser: UserBasicType = {
     uuid: 'user-uuid-123',
     distinct_id: 'user-123',
     first_name: 'Alice',
-    email: 'alice@posthog.com',
+    email: 'alice@hanzo.ai',
 }
 
 const mockEventImages = [
@@ -207,7 +207,7 @@ This event tracks page views across the application.
 - Contains page metadata
 
 \`\`\`javascript
-posthog.capture('$pageview', { url: window.location.href })
+insights.capture('$pageview', { url: window.location.href })
 \`\`\``,
     }
 

@@ -31,7 +31,7 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Use `posthog-node` to evaluate feature flags on the server. The server-side SDK uses an async
+                        Use `insights-node` to evaluate feature flags on the server. The server-side SDK uses an async
                         API and requires a `distinct_id` for each user. Initialize Insights in your API route or server
                         action:
                     </Markdown>
@@ -41,10 +41,10 @@ export const getNextJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'typescript',
                                 file: 'app/api/example/route.ts',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node'
+                                    import { Insights } from 'insights-node'
 
-                                    const client = new Insights(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-                                        host: process.env.NEXT_PUBLIC_POSTHOG_HOST
+                                    const client = new Insights(process.env.NEXT_PUBLIC_INSIGHTS_KEY!, {
+                                        host: process.env.NEXT_PUBLIC_INSIGHTS_HOST
                                     })
                                 `,
                             },

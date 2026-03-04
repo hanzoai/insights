@@ -2,8 +2,8 @@ import { useReactFlow } from '@xyflow/react'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconArrowLeft, IconTrash } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonTab, LemonTabs, Tooltip } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconTrash } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonTab, LemonTabs, Tooltip } from '@hanzo/lemon-ui'
 
 import { capitalizeFirstLetter } from 'lib/utils'
 

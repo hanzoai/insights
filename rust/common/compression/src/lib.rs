@@ -1,7 +1,7 @@
-//! Common compression utilities for PostHog Rust services
+//! Common compression utilities for Insights Rust services
 //!
 //! This crate provides gzip compression and decompression capabilities
-//! that are shared across PostHog's Rust services, including feature-flags.
+//! that are shared across Insights Rust services, including feature-flags.
 //!
 //! Supports:
 //! - gzip compression/decompression

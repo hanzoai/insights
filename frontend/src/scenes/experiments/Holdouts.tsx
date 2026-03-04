@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPencil, IconTrash } from '@posthog/icons'
+import { IconPencil, IconTrash } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -12,7 +12,7 @@ import {
     LemonModal,
     LemonTable,
     LemonTableColumns,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
 

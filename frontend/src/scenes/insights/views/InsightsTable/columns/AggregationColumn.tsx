@@ -2,8 +2,8 @@ import './AggregationColumn.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown } from '@posthog/icons'
-import { LemonMenu, LemonMenuItem } from '@posthog/lemon-ui'
+import { IconChevronDown } from '@hanzo/icons'
+import { LemonMenu, LemonMenuItem } from '@hanzo/lemon-ui'
 
 import { average, median } from 'lib/utils'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'

@@ -50,7 +50,7 @@ You must classify the report into one of three categories:
    - Experiment reactions: the report describes an A/B test result that warrants a code change (e.g., rolling out the winning variant, removing losing variant code)
    - Feature flag cleanup: the report identifies a feature flag that should be cleaned up (removing references in code, disabling the flag)
    - User experience issues: the report identifies UX problems observed in session data that can be addressed in code
-   - Deep investigation: slightly surprisingly, one possible action the agent can take is to deep dive into a report, looking at code context and querying posthog data. The agent
+   - Deep investigation: slightly surprisingly, one possible action the agent can take is to deep dive into a report, looking at code context and querying insights data. The agent
      is able to ask for human input once the investigation is complete, so if the report clearly outlines an issue and provides a lot of "jumping off" context for a deeper dive,
      even though the agent might not be able to immediately make a code change, it's able to take immediately useful actions.
 

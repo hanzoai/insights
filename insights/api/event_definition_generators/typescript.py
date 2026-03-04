@@ -29,8 +29,8 @@ class TypeScriptGenerator(EventDefinitionGenerator):
  *
  * Provides capture() for type-safe events and captureRaw() for flexibility
  */
-import originalPostHog from 'posthog-js'
-import type {{ CaptureOptions, CaptureResult, PostHog as OriginalPostHog, Properties }} from 'posthog-js'
+import originalHanzo Insights from 'insights-js'
+import type {{ CaptureOptions, CaptureResult, Hanzo Insights as OriginalHanzo Insights, Properties }} from 'insights-js'
 """
 
         # Generate event schemas interface
@@ -75,31 +75,31 @@ type IsExactlyString<T> = string extends T ? (T extends string ? true : false) :
 """
 
         # Generate TypedInsights interface
-        typed_posthog_interface = """
+        typed_insights_interface = """
 // Enhanced Insights interface with typed capture
-interface TypedInsights extends Omit<OriginalPostHog, 'capture'> {
+interface TypedInsights extends Omit<OriginalHanzo Insights, 'capture'> {
     /**
      * Type-safe capture for defined events, or flexible capture for undefined events
      *
      * Note: For defined events, wrap properties in a variable to allow additional properties:
      * const props = { file_size_b: 100, extra: 'data' }
-     * posthog.capture('downloaded_file', props)
+     * insights.capture('downloaded_file', props)
      *
      * @example
      * // Defined event with type safety
-     * posthog.capture('uploaded_file', {
+     * insights.capture('uploaded_file', {
      *   file_name: 'test.txt',
      *   file_size_b: 100
      * })
      *
      * @example
      * // For events with all optional properties, properties argument is optional
-     * posthog.capture('logged_out') // no properties needed
+     * insights.capture('logged_out') // no properties needed
      *
      * @example
      * // Undefined events work with arbitrary properties
-     * posthog.capture('custom_event', { whatever: 'data' })
-     * posthog.capture('another_event') // or no properties
+     * insights.capture('custom_event', { whatever: 'data' })
+     * insights.capture('another_event') // or no properties
      */
     // Overload 1: For known events (specific EventName literals)
     // This should match first for all known event names
@@ -126,7 +126,7 @@ interface TypedInsights extends Omit<OriginalPostHog, 'capture'> {
      * Use captureRaw() only when you need to bypass all type checking.
      *
      * @example
-     * posthog.captureRaw('Any Event Name', { whatever: 'data' })
+     * insights.captureRaw('Any Event Name', { whatever: 'data' })
      */
     captureRaw(event_name: string, properties?: Properties | null, options?: CaptureOptions): CaptureResult | undefined
 }
@@ -135,7 +135,7 @@ interface TypedInsights extends Omit<OriginalPostHog, 'capture'> {
         # Generate implementation
         implementation = """
 // Create the implementation
-const createTypedInsights = (original: OriginalPostHog): TypedInsights => {
+const createTypedInsights = (original: OriginalHanzo Insights): TypedInsights => {
     // Create the enhanced Insights object
     const enhanced: TypedInsights = Object.create(original)
 
@@ -173,31 +173,31 @@ const createTypedInsights = (original: OriginalPostHog): TypedInsights => {
         # Generate exports
         exports = """
 // Create and export the typed instance
-const posthog = createTypedInsights(originalPostHog as OriginalPostHog)
+const insights = createTypedInsights(originalHanzo Insights as OriginalHanzo Insights)
 
-export default posthog
+export default insights
 export type { EventSchemas, TypedInsights }
 
-// Re-export everything else from posthog-js
-export * from 'posthog-js'
+// Re-export everything else from insights-js
+export * from 'insights-js'
 
 /**
  * USAGE GUIDE
  * ===========
  *
  * For type-safe defined events (recommended):
- *   posthog.capture('uploaded_file', { file_name: 'test.txt', file_size_b: 100 })
+ *   insights.capture('uploaded_file', { file_name: 'test.txt', file_size_b: 100 })
  *
  * For undefined events (flexible):
- *   posthog.capture('Custom Event', { whatever: 'data' })
+ *   insights.capture('Custom Event', { whatever: 'data' })
  *
  * For bypassing all type checking (rare):
- *   posthog.captureRaw('Any Event', { whatever: 'data' })
+ *   insights.captureRaw('Any Event', { whatever: 'data' })
  */
 """
 
         # Combine all sections
-        return header + event_schemas + type_aliases + typed_posthog_interface + implementation + exports
+        return header + event_schemas + type_aliases + typed_insights_interface + implementation + exports
 
     def _map_property_type(self, property_type: str) -> str:
         type_map = {

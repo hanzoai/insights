@@ -11,7 +11,7 @@ import {
     IconPin,
     IconPinFilled,
     IconX,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

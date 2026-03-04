@@ -5,7 +5,7 @@ import { CollapsibleExceptionList } from 'lib/components/Errors/ExceptionList/Co
 import { LoadingExceptionList } from 'lib/components/Errors/ExceptionList/LoadingExceptionList'
 import { RawExceptionList } from 'lib/components/Errors/ExceptionList/RawExceptionList'
 import { errorPropertiesLogic } from 'lib/components/Errors/errorPropertiesLogic'
-import posthog from 'lib/posthog-typed'
+import insights from 'lib/insights-typed'
 import { TabsPrimitiveContent, TabsPrimitiveContentProps } from 'lib/ui/TabsPrimitive/TabsPrimitive'
 import { cn } from 'lib/utils/css-classes'
 
@@ -48,7 +48,7 @@ function StacktraceIssueDisplay({ className }: { className?: string }): JSX.Elem
     const commonProps = { showAllFrames, setShowAllFrames, className }
 
     const handleFirstFrameOpen = useCallbackOnce(() => {
-        posthog.capture('error_tracking_stacktrace_explored', { issue_id: issueId })
+        insights.capture('error_tracking_stacktrace_explored', { issue_id: issueId })
     }, [issueId])
 
     return match([loading, showAsText])

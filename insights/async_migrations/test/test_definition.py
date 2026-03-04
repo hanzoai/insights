@@ -25,8 +25,8 @@ class TestAsyncMigrationDefinition(BaseTest):
         self.assertTrue(isinstance(example_migration, AsyncMigrationDefinition))
         self.assertTrue(isinstance(example_migration.operations[0], AsyncMigrationOperation))
         self.assertEqual(example_migration.description, "An example async migration.")
-        self.assertEqual(example_migration.posthog_min_version, "1.29.0")
-        self.assertEqual(example_migration.posthog_max_version, "1.30.0")
+        self.assertEqual(example_migration.insights_min_version, "1.29.0")
+        self.assertEqual(example_migration.insights_max_version, "1.30.0")
         self.assertEqual(example_migration.operations[-1].fn, example_fn)
         self.assertEqual(example_migration.operations[-1].rollback_fn, example_rollback_fn)
         self.assertTrue(
@@ -37,7 +37,7 @@ class TestAsyncMigrationDefinition(BaseTest):
         )
 
     def test_get_migration_instance_and_parameters(self):
-        setup_async_migrations(ignore_posthog_version=True)
+        setup_async_migrations(ignore_insights_version=True)
 
         MIGRATION_NAME = "0007_persons_and_groups_on_events_backfill"
 

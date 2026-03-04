@@ -76,11 +76,11 @@ services:
         image: ghcr.io/hanzoai/sql:latest
         restart: on-failure
         environment:
-            POSTGRES_USER: posthog
-            POSTGRES_DB: posthog
-            POSTGRES_PASSWORD: posthog
+            POSTGRES_USER: insights
+            POSTGRES_DB: insights
+            POSTGRES_PASSWORD: insights
         healthcheck:
-            test: ['CMD-SHELL', 'pg_isready -U posthog']
+            test: ['CMD-SHELL', 'pg_isready -U insights']
             interval: 5s
             timeout: 5s
         ports:
@@ -98,7 +98,7 @@ services:
                 condition: service_healthy
                 restart: true
         environment:
-            DATABASE_URL: postgres://posthog:posthog@db:5432/test_database
+            DATABASE_URL: postgres://insights:insights@db:5432/test_database
 
     echo_server:
         image: docker.io/library/caddy:2

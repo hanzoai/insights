@@ -2,7 +2,7 @@ import { actions, connect, kea, key, listeners, path, props, reducers, selectors
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

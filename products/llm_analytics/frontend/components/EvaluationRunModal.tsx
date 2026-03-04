@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { LemonButton, LemonModal, LemonSelect } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal, LemonSelect } from '@hanzo/lemon-ui'
 
 import { llmEvaluationsLogic } from '../evaluations/llmEvaluationsLogic'
 import { llmEvaluationExecutionLogic } from '../llmEvaluationExecutionLogic'

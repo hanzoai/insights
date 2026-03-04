@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconClock, IconCopy, IconDownload, IconEllipsis, IconShare, IconTrash } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconClock, IconCopy, IconDownload, IconEllipsis, IconShare, IconTrash } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

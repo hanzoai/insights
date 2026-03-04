@@ -5,7 +5,7 @@
 # https://insights.hanzo.ai/handbook/engineering/developing-locally
 #
 # Insights has sunset support for self-hosted K8s deployments.
-# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-posthog
+# See: https://insights.hanzo.ai/blog/sunsetting-helm-support-insights
 #
 
 services:
@@ -112,7 +112,7 @@ services:
         environment:
             - DEBUG=1
             - OBJECT_STORAGE_ENDPOINT=http://objectstorage:19000
-            - POSTHOG_SKIP_MIGRATION_CHECKS=true
+            - INSIGHTS_SKIP_MIGRATION_CHECKS=true
             - JS_URL=http://localhost:8000
         depends_on:
             - db

@@ -27,7 +27,7 @@ class MarkInactiveExportsAsFinished(TestCase):
 
     NOTE: this test used to explicitly test the migration by first migrating to
     migration 0272 and then migrating to 0273. However, this is not possible
-    with the addition of a squashed migration from posthog 0001 to 0284, as the
+    with the addition of a squashed migration from insights 0001 to 0284, as the
     migration in question is not elided. Instead, we explicitly test the
     migration forwards code. This isn't ideal as we're not testing with the same
     model state as the migration would be run on, but it's better than nothing.

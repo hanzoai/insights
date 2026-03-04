@@ -1,7 +1,7 @@
 import { useAsyncActions, useValues } from 'kea'
 
-import { IconArrowRight, IconLock } from '@posthog/icons'
-import { LemonButton, Popover, PopoverProps, Tooltip } from '@posthog/lemon-ui'
+import { IconArrowRight, IconLock } from '@hanzo/icons'
+import { LemonButton, Popover, PopoverProps, Tooltip } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { Link } from 'lib/lemon-ui/Link'
@@ -47,7 +47,7 @@ export function AIConsentPopoverWrapper({
                         for compliance (and your existing DPA doesn't already
                         <br />
                         cover AI subprocessors),{' '}
-                        <Link to="https://posthog.com/dpa" target="_blank">
+                        <Link to="https://hanzo.ai/dpa" target="_blank">
                             you can get a fresh DPA here
                         </Link>
                         .

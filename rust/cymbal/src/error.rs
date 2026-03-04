@@ -5,7 +5,7 @@ use common_geoip::GeoIpError;
 use common_kafka::kafka_producer::KafkaProduceError;
 use common_redis::CustomRedisError;
 use common_types::{CapturedEvent, ClickHouseEvent};
-use posthog_symbol_data::SymbolDataError;
+use insights_symbol_data::SymbolDataError;
 use rdkafka::error::KafkaError;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

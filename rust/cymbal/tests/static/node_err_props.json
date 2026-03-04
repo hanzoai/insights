@@ -43,11 +43,11 @@
                         "pre_context": [
                             "});",
                             "",
-                            "posthog.debug();",
+                            "insights.debug();",
                             "",
                             "const server = createServer((req, res) => {",
                             "  res.writeHead(200, { \"Content-Type\": \"text/plain\" });",
-                            "  posthog.capture({ event: \"Test event\", distinctId: \"test\" });"
+                            "  insights.capture({ event: \"Test event\", distinctId: \"test\" });"
                         ],
                         "context_line": "  throw new Error(\"My first Insights error!\");",
                         "post_context": [
@@ -68,6 +68,6 @@
             }
         }
     ],
-    "$lib": "posthog-node",
+    "$lib": "insights-node",
     "$lib_version": "4.4.1"
 }

@@ -40,7 +40,7 @@ class TestVectorSearchQueryRunner(ClickhouseTestMixin, APIBaseTest):
             test_account_filters=[
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 }

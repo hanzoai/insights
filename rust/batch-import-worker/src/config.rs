@@ -23,7 +23,7 @@ pub struct Config {
     #[envconfig(nested = true)]
     pub kafka: KafkaConfig,
 
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub database_url: String,
 
     // Rust service connect directly to postgres, not via pgbouncer, so we keep this low

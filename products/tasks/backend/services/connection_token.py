@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from products.tasks.backend.models import TaskRun
 
 
-SANDBOX_CONNECTION_AUDIENCE = "posthog:sandbox_connection"
+SANDBOX_CONNECTION_AUDIENCE = "insights:sandbox_connection"
 
 
 def _normalize_pem_key(key: str) -> str:

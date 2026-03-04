@@ -28,28 +28,28 @@ async fn test_simple_batch_write(db: PgPool) {
     process_batch(&config, cache, &db, updates).await;
 
     // fetch results and ensure they landed correctly
-    let event_def_name: String = sqlx::query_scalar!(r#"SELECT name from posthog_eventdefinition"#)
+    let event_def_name: String = sqlx::query_scalar!(r#"SELECT name from insights_eventdefinition"#)
         .fetch_one(&db)
         .await
         .unwrap();
     assert_eq!(String::from("$pageview"), event_def_name);
 
     let enforcement_mode: String =
-        sqlx::query_scalar!(r#"SELECT enforcement_mode from posthog_eventdefinition"#)
+        sqlx::query_scalar!(r#"SELECT enforcement_mode from insights_eventdefinition"#)
             .fetch_one(&db)
             .await
             .unwrap();
     assert_eq!(String::from("allow"), enforcement_mode);
 
     let prop_defs_count: Option<i64> =
-        sqlx::query_scalar!(r#"SELECT count(*) from posthog_propertydefinition"#)
+        sqlx::query_scalar!(r#"SELECT count(*) from insights_propertydefinition"#)
             .fetch_one(&db)
             .await
             .unwrap();
     assert_eq!(Some(100), prop_defs_count);
 
     let event_props_count: Option<i64> =
-        sqlx::query_scalar!(r#"SELECT count(*) from posthog_eventproperty"#)
+        sqlx::query_scalar!(r#"SELECT count(*) from insights_eventproperty"#)
             .fetch_one(&db)
             .await
             .unwrap();
@@ -60,7 +60,7 @@ async fn test_simple_batch_write(db: PgPool) {
 async fn test_group_batch_write(db: PgPool) {
     let _unused = sqlx::query!(
         r#"
-        INSERT INTO posthog_grouptypemapping (id, group_type, group_type_index, team_id, project_id)
+        INSERT INTO insights_grouptypemapping (id, group_type, group_type_index, team_id, project_id)
             VALUES(1, 'Organization', 1, 111, 111)
     "#
     )
@@ -96,21 +96,21 @@ async fn test_group_batch_write(db: PgPool) {
     process_batch(&config, cache, &db, updates).await;
 
     // fetch results and ensure they landed correctly
-    let event_def_name: String = sqlx::query_scalar!(r#"SELECT name from posthog_eventdefinition"#)
+    let event_def_name: String = sqlx::query_scalar!(r#"SELECT name from insights_eventdefinition"#)
         .fetch_one(&db)
         .await
         .unwrap();
     assert_eq!(String::from("$groupidentify"), event_def_name);
 
     let prop_defs_count: Option<i64> =
-        sqlx::query_scalar!(r#"SELECT count(*) from posthog_propertydefinition WHERE type = 3"#)
+        sqlx::query_scalar!(r#"SELECT count(*) from insights_propertydefinition WHERE type = 3"#)
             .fetch_one(&db)
             .await
             .unwrap();
     assert_eq!(Some(100), prop_defs_count);
 
     let event_props_count: Option<i64> =
-        sqlx::query_scalar!(r#"SELECT count(*) from posthog_eventproperty"#)
+        sqlx::query_scalar!(r#"SELECT count(*) from insights_eventproperty"#)
             .fetch_one(&db)
             .await
             .unwrap();
@@ -133,21 +133,21 @@ async fn test_person_batch_write(db: PgPool) {
     process_batch(&config, cache, &db, updates).await;
 
     // fetch results and ensure they landed correctly
-    let event_def_name: String = sqlx::query_scalar!(r#"SELECT name from posthog_eventdefinition"#)
+    let event_def_name: String = sqlx::query_scalar!(r#"SELECT name from insights_eventdefinition"#)
         .fetch_one(&db)
         .await
         .unwrap();
     assert_eq!(String::from("event_with_person"), event_def_name);
 
     let prop_defs_count: Option<i64> =
-        sqlx::query_scalar!(r#"SELECT count(*) from posthog_propertydefinition WHERE type = 2"#)
+        sqlx::query_scalar!(r#"SELECT count(*) from insights_propertydefinition WHERE type = 2"#)
             .fetch_one(&db)
             .await
             .unwrap();
     assert_eq!(Some(100), prop_defs_count);
 
     let event_props_count: Option<i64> =
-        sqlx::query_scalar!(r#"SELECT count(*) from posthog_eventproperty"#)
+        sqlx::query_scalar!(r#"SELECT count(*) from insights_eventproperty"#)
             .fetch_one(&db)
             .await
             .unwrap();
@@ -274,7 +274,7 @@ async fn test_property_definitions_conflict_update(db: PgPool) {
 
     // Verify initial state
     let initial_row = sqlx::query!(
-        r#"SELECT property_type, is_numerical FROM posthog_propertydefinition WHERE name = 'test_prop'"#
+        r#"SELECT property_type, is_numerical FROM insights_propertydefinition WHERE name = 'test_prop'"#
     )
     .fetch_one(&db)
     .await
@@ -302,7 +302,7 @@ async fn test_property_definitions_conflict_update(db: PgPool) {
 
     // Verify both fields were updated
     let updated_row = sqlx::query!(
-        r#"SELECT property_type, is_numerical FROM posthog_propertydefinition WHERE name = 'test_prop'"#
+        r#"SELECT property_type, is_numerical FROM insights_propertydefinition WHERE name = 'test_prop'"#
     )
     .fetch_one(&db)
     .await
@@ -313,7 +313,7 @@ async fn test_property_definitions_conflict_update(db: PgPool) {
 
     // Verify only one row exists (no duplicate)
     let count: Option<i64> = sqlx::query_scalar!(
-        r#"SELECT COUNT(*) FROM posthog_propertydefinition WHERE name = 'test_prop'"#
+        r#"SELECT COUNT(*) FROM insights_propertydefinition WHERE name = 'test_prop'"#
     )
     .fetch_one(&db)
     .await

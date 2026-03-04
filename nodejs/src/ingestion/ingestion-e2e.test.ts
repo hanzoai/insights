@@ -1646,7 +1646,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
             return queryResult.map((warning: any) => ({ ...warning, details: parseJSON(warning.details) }))
         }
 
-        // TODO: Re-enable after re-adding FK constraints to posthog_persondistinctid
+        // TODO: Re-enable after re-adding FK constraints to insights_persondistinctid
         // testWithTeamIngester('alias events ordering scenario 1: original order', {}, async (ingester, hub, team) => {
         //     const testName = DateTime.now().toFormat('yyyy-MM-dd-HH-mm-ss')
         //     const user1DistinctId = 'user1-distinct-id'
@@ -1761,7 +1761,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     })
         // })
 
-        // TODO: Re-enable after re-adding FK constraints to posthog_persondistinctid
+        // TODO: Re-enable after re-adding FK constraints to insights_persondistinctid
         // testWithTeamIngester('alias events ordering scenario 2: alias first', {}, async (ingester, hub, team) => {
         //     const testName = DateTime.now().toFormat('yyyy-MM-dd-HH-mm-ss')
         //     const user1DistinctId = 'user1-distinct-id'
@@ -1877,7 +1877,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     })
         // })
 
-        // TODO: Re-enable after re-adding FK constraints to posthog_persondistinctid
+        // TODO: Re-enable after re-adding FK constraints to insights_persondistinctid
         // testWithTeamIngester('alias events ordering scenario 2: user 2 first', {}, async (ingester, hub, team) => {
         //     const testName = DateTime.now().toFormat('yyyy-MM-dd-HH-mm-ss')
         //     const user1DistinctId = 'user1-distinct-id'
@@ -2492,7 +2492,7 @@ describe.each([{ PERSONS_PREFETCH_ENABLED: false }, { PERSONS_PREFETCH_ENABLED: 
         //     {},
         //     async (ingester, hub, team) => {
         //         // This test is in reference to
-        //         // https://github.com/PostHog/insights/issues/5527 , where we were
+        //         // https://github.com/hanzoai/insights/issues/5527 , where we were
         //         // correctly identifying that an anonymous user before login should be
         //         // aliased to the user they subsequently login as, but incorrectly
         //         // aliasing on subsequent $identify events. The anonymous case is

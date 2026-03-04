@@ -1,11 +1,11 @@
 # Process registry for the intent-based dev environment.
 #
 # This file defines all available processes and their capabilities.
-# Normally, `hogli dev:generate` creates a tailored config at
-# .posthog/.generated/mprocs.yaml based on your selected intents.
-# This file is used as fallback when hogli isn't available.
+# Normally, `insightscli dev:generate` creates a tailored config at
+# .insights/.generated/mprocs.yaml based on your selected intents.
+# This file is used as fallback when insightscli isn't available.
 #
-# To customize which processes run, use `hogli dev:setup`.
+# To customize which processes run, use `insightscli dev:setup`.
 # See devenv/intent-map.yaml for intent-to-capability mappings.
 
 procs:
@@ -24,11 +24,11 @@ procs:
                 echo ''
             fi
             printf '  \033[1mCommands:\033[0m\n'
-            printf '    \033[38;2;29;74;255mhogli dev:setup\033[0m    Configure which services run\n'
-            printf '    \033[38;2;29;74;255mhogli dev:explain\033[0m  Show why each service is running\n'
+            printf '    \033[38;2;29;74;255minsightscli dev:setup\033[0m    Configure which services run\n'
+            printf '    \033[38;2;29;74;255minsightscli dev:explain\033[0m  Show why each service is running\n'
             echo ''
             printf '\033[38;5;245m  ─────────────────────────────────────\033[0m\n'
-            printf '  \033[38;5;245mRun \033[0m\033[38;2;29;74;255mhogli dev:setup\033[0m\033[38;5;245m to tailor this to your workflow.\033[0m\n'
+            printf '  \033[38;5;245mRun \033[0m\033[38;2;29;74;255minsightscli dev:setup\033[0m\033[38;5;245m to tailor this to your workflow.\033[0m\n'
 
     backend:
         shell: 'uv sync --active && bin/wait-for-docker && bin/check_ducklake_up && ./bin/start-backend'
@@ -43,10 +43,10 @@ procs:
         capability: celery_scheduler
 
     nodejs:
-        shell: 'bin/wait-for-docker && bin/check_ducklake_up && ./bin/posthog-node'
+        shell: 'bin/wait-for-docker && bin/check_ducklake_up && ./bin/insights-node'
         capability: event_ingestion
         # Node.js capabilities are controlled via NODEJS_CAPABILITY_GROUPS env var
-        # Set by hogli dev:generate based on selected nodejs_* capabilities
+        # Set by insightscli dev:generate based on selected nodejs_* capabilities
         # Valid groups: cdp_workflows, realtime_cohorts, session_replay, logs, feature_flags
         # Example: NODEJS_CAPABILITY_GROUPS=cdp_workflows,session_replay
 
@@ -67,7 +67,7 @@ procs:
             if [ -n "$TEMPORAL_DISABLE_HOT_RELOAD" ] || ! command -v nodemon >/dev/null 2>&1; then \
                 python manage.py start_temporal_worker --task-queue development-task-queue; \
             else \
-                nodemon -w common -w dags -w ee -w posthog -w products -w pyproject.toml -e py --signal SIGTERM --exec "python manage.py start_temporal_worker --task-queue development-task-queue"; \
+                nodemon -w common -w dags -w ee -w insights -w products -w pyproject.toml -e py --signal SIGTERM --exec "python manage.py start_temporal_worker --task-queue development-task-queue"; \
             fi
         capability: temporal_workflows
 
@@ -92,7 +92,7 @@ procs:
     cyclotron-janitor-shadow:
         shell: |-
             bin/wait-for-docker && \
-            DATABASE_URL=postgres://posthog:posthog@localhost:5432/cyclotron_shadow \
+            DATABASE_URL=postgres://insights:insights@localhost:5432/cyclotron_shadow \
             BIND_PORT=3304 \
             JANITOR_ID=shadow-janitor \
             SHARD_ID=shadow \
@@ -161,8 +161,8 @@ procs:
         env:
             LLM_GATEWAY_DEBUG: 'true'
             LLM_GATEWAY_TEAM_RATE_LIMIT_MULTIPLIERS: '{"1": 10}'
-            LLM_GATEWAY_POSTHOG_PROJECT_TOKEN: 'phc_localposthogprojecttoken'
-            LLM_GATEWAY_POSTHOG_HOST: 'http://localhost:8010'
+            LLM_GATEWAY_INSIGHTS_PROJECT_TOKEN: 'phc_localinsightsprojecttoken'
+            LLM_GATEWAY_INSIGHTS_HOST: 'http://localhost:8010'
 
     mcp:
         shell: 'bin/start-mcp-server'
@@ -213,7 +213,7 @@ procs:
         # no capability - manual start
 
     storybook:
-        shell: 'pnpm --filter=@posthog/storybook install && pnpm run storybook'
+        shell: 'pnpm --filter=@hanzo/storybook install && pnpm run storybook'
         autostart: false
         # no capability - manual start
 

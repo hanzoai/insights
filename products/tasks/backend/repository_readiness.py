@@ -80,11 +80,11 @@ IGNORED_PATH_PREFIXES = (
     "vendor/",
 )
 
-POSTHOG_INIT_PATTERN = re.compile(r"posthog\.init\s*\(", re.IGNORECASE)
-POSTHOG_CAPTURE_PATTERN = re.compile(r"posthog\.capture\s*\(", re.IGNORECASE)
-POSTHOG_CAPTURE_EVENT_PATTERN = re.compile(r'posthog\.capture\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE)
+INSIGHTS_INIT_PATTERN = re.compile(r"insights\.init\s*\(", re.IGNORECASE)
+INSIGHTS_CAPTURE_PATTERN = re.compile(r"insights\.capture\s*\(", re.IGNORECASE)
+INSIGHTS_CAPTURE_EVENT_PATTERN = re.compile(r'insights\.capture\s*\(\s*[\'"]([^\'"]+)[\'"]', re.IGNORECASE)
 ERROR_SIGNAL_PATTERNS = (
-    re.compile(r"posthog\.captureexception\s*\(", re.IGNORECASE),
+    re.compile(r"insights\.captureexception\s*\(", re.IGNORECASE),
     re.compile(r"sentry\.init\s*\(", re.IGNORECASE),
     re.compile(r"capture_exception\s*\(", re.IGNORECASE),
     re.compile(r"reportexception\s*\(", re.IGNORECASE),
@@ -93,8 +93,8 @@ ERROR_SIGNAL_PATTERNS = (
 
 @dataclass
 class RepositoryScanEvidence:
-    found_posthog_init: bool
-    found_posthog_capture: bool
+    found_insights_init: bool
+    found_insights_capture: bool
     found_error_signal: bool
     captured_event_names: list[str]
     files_scanned: int
@@ -183,7 +183,7 @@ def _should_scan_path(path: str) -> bool:
 def _candidate_path_score(path: str) -> int:
     lowered = path.lower()
     score = 0
-    for keyword in ("posthog", "analytics", "tracking", "telemetry", "instrument", "error", "replay"):
+    for keyword in ("insights", "analytics", "tracking", "telemetry", "instrument", "error", "replay"):
         if keyword in lowered:
             score += 2
     if lowered.startswith("src/"):
@@ -222,8 +222,8 @@ def _fetch_file_content(access_token: str, repository: str, path: str, ref: str 
 def _scan_repository(access_token: str, repository: str) -> tuple[RepositoryScanEvidence, list[str]]:
     tree_paths, default_branch = _fetch_repository_tree(access_token, repository)
 
-    found_posthog_init = False
-    found_posthog_capture = False
+    found_insights_init = False
+    found_insights_capture = False
     found_error_signal = False
     event_names: set[str] = set()
     scanned = 0
@@ -242,16 +242,16 @@ def _scan_repository(access_token: str, repository: str) -> tuple[RepositoryScan
             continue
 
         scanned += 1
-        if POSTHOG_INIT_PATTERN.search(content):
-            found_posthog_init = True
-        if POSTHOG_CAPTURE_PATTERN.search(content):
-            found_posthog_capture = True
+        if INSIGHTS_INIT_PATTERN.search(content):
+            found_insights_init = True
+        if INSIGHTS_CAPTURE_PATTERN.search(content):
+            found_insights_capture = True
         for pattern in ERROR_SIGNAL_PATTERNS:
             if pattern.search(content):
                 found_error_signal = True
                 break
 
-        for match in POSTHOG_CAPTURE_EVENT_PATTERN.findall(content):
+        for match in INSIGHTS_CAPTURE_EVENT_PATTERN.findall(content):
             cleaned = match.strip()
             if cleaned:
                 event_names.add(cleaned)
@@ -266,8 +266,8 @@ def _scan_repository(access_token: str, repository: str) -> tuple[RepositoryScan
             backend_markers += 1
 
     evidence = RepositoryScanEvidence(
-        found_posthog_init=found_posthog_init,
-        found_posthog_capture=found_posthog_capture,
+        found_insights_init=found_insights_init,
+        found_insights_capture=found_insights_capture,
         found_error_signal=found_error_signal,
         captured_event_names=sorted(event_names)[:100],
         files_scanned=scanned,
@@ -419,8 +419,8 @@ def compute_repository_readiness(
     except Exception:
         logger.exception("repository_readiness.scan_failed", extra={"repository": repository})
         scan_evidence = RepositoryScanEvidence(
-            found_posthog_init=False,
-            found_posthog_capture=False,
+            found_insights_init=False,
+            found_insights_capture=False,
             found_error_signal=False,
             captured_event_names=[],
             files_scanned=0,
@@ -457,8 +457,8 @@ def compute_repository_readiness(
     if not applicability["tracking"]:
         tracking = _capability_state("Tracking is not required for this repository type.", "not_applicable")
     else:
-        static_tracking_ok = scan_evidence.found_posthog_init and (
-            scan_evidence.found_posthog_capture or bool(scan_evidence.captured_event_names)
+        static_tracking_ok = scan_evidence.found_insights_init and (
+            scan_evidence.found_insights_capture or bool(scan_evidence.captured_event_names)
         )
         if not static_tracking_ok:
             tracking = _capability_state(
@@ -495,7 +495,7 @@ def compute_repository_readiness(
             "not_applicable",
         )
     else:
-        static_cv_ok = scan_evidence.found_posthog_init
+        static_cv_ok = scan_evidence.found_insights_init
         if not static_cv_ok:
             computer_vision = _capability_state(
                 "No frontend Insights initialization found for computer vision support.",
@@ -526,7 +526,7 @@ def compute_repository_readiness(
         errors = _capability_state("Error tracking is not required for this repository type.", "not_applicable")
     else:
         static_error_ok = scan_evidence.found_error_signal or (
-            classification == "frontend_js" and scan_evidence.found_posthog_init
+            classification == "frontend_js" and scan_evidence.found_insights_init
         )
         if not static_error_ok:
             errors = _capability_state(
@@ -587,8 +587,8 @@ def compute_repository_readiness(
             "filesScanned": scan_evidence.files_scanned,
             "detectedFilesCount": scan_evidence.detected_files_count,
             "eventNameCount": len(scan_evidence.captured_event_names),
-            "foundPosthogInit": scan_evidence.found_posthog_init,
-            "foundPosthogCapture": scan_evidence.found_posthog_capture,
+            "foundInsightsInit": scan_evidence.found_insights_init,
+            "foundInsightsCapture": scan_evidence.found_insights_capture,
             "foundErrorSignal": scan_evidence.found_error_signal,
         },
     }

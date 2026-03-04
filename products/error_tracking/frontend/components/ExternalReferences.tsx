@@ -1,10 +1,10 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
+import insights from '@hanzo/insights'
+import { useFeatureFlagEnabled } from '@hanzo/insights/react'
 import { useMemo } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonDialog, LemonInput, LemonTextArea, Link } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonDialog, LemonInput, LemonTextArea, Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { GitHubRepositorySelectField } from 'lib/integrations/GitHubIntegrationHelpers'
@@ -81,7 +81,7 @@ export const ExternalReferences = (): JSX.Element | null => {
                     to={reference.external_url}
                     target="_blank"
                     onClick={() => {
-                        posthog.capture('error_tracking_external_issue_clicked', {
+                        insights.capture('error_tracking_external_issue_clicked', {
                             issue_id: issue.id,
                             integration_kind: reference.integration.kind,
                         })
@@ -149,8 +149,8 @@ const createGitHubIssueForm = (
     integration: IntegrationType,
     onSubmit: onSubmitFormType
 ): void => {
-    const posthogUrl = window.location.origin + window.location.pathname
-    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${posthogUrl}`
+    const insightsUrl = window.location.origin + window.location.pathname
+    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${insightsUrl}`
 
     LemonDialog.openForm({
         title: 'Create GitHub issue',
@@ -188,8 +188,8 @@ const createGitLabIssueForm = (
     integration: IntegrationType,
     onSubmit: onSubmitFormType
 ): void => {
-    const posthogUrl = window.location.origin + window.location.pathname
-    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${posthogUrl}`
+    const insightsUrl = window.location.origin + window.location.pathname
+    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${insightsUrl}`
 
     LemonDialog.openForm({
         title: 'Create GitLab issue',
@@ -258,8 +258,8 @@ const createJiraIssueForm = (
     integration: IntegrationType,
     onSubmit: onSubmitFormType
 ): void => {
-    const posthogUrl = window.location.origin + window.location.pathname
-    const description = issue.description + '\n\n' + `Insights issue: ${posthogUrl}`
+    const insightsUrl = window.location.origin + window.location.pathname
+    const description = issue.description + '\n\n' + `Insights issue: ${insightsUrl}`
 
     LemonDialog.openForm({
         title: 'Create Jira issue',

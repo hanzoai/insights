@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBalance, IconFlag } from '@posthog/icons'
+import { IconBalance, IconFlag } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -9,7 +9,7 @@ import {
     LemonModal,
     LemonTable,
     LemonTableColumns,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'

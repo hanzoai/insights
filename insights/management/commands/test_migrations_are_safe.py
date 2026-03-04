@@ -26,12 +26,12 @@ def validate_migration_sql(sql) -> bool:
     operations = sql.split("\n")
     tables_created_so_far: list[str] = []
     for operation_sql in operations:
-        # Extract table name from queries of this format: ALTER TABLE "posthog_feature" or ALTER TABLE posthog_feature
+        # Extract table name from queries of this format: ALTER TABLE "insights_feature" or ALTER TABLE insights_feature
         table_being_altered: Optional[str] = None
         if "ALTER TABLE" in operation_sql:
             matches = re.findall(r'ALTER TABLE "?([a-z_]+)"?', operation_sql)
             table_being_altered = matches[0] if matches else None
-        # Extract table name from queries of this format: CREATE TABLE "posthog_feature" or CREATE TABLE posthog_feature
+        # Extract table name from queries of this format: CREATE TABLE "insights_feature" or CREATE TABLE insights_feature
         if "CREATE TABLE" in operation_sql:
             matches = re.findall(r'CREATE TABLE "?([a-z_]+)"?', operation_sql)
             if matches:
@@ -122,7 +122,7 @@ def validate_migration_sql(sql) -> bool:
         ):
             print(
                 f"\n\n\033[91mFound a CONSTRAINT command without NOT VALID. This locks tables which causes downtime. "
-                "See https://github.com/PostHog/posthog/blob/master/docs/published/safe-django-migrations.md for guidance."
+                "See https://github.com/Hanzo Insights/insights/blob/master/docs/published/safe-django-migrations.md for guidance."
                 "If adding the constraint by itself, please use `AddConstraintNotValid()` of `django.contrib.postgres.operations` instead. "
                 "See https://docs.djangoproject.com/en/4.2/ref/contrib/postgres/operations/#adding-constraints-without-enforcing-validation.\n"
                 f"Source: `{operation_sql}`"
@@ -135,7 +135,7 @@ def validate_migration_sql(sql) -> bool:
         ):
             print(
                 f"\n\n\033[91mFound a CREATE INDEX command that isn't run CONCURRENTLY. This locks tables which causes downtime. "
-                "See https://github.com/PostHog/posthog/blob/master/docs/published/safe-django-migrations.md for guidance."
+                "See https://github.com/Hanzo Insights/insights/blob/master/docs/published/safe-django-migrations.md for guidance."
                 "If adding the index by itself, please use `AddIndexConcurrently()` of `django.contrib.postgres.operations` instead. "
                 "See https://docs.djangoproject.com/en/4.2/ref/contrib/postgres/operations/#concurrent-index-operations.\n"
                 f"Source: `{operation_sql}`"
@@ -152,9 +152,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         def run_and_check_migration(variable):
             try:
-                # Handle both posthog/migrations and products/*/backend/migrations paths
+                # Handle both insights/migrations and products/*/backend/migrations paths
                 # For products: products/product_name/backend/migrations/0001_initial.py -> (product_name, 0001_initial)
-                # For posthog: posthog/migrations/0001_initial.py -> (posthog, 0001_initial)
+                # For insights: insights/migrations/0001_initial.py -> (insights, 0001_initial)
                 products_match = re.findall(r"products/([a-z_]+)/backend/migrations/([a-zA-Z_0-9]+)\.py", variable)
                 if products_match:
                     results = products_match[0]
@@ -169,7 +169,7 @@ class Command(BaseCommand):
             except IndexError:
                 print(f"\n\n\033[93m⚠️  WARNING: Could not parse migration path: {variable.strip()}\033[0m")
                 print(
-                    "Expected format: posthog/migrations/NNNN_name.py or products/name/backend/migrations/NNNN_name.py"
+                    "Expected format: insights/migrations/NNNN_name.py or products/name/backend/migrations/NNNN_name.py"
                 )
                 if os.getenv("CI"):
                     print("\033[91mFailing in CI due to unparseable migration path\033[0m")
@@ -192,7 +192,7 @@ class Command(BaseCommand):
             migrations = []
 
         if not migrations:
-            migrations = ["posthog/migrations/0771_teamrevenueanalyticsconfig_filter_test_accounts_and_more.py"]
+            migrations = ["insights/migrations/0771_teamrevenueanalyticsconfig_filter_test_accounts_and_more.py"]
 
         if len(migrations) > 1:
             print(

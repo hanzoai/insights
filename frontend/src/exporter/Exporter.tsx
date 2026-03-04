@@ -67,7 +67,7 @@ export function Exporter(props: ExportedData): JSX.Element {
         // NOTE: We post the window name to allow the parent to identify the iframe
         // it's ok to use we use a wildcard for the origin bc data isn't sensitive
         // nosemgrep: javascript.browser.security.wildcard-postmessage-configuration.wildcard-postmessage-configuration
-        window.parent?.postMessage({ event: 'posthog:dimensions', name: window.name, height, width }, '*')
+        window.parent?.postMessage({ event: 'insights:dimensions', name: window.name, height, width }, '*')
     }, [height, width])
 
     useThemedHtml(false)
@@ -91,7 +91,7 @@ export function Exporter(props: ExportedData): JSX.Element {
                     type === ExportType.Scene ? (
                         <div className="SharedDashboard-header">
                             <Link
-                                to="https://posthog.com?utm_medium=in-product&utm_campaign=shared-dashboard"
+                                to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
                                 target="_blank"
                             >
                                 <Logo className="text-lg" />
@@ -106,7 +106,7 @@ export function Exporter(props: ExportedData): JSX.Element {
                         </div>
                     ) : type === ExportType.Embed ? (
                         <Link
-                            to="https://posthog.com?utm_medium=in-product&utm_campaign=shared-dashboard"
+                            to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
                             target="_blank"
                         >
                             <Logo className="text-lg" />
@@ -148,7 +148,7 @@ export function Exporter(props: ExportedData): JSX.Element {
                         <div>
                             Made with{' '}
                             <Link
-                                to="https://posthog.com?utm_medium=in-product&utm_campaign=shared-dashboard"
+                                to="https://hanzo.ai?utm_medium=in-product&utm_campaign=shared-dashboard"
                                 target="_blank"
                             >
                                 Insights — open-source product analytics

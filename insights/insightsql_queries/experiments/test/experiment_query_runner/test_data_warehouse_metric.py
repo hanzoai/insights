@@ -267,7 +267,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
                 "person_properties",
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 },
@@ -388,7 +388,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
                 groups=[
                     {
                         "properties": [
-                            {"key": "email", "operator": "not_icontains", "value": "@posthog.com", "type": "person"}
+                            {"key": "email", "operator": "not_icontains", "value": "@hanzo.ai", "type": "person"}
                         ]
                     }
                 ],
@@ -476,7 +476,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
         _create_person(
             team=self.team,
             distinct_ids=["internal_test_1"],
-            properties={"email": "internal_test_1@posthog.com"},
+            properties={"email": "internal_test_1@hanzo.ai"},
         )
         # 10th exposure for 'test'
         # filtered out by "event_properties" , "person_properties", and "group"

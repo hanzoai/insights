@@ -3,7 +3,7 @@ import { actions, kea, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 
-import { LemonDialog, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { urls } from 'scenes/urls'

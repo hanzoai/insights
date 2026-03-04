@@ -70,7 +70,7 @@ if (res.status >= 200 and res.status < 300) {
 
 
 class TemplateGoogleCloudStorageMigrator(InsightsFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-gcs-plugin"
+    plugin_url = "https://github.com/Hanzo Insights/insights-gcs-plugin"
 
     @classmethod
     def migrate(cls, obj):

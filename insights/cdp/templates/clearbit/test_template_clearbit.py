@@ -5,7 +5,7 @@ EXAMPLE_RESPONSE = {
     "person": {
         "id": "1234",
         "name": {"fullName": "Max the Mascot", "givenName": "Max", "familyName": "the Mascot"},
-        "email": "max@posthog.com",
+        "email": "max@hanzo.ai",
     },
     "company": {
         "id": "1234",
@@ -20,7 +20,7 @@ class TestTemplateClearbit(BaseInsightsFunctionTemplateTest):
     template = template_clearbit
 
     def _inputs(self, **kwargs):
-        inputs = {"api_key": "API_KEY", "email": "example@posthog.com"}
+        inputs = {"api_key": "API_KEY", "email": "example@hanzo.ai"}
         inputs.update(kwargs)
         return inputs
 
@@ -30,7 +30,7 @@ class TestTemplateClearbit(BaseInsightsFunctionTemplateTest):
         assert res.result is None
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://person-stream.clearbit.com/v2/combined/find?email=example@posthog.com",
+            "https://person-stream.clearbit.com/v2/combined/find?email=example@hanzo.ai",
             {"method": "GET", "headers": {"Authorization": "Bearer API_KEY"}},
         )
 
@@ -48,25 +48,25 @@ class TestTemplateClearbit(BaseInsightsFunctionTemplateTest):
         assert res.result is False
         assert self.get_mock_fetch_calls() == []
 
-    def test_function_captures_posthog_event_if_found(self):
+    def test_function_captures_insights_event_if_found(self):
         self.mock_fetch_response = lambda *args: {"status": 200, "body": EXAMPLE_RESPONSE}  # type: ignore
 
         self.run_function(inputs=self._inputs())
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://person-stream.clearbit.com/v2/combined/find?email=example@posthog.com",
+            "https://person-stream.clearbit.com/v2/combined/find?email=example@hanzo.ai",
             {"method": "GET", "headers": {"Authorization": "Bearer API_KEY"}},
         )
 
         assert self.get_mock_print_calls() == [("Clearbit data found - sending event to Insights",)]
-        assert self.get_mock_posthog_capture_calls() == [
+        assert self.get_mock_analytics_capture_calls() == [
             (
                 {
                     "event": "$set",
                     "distinct_id": "distinct-id",
                     "properties": {
                         "$lib": "insights_function",
-                        "$insights_function_source": "https://us.posthog.com/insights_functions/1234",
+                        "$insights_function_source": "https://insights.hanzo.ai/insights_functions/1234",
                         "$set_once": {
                             "person": {
                                 "id": "1234",
@@ -75,7 +75,7 @@ class TestTemplateClearbit(BaseInsightsFunctionTemplateTest):
                                     "givenName": "Max",
                                     "familyName": "the Mascot",
                                 },
-                                "email": "max@posthog.com",
+                                "email": "max@hanzo.ai",
                             },
                             "company": {
                                 "id": "1234",

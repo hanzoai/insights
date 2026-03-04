@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents(in *jlexer.Lexer, out *ResponsePostHogEvent) {
+func easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(in *jlexer.Lexer, out *ResponseInsightsEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -84,7 +84,7 @@ func easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents(out *jwriter.Writer, in ResponsePostHogEvent) {
+func easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(out *jwriter.Writer, in ResponseInsightsEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -150,29 +150,29 @@ func easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents(out *jwriter.
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v ResponsePostHogEvent) MarshalJSON() ([]byte, error) {
+func (v ResponseInsightsEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents(&w, v)
+	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v ResponsePostHogEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents(w, v)
+func (v ResponseInsightsEvent) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *ResponsePostHogEvent) UnmarshalJSON(data []byte) error {
+func (v *ResponseInsightsEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents(&r, v)
+	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *ResponsePostHogEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents(l, v)
+func (v *ResponseInsightsEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents(l, v)
 }
-func easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents1(in *jlexer.Lexer, out *ResponseGeoEvent) {
+func easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(in *jlexer.Lexer, out *ResponseGeoEvent) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -211,7 +211,7 @@ func easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents1(in *jlexer.L
 		in.Consumed()
 	}
 }
-func easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents1(out *jwriter.Writer, in ResponseGeoEvent) {
+func easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(out *jwriter.Writer, in ResponseGeoEvent) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -246,23 +246,23 @@ func easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents1(out *jwriter
 // MarshalJSON supports json.Marshaler interface
 func (v ResponseGeoEvent) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents1(&w, v)
+	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v ResponseGeoEvent) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson4d398eaaEncodeGithubComPosthogPosthogLivestreamEvents1(w, v)
+	easyjson4d398eaaEncodeGithubComHanzoaiInsightsLivestreamEvents1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *ResponseGeoEvent) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents1(&r, v)
+	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *ResponseGeoEvent) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson4d398eaaDecodeGithubComPosthogPosthogLivestreamEvents1(l, v)
+	easyjson4d398eaaDecodeGithubComHanzoaiInsightsLivestreamEvents1(l, v)
 }

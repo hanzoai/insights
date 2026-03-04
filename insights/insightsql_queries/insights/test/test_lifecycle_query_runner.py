@@ -57,7 +57,7 @@ class TestLifecycleQueryRetentionGroupAggregation(ClickhouseTestMixin, APIBaseTe
                         distinct_ids=[id],
                         properties={
                             "name": id,
-                            **({"email": "test@posthog.com"} if id == "p1" else {}),
+                            **({"email": "test@hanzo.ai"} if id == "p1" else {}),
                         },
                     )
                 )
@@ -705,7 +705,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
     def _create_random_events(self) -> str:
         random_uuid = f"RANDOM_TEST_ID::{UUIDT()}"
         _create_person(
-            properties={"sneaky_mail": "tim@posthog.com", "random_uuid": random_uuid},
+            properties={"sneaky_mail": "tim@hanzo.ai", "random_uuid": random_uuid},
             team=self.team,
             distinct_ids=["bla"],
             is_identified=True,
@@ -735,7 +735,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         distinct_ids=[id],
                         properties={
                             "name": id,
-                            **({"email": "test@posthog.com"} if id == "p1" else {}),
+                            **({"email": "test@hanzo.ai"} if id == "p1" else {}),
                         },
                     )
                 )
@@ -1877,7 +1877,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self._create_events(
             data=[
                 (
-                    "p1",  # p1 gets test@posthog.com as email and gets filtered out
+                    "p1",  # p1 gets test@hanzo.ai as email and gets filtered out
                     [
                         "2020-01-11T12:00:00Z",
                         "2020-01-12T12:00:00Z",
@@ -2050,7 +2050,7 @@ class TestLifecycleQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     "properties": [
                         {
                             "key": "email",
-                            "value": ["test@posthog.com"],
+                            "value": ["test@hanzo.ai"],
                             "type": "person",
                             "operator": "exact",
                         }

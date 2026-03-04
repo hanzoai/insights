@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconMessage } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconMessage } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { SceneComment } from 'lib/components/Scenes/SceneComment'
 import { SceneShareButton } from 'lib/components/Scenes/SceneShareButton'

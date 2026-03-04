@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { PropsWithChildren, useState } from 'react'
 import { match } from 'ts-pattern'
 
-import { IconChevronRight } from '@posthog/icons'
-import { LemonSkeleton, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronRight } from '@hanzo/icons'
+import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyLargeNumber } from 'lib/utils'

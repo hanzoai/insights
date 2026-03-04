@@ -32,7 +32,7 @@ class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
                     "event": "sign up",
                     "properties": {
                         "distinct_id": "66e614bd-d9f2-491e-9e2c-eeab3090f72f",
-                        "token": "phc_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpicMFKELQXGGTYQO",
+                        "token": "hi_ex7Mnvi4DqeB6xSQoXU1UVPzAmUIpicMFKELQXGGTYQO",
                         "bob": {"name": "bob"},
                         "age": 99,
                         "name": "bob",
@@ -43,7 +43,7 @@ class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
                     },
                 },
                 "person": {
-                    "properties": {"email": "max@posthog.com", "name": "Max", "company": "Insights"},
+                    "properties": {"email": "max@hanzo.ai", "name": "Max", "company": "Insights"},
                 },
             },
         )
@@ -52,7 +52,7 @@ class TestTemplateAvo(BaseInsightsFunctionTemplateTest):
         res[1]["body"][0]["sessionId"] = "4d4454b4-31bb-4b13-8167-4ec76a0f49b6"
         res[1]["body"][0]["createdAt"] = "2024-09-06T09:04:28.324Z"
         assert res == (
-            "https://api.avo.app/inspector/posthog/v1/track",
+            "https://api.avo.app/inspector/insights/v1/track",
             {
                 "method": "POST",
                 "headers": {

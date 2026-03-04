@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { IconBook } from '@posthog/icons'
+import { IconBook } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -31,7 +31,7 @@ import { MaxUIContext } from './maxTypes'
 const PENDING_PROMPT_MAX_AGE_MS = 5 * 60 * 1000
 
 /** Key for storing pending AI assistant context in sessionStorage */
-export const PENDING_MAX_CONTEXT_KEY = 'posthog.pending_max_context'
+export const PENDING_MAX_CONTEXT_KEY = 'insights.pending_max_context'
 
 /** Maximum age for restored context (5 minutes) */
 const PENDING_CONTEXT_MAX_AGE_MS = 5 * 60 * 1000

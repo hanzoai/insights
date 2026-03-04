@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonCollapse, LemonTable, LemonTableColumns, LemonTabs } from '@posthog/lemon-ui'
+import { LemonCollapse, LemonTable, LemonTableColumns, LemonTabs } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import ViewRecordingsPlaylistButton from 'lib/components/ViewRecordingButton/ViewRecordingsPlaylistButton'
@@ -273,7 +273,7 @@ export function ResultDetails({
                         }
                         data-attr="experiment-metrics-view-recordings"
                         onClick={() => {
-                            posthog.capture('viewed recordings from experiment', { variant: variantKey })
+                            insights.capture('viewed recordings from experiment', { variant: variantKey })
                         }}
                     />
                 )

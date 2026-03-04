@@ -1,4 +1,4 @@
-"""ETL pipeline for syncing posthog_organization and posthog_team tables from Postgres to ClickHouse."""
+"""ETL pipeline for syncing insights_organization and insights_team tables from Postgres to ClickHouse."""
 
 import json
 import uuid
@@ -78,7 +78,7 @@ def get_postgres_connection():
 def get_organization_table_sql() -> str:
     """Get SQL for creating the organization table."""
     return """
-        CREATE TABLE IF NOT EXISTS models.posthog_organization (
+        CREATE TABLE IF NOT EXISTS models.insights_organization (
             id UUID,
             name String,
             slug String,
@@ -107,7 +107,7 @@ def get_organization_table_sql() -> str:
             is_platform Nullable(UInt8),
             _inserted_at DateTime64(6) DEFAULT now64(6)
         )
-        ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/posthog_organization', '{shard}-{replica}', _inserted_at)
+        ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/insights_organization', '{shard}-{replica}', _inserted_at)
         ORDER BY (id, updated_at)
         SETTINGS index_granularity = 8192
     """
@@ -116,7 +116,7 @@ def get_organization_table_sql() -> str:
 def get_team_table_sql() -> str:
     """Get SQL for creating the team table."""
     return """
-        CREATE TABLE IF NOT EXISTS models.posthog_team (
+        CREATE TABLE IF NOT EXISTS models.insights_team (
             id Int64,
             uuid UUID,
             organization_id UUID,
@@ -198,7 +198,7 @@ def get_team_table_sql() -> str:
             base_currency Nullable(String),
             _inserted_at DateTime64(6) DEFAULT now64(6)
         )
-        ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/posthog_team', '{shard}-{replica}', _inserted_at)
+        ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/noshard/insights_team', '{shard}-{replica}', _inserted_at)
         ORDER BY (organization_id, id, updated_at)
         SETTINGS index_granularity = 8192
     """
@@ -243,8 +243,8 @@ def create_clickhouse_tables(
             context.log.info("Force recreate requested, dropping existing tables...")
         try:
             # Use Query class to drop tables on all nodes
-            cluster.map_all_hosts(Query("DROP TABLE IF EXISTS models.posthog_organization")).result()
-            cluster.map_all_hosts(Query("DROP TABLE IF EXISTS models.posthog_team")).result()
+            cluster.map_all_hosts(Query("DROP TABLE IF EXISTS models.insights_organization")).result()
+            cluster.map_all_hosts(Query("DROP TABLE IF EXISTS models.insights_team")).result()
             if context:
                 context.log.info("Dropped existing tables on all nodes")
         except Exception as e:
@@ -254,22 +254,22 @@ def create_clickhouse_tables(
     # Create tables if they don't exist on all nodes
     # The IF NOT EXISTS clause ensures we don't error if tables already exist
     if context:
-        context.log.info("Creating posthog_organization table if it doesn't exist...")
+        context.log.info("Creating insights_organization table if it doesn't exist...")
     try:
         cluster.map_all_hosts(Query(get_organization_table_sql())).result()
         if context:
-            context.log.info("Created/verified posthog_organization table on all nodes")
+            context.log.info("Created/verified insights_organization table on all nodes")
     except Exception as e:
         if context:
             context.log.exception(f"Error creating organization table: {e}")
         raise
 
     if context:
-        context.log.info("Creating posthog_team table if it doesn't exist...")
+        context.log.info("Creating insights_team table if it doesn't exist...")
     try:
         cluster.map_all_hosts(Query(get_team_table_sql())).result()
         if context:
-            context.log.info("Created/verified posthog_team table on all nodes")
+            context.log.info("Created/verified insights_team table on all nodes")
     except Exception as e:
         if context:
             context.log.exception(f"Error creating team table: {e}")
@@ -314,7 +314,7 @@ def fetch_organizations_in_batches(conn, last_sync: Optional[datetime] = None, b
                 personalization,
                 domain_whitelist,
                 is_platform
-            FROM posthog_organization
+            FROM insights_organization
         """
 
         params = []
@@ -435,7 +435,7 @@ def fetch_teams_in_batches(conn, last_sync: Optional[datetime] = None, batch_siz
                 revenue_tracking_config,
                 drop_events_older_than,
                 base_currency
-            FROM posthog_team
+            FROM insights_team
         """
 
         params = []
@@ -619,7 +619,7 @@ def insert_organizations_to_clickhouse(organizations: list[dict], batch_size: in
         # ClickHouse requires passing data as list of tuples
         data = [tuple(row.get(col) for col in columns) for row in batch]
 
-        query = f"INSERT INTO models.posthog_organization ({', '.join(columns)}) VALUES"
+        query = f"INSERT INTO models.insights_organization ({', '.join(columns)}) VALUES"
 
         sync_execute(query, data, with_column_types=False)
         total_inserted += len(batch)
@@ -646,7 +646,7 @@ def insert_teams_to_clickhouse(teams: list[dict], batch_size: int = 10000) -> in
         # ClickHouse requires passing data as list of tuples
         data = [tuple(row.get(col) for col in columns) for row in batch]
 
-        query = f"INSERT INTO models.posthog_team ({', '.join(columns)}) VALUES"
+        query = f"INSERT INTO models.insights_team ({', '.join(columns)}) VALUES"
 
         sync_execute(query, data, with_column_types=False)
         total_inserted += len(batch)
@@ -670,17 +670,17 @@ def sync_organizations(
     # Get last sync timestamp from ClickHouse (if incremental)
     last_sync = None
     if not config.full_refresh:
-        result = sync_execute("SELECT max(updated_at) FROM models.posthog_organization")
+        result = sync_execute("SELECT max(updated_at) FROM models.insights_organization")
         if result and result[0][0]:
             last_sync = result[0][0]
             context.log.info(f"Last sync timestamp for organizations: {last_sync}")
 
     # If full refresh, truncate the table
     if config.full_refresh:
-        context.log.info("Full refresh requested, truncating posthog_organization table...")
+        context.log.info("Full refresh requested, truncating insights_organization table...")
         try:
-            sync_execute("TRUNCATE TABLE models.posthog_organization")
-            context.log.info("Truncated posthog_organization table for full refresh")
+            sync_execute("TRUNCATE TABLE models.insights_organization")
+            context.log.info("Truncated insights_organization table for full refresh")
         except Exception as e:
             context.log.warning(f"Could not truncate table (may not exist yet): {e}")
             # Table might not exist, continue as it will be created
@@ -750,17 +750,17 @@ def sync_teams(
     # Get last sync timestamp from ClickHouse (if incremental)
     last_sync = None
     if not config.full_refresh:
-        result = sync_execute("SELECT max(updated_at) FROM models.posthog_team")
+        result = sync_execute("SELECT max(updated_at) FROM models.insights_team")
         if result and result[0][0]:
             last_sync = result[0][0]
             context.log.info(f"Last sync timestamp for teams: {last_sync}")
 
     # If full refresh, truncate the table
     if config.full_refresh:
-        context.log.info("Full refresh requested, truncating posthog_team table...")
+        context.log.info("Full refresh requested, truncating insights_team table...")
         try:
-            sync_execute("TRUNCATE TABLE models.posthog_team")
-            context.log.info("Truncated posthog_team table for full refresh")
+            sync_execute("TRUNCATE TABLE models.insights_team")
+            context.log.info("Truncated insights_team table for full refresh")
         except Exception as e:
             context.log.warning(f"Could not truncate table (may not exist yet): {e}")
             # Table might not exist, continue as it will be created
@@ -822,8 +822,8 @@ def verify_sync(
 ) -> dict[str, Any]:
     """Verify the sync was successful by checking row counts."""
     # Get counts from ClickHouse
-    org_count_result = sync_execute("SELECT count(*) FROM models.posthog_organization")
-    team_count_result = sync_execute("SELECT count(*) FROM models.posthog_team")
+    org_count_result = sync_execute("SELECT count(*) FROM models.insights_organization")
+    team_count_result = sync_execute("SELECT count(*) FROM models.insights_team")
 
     org_count = org_count_result[0][0] if org_count_result else 0
     team_count = team_count_result[0][0] if team_count_result else 0
@@ -928,7 +928,7 @@ def organizations_in_clickhouse(
                 personalization,
                 domain_whitelist,
                 is_platform
-            FROM posthog_organization
+            FROM insights_organization
             WHERE updated_at >= %s AND updated_at < %s
             ORDER BY updated_at ASC
             """,
@@ -1056,7 +1056,7 @@ def teams_in_clickhouse(
                 revenue_tracking_config,
                 drop_events_older_than,
                 base_currency
-            FROM posthog_team
+            FROM insights_team
             WHERE updated_at >= %s AND updated_at < %s
             ORDER BY updated_at ASC
             """,

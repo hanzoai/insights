@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconGear, IconLaptop, IconPhone, IconTabletLandscape, IconTabletPortrait } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonSelect } from '@posthog/lemon-ui'
+import { IconGear, IconLaptop, IconPhone, IconTabletLandscape, IconTabletPortrait } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonSelect } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { heatmapDateOptions } from 'lib/components/IframedToolbarBrowser/utils'

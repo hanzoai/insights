@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconFlag, IconFlask } from '@posthog/icons'
-import { LemonDivider } from '@posthog/lemon-ui'
+import { IconFlag, IconFlask } from '@hanzo/icons'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'

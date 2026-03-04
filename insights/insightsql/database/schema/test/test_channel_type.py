@@ -701,7 +701,7 @@ class TestChannelType(ClickhouseTestMixin, APIBaseTest):
         )
 
     def test_fbclid_only(self):
-        # no reproduction, this just came from a support ticket, see https://posthoghelp.zendesk.com/agent/tickets/23328
+        # no reproduction, this just came from a support ticket, see https://insightshelp.zendesk.com/agent/tickets/23328
         self.assertEqual(
             "Organic Social",
             self._get_initial_channel_type_from_wild_clicks(
@@ -749,7 +749,7 @@ class TestChannelType(ClickhouseTestMixin, APIBaseTest):
     #     )
 
     def test_zendesk_ticket_14945(self):
-        # see https://posthoghelp.zendesk.com/agent/tickets/14945
+        # see https://insightshelp.zendesk.com/agent/tickets/14945
 
         # In this ticket, a customer's paid social traffic was incorrect tagged as organic social, because we
         # didn't recognise the word "Paid" with an uppercase 'P' as a paid source. Really, this should have

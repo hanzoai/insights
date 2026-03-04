@@ -77,7 +77,7 @@ class TestStorage(APIBaseTest):
             presigned_url = get_presigned_url(file_name)
             assert presigned_url is not None
             assert re.match(
-                r"^http://localhost:\d+/posthog/test_storage_bucket/test_can_generate_presigned_url_for_existing_file/.*\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.*$",
+                r"^http://localhost:\d+/insights/test_storage_bucket/test_can_generate_presigned_url_for_existing_file/.*\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.*$",
                 presigned_url,
             )
 
@@ -89,7 +89,7 @@ class TestStorage(APIBaseTest):
             presigned_url = get_presigned_url(file_name)
             assert presigned_url is not None
             assert re.match(
-                r"^http://localhost:\d+/posthog/test_storage_bucket/test_can_ignore_presigned_url_for_non_existent_file/.*?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.*$",
+                r"^http://localhost:\d+/insights/test_storage_bucket/test_can_ignore_presigned_url_for_non_existent_file/.*?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.*$",
                 presigned_url,
             )
 
@@ -101,7 +101,7 @@ class TestStorage(APIBaseTest):
             assert presigned_url is not None
             assert "fields" in presigned_url
             assert re.match(
-                r"^http://localhost:\d+/posthog",
+                r"^http://localhost:\d+/insights",
                 presigned_url["url"],
             )
 

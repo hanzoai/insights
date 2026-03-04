@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGlobe, IconGraph, IconPieChart, IconRetentionHeatmap, IconTrends } from '@posthog/icons'
-import { LemonSelect, LemonSelectOptions } from '@posthog/lemon-ui'
+import { IconGlobe, IconGraph, IconPieChart, IconRetentionHeatmap, IconTrends } from '@hanzo/icons'
+import { LemonSelect, LemonSelectOptions } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Icon123, IconAreaChart, IconCumulativeChart, IconTableChart } from 'lib/lemon-ui/icons'

@@ -2,8 +2,8 @@ import { AnimatePresence } from 'motion/react'
 import * as motion from 'motion/react-client'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconPlus, IconX } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlus, IconX } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { SurveyQuestionType } from '~/types'
 

@@ -360,7 +360,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Microsoft Teams when an issue is created',
             inputs: {
                 text: {
-                    value: '**🔴 {event.properties.name} created:** {event.properties.description} (View in [Posthog]({project.url}/error_tracking/{event.distinct_id}?fingerprint={event.properties.fingerprint}&timestamp={event.properties.exception_timestamp}))',
+                    value: '**🔴 {event.properties.name} created:** {event.properties.description} (View in [Insights]({project.url}/error_tracking/{event.distinct_id}?fingerprint={event.properties.fingerprint}&timestamp={event.properties.exception_timestamp}))',
                 },
             },
         },
@@ -416,7 +416,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                 description: {
                     value: '{event.properties.description}',
                 },
-                posthog_issue_id: {
+                insights_issue_id: {
                     value: '{event.distinct_id}',
                 },
             },
@@ -433,7 +433,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                 description: {
                     value: '{event.properties.description}',
                 },
-                posthog_issue_id: {
+                insights_issue_id: {
                     value: '{event.distinct_id}',
                 },
             },
@@ -450,7 +450,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
                 description: {
                     value: '{event.properties.description}',
                 },
-                posthog_issue_id: {
+                insights_issue_id: {
                     value: '{event.distinct_id}',
                 },
             },
@@ -481,7 +481,7 @@ export const INSIGHTS_FUNCTION_SUB_TEMPLATES: Record<InsightsFunctionSubTemplate
             description: 'Posts a message to Microsoft Teams when an issue is reopened',
             inputs: {
                 text: {
-                    value: '**🔄 {event.properties.name} reopened:** {event.properties.description} (View in [Posthog]({project.url}/error_tracking/{event.distinct_id}?fingerprint={event.properties.fingerprint}&timestamp={event.properties.exception_timestamp}))',
+                    value: '**🔄 {event.properties.name} reopened:** {event.properties.description} (View in [Insights]({project.url}/error_tracking/{event.distinct_id}?fingerprint={event.properties.fingerprint}&timestamp={event.properties.exception_timestamp}))',
                 },
             },
         },

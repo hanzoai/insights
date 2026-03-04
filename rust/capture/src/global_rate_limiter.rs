@@ -21,7 +21,7 @@ impl GlobalRateLimiter {
         redis_instances: Vec<Arc<dyn Client + Send + Sync>>,
     ) -> anyhow::Result<Self> {
         let redis_prefix = format!(
-            "@posthog/capture/global_rate_limiter/{}",
+            "@hanzo/capture/global_rate_limiter/{}",
             config.capture_mode.as_tag()
         );
 

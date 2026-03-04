@@ -16,9 +16,9 @@ Requires the project's Python environment (managed by uv) for template rendering
 that imports Pydantic models from product code.
 
 Usage:
-    hogli build:skills          # Build all product skills to dist/skills/ and dist/skills.zip
-    hogli build:skills --list   # List discovered skills without building
-    hogli lint:skills           # Validate skill sources without rendering
+    insightscli build:skills          # Build all product skills to dist/skills/ and dist/skills.zip
+    insightscli build:skills --list   # List discovered skills without building
+    insightscli lint:skills           # Validate skill sources without rendering
 """
 
 from __future__ import annotations

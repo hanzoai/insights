@@ -19,7 +19,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 language: 'yaml',
                                 file: 'pubspec.yaml',
                                 code: dedent`
-                                    posthog_flutter: ^5.0.0
+                                    insights_flutter: ^5.0.0
                                 `,
                             },
                         ]}
@@ -52,7 +52,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                         <activity>
                                             [...]
                                         </activity>
-                                        <meta-data android:name="com.posthog.posthog.AUTO_INIT" android:value="false" />
+                                        <meta-data android:name="com.insights.insights.AUTO_INIT" android:value="false" />
                                     </application>
                                 `,
                             },
@@ -90,7 +90,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 code: dedent`
                                     <dict>
                                         [...]
-                                        <key>com.posthog.posthog.AUTO_INIT</key>
+                                        <key>com.insights.insights.AUTO_INIT</key>
                                         <false/>
                                         [...]
                                     </dict>
@@ -120,7 +120,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                     <Markdown>
@@ -146,7 +146,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'main.dart',
                                 code: dedent`
                                     import 'package:flutter/material.dart';
-                                    import 'package:posthog_flutter/posthog_flutter.dart';
+                                    import 'package:insights_flutter/insights_flutter.dart';
 
                                     Future<void> main() async {
                                       WidgetsFlutterBinding.ensureInitialized();
@@ -169,7 +169,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                       // Throttling delay used to reduce the number of snapshots captured. Default is 1s.
                                       config.sessionReplayConfig.throttleDelay = const Duration(milliseconds: 1000);
 
-                                      await Posthog().setup(config);
+                                      await Insights().setup(config);
                                       runApp(MyApp());
                                     }
                                 `,
@@ -178,7 +178,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     />
                     <Markdown>
                         For more configuration options, see the [Flutter session replay
-                        docs](https://posthog.com/docs/session-replay/installation?tab=Flutter).
+                        docs](https://hanzo.ai/docs/session-replay/installation?tab=Flutter).
                     </Markdown>
                 </>
             ),
@@ -189,7 +189,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        For Session Replay to work, wrap your app with `InsightsWidget` and add the `PosthogObserver`:
+                        For Session Replay to work, wrap your app with `InsightsWidget` and add the `InsightsObserver`:
                     </Markdown>
                     <Tab.Group tabs={['MaterialApp', 'go_router']}>
                         <Tab.List>
@@ -205,14 +205,14 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             file: 'MyApp.dart',
                                             code: dedent`
                                                 import 'package:flutter/material.dart';
-                                                import 'package:posthog_flutter/posthog_flutter.dart';
+                                                import 'package:insights_flutter/insights_flutter.dart';
 
                                                 class MyApp extends StatelessWidget {
                                                   @override
                                                   Widget build(BuildContext context) {
                                                     return InsightsWidget(
                                                       child: MaterialApp(
-                                                        navigatorObservers: [PosthogObserver()],
+                                                        navigatorObservers: [InsightsObserver()],
                                                         title: 'My App',
                                                         home: const HomeScreen(),
                                                       ),
@@ -233,10 +233,10 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                             code: dedent`
                                                 import 'package:flutter/material.dart';
                                                 import 'package:go_router/go_router.dart';
-                                                import 'package:posthog_flutter/posthog_flutter.dart';
+                                                import 'package:insights_flutter/insights_flutter.dart';
 
                                                 final GoRouter _router = GoRouter(
-                                                  observers: [PosthogObserver()],
+                                                  observers: [InsightsObserver()],
                                                   routes: [
                                                     GoRoute(
                                                       name: 'home',  // Name your routes for proper screen tracking

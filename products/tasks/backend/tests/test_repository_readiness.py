@@ -23,8 +23,8 @@ from products.tasks.backend.repository_readiness import (
 
 def _empty_evidence(**overrides: Any) -> RepositoryScanEvidence:
     return RepositoryScanEvidence(
-        found_posthog_init=overrides.get("found_posthog_init", False),
-        found_posthog_capture=overrides.get("found_posthog_capture", False),
+        found_insights_init=overrides.get("found_insights_init", False),
+        found_insights_capture=overrides.get("found_insights_capture", False),
         found_error_signal=overrides.get("found_error_signal", False),
         captured_event_names=overrides.get("captured_event_names", []),
         files_scanned=overrides.get("files_scanned", 0),
@@ -69,7 +69,7 @@ class TestCandidatePathScore(TestCase):
     @parameterized.expand(
         [
             ("no_keywords", "src/utils.ts", 1),
-            ("posthog_keyword", "src/posthog.ts", 3),
+            ("insights_keyword", "src/insights.ts", 3),
             ("analytics_keyword", "lib/analytics.py", 2),
             ("tracking_keyword", "tracking/events.js", 2),
             ("telemetry_keyword", "telemetry.go", 2),
@@ -79,8 +79,8 @@ class TestCandidatePathScore(TestCase):
             ("src_prefix", "src/main.ts", 1),
             ("app_prefix", "app/main.ts", 1),
             ("no_prefix", "lib/main.ts", 0),
-            ("multiple_keywords", "src/posthog-analytics.ts", 5),
-            ("all_keywords", "src/posthog-analytics-tracking-telemetry-instrument-error-replay.ts", 15),
+            ("multiple_keywords", "src/insights-analytics.ts", 5),
+            ("all_keywords", "src/insights-analytics-tracking-telemetry-instrument-error-replay.ts", 15),
         ]
     )
     def test_candidate_path_score(self, _name: str, path: str, expected: int) -> None:
@@ -94,9 +94,9 @@ class TestSelectCandidatePaths(TestCase):
         assert set(result) == {"src/main.ts", "src/utils.py"}
 
     def test_sorts_by_score_descending(self) -> None:
-        paths = ["lib/utils.ts", "src/posthog.ts", "app/main.ts"]
+        paths = ["lib/utils.ts", "src/insights.ts", "app/main.ts"]
         result = _select_candidate_paths(paths)
-        assert result[0] == "src/posthog.ts"
+        assert result[0] == "src/insights.ts"
 
     def test_truncates_to_max(self) -> None:
         paths = [f"src/file{i}.ts" for i in range(MAX_CANDIDATE_PATHS + 20)]
@@ -110,7 +110,7 @@ class TestClassifyRepository(TestCase):
             ("test_repo", "org/test-app", [], _empty_evidence(), "test_or_sandbox", True),
             ("sandbox_repo", "org/my-sandbox", [], _empty_evidence(), "test_or_sandbox", True),
             ("demo_repo", "org/demo-project", [], _empty_evidence(), "test_or_sandbox", True),
-            ("sdk_repo", "org/posthog-sdk", [], _empty_evidence(), "sdk_or_library", True),
+            ("sdk_repo", "org/insights-sdk", [], _empty_evidence(), "sdk_or_library", True),
             ("library_repo", "org/my-library", [], _empty_evidence(), "sdk_or_library", True),
             (
                 "frontend_by_markers",
@@ -242,7 +242,7 @@ class TestComputeRepositoryReadiness(TestCase):
             mock_logger.exception.assert_called_once()
 
         assert result["scan"]["filesScanned"] == 0
-        assert result["scan"]["foundPosthogInit"] is False
+        assert result["scan"]["foundInsightsInit"] is False
         assert "overall" in result
 
     @patch("products.tasks.backend.repository_readiness._scan_repository")
@@ -290,8 +290,8 @@ class TestComputeRepositoryReadiness(TestCase):
     ) -> None:
         self._mock_integration(mock_integration_cls)
         evidence = _empty_evidence(
-            found_posthog_init=True,
-            found_posthog_capture=True,
+            found_insights_init=True,
+            found_insights_capture=True,
             found_error_signal=True,
             frontend_markers=1,
         )
@@ -308,8 +308,8 @@ class TestComputeRepositoryReadiness(TestCase):
         assert result["replayInsights"]["state"] == "detected"
         assert result["errorInsights"]["state"] == "detected"
         assert result["overall"] == "detected"
-        assert result["scan"]["foundPosthogInit"] is True
-        assert result["scan"]["foundPosthogCapture"] is True
+        assert result["scan"]["foundInsightsInit"] is True
+        assert result["scan"]["foundInsightsCapture"] is True
         assert result["scan"]["foundErrorSignal"] is True
 
     @patch("products.tasks.backend.repository_readiness._scan_repository")
@@ -323,8 +323,8 @@ class TestComputeRepositoryReadiness(TestCase):
     ) -> None:
         self._mock_integration(mock_integration_cls)
         evidence = _empty_evidence(
-            found_posthog_init=True,
-            found_posthog_capture=True,
+            found_insights_init=True,
+            found_insights_capture=True,
             found_error_signal=True,
             frontend_markers=1,
         )
@@ -360,7 +360,7 @@ class TestComputeRepositoryReadiness(TestCase):
         assert result["replayInsights"]["state"] == "needs_setup"
         assert result["errorInsights"]["state"] == "needs_setup"
         assert result["overall"] == "needs_setup"
-        assert result["scan"]["foundPosthogInit"] is False
+        assert result["scan"]["foundInsightsInit"] is False
 
     @patch("products.tasks.backend.repository_readiness.time")
     @patch("products.tasks.backend.repository_readiness._fetch_file_content")

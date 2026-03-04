@@ -13,7 +13,7 @@ filename = args[1]
 
 debug = "--debug" in modifiers
 
-if not filename.endswith(".hoge"):
+if not filename.endswith(".iqle"):
     raise ValueError("filename must end with '.hoge'. Got: " + filename)
 
 with open(filename) as file:

@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react'
 
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { useStorybookMocks } from '~/mocks/browser'
 import { NodeKind } from '~/queries/schema/schema-general'

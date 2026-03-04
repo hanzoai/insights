@@ -22,6 +22,6 @@ class UserHomeSettings(UUIDTModel, RootTeamMixin):
         constraints = [
             models.UniqueConstraint(
                 fields=["team", "user"],
-                name="posthog_unique_user_home_settings",
+                name="insights_unique_user_home_settings",
             )
         ]

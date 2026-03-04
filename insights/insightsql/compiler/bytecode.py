@@ -113,7 +113,7 @@ def create_bytecode(
 
 
 class BytecodeCompiler(Visitor):
-    mode: Literal["hog", "ast"]
+    mode: Literal["iql", "ast"]
 
     def __init__(
         self,
@@ -128,7 +128,7 @@ class BytecodeCompiler(Visitor):
     ):
         super().__init__()
         self.enclosing = enclosing
-        self.mode = enclosing.mode if enclosing else "hog"
+        self.mode = enclosing.mode if enclosing else "iql"
         self.supported_functions = supported_functions or set()
         self.in_repl = in_repl
         self.locals: list[Local] = locals or []
@@ -178,10 +178,10 @@ class BytecodeCompiler(Visitor):
         return len(self.locals) - 1
 
     def visit(self, node: ast.AST | None):
-        # In "hog" mode we compile AST nodes to bytecode.
+        # In "iql" mode we compile AST nodes to bytecode.
         # In "ast" mode we pass through as they are.
         # You may enter "ast" mode with `sql()` or `(select ...)`
-        if self.mode == "hog" or isinstance(node, ast.Placeholder):
+        if self.mode == "iql" or isinstance(node, ast.Placeholder):
             return super().visit(node)
         return self._visit_hog_ast(node)
 
@@ -1051,7 +1051,7 @@ class BytecodeCompiler(Visitor):
                 if self.mode == "fn":
                     raise QueryError("Placeholders are not allowed in this context")
                 prev_mode = self.mode
-                self.mode = "hog"
+                self.mode = "iql"
                 try:
                     response = self.visit(value.expr)
                 finally:
@@ -1074,7 +1074,7 @@ class BytecodeCompiler(Visitor):
 
     def visit_placeholder(self, node: ast.Placeholder):
         if self.mode == "ast":
-            self.mode = "hog"
+            self.mode = "iql"
             try:
                 result = self.visit(node.expr)
             finally:

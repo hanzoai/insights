@@ -18,8 +18,8 @@ import {
     IconLogomark,
     IconRedux,
     IconTerminal,
-} from '@posthog/icons'
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { Dayjs } from 'lib/dayjs'
 import useIsHovering from 'lib/hooks/useIsHovering'
@@ -100,7 +100,7 @@ const typeToIconAndDescription: Record<InspectorListItem['type'], IconAndDescrip
 
 const notExpandable = ['inspector-summary', 'inactivity', 'session-change']
 
-// TODO @posthog/icons doesn't export the type we need here
+// TODO @hanzo/icons doesn't export the type we need here
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types,@typescript-eslint/explicit-function-return-type
 export function eventToIcon(event: string | undefined | null) {
     switch (event) {

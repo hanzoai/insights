@@ -5,8 +5,8 @@ import { CSS } from '@dnd-kit/utilities'
 import { useActions, useValues } from 'kea'
 import { Group } from 'kea-forms'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonDialog, LemonInput, LemonSelect, LemonTag } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonDialog, LemonInput, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { QuestionBranchingInput } from 'scenes/surveys/components/question-branching/QuestionBranchingInput'
@@ -268,7 +268,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                 )}
                 {question.type === SurveyQuestionType.Link && (
                     <LemonField name="link" label="Link" info="Only https:// or mailto: links are supported.">
-                        <LemonInput value={question.link || ''} placeholder="https://posthog.com" />
+                        <LemonInput value={question.link || ''} placeholder="https://hanzo.ai" />
                     </LemonField>
                 )}
                 {question.type === SurveyQuestionType.Rating && (
@@ -446,7 +446,7 @@ export function SurveyEditQuestionGroup({ index, question }: { index: number; qu
                     className="flex-1 flex gap-1 justify-center"
                     info={
                         canSkipSubmitButton
-                            ? "When the 'Automatically submit on selection' option is enabled, users won't need to click a submit button - their response will be submitted immediately after selecting an option. The submit button will be hidden. Requires at least version 1.244.0 of posthog-js. Not available for the mobile SDKs at the moment."
+                            ? "When the 'Automatically submit on selection' option is enabled, users won't need to click a submit button - their response will be submitted immediately after selecting an option. The submit button will be hidden. Requires at least version 1.244.0 of insights-js. Not available for the mobile SDKs at the moment."
                             : undefined
                     }
                 >

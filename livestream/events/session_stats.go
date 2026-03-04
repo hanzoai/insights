@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/golang-lru/v2/expirable"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/metrics"
 )
 
 const sessionRecordingTTL = 5 * time.Minute

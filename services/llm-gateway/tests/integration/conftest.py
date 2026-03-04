@@ -16,7 +16,7 @@ from openai import OpenAI
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 
-TEST_POSTHOG_API_KEY = "phx_fake_personal_api_key"
+TEST_INSIGHTS_API_KEY = "hix_fake_personal_api_key"
 
 MOCK_MODEL_COSTS = {
     "gpt-4o": {
@@ -149,7 +149,7 @@ def gateway_url_all_providers():
 @pytest.fixture
 def openai_client(gateway_url):
     return OpenAI(
-        api_key=TEST_POSTHOG_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=f"{gateway_url}/v1",
     )
 
@@ -158,7 +158,7 @@ def openai_client(gateway_url):
 def openai_client_all_providers(gateway_url_all_providers):
     """OpenAI client with all providers configured (for models endpoint tests)."""
     return OpenAI(
-        api_key=TEST_POSTHOG_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=f"{gateway_url_all_providers}/v1",
     )
 
@@ -166,6 +166,6 @@ def openai_client_all_providers(gateway_url_all_providers):
 @pytest.fixture
 def anthropic_client(gateway_url):
     return Anthropic(
-        api_key=TEST_POSTHOG_API_KEY,
+        api_key=TEST_INSIGHTS_API_KEY,
         base_url=gateway_url,
     )

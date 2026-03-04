@@ -63,7 +63,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
     compiled_hog: Any
     mock_fetch = MagicMock()
     mock_print = MagicMock()
-    mock_posthog_capture = MagicMock()
+    mock_insights_capture = MagicMock()
     fetch_responses: dict[str, dict[Any, Any]] = {}
 
     def setUp(self):
@@ -75,7 +75,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         self.mock_fetch = MagicMock(
             side_effect=lambda *args: print("[DEBUG InsightsFunctionFetch]", *args) or self.mock_fetch_response(*args)  # noqa: T201
         )
-        self.mock_posthog_capture = MagicMock(
+        self.mock_insights_capture = MagicMock(
             side_effect=lambda *args: print("[DEBUG InsightsFunctionInsightsCapture]", *args)  # noqa: T201
         )
 
@@ -90,9 +90,9 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         # Return a simple array which is easier to debug
         return [call.args for call in self.mock_print.mock_calls]
 
-    def get_mock_posthog_capture_calls(self):
+    def get_mock_insights_capture_calls(self):
         # Return a simple array which is easier to debug
-        return [call.args for call in self.mock_posthog_capture.mock_calls]
+        return [call.args for call in self.mock_insights_capture.mock_calls]
 
     def createHogGlobals(self, globals=None) -> dict:
         # Return an object simulating the
@@ -106,8 +106,8 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
                 "timestamp": "2024-01-01T00:00:00Z",
                 "elements_chain": "",
             },
-            "person": {"id": "person-id", "properties": {"email": "example@posthog.com"}},
-            "source": {"url": "https://us.posthog.com/insights_functions/1234"},
+            "person": {"id": "person-id", "properties": {"email": "example@hanzo.ai"}},
+            "source": {"url": "https://insights.hanzo.ai/insights_functions/1234"},
         }
 
         if globals:
@@ -130,7 +130,7 @@ class BaseInsightsFunctionTemplateTest(BaseTest):
         final_functions: dict = {
             "fetch": self.mock_fetch,
             "print": self.mock_print,
-            "postHogCapture": self.mock_posthog_capture,
+            "insightsCapture": self.mock_insights_capture,
         }
 
         if functions:
@@ -226,7 +226,7 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
             window.{self.track_fn} = {self.track_fn};
 
             const globals = {json.dumps(js_globals)};
-            const posthog = {{
+            const insights = {{
                 get_property: (key) => key === '$stored_person_properties' ? globals.person.properties : null,
                 config: {{
                     debug: true,
@@ -235,9 +235,9 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
 
             const initFn = {self._get_transpiled(edit_payload)}().init;
 
-            const processEvent = initFn({{ posthog, callback: console.log }}).processEvent;
+            const processEvent = initFn({{ insights, callback: console.log }}).processEvent;
 
-            processEvent(globals, posthog);;
+            processEvent(globals, insights);;
             """
 
         with STPyV8.JSContext() as ctxt:

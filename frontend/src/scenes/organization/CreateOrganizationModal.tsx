@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { useState } from 'react'
 
-import { LemonButton, LemonInput, LemonModal, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, LemonModal, Link } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -39,7 +39,7 @@ export function CreateOrganizationModal({
                 <p>
                     Organizations gather people building together.
                     <br />
-                    <Link to="https://posthog.com/docs/user-guides/organizations-and-projects" target="_blank">
+                    <Link to="https://hanzo.ai/docs/user-guides/organizations-and-projects" target="_blank">
                         Learn more in Insights docs.
                     </Link>
                 </p>

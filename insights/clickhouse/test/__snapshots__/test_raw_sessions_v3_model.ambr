@@ -72,8 +72,8 @@
     (SELECT hostName() as host,
             count() as parts_count,
             partition
-     FROM clusterAllReplicas('posthog', system.parts)
-     WHERE database = 'posthog_test'
+     FROM clusterAllReplicas('insights', system.parts)
+     WHERE database = 'insights_test'
        AND table = 'sharded_raw_sessions_v3'
        AND partition IN ('202511')
        AND active = 99999

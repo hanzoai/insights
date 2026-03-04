@@ -24,7 +24,7 @@ from zxcvbn import zxcvbn
 
 from insights.clickhouse.query_tagging import tag_queries
 from insights.helpers.two_factor_session import enforce_two_factor
-from insights.jwt import PosthogJwtAudience, decode_jwt
+from insights.jwt import InsightsJwtAudience, decode_jwt
 from insights.models.oauth import OAuthAccessToken, OAuthApplication, OAuthApplicationAuthBrand
 from insights.models.personal_api_key import PERSONAL_API_KEY_MODES_TO_TRY, PersonalAPIKey, hash_key_value
 from insights.models.sharing_configuration import SharingConfiguration
@@ -180,8 +180,8 @@ class PersonalAPIKeyAuthentication(authentication.BaseAuthentication):
                 token = authorization_match.group(1).strip()
 
                 if token.startswith(
-                    "pha_"
-                ):  # TRICKY: This returns None to allow the next authentication method to have a go. This should be `if not token.startswith("phx_")`, but we need to support legacy personal api keys that may not have been prefixed with phx_.
+                    "hia_"
+                ):  # TRICKY: This returns None to allow the next authentication method to have a go. This should be `if not token.startswith("hix_")`, but we need to support legacy personal api keys that may not have been prefixed with hix_.
                     return None
                 return token, "Authorization header"
         data = request.data if request_data is None and isinstance(request, Request) else request_data
@@ -296,7 +296,7 @@ class ProjectSecretAPIKeyAuthentication(authentication.BaseAuthentication):
     ) -> Optional[str]:
         """Try to find project secret API key in request and return it"""
         if "authorization" in request.headers:
-            authorization_match = re.match(rf"^{cls.keyword}\s+(phs_[a-zA-Z0-9]+)$", request.headers["authorization"])
+            authorization_match = re.match(rf"^{cls.keyword}\s+(his_[a-zA-Z0-9]+)$", request.headers["authorization"])
             if authorization_match:
                 return authorization_match.group(1).strip()
 
@@ -367,7 +367,7 @@ class TemporaryTokenAuthentication(authentication.BaseAuthentication):
                     detail="No temporary_token set. "
                     + "That means you're either trying to access this API from a different site, "
                     + "or it means your proxy isn't sending the correct headers. "
-                    + "See https://posthog.com/docs/deployment/running-behind-proxy for more information."
+                    + "See https://hanzo.ai/docs/deployment/running-behind-proxy for more information."
                 )
         if request.GET.get("temporary_token"):
             User = apps.get_model(app_label="insights", model_name="User")
@@ -397,7 +397,7 @@ class JwtAuthentication(authentication.BaseAuthentication):
             if authorization_match:
                 try:
                     token = authorization_match.group(1).strip()
-                    info = decode_jwt(token, PosthogJwtAudience.IMPERSONATED_USER)
+                    info = decode_jwt(token, InsightsJwtAudience.IMPERSONATED_USER)
                     user = User.objects.get(pk=info["id"])
                     return (user, None)
                 except jwt.DecodeError:
@@ -465,15 +465,15 @@ class SharingPasswordProtectedAuthentication(authentication.BaseAuthentication):
             authorization_match = re.match(rf"^{self.keyword}\s+(\S.+)$", request.headers["authorization"])
             if authorization_match:
                 sharing_jwt_token = authorization_match.group(1).strip()
-        elif hasattr(request, "COOKIES") and request.COOKIES.get("posthog_sharing_token"):
-            sharing_jwt_token = request.COOKIES.get("posthog_sharing_token")
+        elif hasattr(request, "COOKIES") and request.COOKIES.get("insights_sharing_token"):
+            sharing_jwt_token = request.COOKIES.get("insights_sharing_token")
 
         if not sharing_jwt_token:
             return None
 
         try:
             # Attempt full JWT validation - this will fail fast for non-sharing JWTs due to audience mismatch
-            payload = decode_jwt(sharing_jwt_token, PosthogJwtAudience.SHARING_PASSWORD_PROTECTED)
+            payload = decode_jwt(sharing_jwt_token, InsightsJwtAudience.SHARING_PASSWORD_PROTECTED)
 
             from insights.models.share_password import SharePassword
 
@@ -551,7 +551,7 @@ class OAuthAccessTokenAuthentication(authentication.BaseAuthentication):
             if authorization_match:
                 token = authorization_match.group(1).strip()
 
-                if token.startswith("pha_"):
+                if token.startswith("hia_"):
                     return token
                 return None
         return None

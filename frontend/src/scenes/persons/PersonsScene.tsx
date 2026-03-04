@@ -1,7 +1,7 @@
 import { useActions, useAsyncActions, useValues } from 'kea'
 
-import { IconEllipsis, IconRewind } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@posthog/lemon-ui'
+import { IconEllipsis, IconRewind } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonMenu } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonField } from 'lib/lemon-ui/LemonField'

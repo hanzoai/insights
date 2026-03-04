@@ -21,7 +21,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                npm install --save posthog-docusaurus
+                                npm install --save insights-docusaurus
                             `,
                             },
                         ]}
@@ -44,7 +44,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 module.exports = {
                                   plugins: [
                                     [
-                                      'posthog-docusaurus',
+                                      'insights-docusaurus',
                                       {
                                         apiKey: '<ph_project_api_key>',
                                         appUrl: '<ph_client_api_host>',
@@ -59,7 +59,7 @@ export const getDocusaurusSteps = (ctx: OnboardingComponentsContext): StepDefini
                     />
                     <CalloutBox type="fyi" title="More options">
                         <Markdown>
-                            See the [Docusaurus integration docs](https://posthog.com/docs/libraries/docusaurus) for
+                            See the [Docusaurus integration docs](https://hanzo.ai/docs/libraries/docusaurus) for
                             more configuration options.
                         </Markdown>
                     </CalloutBox>

@@ -5,9 +5,9 @@ import { loaders } from 'kea-loaders'
 import { beforeUnload, router, urlToAction } from 'kea-router'
 import { CombinedLocation } from 'kea-router/lib/utils'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { CyclotronJobInputsValidation } from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
@@ -487,7 +487,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         ? await api.insightsFunctions.create(configuration)
                         : await api.insightsFunctions.update(props.id!, configuration)
 
-                    posthog.capture('custom function saved', {
+                    insights.capture('custom function saved', {
                         id: res.id,
                         template_id: res.template?.id,
                         template_name: res.template?.name,
@@ -519,7 +519,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                         }
                         const triggerEvent = triggerEventMap[res.template.id]
 
-                        posthog.capture('error_tracking_alert_created', {
+                        insights.capture('error_tracking_alert_created', {
                             trigger_event: triggerEvent,
                             subtemplate_id: res.template.id,
                             has_custom_filters: res.filters && Object.keys(res.filters).length > 1,
@@ -856,7 +856,7 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                             ? {
                                   id: personId,
                                   properties: {
-                                      email: 'example@posthog.com',
+                                      email: 'example@hanzo.ai',
                                   },
                                   name: 'Example person',
                                   url: `${window.location.origin}/person/${personId}`,
@@ -1238,40 +1238,40 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
 
     listeners(({ actions, values, cache }) => ({
         reportAIInsightsFunctionPrompted: () => {
-            posthog.capture('ai_insights_function_prompted', { type: values.type })
+            insights.capture('ai_insights_function_prompted', { type: values.type })
         },
         reportAIInsightsFunctionAccepted: () => {
-            posthog.capture('ai_insights_function_accepted', { type: values.type })
+            insights.capture('ai_insights_function_accepted', { type: values.type })
         },
         reportAIInsightsFunctionRejected: () => {
-            posthog.capture('ai_insights_function_rejected', { type: values.type })
+            insights.capture('ai_insights_function_rejected', { type: values.type })
         },
         reportAIInsightsFunctionPromptOpen: () => {
-            posthog.capture('ai_insights_function_prompt_open', { type: values.type })
+            insights.capture('ai_insights_function_prompt_open', { type: values.type })
         },
         reportAIFiltersPrompted: () => {
-            posthog.capture('ai_insights_function_filters_prompted', { type: values.type })
+            insights.capture('ai_insights_function_filters_prompted', { type: values.type })
         },
         reportAIFiltersAccepted: () => {
-            posthog.capture('ai_insights_function_filters_accepted', { type: values.type })
+            insights.capture('ai_insights_function_filters_accepted', { type: values.type })
         },
         reportAIFiltersRejected: () => {
-            posthog.capture('ai_insights_function_filters_rejected', { type: values.type })
+            insights.capture('ai_insights_function_filters_rejected', { type: values.type })
         },
         reportAIFiltersPromptOpen: () => {
-            posthog.capture('ai_insights_function_filters_prompt_open', { type: values.type })
+            insights.capture('ai_insights_function_filters_prompt_open', { type: values.type })
         },
         reportAIInsightsFunctionInputsPrompted: () => {
-            posthog.capture('ai_insights_function_inputs_prompted', { type: values.type })
+            insights.capture('ai_insights_function_inputs_prompted', { type: values.type })
         },
         reportAIInsightsFunctionInputsAccepted: () => {
-            posthog.capture('ai_insights_function_inputs_accepted', { type: values.type })
+            insights.capture('ai_insights_function_inputs_accepted', { type: values.type })
         },
         reportAIInsightsFunctionInputsRejected: () => {
-            posthog.capture('ai_insights_function_inputs_rejected', { type: values.type })
+            insights.capture('ai_insights_function_inputs_rejected', { type: values.type })
         },
         reportAIInsightsFunctionInputsPromptOpen: () => {
-            posthog.capture('ai_insights_function_inputs_prompt_open', { type: values.type })
+            insights.capture('ai_insights_function_inputs_prompt_open', { type: values.type })
         },
         loadTemplateSuccess: () => actions.resetForm(),
         loadInsightsFunctionSuccess: () => {

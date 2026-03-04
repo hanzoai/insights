@@ -279,7 +279,7 @@ class ClickHouseClient:
         self.params.update(kwargs)
 
     @classmethod
-    def from_posthog_settings(cls, settings, **kwargs):
+    def from_insights_settings(cls, settings, **kwargs):
         """Initialize a ClickHouseClient from Insights settings."""
         return cls(
             url=settings.CLICKHOUSE_URL,

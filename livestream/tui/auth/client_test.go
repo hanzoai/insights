@@ -12,11 +12,11 @@ func TestDeriveStreamHost(t *testing.T) {
 		appHost  string
 		expected string
 	}{
-		{"US cloud", "https://us.posthog.com", "https://live.us.posthog.com"},
-		{"US cloud trailing slash", "https://us.posthog.com/", "https://live.us.posthog.com"},
-		{"app.posthog.com defaults to US", "https://app.posthog.com", "https://live.us.posthog.com"},
-		{"EU cloud", "https://eu.posthog.com", "https://live.eu.posthog.com"},
-		{"dev environment", "https://app.dev.posthog.dev", "https://live.dev.posthog.dev"},
+		{"US cloud", "https://us.insights.hanzo.ai", "https://live.us.insights.hanzo.ai"},
+		{"US cloud trailing slash", "https://us.insights.hanzo.ai/", "https://live.us.insights.hanzo.ai"},
+		{"insights.hanzo.ai defaults to US", "https://insights.hanzo.ai", "https://live.us.insights.hanzo.ai"},
+		{"EU cloud", "https://eu.insights.hanzo.ai", "https://live.eu.insights.hanzo.ai"},
+		{"dev environment", "https://dev.insights.hanzo.ai", "https://live.dev.insights.hanzo.ai"},
 		{"local dev", "http://localhost:8000", "http://localhost:8010"},
 		{"unknown host", "https://custom.example.com", "http://localhost:8010"},
 	}

@@ -35,7 +35,7 @@ def _create_batch_export_ok(
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -577,7 +577,7 @@ def test_batch_export_earliest_backfill_rejected_without_feature_flag(
     batch_export = _create_batch_export_ok(client, team, "persons")
     batch_export_id = batch_export["id"]
 
-    with patch("insights.batch_exports.http.posthoganalytics.feature_enabled", return_value=False):
+    with patch("insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=False):
         response = backfill_batch_export(
             client,
             team.pk,
@@ -606,7 +606,7 @@ def test_batch_export_earliest_backfill_allowed_with_feature_flag(
     batch_export = _create_batch_export_ok(client, team, "persons")
     batch_export_id = batch_export["id"]
 
-    with patch("insights.batch_exports.http.posthoganalytics.feature_enabled", return_value=True):
+    with patch("insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True):
         response = backfill_batch_export(
             client,
             team.pk,

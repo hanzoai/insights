@@ -6,7 +6,7 @@ import structlog
 from cachetools import cached
 from celery import shared_task
 from dateutil import parser
-from posthoganalytics.client import Client as InsightsClient
+from hanzoanalytics.client import Client as InsightsClient
 from retry import retry
 
 from insights.schema import AIEventType
@@ -785,10 +785,10 @@ def capture_llm_analytics_report(
         raise ValueError("organization_id must be provided")
 
     try:
-        pha_client = get_ph_client()
+        hia_client = get_ph_client()
 
         capture_event(
-            pha_client=pha_client,
+            hia_client=hia_client,
             name="llm analytics usage",
             organization_id=organization_id,
             properties=report_dict,
@@ -801,9 +801,9 @@ def capture_llm_analytics_report(
         )
 
         try:
-            pha_client = get_ph_client()
+            hia_client = get_ph_client()
             capture_event(
-                pha_client=pha_client,
+                hia_client=hia_client,
                 name="llm analytics usage report failure",
                 organization_id=organization_id,
                 properties={"error": str(err)},
@@ -828,15 +828,15 @@ def send_llm_analytics_usage_reports(
         at: ISO format date to run the report for (defaults to previous day)
         organization_ids: Optional list of specific organization IDs to report on
     """
-    import posthoganalytics
+    import hanzoanalytics
 
     # Check if reports are disabled
-    are_usage_reports_disabled = posthoganalytics.feature_enabled(
+    are_usage_reports_disabled = hanzoanalytics.feature_enabled(
         "llm-analytics-disable-usage-reports", "internal_billing_events"
     )
 
     if are_usage_reports_disabled:
-        posthoganalytics.capture_exception(Exception(f"LLM Analytics usage reports are disabled for {at}"))
+        hanzoanalytics.capture_exception(Exception(f"LLM Analytics usage reports are disabled for {at}"))
         return
 
     at_date = parser.parse(at) if at else None

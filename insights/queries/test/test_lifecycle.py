@@ -45,7 +45,7 @@ class TestLifecycle(TestLifecycleBase):
                         distinct_ids=[id],
                         properties={
                             "name": id,
-                            **({"email": "test@posthog.com"} if id == "p1" else {}),
+                            **({"email": "test@hanzo.ai"} if id == "p1" else {}),
                         },
                     )
                 )
@@ -787,7 +787,7 @@ class TestLifecycle(TestLifecycleBase):
         self._create_events(
             data=[
                 (
-                    "p1",  # p1 gets test@posthog.com as email and gets filtered out
+                    "p1",  # p1 gets test@hanzo.ai as email and gets filtered out
                     [
                         "2020-01-11T12:00:00Z",
                         "2020-01-12T12:00:00Z",

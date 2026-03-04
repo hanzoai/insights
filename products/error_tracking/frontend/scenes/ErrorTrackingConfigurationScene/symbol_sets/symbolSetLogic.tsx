@@ -2,7 +2,7 @@ import { actions, defaults, kea, listeners, path, reducers, selectors } from 'ke
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { CountedPaginatedResponse } from 'lib/api'
 import { ErrorTrackingSymbolSet, SymbolSetStatusFilter } from 'lib/components/Errors/types'

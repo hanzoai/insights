@@ -2,7 +2,7 @@ import { KafkaProducerObserver } from '~/tests/helpers/mocks/producer.spy'
 
 import { DateTime } from 'luxon'
 
-import { PluginEvent, Properties } from '@posthog/plugin-scaffold'
+import { PluginEvent, Properties } from '@hanzo/plugin-scaffold'
 
 import { KAFKA_INGESTION_WARNINGS, KAFKA_PERSON, KAFKA_PERSON_DISTINCT_ID } from '~/config/kafka-topics'
 import { PipelineResultType, isDlqResult, isOkResult, isRedirectResult } from '~/ingestion/pipelines/results'

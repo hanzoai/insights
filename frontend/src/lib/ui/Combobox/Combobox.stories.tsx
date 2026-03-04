@@ -1,6 +1,6 @@
 import type { Meta } from '@storybook/react'
 
-import { IconGear, IconPlusSmall } from '@posthog/icons'
+import { IconGear, IconPlusSmall } from '@hanzo/icons'
 
 import { Link } from 'lib/lemon-ui/Link'
 
@@ -66,9 +66,9 @@ function RenderCombobox(): JSX.Element {
                                     iconOnly: true,
                                     isSideActionRight: true,
                                 }}
-                                tooltip="Visit posthog's website"
+                                tooltip="Visit insights's website"
                                 tooltipPlacement="right"
-                                to="https://posthog.com"
+                                to="https://hanzo.ai"
                             >
                                 <IconGear className="text-tertiary" />
                             </Link>

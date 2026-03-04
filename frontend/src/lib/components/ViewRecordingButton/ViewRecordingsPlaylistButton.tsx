@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 
-import { IconRewindPlay } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, Tooltip } from '@posthog/lemon-ui'
+import { IconRewindPlay } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, Tooltip } from '@hanzo/lemon-ui'
 
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { urls } from 'scenes/urls'

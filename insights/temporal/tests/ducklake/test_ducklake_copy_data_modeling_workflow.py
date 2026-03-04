@@ -34,7 +34,7 @@ def _create_mock_catalog():
         "DUCKLAKE_RDS_HOST": "localhost",
         "DUCKLAKE_RDS_PORT": "5432",
         "DUCKLAKE_RDS_DATABASE": "ducklake",
-        "DUCKLAKE_RDS_USERNAME": "posthog",
+        "DUCKLAKE_RDS_USERNAME": "insights",
         "DUCKLAKE_RDS_PASSWORD": "password",
         "DUCKLAKE_BUCKET": "test-bucket",
         "DUCKLAKE_BUCKET_REGION": "us-east-1",
@@ -379,7 +379,7 @@ async def test_ducklake_copy_workflow_skips_when_feature_flag_disabled(monkeypat
         call_counts["copy"] += 1
 
     monkeypatch.setattr(
-        ducklake_module.posthoganalytics,
+        ducklake_module.hanzoanalytics,
         "feature_enabled",
         lambda *args, **kwargs: False,
     )
@@ -861,7 +861,7 @@ async def test_ducklake_copy_workflow_runs_when_feature_flag_enabled(monkeypatch
         return []
 
     monkeypatch.setattr(
-        ducklake_module.posthoganalytics,
+        ducklake_module.hanzoanalytics,
         "feature_enabled",
         lambda *args, **kwargs: True,
     )

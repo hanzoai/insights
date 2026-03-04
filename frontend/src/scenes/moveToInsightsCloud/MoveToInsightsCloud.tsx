@@ -9,8 +9,8 @@ import {
     IconSupport,
     IconTrending,
     IconUpload,
-} from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { ExperimentsHog } from 'lib/components/mascots'
 import { SceneExport } from 'scenes/sceneTypes'
@@ -42,7 +42,7 @@ const CLOUD_FEATURES: CloudFeature[] = [
         description:
             "We've done this before. It's just a few clicks to get your data moving from self-hosted to Cloud.",
         icon: <IconUpload />,
-        link: 'https://posthog.com/docs/migrate/migrate-to-cloud',
+        link: 'https://hanzo.ai/docs/migrate/migrate-to-cloud',
     },
     {
         name: 'Auto-scaling',
@@ -71,20 +71,20 @@ const CLOUD_FEATURES: CloudFeature[] = [
         description:
             'Group analytics, data pipelines, experiments, and other premium features are only available on Insights Cloud.',
         icon: <IconFeatures />,
-        link: 'https://posthog.com/pricing',
+        link: 'https://hanzo.ai/pricing',
     },
     {
         name: 'World-class support',
         description:
             'Insights Cloud customers get access to our world-class support team, not just the community forum.',
         icon: <IconSupport />,
-        link: 'https://posthog.com/handbook/growth/customer-support',
+        link: 'https://hanzo.ai/handbook/growth/customer-support',
     },
     {
         name: 'SOC 2 compliant',
         description: "We're SOC-2 compliant, so you can rest easy knowing your data is secure.",
         icon: <IconPrivacy />,
-        link: 'https://posthog.com/handbook/company/security',
+        link: 'https://hanzo.ai/handbook/company/security',
     },
     {
         name: 'HIPAA compliant',
@@ -109,7 +109,7 @@ export function MoveToInsightsCloud(): JSX.Element {
                         </p>
                         <div className="flex">
                             <LemonButton
-                                to="https://us.posthog.com/signup?utm_medium=in-product&utm_campaign=move-to-cloud"
+                                to="https://insights.hanzo.ai/signup?utm_medium=in-product&utm_campaign=move-to-cloud"
                                 type="primary"
                                 status="alt"
                             >

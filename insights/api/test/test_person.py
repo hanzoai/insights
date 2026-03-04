@@ -313,7 +313,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
 
         with snapshot_postgres_queries_context(
             self,
-            custom_query_matcher=lambda query: f"DELETE FROM posthog_person WHERE team_id = {self.team.pk} AND id = {person.pk}"
+            custom_query_matcher=lambda query: f"DELETE FROM insights_person WHERE team_id = {self.team.pk} AND id = {person.pk}"
             in query,
         ):
             response = self.client.delete(f"/api/person/{person.uuid}/")
@@ -329,7 +329,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             person_id=None,  # can't query directly for deleted person
             expected=[
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "deleted",
                     "scope": "Person",
                     "item_id": str(person.pk),
@@ -621,7 +621,7 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             person_id=person1.uuid,
             expected=[
                 {
-                    "user": {"first_name": "", "email": "user1@posthog.com"},
+                    "user": {"first_name": "", "email": "user1@hanzo.ai"},
                     "activity": "split_person",
                     "scope": "Person",
                     "item_id": str(person1.pk),
@@ -1341,8 +1341,8 @@ class TestPerson(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
         assert person.version > 105
 
     @mock.patch(
-        f"{posthog.models.person.deletion.__name__}.create_person_distinct_id",
-        wraps=posthog.models.person.deletion.create_person_distinct_id,
+        f"{insights.models.person.deletion.__name__}.create_person_distinct_id",
+        wraps=insights.models.person.deletion.create_person_distinct_id,
     )
     @pytest.mark.flaky(reruns=2)
     def test_reset_person_distinct_id_not_found(self, mocked_ch_call):

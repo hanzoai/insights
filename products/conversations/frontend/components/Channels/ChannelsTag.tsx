@@ -1,5 +1,5 @@
-import { IconComment, IconLetter } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconComment, IconLetter } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { IconSlack } from 'lib/lemon-ui/icons'
 

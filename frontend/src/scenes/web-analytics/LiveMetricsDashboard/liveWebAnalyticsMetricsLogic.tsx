@@ -1,6 +1,6 @@
 import { actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -77,7 +77,7 @@ export const liveWebAnalyticsMetricsLogic = kea<liveWebAnalyticsMetricsLogicType
                             // For cookieless events, device_id isn't set before preprocessing
                             // so we create a device key from IP + user agent
                             let deviceKey = deviceId
-                            if (!deviceKey || deviceKey === '$posthog_cookieless') {
+                            if (!deviceKey || deviceKey === '$insights_cookieless') {
                                 const ip = event.properties?.$ip ?? ''
                                 const ua = event.properties?.$raw_user_agent ?? ''
                                 deviceKey = `cookieless_${hashCodeForString(ip + ua)}`
@@ -366,7 +366,7 @@ const loadQueryData = async (
                         ifNull(properties.${property}, 'Unknown') AS ${alias},
                         arrayDistinct(groupArray(
                             if(
-                                properties.$device_id IS NULL OR properties.$device_id = '$posthog_cookieless',
+                                properties.$device_id IS NULL OR properties.$device_id = '$insights_cookieless',
                                 concat(
                                     'cookieless_transform|||',
                                     ifNull(properties.$ip, ''),

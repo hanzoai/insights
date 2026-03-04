@@ -1,4 +1,4 @@
-import { LemonCheckbox, Tooltip } from '@posthog/lemon-ui'
+import { LemonCheckbox, Tooltip } from '@hanzo/lemon-ui'
 
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
 
@@ -73,7 +73,7 @@ export function ExperimentMetricOutlierHandling({
                     >
                         <Tooltip
                             title="Useful if a large number of participants in the experiment does not have the event resulting in a 0 value."
-                            docLink="https://posthog.com/docs/experiments/metrics#outlier-handling"
+                            docLink="https://hanzo.ai/docs/experiments/metrics#outlier-handling"
                         >
                             <span>
                                 <LemonCheckbox

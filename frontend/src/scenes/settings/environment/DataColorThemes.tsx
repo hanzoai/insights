@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBadge } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonLabel, LemonSelect, LemonTable, Link } from '@posthog/lemon-ui'
+import { IconBadge } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonLabel, LemonSelect, LemonTable, Link } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
@@ -28,7 +28,7 @@ export function DataColorThemes(): JSX.Element {
                     These themes can be used in insights. You can also set a default theme for all insights below. For
                     more details, check out our{' '}
                     <Link
-                        to="https://posthog.com/docs/product-analytics/color-themes?utm_campaign=settings&utm_medium=in-product"
+                        to="https://hanzo.ai/docs/product-analytics/color-themes?utm_campaign=settings&utm_medium=in-product"
                         target="_blank"
                     >
                         docs

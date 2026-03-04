@@ -49,7 +49,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /code
-COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY turbo.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json .pnpmfile.cjs ./
 COPY ./bin/turbo ./bin/turbo
 COPY ./patches ./patches
 COPY ./rust ./rust
@@ -59,6 +59,8 @@ COPY ./common/scriptvm/typescript/ ./common/scriptvm/typescript/
 COPY ./common/plugin-scaffold/ ./common/plugin-scaffold/
 COPY ./common/siphash/ ./common/siphash/
 COPY ./common/insights-node/ ./common/insights-node/
+COPY ./common/insights-js/ ./common/insights-js/
+COPY ./common/insights-js-lite/ ./common/insights-js-lite/
 COPY ./nodejs/package.json ./nodejs/tsconfig.json ./nodejs/tsconfig.build.json ./nodejs/
 SHELL ["/bin/bash", "-e", "-o", "pipefail", "-c"]
 
@@ -68,9 +70,9 @@ ENV BUILD_LIBRDKAFKA=0
 # Compile and install Node.js dependencies
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && \
-    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@insights/nodejs... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
-    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@insights/plugin-transpiler... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
-    NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@insights/plugin-transpiler build
+    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@hanzo/nodejs... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=16384" CI=1 pnpm --filter=@hanzo/plugin-transpiler... install --no-frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@hanzo/plugin-transpiler build
 
 # Build the nodejs services
 COPY ./nodejs/src/ ./nodejs/src/
@@ -79,10 +81,10 @@ COPY ./nodejs/assets/ ./nodejs/assets/
 COPY ./nodejs/bin/ ./nodejs/bin/
 
 # Build cyclotron first
-RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@insights/cyclotron build
+RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@hanzo/cyclotron build
 
 # Then build the nodejs services
-RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@insights/nodejs build
+RUN NODE_OPTIONS="--max-old-space-size=16384" bin/turbo --filter=@hanzo/nodejs build
 
 
 #

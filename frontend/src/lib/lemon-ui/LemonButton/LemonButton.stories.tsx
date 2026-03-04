@@ -1,8 +1,8 @@
 import { Meta, StoryFn, StoryObj } from '@storybook/react'
 import clsx from 'clsx'
 
-import { IconGear, IconInfo, IconPlus } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconGear, IconInfo, IconPlus } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { useAsyncHandler } from 'lib/hooks/useAsyncHandler'
@@ -324,13 +324,13 @@ export const AsLinks = (): JSX.Element => {
             <LemonButton to={urls.projectHomepage()}>Internal link with "to"</LemonButton>
 
             <p>External links will be automatically detected and routed to normally</p>
-            <LemonButton to="https://posthog.com">External link</LemonButton>
+            <LemonButton to="https://hanzo.ai">External link</LemonButton>
 
             <p>
                 The <code>targetBlank</code> prop will open the link in a new window/tab, setting the appropriate
                 attributed like <code>rel="noopener"</code>
             </p>
-            <LemonButton to="https://posthog.com" targetBlank>
+            <LemonButton to="https://hanzo.ai" targetBlank>
                 External link with "targetBlank"
             </LemonButton>
         </div>
@@ -393,7 +393,7 @@ WithTooltip.args = {
     ...Default.args,
     tooltip: (
         <>
-            This is example with a link: <Link to="https://posthog.com">Go home</Link>
+            This is example with a link: <Link to="https://hanzo.ai">Go home</Link>
         </>
     ),
 }
@@ -403,7 +403,7 @@ WithTooltipPlacementAndArrowOffset.args = {
     ...Default.args,
     tooltip: (
         <>
-            This is example with a link: <Link to="https://posthog.com">Go home</Link>
+            This is example with a link: <Link to="https://hanzo.ai">Go home</Link>
         </>
     ),
     tooltipPlacement: 'top-start',

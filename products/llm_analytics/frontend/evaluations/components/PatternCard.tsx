@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconCheck, IconMinus, IconX } from '@posthog/icons'
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCheck, IconMinus, IconX } from '@hanzo/icons'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { urls } from 'scenes/urls'
 
@@ -50,7 +50,7 @@ export function PatternCard({ pattern, type, runsLookup }: PatternCardProps): JS
                                         className="text-xs font-mono text-primary hover:underline"
                                         data-attr="llma-evaluation-summary-example-link"
                                         onClick={() => {
-                                            posthog.capture('llma evaluation summary example clicked', {
+                                            insights.capture('llma evaluation summary example clicked', {
                                                 pattern_type: type,
                                                 pattern_title: pattern.title,
                                             })

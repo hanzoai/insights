@@ -17,18 +17,18 @@
 <meta name="apple-mobile-web-app-title" content="Insights">
 <meta name="application-name" content="Insights">
 
-{% if not opt_out_capture and js_posthog_api_key %}
+{% if not opt_out_capture and js_insights_api_key %}
     <script nonce="{{ request.csp_nonce }}">
-        window.JS_POSTHOG_API_KEY = "{{ js_posthog_api_key|escapejs }}";
-        window.JS_POSTHOG_HOST = "{{ js_posthog_host|escapejs }}";
-        if (window.JS_POSTHOG_HOST.trim().length === 0) {
-            window.JS_POSTHOG_HOST = window.location.origin;
+        window.JS_INSIGHTS_API_KEY = "{{ js_insights_api_key|escapejs }}";
+        window.JS_INSIGHTS_HOST = "{{ js_insights_host|escapejs }}";
+        if (window.JS_INSIGHTS_HOST.trim().length === 0) {
+            window.JS_INSIGHTS_HOST = window.location.origin;
         }
-        window.JS_POSTHOG_UI_HOST = "{{ js_posthog_ui_host|escapejs }}";
-        window.JS_POSTHOG_SELF_CAPTURE = {{self_capture | yesno:"true,false" }};
-        window.POSTHOG_USER_IDENTITY_WITH_FLAGS = JSON.parse("{{ posthog_bootstrap | escapejs }}")
+        window.JS_INSIGHTS_UI_HOST = "{{ js_insights_ui_host|escapejs }}";
+        window.JS_INSIGHTS_SELF_CAPTURE = {{self_capture | yesno:"true,false" }};
+        window.INSIGHTS_USER_IDENTITY_WITH_FLAGS = JSON.parse("{{ insights_bootstrap | escapejs }}")
         window.IMPERSONATED_SESSION = {{is_impersonated_session | yesno:"true,false"}};
-        window.POSTHOG_JS_UUID_VERSION = "{{posthog_js_uuid_version}}";
+        window.INSIGHTS_JS_UUID_VERSION = "{{insights_js_uuid_version}}";
     </script>
 {% endif %}
 {% if stripe_public_key %}
@@ -36,12 +36,12 @@
         window.STRIPE_PUBLIC_KEY = '{{ stripe_public_key | escapejs }}';
     </script>
 {% endif %}
-<script nonce="{{ request.csp_nonce }}" id='posthog-app-user-preload'>
+<script nonce="{{ request.csp_nonce }}" id='insights-app-user-preload'>
     {# nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag #}
-    window.POSTHOG_APP_CONTEXT = JSON.parse("{{ posthog_app_context | escapejs }}");
+    window.INSIGHTS_APP_CONTEXT = JSON.parse("{{ insights_app_context | escapejs }}");
     {# Inject the expected location of JS bundle, #}
     {# use to allow the location of the bundle to be set at runtime, #}
-    {# e.g. for PostHog Cloud we serve the frontend JS from a CDN #}
+    {# e.g. for Hanzo Insights Cloud we serve the frontend JS from a CDN #}
     {# nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag #}
     window.JS_URL = "{{ js_url|default:"" }}";
     {# nosemgrep: generic.html-templates.security.var-in-script-tag.var-in-script-tag (yesno filter produces literal strings) #}

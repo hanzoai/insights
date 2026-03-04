@@ -1,8 +1,8 @@
 import { BindLogic, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconBook, IconPlusSmall } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconBook, IconPlusSmall } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -110,7 +110,7 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                             dismissKey="endpoints-docs-upgrade-banner"
                             action={{
                                 children: 'View docs',
-                                to: 'https://posthog.com/docs/endpoints',
+                                to: 'https://hanzo.ai/docs/endpoints',
                                 targetBlank: true,
                             }}
                             icon={<IconBook />}
@@ -127,7 +127,7 @@ export function EndpointsScene({ tabId }: { tabId?: string }): JSX.Element {
                                     ? ENDPOINTS_USAGE_PRODUCT_DESCRIPTION
                                     : ENDPOINTS_PRODUCT_DESCRIPTION
                             }
-                            docsURL="https://posthog.com/docs/endpoints"
+                            docsURL="https://hanzo.ai/docs/endpoints"
                             customHog={BigLeaguesHog}
                             isEmpty={false}
                             action={() => router.actions.push(urls.sqlEditor({ outputTab: OutputTab.Endpoint }))}

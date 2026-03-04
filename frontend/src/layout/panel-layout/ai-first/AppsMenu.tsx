@@ -3,8 +3,8 @@ import { useValues } from 'kea'
 import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconApps, IconChevronRight } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconApps, IconChevronRight } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

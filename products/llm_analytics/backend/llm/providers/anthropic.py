@@ -9,9 +9,9 @@ from typing import Any
 from django.conf import settings
 
 import anthropic
-import posthoganalytics
+import hanzoanalytics
 from anthropic.types import MessageParam, TextBlockParam, ThinkingConfigEnabledParam
-from posthoganalytics.ai.anthropic import Anthropic
+from hanzoanalytics.ai.anthropic import Anthropic
 from pydantic import BaseModel
 
 from products.llm_analytics.backend.llm.errors import (
@@ -85,11 +85,11 @@ class AnthropicAdapter:
         """Non-streaming completion with optional structured output."""
         effective_api_key = api_key or self._get_default_api_key()
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
         client: Any
-        if analytics.capture and posthog_client:
+        if analytics.capture and analytics_client:
             client = Anthropic(
-                api_key=effective_api_key, posthog_client=posthog_client, timeout=AnthropicConfig.TIMEOUT
+                api_key=effective_api_key, analytics_client=analytics_client, timeout=AnthropicConfig.TIMEOUT
             )
         else:
             client = anthropic.Anthropic(api_key=effective_api_key, timeout=AnthropicConfig.TIMEOUT)
@@ -166,11 +166,11 @@ Return ONLY the JSON object, no other text or markdown formatting."""
         effective_api_key = api_key or self._get_default_api_key()
         model_id = request.model
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
         client: Any
-        if analytics.capture and posthog_client:
+        if analytics.capture and analytics_client:
             client = Anthropic(
-                api_key=effective_api_key, posthog_client=posthog_client, timeout=AnthropicConfig.TIMEOUT
+                api_key=effective_api_key, analytics_client=analytics_client, timeout=AnthropicConfig.TIMEOUT
             )
         else:
             client = anthropic.Anthropic(api_key=effective_api_key, timeout=AnthropicConfig.TIMEOUT)
@@ -205,10 +205,10 @@ Return ONLY the JSON object, no other text or markdown formatting."""
             }
 
             if analytics.capture:
-                common_kwargs["posthog_distinct_id"] = analytics.distinct_id
-                common_kwargs["posthog_trace_id"] = analytics.trace_id or str(uuid.uuid4())
-                common_kwargs["posthog_properties"] = analytics.properties or {}
-                common_kwargs["posthog_groups"] = analytics.groups or {}
+                common_kwargs["insights_distinct_id"] = analytics.distinct_id
+                common_kwargs["insights_trace_id"] = analytics.trace_id or str(uuid.uuid4())
+                common_kwargs["insights_properties"] = analytics.properties or {}
+                common_kwargs["insights_groups"] = analytics.groups or {}
 
             if tools is not None:
                 common_kwargs["tools"] = tools
@@ -329,10 +329,10 @@ Return ONLY the JSON object, no other text or markdown formatting."""
         """Build Insights analytics kwargs if using instrumented client."""
         if analytics.capture and isinstance(client, Anthropic):
             return {
-                "posthog_distinct_id": analytics.distinct_id,
-                "posthog_trace_id": analytics.trace_id or str(uuid.uuid4()),
-                "posthog_properties": analytics.properties or {},
-                "posthog_groups": analytics.groups or {},
+                "insights_distinct_id": analytics.distinct_id,
+                "insights_trace_id": analytics.trace_id or str(uuid.uuid4()),
+                "insights_properties": analytics.properties or {},
+                "insights_groups": analytics.groups or {},
             }
         return {}
 

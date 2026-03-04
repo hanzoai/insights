@@ -1,5 +1,5 @@
-import { IconWarning } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconWarning } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { checkSelectorFragilityCached } from '~/toolbar/utils/selectorQuality'
 
@@ -33,7 +33,7 @@ export function SelectorQualityWarning({ selector, compact = false }: SelectorQu
                 <code className="text-xs">data-*</code> attribute (e.g. <code className="text-xs">data-analytics</code>)
                 for stable tracking.{' '}
                 <button
-                    onClick={() => window.open('https://posthog.com/docs/toolbar#2-element-filters', '_blank')}
+                    onClick={() => window.open('https://hanzo.ai/docs/toolbar#2-element-filters', '_blank')}
                     className="text-link underline cursor-pointer bg-transparent border-0 p-0"
                 >
                     Learn more

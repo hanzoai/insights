@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useRef } from 'react'
 
-import { IconInfo, IconX } from '@posthog/icons'
+import { IconInfo, IconX } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -15,7 +15,7 @@ import {
     LemonSwitch,
     LemonTag,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CodeSnippet } from 'lib/components/CodeSnippet'
 import { LemonField } from 'lib/lemon-ui/LemonField'

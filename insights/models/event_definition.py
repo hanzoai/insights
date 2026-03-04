@@ -40,7 +40,7 @@ class EventDefinition(UUIDTModel):
     class Meta:
         indexes = [
             # Index on project_id foreign key
-            models.Index(fields=["project"], name="posthog_eve_proj_id_f93fcbb0"),
+            models.Index(fields=["project"], name="insights_eve_proj_id_f93fcbb0"),
             GinIndex(
                 name="index_event_definition_name",
                 fields=["name"],
@@ -48,7 +48,7 @@ class EventDefinition(UUIDTModel):
             ),  # To speed up DB-based fuzzy searching
             models.Index(
                 fields=["team_id"],
-                name="posthog_eventdef_enforce_idx",
+                name="insights_eventdef_enforce_idx",
                 condition=models.Q(enforcement_mode="reject"),
             ),
         ]

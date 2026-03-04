@@ -2,9 +2,9 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, selecto
 import { DeepPartialMap, ValidationErrorType, forms } from 'kea-forms'
 import { lazyLoaders, loaders } from 'kea-loaders'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog } from '@posthog/lemon-ui'
+import { LemonDialog } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { CyclotronJobInputsValidation } from 'lib/components/CyclotronJob/CyclotronJobInputsValidation'
@@ -190,7 +190,7 @@ export const workflowLogic = kea<workflowLogicType>([
                         const result = await api.insightsFlows.createInsightsFlow(updates)
 
                         if (props.templateId) {
-                            posthog.capture('insights_flow_created_from_template', {
+                            insights.capture('insights_flow_created_from_template', {
                                 workflow_id: result.id,
                                 template_id: props.templateId,
                             })

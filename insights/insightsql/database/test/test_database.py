@@ -101,12 +101,12 @@ class TestDatabase(BaseTest, QueryMatchingTest):
                     pretty=False,
                 )
 
-    def test_serialize_database_posthog_table(self):
+    def test_serialize_database_insights_table(self):
         database = Database.create_for(team=self.team)
         serialized_database = database.serialize(InsightsQLContext(team_id=self.team.pk, database=database))
 
-        posthog_table_names = database.get_posthog_table_names()
-        for table_name in posthog_table_names:
+        insights_table_names = database.get_insights_table_names()
+        for table_name in insights_table_names:
             assert serialized_database.get(table_name) is not None
 
     def test_serialize_database_deleted_saved_query(self):
@@ -1110,8 +1110,8 @@ class TestDatabase(BaseTest, QueryMatchingTest):
                 continue
             assert "team_id" in table.fields, f"Table {table_name} must have a team_id column"
 
-    def test_no_new_posthog_tables(self):
-        existing_posthog_table_names = [
+    def test_no_new_insights_tables(self):
+        existing_insights_table_names = [
             "events",
             "groups",
             "persons",
@@ -1160,8 +1160,8 @@ class TestDatabase(BaseTest, QueryMatchingTest):
 
         current_tables = ROOT_TABLES__DO_NOT_ADD_ANY_MORE.keys()
         for table_name in current_tables:
-            assert table_name in existing_posthog_table_names, (
-                f"Table {table_name} should not be added to ROOT_TABLES__DO_NOT_ADD_ANY_MORE. Add the table to the `posthog` TableNode"
+            assert table_name in existing_insights_table_names, (
+                f"Table {table_name} should not be added to ROOT_TABLES__DO_NOT_ADD_ANY_MORE. Add the table to the `insights` TableNode"
             )
 
     def test_database_serialization_handles_invalid_sources_gracefully(self):

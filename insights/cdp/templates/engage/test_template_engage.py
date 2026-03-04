@@ -20,7 +20,7 @@ class TestTemplateEngageso(BaseInsightsFunctionTemplateTest):
         event["event"] = event["name"]
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://api.engage.so/posthog",
+            "https://api.engage.so/insights",
             {
                 "method": "POST",
                 "headers": {

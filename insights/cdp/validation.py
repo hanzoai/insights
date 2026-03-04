@@ -17,7 +17,7 @@ from insights.models.insights_functions.insights_function import TYPES_WITH_JAVA
 logger = logging.getLogger(__name__)
 
 
-CORE_SUPPORTED_FUNCTIONS = {"fetch", "postHogCapture"}
+CORE_SUPPORTED_FUNCTIONS = {"fetch", "insightsCapture"}
 
 PRODUCT_ASYNC_FUNCTIONS: set[str] = set()
 
@@ -26,8 +26,8 @@ def register_supported_function(name: str) -> None:
     PRODUCT_ASYNC_FUNCTIONS.add(name)
 
 
-register_supported_function("postHogGetTicket")
-register_supported_function("postHogUpdateTicket")
+register_supported_function("insightsGetTicket")
+register_supported_function("insightsUpdateTicket")
 
 
 class InputCollector(TraversingVisitor):

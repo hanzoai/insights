@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCode, IconCursorClick, IconDocument, IconTrash } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonDialog, LemonDivider, LemonSelect, LemonTag } from '@posthog/lemon-ui'
+import { IconCode, IconCursorClick, IconDocument, IconTrash } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonDialog, LemonDivider, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
@@ -52,14 +52,14 @@ const ISSUE_CONFIG: Record<
         label: 'Missing target element',
         instruction:
             'Click "Select element in Toolbar" to choose an element on your page, or "Remove element" to position the step as a simple pop-up.',
-        docsLink: 'https://posthog.com/docs/product-tours/element-selection#automatic-element-targeting',
+        docsLink: 'https://hanzo.ai/docs/product-tours/element-selection#automatic-element-targeting',
     },
     missing_selector: {
         icon: <IconCode />,
         label: 'Missing CSS selector',
         instruction:
             'Enter a CSS selector in the step settings, or click "Remove element" to position the step as a simple pop-up.',
-        docsLink: 'https://posthog.com/docs/product-tours/element-selection#manual-element-targeting',
+        docsLink: 'https://hanzo.ai/docs/product-tours/element-selection#manual-element-targeting',
     },
 }
 

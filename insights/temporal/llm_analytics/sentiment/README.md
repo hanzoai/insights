@@ -8,7 +8,7 @@ Classifies user messages from `$ai_generation` events using an ONNX model
 
 1. Frontend calls the sentiment API with one or more trace IDs
 2. Django starts a Temporal workflow (`llma-sentiment-classify`)
-3. The activity fetches `$ai_generation` events via HogQL,
+3. The activity fetches `$ai_generation` events via InsightsQL,
    extracts user messages, and classifies them in a single batch
 4. Results are cached (24h TTL) and returned to the frontend
 
@@ -19,11 +19,11 @@ Classifies user messages from `$ai_generation` events using an ONNX model
 | `schema.py`     | Dataclasses: `ClassifySentimentInput`, `SentimentResult`, `PendingClassification` |
 | `workflow.py`   | Temporal workflow definition                                                      |
 | `activities.py` | Temporal activity (orchestration)                                                 |
-| `data.py`       | HogQL query execution and row grouping                                            |
+| `data.py`       | InsightsQL query execution and row grouping                                            |
 | `model.py`      | ONNX model loading and `classify()`                                               |
 | `extraction.py` | User message extraction from `$ai_input`                                          |
 | `utils.py`      | Shared helpers: result building, date resolution, score averaging                 |
-| `constants.py`  | Config values, caps, and the HogQL query template                                 |
+| `constants.py`  | Config values, caps, and the InsightsQL query template                                 |
 | `metrics.py`    | Prometheus metrics and Temporal interceptor                                       |
 
 ## Local development
@@ -38,16 +38,16 @@ This pulls in `optimum[onnxruntime]` and `torch` (~2GB).
 In production these are pre-installed in `Dockerfile.llm-analytics`.
 
 The ONNX model is downloaded on first use and cached to `ONNX_CACHE_DIR`
-(default `/tmp/posthog-sentiment-onnx-cache`).
+(default `/tmp/insights-sentiment-onnx-cache`).
 In production the model is baked into the Docker image at build time.
 
 ## Running tests
 
 ```bash
-pytest posthog/temporal/llm_analytics/sentiment/ -x -q
+pytest insights/temporal/llm_analytics/sentiment/ -x -q
 ```
 
-Tests mock the model and HogQL layer so the sentiment dependency group
+Tests mock the model and InsightsQL layer so the sentiment dependency group
 is not required to run them.
 
 ## API endpoints

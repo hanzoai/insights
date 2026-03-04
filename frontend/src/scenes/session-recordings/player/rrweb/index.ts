@@ -1,7 +1,7 @@
 import Hls from 'hls.js'
 
-import { ReplayPlugin, playerConfig } from '@posthog/rrweb'
-import { EventType, IncrementalSource, eventWithTime } from '@posthog/rrweb-types'
+import { ReplayPlugin, playerConfig } from '@hanzo/rrweb'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/rrweb-types'
 
 export const PLACEHOLDER_SVG_PATTERN_DATA_URL =
     'url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSJibGFjayIvPgo8cGF0aCBkPSJNOCAwSDE2TDAgMTZWOEw4IDBaIiBmaWxsPSIjMkQyRDJEIi8+CjxwYXRoIGQ9Ik0xNiA4VjE2SDhMMTYgOFoiIGZpbGw9IiMyRDJEMkQiLz4KPC9zdmc+Cg==")'
@@ -192,12 +192,12 @@ export const makeLogger = (onIncrement: (count: number) => void): BuiltLogging =
         warning: 0,
     }
 
-    ;(window as any)[`__posthog_player_logs`] = (window as any)[`__posthog_player_logs`] || []
-    ;(window as any)[`__posthog_player_warnings`] = (window as any)[`__posthog_player_warnings`] || []
+    ;(window as any)[`__insights_player_logs`] = (window as any)[`__insights_player_logs`] || []
+    ;(window as any)[`__insights_player_warnings`] = (window as any)[`__insights_player_warnings`] || []
 
     const logStores: Record<LogType, any[]> = {
-        log: (window as any)[`__posthog_player_logs`],
-        warning: (window as any)[`__posthog_player_warnings`],
+        log: (window as any)[`__insights_player_logs`],
+        warning: (window as any)[`__insights_player_warnings`],
     }
 
     const timers: LoggingTimers = {
@@ -223,7 +223,7 @@ export const makeLogger = (onIncrement: (count: number) => void): BuiltLogging =
                     }
 
                     console.warn(
-                        `[PostScript REPLayer] ${counters[type]} ${type}s (window.__posthog_player_${type}s to safely log them)`
+                        `[PostScript REPLayer] ${counters[type]} ${type}s (window.__insights_player_${type}s to safely log them)`
                     )
                     counters[type] = 0
                 }, 5000)

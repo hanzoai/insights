@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonBanner, LemonDialog } from '@posthog/lemon-ui'
+import { LemonBanner, LemonDialog } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { CodeSnippet } from 'lib/components/CodeSnippet'

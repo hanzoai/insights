@@ -1,5 +1,5 @@
 import { BindLogic, useActions, useValues } from 'kea'
-import { SurveyQuestionType } from 'posthog-js'
+import { SurveyQuestionType } from '@hanzo/insights'
 import { useMemo, useRef } from 'react'
 
 import {
@@ -10,7 +10,7 @@ import {
     LemonModal,
     LemonSwitch,
     LemonTextArea,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonMenuOverlay } from 'lib/lemon-ui/LemonMenu/LemonMenu'
 import { SurveyAppearancePreview } from 'scenes/surveys/SurveyAppearancePreview'

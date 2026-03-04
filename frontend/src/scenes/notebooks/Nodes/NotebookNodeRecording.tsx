@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPerson } from '@posthog/icons'
-import { LemonInput, LemonSwitch } from '@posthog/lemon-ui'
+import { IconPerson } from '@hanzo/icons'
+import { LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

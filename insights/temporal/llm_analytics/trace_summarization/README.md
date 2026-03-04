@@ -168,5 +168,5 @@ Text representations (up to 2 MB) are stored in Redis between the two activities
 ## Testing
 
 ```bash
-pytest posthog/temporal/llm_analytics/trace_summarization/tests/ -v
+pytest insights/temporal/llm_analytics/trace_summarization/tests/ -v
 ```

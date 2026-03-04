@@ -284,11 +284,11 @@ mod tests {
         assert!(config.is_persons_db_routing_enabled());
         assert_eq!(
             config.get_persons_read_database_url(),
-            "postgres://posthog:posthog@localhost:5432/posthog_persons"
+            "postgres://insights:insights@localhost:5432/insights_persons"
         );
         assert_eq!(
             config.get_persons_write_database_url(),
-            "postgres://posthog:posthog@localhost:5432/posthog_persons"
+            "postgres://insights:insights@localhost:5432/insights_persons"
         );
     }
 }

@@ -39,7 +39,7 @@ class SignalReportAdmin(admin.ModelAdmin):
     def team_link(self, report: SignalReport):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[report.team.pk]),
+            reverse("admin:insights_team_change", args=[report.team.pk]),
             report.team.name,
         )
 

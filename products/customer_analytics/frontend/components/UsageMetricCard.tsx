@@ -1,5 +1,5 @@
-import { IconTrending } from '@posthog/icons'
-import { LemonCard, LemonSkeleton, Tooltip } from '@posthog/lemon-ui'
+import { IconTrending } from '@hanzo/icons'
+import { LemonCard, LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
 
 import { getColorVar } from 'lib/colors'
 import { IconTrendingDown, IconTrendingFlat } from 'lib/lemon-ui/icons'

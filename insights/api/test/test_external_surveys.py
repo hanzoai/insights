@@ -172,7 +172,7 @@ class TestExternalSurveys(APIBaseTest):
         content = response.content.decode()
         assert survey.name in content
         assert str(survey.id) in content
-        assert "posthog-survey-container" in content
+        assert "insights-survey-container" in content
 
         # Check Insights configuration is injected
         assert "projectConfig" in content

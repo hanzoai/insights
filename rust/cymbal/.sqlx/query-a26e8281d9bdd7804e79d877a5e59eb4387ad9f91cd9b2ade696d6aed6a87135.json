@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE posthog_errortrackingsymbolset SET last_used = $2 WHERE id = $1",
+  "query": "UPDATE insights_errortrackingsymbolset SET last_used = $2 WHERE id = $1",
   "describe": {
     "columns": [],
     "parameters": {

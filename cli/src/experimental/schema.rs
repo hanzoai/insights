@@ -39,10 +39,10 @@ impl Language {
     /// Get the default output filename for this language
     fn default_output_path(&self) -> &'static str {
         match self {
-            Language::TypeScript => "posthog-typed.ts",
-            Language::Golang => "posthog-typed.go",
+            Language::TypeScript => "insights-typed.ts",
+            Language::Golang => "insights-typed.go",
             // Python uses underscore because hyphens aren't valid in Python module names
-            Language::Python => "posthog_typed.py",
+            Language::Python => "insights_typed.py",
         }
     }
 
@@ -51,18 +51,18 @@ impl Language {
         match self {
             Language::TypeScript => format!(
                 r#"
-1. Import PostHog from your generated module:
-   import posthog from './{output_path}'
+1. Import Insights from your generated module:
+   import insights from './{output_path}'
 2. Use typed events with autocomplete and type safety on known events:
-   posthog.capture('event_name', {{ property: 'value' }})
+   insights.capture('event_name', {{ property: 'value' }})
 3. Use captureRaw() when you need to bypass type checking:
-   posthog.captureRaw('dynamic_event_name', {{ whatever: 'data' }})
+   insights.captureRaw('dynamic_event_name', {{ whatever: 'data' }})
 "#
             ),
             Language::Golang => format!(
                 r#"
-1. Install the PostHog Go SDK if you haven't already:
-   go get github.com/posthog/posthog-go
+1. Install the Insights Go SDK if you haven't already:
+   go get github.com/hanzoai/insights-go
 2. Store the generated Go code in a folder named `typed` (e.g. `/src/lib/typed`):
    mkdir -p <your-directory>/src/lib/typed
    mv {output_path} <your-directory>/src/lib/typed
@@ -80,12 +80,12 @@ You can add optional properties through the option functions:
             Language::Python => format!(
                 r#"
 1. Save the generated file in your project (if not generated there already):
-   mv {output_path} <your-project>/posthog_typed.py
+   mv {output_path} <your-project>/insights_typed.py
 
-2. Import and use the typed PostHog client:
-   from posthog_typed import PosthogTyped
+2. Import and use the typed Insights client:
+   from insights_typed import InsightsTyped
 
-   client = PosthogTyped("<ph_project_api_key>", host="<ph_client_api_host>")
+   client = InsightsTyped("<ph_project_api_key>", host="<ph_client_api_host>")
 
    # Use typed capture methods with full IDE autocomplete:
    client.capture_event_name(
@@ -93,7 +93,7 @@ You can add optional properties through the option functions:
        distinct_id="user_123",
    )
 
-3. All standard Posthog methods are available:
+3. All standard Insights methods are available:
    client.identify(...)
    client.capture(...)  # For untyped/dynamic events
    client.flush()
@@ -133,19 +133,19 @@ struct LanguageConfig {
 }
 
 impl SchemaConfig {
-    /// Load config from posthog.json, returns empty config if file doesn't exist or is invalid
+    /// Load config from insights.json, returns empty config if file doesn't exist or is invalid
     fn load() -> Self {
-        let content = fs::read_to_string("posthog.json").ok();
+        let content = fs::read_to_string("insights.json").ok();
         content
             .and_then(|c| serde_json::from_str(&c).ok())
             .unwrap_or_default()
     }
 
-    /// Save config to posthog.json
+    /// Save config to insights.json
     fn save(&self) -> Result<()> {
         let json =
             serde_json::to_string_pretty(self).context("Failed to serialize schema config")?;
-        fs::write("posthog.json", json).context("Failed to write posthog.json")?;
+        fs::write("insights.json", json).context("Failed to write insights.json")?;
         Ok(())
     }
 
@@ -195,7 +195,7 @@ pub fn pull(_host: Option<String>, output_override: Option<String>) -> Result<()
     let language = select_language()?;
 
     info!(
-        "Fetching {} definitions from PostHog...",
+        "Fetching {} definitions from Insights...",
         language.display_name()
     );
 
@@ -247,7 +247,7 @@ pub fn pull(_host: Option<String>, output_override: Option<String>) -> Result<()
     info!("✓ Generated {}", output_path);
 
     // Update schema configuration for this language
-    info!("Updating posthog.json...");
+    info!("Updating insights.json...");
     let mut config = SchemaConfig::load();
     config.update_language(
         language,
@@ -256,7 +256,7 @@ pub fn pull(_host: Option<String>, output_override: Option<String>) -> Result<()
         response.event_count,
     );
     config.save()?;
-    info!("✓ Updated posthog.json");
+    info!("✓ Updated insights.json");
 
     println!("✓ Schema sync complete!");
     println!("\nNext steps:");
@@ -271,7 +271,7 @@ fn determine_output_path(language: Language, output_override: Option<String>) ->
         return Ok(normalize_output_path(&path, language));
     }
 
-    // Check if posthog.json exists and has an output_path for this language
+    // Check if insights.json exists and has an output_path for this language
     let config = SchemaConfig::load();
     if let Some(path) = config.get_output_path(language) {
         return Ok(path);
@@ -285,14 +285,14 @@ fn determine_output_path(language: Language, output_override: Option<String>) ->
         .unwrap_or_else(|| ".".to_string());
 
     let help_message = format!(
-        "Your app will import PostHog from this file, so it should be accessible \
+        "Your app will import Insights from this file, so it should be accessible \
          throughout your codebase (e.g., src/lib/, app/lib/, or your project root). \
-         This path will be saved in posthog.json and can be changed later. \
+         This path will be saved in insights.json and can be changed later. \
          Current directory: {current_dir}"
     );
 
     let path = Text::new(&format!(
-        "Where should we save the {} typed PostHog module?",
+        "Where should we save the {} typed Insights module?",
         language.display_name()
     ))
     .with_default(default_filename)
@@ -322,7 +322,7 @@ fn normalize_output_path(path: &str, language: Language) -> String {
 
 pub fn status() -> Result<()> {
     // Check authentication
-    println!("\nPostHog Schema Sync Status\n");
+    println!("\nInsights Schema Sync Status\n");
 
     println!("Authentication:");
     let config = context().config.clone();
@@ -344,7 +344,7 @@ pub fn status() -> Result<()> {
 
     if config.languages.is_empty() {
         println!("  ✗ No schemas synced");
-        println!("  Run: posthog-cli exp schema pull");
+        println!("  Run: insights-cli exp schema pull");
     } else {
         println!("  ✓ Schemas synced\n");
 

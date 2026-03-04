@@ -1,8 +1,8 @@
 import { BubbleMenu } from '@tiptap/react/menus'
 import { useValues } from 'kea'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { richContentEditorLogic } from 'lib/components/RichContentEditor/richContentEditorLogic'
 

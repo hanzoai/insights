@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { LemonButton, LemonModal, LemonSelect, LemonSelectOptions, LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonButton, LemonModal, LemonSelect, LemonSelectOptions, LemonSkeleton } from '@hanzo/lemon-ui'
 import {
     APIInstallation,
     AndroidInstallation,
@@ -36,8 +36,8 @@ import {
     TanStackInstallation,
     VueInstallation,
     WebflowInstallation,
-} from '@posthog/shared-onboarding/product-analytics'
-import type { StepDefinition } from '@posthog/shared-onboarding/steps'
+} from '@hanzo/shared-onboarding/product-analytics'
+import type { StepDefinition } from '@hanzo/shared-onboarding/steps'
 
 import { JSSnippet } from 'lib/components/JSSnippet'
 import { Link } from 'lib/lemon-ui/Link'
@@ -72,45 +72,45 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         Installation: HTMLSnippetInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'HTML snippet',
-        docsLink: 'https://posthog.com/docs/libraries/js',
+        docsLink: 'https://hanzo.ai/docs/libraries/js',
     },
     [SDKKey.JS_WEB]: {
         Installation: JSWebInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'JavaScript web',
-        docsLink: 'https://posthog.com/docs/libraries/js',
+        docsLink: 'https://hanzo.ai/docs/libraries/js',
     },
     [SDKKey.REACT]: {
         Installation: ReactInstallation,
         snippets: JS_WEB_SNIPPETS,
         wizardIntegrationName: 'React',
         name: 'React',
-        docsLink: 'https://posthog.com/docs/libraries/react',
+        docsLink: 'https://hanzo.ai/docs/libraries/react',
     },
     [SDKKey.NEXT_JS]: {
         Installation: NextJSInstallation,
         snippets: JS_WEB_SNIPPETS,
         wizardIntegrationName: 'Next.js',
         name: 'Next.js',
-        docsLink: 'https://posthog.com/docs/libraries/next-js',
+        docsLink: 'https://hanzo.ai/docs/libraries/next-js',
     },
     [SDKKey.NODE_JS]: {
         Installation: NodeJSInstallation,
         snippets: NODE_SNIPPETS,
         name: 'Node.js',
-        docsLink: 'https://posthog.com/docs/libraries/node',
+        docsLink: 'https://hanzo.ai/docs/libraries/node',
     },
     [SDKKey.PYTHON]: {
         Installation: PythonInstallation,
         snippets: PYTHON_SNIPPETS,
         name: 'Python',
-        docsLink: 'https://posthog.com/docs/libraries/python',
+        docsLink: 'https://hanzo.ai/docs/libraries/python',
     },
     [SDKKey.REACT_NATIVE]: {
         Installation: ReactNativeInstallation,
         wizardIntegrationName: 'React Native',
         name: 'React Native',
-        docsLink: 'https://posthog.com/docs/libraries/react-native',
+        docsLink: 'https://hanzo.ai/docs/libraries/react-native',
     },
 
     // Web
@@ -118,80 +118,80 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         Installation: AngularInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Angular',
-        docsLink: 'https://posthog.com/docs/libraries/angular',
+        docsLink: 'https://hanzo.ai/docs/libraries/angular',
     },
     [SDKKey.ASTRO]: {
         Installation: AstroInstallation,
         snippets: JS_WEB_SNIPPETS,
         wizardIntegrationName: 'Astro',
         name: 'Astro',
-        docsLink: 'https://posthog.com/docs/libraries/astro',
+        docsLink: 'https://hanzo.ai/docs/libraries/astro',
     },
     [SDKKey.BUBBLE]: {
         Installation: BubbleInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Bubble',
-        docsLink: 'https://posthog.com/docs/libraries/bubble',
+        docsLink: 'https://hanzo.ai/docs/libraries/bubble',
     },
     [SDKKey.FRAMER]: {
         Installation: FramerInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Framer',
-        docsLink: 'https://posthog.com/docs/libraries/framer',
+        docsLink: 'https://hanzo.ai/docs/libraries/framer',
     },
     [SDKKey.NUXT_JS]: {
         Installation: NuxtInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Nuxt.js',
-        docsLink: 'https://posthog.com/docs/libraries/nuxt-js',
+        docsLink: 'https://hanzo.ai/docs/libraries/nuxt-js',
     },
     [SDKKey.REMIX]: {
         Installation: RemixInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Remix',
-        docsLink: 'https://posthog.com/docs/libraries/remix',
+        docsLink: 'https://hanzo.ai/docs/libraries/remix',
     },
     [SDKKey.SVELTE]: {
         Installation: SvelteInstallation,
         snippets: JS_WEB_SNIPPETS,
         wizardIntegrationName: 'Svelte',
         name: 'Svelte',
-        docsLink: 'https://posthog.com/docs/libraries/svelte',
+        docsLink: 'https://hanzo.ai/docs/libraries/svelte',
     },
     [SDKKey.TANSTACK_START]: {
         Installation: TanStackInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'TanStack Start',
-        docsLink: 'https://posthog.com/docs/libraries/react',
+        docsLink: 'https://hanzo.ai/docs/libraries/react',
     },
     [SDKKey.VUE_JS]: {
         Installation: VueInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Vue.js',
-        docsLink: 'https://posthog.com/docs/libraries/vue-js',
+        docsLink: 'https://hanzo.ai/docs/libraries/vue-js',
     },
     [SDKKey.WEBFLOW]: {
         Installation: WebflowInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Webflow',
-        docsLink: 'https://posthog.com/docs/libraries/webflow',
+        docsLink: 'https://hanzo.ai/docs/libraries/webflow',
     },
 
     // Mobile
     [SDKKey.ANDROID]: {
         Installation: AndroidInstallation,
         name: 'Android',
-        docsLink: 'https://posthog.com/docs/libraries/android',
+        docsLink: 'https://hanzo.ai/docs/libraries/android',
     },
     [SDKKey.FLUTTER]: {
         Installation: FlutterInstallation,
         name: 'Flutter',
-        docsLink: 'https://posthog.com/docs/libraries/flutter',
+        docsLink: 'https://hanzo.ai/docs/libraries/flutter',
     },
     [SDKKey.IOS]: {
         Installation: IOSInstallation,
         name: 'iOS',
-        docsLink: 'https://posthog.com/docs/libraries/ios',
+        docsLink: 'https://hanzo.ai/docs/libraries/ios',
     },
 
     // Server
@@ -200,55 +200,55 @@ const SDK_CONFIGS: Record<string, SDKConfig> = {
         snippets: PYTHON_SNIPPETS,
         wizardIntegrationName: 'Django',
         name: 'Django',
-        docsLink: 'https://posthog.com/docs/libraries/django',
+        docsLink: 'https://hanzo.ai/docs/libraries/django',
     },
     [SDKKey.ELIXIR]: {
         Installation: ElixirInstallation,
         name: 'Elixir',
-        docsLink: 'https://posthog.com/docs/libraries/elixir',
+        docsLink: 'https://hanzo.ai/docs/libraries/elixir',
     },
     [SDKKey.GO]: {
         Installation: GoInstallation,
         name: 'Go',
-        docsLink: 'https://posthog.com/docs/libraries/go',
+        docsLink: 'https://hanzo.ai/docs/libraries/go',
     },
     [SDKKey.LARAVEL]: {
         Installation: LaravelInstallation,
         name: 'Laravel',
-        docsLink: 'https://posthog.com/docs/libraries/laravel',
+        docsLink: 'https://hanzo.ai/docs/libraries/laravel',
     },
     [SDKKey.PHP]: {
         Installation: PHPInstallation,
         name: 'PHP',
-        docsLink: 'https://posthog.com/docs/libraries/php',
+        docsLink: 'https://hanzo.ai/docs/libraries/php',
     },
     [SDKKey.RUBY]: {
         Installation: RubyInstallation,
         name: 'Ruby',
-        docsLink: 'https://posthog.com/docs/libraries/ruby',
+        docsLink: 'https://hanzo.ai/docs/libraries/ruby',
     },
     [SDKKey.RUBY_ON_RAILS]: {
         Installation: RubyOnRailsInstallation,
         name: 'Ruby on Rails',
-        docsLink: 'https://posthog.com/docs/libraries/rails',
+        docsLink: 'https://hanzo.ai/docs/libraries/rails',
     },
 
     // Integrations
     [SDKKey.API]: {
         Installation: APIInstallation,
         name: 'API',
-        docsLink: 'https://posthog.com/docs/api',
+        docsLink: 'https://hanzo.ai/docs/api',
     },
     [SDKKey.DOCUSAURUS]: {
         Installation: DocusaurusInstallation,
         name: 'Docusaurus',
-        docsLink: 'https://posthog.com/docs/libraries/docusaurus',
+        docsLink: 'https://hanzo.ai/docs/libraries/docusaurus',
     },
     [SDKKey.GOOGLE_TAG_MANAGER]: {
         Installation: GoogleTagManagerInstallation,
         snippets: JS_WEB_SNIPPETS,
         name: 'Google Tag Manager',
-        docsLink: 'https://posthog.com/docs/libraries/google-tag-manager',
+        docsLink: 'https://hanzo.ai/docs/libraries/google-tag-manager',
     },
 }
 

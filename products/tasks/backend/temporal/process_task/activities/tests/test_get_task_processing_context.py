@@ -40,7 +40,7 @@ class TestGetTaskProcessingContextActivity:
         assert result.run_id == str(task_run.id)
         assert result.team_id == test_task.team_id
         assert result.github_integration_id == test_task.github_integration_id
-        assert result.repository == "posthog/posthog-js"
+        assert result.repository == "hanzoai/insights-js"
         assert result.create_pr is True
 
     @pytest.mark.django_db
@@ -63,7 +63,7 @@ class TestGetTaskProcessingContextActivity:
     def test_get_task_processing_context_with_different_repository(
         self, activity_environment, team, user, github_integration
     ):
-        task = self._create_task_with_repo(team, user, github_integration, "posthog/posthog-js")
+        task = self._create_task_with_repo(team, user, github_integration, "hanzoai/insights-js")
         task_run = task.create_run()
 
         try:
@@ -74,7 +74,7 @@ class TestGetTaskProcessingContextActivity:
             assert result.run_id == str(task_run.id)
             assert result.team_id == task.team_id
             assert result.github_integration_id == github_integration.id
-            assert result.repository == "posthog/posthog-js"
+            assert result.repository == "hanzoai/insights-js"
         finally:
             self._cleanup_task(task)
 

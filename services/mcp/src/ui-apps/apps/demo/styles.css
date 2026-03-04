@@ -84,7 +84,7 @@
 .demo-log-type {
     margin-right: 0.5rem;
     font-weight: 600;
-    color: var(--posthog-chart-5);
+    color: var(--insights-chart-5);
 }
 
 .demo-log-data {

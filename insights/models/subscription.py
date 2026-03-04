@@ -11,7 +11,7 @@ from django.utils import timezone
 from dateutil.rrule import DAILY, FR, MO, MONTHLY, SA, SU, TH, TU, WE, WEEKLY, YEARLY, rrule
 
 from insights.exceptions_capture import capture_exception
-from insights.jwt import PosthogJwtAudience, decode_jwt, encode_jwt
+from insights.jwt import InsightsJwtAudience, decode_jwt, encode_jwt
 from insights.utils import absolute_uri
 
 UNSUBSCRIBE_TOKEN_EXP_DAYS = 30
@@ -213,12 +213,12 @@ def get_unsubscribe_token(subscription: Subscription, email: str) -> str:
     return encode_jwt(
         {"id": subscription.id, "email": email},
         expiry_delta=timedelta(days=UNSUBSCRIBE_TOKEN_EXP_DAYS),
-        audience=PosthogJwtAudience.UNSUBSCRIBE,
+        audience=InsightsJwtAudience.UNSUBSCRIBE,
     )
 
 
 def unsubscribe_using_token(token: str) -> Subscription:
-    info = decode_jwt(token, audience=PosthogJwtAudience.UNSUBSCRIBE)
+    info = decode_jwt(token, audience=InsightsJwtAudience.UNSUBSCRIBE)
     subscription = Subscription.objects.get(pk=info["id"])
 
     emails = subscription.target_value.split(",")

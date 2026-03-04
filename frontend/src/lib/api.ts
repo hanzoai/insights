@@ -1,6 +1,6 @@
 import { EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source'
 import { encodeParams } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { ActivityLogProps } from 'lib/components/ActivityLog/ActivityLog'
 import { ActivityLogItem } from 'lib/components/ActivityLog/humanizeActivity'
@@ -344,7 +344,7 @@ export class RecordingDeletedError extends Error {
     }
 }
 
-const CSRF_COOKIE_NAME = 'posthog_csrftoken'
+const CSRF_COOKIE_NAME = 'insights_csrftoken'
 
 export function getCookie(name: string): string | null {
     let cookieValue: string | null = null
@@ -1927,17 +1927,17 @@ function getSessionId(): string | undefined {
     // get_session_id is not always present e.g. in the toolbar
     // but our typing in the SDK doesn't make this clear
     // TODO when the SDK makes this safe this check can be simplified
-    if (typeof posthog?.get_session_id !== 'function') {
+    if (typeof insights?.get_session_id !== 'function') {
         return undefined
     }
-    return posthog.get_session_id()
+    return insights.get_session_id()
 }
 
 function getDistinctId(): string | undefined {
-    if (typeof posthog?.get_distinct_id !== 'function') {
+    if (typeof insights?.get_distinct_id !== 'function') {
         return undefined
     }
-    return posthog.get_distinct_id()
+    return insights.get_distinct_id()
 }
 
 const api = {
@@ -5549,8 +5549,8 @@ const api = {
                 signal: options?.signal,
                 headers: {
                     ...objectClean(options?.headers ?? {}),
-                    ...(getSessionId() ? { 'X-POSTHOG-SESSION-ID': getSessionId() } : {}),
-                    ...(getDistinctId() ? { 'X-POSTHOG-DISTINCT-ID': getDistinctId() } : {}),
+                    ...(getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
+                    ...(getDistinctId() ? { 'X-INSIGHTS-DISTINCT-ID': getDistinctId() } : {}),
                     ...authHeaders,
                 },
             })
@@ -5574,7 +5574,7 @@ const api = {
                     ...objectClean(options?.headers ?? {}),
                     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
                     'X-CSRFToken': getCookie(CSRF_COOKIE_NAME) || '',
-                    ...(getSessionId() ? { 'X-POSTHOG-SESSION-ID': getSessionId() } : {}),
+                    ...(getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
                 },
                 body: isFormData ? data : JSON.stringify(data),
                 signal: options?.signal,
@@ -5609,7 +5609,7 @@ const api = {
                     ...objectClean(options?.headers ?? {}),
                     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
                     'X-CSRFToken': getCookie(CSRF_COOKIE_NAME) || '',
-                    ...(getSessionId() ? { 'X-POSTHOG-SESSION-ID': getSessionId() } : {}),
+                    ...(getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
                 },
                 body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
                 signal: options?.signal,
@@ -5626,7 +5626,7 @@ const api = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': getCookie(CSRF_COOKIE_NAME) || '',
-                    ...(getSessionId() ? { 'X-POSTHOG-SESSION-ID': getSessionId() } : {}),
+                    ...(getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
                 },
             })
         )
@@ -5670,8 +5670,8 @@ const api = {
             method,
             headers: {
                 ...(method === 'POST' ? { 'Content-Type': 'application/json' } : {}),
-                'X-CSRFToken': getCookie('posthog_csrftoken') || '',
-                ...(getSessionId() ? { 'X-POSTHOG-SESSION-ID': getSessionId() } : {}),
+                'X-CSRFToken': getCookie('insights_csrftoken') || '',
+                ...(getSessionId() ? { 'X-INSIGHTS-SESSION-ID': getSessionId() } : {}),
                 ...objectClean(headers ?? {}),
             },
             body: data !== undefined ? JSON.stringify(data) : undefined,
@@ -5843,10 +5843,10 @@ async function handleFetch(url: string, method: string, fetcher: () => Promise<R
     if (!response.ok) {
         const duration = new Date().getTime() - startTime
         const pathname = new URL(url, location.origin).pathname
-        // when used inside the posthog toolbar, `posthog.capture` isn't loaded
+        // when used inside the insights toolbar, `insights.capture` isn't loaded
         // check if the function is available before calling it.
-        if (posthog.capture) {
-            posthog.capture('client_request_failure', { pathname, method, duration, status: response.status })
+        if (insights.capture) {
+            insights.capture('client_request_failure', { pathname, method, duration, status: response.status })
         }
 
         const data = await getJSONOrNull(response)

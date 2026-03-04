@@ -40,7 +40,7 @@ export function BillingAlertsV2({ className }: { className?: string }): JSX.Elem
         ? billingAlert.action
         : billingAlert.contactSupport
           ? {
-                to: 'mailto:sales@posthog.com',
+                to: 'mailto:sales@hanzo.ai',
                 children: billingAlert.buttonCTA || 'Contact support',
                 onClick: () => reportBillingAlertActionClicked(billingAlert),
             }

@@ -12,11 +12,11 @@ BigQuery batch exports can be tested against a real BigQuery instance, but doing
 To enable testing for BigQuery batch exports, we require:
 
 1. A BigQuery project and dataset
-2. A BigQuery ServiceAccount with access to said project and dataset. See the [BigQuery batch export documentation](https://posthog.com/docs/cdp/batch-exports/bigquery#setting-up-bigquery-access) on detailed steps to setup a ServiceAccount.
+2. A BigQuery ServiceAccount with access to said project and dataset. See the [BigQuery batch export documentation](https://hanzo.ai/docs/cdp/batch-exports/bigquery#setting-up-bigquery-access) on detailed steps to setup a ServiceAccount.
 
 Then, a [key](https://cloud.google.com/iam/docs/keys-create-delete#creating) can be created for the BigQuery ServiceAccount and saved to a local file. For Insights employees, this file should already be available under the Insights password manager.
 
-Tests for BigQuery batch exports can be then run from the root of the `posthog` repo:
+Tests for BigQuery batch exports can be then run from the root of the `insights` repo:
 
 ```bash
 DEBUG=1 GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/project-credentials.json pytest products/batch_exports/backend/tests/temporal/destinations/test_bigquery_batch_export_workflow.py
@@ -38,7 +38,7 @@ To enable testing for Redshift batch exports, we require:
 3. User credentials (user requires `CREATEDB` permissions for testing but **not** superuser access).
 4. (Optional: For 'COPY' tests): An S3 bucket and credentials to access it.
 
-For Insights employees, check the password manager as a set of development credentials should already be available. You will also need to use the `dev` exit node in Tailscale and be added to the `group:engineering` group in the tailnet policy. With these credentials, and Tailscale setup, we can run the tests from the root of the `posthog` repo with:
+For Insights employees, check the password manager as a set of development credentials should already be available. You will also need to use the `dev` exit node in Tailscale and be added to the `group:engineering` group in the tailnet policy. With these credentials, and Tailscale setup, we can run the tests from the root of the `insights` repo with:
 
 ```bash
 DEBUG=1 REDSHIFT_HOST=workgroup.111222333.region.redshift-serverless.amazonaws.com REDSHIFT_USER=test_user REDSHIFT_PASSWORD=test_password pytest products/batch_exports/backend/tests/temporal/destinations/redshift
@@ -70,7 +70,7 @@ Additional setup is required to run the tests against an S3 bucket:
 > [!NOTE]
 > For Insights employees, your password manager contains a set of credentials for S3 batch exports development testing. You may populate your development environment with these credentials and use the provided test bucket and KMS key.
 
-With these setup steps done, we can run the S3-specific tests from the root of the `posthog` repo with:
+With these setup steps done, we can run the S3-specific tests from the root of the `insights` repo with:
 
 ```bash
 DEBUG=1 S3_TEST_KMS_KEY_ID='1111111-2222-3333-4444-55555555555' S3_TEST_BUCKET='your-test-bucket' AWS_ACCESS_KEY_ID="AAAA" AWS_SECRET_ACCESS_KEY="BBBB" pytest products/batch_exports/backend/tests/temporal/destinations/s3/test_workflow_with_s3_bucket.py
@@ -91,7 +91,7 @@ Additional setup is required to run the tests against a GCS bucket:
 > [!NOTE]
 > For Insights employees, your password manager contains a set of credentials for GCS batch exports development testing. You may populate your development environment with these credentials and use the provided test bucket.
 
-With these setup steps done, we can run the GCS-specific tests from the root of the `posthog` repo with:
+With these setup steps done, we can run the GCS-specific tests from the root of the `insights` repo with:
 
 ```bash
 DEBUG=1 GCS_TEST_BUCKET='your-test-bucket' AWS_ACCESS_KEY_ID="AAAA" AWS_SECRET_ACCESS_KEY="BBBB" pytest products/batch_exports/backend/tests/temporal/destinations/s3/test_workflow_with_gcs_bucket.py
@@ -118,7 +118,7 @@ We currently support 2 types of authentication for Snowflake batch exports:
 
 ### Password authentication
 
-For password authentication, you can run the tests from the root of the `posthog` repo with:
+For password authentication, you can run the tests from the root of the `insights` repo with:
 
 ```bash
 DEBUG=1 SNOWFLAKE_WAREHOUSE='your-warehouse' SNOWFLAKE_USERNAME='your-username' SNOWFLAKE_PASSWORD='your-password' SNOWFLAKE_ACCOUNT='your-account' SNOWFLAKE_ROLE='your-role' pytest products/batch_exports/backend/tests/temporal/destinations/test_snowflake_batch_export_workflow.py
@@ -130,7 +130,7 @@ Replace the `SNOWFLAKE_*` environment variables with the values obtained from th
 
 For key pair authentication, you will first need to generate a key pair. You can find instructions on how to do this in the [Snowflake documentation](https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-authentication)
 
-Once you have generated the key pair, you can run the tests from the root of the `posthog` repo with:
+Once you have generated the key pair, you can run the tests from the root of the `insights` repo with:
 
 ```bash
 DEBUG=1 SNOWFLAKE_WAREHOUSE='your-warehouse' SNOWFLAKE_USERNAME='your-username' SNOWFLAKE_PRIVATE_KEY='your-private-key' SNOWFLAKE_PRIVATE_KEY_PASSPHRASE='your-passphrase' SNOWFLAKE_ACCOUNT='your-account' SNOWFLAKE_ROLE='your-role' pytest products/batch_exports/backend/tests/temporal/destinations/test_snowflake_batch_export_workflow.py
@@ -152,7 +152,7 @@ The Azurite emulator provides Azure Storage API compatibility locally. To run th
    docker compose -f docker-compose.dev.yml --profile batch-exports up -d
    ```
 
-2. Run the tests from the root of the `posthog` repo:
+2. Run the tests from the root of the `insights` repo:
 
    ```bash
    DEBUG=1 pytest products/batch_exports/backend/tests/temporal/destinations/azure_blob/ -v
@@ -169,7 +169,7 @@ To run tests against a real Azure Storage account (for E2E validation):
 > [!NOTE]
 > For Insights employees, check the password manager for Azure Storage development credentials.
 
-With these setup steps done, we can run the Azure-specific tests from the root of the `posthog` repo with:
+With these setup steps done, we can run the Azure-specific tests from the root of the `insights` repo with:
 
 ```bash
 DEBUG=1 AZURE_STORAGE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=<ACCOUNT_NAME>;AccountKey=<ACCOUNT_KEY>;EndpointSuffix=core.windows.net' \

@@ -18,9 +18,9 @@ impl Organization {
             Self,
             "SELECT
                 o.id, o.is_ai_data_processing_approved
-            FROM posthog_organization o
-                JOIN posthog_team ON o.id = posthog_team.organization_id
-            WHERE posthog_team.id = $1",
+            FROM insights_organization o
+                JOIN insights_team ON o.id = insights_team.organization_id
+            WHERE insights_team.id = $1",
             team_id
         )
         .fetch_optional(e)

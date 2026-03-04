@@ -48,7 +48,7 @@ def test_create_batch_export_with_interval_schedule(client: HttpClient, temporal
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "use_virtual_style_addressing": True,
@@ -65,7 +65,7 @@ def test_create_batch_export_with_interval_schedule(client: HttpClient, temporal
     client.force_login(user)
 
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=True,
     ) as feature_enabled:
         response = create_batch_export(
@@ -126,7 +126,7 @@ def test_create_batch_export_with_interval_schedule(client: HttpClient, temporal
     # S3 specific inputs
     assert args["bucket_name"] == "my-production-s3-bucket"
     assert args["region"] == "us-east-1"
-    assert args["prefix"] == "posthog-events/"
+    assert args["prefix"] == "insights-events/"
     assert args["aws_access_key_id"] == "abc123"
     assert args["aws_secret_access_key"] == "secret"
     assert args["use_virtual_style_addressing"]
@@ -198,7 +198,7 @@ def test_create_batch_export_with_different_intervals_timezones_and_interval_off
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -223,7 +223,7 @@ def test_create_batch_export_with_different_intervals_timezones_and_interval_off
 
     # ensure high-frequency-batch-exports feature flag is enabled
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=True,
     ):
         response = create_batch_export(
@@ -344,7 +344,7 @@ def test_cannot_create_a_batch_export_for_another_organization(client: HttpClien
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -379,7 +379,7 @@ def test_cannot_create_a_batch_export_with_higher_frequencies_if_not_enabled(
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -393,7 +393,7 @@ def test_cannot_create_a_batch_export_with_higher_frequencies_if_not_enabled(
 
     client.force_login(user)
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=False,
     ) as feature_enabled:
         response = create_batch_export(
@@ -442,7 +442,7 @@ def test_create_batch_export_with_custom_schema(client: HttpClient, temporal, or
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -541,7 +541,7 @@ def test_create_batch_export_fails_with_invalid_query(
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -653,7 +653,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": "default",
             },
@@ -664,7 +664,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
             },
@@ -675,7 +675,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             "COPY",
             {
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": "default",
             },
@@ -686,7 +686,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             "COPY",
             {
                 "s3_bucket": "my-production-s3-bucket",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": "default",
             },
@@ -698,7 +698,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123"},
                 "authorization": "default",
             },
@@ -710,7 +710,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {},
                 "authorization": "default",
             },
@@ -722,7 +722,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": {},
             },
@@ -734,7 +734,7 @@ def test_create_snowflake_batch_export_validates_credentials(
             {
                 "s3_bucket": "my-production-s3-bucket",
                 "region_name": "us-east-1",
-                "s3_key_prefix": "posthog-events/",
+                "s3_key_prefix": "insights-events/",
                 "bucket_credentials": {"aws_access_key_id": "abc123", "aws_secret_access_key": "secret"},
                 "authorization": "",
             },
@@ -841,7 +841,7 @@ def test_create_s3_batch_export_validates_file_format_and_compression(
         "config": {
             "bucket_name": "my-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
             "file_format": file_format,
@@ -926,7 +926,7 @@ def test_create_s3_batch_export_validates_missing_inputs(client: HttpClient, tem
             {
                 "bucket_name": "my-s3-bucket",
                 "region": "us-east-1",
-                "prefix": "posthog-events/",
+                "prefix": "insights-events/",
                 "aws_access_key_id": "abc123",
                 "aws_secret_access_key": "secret",
                 "hello": 123,  # Unknown field
@@ -1004,7 +1004,7 @@ def databricks_integration(team, user):
 @pytest.fixture
 def enable_databricks(team):
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled", return_value=True
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True
     ) as feature_enabled:
         yield
         feature_enabled.assert_any_call(
@@ -1301,7 +1301,7 @@ def test_creating_azure_blob_batch_export_fails_if_feature_flag_is_not_enabled(
     client.force_login(user)
 
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=False,
     ):
         response = create_batch_export(
@@ -1351,7 +1351,7 @@ def test_creating_azure_blob_batch_export_using_integration(
     client.force_login(user)
 
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=True,
     ):
         response = create_batch_export(
@@ -1391,7 +1391,7 @@ def test_creating_http_batch_export_only_allows_events_model(
     destination_data = {
         "type": "HTTP",
         "config": {
-            "url": "https://us.i.posthog.com/batch/",
+            "url": "https://us.i.hanzo.ai/batch/",
             "token": "secret-token",
         },
     }
@@ -1469,7 +1469,7 @@ def test_creating_http_batch_export_only_allows_events_model(
             {
                 "bucket_name": "my-s3-bucket",
                 "region": "us-east-1",
-                "prefix": "posthog-events/",
+                "prefix": "insights-events/",
                 "aws_access_key_id": "abc123",
                 "aws_secret_access_key": "secret",
             },
@@ -1521,7 +1521,7 @@ def test_creating_batch_export_with_filters(
 @pytest.fixture
 def enable_backfilling_workflows(team):
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled", return_value=True
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True
     ) as feature_enabled:
         yield
 

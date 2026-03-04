@@ -9,7 +9,7 @@ from insights.insightsql_queries.insights.trends.trends_query_runner import Tren
 
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 
-TEST_BUCKET = "test_storage_bucket-posthog.trends.datawarehouse.timestamp_handling"
+TEST_BUCKET = "test_storage_bucket-insights.trends.datawarehouse.timestamp_handling"
 
 
 @pytest.mark.django_db

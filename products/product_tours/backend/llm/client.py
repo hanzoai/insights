@@ -4,9 +4,9 @@ from typing import TypeVar
 from django.conf import settings
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from google.genai.types import ContentListUnion, GenerateContentConfig
-from posthoganalytics.ai.gemini import genai
+from hanzoanalytics.ai.gemini import genai
 from pydantic import BaseModel
 from rest_framework import exceptions
 
@@ -16,18 +16,18 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def create_gemini_client():
-    if settings.DEBUG and posthoganalytics.disabled:
-        posthoganalytics.disabled = False
-        if not posthoganalytics.host:
-            posthoganalytics.host = settings.SITE_URL
+    if settings.DEBUG and hanzoanalytics.disabled:
+        hanzoanalytics.disabled = False
+        if not hanzoanalytics.host:
+            hanzoanalytics.host = settings.SITE_URL
 
-    posthog_client = posthoganalytics.default_client
-    if not posthog_client:
+    analytics_client = hanzoanalytics.default_client
+    if not analytics_client:
         logger.warning("Insights default_client not available, LLM analytics will not be tracked")
 
     return genai.Client(
         api_key=settings.GEMINI_API_KEY,
-        posthog_client=posthog_client,
+        analytics_client=analytics_client,
     )
 
 
@@ -37,7 +37,7 @@ def generate_structured_output(
     system_prompt: str,
     contents: ContentListUnion,
     response_schema: type[T],
-    posthog_properties: dict | None = None,
+    insights_properties: dict | None = None,
     team_id: int | None = None,
     distinct_id: str | None = None,
 ) -> tuple[T, str]:
@@ -50,17 +50,17 @@ def generate_structured_output(
     )
 
     trace_id = str(uuid.uuid4())
-    properties = posthog_properties or {}
+    properties = insights_properties or {}
 
     try:
         response = client.models.generate_content(
             model=model,
             contents=contents,
             config=config,
-            posthog_distinct_id=distinct_id or "",
-            posthog_trace_id=trace_id,
-            posthog_properties=properties,
-            posthog_groups={"project": str(team_id)} if team_id else {},
+            insights_distinct_id=distinct_id or "",
+            insights_trace_id=trace_id,
+            insights_properties=properties,
+            insights_groups={"project": str(team_id)} if team_id else {},
         )
 
         if not response.text:

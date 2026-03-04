@@ -2,10 +2,10 @@ import { getAppContext } from './getAppContext'
 
 export function apiHostOrigin(): string {
     const appOrigin = window.location.origin
-    if (appOrigin === 'https://us.posthog.com') {
-        return 'https://us.i.posthog.com'
-    } else if (appOrigin === 'https://eu.posthog.com') {
-        return 'https://eu.i.posthog.com'
+    if (appOrigin === 'https://insights.hanzo.ai') {
+        return 'https://us.i.hanzo.ai'
+    } else if (appOrigin === 'https://insights.hanzo.ai') {
+        return 'https://eu.i.hanzo.ai'
     }
     return appOrigin
 }
@@ -14,12 +14,12 @@ export function liveEventsHostOrigin(): string | null {
     const appOrigin = window.location.origin
     const appContext = getAppContext()
 
-    if (appOrigin === 'https://us.posthog.com') {
-        return 'https://live.us.posthog.com'
-    } else if (appOrigin === 'https://eu.posthog.com') {
-        return 'https://live.eu.posthog.com'
-    } else if (appOrigin === 'https://app.dev.posthog.dev') {
-        return 'https://live.dev.posthog.dev'
+    if (appOrigin === 'https://insights.hanzo.ai') {
+        return 'https://live.insights.hanzo.ai'
+    } else if (appOrigin === 'https://insights.hanzo.ai') {
+        return 'https://live.insights.hanzo.ai'
+    } else if (appOrigin === 'https://app.dev.insights.dev') {
+        return 'https://live.dev.insights.dev'
     } else if (process.env.STORYBOOK) {
         return 'http://localhost:6006'
     }
@@ -30,12 +30,12 @@ export function liveEventsHostOrigin(): string | null {
 export function publicWebhooksHostOrigin(): string | null {
     const appOrigin = window.location.origin
 
-    if (appOrigin === 'https://us.posthog.com') {
-        return 'https://webhooks.us.posthog.com'
-    } else if (appOrigin === 'https://eu.posthog.com') {
-        return 'https://webhooks.eu.posthog.com'
-    } else if (appOrigin === 'https://app.dev.posthog.dev') {
-        return 'https://webhooks.dev.posthog.dev'
+    if (appOrigin === 'https://insights.hanzo.ai') {
+        return 'https://webhooks.insights.hanzo.ai'
+    } else if (appOrigin === 'https://insights.hanzo.ai') {
+        return 'https://webhooks.insights.hanzo.ai'
+    } else if (appOrigin === 'https://app.dev.insights.dev') {
+        return 'https://webhooks.dev.insights.dev'
     }
 
     return appOrigin

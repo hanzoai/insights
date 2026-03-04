@@ -1,7 +1,7 @@
 import { BuiltLogic, useActions, useMountedLogic, useValues } from 'kea'
 
-import { IconCheckCircle, IconRefresh } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonSelect } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconRefresh } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonSelect } from '@hanzo/lemon-ui'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 

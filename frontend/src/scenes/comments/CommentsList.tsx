@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { PhonePairHogs } from 'lib/components/mascots'
 

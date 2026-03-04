@@ -1,5 +1,5 @@
-provider "posthog" {
-  api_key    = var.posthog_api_key
-  host       = local.posthog_host
-  project_id = var.posthog_project_id
+provider "insights" {
+  api_key    = var.insights_api_key
+  host       = local.insights_host
+  project_id = var.insights_project_id
 }

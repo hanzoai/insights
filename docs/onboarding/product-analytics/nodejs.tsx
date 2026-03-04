@@ -18,21 +18,21 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                npm install posthog-node
+                                npm install insights-node
                             `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                yarn add posthog-node
+                                yarn add insights-node
                             `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                pnpm add posthog-node
+                                pnpm add insights-node
                             `,
                             },
                         ]}
@@ -52,7 +52,7 @@ export const getNodeJSSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'javascript',
                                 file: 'Node.js',
                                 code: dedent`
-                                import { Insights } from 'posthog-node'
+                                import { Insights } from 'insights-node'
 
                                 const client = new Insights(
                                     '<ph_project_api_key>',

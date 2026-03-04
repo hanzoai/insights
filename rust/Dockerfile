@@ -1,6 +1,6 @@
 # Taken from: https://depot.dev/docs/container-builds/how-to-guides/optimal-dockerfiles/rust-dockerfile
 FROM rust:1.91-bookworm AS base
-# Note - sccache pinned due to problem with depot builds. See https://posthog.slack.com/archives/C0457KENW2E/p1768558484810999?thread_ts=1768497407.301109&cid=C0457KENW2E
+# Note - sccache pinned due to problem with depot builds.
 RUN cargo install --locked cargo-chef sccache@0.12.0
 ENV RUSTC_WRAPPER=sccache SCCACHE_LOG=debug SCCACHE_DIR=/sccache
 
@@ -54,7 +54,7 @@ RUN apt-get update && \
     && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir share && \
-    ( curl -s -L "https://mmdbcdn.posthog.net/" --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb ) && \
+    ( curl -s -L "https://mmdbcdn.insights.hanzo.ai/" --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb ) && \
     chmod -R 755 ./share/GeoLite2-City.mmdb && \
     mkdir -p /app/share && \
     mv ./share/GeoLite2-City.mmdb /app/share/ && \

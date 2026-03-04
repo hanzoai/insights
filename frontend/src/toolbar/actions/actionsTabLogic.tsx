@@ -9,7 +9,7 @@ import { urls } from 'scenes/urls'
 import { actionsLogic } from '~/toolbar/actions/actionsLogic'
 import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ActionDraftType, ActionForm } from '~/toolbar/types'
 import {
     actionStepToActionStepFormItem,
@@ -381,11 +381,11 @@ export const actionsTabLogic = kea<actionsTabLogicType>([
             }
         },
         showButtonActions: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'actions', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'actions', enabled: true })
         },
         hideButtonActions: () => {
             actions.setShowActionsTooltip(false)
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'actions', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'actions', enabled: false })
         },
         [actionsLogic.actionTypes.getActionsSuccess]: () => {
             const { userIntent, actionId } = values

@@ -6,15 +6,15 @@ import hashlib
 from django.core.cache import cache
 from django.utils.crypto import get_random_string
 
-import posthoganalytics
+import hanzoanalytics
 from google.genai.types import GenerateContentConfig, Schema
 from openai.types.chat import (
     ChatCompletionMessageParam,
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
 )
-from posthoganalytics.ai.gemini import genai
-from posthoganalytics.ai.openai import OpenAI
+from hanzoanalytics.ai.gemini import genai
+from hanzoanalytics.ai.openai import OpenAI
 from rest_framework import exceptions, response, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import AuthenticationFailed
@@ -159,7 +159,7 @@ class SetupWizardViewSet(viewsets.ViewSet):
             key = f"{SETUP_WIZARD_CACHE_PREFIX}{hash}"
             wizard_data = cache.get(key)
 
-            # wizard_data should only be mocked during the @posthog/wizard E2E tests, so that fixtures can be generated.
+            # wizard_data should only be mocked during the @insights/wizard E2E tests, so that fixtures can be generated.
             mock_wizard_data = settings.DEBUG and fixture_generation
 
             if mock_wizard_data:
@@ -195,9 +195,9 @@ class SetupWizardViewSet(viewsets.ViewSet):
 
             trace_id = request.headers.get("X-Insights-Trace-Id") or hashlib.sha256(distinct_id.encode()).hexdigest()
 
-        posthog_client = posthoganalytics.default_client
+        analytics_client = hanzoanalytics.default_client
 
-        if not posthog_client:
+        if not analytics_client:
             raise exceptions.ValidationError("Insights client not found")
 
         system_prompt = (
@@ -217,7 +217,7 @@ class SetupWizardViewSet(viewsets.ViewSet):
                 )
                 raise error
 
-            client = genai.Client(api_key=api_key, posthog_client=posthog_client)
+            client = genai.Client(api_key=api_key, analytics_client=analytics_client)
 
             converted_schema = json_schema_to_gemini_schema(json_schema)
 
@@ -235,9 +235,9 @@ class SetupWizardViewSet(viewsets.ViewSet):
                 model=model,
                 contents=message,
                 config=config,
-                posthog_distinct_id=distinct_id,
-                posthog_trace_id=trace_id,
-                posthog_properties={
+                insights_distinct_id=distinct_id,
+                insights_trace_id=trace_id,
+                insights_properties={
                     "ai_product": "wizard",
                     "ai_feature": "query",
                 },
@@ -268,16 +268,16 @@ class SetupWizardViewSet(viewsets.ViewSet):
 
             messages: list[ChatCompletionMessageParam] = [system_message, user_message]
 
-            openai = OpenAI(posthog_client=posthog_client, base_url=settings.OPENAI_BASE_URL)
+            openai = OpenAI(analytics_client=analytics_client, base_url=settings.OPENAI_BASE_URL)
 
             result = openai.chat.completions.create(
                 model=model,
                 seed=MODEL_SEED,
                 messages=messages,
                 response_format={"type": "json_schema", "json_schema": json_schema},  # type: ignore
-                posthog_distinct_id=distinct_id,
-                posthog_trace_id=trace_id,
-                posthog_properties={
+                insights_distinct_id=distinct_id,
+                insights_trace_id=trace_id,
+                insights_properties={
                     "ai_product": "wizard",
                     "ai_feature": "query",
                 },

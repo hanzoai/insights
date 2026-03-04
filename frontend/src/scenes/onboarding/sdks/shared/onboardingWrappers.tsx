@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { StepDefinition } from '@posthog/shared-onboarding/steps'
+import { StepDefinition } from '@hanzo/shared-onboarding/steps'
 
 import { OnboardingDocsContentWrapper } from 'scenes/onboarding/OnboardingDocsContentWrapper'
 

@@ -21,7 +21,7 @@ from django.conf import settings
 from django.db import connection
 
 import structlog
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from prometheus_client import Counter, Gauge
 
 from insights.metrics import pushed_metrics_registry
@@ -50,16 +50,16 @@ CACHE_SIZE_SAMPLE_LIMIT = 1000
 
 # Consolidated HyperCache metrics with namespace labels
 # These replace cache-specific metrics in flags_cache.py and team_metadata_cache.py
-# Note: Batch refresh duration is tracked by the generic posthog_celery_task_duration_seconds metric
+# Note: Batch refresh duration is tracked by the generic insights_celery_task_duration_seconds metric
 
 HYPERCACHE_SIGNAL_UPDATE_COUNTER = Counter(
-    "posthog_hypercache_signal_updates",
+    "insights_hypercache_signal_updates",
     "Cache updates triggered by Django signals",
     labelnames=["namespace", "operation", "result"],
 )
 
 HYPERCACHE_INVALIDATION_COUNTER = Counter(
-    "posthog_hypercache_invalidations",
+    "insights_hypercache_invalidations",
     "Full cache invalidations (schema changes)",
     labelnames=["namespace"],
 )
@@ -91,7 +91,7 @@ def push_hypercache_stats_metrics(
     try:
         with pushed_metrics_registry(f"hypercache_stats_{namespace}") as registry:
             coverage_gauge = Gauge(
-                "posthog_hypercache_coverage_percent",
+                "insights_hypercache_coverage_percent",
                 "Percentage of teams with cached data",
                 labelnames=["namespace"],
                 registry=registry,
@@ -99,7 +99,7 @@ def push_hypercache_stats_metrics(
             coverage_gauge.labels(namespace=namespace).set(coverage_percent)
 
             entries_gauge = Gauge(
-                "posthog_hypercache_entries_total",
+                "insights_hypercache_entries_total",
                 "Total number of entries in the HyperCache",
                 labelnames=["namespace"],
                 registry=registry,
@@ -107,7 +107,7 @@ def push_hypercache_stats_metrics(
             entries_gauge.labels(namespace=namespace).set(entries_total)
 
             expiry_tracked_gauge = Gauge(
-                "posthog_hypercache_expiry_tracked_total",
+                "insights_hypercache_expiry_tracked_total",
                 "Number of entries tracked in the expiry sorted set",
                 labelnames=["namespace"],
                 registry=registry,
@@ -116,7 +116,7 @@ def push_hypercache_stats_metrics(
 
             if size_bytes is not None:
                 size_gauge = Gauge(
-                    "posthog_hypercache_size_bytes",
+                    "insights_hypercache_size_bytes",
                     "Estimated total cache size in bytes",
                     labelnames=["namespace"],
                     registry=registry,
@@ -149,7 +149,7 @@ def push_hypercache_teams_processed_metrics(
     try:
         with pushed_metrics_registry(f"hypercache_teams_processed_{namespace}") as registry:
             success_gauge = Gauge(
-                "posthog_hypercache_teams_processed_last_run",
+                "insights_hypercache_teams_processed_last_run",
                 "Teams processed in the last batch refresh run",
                 labelnames=["namespace", "result"],
                 registry=registry,
@@ -223,9 +223,9 @@ class HyperCacheManagementConfig:
 
     @property
     def _django_key_prefix(self) -> str:
-        """Get Django cache key prefix (e.g., 'posthog:1:')."""
+        """Get Django cache key prefix (e.g., 'insights:1:')."""
         # Django redis cache uses KEY_PREFIX + VERSION to build the full prefix
-        # Default version is 1, resulting in "posthog:1:" prefix
+        # Default version is 1, resulting in "insights:1:" prefix
         cache_client = self.hypercache.cache_client
         key_prefix = getattr(cache_client, "key_prefix", "")
         version = getattr(cache_client, "version", 1)

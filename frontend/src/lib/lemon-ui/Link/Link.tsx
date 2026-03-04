@@ -3,7 +3,7 @@ import './Link.scss'
 import { router } from 'kea-router'
 import React from 'react'
 
-import { IconExternal, IconOpenSidebar, IconSend } from '@posthog/icons'
+import { IconExternal, IconOpenSidebar, IconSend } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -98,7 +98,7 @@ const shouldForcePageLoad = (input: any): boolean => {
 }
 
 const isInsightsDomain = (url: string): boolean => {
-    return /^https:\/\/((www|app|eu)\.)?posthog\.com/.test(url)
+    return /^https:\/\/((www|app|eu)\.)?insights\.com/.test(url)
 }
 
 const isDirectLink = (url: string): boolean => {
@@ -106,10 +106,10 @@ const isDirectLink = (url: string): boolean => {
 }
 
 const isInsightsComDocs = (url: string): url is InsightsComDocsURL => {
-    return /^https:\/\/(www\.)?posthog\.com\/docs/.test(url)
+    return /^https:\/\/(www\.)?insights\.com\/docs/.test(url)
 }
 
-export type InsightsComDocsURL = `https://${'www.' | ''}posthog.com/docs/${string}`
+export type InsightsComDocsURL = `https://${'www.' | ''}hanzo.ai/docs/${string}`
 
 /**
  * Link

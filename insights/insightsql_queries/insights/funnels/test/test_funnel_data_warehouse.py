@@ -22,7 +22,7 @@ from insights.types import AnyPropertyFilter
 
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 
-TEST_BUCKET = "test_storage_bucket-posthog.insightsql_queries.insights.funnels.funnel_data_warehouse"
+TEST_BUCKET = "test_storage_bucket-insights.insightsql_queries.insights.funnels.funnel_data_warehouse"
 
 
 class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
@@ -348,7 +348,7 @@ class TestFunnelDataWarehouse(ClickhouseTestMixin, BaseTest):
                 runner.calculate()
 
         assert type(exc_info.value).__name__ == "CHQueryErrorFunctionThrowIfValueIsNonZero"
-        assert "posthog_test_test_table_1.id_with_nulls, but a non-null value" in str(exc_info.value)
+        assert "insights_test_test_table_1.id_with_nulls, but a non-null value" in str(exc_info.value)
 
         # nulls can be filtered to make the query work
         not_null_filter: list[AnyPropertyFilter] = [

@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 
-import { IconBolt } from '@posthog/icons'
-import { LemonSelect } from '@posthog/lemon-ui'
+import { IconBolt } from '@hanzo/icons'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { LemonField } from 'lib/lemon-ui/LemonField'

@@ -134,7 +134,7 @@ class FOSSColumnOptimizer:
 
             # Math properties are also implicitly used.
             #
-            # See posthog/queries/trends/util.py#process_math
+            # See insights/queries/trends/util.py#process_math
             if entity.math_property:
                 counter[(entity.math_property, "event", None)] += 1
 

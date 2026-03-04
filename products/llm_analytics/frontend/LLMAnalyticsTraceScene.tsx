@@ -15,7 +15,7 @@ import {
     IconMessage,
     IconReceipt,
     IconSearch,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -29,7 +29,7 @@ import {
     Link,
     SpinnerOverlay,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'
 import { JSONViewer } from 'lib/components/JSONViewer'

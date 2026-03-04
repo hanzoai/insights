@@ -232,7 +232,7 @@ fn detect_group_changes(
     Ok(changed_groups)
 }
 
-/// Create a PostHog group identify event
+/// Create a Insights group identify event
 fn create_group_identify_event(
     context: &TransformContext,
     distinct_id: String,
@@ -339,7 +339,7 @@ impl AmplitudeEvent {
 
             let event_type = match event_type_raw.as_str() {
                 // Amplitude generates synthetic session_start and session_end events as markers.
-                // PostHog calculates sessions from timestamp gaps, so these have no meaning and should be filtered.
+                // Insights calculates sessions from timestamp gaps, so these have no meaning and should be filtered.
                 "session_start" | "session_end" => return Ok(vec![]),
                 "[Amplitude] Page Viewed" => "$pageview".to_string(),
                 "[Amplitude] Element Clicked" | "[Amplitude] Element Changed" => {
@@ -845,7 +845,7 @@ mod tests {
     #[test]
     fn test_synthetic_session_events_filtered_out() {
         // Amplitude generates synthetic session_start and session_end events.
-        // PostHog calculates sessions from timestamp gaps, so these should be filtered.
+        // Insights calculates sessions from timestamp gaps, so these should be filtered.
         for event_type in ["session_start", "session_end"] {
             let amp_event = AmplitudeEvent {
                 event_type: Some(event_type.to_string()),

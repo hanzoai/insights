@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonSwitch, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonSwitch, Tooltip } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -58,7 +58,7 @@ export function ActivityLogOrgLevelSettings(): JSX.Element {
                 </p>
 
                 <LemonSwitch
-                    id="posthog-activity-log-org-level-switch"
+                    id="insights-activity-log-org-level-switch"
                     onChange={handleToggle}
                     checked={!!currentTeam?.receive_org_level_activity_logs}
                     disabledReason={restrictionReason || undefined}

@@ -14,7 +14,7 @@
           })();
       let processEvent = undefined;
       if ('onEvent' in source) {
-          processEvent = function processEvent(globals, posthog) {
+          processEvent = function processEvent(globals, insights) {
               if (!('onEvent' in source)) { return; };
               const inputs = buildInputs(globals);
               const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -26,15 +26,15 @@
       }
   
       function init(config) {
-          const posthog = config.posthog;
+          const insights = config.insights;
           const callback = config.callback;
           if ('onLoad' in source) {
               const globals = {
                   person: {
-                      properties: posthog.get_property('$stored_person_properties'),
+                      properties: insights.get_property('$stored_person_properties'),
                   }
               }
-              const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+              const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
               if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
           } else {
               callback(true);
@@ -43,7 +43,7 @@
           const response = {}
   
           if (processEvent) {
-              response.processEvent = (globals) => processEvent(globals, posthog)
+              response.processEvent = (globals) => processEvent(globals, insights)
           }
   
           return response
@@ -68,7 +68,7 @@
   function getInputsKey(key, initial) { try { switch (key) {
   case "complexInput": return {"nested": __getProperty(__getProperty(__getGlobal("event"), "properties", true), "url", true), "list": [__getProperty(__getProperty(__getGlobal("person"), "properties", true), "name", true), __getProperty(__getGlobal("groups"), "group_name", true)]};
   default: return null; }
-  } catch (e) { if(!initial) {console.error('[POSTHOG-JS] Unable to compute value for inputs', key, e);} return null } }
+  } catch (e) { if(!initial) {console.error('[INSIGHTS-JS] Unable to compute value for inputs', key, e);} return null } }
   inputs["complexInput"] = getInputsKey("complexInput");
   return inputs;}
   const source = (function() {
@@ -77,7 +77,7 @@
           })();
       let processEvent = undefined;
       if ('onEvent' in source) {
-          processEvent = function processEvent(globals, posthog) {
+          processEvent = function processEvent(globals, insights) {
               if (!('onEvent' in source)) { return; };
               const inputs = buildInputs(globals);
               const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -89,15 +89,15 @@
       }
   
       function init(config) {
-          const posthog = config.posthog;
+          const insights = config.insights;
           const callback = config.callback;
           if ('onLoad' in source) {
               const globals = {
                   person: {
-                      properties: posthog.get_property('$stored_person_properties'),
+                      properties: insights.get_property('$stored_person_properties'),
                   }
               }
-              const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+              const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
               if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
           } else {
               callback(true);
@@ -106,7 +106,7 @@
           const response = {}
   
           if (processEvent) {
-              response.processEvent = (globals) => processEvent(globals, posthog)
+              response.processEvent = (globals) => processEvent(globals, insights)
           }
   
           return response
@@ -131,7 +131,7 @@
           })();
       let processEvent = undefined;
       if ('onEvent' in source) {
-          processEvent = function processEvent(globals, posthog) {
+          processEvent = function processEvent(globals, insights) {
               if (!('onEvent' in source)) { return; };
               const inputs = buildInputs(globals);
               const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -143,15 +143,15 @@
       }
   
       function init(config) {
-          const posthog = config.posthog;
+          const insights = config.insights;
           const callback = config.callback;
           if ('onLoad' in source) {
               const globals = {
                   person: {
-                      properties: posthog.get_property('$stored_person_properties'),
+                      properties: insights.get_property('$stored_person_properties'),
                   }
               }
-              const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+              const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
               if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
           } else {
               callback(true);
@@ -160,7 +160,7 @@
           const response = {}
   
           if (processEvent) {
-              response.processEvent = (globals) => processEvent(globals, posthog)
+              response.processEvent = (globals) => processEvent(globals, insights)
           }
   
           return response
@@ -267,16 +267,16 @@
   function getInputsKey(key, initial) { try { switch (key) {
   case "greeting": return concat("Hello, ", __getProperty(__getProperty(__getGlobal("person"), "properties", true), "nonexistent_property", true), "!");
   default: return null; }
-  } catch (e) { if(!initial) {console.error('[POSTHOG-JS] Unable to compute value for inputs', key, e);} return null } }
+  } catch (e) { if(!initial) {console.error('[INSIGHTS-JS] Unable to compute value for inputs', key, e);} return null } }
   inputs["greeting"] = getInputsKey("greeting");
   return inputs;}
   const source = (function() {
-              function onLoad({ inputs, posthog }) { console.log(inputs); }
+              function onLoad({ inputs, insights }) { console.log(inputs); }
               return {onLoad: onLoad};
           })();
       let processEvent = undefined;
       if ('onEvent' in source) {
-          processEvent = function processEvent(globals, posthog) {
+          processEvent = function processEvent(globals, insights) {
               if (!('onEvent' in source)) { return; };
               const inputs = buildInputs(globals);
               const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -285,21 +285,21 @@
               if (!filterMatches) { return; }
               if ((__getGlobal("event") == "$autocapture")) {(function (){const newInputs = structuredClone(inputs); const __getGlobal = (key) => key === 'inputs' ? newInputs : globals[key];
   try { newInputs["greeting"] = concat("Hallo, ", __getProperty(__getProperty(__getGlobal("person"), "properties", true), "nonexistent_property", true), "!"); } catch (e) { console.error(e) }
-  source.onEvent({ inputs: newInputs, posthog });})();}
+  source.onEvent({ inputs: newInputs, insights });})();}
   
           }
       }
   
       function init(config) {
-          const posthog = config.posthog;
+          const insights = config.insights;
           const callback = config.callback;
           if ('onLoad' in source) {
               const globals = {
                   person: {
-                      properties: posthog.get_property('$stored_person_properties'),
+                      properties: insights.get_property('$stored_person_properties'),
                   }
               }
-              const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+              const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
               if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
           } else {
               callback(true);
@@ -308,7 +308,7 @@
           const response = {}
   
           if (processEvent) {
-              response.processEvent = (globals) => processEvent(globals, posthog)
+              response.processEvent = (globals) => processEvent(globals, insights)
           }
   
           return response
@@ -333,7 +333,7 @@
           })();
       let processEvent = undefined;
       if ('onEvent' in source) {
-          processEvent = function processEvent(globals, posthog) {
+          processEvent = function processEvent(globals, insights) {
               if (!('onEvent' in source)) { return; };
               const inputs = buildInputs(globals);
               const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -345,15 +345,15 @@
       }
   
       function init(config) {
-          const posthog = config.posthog;
+          const insights = config.insights;
           const callback = config.callback;
           if ('onLoad' in source) {
               const globals = {
                   person: {
-                      properties: posthog.get_property('$stored_person_properties'),
+                      properties: insights.get_property('$stored_person_properties'),
                   }
               }
-              const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+              const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
               if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
           } else {
               callback(true);
@@ -362,7 +362,7 @@
           const response = {}
   
           if (processEvent) {
-              response.processEvent = (globals) => processEvent(globals, posthog)
+              response.processEvent = (globals) => processEvent(globals, insights)
           }
   
           return response
@@ -469,7 +469,7 @@
   function getInputsKey(key, initial) { try { switch (key) {
   case "greeting": return concat("Hello, ", __getProperty(__getProperty(__getGlobal("person"), "properties", true), "name", true), "!");
   default: return null; }
-  } catch (e) { if(!initial) {console.error('[POSTHOG-JS] Unable to compute value for inputs', key, e);} return null } }
+  } catch (e) { if(!initial) {console.error('[INSIGHTS-JS] Unable to compute value for inputs', key, e);} return null } }
   inputs["greeting"] = getInputsKey("greeting");
   return inputs;}
   const source = (function() {
@@ -478,7 +478,7 @@
           })();
       let processEvent = undefined;
       if ('onEvent' in source) {
-          processEvent = function processEvent(globals, posthog) {
+          processEvent = function processEvent(globals, insights) {
               if (!('onEvent' in source)) { return; };
               const inputs = buildInputs(globals);
               const filterGlobals = { ...globals.groups, ...globals.event, person: globals.person, inputs, pdi: { distinct_id: globals.event.distinct_id, person: globals.person } };
@@ -490,15 +490,15 @@
       }
   
       function init(config) {
-          const posthog = config.posthog;
+          const insights = config.insights;
           const callback = config.callback;
           if ('onLoad' in source) {
               const globals = {
                   person: {
-                      properties: posthog.get_property('$stored_person_properties'),
+                      properties: insights.get_property('$stored_person_properties'),
                   }
               }
-              const r = source.onLoad({ inputs: buildInputs(globals, true), posthog: posthog });
+              const r = source.onLoad({ inputs: buildInputs(globals, true), insights: insights });
               if (r && typeof r.then === 'function' && typeof r.finally === 'function') { r.catch(() => callback(false)).then(() => callback(true)) } else { callback(true) }
           } else {
               callback(true);
@@ -507,7 +507,7 @@
           const response = {}
   
           if (processEvent) {
-              response.processEvent = (globals) => processEvent(globals, posthog)
+              response.processEvent = (globals) => processEvent(globals, insights)
           }
   
           return response

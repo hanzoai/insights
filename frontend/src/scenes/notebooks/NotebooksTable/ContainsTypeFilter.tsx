@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { LemonInputSelect } from 'lib/lemon-ui/LemonInputSelect'
 import { NotebooksListFilters } from 'scenes/notebooks/NotebooksTable/notebooksTableLogic'
@@ -58,7 +58,7 @@ export function ContainsTypeFilters({
                     .map(([type, label]) => ({ key: type, label }))}
                 value={filters.contains}
                 onChange={(newValue: string[]) => {
-                    posthog.capture('notebook containing filter applied')
+                    insights.capture('notebook containing filter applied')
                     setFilters({ contains: newValue.map((x) => x as NotebookNodeType) })
                 }}
                 data-attr="notebooks-list-contains-filters"

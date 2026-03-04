@@ -13,7 +13,7 @@ import {
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import { IconDragHandle, IconLink } from 'lib/lemon-ui/icons'
-import { LemonButton, LemonMenu, LemonMenuItems } from '@posthog/lemon-ui'
+import { LemonButton, LemonMenu, LemonMenuItems } from '@hanzo/lemon-ui'
 import './NodeWrapper.scss'
 import { LemonSkeleton } from 'lib/lemon-ui/LemonSkeleton'
 import { BindLogic, useActions, useMountedLogic, useValues } from 'kea'
@@ -22,16 +22,16 @@ import { hashCodeForString } from 'lib/utils'
 import { useInView } from 'react-intersection-observer'
 import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { NotebookNodeLogicProps, notebookNodeLogic } from './notebookNodeLogic'
-import { posthogNodeInputRule, posthogNodePasteRule, useSyncedAttributes } from './utils'
+import { insightsNodeInputRule, insightsNodePasteRule, useSyncedAttributes } from './utils'
 import { KNOWN_NODES } from '../utils'
 import { NotebookNodeTitle } from './components/NotebookNodeTitle'
 import { DuckSqlRunMenu } from './components/DuckSqlRunMenu'
 import { InsightsqlSqlRunMenu } from './components/InsightsqlSqlRunMenu'
 import { PythonRunMenu } from './components/PythonRunMenu'
 import { SlashCommandsPopover } from '../Notebook/SlashCommands'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { NotebookNodeContext } from './NotebookNodeContext'
-import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconPlus, IconX } from '@posthog/icons'
+import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconPlus, IconX } from '@hanzo/icons'
 import {
     CreateInsightsWidgetNodeOptions,
     CustomNotebookNodeAttributes,
@@ -468,7 +468,7 @@ export function createInsightsWidgetNode<T extends CustomNotebookNodeAttributes>
 
         useEffect(() => {
             if (props.node.attrs.nodeId === null) {
-                posthog.capture('notebook node added', { node_type: props.node.type.name })
+                insights.capture('notebook node added', { node_type: props.node.type.name })
             }
             // oxlint-disable-next-line exhaustive-deps
         }, [props.node.attrs.nodeId])
@@ -561,7 +561,7 @@ export function createInsightsWidgetNode<T extends CustomNotebookNodeAttributes>
         addPasteRules() {
             return pasteOptions
                 ? [
-                      posthogNodePasteRule({
+                      insightsNodePasteRule({
                           editor: this.editor,
                           type: this.type,
                           ...pasteOptions,
@@ -573,7 +573,7 @@ export function createInsightsWidgetNode<T extends CustomNotebookNodeAttributes>
         addInputRules() {
             return inputOptions
                 ? [
-                      posthogNodeInputRule({
+                      insightsNodeInputRule({
                           editor: this.editor,
                           type: this.type,
                           ...inputOptions,

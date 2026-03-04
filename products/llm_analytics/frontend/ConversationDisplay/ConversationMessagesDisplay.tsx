@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import React from 'react'
 
-import { IconCode, IconEye, IconMarkdown, IconMarkdownFilled } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconCode, IconEye, IconMarkdown, IconMarkdownFilled } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { HighlightedJSONViewer } from 'lib/components/HighlightedJSONViewer'

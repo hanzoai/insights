@@ -10,4 +10,4 @@ export {
     captureHostContextChanged,
     captureLinkOpened,
     captureDisplayModeRequested,
-} from './posthog'
+} from './insights'

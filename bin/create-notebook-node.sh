@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to create a new PostHog notebook node
+# Script to create a new Hanzo Insights notebook node
 # Usage: ./bin/create-notebook-node.sh
 
 set -e
@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Ask for node name
-echo -e "${BLUE}Creating a new PostHog notebook node${NC}"
+echo -e "${BLUE}Creating a new Hanzo Insights notebook node${NC}"
 echo ""
 read -p "Enter the node name (PascalCase, e.g., 'RelatedGroups'): " NODE_NAME
 
@@ -60,7 +60,7 @@ cat > "$NODE_FILE" << 'EOF'
 import { useValues } from 'kea'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
-import { createPostHogWidgetNode } from './NodeWrapper'
+import { createHanzo InsightsWidgetNode } from './NodeWrapper'
 import { notebookNodeLogic } from './notebookNodeLogic'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNode__NODE_NAME__Attributes>): JSX.Element | null => {
@@ -82,7 +82,7 @@ type NotebookNode__NODE_NAME__Attributes = {
     // TODO: Add your attributes here
 }
 
-export const NotebookNode__NODE_NAME__ = createPostHogWidgetNode<NotebookNode__NODE_NAME__Attributes>({
+export const NotebookNode__NODE_NAME__ = createHanzo InsightsWidgetNode<NotebookNode__NODE_NAME__Attributes>({
     nodeType: NotebookNodeType.__NODE_NAME__,
     titlePlaceholder: '__TITLE_PLACEHOLDER__',
     Component,

@@ -7,7 +7,7 @@ from insights.api.monitoring import monitor
 from insights.api.routing import TeamAndOrgViewSetMixin
 from insights.permissions import AccessControlPermission
 
-from ..models.model_configuration import POSTHOG_ALLOWED_MODELS, LLMModelConfiguration
+from ..models.model_configuration import INSIGHTS_ALLOWED_MODELS, LLMModelConfiguration
 from ..models.provider_keys import LLMProvider, LLMProviderKey
 from .metrics import llma_track_latency
 
@@ -60,8 +60,8 @@ class LLMModelsViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
             team_id=self.team_id,
         )
         available = config.get_available_models()
-        posthog_allowed = POSTHOG_ALLOWED_MODELS.get(provider, [])
+        insights_allowed = INSIGHTS_ALLOWED_MODELS.get(provider, [])
 
         return Response(
-            {"models": [{"id": model, "posthog_available": model in posthog_allowed} for model in available]}
+            {"models": [{"id": model, "insights_available": model in insights_allowed} for model in available]}
         )

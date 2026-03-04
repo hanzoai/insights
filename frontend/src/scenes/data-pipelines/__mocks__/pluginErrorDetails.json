@@ -54,7 +54,7 @@
                         },
                         "$referrer": "http://localhost:8000/signup",
                         "$referring_domain": "localhost:8000",
-                        "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                        "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                         "$session_id": "018c2035-4b74-7cad-893a-4dbbfeca42f6",
                         "$window_id": "018c1be8-e593-7bf2-89b1-359fc9e5968a",
                         "title": "App name • Pipeline • Insights",
@@ -78,7 +78,7 @@
                     "site_url": "http://localhost:8000",
                     "now": "2023-11-30T12:35:27.283425+00:00",
                     "sent_at": "2023-11-30T12:35:27.274000+00:00",
-                    "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                    "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                     "team_id": 1
                 }
             }
@@ -150,7 +150,7 @@
                             "[Object]"
                         ],
                         "$el_text": "View app metrics",
-                        "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                        "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                         "$session_id": "018c2035-4b74-7cad-893a-4dbbfeca42f6",
                         "...": "16 items not stringified"
                     },
@@ -160,7 +160,7 @@
                     "site_url": "http://localhost:8000",
                     "now": "2023-11-30T12:35:27.283425+00:00",
                     "sent_at": "2023-11-30T12:35:27.274000+00:00",
-                    "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                    "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                     "team_id": 1
                 }
             }
@@ -238,7 +238,7 @@
                             "[Object]",
                             "[Object]"
                         ],
-                        "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                        "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                         "$session_id": "018c2035-4b74-7cad-893a-4dbbfeca42f6",
                         "$window_id": "018c1be8-e593-7bf2-89b1-359fc9e5968a",
                         "...": "15 items not stringified"
@@ -249,7 +249,7 @@
                     "site_url": "http://localhost:8000",
                     "now": "2023-11-30T12:35:27.283425+00:00",
                     "sent_at": "2023-11-30T12:35:27.274000+00:00",
-                    "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                    "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                     "team_id": 1
                 }
             }
@@ -308,7 +308,7 @@
                         },
                         "$referrer": "http://localhost:8000/pipeline/apps-management",
                         "$referring_domain": "localhost:8000",
-                        "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                        "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                         "$session_id": "018c2035-4b74-7cad-893a-4dbbfeca42f6",
                         "$window_id": "018c2035-4b74-7cad-893a-4dbc6a16e1fd",
                         "title": "testing erroring app • Data pipeline • Insights",
@@ -332,7 +332,7 @@
                     "site_url": "http://localhost:8000",
                     "now": "2023-11-30T12:35:24.287500+00:00",
                     "sent_at": "2023-11-30T12:35:24.282000+00:00",
-                    "token": "phc_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
+                    "token": "hi_hHhd3egVQQNNXJlbntvgTSepDwpXPRu4V9CMQMXPiyH",
                     "team_id": 1
                 }
             }

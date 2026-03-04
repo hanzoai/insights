@@ -16,7 +16,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                 <Blockquote>
                     <Markdown>
                         {dedent`
-                            **Using Ruby on Rails?** The \`posthog-rails\` gem provides automatic exception capture for controllers and background jobs. Select "Ruby on Rails" from the SDK list for setup instructions.
+                            **Using Ruby on Rails?** The \`insights-rails\` gem provides automatic exception capture for controllers and background jobs. Select "Ruby on Rails" from the SDK list for setup instructions.
                         `}
                     </Markdown>
                 </Blockquote>
@@ -35,7 +35,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                                   # Code that might raise an exception
                                   raise StandardError, "Something went wrong"
                                 rescue => e
-                                  posthog.capture_exception(
+                                  insights.capture_exception(
                                     e,
                                     distinct_id: 'user_distinct_id',
                                     properties: {
@@ -71,7 +71,7 @@ export const getRubySteps = (ctx: OnboardingComponentsContext): StepDefinition[]
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

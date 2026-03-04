@@ -887,28 +887,28 @@ class TestStateTransformsIntegration(ClickhouseTestMixin, APIBaseTest):
             team=self.team,
             distinct_id="user_1",
             timestamp=datetime(2023, 1, 1, 12, 0, 0),
-            properties={"session_duration": 10, "$host": "app.posthog.com", "$pathname": "/home"},
+            properties={"session_duration": 10, "$host": "insights.hanzo.ai", "$pathname": "/home"},
         )
         _create_event(
             event="$pageview",
             team=self.team,
             distinct_id="user_1",
             timestamp=datetime(2023, 1, 1, 12, 5, 0),
-            properties={"session_duration": 20, "$host": "app.posthog.com", "$pathname": "/features"},
+            properties={"session_duration": 20, "$host": "insights.hanzo.ai", "$pathname": "/features"},
         )
         _create_event(
             event="$pageview",
             team=self.team,
             distinct_id="user_2",
             timestamp=datetime(2023, 1, 1, 13, 0, 0),
-            properties={"session_duration": 30, "$host": "docs.posthog.com", "$pathname": "/docs"},
+            properties={"session_duration": 30, "$host": "docs.hanzo.ai", "$pathname": "/docs"},
         )
         _create_event(
             event="click",
             team=self.team,
             distinct_id="user_1",
             timestamp=datetime(2023, 1, 1, 12, 10, 0),
-            properties={"button": "signup", "$host": "app.posthog.com", "$pathname": "/features"},
+            properties={"button": "signup", "$host": "insights.hanzo.ai", "$pathname": "/features"},
         )
         flush_persons_and_events()
 

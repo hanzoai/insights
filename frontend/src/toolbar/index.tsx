@@ -10,7 +10,7 @@ import { routerPlugin } from 'kea-router'
 import { subscriptionsPlugin } from 'kea-subscriptions'
 import { waitForPlugin } from 'kea-waitfor'
 import { windowValuesPlugin } from 'kea-window-values'
-import type { PostHog } from 'posthog-js'
+import type { Insights } from '~/lib/insights-browser'
 import { createRoot } from 'react-dom/client'
 
 import { disposablesPlugin } from '~/kea-disposables'
@@ -71,10 +71,10 @@ const initKeaInToolbar = ({ routerHistory, routerLocation, beforePlugins }: Init
 
 const win = window as any
 
-win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, posthog?: PostHog) {
-    // If posthog and toolbarFlagsKey is present, fetch the feature flags from the backend
-    if (posthog && toolbarParams.toolbarFlagsKey) {
-        const apiHost = posthog.config?.api_host || toolbarParams.apiURL || window.location.origin
+win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, insights?: Insights) {
+    // If insights and toolbarFlagsKey is present, fetch the feature flags from the backend
+    if (insights && toolbarParams.toolbarFlagsKey) {
+        const apiHost = insights.config?.api_host || toolbarParams.apiURL || window.location.origin
         const trimmedHost = apiHost.replace(/\/+$/, '')
         await fetch(`${trimmedHost}/api/user/get_toolbar_preloaded_flags?key=${toolbarParams.toolbarFlagsKey}`, {
             credentials: 'include',
@@ -82,7 +82,7 @@ win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, posthog?:
             .then((response) => response.json())
             .then((data) => {
                 if (data.featureFlags) {
-                    posthog.featureFlags.overrideFeatureFlags({ flags: data.featureFlags })
+                    insights.featureFlags.overrideFeatureFlags({ flags: data.featureFlags })
                 } else {
                     console.error('[Toolbar Flags] Feature flags not found:', JSON.stringify(data))
                 }
@@ -98,9 +98,9 @@ win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, posthog?:
 
     document.body.appendChild(container)
 
-    if (!posthog) {
+    if (!insights) {
         console.warn(
-            '⚠️⚠️⚠️ Loaded toolbar via old version of posthog-js that does not support feature flags. Please upgrade! ⚠️⚠️⚠️'
+            '⚠️⚠️⚠️ Loaded toolbar via old version of insights-js that does not support feature flags. Please upgrade! ⚠️⚠️⚠️'
         )
     }
 
@@ -109,7 +109,7 @@ win['ph_load_toolbar'] = async function (toolbarParams: ToolbarParams, posthog?:
             {...toolbarParams}
             actionId={parseInt(String(toolbarParams.actionId))}
             experimentId={parseInt(String(toolbarParams.experimentId))}
-            posthog={posthog}
+            insights={insights}
         />
     )
 }

@@ -27,7 +27,7 @@ class DataWarehouseTableAdmin(admin.ModelAdmin):
     def team_link(self, dashboard: Dashboard):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[dashboard.team.pk]),
+            reverse("admin:insights_team_change", args=[dashboard.team.pk]),
             dashboard.team.name,
         )
 
@@ -35,6 +35,6 @@ class DataWarehouseTableAdmin(admin.ModelAdmin):
     def organization_link(self, dashboard: Dashboard):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_organization_change", args=[dashboard.team.organization.pk]),
+            reverse("admin:insights_organization_change", args=[dashboard.team.organization.pk]),
             dashboard.team.organization.name,
         )

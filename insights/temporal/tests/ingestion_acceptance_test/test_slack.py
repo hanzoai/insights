@@ -9,10 +9,10 @@ from insights.temporal.ingestion_acceptance_test.slack import send_slack_notific
 @pytest.fixture
 def config() -> Config:
     return Config(
-        api_host="https://test.posthog.com",
-        project_api_key="phc_test_key",
+        api_host="https://test.hanzo.ai",
+        project_api_key="hi_test_key",
         project_id="12345",
-        personal_api_key="phx_personal_key",
+        personal_api_key="hix_personal_key",
         slack_webhook_url="https://hooks.slack.com/services/T00/B00/XXX",
     )
 
@@ -37,7 +37,7 @@ def passing_result() -> TestSuiteResult:
             ),
         ],
         total_duration_seconds=3.5,
-        environment={"api_host": "https://test.posthog.com", "project_id": "12345"},
+        environment={"api_host": "https://test.hanzo.ai", "project_id": "12345"},
         timestamp="2024-01-01T00:00:00Z",
     )
 
@@ -63,7 +63,7 @@ def failing_result() -> TestSuiteResult:
             ),
         ],
         total_duration_seconds=3.0,
-        environment={"api_host": "https://test.posthog.com", "project_id": "12345"},
+        environment={"api_host": "https://test.hanzo.ai", "project_id": "12345"},
         timestamp="2024-01-01T00:00:00Z",
     )
 
@@ -149,7 +149,7 @@ class TestSendSlackNotification:
         assert env_block["type"] == "context"
         env_text = env_block["elements"][0]["text"]
 
-        assert "test.posthog.com" in env_text
+        assert "test.hanzo.ai" in env_text
         assert "12345" in env_text
 
     @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
@@ -172,10 +172,10 @@ class TestSendSlackNotification:
     @patch("insights.temporal.ingestion_acceptance_test.slack.requests.post")
     def test_does_nothing_when_no_webhook_url(self, mock_post: MagicMock, failing_result: TestSuiteResult) -> None:
         config_no_webhook = Config(
-            api_host="https://test.posthog.com",
-            project_api_key="phc_test_key",
+            api_host="https://test.hanzo.ai",
+            project_api_key="hi_test_key",
             project_id="12345",
-            personal_api_key="phx_personal_key",
+            personal_api_key="hix_personal_key",
             slack_webhook_url=None,
         )
 

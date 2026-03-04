@@ -8,7 +8,7 @@
  * - Organization: Top-level account (e.g., "Acme Corp")
  * - Project: Container within an org (e.g., "Web App", "Mobile App")
  * - Team: Environment within project where data lives (e.g., "Production", "Staging")
- * - User: Configurable via LOGIN_USERNAME/LOGIN_PASSWORD env vars (defaults: test@posthog.com/12345678)
+ * - User: Configurable via LOGIN_USERNAME/LOGIN_PASSWORD env vars (defaults: test@hanzo.ai/12345678)
  */
 import { APIRequestContext, Page } from '@playwright/test'
 
@@ -85,7 +85,7 @@ export class PlaywrightSetup {
     }
 
     /**
-     * Creates a complete Insights workspace: Organization → Project → Team + test@posthog.com user
+     * Creates a complete Insights workspace: Organization → Project → Team + test@hanzo.ai user
      *
      * This is the main setup method - creates everything you need for most tests.
      * The test user will be a member of the organization.

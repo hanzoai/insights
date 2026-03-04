@@ -14,7 +14,7 @@ Adding a new filter/breakdown option in Revenue Analytics only requires changes 
 
 ### 1. Taxonomy Definition
 
-**File**: `posthog/taxonomy/taxonomy.py`
+**File**: `insights/taxonomy/taxonomy.py`
 
 Add to the `CORE_FILTER_DEFINITIONS_BY_GROUP` under the `"revenue_analytics"` group making sure you include the proper prefix in the key:
 
@@ -99,7 +99,7 @@ def build(handle: SourceHandle) -> Iterable[BuiltQuery]:
 After making the necessary changes, run these commands to regenerate the auto-generated files:
 
 ```bash
-# After updating posthog/taxonomy/taxonomy.py
+# After updating insights/taxonomy/taxonomy.py
 pnpm taxonomy:build
 
 # After updating frontend/src/queries/schema/schema-general.ts
@@ -110,7 +110,7 @@ pnpm schema:build
 
 When adding a new Revenue Analytics filter/breakdown option, you need to modify only these files:
 
-1. **`posthog/taxonomy/taxonomy.py`** - Filter metadata definition
+1. **`insights/taxonomy/taxonomy.py`** - Filter metadata definition
 1. **Database view schema files** (e.g., `views/schema/*.py`) - Ensure required fields exist in the schema
 1. **Database view source files** (e.g., `views/sources/**/*.py`) - Ensure required fields exist in the query source
 

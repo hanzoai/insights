@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-web-analytics",
+    "name": "@hanzo/products-web-analytics",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -9,7 +9,7 @@
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

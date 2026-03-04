@@ -38,7 +38,7 @@ const style = `
         filter: grayscale(100%);
     }
 `
-export function onLoad({ inputs, posthog }) {
+export function onLoad({ inputs, insights }) {
     if (inputs.domains) {
         const domains = inputs.domains.split(',').map((domain) => domain.trim())
         if (domains.length > 0 && domains.indexOf(window.location.hostname) === -1) {
@@ -54,11 +54,11 @@ export function onLoad({ inputs, posthog }) {
         if (rainInterval) {
             window.clearInterval(rainInterval)
             rainInterval = undefined
-            posthog.capture('Pineapple mode deactivated', inputs)
+            insights.capture('Pineapple mode deactivated', inputs)
             buttonElement?.classList.remove('disabled')
         } else {
             rainInterval = window.setInterval(() => makeItRain(shadow, emoji, intensity), 1000 / intensity)
-            posthog.capture('Pineapple mode activated', inputs)
+            insights.capture('Pineapple mode activated', inputs)
             buttonElement?.classList.add('disabled')
         }
     }
@@ -119,7 +119,7 @@ function createShadow(style?: string): ShadowRoot {
             "key": "domains",
             "type": "string",
             "label": "Domains",
-            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,app.posthog.com"',
+            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,insights.hanzo.ai"',
             "default": "",
         },
         {

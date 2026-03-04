@@ -32,7 +32,7 @@ from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 from products.data_warehouse.backend.models import DataWarehouseJoin
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 
-TEST_BUCKET = "test_storage_bucket-posthog.insightsql.datawarehouse.trendquery"
+TEST_BUCKET = "test_storage_bucket-insights.insightsql.datawarehouse.trendquery"
 
 
 class TestTrendsDataWarehouseQuery(ClickhouseTestMixin, BaseTest):

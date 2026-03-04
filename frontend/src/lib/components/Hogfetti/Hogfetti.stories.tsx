@@ -1,6 +1,6 @@
 import { Meta } from '@storybook/react'
 
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { useHogfetti } from './Hogfetti'
 

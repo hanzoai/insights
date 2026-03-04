@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconTrending } from '@posthog/icons'
-import { LemonDivider, Tooltip } from '@posthog/lemon-ui'
+import { IconTrending } from '@hanzo/icons'
+import { LemonDivider, Tooltip } from '@hanzo/lemon-ui'
 
 import { Link } from 'lib/lemon-ui/Link'
 import { IconTrendingDown } from 'lib/lemon-ui/icons'
@@ -83,7 +83,7 @@ export function HowToReadTooltip(): JSX.Element {
                             alt="How to read metrics"
                         />
                         <p className="text-sm mb-0">
-                            <Link to="https://posthog.com/docs/experiments/analyzing-results">
+                            <Link to="https://hanzo.ai/docs/experiments/analyzing-results">
                                 Learn more about analyzing results
                             </Link>
                         </p>

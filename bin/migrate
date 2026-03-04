@@ -87,7 +87,7 @@ fi
 
 if [ "$RUN_POSTGRES" = "1" ]; then
     # Run postgres migrations with retry logic
-    # If POSTHOG_POSTGRES_DIRECT_HOST is set, use direct connection (bypasses PgBouncer)
+    # If INSIGHTS_POSTGRES_DIRECT_HOST is set, use direct connection (bypasses PgBouncer)
     # which allows lock_timeout to be set in Django database OPTIONS
     MIGRATE_MAX_RETRIES=${MIGRATE_MAX_RETRIES:-10}
     MIGRATE_RETRY_DELAY=${MIGRATE_RETRY_DELAY:-3}
@@ -100,7 +100,7 @@ if [ "$RUN_POSTGRES" = "1" ]; then
     # Build migrate command
     # --production skips local-dev features (orphan check, migration caching)
     # Use direct connection if available (bypasses PgBouncer for lock_timeout support)
-    if [ -n "$POSTHOG_POSTGRES_DIRECT_HOST" ]; then
+    if [ -n "$INSIGHTS_POSTGRES_DIRECT_HOST" ]; then
         MIGRATE_CMD="python manage.py migrate --noinput --database=default_direct"
         echo "[migrate] Using direct database connection (lock_timeout enabled)"
     else
@@ -190,7 +190,7 @@ fi
 
 if run_scope "async"; then
     # NOTE: we do not apply any non-noop migrations here. Rather these are run
-    # manually within the UI. See https://posthog.com/docs/runbook/async-migrations
+    # manually within the UI. See https://insights.hanzo.ai/docs/runbook/async-migrations
     # for details.
     python manage.py run_async_migrations --complete-noop-migrations
     if [ $? -ne 0 ]; then
@@ -199,7 +199,7 @@ if run_scope "async"; then
     fi
 
     # NOTE: this check should not fail if a migration isn't complete but within the
-    # given async migration posthog version range, thus this should not block e.g.
+    # given async migration insights version range, thus this should not block e.g.
     # k8s pod deployments.
     python manage.py run_async_migrations --check
     if [ $? -ne 0 ]; then

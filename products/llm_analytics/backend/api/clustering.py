@@ -7,7 +7,7 @@ from typing import cast
 from django.conf import settings
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import serializers, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -162,7 +162,7 @@ class LLMAnalyticsClusteringRunViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet)
         """
         # Check feature flag
         distinct_id = getattr(request.user, "distinct_id", None)
-        if not distinct_id or not posthoganalytics.feature_enabled(
+        if not distinct_id or not hanzoanalytics.feature_enabled(
             "llm-analytics-clustering-admin",
             distinct_id,
             groups={"organization": str(self.organization.id)},

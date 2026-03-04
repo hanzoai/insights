@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconCheck, IconWarning, IconX } from '@posthog/icons'
-import { LemonButton, LemonModal, Spinner } from '@posthog/lemon-ui'
+import { IconCheck, IconWarning, IconX } from '@hanzo/icons'
+import { LemonButton, LemonModal, Spinner } from '@hanzo/lemon-ui'
 
 import { LemonInputSelect, LemonInputSelectOption } from 'lib/lemon-ui/LemonInputSelect/LemonInputSelect'
 import { CURRENCY_SYMBOL_TO_NAME_MAP, IMPORTANT_CURRENCIES, OTHER_CURRENCIES } from 'lib/utils/geography/currency'

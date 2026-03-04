@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconChat } from '@posthog/icons'
+import { IconChat } from '@hanzo/icons'
 
 import { humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import { WarningHog } from 'lib/components/mascots'

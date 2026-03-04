@@ -98,7 +98,7 @@ const HOG_TEMPLATE: InsightsFunctionTemplateType = {
     ],
     filters: null,
     masking: null,
-    icon_url: '/static/posthog-icon.svg',
+    icon_url: '/static/insights-icon.svg',
 }
 
 const INSIGHTS_FUNCTION: InsightsFunctionType = {
@@ -176,7 +176,7 @@ describe('insightsFunctionConfigurationLogic', () => {
         it('saves if form valid', async () => {
             logic.mount()
             await expectLogic(logic).toDispatchActions(['loadTemplate', 'loadTemplateSuccess'])
-            logic.actions.setConfigurationValue('inputs.url', { value: 'https://posthog.com' })
+            logic.actions.setConfigurationValue('inputs.url', { value: 'https://hanzo.ai' })
 
             await expectLogic(logic, () => {
                 logic.actions.submitConfiguration()

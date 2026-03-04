@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useRef, useState } from 'react'
 
-import { IconChevronRight, IconPlusSmall, IconSidebarClose, IconSidebarOpen } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconChevronRight, IconPlusSmall, IconSidebarClose, IconSidebarOpen } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { RenderKeybind } from 'lib/components/AppShortcuts/AppShortcutMenu'

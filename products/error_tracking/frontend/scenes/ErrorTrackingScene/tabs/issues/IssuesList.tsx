@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { LemonBanner, Link, Tooltip } from '@posthog/lemon-ui'
+import { LemonBanner, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
@@ -150,7 +150,7 @@ export function IssuesList(): JSX.Element {
                         }}
                     >
                         Revenue sorting requires setting up{' '}
-                        <Link to="https://posthog.com/docs/revenue-analytics">Revenue analytics</Link>. It does not yet
+                        <Link to="https://hanzo.ai/docs/revenue-analytics">Revenue analytics</Link>. It does not yet
                         work well for customers with a large number of persons or groups. We're keen to hear feedback or
                         any issues you have using it while we work to improve the performance
                     </LemonBanner>

@@ -5,7 +5,7 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 import difference from 'lodash.difference'
 import sortBy from 'lodash.sortby'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'

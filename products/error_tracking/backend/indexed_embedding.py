@@ -32,17 +32,17 @@ SELECT
     cosineDistance(document_embeddings.embedding, [omitted]) AS dist
 FROM
     (SELECT
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072.product AS product,
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072.document_type AS document_type,
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072.rendering AS rendering,
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072.content AS content,
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072.embedding AS embedding,
+        distributed_insights_document_embeddings_text_embedding_3_large_3072.product AS product,
+        distributed_insights_document_embeddings_text_embedding_3_large_3072.document_type AS document_type,
+        distributed_insights_document_embeddings_text_embedding_3_large_3072.rendering AS rendering,
+        distributed_insights_document_embeddings_text_embedding_3_large_3072.content AS content,
+        distributed_insights_document_embeddings_text_embedding_3_large_3072.embedding AS embedding,
         'text-embedding-3-large-3072' AS model_name,
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072.document_id AS document_id
+        distributed_insights_document_embeddings_text_embedding_3_large_3072.document_id AS document_id
     FROM
-        distributed_posthog_document_embeddings_text_embedding_3_large_3072 FINAL
+        distributed_insights_document_embeddings_text_embedding_3_large_3072 FINAL
     WHERE
-        equals(distributed_posthog_document_embeddings_text_embedding_3_large_3072.team_id, 1)) AS document_embeddings
+        equals(distributed_insights_document_embeddings_text_embedding_3_large_3072.team_id, 1)) AS document_embeddings
 WHERE
     ifNull(equals(document_embeddings.model_name, 'text-embedding-3-large-3072'), 0)
 ORDER BY
@@ -58,7 +58,7 @@ Expression (Project names)
     Sorting (Sorting for ORDER BY)
       Expression ((Before ORDER BY + Projection))
         Filter (((WHERE + (Change column names to column identifiers + (Change remote column names to local column names + ( + (Project names + Projection))))) + (WHERE + Change column names to column identifiers)))
-          ReadFromMergeTree (default.sharded_posthog_document_embeddings_text_embedding_3_large_3072)
+          ReadFromMergeTree (default.sharded_insights_document_embeddings_text_embedding_3_large_3072)
           Indexes:
             MinMax
               Condition: true
@@ -150,7 +150,7 @@ WHERE model_name = '{model_name}'
 """
 
 # Name of the Kafka-to-buffer MV
-KAFKA_TO_BUFFER_MV = "posthog_document_embeddings_kafka_to_buffer_mv"
+KAFKA_TO_BUFFER_MV = "insights_document_embeddings_kafka_to_buffer_mv"
 
 
 # Base SQL template for buffer tables
@@ -206,10 +206,10 @@ def DOCUMENT_EMBEDDINGS_BUFFER_WRITABLE_TABLE_SQL():
 
 # Buffer tables: Data flows from Kafka -> writable buffer (ingestion) -> sharded buffer (data nodes)
 DOCUMENT_EMBEDDINGS_BUFFER_SHARDED_TABLE = (
-    "sharded_posthog_document_embeddings_buffer"  # Persistent storage on data nodes
+    "sharded_insights_document_embeddings_buffer"  # Persistent storage on data nodes
 )
 DOCUMENT_EMBEDDINGS_BUFFER_WRITABLE_TABLE = (
-    "writable_posthog_document_embeddings_buffer"  # Stateless proxy on ingestion nodes
+    "writable_insights_document_embeddings_buffer"  # Stateless proxy on ingestion nodes
 )
 
 # Define the models currently in use
@@ -285,16 +285,16 @@ class ModelTableDefinitions:
     # Table names
 
     def sharded_table_name(self) -> str:
-        return f"sharded_posthog_document_embeddings_{self.normalized_model_name}"
+        return f"sharded_insights_document_embeddings_{self.normalized_model_name}"
 
     def distributed_table_name(self) -> str:
-        return f"distributed_posthog_document_embeddings_{self.normalized_model_name}"
+        return f"distributed_insights_document_embeddings_{self.normalized_model_name}"
 
     def writable_table_name(self) -> str:
-        return f"writable_posthog_document_embeddings_{self.normalized_model_name}"
+        return f"writable_insights_document_embeddings_{self.normalized_model_name}"
 
     def materialized_view_name(self) -> str:
-        return f"posthog_document_embeddings_{self.normalized_model_name}_mv"
+        return f"insights_document_embeddings_{self.normalized_model_name}_mv"
 
     # SQL statements for creating tables
 
@@ -408,7 +408,7 @@ def DOCUMENT_EMBEDDINGS_UNION_VIEW_SQL() -> str:
             '{model_name}' AS model_name
         FROM {distributed_table}""")
 
-    view_sql = f"""CREATE VIEW IF NOT EXISTS posthog_document_embeddings_union_view
+    view_sql = f"""CREATE VIEW IF NOT EXISTS insights_document_embeddings_union_view
 AS {" UNION ALL ".join(union_parts)}"""
 
     return view_sql

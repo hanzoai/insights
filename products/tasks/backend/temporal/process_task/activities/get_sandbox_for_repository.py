@@ -84,9 +84,9 @@ def get_sandbox_for_repository(input: GetSandboxForRepositoryInput) -> GetSandbo
 
         environment_variables = {
             "GITHUB_TOKEN": github_token,
-            "POSTHOG_PERSONAL_API_KEY": access_token,
-            "POSTHOG_API_URL": get_sandbox_api_url(),
-            "POSTHOG_PROJECT_ID": str(ctx.team_id),
+            "INSIGHTS_PERSONAL_API_KEY": access_token,
+            "INSIGHTS_API_URL": get_sandbox_api_url(),
+            "INSIGHTS_PROJECT_ID": str(ctx.team_id),
             "JWT_PUBLIC_KEY": get_sandbox_jwt_public_key(),
         }
 

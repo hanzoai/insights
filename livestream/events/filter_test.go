@@ -14,7 +14,7 @@ import (
 func TestNewFilter(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -52,7 +52,7 @@ func TestUuidFromDistinctId(t *testing.T) {
 }
 
 func TestConvertToResponseGeoEvent(t *testing.T) {
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Lat:        40.7128,
 		Lng:        -74.0060,
 		DistinctId: "user1",
@@ -66,9 +66,9 @@ func TestConvertToResponseGeoEvent(t *testing.T) {
 	assert.Equal(t, uint(1), result.Count)
 }
 
-func TestConvertToResponsePostHogEvent(t *testing.T) {
+func TestConvertToResponseInsightsEvent(t *testing.T) {
 	timestamp := "2023-01-01T00:00:00Z"
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  timestamp,
 		DistinctId: "user1",
@@ -76,7 +76,7 @@ func TestConvertToResponsePostHogEvent(t *testing.T) {
 		Properties: map[string]interface{}{"url": "https://example.com"},
 	}
 
-	result := convertToResponsePostHogEvent(event, 1, nil)
+	result := convertToResponseInsightsEvent(event, 1, nil)
 
 	assert.Equal(t, "123", result.Uuid)
 	assert.Equal(t, "2023-01-01T00:00:00Z", result.Timestamp)
@@ -89,7 +89,7 @@ func TestConvertToResponsePostHogEvent(t *testing.T) {
 func TestFilterRun(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -114,7 +114,7 @@ func TestFilterRun(t *testing.T) {
 
 	// Test event filtering
 	timestamp := "2023-01-01T00:00:00Z"
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  timestamp,
 		DistinctId: "user1",
@@ -127,7 +127,7 @@ func TestFilterRun(t *testing.T) {
 	// Wait for event to be processed
 	select {
 	case receivedEvent := <-eventChan:
-		responseEvent, ok := receivedEvent.(ResponsePostHogEvent)
+		responseEvent, ok := receivedEvent.(ResponseInsightsEvent)
 		require.True(t, ok)
 		assert.Equal(t, "123", responseEvent.Uuid)
 		assert.Equal(t, "user1", responseEvent.DistinctId)
@@ -148,7 +148,7 @@ func TestFilterRun(t *testing.T) {
 func TestFilterRunWithGeoEvent(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -170,7 +170,7 @@ func TestFilterRunWithGeoEvent(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	// Test geo event filtering
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Lat:        40.7128,
 		Lng:        -74.0060,
 		DistinctId: "user1",
@@ -194,7 +194,7 @@ func TestFilterRunWithGeoEvent(t *testing.T) {
 func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 	subChan := make(chan Subscription)
 	unSubChan := make(chan Subscription)
-	inboundChan := make(chan PostHogEvent)
+	inboundChan := make(chan InsightsEvent)
 
 	filter := NewFilter(subChan, unSubChan, inboundChan)
 
@@ -239,7 +239,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 
 	time.Sleep(10 * time.Millisecond)
 
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -255,7 +255,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 
 	select {
 	case received := <-eventChan1:
-		responseEvent, ok := received.(ResponsePostHogEvent)
+		responseEvent, ok := received.(ResponseInsightsEvent)
 		require.True(t, ok)
 		assert.Equal(t, map[string]interface{}{"url": "https://example.com"}, responseEvent.Properties)
 	case <-time.After(100 * time.Millisecond):
@@ -264,7 +264,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 
 	select {
 	case received := <-eventChan2:
-		responseEvent, ok := received.(ResponsePostHogEvent)
+		responseEvent, ok := received.(ResponseInsightsEvent)
 		require.True(t, ok)
 		assert.Equal(t, map[string]interface{}{
 			"url":      "https://example.com",
@@ -276,7 +276,7 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 
 	select {
 	case received := <-eventChan3:
-		responseEvent, ok := received.(ResponsePostHogEvent)
+		responseEvent, ok := received.(ResponseInsightsEvent)
 		require.True(t, ok)
 		assert.Equal(t, map[string]interface{}{
 			"url":          "https://example.com",
@@ -294,8 +294,8 @@ func TestFilterRunWithMultipleSubscribersDifferentProperties(t *testing.T) {
 	assert.Empty(t, filter.subs)
 }
 
-func TestResponsePostHogEvent_MarshalJSON(t *testing.T) {
-	event := ResponsePostHogEvent{
+func TestResponseInsightsEvent_MarshalJSON(t *testing.T) {
+	event := ResponseInsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2023-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -316,7 +316,7 @@ func TestIncludeProperties_NilIncludesAllProperties(t *testing.T) {
 		"$browser":     "Chrome",
 	}
 
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -324,13 +324,13 @@ func TestIncludeProperties_NilIncludesAllProperties(t *testing.T) {
 		Properties: properties,
 	}
 
-	result := convertToResponsePostHogEvent(event, 1, nil)
+	result := convertToResponseInsightsEvent(event, 1, nil)
 
 	assert.Equal(t, properties, result.Properties)
 }
 
 func TestIncludeProperties_EmptySliceIncludesNoProperties(t *testing.T) {
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -341,13 +341,13 @@ func TestIncludeProperties_EmptySliceIncludesNoProperties(t *testing.T) {
 		},
 	}
 
-	result := convertToResponsePostHogEvent(event, 1, []string{})
+	result := convertToResponseInsightsEvent(event, 1, []string{})
 
 	assert.Equal(t, map[string]interface{}{}, result.Properties)
 }
 
 func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -359,7 +359,7 @@ func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
 		},
 	}
 
-	result := convertToResponsePostHogEvent(event, 1, []string{"url", "$device_type"})
+	result := convertToResponseInsightsEvent(event, 1, []string{"url", "$device_type"})
 
 	assert.Equal(t, map[string]interface{}{
 		"url":          "https://example.com",
@@ -368,7 +368,7 @@ func TestIncludeProperties_SpecificPropertiesFiltersCorrectly(t *testing.T) {
 }
 
 func TestIncludeProperties_NonExistentPropertiesAreIgnored(t *testing.T) {
-	event := PostHogEvent{
+	event := InsightsEvent{
 		Uuid:       "123",
 		Timestamp:  "2026-01-01T00:00:00Z",
 		DistinctId: "user1",
@@ -378,7 +378,7 @@ func TestIncludeProperties_NonExistentPropertiesAreIgnored(t *testing.T) {
 		},
 	}
 
-	result := convertToResponsePostHogEvent(event, 1, []string{"url", "nonexistent"})
+	result := convertToResponseInsightsEvent(event, 1, []string{"url", "nonexistent"})
 
 	assert.Equal(t, map[string]interface{}{
 		"url": "https://example.com",

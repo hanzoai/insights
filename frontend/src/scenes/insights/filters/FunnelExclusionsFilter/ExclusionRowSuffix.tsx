@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonSelect } from '@posthog/lemon-ui'
+import { IconFilter, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonSelect } from '@hanzo/lemon-ui'
 
 import { IconWithCount } from 'lib/lemon-ui/icons'
 import { getClampedFunnelStepRange } from 'scenes/funnels/funnelUtils'

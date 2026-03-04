@@ -3,8 +3,8 @@ import './PreflightCheck.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconCollapse, IconExpand, IconRefresh, IconWarning } from '@posthog/icons'
-import { Link, Spinner } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconCollapse, IconExpand, IconRefresh, IconWarning } from '@hanzo/icons'
+import { Link, Spinner } from '@hanzo/lemon-ui'
 
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
@@ -72,14 +72,14 @@ export function PreflightCheck(): JSX.Element {
                 <p className="text-center mt-4 mb-0">
                     Need help? Take a look at our{' '}
                     <Link
-                        to="https://posthog.com/docs/self-host/deploy/troubleshooting"
+                        to="https://hanzo.ai/docs/self-host/deploy/troubleshooting"
                         target="_blank"
                         targetBlankIcon={false}
                     >
                         documentation
                     </Link>{' '}
                     or{' '}
-                    <Link to="https://posthog.com/support" target="_blank" targetBlankIcon={false}>
+                    <Link to="https://hanzo.ai/support" target="_blank" targetBlankIcon={false}>
                         visit community support
                     </Link>
                     .
@@ -130,11 +130,11 @@ export function PreflightCheck(): JSX.Element {
                             <p className="Preflight__header--secondary-text">
                                 Validation happens immediately. You can rerun validation checks by clicking “validate
                                 requirements”. If you get stuck, try our{' '}
-                                <Link to="https://posthog.com/docs/self-host/deploy/troubleshooting" target="_blank">
+                                <Link to="https://hanzo.ai/docs/self-host/deploy/troubleshooting" target="_blank">
                                     troubleshooting guide
                                 </Link>{' '}
                                 or our{' '}
-                                <Link to="https://posthog.com/docs/runbook" target="_blank">
+                                <Link to="https://hanzo.ai/docs/runbook" target="_blank">
                                     self-host runbook
                                 </Link>
                                 .

@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef } from 'react'
 
-import { LemonTable, LemonTableColumns } from '@posthog/lemon-ui'
+import { LemonTable, LemonTableColumns } from '@hanzo/lemon-ui'
 
 import { DatabaseSchemaTable } from '~/queries/schema/schema-general'
 

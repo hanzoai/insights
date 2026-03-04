@@ -9,7 +9,7 @@ function CreateInsightsAstroFileSnippet(): JSX.Element {
         <CodeSnippet language={Language.Bash}>
             {`cd ./src/components 
 # or 'cd ./src && mkdir components && cd ./components' if your components folder doesn't exist 
-touch posthog.astro`}
+touch insights.astro`}
         </CodeSnippet>
     )
 }
@@ -20,7 +20,7 @@ function AstroSetupSnippet(): JSX.Element {
         <>
             <CodeSnippet language={Language.JavaScript}>
                 {`---
-// src/components/posthog.astro
+// src/components/insights.astro
 ---
 ${jsSnippetScriptTag}
 `}
@@ -43,7 +43,7 @@ function LayoutCodeSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript}>
             {`---
-import Insights from '../components/posthog.astro'
+import Insights from '../components/insights.astro'
 ---
 <head>
     <Insights />
@@ -71,7 +71,7 @@ export function SDKInstallAstroInstructions({ hideWizard }: { hideWizard?: boole
             <SetupWizardBanner integrationName="Astro" hide={hideWizard} />
             <h3>1. Create the Insights component</h3>
             <p>
-                In your <code>src/components</code> folder, create a <code>posthog.astro</code> file:
+                In your <code>src/components</code> folder, create a <code>insights.astro</code> file:
             </p>
             <CreateInsightsAstroFileSnippet />
             <p>
@@ -82,14 +82,14 @@ export function SDKInstallAstroInstructions({ hideWizard }: { hideWizard?: boole
                 >
                     to prevent Astro from processing it
                 </Link>
-                , or you will get TypeScript and build errors that property 'posthog' does not exist on type 'Window &
+                , or you will get TypeScript and build errors that property 'insights' does not exist on type 'Window &
                 typeof globalThis':
             </p>
             <AstroSetupSnippet />
 
             <h3>2. Create a layout</h3>
             <p>
-                Create a layout where we will use <code>posthog.astro</code>. Create a new file{' '}
+                Create a layout where we will use <code>insights.astro</code>. Create a new file{' '}
                 <code>InsightsLayout.astro</code> in your <code>src/layouts</code> folder:
             </p>
             <CreateLayoutSnippet />

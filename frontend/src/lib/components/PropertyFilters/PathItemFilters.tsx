@@ -1,8 +1,8 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPlusSmall } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlusSmall } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { AnyPropertyFilter, PropertyFilterType, PropertyOperator } from '~/types'
 

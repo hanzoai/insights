@@ -1,6 +1,6 @@
 import zxcvbn from 'zxcvbn'
 
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'

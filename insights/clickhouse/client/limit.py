@@ -22,13 +22,13 @@ DEFAULT_APP_ORG_CONCURRENT_QUERIES = 20
 DEFAULT_APP_DASHBOARD_CONCURRENT_QUERIES = 6
 
 CONCURRENT_QUERY_LIMIT_EXCEEDED_COUNTER = Counter(
-    "posthog_clickhouse_query_concurrency_limit_exceeded",
+    "insights_clickhouse_query_concurrency_limit_exceeded",
     "Number of times a team tried to exceed concurrency limit.",
     ["task_name", "team_id", "limit", "limit_name", "result"],
 )
 
 CONCURRENT_TASKS_LIMIT_EXCEEDED_COUNTER = Counter(
-    "posthog_celery_task_concurrency_limit_exceeded",
+    "insights_celery_task_concurrency_limit_exceeded",
     "Number of times a Celery task exceeded the concurrency limit",
     ["task_name", "limit", "limit_name"],
 )

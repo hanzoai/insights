@@ -1,6 +1,6 @@
 use rdkafka::ClientConfig;
 
-/// Kafka consumer configuration builder with sensible defaults for PostHog services.
+/// Kafka consumer configuration builder with sensible defaults for Insights services.
 ///
 /// Two entry points provide appropriate defaults for each consumer type:
 /// - `for_batch_consumer`: Group-based consumer with full consumer-group settings
@@ -16,7 +16,7 @@ pub struct ConsumerConfigBuilder {
 }
 
 impl ConsumerConfigBuilder {
-    /// Create a config builder for a **group-based batch consumer** with PostHog defaults.
+    /// Create a config builder for a **group-based batch consumer** with Insights defaults.
     ///
     /// Sets: auto.offset.store=false, auto.commit=false, socket.timeout.ms,
     /// session.timeout.ms, heartbeat.interval.ms, max.poll.interval.ms.

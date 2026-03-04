@@ -48,7 +48,7 @@
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
                             transform(ifNull(nullIf(if(empty(trim(TRAILING '/?#'
                                                                   from replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''))), '/', trim(TRAILING '/?#'
-                                                                                                                                                              from replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''))), ''), '$$_posthog_breakdown_null_$$'), (['https://example.com/home', 'https://example.com']), (['https://example.com/home', 'https://example.com']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                                                                                                                                                              from replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''))), ''), '$$_insights_breakdown_null_$$'), (['https://example.com/home', 'https://example.com']), (['https://example.com/home', 'https://example.com']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'watched movie'
@@ -113,7 +113,7 @@
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
                             transform(ifNull(nullIf(if(empty(trim(TRAILING '/?#'
                                                                   from replaceRegexpAll(JSONExtractRaw(properties, '$pathname'), '^"|"$', ''))), '/', trim(TRAILING '/?#'
-                                                                                                                                                           from replaceRegexpAll(JSONExtractRaw(properties, '$pathname'), '^"|"$', ''))), ''), '$$_posthog_breakdown_null_$$'), (['/home', '/']), (['/home', '/']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                                                                                                                                                           from replaceRegexpAll(JSONExtractRaw(properties, '$pathname'), '^"|"$', ''))), ''), '$$_insights_breakdown_null_$$'), (['/home', '/']), (['/home', '/']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'watched movie'

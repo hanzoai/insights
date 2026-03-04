@@ -1,9 +1,9 @@
 import equal from 'fast-deep-equal'
 import { actions, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { syncSearchParams, updateSearchParams } from '@posthog/products-error-tracking/frontend/utils'
+import { syncSearchParams, updateSearchParams } from '@hanzo/products-error-tracking/frontend/utils'
 
 import { DEFAULT_UNIVERSAL_GROUP_FILTER } from 'lib/components/UniversalFilters/universalFiltersLogic'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
@@ -227,7 +227,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
     listeners(({ values, actions }) => ({
         setSearchTerm: ({ searchTerm }) => {
             if (values.hasRunQuery) {
-                posthog.capture('logs filter changed', {
+                insights.capture('logs filter changed', {
                     filter_type: 'search',
                     search_term_length: searchTerm?.length ?? 0,
                 })
@@ -275,7 +275,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
             }
 
             if (values.hasRunQuery) {
-                posthog.capture('logs filter changed', { filter_type: 'attributes' })
+                insights.capture('logs filter changed', { filter_type: 'attributes' })
                 actions.addProductIntent({
                     product_type: ProductKey.LOGS,
                     intent_context: ProductIntentContext.LOGS_SET_FILTERS,
@@ -286,7 +286,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
         },
         setSeverityLevels: ({ severityLevels }) => {
             if (values.hasRunQuery) {
-                posthog.capture('logs filter changed', {
+                insights.capture('logs filter changed', {
                     filter_type: 'severity',
                     severity_levels: severityLevels ?? [],
                 })
@@ -300,7 +300,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
         },
         setServiceNames: ({ serviceNames }) => {
             if (values.hasRunQuery) {
-                posthog.capture('logs filter changed', {
+                insights.capture('logs filter changed', {
                     filter_type: 'service',
                     service_count: serviceNames?.length ?? 0,
                 })
@@ -314,7 +314,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
         },
         setDateRange: () => {
             if (values.hasRunQuery) {
-                posthog.capture('logs filter changed', { filter_type: 'date_range' })
+                insights.capture('logs filter changed', { filter_type: 'date_range' })
                 actions.addProductIntent({
                     product_type: ProductKey.LOGS,
                     intent_context: ProductIntentContext.LOGS_SET_FILTERS,
@@ -325,7 +325,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
         },
         setFilters: ({ pushToHistory }) => {
             if (values.hasRunQuery) {
-                posthog.capture('logs filter changed', { filter_type: 'bulk' })
+                insights.capture('logs filter changed', { filter_type: 'bulk' })
                 actions.addProductIntent({
                     product_type: ProductKey.LOGS,
                     intent_context: ProductIntentContext.LOGS_SET_FILTERS,
@@ -337,13 +337,13 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
             actions.syncUrlAndRunQuery()
         },
         setOrderBy: ({ orderBy, source }) => {
-            posthog.capture('logs setting changed', { setting: 'order_by', value: orderBy, source })
+            insights.capture('logs setting changed', { setting: 'order_by', value: orderBy, source })
             actions.syncUrlAndRunQuery()
         },
         restoreFiltersFromHistory: ({ index }) => {
             const entry = values.filterHistory[index]
             if (entry) {
-                posthog.capture('logs filter history restored', {
+                insights.capture('logs filter history restored', {
                     history_index: index,
                     history_size: values.filterHistory.length,
                 })
@@ -351,7 +351,7 @@ export const logsSceneLogic = kea<logsSceneLogicType>([
             }
         },
         clearFilterHistory: () => {
-            posthog.capture('logs filter history cleared', {
+            insights.capture('logs filter history cleared', {
                 history_size: values.filterHistory.length,
             })
         },

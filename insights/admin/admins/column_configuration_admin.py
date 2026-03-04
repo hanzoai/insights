@@ -24,6 +24,6 @@ class ColumnConfigurationAdmin(admin.ModelAdmin):
     def team_link(self, config: ColumnConfiguration):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[config.team.pk]),
+            reverse("admin:insights_team_change", args=[config.team.pk]),
             config.team.name,
         )

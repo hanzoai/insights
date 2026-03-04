@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPlusSmall, IconX } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconX } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { EventsQuery } from '~/queries/schema/schema-general'
 

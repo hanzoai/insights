@@ -102,7 +102,7 @@ def test_can_run_s3_test_step_for_new_destination(
         "config": {
             "bucket_name": bucket_name,
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "object_storage_root_user",
             "aws_secret_access_key": "object_storage_root_password",
             "endpoint_url": settings.OBJECT_STORAGE_ENDPOINT,
@@ -139,7 +139,7 @@ def test_can_run_s3_test_step_for_destination(
         "config": {
             "bucket_name": bucket_name,
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "object_storage_root_user",
             "aws_secret_access_key": "object_storage_root_password",
             "endpoint_url": settings.OBJECT_STORAGE_ENDPOINT,
@@ -299,7 +299,7 @@ def test_can_run_s3_test_step_with_additional_fields(
         "config": {
             "bucket_name": bucket_name,
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "object_storage_root_user",
             "aws_secret_access_key": "object_storage_root_password",
             "endpoint_url": settings.OBJECT_STORAGE_ENDPOINT,
@@ -412,7 +412,7 @@ def databricks_integration(team, user):
 @pytest.fixture
 def enable_databricks(team):
     with unittest.mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled",
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled",
         return_value=True,
     ) as feature_enabled:
         yield

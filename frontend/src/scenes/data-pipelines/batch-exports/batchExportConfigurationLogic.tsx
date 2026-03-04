@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { beforeUnload, router } from 'kea-router'
 
-import { LemonDialog, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { addProductIntent } from 'lib/utils/product-intents'

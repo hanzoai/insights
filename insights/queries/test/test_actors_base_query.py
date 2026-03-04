@@ -26,7 +26,7 @@ class TestActorsBaseQuery(ClickhouseTestMixin, APIBaseTest):
             distinct_ids=["p1"],
             properties={
                 "name": "p1",
-                "email": "test@posthog.com",
+                "email": "test@hanzo.ai",
             },
         )
         flush_persons_and_events()
@@ -36,7 +36,7 @@ class TestActorsBaseQuery(ClickhouseTestMixin, APIBaseTest):
 
         assert len(result) == 1
         assert result[0]["uuid"] == person.uuid
-        assert result[0]["properties"]["email"] == "test@posthog.com"
+        assert result[0]["properties"]["email"] == "test@hanzo.ai"
 
     @snapshot_postgres_queries
     def test_get_people_with_prefetch(self):

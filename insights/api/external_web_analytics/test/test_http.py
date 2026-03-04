@@ -14,7 +14,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_success(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -50,7 +50,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_with_host_filter(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -81,7 +81,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
         assert query.properties[0].value == ["example.com"]
 
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_missing_required_params(self, mock_feature_enabled, mock_team_ids):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -116,7 +116,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_invalid_breakdown_by(self, mock_feature_enabled, mock_team_ids):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -132,7 +132,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_with_pagination(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -188,7 +188,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_with_bounce_rate_breakdown(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -241,7 +241,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_invalid_date_format(self, mock_feature_enabled, mock_team_ids):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -257,7 +257,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_empty_results(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         mock_team_ids.__contains__.return_value = True
         mock_feature_enabled.return_value = True
@@ -288,7 +288,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_pagination_with_has_more(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         """Test pagination when there are more results available"""
         mock_team_ids.__contains__.return_value = True
@@ -338,7 +338,7 @@ class TestExternalWebAnalyticsBreakdownEndpoint(APIBaseTest):
 
     @patch("insights.api.external_web_analytics.query_adapter.WebStatsTableQueryRunner")
     @patch("insights.api.external_web_analytics.http.TEAM_IDS_WITH_EXTERNAL_WEB_ANALYTICS")
-    @patch("insights.api.external_web_analytics.http.posthoganalytics.feature_enabled")
+    @patch("insights.api.external_web_analytics.http.hanzoanalytics.feature_enabled")
     def test_breakdown_pagination_no_more_results(self, mock_feature_enabled, mock_team_ids, mock_runner_class):
         """Test pagination when there are no more results"""
         mock_team_ids.__contains__.return_value = True

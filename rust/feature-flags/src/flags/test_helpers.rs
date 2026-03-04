@@ -14,10 +14,10 @@ use common_redis::Client as RedisClient;
 use common_types::TeamId;
 
 /// Generate the Django-compatible hypercache key for tests
-/// Format: posthog:1:cache/teams/{team_id}/feature_flags/flags.json
-/// The "posthog:1:" prefix matches Django's cache versioning
+/// Format: insights:1:cache/teams/{team_id}/feature_flags/flags.json
+/// The "insights:1:" prefix matches Django's cache versioning
 pub fn hypercache_test_key(team_id: TeamId) -> String {
-    format!("posthog:1:cache/teams/{team_id}/feature_flags/flags.json")
+    format!("insights:1:cache/teams/{team_id}/feature_flags/flags.json")
 }
 
 pub fn create_simple_property_filter(
@@ -79,7 +79,7 @@ pub fn create_simple_flag(properties: Vec<PropertyFilter>, rollout_percentage: f
 
 /// Test-only helper to read feature flags directly from Redis (hypercache format)
 ///
-/// Reads from hypercache key format: posthog:1:cache/teams/{team_id}/feature_flags/flags.json
+/// Reads from hypercache key format: insights:1:cache/teams/{team_id}/feature_flags/flags.json
 /// Uses Django-compatible key format with version prefix.
 /// Expects Pickle(JSON) format matching what Django writes.
 /// Useful for testing cache behavior and verifying cache contents.
@@ -137,7 +137,7 @@ pub async fn get_flags_from_redis(
 /// Test-only helper to write feature flags to hypercache (the new cache format)
 ///
 /// Writes flags in Django-compatible format: Pickle(JSON)
-/// at key: posthog:1:cache/teams/{team_id}/feature_flags/flags.json
+/// at key: insights:1:cache/teams/{team_id}/feature_flags/flags.json
 ///
 /// This helper writes uncompressed Pickle(JSON) to match small payloads from Django
 /// (data < 512 bytes). For larger payloads, Django writes Zstd(Pickle(JSON)), but

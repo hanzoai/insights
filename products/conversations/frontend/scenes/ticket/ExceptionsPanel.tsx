@@ -1,4 +1,4 @@
-import { LemonButton, LemonCollapse } from '@posthog/lemon-ui'
+import { LemonButton, LemonCollapse } from '@hanzo/lemon-ui'
 
 import { urls } from 'scenes/urls'
 

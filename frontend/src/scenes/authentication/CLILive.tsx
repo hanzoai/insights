@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -24,7 +24,7 @@ export function CLILive(): JSX.Element {
                 <div className="text-center space-y-4">
                     <h2>Missing port parameter</h2>
                     <LemonBanner type="error">
-                        This page should be opened from the Insights Live TUI. Please run <code>posthog-live</code> in
+                        This page should be opened from the Insights Live TUI. Please run <code>insights-live</code> in
                         your terminal.
                     </LemonBanner>
                 </div>

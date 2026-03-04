@@ -1,7 +1,7 @@
 import { Placement } from '@floating-ui/react'
 import { Ref, forwardRef, useEffect, useState } from 'react'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'
 import {

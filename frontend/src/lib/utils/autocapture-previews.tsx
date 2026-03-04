@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 
@@ -39,7 +39,7 @@ function correctRelativeSrcImages(
                 src: ensureNoTrailingSlash(origin) + img.src,
             }
         } catch (e) {
-            posthog.captureException(e, { imageSource: img.src, properties: properties || {} })
+            insights.captureException(e, { imageSource: img.src, properties: properties || {} })
             // don't show this image... something is unexpected about the URL
             return null
         }

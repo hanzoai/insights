@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconHome } from '@posthog/icons'
+import { IconHome } from '@hanzo/icons'
 
 import { SceneDashboardChoiceRequired } from 'lib/components/SceneDashboardChoice/SceneDashboardChoiceRequired'
 import { FEATURE_FLAGS } from 'lib/constants'

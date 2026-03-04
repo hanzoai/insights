@@ -2,9 +2,9 @@ import { BuiltLogic, actions, beforeUnmount, connect, kea, key, listeners, path,
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { EditorRange, JSONContent } from 'lib/components/RichContentEditor/types'
@@ -421,7 +421,7 @@ export const notebookLogic = kea<notebookLogicType>([
                         title,
                     })
 
-                    posthog.capture(`notebook duplicated`, {
+                    insights.capture(`notebook duplicated`, {
                         short_id: response.short_id,
                     })
 
@@ -720,7 +720,7 @@ export const notebookLogic = kea<notebookLogicType>([
             }
 
             if (!skipCapture) {
-                posthog.capture('notebook content changed', {
+                insights.capture('notebook content changed', {
                     short_id: values.notebook?.short_id,
                 })
             }

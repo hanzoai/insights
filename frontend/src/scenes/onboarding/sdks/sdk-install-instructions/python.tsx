@@ -9,7 +9,7 @@ type InsightsPythonOptions = {
 }
 
 function PythonInstallSnippet(): JSX.Element {
-    return <CodeSnippet language={Language.Bash}>pip install posthog</CodeSnippet>
+    return <CodeSnippet language={Language.Bash}>pip install insights</CodeSnippet>
 }
 
 export function PythonSetupSnippet({ enableExceptionAutocapture = false }: InsightsPythonOptions): JSX.Element {
@@ -23,9 +23,9 @@ export function PythonSetupSnippet({ enableExceptionAutocapture = false }: Insig
 
     return (
         <CodeSnippet language={Language.Python}>
-            {`from posthog import Posthog
+            {`from insights import Insights
 
-posthog = Posthog(
+insights = Insights(
   project_api_key='${currentTeam?.api_token}',
   ${options.join(',\n  ')}
 )`}

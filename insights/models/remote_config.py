@@ -33,19 +33,19 @@ from products.product_tours.backend.models import ProductTour
 tracer = trace.get_tracer(__name__)
 
 CELERY_TASK_REMOTE_CONFIG_SYNC = Counter(
-    "posthog_remote_config_sync",
+    "insights_remote_config_sync",
     "Number of times the remote config sync task has been run",
     labelnames=["result"],
 )
 
 REMOTE_CONFIG_CACHE_COUNTER = Counter(
-    "posthog_remote_config_via_cache",
+    "insights_remote_config_via_cache",
     "Metric tracking whether a remote config was fetched from cache or not",
     labelnames=["result"],
 )
 
 REMOTE_CONFIG_CDN_PURGE_COUNTER = Counter(
-    "posthog_remote_config_cdn_purge",
+    "insights_remote_config_cdn_purge",
     "Number of times the remote config CDN purge task has been run",
     labelnames=["result"],
 )
@@ -210,7 +210,7 @@ class RemoteConfig(UUIDTModel):
 
             recorder_script = team.extra_settings.get("recorder_script") if team.extra_settings else None
             if not recorder_script and settings.DEBUG:
-                recorder_script = "posthog-recorder"
+                recorder_script = "insights-recorder"
             if recorder_script:
                 rrweb_script_config = {
                     "script": recorder_script,
@@ -330,7 +330,7 @@ class RemoteConfig(UUIDTModel):
             config = get_site_config_from_schema(site_app.config_schema, site_app.config)
             site_apps_js.append(
                 indent_js(
-                    f"\n{{\n  id: '{site_app.token}',\n  init: function(config) {{\n    {indent_js(site_app.source, indent=4)}().inject({{ config:{json.dumps(config)}, posthog:config.posthog }});\n    config.callback(); return {{}}  }}\n}}"
+                    f"\n{{\n  id: '{site_app.token}',\n  init: function(config) {{\n    {indent_js(site_app.source, indent=4)}().inject({{ config:{json.dumps(config)}, insights:config.insights }});\n    config.callback(); return {{}}  }}\n}}"
                 )
             )
         site_functions = (
@@ -397,8 +397,8 @@ class RemoteConfig(UUIDTModel):
         config = sanitize_config_for_public_cdn(config, request=request)
 
         js_content = f"""(function() {{
-  window._POSTHOG_REMOTE_CONFIG = window._POSTHOG_REMOTE_CONFIG || {{}};
-  window._POSTHOG_REMOTE_CONFIG['{token}'] = {{
+  window._INSIGHTS_REMOTE_CONFIG = window._INSIGHTS_REMOTE_CONFIG || {{}};
+  window._INSIGHTS_REMOTE_CONFIG['{token}'] = {{
     config: {json.dumps(config)},
     siteApps: [{",".join(site_apps_js)}]
   }}

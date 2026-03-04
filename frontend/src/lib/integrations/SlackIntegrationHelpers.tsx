@@ -8,7 +8,7 @@ import {
     LemonInputSelectOption,
     Link,
     ProfilePicture,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
@@ -142,7 +142,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                 emptyStateComponent={
                     <p className="text-secondary italic p-1">
                         No channels found. Make sure the Insights Slack App is installed in the channel.{' '}
-                        <Link to="https://posthog.com/docs/cdp/destinations/slack" target="_blank">
+                        <Link to="https://hanzo.ai/docs/cdp/destinations/slack" target="_blank">
                             See the docs for more information.
                         </Link>
                     </p>
@@ -167,7 +167,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                         <span>
                             The Insights Slack App is not in this channel. Please add it to the channel otherwise
                             Subscriptions will fail to be delivered.{' '}
-                            <Link to="https://posthog.com/docs/webhooks/slack" target="_blank">
+                            <Link to="https://hanzo.ai/docs/webhooks/slack" target="_blank">
                                 See the Docs for more information
                             </Link>
                         </span>

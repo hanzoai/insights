@@ -26,7 +26,7 @@ describe('insightHclExporter test', () => {
 
             const hcl = generateInsightHCL(insight).hcl
 
-            expect(hcl).toContain(`resource "posthog_insight" "${expected}"`)
+            expect(hcl).toContain(`resource "insights_insight" "${expected}"`)
         })
     })
 
@@ -74,7 +74,7 @@ describe('insightHclExporter test', () => {
             const result = generateInsightHCL(insight)
             const hcl = result.hcl
 
-            expect(hcl).toContain('resource "posthog_insight" "my_test_insight"')
+            expect(hcl).toContain('resource "insights_insight" "my_test_insight"')
             expect(hcl).toContain('name = "My Test Insight"')
             expect(hcl).toContain('description = "A test insight for unit testing"')
             expect(hcl).toContain('query_json = jsonencode(')
@@ -98,7 +98,7 @@ describe('insightHclExporter test', () => {
             const hcl = result.hcl
 
             expect(hcl).toContain('import {')
-            expect(hcl).toContain('to = posthog_insight.saved_insight')
+            expect(hcl).toContain('to = insights_insight.saved_insight')
             expect(hcl).toContain('id = "1/456"')
 
             const warnings = result.warnings
@@ -144,7 +144,7 @@ describe('insightHclExporter test', () => {
 
             const hcl = generateInsightHCL(insight).hcl
 
-            expect(hcl).toContain('resource "posthog_insight" "derived_name"')
+            expect(hcl).toContain('resource "insights_insight" "derived_name"')
             expect(hcl).toContain('derived_name = "Derived Name"')
         })
 
@@ -181,7 +181,7 @@ describe('insightHclExporter test', () => {
 
             const hcl = generateInsightHCL(insight).hcl
 
-            expect(hcl).toMatch(/# Compatible with posthog provider v\d+\.\d+/)
+            expect(hcl).toMatch(/# Compatible with insights provider v\d+\.\d+/)
         })
     })
 
@@ -220,7 +220,7 @@ describe('insightHclExporter test', () => {
             const result = generateInsightHCL(insight)
 
             expect(result.warnings).toContain(
-                'Some `dashboard_ids` are hardcoded. After exporting, consider referencing the Terraform resource instead (for example, `posthog_dashboard.my_dashboard.id`) so the dashboard is managed alongside this configuration.'
+                'Some `dashboard_ids` are hardcoded. After exporting, consider referencing the Terraform resource instead (for example, `insights_dashboard.my_dashboard.id`) so the dashboard is managed alongside this configuration.'
             )
         })
 
@@ -232,10 +232,10 @@ describe('insightHclExporter test', () => {
             })
 
             const result = generateInsightHCL(insight, {
-                dashboardIdReplacements: new Map([[1, 'posthog_dashboard.my_dashboard.id']]),
+                dashboardIdReplacements: new Map([[1, 'insights_dashboard.my_dashboard.id']]),
             })
 
-            expect(result.hcl).toContain('dashboard_ids = [posthog_dashboard.my_dashboard.id]')
+            expect(result.hcl).toContain('dashboard_ids = [insights_dashboard.my_dashboard.id]')
             expect(result.hcl).not.toContain('dashboard_ids = [1]')
             expect(result.warnings).toHaveLength(0)
         })
@@ -249,13 +249,13 @@ describe('insightHclExporter test', () => {
 
             const result = generateInsightHCL(insight, {
                 dashboardIdReplacements: new Map([
-                    [1, 'posthog_dashboard.dashboard_one.id'],
-                    [2, 'posthog_dashboard.dashboard_two.id'],
+                    [1, 'insights_dashboard.dashboard_one.id'],
+                    [2, 'insights_dashboard.dashboard_two.id'],
                 ]),
             })
 
             expect(result.hcl).toContain(
-                'dashboard_ids = [posthog_dashboard.dashboard_one.id, posthog_dashboard.dashboard_two.id]'
+                'dashboard_ids = [insights_dashboard.dashboard_one.id, insights_dashboard.dashboard_two.id]'
             )
             expect(result.warnings).toHaveLength(0)
         })
@@ -269,17 +269,17 @@ describe('insightHclExporter test', () => {
 
             const result = generateInsightHCL(insight, {
                 dashboardIdReplacements: new Map([
-                    [1, 'posthog_dashboard.dashboard_one.id'],
-                    [3, 'posthog_dashboard.dashboard_three.id'],
+                    [1, 'insights_dashboard.dashboard_one.id'],
+                    [3, 'insights_dashboard.dashboard_three.id'],
                 ]),
             })
 
             expect(result.hcl).toContain(
-                'dashboard_ids = [posthog_dashboard.dashboard_one.id, 2, posthog_dashboard.dashboard_three.id, 4]'
+                'dashboard_ids = [insights_dashboard.dashboard_one.id, 2, insights_dashboard.dashboard_three.id, 4]'
             )
             // Should still warn because IDs 2 and 4 are hardcoded
             expect(result.warnings).toContain(
-                'Some `dashboard_ids` are hardcoded. After exporting, consider referencing the Terraform resource instead (for example, `posthog_dashboard.my_dashboard.id`) so the dashboard is managed alongside this configuration.'
+                'Some `dashboard_ids` are hardcoded. After exporting, consider referencing the Terraform resource instead (for example, `insights_dashboard.my_dashboard.id`) so the dashboard is managed alongside this configuration.'
             )
         })
     })

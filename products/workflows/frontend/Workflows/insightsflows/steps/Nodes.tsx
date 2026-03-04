@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCopy, IconDrag, IconPlus } from '@posthog/icons'
+import { IconCopy, IconDrag, IconPlus } from '@hanzo/icons'
 
 import { insightsFlowEditorLogic } from '../insightsFlowEditorLogic'
 import { NODE_HEIGHT, NODE_WIDTH } from '../react_flow_utils/constants'

@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -273,7 +273,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
 
                         actions.loadDatabase()
 
-                        posthog.capture('join updated')
+                        insights.capture('join updated')
                     } catch (error: any) {
                         actions.setError(error.detail)
                     }
@@ -297,7 +297,7 @@ export const viewLinkLogic = kea<viewLinkLogicType>([
 
                         actions.loadDatabase()
 
-                        posthog.capture('join created')
+                        insights.capture('join created')
                         globalSetupLogic.findMounted()?.actions.markTaskAsCompleted(SetupTaskId.JoinExternalData)
                     } catch (error: any) {
                         actions.setError(error.detail)
@@ -514,7 +514,7 @@ async function loadTablePreviewData(
         )
         setDataAction(transformedData)
     } catch (error) {
-        posthog.captureException(error)
+        insights.captureException(error)
         setDataAction([])
     }
 }

@@ -19,7 +19,7 @@ const pathsWithoutProjectId = [
     'render_query',
 ]
 
-const projectIdentifierInUrlRegex = /^\/project\/(\d+|phc_)/
+const projectIdentifierInUrlRegex = /^\/project\/(\d+|hi_)/
 
 function isPathWithoutProjectId(path: string): boolean {
     const firstPart = path.split('/')[1]

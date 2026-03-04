@@ -1,4 +1,4 @@
-import { LemonDivider } from '@posthog/lemon-ui'
+import { LemonDivider } from '@hanzo/lemon-ui'
 
 import { cn } from 'lib/utils/css-classes'
 

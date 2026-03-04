@@ -21,7 +21,7 @@
           (SELECT tupleElement(breakdown_tuple, 1) AS breakdown_property,
                   tupleElement(breakdown_tuple, 2) AS breakdown_value
            FROM
-             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_posthog_breakdown_null_$$'))]) AS breakdown_tuple
+             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_insights_breakdown_null_$$'))]) AS breakdown_tuple
               FROM events
               LEFT OUTER JOIN
                 (SELECT tupleElement(argMax(tuple(error_tracking_issue_fingerprint_overrides.issue_id), error_tracking_issue_fingerprint_overrides.version), 1) AS issue_id,
@@ -71,7 +71,7 @@
           (SELECT tupleElement(breakdown_tuple, 1) AS breakdown_property,
                   tupleElement(breakdown_tuple, 2) AS breakdown_value
            FROM
-             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_posthog_breakdown_null_$$'))]) AS breakdown_tuple
+             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_insights_breakdown_null_$$'))]) AS breakdown_tuple
               FROM events
               LEFT OUTER JOIN
                 (SELECT tupleElement(argMax(tuple(error_tracking_issue_fingerprint_overrides.issue_id), error_tracking_issue_fingerprint_overrides.version), 1) AS issue_id,
@@ -121,7 +121,7 @@
           (SELECT tupleElement(breakdown_tuple, 1) AS breakdown_property,
                   tupleElement(breakdown_tuple, 2) AS breakdown_value
            FROM
-             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_posthog_breakdown_null_$$'))]) AS breakdown_tuple
+             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_insights_breakdown_null_$$'))]) AS breakdown_tuple
               FROM events
               LEFT OUTER JOIN
                 (SELECT tupleElement(argMax(tuple(error_tracking_issue_fingerprint_overrides.issue_id), error_tracking_issue_fingerprint_overrides.version), 1) AS issue_id,
@@ -171,7 +171,7 @@
           (SELECT tupleElement(breakdown_tuple, 1) AS breakdown_property,
                   tupleElement(breakdown_tuple, 2) AS breakdown_value
            FROM
-             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_posthog_breakdown_null_$$')), tuple('$os', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$os'), ''), 'null'), '^"|"$', '')), '$$_posthog_breakdown_null_$$'))]) AS breakdown_tuple
+             (SELECT arrayJoin([tuple('$browser', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$browser'), ''), 'null'), '^"|"$', '')), '$$_insights_breakdown_null_$$')), tuple('$os', ifNull(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, '$os'), ''), 'null'), '^"|"$', '')), '$$_insights_breakdown_null_$$'))]) AS breakdown_tuple
               FROM events
               LEFT OUTER JOIN
                 (SELECT tupleElement(argMax(tuple(error_tracking_issue_fingerprint_overrides.issue_id), error_tracking_issue_fingerprint_overrides.version), 1) AS issue_id,

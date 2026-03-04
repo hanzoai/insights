@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { LemonButton, LemonInput, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import SignupReferralSource from 'lib/components/SignupReferralSource'
 import SignupRoleSelect from 'lib/components/SignupRoleSelect'
@@ -67,11 +67,11 @@ export function SignupPanelOnboarding(): JSX.Element | null {
 
             <div className="text-center text-secondary">
                 By {!preflight?.demo ? 'creating an account' : 'entering the demo environment'}, you agree to our{' '}
-                <Link to={`https://posthog.com/terms?${UTM_TAGS}`} target="_blank">
+                <Link to={`https://hanzo.ai/terms?${UTM_TAGS}`} target="_blank">
                     Terms of Service
                 </Link>{' '}
                 and{' '}
-                <Link to={`https://posthog.com/privacy?${UTM_TAGS}`} target="_blank">
+                <Link to={`https://hanzo.ai/privacy?${UTM_TAGS}`} target="_blank">
                     Privacy Policy
                 </Link>
                 .

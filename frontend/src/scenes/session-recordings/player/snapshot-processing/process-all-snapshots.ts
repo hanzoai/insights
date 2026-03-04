@@ -1,6 +1,7 @@
-import posthog, { PostHog } from 'posthog-js'
+import insights from '@hanzo/insights'
+import { Insights } from '~/lib/insights-browser'
 
-import { EventType, eventWithTime, fullSnapshotEvent } from '@posthog/rrweb-types'
+import { EventType, eventWithTime, fullSnapshotEvent } from '@hanzo/rrweb-types'
 
 import { isEmptyObject, isObject } from 'lib/utils'
 import { transformEventToWeb } from 'scenes/session-recordings/mobile-replay'
@@ -243,7 +244,7 @@ function createPushPatchedMeta(
             context.result.push(metaEvent)
             context.sourceResult.push(metaEvent)
             throttleCapture(`${sessionRecordingId}-patched-meta`, () => {
-                posthog.capture('patched meta into web recording', {
+                insights.capture('patched meta into web recording', {
                     throttleCaptureKey: `${sessionRecordingId}-patched-meta`,
                     sessionRecordingId,
                     sourceKey: sourceKey,
@@ -253,7 +254,7 @@ function createPushPatchedMeta(
             return true
         }
         throttleCapture(`${sessionRecordingId}-no-viewport-found`, () => {
-            posthog.captureException(new Error('No event viewport or meta snapshot found for full snapshot'), {
+            insights.captureException(new Error('No event viewport or meta snapshot found for full snapshot'), {
                 throttleCaptureKey: `${sessionRecordingId}-no-viewport-found`,
                 sessionRecordingId,
                 sourceKey: sourceKey,
@@ -284,7 +285,7 @@ function processSnapshot(
             context.seenHashes.add(snapshotHash)
         } else {
             throttleCapture(`${sessionRecordingId}-duplicate-snapshot`, () => {
-                posthog.capture('session recording has duplicate snapshots', {
+                insights.capture('session recording has duplicate snapshots', {
                     sessionRecordingId,
                     sourceKey: sourceKey,
                 })
@@ -417,8 +418,8 @@ function isLengthPrefixedSnappy(uint8Data: Uint8Array): boolean {
     return true
 }
 
-const lengthPrefixedSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: PostHog): Promise<string> => {
-    const workerManager = getDecompressionWorkerManager(posthogInstance)
+const lengthPrefixedSnappyDecompress = async (uint8Data: Uint8Array, insightsInstance?: Insights): Promise<string> => {
+    const workerManager = getDecompressionWorkerManager(insightsInstance)
 
     // Phase 1: Parse and collect all compressed blocks
     const compressedBlocks: Uint8Array[] = []
@@ -475,8 +476,8 @@ const lengthPrefixedSnappyDecompress = async (uint8Data: Uint8Array, posthogInst
     return decompressedParts.join('\n')
 }
 
-const rawSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: PostHog): Promise<string> => {
-    const workerManager = getDecompressionWorkerManager(posthogInstance)
+const rawSnappyDecompress = async (uint8Data: Uint8Array, insightsInstance?: Insights): Promise<string> => {
+    const workerManager = getDecompressionWorkerManager(insightsInstance)
 
     const decompressedData = await workerManager.decompress(uint8Data, { isParallel: false })
 
@@ -485,17 +486,17 @@ const rawSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: Post
 }
 
 function reportParseStats(
-    posthogInstance: PostHog | undefined,
+    insightsInstance: Insights | undefined,
     snapshotCount: number,
     parseDuration: number,
     lineCount: number,
     compressionType: 'length_prefixed_snappy' | 'raw_snappy'
 ): void {
-    if (!posthogInstance) {
+    if (!insightsInstance) {
         return
     }
 
-    posthogInstance.capture('replay_parse_timing', {
+    insightsInstance.capture('replay_parse_timing', {
         snapshot_count: snapshotCount,
         parse_duration_ms: parseDuration,
         line_count: lineCount,
@@ -506,7 +507,7 @@ function reportParseStats(
 export const parseEncodedSnapshots = async (
     items: (RecordingSnapshot | EncodedRecordingSnapshot | string)[] | ArrayBuffer | Uint8Array,
     sessionId: string,
-    posthogInstance?: PostHog,
+    insightsInstance?: Insights,
     registerWindowId?: RegisterWindowIdCallback
 ): Promise<RecordingSnapshot[]> => {
     const startTime = performance.now()
@@ -519,12 +520,12 @@ export const parseEncodedSnapshots = async (
 
         if (isLengthPrefixedSnappy(uint8Data)) {
             try {
-                const combinedText = await lengthPrefixedSnappyDecompress(uint8Data, posthogInstance)
+                const combinedText = await lengthPrefixedSnappyDecompress(uint8Data, insightsInstance)
                 const lines = combinedText.split('\n').filter((line) => line.trim().length > 0)
-                const snapshots = await parseEncodedSnapshots(lines, sessionId, posthogInstance, registerFn)
+                const snapshots = await parseEncodedSnapshots(lines, sessionId, insightsInstance, registerFn)
                 const parseDuration = performance.now() - startTime
                 reportParseStats(
-                    posthogInstance,
+                    insightsInstance,
                     snapshots.length,
                     parseDuration,
                     lines.length,
@@ -533,7 +534,7 @@ export const parseEncodedSnapshots = async (
                 return snapshots
             } catch (error) {
                 console.error('Length-prefixed Snappy decompression failed:', error)
-                posthog.captureException(new Error('Failed to decompress length-prefixed snapshot data'), {
+                insights.captureException(new Error('Failed to decompress length-prefixed snapshot data'), {
                     sessionId,
                     error: error instanceof Error ? error.message : 'Unknown error',
                     feature: 'session-recording-client-side-decompression',
@@ -543,11 +544,11 @@ export const parseEncodedSnapshots = async (
         }
 
         try {
-            const combinedText = await rawSnappyDecompress(uint8Data, posthogInstance)
+            const combinedText = await rawSnappyDecompress(uint8Data, insightsInstance)
             const lines = combinedText.split('\n').filter((line) => line.trim().length > 0)
-            const snapshots = await parseEncodedSnapshots(lines, sessionId, posthogInstance, registerFn)
+            const snapshots = await parseEncodedSnapshots(lines, sessionId, insightsInstance, registerFn)
             const parseDuration = performance.now() - startTime
-            reportParseStats(posthogInstance, snapshots.length, parseDuration, lines.length, 'raw_snappy')
+            reportParseStats(insightsInstance, snapshots.length, parseDuration, lines.length, 'raw_snappy')
             return snapshots
         } catch (error) {
             try {
@@ -555,10 +556,10 @@ export const parseEncodedSnapshots = async (
                 const combinedText = textDecoder.decode(uint8Data)
 
                 const lines = combinedText.split('\n').filter((line) => line.trim().length > 0)
-                return parseEncodedSnapshots(lines, sessionId, posthogInstance, registerFn)
+                return parseEncodedSnapshots(lines, sessionId, insightsInstance, registerFn)
             } catch (decodeError) {
                 console.error('Failed to decompress or decode binary data:', error, decodeError)
-                posthog.captureException(new Error('Failed to process snapshot data'), {
+                insights.captureException(new Error('Failed to process snapshot data'), {
                     sessionId,
                     decompressionError: error instanceof Error ? error.message : 'Unknown error',
                     decodeError: decodeError instanceof Error ? decodeError.message : 'Unknown error',
@@ -648,7 +649,7 @@ export const parseEncodedSnapshots = async (
                 exampleLines: unparseableLines.slice(0, 3),
             }
             throttleCapture(`${sessionId}-unparseable-lines`, () => {
-                posthog.capture('session recording had unparseable lines', {
+                insights.capture('session recording had unparseable lines', {
                     ...extra,
                     feature: 'session-recording-snapshot-processing',
                 })

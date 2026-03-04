@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonDropdown, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonDropdown, Link } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { CodeEditorResizeable } from 'lib/monaco/CodeEditorResizable'
@@ -84,13 +84,13 @@ export function InsightsFunctionCode(): JSX.Element {
             </div>
 
             {showSource ? (
-                <LemonField name="hog">
+                <LemonField name="iql">
                     {({ value, onChange }) => (
                         <>
                             {!type.startsWith('site_') ? (
                                 <span className="text-xs text-secondary">
                                     This is the underlying Custom code that will run whenever this triggers.{' '}
-                                    <Link to="https://posthog.com/docs/hog">See the docs</Link> for more info
+                                    <Link to="https://hanzo.ai/docs/hog">See the docs</Link> for more info
                                 </span>
                             ) : null}
                             {mightDropEvents && (
@@ -101,7 +101,7 @@ export function InsightsFunctionCode(): JSX.Element {
                             )}
                             {type === 'source_webhook' && (
                                 <LemonBanner type="info" className="mt-2">
-                                    <b>HTTP requests:</b> Webhook sources can call <code>postHogCapture</code> to ingest
+                                    <b>HTTP requests:</b> Webhook sources can call <code>insightsCapture</code> to ingest
                                     events to Insights. You can also do HTTP calls with <code>fetch</code>. In this case
                                     however, the request will be queued to a background task, a <code>201 Created</code>{' '}
                                     response will be returned and the event will be ingested asynchronously.

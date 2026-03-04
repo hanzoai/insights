@@ -14,15 +14,15 @@ test.describe('Password Reset', () => {
     })
 
     test('Can request password reset', async ({ page }) => {
-        await loginPage.enterUsername('fake@posthog.com')
+        await loginPage.enterUsername('fake@hanzo.ai')
         await page.locator('[data-attr=login-email]').blur()
         await expect(page.locator('[data-attr=forgot-password]')).toBeVisible({ timeout: 5000 })
         await page.click('[data-attr="forgot-password"]')
-        await expect(page).toHaveURL('/reset?email=fake%40posthog.com')
-        await page.fill('[data-attr="reset-email"]', 'test@posthog.com')
+        await expect(page).toHaveURL('/reset?email=fake%40hanzo.ai')
+        await page.fill('[data-attr="reset-email"]', 'test@hanzo.ai')
         await page.click('button[type=submit]')
         await expect(page.getByText('Request received successfully!')).toBeVisible()
-        await expect(page.getByText('test@posthog.com')).toBeVisible()
+        await expect(page.getByText('test@hanzo.ai')).toBeVisible()
     })
 
     test('Cannot reset with invalid token', async ({ page }) => {
@@ -66,7 +66,7 @@ test.describe('Password Reset', () => {
         expect(response.status()).toBe(200)
         const responseBody = await response.json()
         expect(responseBody.success).toBe(true)
-        expect(responseBody.email).toBe('test@posthog.com')
+        expect(responseBody.email).toBe('test@hanzo.ai')
 
         await expect(page.locator('.Toastify__toast--success')).toBeVisible()
         await expect(page).not.toHaveURL('/reset/e2e_test_user/e2e_test_token')

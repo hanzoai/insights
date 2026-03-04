@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconRefresh } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -84,7 +84,7 @@ export function ConfigureSCIMModal(): JSX.Element {
                 </LemonModal.Header>
                 <LemonModal.Content className="space-y-2">
                     <p>
-                        <Link to="https://posthog.com/docs/data/sso#setting-up-scim" target="_blank" targetBlankIcon>
+                        <Link to="https://hanzo.ai/docs/data/sso#setting-up-scim" target="_blank" targetBlankIcon>
                             Read the docs
                         </Link>
                     </p>

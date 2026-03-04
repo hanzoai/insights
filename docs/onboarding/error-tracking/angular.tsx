@@ -24,18 +24,18 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     blocks={[
                         {
                             language: 'typescript',
-                            file: 'src/app/posthog-error-handler.ts',
+                            file: 'src/app/insights-error-handler.ts',
                             code: dedent`
                               import { ErrorHandler, Injectable, Provider } from '@angular/core';
                               import { HttpErrorResponse } from '@angular/common/http';
-                              import posthog from 'posthog-js';
+                              import insights from '@hanzo/insights';
                               
                               @Injectable({ providedIn: 'root' })
                               class InsightsErrorHandler implements ErrorHandler {
                                 public constructor() {}
                                 public handleError(error: unknown): void {
                                   const extractedError = this._extractError(error) || 'Unknown error';
-                                  runOutsideAngular(() => posthog.captureException(extractedError));
+                                  runOutsideAngular(() => insights.captureException(extractedError));
                                 }
                                 protected _extractError(errorCandidate: unknown): unknown {
                                   const error = tryToUnwrapZonejsError(errorCandidate);
@@ -116,7 +116,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                               import { provideRouter } from '@angular/router';
 
                               import { routes } from './app.routes';
-                              import { provideInsightsErrorHandler } from './posthog-error-handler'; // +
+                              import { provideInsightsErrorHandler } from './insights-error-handler'; // +
                               export const appConfig: ApplicationConfig = {
                                 providers: [
                                   ...
@@ -147,7 +147,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             language: 'typescript',
                             file: 'TypeScript',
                             code: dedent`
-                              posthog.captureException(e, additionalProperties)
+                              insights.captureException(e, additionalProperties)
                             `,
                         },
                     ]}
@@ -165,7 +165,7 @@ export const getAngularSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

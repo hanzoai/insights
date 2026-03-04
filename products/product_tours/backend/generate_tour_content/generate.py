@@ -131,7 +131,7 @@ def generate_with_gemini(
         system_prompt=TOUR_GENERATION_SYSTEM_PROMPT,
         contents=contents,
         response_schema=TourGenerationResponse,
-        posthog_properties={
+        insights_properties={
             "tour_id": tour_id,
             "ai_product": "tour_content_generation",
         },

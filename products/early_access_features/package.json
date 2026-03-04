@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-early-access-features",
+    "name": "@hanzo/products-early-access-features",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
@@ -11,7 +11,7 @@
         "kea-subscriptions": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@storybook/react": "*",
         "@types/react": "*",
         "clsx": "*",

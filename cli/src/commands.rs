@@ -13,7 +13,7 @@ use crate::{
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
-    /// The PostHog host to connect to
+    /// The Insights host to connect to
     #[arg(long)]
     host: Option<String>,
 
@@ -24,8 +24,8 @@ pub struct Cli {
     #[arg(long, default_value = "false")]
     skip_ssl_verification: bool,
 
-    /// Set the number of requests per minute for the Posthog API Client.
-    #[arg(long, env = "POSTHOG_CLIENT_RATE_LIMIT")]
+    /// Set the number of requests per minute for the Insights API Client.
+    #[arg(long, env = "INSIGHTS_CLIENT_RATE_LIMIT")]
     rate_limit: Option<usize>,
 
     #[command(subcommand)]
@@ -34,8 +34,8 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Interactively authenticate with PostHog, storing a personal API token locally. You can also use the
-    /// environment variables `POSTHOG_CLI_API_KEY` and `POSTHOG_CLI_PROJECT_ID`
+    /// Interactively authenticate with Insights, storing a personal API token locally. You can also use the
+    /// environment variables `INSIGHTS_CLI_API_KEY` and `INSIGHTS_CLI_PROJECT_ID`
     Login,
 
     /// Experimental commands, not quite ready for prime time
@@ -44,7 +44,7 @@ pub enum Commands {
         cmd: ExpCommand,
     },
 
-    #[command(about = "Upload a directory of bundled chunks to PostHog")]
+    #[command(about = "Upload a directory of bundled chunks to Insights")]
     Sourcemap {
         #[command(subcommand)]
         cmd: SourcemapCommand,
@@ -57,38 +57,38 @@ pub enum ExpCommand {
     Task {
         #[command(subcommand)]
         cmd: TaskCommand,
-        /// Whether to skip SSL verification when talking to the posthog API - only use when using self-signed certificates for
+        /// Whether to skip SSL verification when talking to the Insights API - only use when using self-signed certificates for
         /// self-deployed instances
         // TODO - it seems likely we won't support tasks for self hosted, but I'm putting this here in case we do
         #[arg(long, default_value = "false")]
         skip_ssl_verification: bool,
     },
 
-    /// Run a SQL query against any data you have in posthog. This is mostly for fun, and subject to change
+    /// Run a SQL query against any data you have in Insights. This is mostly for fun, and subject to change
     Query {
         #[command(subcommand)]
         cmd: QueryCommand,
     },
 
-    /// Manage PostHog endpoints as YAML files. Pull endpoints from PostHog, or push changes from your YAML files.
+    /// Manage Insights endpoints as YAML files. Pull endpoints from Insights, or push changes from your YAML files.
     Endpoints {
         #[command(subcommand)]
         cmd: EndpointCommand,
     },
 
-    #[command(about = "Upload hermes sourcemaps to PostHog")]
+    #[command(about = "Upload hermes sourcemaps to Insights")]
     Hermes {
         #[command(subcommand)]
         cmd: HermesSubcommand,
     },
 
-    #[command(about = "Upload proguard mapping files to PostHog")]
+    #[command(about = "Upload proguard mapping files to Insights")]
     Proguard {
         #[command(subcommand)]
         cmd: ProguardSubcommand,
     },
 
-    #[command(about = "Upload iOS/macOS dSYM files to PostHog")]
+    #[command(about = "Upload iOS/macOS dSYM files to Insights")]
     Dsym {
         #[command(subcommand)]
         cmd: DsymSubcommand,
@@ -105,7 +105,7 @@ pub enum ExpCommand {
 pub enum SchemaCommand {
     /// Download event definitions and generate typed SDK
     Pull {
-        /// Output path for generated definitions (stored in posthog.json for future runs)
+        /// Output path for generated definitions (stored in Insights.json for future runs)
         #[arg(short, long)]
         output: Option<String>,
     },

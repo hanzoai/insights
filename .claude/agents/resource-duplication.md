@@ -32,7 +32,7 @@ Dependencies between models are detected from 1) django relations (ex: models.Fo
 - What is the team for the resource.
 - ...and more
 
-If you want a resource to be able to be duplicated, you MUST create a visitor. Visitors are stored under `posthog/models/resource_transfer/visitors`. Each visitor must inherit from `ResourceTransferVisitor` defined in `posthog/models/resource_transfer/visitors/base.py`.
+If you want a resource to be able to be duplicated, you MUST create a visitor. Visitors are stored under `insights/models/resource_transfer/visitors`. Each visitor must inherit from `ResourceTransferVisitor` defined in `insights/models/resource_transfer/visitors/base.py`.
 
 Your visitor's metaclass params and overloaded class methods will change how the resource is duplicated, so make sure to implement all fields that may be necessary.
 
@@ -68,13 +68,13 @@ The following is required in each class:
 The most simple visitor implementation will look like:
 
 ```python
-from posthog.models.resource_transfer.visitors.base import ResourceTransferVisitor
+from insights.models.resource_transfer.visitors.base import ResourceTransferVisitor
 
 class FooVisitor(ResourceTransferVisitor, kind="Foo"):
     @classmethod
     def get_model(cls) -> type[models.Model]:
         # import should be function-level to avoid possible circular deps
-        from posthog.models import Foo
+        from insights.models import Foo
 
         return Foo
 ```
@@ -82,13 +82,13 @@ class FooVisitor(ResourceTransferVisitor, kind="Foo"):
 If you want to exclude some fields:
 
 ```python
-from posthog.models.resource_transfer.visitors.base import ResourceTransferVisitor
+from insights.models.resource_transfer.visitors.base import ResourceTransferVisitor
 
 class FooVisitor(ResourceTransferVisitor, kind="Foo", excluded_fields=["bar"]):
     @classmethod
     def get_model(cls) -> type[models.Model]:
         # import should be function-level to avoid possible circular deps
-        from posthog.models import Foo
+        from insights.models import Foo
 
         return Foo
 ```

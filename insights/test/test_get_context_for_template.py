@@ -15,18 +15,18 @@ class TestGetContextForTemplate(APIBaseTest):
 
         # the current team has an api_token
         assert self.team.api_token != "sTMFPsFhdP1Ssg"
-        # but we use the posthog cloud api_token for the context
+        # but we use the insights cloud api_token for the context
         assert actual == {
             "git_rev": mock.ANY,
             "js_capture_time_to_see_data": False,
             # NB: we default to the PH Cloud key
-            "js_posthog_api_key": "sTMFPsFhdP1Ssg",
-            "js_posthog_host": "",
+            "js_insights_api_key": "sTMFPsFhdP1Ssg",
+            "js_insights_host": "",
             "js_url": "http://localhost:8234",
             "opt_out_capture": False,
-            "posthog_app_context": '{"persisted_feature_flags": ["the_persisted_flags"], "anonymous": false}',
-            "posthog_bootstrap": "{}",
-            "posthog_js_uuid_version": "v7",
+            "insights_app_context": '{"persisted_feature_flags": ["the_persisted_flags"], "anonymous": false}',
+            "insights_bootstrap": "{}",
+            "insights_js_uuid_version": "v7",
             "region": None,
             "self_capture": True,
         }

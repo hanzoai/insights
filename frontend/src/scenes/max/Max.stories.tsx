@@ -2828,7 +2828,7 @@ export const ChangelogOnly: StoryFn = () => {
     return <Template />
 }
 ChangelogOnly.parameters = {
-    featureFlags: ['posthog-ai-changelog'],
+    featureFlags: ['insights-ai-changelog'],
     testOptions: {
         waitForLoadersToDisappear: false,
     },
@@ -2845,7 +2845,7 @@ export const AlertsOnly: StoryFn = () => {
     return <Template />
 }
 AlertsOnly.parameters = {
-    featureFlags: ['posthog-ai-alerts'],
+    featureFlags: ['insights-ai-alerts'],
     testOptions: {
         waitForLoadersToDisappear: false,
     },
@@ -2862,7 +2862,7 @@ export const OutageAlert: StoryFn = () => {
     return <Template />
 }
 OutageAlert.parameters = {
-    featureFlags: ['posthog-ai-alerts'],
+    featureFlags: ['insights-ai-alerts'],
     testOptions: {
         waitForLoadersToDisappear: false,
     },
@@ -2880,7 +2880,7 @@ export const AlertsWithChangelog: StoryFn = () => {
     return <Template />
 }
 AlertsWithChangelog.parameters = {
-    featureFlags: ['posthog-ai-changelog', 'posthog-ai-alerts'],
+    featureFlags: ['insights-ai-changelog', 'insights-ai-alerts'],
     testOptions: {
         waitForLoadersToDisappear: false,
     },
@@ -2898,7 +2898,7 @@ export const OutageWithChangelog: StoryFn = () => {
     return <Template />
 }
 OutageWithChangelog.parameters = {
-    featureFlags: ['posthog-ai-changelog', 'posthog-ai-alerts'],
+    featureFlags: ['insights-ai-changelog', 'insights-ai-alerts'],
     testOptions: {
         waitForLoadersToDisappear: false,
     },
@@ -2916,7 +2916,7 @@ export const MultipleAlerts: StoryFn = () => {
     return <Template />
 }
 MultipleAlerts.parameters = {
-    featureFlags: ['posthog-ai-changelog', 'posthog-ai-alerts'],
+    featureFlags: ['insights-ai-changelog', 'insights-ai-alerts'],
     testOptions: {
         waitForLoadersToDisappear: false,
     },

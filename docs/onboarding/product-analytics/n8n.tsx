@@ -12,7 +12,7 @@ export const getN8nSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <Markdown>
                     n8n is an open-source workflow automation tool. In your n8n workflow, add the [Insights
-                    node](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.posthog/).
+                    node](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.insights/).
                 </Markdown>
             ),
         },

@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconInfo, IconThumbsDown, IconThumbsUp } from '@posthog/icons'
-import { LemonButton, LemonCollapse, LemonSkeleton, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
+import { LemonButton, LemonCollapse, LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
 
 import { CompareFilter } from 'lib/components/CompareFilter/CompareFilter'
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'

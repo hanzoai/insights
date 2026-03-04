@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'

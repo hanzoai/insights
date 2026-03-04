@@ -2,8 +2,8 @@ import { DismissableLayer } from '@radix-ui/react-dismissable-layer'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { cn } from 'lib/utils/css-classes'

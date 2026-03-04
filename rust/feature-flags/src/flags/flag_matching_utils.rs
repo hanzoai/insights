@@ -44,7 +44,7 @@ use super::{flag_group_type_mapping::GroupTypeIndex, flag_matching::FlagEvaluati
 const LONG_SCALE: u64 = 0xfffffffffffffff;
 
 /// Precomputed mapping from property name to its $initial_ equivalent.
-/// Source: posthog/taxonomy/taxonomy.py - PERSON_PROPERTIES_ADAPTED_FROM_EVENT + CAMPAIGN_PROPERTIES
+/// Source: insights/taxonomy/taxonomy.py - PERSON_PROPERTIES_ADAPTED_FROM_EVENT + CAMPAIGN_PROPERTIES
 static INITIAL_PROPERTY_MAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
     HashMap::from([
         // PERSON_PROPERTIES_ADAPTED_FROM_EVENT
@@ -280,7 +280,7 @@ pub async fn fetch_and_locally_cache_all_relevant_properties(
                         SELECT c.cohort_id,
                                CASE WHEN pc.cohort_id IS NOT NULL THEN true ELSE false END AS is_member
                         FROM unnest($1::integer[]) AS c(cohort_id)
-                        LEFT JOIN posthog_cohortpeople AS pc
+                        LEFT JOIN insights_cohortpeople AS pc
                           ON pc.person_id = $2
                           AND pc.cohort_id = c.cohort_id
                     )
@@ -370,7 +370,7 @@ pub async fn fetch_and_locally_cache_all_relevant_properties(
                 group_type_index,
                 group_key,
                 group_properties
-            FROM posthog_group
+            FROM insights_group
             WHERE team_id = $1
                 AND group_type_index = ANY($2)
                 AND group_key = ANY($3)
@@ -672,8 +672,8 @@ async fn try_get_feature_flag_hash_key_overrides(
                 ppd.distinct_id,
                 fhko.feature_flag_key,
                 fhko.hash_key
-            FROM posthog_persondistinctid ppd
-            LEFT JOIN posthog_featureflaghashkeyoverride fhko
+            FROM insights_persondistinctid ppd
+            LEFT JOIN insights_featureflaghashkeyoverride fhko
                 ON fhko.person_id = ppd.person_id
                 AND fhko.team_id = ppd.team_id
             WHERE ppd.team_id = $1
@@ -850,19 +850,19 @@ async fn try_set_feature_flag_hash_key_overrides(
                 p.person_id,
                 p.distinct_id,
                 existing.feature_flag_key
-            FROM posthog_persondistinctid p
-            LEFT JOIN posthog_featureflaghashkeyoverride existing
+            FROM insights_persondistinctid p
+            LEFT JOIN insights_featureflaghashkeyoverride existing
                 ON existing.person_id = p.person_id AND existing.team_id = p.team_id
             WHERE p.team_id = $1
                 AND p.distinct_id = ANY($2)
-                AND EXISTS (SELECT 1 FROM posthog_person WHERE id = p.person_id AND team_id = p.team_id)
+                AND EXISTS (SELECT 1 FROM insights_person WHERE id = p.person_id AND team_id = p.team_id)
         "#;
 
     // Query 2: Get all active feature flags with experience continuity (non-person pool)
     let flags_query = r#"
             SELECT flag.key
-            FROM posthog_featureflag flag
-            JOIN posthog_team team ON flag.team_id = team.id
+            FROM insights_featureflag flag
+            JOIN insights_team team ON flag.team_id = team.id
             WHERE team.id = $1
                 AND flag.ensure_experience_continuity = TRUE
                 AND flag.active = TRUE
@@ -871,7 +871,7 @@ async fn try_set_feature_flag_hash_key_overrides(
 
     // Query 3: Bulk insert hash key overrides (person pool)
     let bulk_insert_query = r#"
-            INSERT INTO posthog_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
+            INSERT INTO insights_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
             SELECT $1, person_id, flag_key, $2
             FROM UNNEST($3::bigint[], $4::text[]) AS t(person_id, flag_key)
             ON CONFLICT DO NOTHING
@@ -1157,18 +1157,18 @@ async fn try_should_write_hash_key_override(
         SELECT DISTINCT
             p.person_id,
             existing.feature_flag_key
-        FROM posthog_persondistinctid p
-        LEFT JOIN posthog_featureflaghashkeyoverride existing
+        FROM insights_persondistinctid p
+        LEFT JOIN insights_featureflaghashkeyoverride existing
             ON existing.person_id = p.person_id AND existing.team_id = p.team_id
         WHERE p.team_id = $1
             AND p.distinct_id = ANY($2)
-            AND EXISTS (SELECT 1 FROM posthog_person WHERE id = p.person_id AND team_id = p.team_id)
+            AND EXISTS (SELECT 1 FROM insights_person WHERE id = p.person_id AND team_id = p.team_id)
     "#;
 
     // Query 2: Get feature flags from non-person pool
     let flags_query = r#"
-        SELECT key FROM posthog_featureflag flag
-        JOIN posthog_team team ON flag.team_id = team.id
+        SELECT key FROM insights_featureflag flag
+        JOIN insights_team team ON flag.team_id = team.id
         WHERE team.id = $1
             AND flag.ensure_experience_continuity = TRUE
             AND flag.active = TRUE
@@ -1527,7 +1527,7 @@ mod tests {
         let mut transaction = conn.begin().await.expect("Failed to begin transaction");
 
         sqlx::query(
-            "INSERT INTO posthog_persondistinctid (team_id, person_id, distinct_id, version)
+            "INSERT INTO insights_persondistinctid (team_id, person_id, distinct_id, version)
              VALUES ($1, $2, $3, 0)",
         )
         .bind(team.id)
@@ -1616,7 +1616,7 @@ mod tests {
             .await
             .expect("Failed to get connection");
         let count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM posthog_featureflaghashkeyoverride
+            "SELECT COUNT(*) FROM insights_featureflaghashkeyoverride
              WHERE team_id = $1 AND hash_key = $2",
         )
         .bind(team.id)
@@ -1689,7 +1689,7 @@ mod tests {
 
         // Person1 has override for flag 1
         sqlx::query(
-            "INSERT INTO posthog_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
+            "INSERT INTO insights_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
              VALUES ($1, $2, $3, $4)",
         )
         .bind(team.id)
@@ -1749,7 +1749,7 @@ mod tests {
             .await
             .expect("Failed to get connection");
         let count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM posthog_featureflaghashkeyoverride WHERE team_id = $1",
+            "SELECT COUNT(*) FROM insights_featureflaghashkeyoverride WHERE team_id = $1",
         )
         .bind(team.id)
         .fetch_one(&mut *conn)
@@ -2041,7 +2041,7 @@ mod tests {
             .await
             .expect("Failed to get connection");
         let count: i64 = sqlx::query_scalar(
-            "SELECT COUNT(*) FROM posthog_featureflaghashkeyoverride WHERE team_id = $1",
+            "SELECT COUNT(*) FROM insights_featureflaghashkeyoverride WHERE team_id = $1",
         )
         .bind(team.id)
         .fetch_one(&mut *conn)

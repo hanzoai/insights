@@ -1,5 +1,5 @@
 import { actions, afterMount, kea, path, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { FeatureFlagKey } from 'lib/constants'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -14,7 +14,7 @@ export type FeatureFlagsSet = {
 const eventsNotified: Record<string, boolean> = {}
 function notifyFlagIfNeeded(flag: string, flagState: string | boolean | undefined): void {
     if (!eventsNotified[flag]) {
-        posthog.capture('$feature_flag_called', {
+        insights.capture('$feature_flag_called', {
             $feature_flag: flag,
             $feature_flag_response: flagState === undefined ? false : flagState,
         })
@@ -74,7 +74,7 @@ function spyOnFeatureFlags(featureFlags: FeatureFlagsSet): FeatureFlagsSet {
 }
 
 export function getFeatureFlagPayload(flag: FeatureFlagKey): any {
-    return posthog.getFeatureFlagPayload(flag)
+    return insights.getFeatureFlagPayload(flag)
 }
 
 export const featureFlagLogic = kea<featureFlagLogicType>([
@@ -98,6 +98,6 @@ export const featureFlagLogic = kea<featureFlagLogicType>([
         ],
     }),
     afterMount(({ actions }) => {
-        posthog.onFeatureFlags(actions.setFeatureFlags)
+        insights.onFeatureFlags(actions.setFeatureFlags)
     }),
 ])

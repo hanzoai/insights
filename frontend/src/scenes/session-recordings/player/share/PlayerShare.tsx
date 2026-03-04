@@ -2,10 +2,10 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconCopy } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonTextArea } from '@posthog/lemon-ui'
+import { IconCopy } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { SharingModalContent } from 'lib/components/Sharing/SharingModal'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
@@ -88,7 +88,7 @@ function PrivateLink(props: PlayerShareLogicProps): JSX.Element {
                 center
                 sideIcon={<IconCopy />}
                 onClick={() =>
-                    void copyToClipboard(privateLinkUrl, privateLinkUrl).catch((e) => posthog.captureException(e))
+                    void copyToClipboard(privateLinkUrl, privateLinkUrl).catch((e) => insights.captureException(e))
                 }
                 title={privateLinkUrl}
                 disabledReason={privateLinkFormHasErrors ? 'Fix all errors before continuing' : undefined}
@@ -125,7 +125,7 @@ function IntegrationNudgeBanner({
                 action={{
                     children: <span className="w-full text-center">Use linked issues</span>,
                     onClick: () => {
-                        posthog.capture('session_replay_share_integration_nudge_clicked', {
+                        insights.capture('session_replay_share_integration_nudge_clicked', {
                             kind,
                             has_integration: true,
                             action: 'switch_to_linked_issues',
@@ -148,7 +148,7 @@ function IntegrationNudgeBanner({
             action={{
                 children: <span className="w-full text-center">Set up integration</span>,
                 onClick: () => {
-                    posthog.capture('session_replay_share_integration_nudge_clicked', {
+                    insights.capture('session_replay_share_integration_nudge_clicked', {
                         kind,
                         has_integration: false,
                         action: 'go_to_settings',

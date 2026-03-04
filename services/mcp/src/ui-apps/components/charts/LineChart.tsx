@@ -7,11 +7,11 @@ const CHART_WIDTH = 400
 const PADDING = { top: 20, right: 20, bottom: 40, left: 50 }
 
 const COLORS = [
-    'var(--posthog-chart-1, #1d4ed8)',
-    'var(--posthog-chart-2, #7c3aed)',
-    'var(--posthog-chart-3, #059669)',
-    'var(--posthog-chart-4, #dc2626)',
-    'var(--posthog-chart-5, #ea580c)',
+    'var(--insights-chart-1, #1d4ed8)',
+    'var(--insights-chart-2, #7c3aed)',
+    'var(--insights-chart-3, #059669)',
+    'var(--insights-chart-4, #dc2626)',
+    'var(--insights-chart-5, #ea580c)',
 ]
 
 export interface DataPoint {

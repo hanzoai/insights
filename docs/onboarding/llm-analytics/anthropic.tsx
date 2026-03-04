@@ -23,14 +23,14 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'bash',
                                 file: 'Python',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install @posthog/ai posthog-node
+                                    npm install @hanzo/ai insights-node
                                 `,
                             },
                         ]}
@@ -72,7 +72,7 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but you
                             will need to capture the data in the right format. See the schema in the [manual capture
-                            section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
+                            section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -85,7 +85,7 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then pass it to our Anthropic wrapper.
+                        settings](https://insights.hanzo.ai/settings/project), then pass it to our Anthropic wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -94,17 +94,17 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog.ai.anthropic import Anthropic
-                                    from posthog import Posthog
+                                    from insights.ai.anthropic import Anthropic
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         "<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
 
                                     client = Anthropic(
                                         api_key="sk-ant-api...", # Replace with your Anthropic API key
-                                        posthog_client=posthog # This is an optional parameter. If it is not provided, a default client will be used.
+                                        insights_client=insights # This is an optional parameter. If it is not provided, a default client will be used.
                                     )
                                 `,
                             },
@@ -112,8 +112,8 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { Anthropic } from '@posthog/ai'
-                                    import { Insights } from 'posthog-node'
+                                    import { Anthropic } from '@hanzo/ai'
+                                    import { Insights } from 'insights-node'
 
                                     const phClient = new Insights(
                                       '<ph_project_api_key>',
@@ -122,7 +122,7 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
                                     const client = new Anthropic({
                                       apiKey: 'sk-ant-api...', // Replace with your Anthropic API key
-                                      posthog: phClient
+                                      insights: phClient
                                     })
                                 `,
                             },
@@ -163,11 +163,11 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                                 "content": "Tell me a fun fact about mascots"
                                             }
                                         ],
-                                        posthog_distinct_id="user_123", # optional
-                                        posthog_trace_id="trace_123", # optional
-                                        posthog_properties={"conversation_id": "abc123", "paid": True}, # optional
-                                        posthog_groups={"company": "company_id_in_your_db"},  # optional
-                                        posthog_privacy_mode=False # optional
+                                        insights_distinct_id="user_123", # optional
+                                        insights_trace_id="trace_123", # optional
+                                        insights_properties={"conversation_id": "abc123", "paid": True}, # optional
+                                        insights_groups={"company": "company_id_in_your_db"},  # optional
+                                        insights_privacy_mode=False # optional
                                     )
 
                                     print(response.content[0].text)
@@ -185,11 +185,11 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                           content: "Tell me a fun fact about mascots"
                                         }
                                       ],
-                                      posthogDistinctId: "user_123", // optional
-                                      posthogTraceId: "trace_123", // optional
-                                      posthogProperties: { conversationId: "abc123", paid: true }, // optional
-                                      posthogGroups: { company: "company_id_in_your_db" }, // optional
-                                      posthogPrivacyMode: false // optional
+                                      insightsDistinctId: "user_123", // optional
+                                      insightsTraceId: "trace_123", // optional
+                                      insightsProperties: { conversationId: "abc123", paid: true }, // optional
+                                      insightsGroups: { company: "company_id_in_your_db" }, // optional
+                                      insightsPrivacyMode: false // optional
                                     })
 
                                     console.log(response.content[0].text)
@@ -206,7 +206,7 @@ export const getAnthropicSteps = (ctx: OnboardingComponentsContext): StepDefinit
                             - This also works when message streams are used (e.g. \`stream=True\` or \`client.messages.stream(...)\`).
                             - If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request.
 
-                            See our docs on [anonymous vs identified events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            See our docs on [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                             `}
                         </Markdown>
                     </Blockquote>

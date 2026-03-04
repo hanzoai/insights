@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { LemonInputSelect, LemonInputSelectOption, Link } from '@posthog/lemon-ui'
+import { LemonInputSelect, LemonInputSelectOption, Link } from '@hanzo/lemon-ui'
 
 import { usePeriodicRerender } from 'lib/hooks/usePeriodicRerender'
 
@@ -91,7 +91,7 @@ export function TwilioPhoneNumberPicker({
                 emptyStateComponent={
                     <p className="text-secondary italic p-1">
                         No phone numbers found. Make sure your Twilio account has phone numbers configured.{' '}
-                        <Link to="https://posthog.com/docs/cdp/destinations/twilio" target="_blank">
+                        <Link to="https://hanzo.ai/docs/cdp/destinations/twilio" target="_blank">
                             See the docs for more information.
                         </Link>
                     </p>

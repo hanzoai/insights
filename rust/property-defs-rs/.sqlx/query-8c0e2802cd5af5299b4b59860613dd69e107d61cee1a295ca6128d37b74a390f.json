@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT count(*) from posthog_propertydefinition WHERE type = 3",
+  "query": "SELECT count(*) from insights_propertydefinition WHERE type = 3",
   "describe": {
     "columns": [
       {

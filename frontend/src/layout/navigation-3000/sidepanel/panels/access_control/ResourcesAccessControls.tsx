@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { capitalizeFirstLetter } from 'kea-forms'
 import { useMemo, useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInputSelect,
@@ -15,7 +15,7 @@ import {
     ProfileBubbles,
     ProfilePicture,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { UserSelectItem } from 'lib/components/UserSelectItem'

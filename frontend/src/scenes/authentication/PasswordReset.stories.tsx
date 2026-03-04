@@ -70,8 +70,8 @@ export const Success = (): JSX.Element => {
     })
 
     useDelayedOnMountEffect(() => {
-        passwordResetLogic.actions.setRequestPasswordResetValues({ email: 'test@posthog.com' })
-        passwordResetLogic.actions.submitRequestPasswordResetSuccess({ email: 'test@posthog.com' })
+        passwordResetLogic.actions.setRequestPasswordResetValues({ email: 'test@hanzo.ai' })
+        passwordResetLogic.actions.submitRequestPasswordResetSuccess({ email: 'test@hanzo.ai' })
     })
 
     return <PasswordReset />
@@ -93,7 +93,7 @@ export const Throttled = (): JSX.Element => {
     })
 
     useDelayedOnMountEffect(() => {
-        passwordResetLogic.actions.setRequestPasswordResetValues({ email: 'test@posthog.com' })
+        passwordResetLogic.actions.setRequestPasswordResetValues({ email: 'test@hanzo.ai' })
         passwordResetLogic.actions.setRequestPasswordResetManualErrors({ code: 'throttled' })
     })
 

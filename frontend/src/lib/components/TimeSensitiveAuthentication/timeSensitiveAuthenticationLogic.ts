@@ -7,7 +7,7 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { ApiError } from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -190,7 +190,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
     subscriptions(({ values, actions }) => ({
         showAuthenticationModal: (shown) => {
             if (shown) {
-                posthog.capture('reauthentication_modal_shown', {
+                insights.capture('reauthentication_modal_shown', {
                     interrupted_form: values.interruptedForm,
                 })
 
@@ -211,7 +211,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
             if (Array.isArray(values.timeSensitiveAuthenticationRequired)) {
                 values.timeSensitiveAuthenticationRequired[0]() // Resolve
             }
-            posthog.capture('reauthentication_completed')
+            insights.capture('reauthentication_completed')
             actions.setTimeSensitiveAuthenticationRequired(false)
             // Refresh the user so we know the new session expiry
             actions.loadUser()
@@ -220,7 +220,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
             if (Array.isArray(values.timeSensitiveAuthenticationRequired)) {
                 values.timeSensitiveAuthenticationRequired[0]() // Resolve
             }
-            posthog.capture('reauthentication_completed', { method: 'passkey_2fa' })
+            insights.capture('reauthentication_completed', { method: 'passkey_2fa' })
             actions.setTimeSensitiveAuthenticationRequired(false)
             // Refresh the user so we know the new session expiry
             actions.loadUser()
@@ -235,7 +235,7 @@ export const timeSensitiveAuthenticationLogic = kea<timeSensitiveAuthenticationL
                 if (Array.isArray(values.timeSensitiveAuthenticationRequired)) {
                     values.timeSensitiveAuthenticationRequired[1]() // Reject
                 }
-                posthog.capture('reauthentication_modal_dismissed')
+                insights.capture('reauthentication_modal_dismissed')
             }
         },
         checkReauthentication: () => {

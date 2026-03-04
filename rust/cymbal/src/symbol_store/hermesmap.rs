@@ -1,5 +1,5 @@
 use axum::async_trait;
-use posthog_symbol_data::{read_symbol_data, HermesMap};
+use insights_symbol_data::{read_symbol_data, HermesMap};
 
 use crate::{
     error::{HermesError, ResolveError},

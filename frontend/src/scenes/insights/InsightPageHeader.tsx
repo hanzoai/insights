@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconCode2, IconInfo, IconPencil, IconPeople, IconShare, IconTrash } from '@posthog/icons'
+import { IconCode2, IconInfo, IconPencil, IconPeople, IconShare, IconTrash } from '@hanzo/icons'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { AddToDashboardModal } from 'lib/components/AddToDashboard/AddToDashboardModal'
@@ -141,7 +141,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
     const { currentProjectId } = useValues(projectLogic)
     const { push } = useActions(router)
     const [tags, setTags] = useState(insight.tags)
-    const { posthogTablesMap, allTables } = useValues(databaseTableListLogic)
+    const { insightsTablesMap, allTables } = useValues(databaseTableListLogic)
 
     const { breadcrumbs } = useValues(breadcrumbsLogic)
     const lastBreadcrumb = breadcrumbs[breadcrumbs.length - 1]
@@ -152,7 +152,7 @@ export function InsightPageHeader({ insightLogicProps }: { insightLogicProps: In
     const [tablePreviewModalOpen, setTablePreviewModalOpen] = useState<boolean>(false)
     const [terraformModalOpen, setTerraformModalOpen] = useState<boolean>(false)
     const [selectedPreviewColumn, setSelectedPreviewColumn] = useState<string | null>('event_person_id')
-    const previewTable = posthogTablesMap.events ?? allTables[0]
+    const previewTable = insightsTablesMap.events ?? allTables[0]
     const previewColumns = useMemo(
         () => Object.values(previewTable?.fields || {}).filter((column) => column.type !== 'view'),
         [previewTable?.fields]

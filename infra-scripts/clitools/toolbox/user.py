@@ -48,7 +48,7 @@ def parse_arn(arn: str) -> dict:
     """Parse AWS ARN into components."""
     try:
         # Handle AWS STS assumed-role ARN format
-        # Format: arn:aws:sts::ACCOUNT:assumed-role/AWSReservedSSO_developers_0847e649a00cc5e7/michael.k@posthog.com
+        # Format: arn:aws:sts::ACCOUNT:assumed-role/AWSReservedSSO_developers_0847e649a00cc5e7/michael.k@hanzo.ai
         parts = arn.split(":")
         if len(parts) != 6 or "assumed-role" not in parts[5]:
             return {"toolbox-claimed": sanitize_label(arn)}  # fallback for unexpected format

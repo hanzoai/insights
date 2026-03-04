@@ -12,7 +12,7 @@ function AndroidInstallSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.Kotlin}>
             {`dependencies {
-    implementation("com.posthog:posthog-android:3.+")
+    implementation("com.insights:insights-android:3.+")
 }`}
         </CodeSnippet>
     )
@@ -26,8 +26,8 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
             {`class SampleApp : Application() {
 
     companion object {
-        const val POSTHOG_API_KEY = "${currentTeam?.api_token}"
-        const val POSTHOG_HOST = "${apiHostOrigin()}"
+        const val INSIGHTS_API_KEY = "${currentTeam?.api_token}"
+        const val INSIGHTS_HOST = "${apiHostOrigin()}"
     }
 
     override fun onCreate() {
@@ -35,13 +35,13 @@ function AndroidSetupSnippet({ includeReplay }: AndroidSetupProps): JSX.Element 
 
         // Create an Insights Config with the given API key and host
         val config = InsightsAndroidConfig(
-            apiKey = POSTHOG_API_KEY,
-            host = POSTHOG_HOST
+            apiKey = INSIGHTS_API_KEY,
+            host = INSIGHTS_HOST
         )
         ${
             includeReplay
                 ? `
-        // check https://posthog.com/docs/session-replay/installation?tab=Android
+        // check https://hanzo.ai/docs/session-replay/installation?tab=Android
         // for more config and to learn about how we capture sessions on mobile
         // and what to expect
         config.sessionReplay = true
@@ -83,7 +83,7 @@ export function SDKInstallAndroidTrackScreenInstructions(): JSX.Element {
             <p>
                 If you want to manually send a new screen capture event, use the <code>screen</code> function.
             </p>
-            <CodeSnippet language={Language.Kotlin}>{`import com.posthog.Insights
+            <CodeSnippet language={Language.Kotlin}>{`import com.insights.Insights
 
 Insights.screen(
     screenTitle = "Dashboard",

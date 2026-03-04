@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useState } from 'react'
 
-import { IconBook, IconTerminal } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, LemonTag } from '@posthog/lemon-ui'
+import { IconBook, IconTerminal } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, LemonTag } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

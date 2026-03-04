@@ -457,7 +457,7 @@ def update_error_tracking_issue_fingerprints(
         # nosemgrep: python.django.security.audit.raw-query.avoid-raw-sql (parameterized via params list)
         ErrorTrackingIssueFingerprintV2.objects.raw(
             """
-                UPDATE posthog_errortrackingissuefingerprintv2
+                UPDATE insights_errortrackingissuefingerprintv2
                 SET version = version + 1, issue_id = %s
                 WHERE team_id = %s AND fingerprint = ANY(%s)
                 RETURNING fingerprint, version, issue_id, id

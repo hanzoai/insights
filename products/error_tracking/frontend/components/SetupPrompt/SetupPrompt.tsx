@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal } from '@posthog/icons'
-import { LemonButton, Spinner } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { LemonButton, Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { teamLogic } from 'scenes/teamLogic'
@@ -61,7 +61,7 @@ const IngestionStatusCheck = ({ className }: { className?: string }): JSX.Elemen
                     <LemonButton
                         targetBlank
                         sideIcon={<IconExternal className="w-5 h-5" />}
-                        to="https://posthog.com/docs/error-tracking/installation"
+                        to="https://hanzo.ai/docs/error-tracking/installation"
                         onClick={() => {
                             addProductIntent({
                                 product_type: ProductKey.ERROR_TRACKING,
