@@ -44,7 +44,7 @@ export const language: () => languages.IMonarchLanguage = () => ({
             [/"/, 'string', '@string_format_json'],
         ],
 
-        hog: [
+        iql: [
             // whitespace
             { include: '@whitespace' },
 
@@ -152,7 +152,7 @@ export const language: () => languages.IMonarchLanguage = () => ({
         bracketCounting: [
             [/\{/, 'delimiter.bracket', '@bracketCounting'],
             [/\}/, 'delimiter.bracket', '@pop'],
-            { include: 'hog' },
+            { include: 'iql' },
         ],
     },
 })
@@ -161,7 +161,7 @@ export function initHogJsonLanguage(monaco: Monaco): void {
     if (!monaco.languages.getLanguages().some(({ id }) => id === 'hogJson')) {
         monaco.languages.register({
             id: 'hogJson',
-            mimetypes: ['application/hog+json'],
+            mimetypes: ['application/iql+json'],
         })
         monaco.languages.setLanguageConfiguration('hogJson', conf())
         monaco.languages.setMonarchTokensProvider('hogJson', language())

@@ -27,7 +27,7 @@ BASE_APP_METRICS2_COLUMNS = """
     team_id Int64,
     timestamp DateTime64(6, 'UTC'),
     -- The name of the service or product that generated the metrics.
-    -- Examples: plugins, hog
+    -- Examples: plugins, iql
     app_source LowCardinality(String),
     -- An id for the app source.
     -- Set app_source to avoid collision with ids from other app sources if the id generation is not safe.

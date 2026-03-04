@@ -28,7 +28,7 @@ export function InsightsFlowEditorPanelLogs(): JSX.Element | null {
             {shouldShowActionLevelLogs && (
                 <div className="p-2 flex flex-col gap-2 overflow-y-auto">
                     <LogsViewer
-                        logicKey={`hog-flow-editor-panel-${actionId || 'all'}`}
+                        logicKey={`fn-flow-editor-panel-${actionId || 'all'}`}
                         instanceLabel="workflow run"
                         sourceType="insights_flow"
                         sourceId={workflow.id}

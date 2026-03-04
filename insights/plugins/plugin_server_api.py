@@ -44,7 +44,7 @@ def reload_insights_functions_on_workers(team_id: int, insights_function_ids: li
 
 def reload_insights_flows_on_workers(team_id: int, insights_flow_ids: list[str]):
     logger.info(f"Reloading insights flows {insights_flow_ids} on workers")
-    publish_message("reload-hog-flows", {"teamId": team_id, "insightsFlowIds": insights_flow_ids})
+    publish_message("reload-insights-flows", {"teamId": team_id, "insightsFlowIds": insights_flow_ids})
 
 
 def reload_evaluations_on_workers(team_id: int, evaluation_ids: list[str]):

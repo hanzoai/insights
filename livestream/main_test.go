@@ -20,7 +20,7 @@ func TestIndex(t *testing.T) {
 
 	if assert.NoError(t, handlers.Index(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "RealTime Hog 3000", rec.Body.String())
+		assert.Equal(t, "RealTime Insights 3000", rec.Body.String())
 	}
 }
 

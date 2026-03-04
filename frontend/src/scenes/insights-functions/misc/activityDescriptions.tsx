@@ -176,7 +176,7 @@ export function insightsFunctionActivityDescriber(logItem: ActivityLogItem, asNo
                 case 'masking': {
                     const code = (
                         <DiffLink
-                            language={change.field === 'fn' ? 'hog' : 'json'}
+                            language={change.field === 'fn' ? 'iql' : 'json'}
                             before={
                                 typeof change.before === 'string'
                                     ? change.before
