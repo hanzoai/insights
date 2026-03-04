@@ -14,18 +14,18 @@ import (
 
 var funFacts = []string{
 	"Hanzo AI was founded in 2017 during Techstars",
-	"The hedgehog mascot is named Max",
+	"The mascot mascot is named Max",
 	"Insights is 100% open source - check out github.com/hanzoai/insights",
 	"Insights supports 40+ data integrations out of the box",
 	"You can run SQL queries directly on your Insights data",
 	"Insights was built by engineers, for engineers",
-	"Hedgehogs can run up to 6 miles per hour!",
+	"Mascots can run up to 6 miles per hour!",
 }
 
 type WelcomeModel struct {
 	isUpgrade bool
 	factIndex int
-	hedgehog  ui.Hedgehog
+	mascot  ui.Mascot
 }
 
 func NewWelcomeModel() WelcomeModel {
@@ -34,7 +34,7 @@ func NewWelcomeModel() WelcomeModel {
 	return WelcomeModel{
 		isUpgrade: isUpgrade,
 		factIndex: int(n.Int64()),
-		hedgehog:  ui.NewHedgehog(),
+		mascot:  ui.NewMascot(),
 	}
 }
 
@@ -69,7 +69,7 @@ func (m WelcomeModel) Update(msg tea.Msg) (WelcomeModel, tea.Cmd) {
 				m.factIndex = 0
 			}
 		case key.Matches(msg, key.NewBinding(key.WithKeys(" "))):
-			m.hedgehog.Pet()
+			m.mascot.Pet()
 		case key.Matches(msg, key.NewBinding(key.WithKeys("q"))):
 			return m, tea.Quit
 		}
@@ -84,8 +84,8 @@ func (m WelcomeModel) View() string {
 	// Header section
 	header := ui.GetWelcomeArt()
 
-	// Hedgehog section - contained in its own area
-	hedgehogSection := m.hedgehog.RenderWithMessage()
+	// Mascot section - contained in its own area
+	mascotSection := m.mascot.RenderWithMessage()
 
 	// Action section - the main CTA
 	actionTitle := lipgloss.NewStyle().
@@ -123,7 +123,7 @@ func (m WelcomeModel) View() string {
 		lipgloss.Center,
 		header,
 		sectionGap,
-		hedgehogSection,
+		mascotSection,
 		sectionGap,
 		actionSection,
 		sectionGap,

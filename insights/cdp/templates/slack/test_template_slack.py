@@ -3,7 +3,7 @@ import pytest
 from insights.cdp.templates.helpers import BaseInsightsFunctionTemplateTest
 from insights.cdp.templates.slack.template_slack import template as template_slack
 
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 class TestTemplateSlack(BaseInsightsFunctionTemplateTest):
@@ -50,13 +50,13 @@ class TestTemplateSlack(BaseInsightsFunctionTemplateTest):
 
     def test_function_prints_warning_on_bad_status(self):
         self.mock_fetch_response = lambda *args: {"status": 400, "body": {"ok": True}}  # type: ignore
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(self._inputs())
 
         assert e.value.message == "Failed to post message to Slack: 400: {'ok': true}"
 
     def test_function_prints_warning_on_bad_body(self):
         self.mock_fetch_response = lambda *args: {"status": 200, "body": {"ok": False}}  # type: ignore
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(self._inputs())
         assert e.value.message == "Failed to post message to Slack: 200: {'ok': false}"

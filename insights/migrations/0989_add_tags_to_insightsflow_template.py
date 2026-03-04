@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogflowtemplate",
+            model_name="insightsflowtemplate",
             name="tags",
             field=ArrayField(base_field=models.CharField(max_length=255), blank=True, default=list, size=None),
         ),

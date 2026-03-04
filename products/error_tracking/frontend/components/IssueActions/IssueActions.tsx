@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 
 import { LemonButton, LemonDialog, LemonSelect } from '@hanzo/lemon-ui'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { sceneLogic } from 'scenes/sceneLogic'
 import { urls } from 'scenes/urls'
 
@@ -27,7 +27,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
     const { setFilterGroup } = useActions(issueFiltersLogic)
     const { setSelectedIssueIds } = useActions(bulkSelectLogic)
     const { newTab } = useActions(sceneLogic)
-    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti()
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti()
 
     const hasAtLeastTwoIssues = selectedIds.length >= 2
 
@@ -77,7 +77,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
 
     return (
         <div className="flex gap-x-2 justify-between">
-            <HogfettiComponent />
+            <ConfettiComponent />
             <div className="flex gap-x-2">
                 <LemonButton type="secondary" size="small" onClick={openInNewTabs}>
                     Open all
@@ -110,7 +110,7 @@ export function IssueActions({ issues, selectedIds }: IssueActionsProps): JSX.El
                         switch (value) {
                             case 'resolved':
                                 resolveIssues(selectedIds)
-                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerHogfetti, delay))
+                                ;[0, 400, 800].forEach((delay) => setTimeout(triggerConfetti, delay))
                                 break
                             case 'suppressed':
                                 suppressIssues(selectedIds)

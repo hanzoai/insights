@@ -55,7 +55,7 @@ from insights.rate_limit import (
 from insights.rbac.user_access_control import UserAccessControlError
 from insights.schema_migrations.upgrade import upgrade
 
-from common.scriptvm.python.utils import HogVMException
+from common.scriptvm.python.utils import ScriptVMException
 
 
 def _process_query_request(
@@ -171,7 +171,7 @@ class QueryViewSet(TeamAndOrgViewSetMixin, PydanticModelMixin, viewsets.ViewSet)
                 else status.HTTP_200_OK
             )
             return Response(result, status=response_status)
-        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, ScriptVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
         except InternalCHQueryError as e:
             self.handle_column_ch_error(e)

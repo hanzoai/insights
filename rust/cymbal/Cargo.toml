@@ -22,7 +22,7 @@ common-redis = { path = "../common/redis" }
 limiters = { path = "../common/limiters" }
 insights-symbol-data = { path = "../common/symbol_data" }
 common-geoip = { path = "../common/geoip" }
-hogvm = { path = "../common/hogvm" }
+scriptvm = { path = "../common/scriptvm" }
 thiserror = { workspace = true }
 sqlx = { workspace = true }
 serde_json = { workspace = true }

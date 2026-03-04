@@ -3906,7 +3906,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
         [
             ("ExposedCHQueryError", "insights.errors.ExposedCHQueryError", "NO_COMMON_TYPE error from ClickHouse"),
             ("ExposedInsightsQLError", "insights.insightsql.errors.ExposedInsightsQLError", "Invalid InsightsQL syntax"),
-            ("HogVMException", "common.scriptvm.python.utils.HogVMException", "Global variable not found: variables"),
+            ("ScriptVMException", "common.scriptvm.python.utils.ScriptVMException", "Global variable not found: variables"),
         ]
     )
     @patch("insights.caching.calculate_results.calculate_for_query_based_insight")
@@ -3917,12 +3917,12 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
         from insights.errors import ExposedCHQueryError
 
-        from common.scriptvm.python.utils import HogVMException
+        from common.scriptvm.python.utils import ScriptVMException
 
         error_classes: dict[str, type] = {
             "ExposedCHQueryError": ExposedCHQueryError,
             "ExposedInsightsQLError": ExposedInsightsQLError,
-            "HogVMException": HogVMException,
+            "ScriptVMException": ScriptVMException,
         }
         mock_calculate.side_effect = error_classes[_name](error_message)
 
@@ -3943,7 +3943,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
         [
             ("ExposedCHQueryError", "ClickHouse trend error"),
             ("ExposedInsightsQLError", "InsightsQL trend error"),
-            ("HogVMException", "Global variable not found: variables"),
+            ("ScriptVMException", "Global variable not found: variables"),
         ]
     )
     @patch("insights.api.insight.InsightViewSet.calculate_trends_insightsql")
@@ -3955,12 +3955,12 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
         from insights.errors import ExposedCHQueryError
 
-        from common.scriptvm.python.utils import HogVMException
+        from common.scriptvm.python.utils import ScriptVMException
 
         error_classes: dict[str, type] = {
             "ExposedCHQueryError": ExposedCHQueryError,
             "ExposedInsightsQLError": ExposedInsightsQLError,
-            "HogVMException": HogVMException,
+            "ScriptVMException": ScriptVMException,
         }
         mock_calculate.side_effect = error_classes[error_type](error_message)
 
@@ -3976,7 +3976,7 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
         [
             ("ExposedCHQueryError", "ClickHouse funnel error"),
             ("ExposedInsightsQLError", "InsightsQL funnel error"),
-            ("HogVMException", "Global variable not found: variables"),
+            ("ScriptVMException", "Global variable not found: variables"),
         ]
     )
     @patch("insights.api.insight.InsightViewSet.calculate_funnel_insightsql")
@@ -3988,12 +3988,12 @@ class TestInsightErrorHandling(ClickhouseTestMixin, APIBaseTest):
 
         from insights.errors import ExposedCHQueryError
 
-        from common.scriptvm.python.utils import HogVMException
+        from common.scriptvm.python.utils import ScriptVMException
 
         error_classes: dict[str, type] = {
             "ExposedCHQueryError": ExposedCHQueryError,
             "ExposedInsightsQLError": ExposedInsightsQLError,
-            "HogVMException": HogVMException,
+            "ScriptVMException": ScriptVMException,
         }
         mock_calculate.side_effect = error_classes[error_type](error_message)
 

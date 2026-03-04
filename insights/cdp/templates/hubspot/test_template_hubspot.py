@@ -9,7 +9,7 @@ from insights.cdp.templates.hubspot.template_hubspot import (
 )
 from insights.models import PluginConfig
 
-from common.scriptvm.python.utils import UncaughtHogVMException
+from common.scriptvm.python.utils import UncaughtScriptVMException
 
 
 class TestTemplateHubspot(BaseInsightsFunctionTemplateTest):
@@ -341,7 +341,7 @@ class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
         self.fetch_responses = {
             "https://api.hubapi.com/events/v3/event-definitions/purchase/?includeProperties=true": EVENT_DEFINITION_RESPONSE,
         }
-        with pytest.raises(UncaughtHogVMException) as e:
+        with pytest.raises(UncaughtScriptVMException) as e:
             self.run_function(
                 inputs=self._inputs(include_all_properties=True, event="purchase"),
                 globals={
@@ -382,7 +382,7 @@ class TestTemplateHubspotEvent(BaseInsightsFunctionTemplateTest):
                     == f"https://api.hubapi.com/events/v3/event-definitions/{formatted_name}/?includeProperties=true"
                 )
             else:
-                with pytest.raises(UncaughtHogVMException) as e:
+                with pytest.raises(UncaughtScriptVMException) as e:
                     self.run_function(
                         inputs=self._inputs(eventName=event_name),
                         globals={
