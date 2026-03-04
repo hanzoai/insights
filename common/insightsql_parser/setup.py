@@ -12,10 +12,10 @@ homebrew_location = "/opt/homebrew" if platform.machine() == "arm64" else "/usr/
 module = Extension(
     "insightsql_parser",
     sources=[
-        "InsightsQLLexer.cpp",
-        "InsightsQLParser.cpp",
-        "InsightsQLParserBaseVisitor.cpp",
-        "InsightsQLParserVisitor.cpp",
+        "HogQLLexer.cpp",
+        "HogQLParser.cpp",
+        "HogQLParserBaseVisitor.cpp",
+        "HogQLParserVisitor.cpp",
         "error.cpp",
         "string.cpp",
         "json.cpp",

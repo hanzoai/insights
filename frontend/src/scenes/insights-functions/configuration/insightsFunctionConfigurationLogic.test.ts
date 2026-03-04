@@ -103,7 +103,7 @@ const HOG_TEMPLATE: InsightsFunctionTemplateType = {
 
 const INSIGHTS_FUNCTION: InsightsFunctionType = {
     ...HOG_TEMPLATE,
-    hog: HOG_TEMPLATE.code,
+    iql: HOG_TEMPLATE.code,
     description: typeof HOG_TEMPLATE.description === 'string' ? HOG_TEMPLATE.description : '',
     created_at: '2021-09-29T14:00:00Z',
     created_by: {} as any,
@@ -140,7 +140,7 @@ describe('insightsFunctionConfigurationLogic', () => {
                 description: HOG_TEMPLATE.description,
                 inputs_schema: HOG_TEMPLATE.inputs_schema,
                 filters: null,
-                hog: HOG_TEMPLATE.code,
+                iql: HOG_TEMPLATE.code,
                 icon_url: HOG_TEMPLATE.icon_url,
                 inputs: {
                     method: { value: 'POST' },

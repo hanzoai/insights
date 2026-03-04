@@ -515,7 +515,7 @@ class TestGoogleCloudIntegrationModel(BaseTest):
         "project_id": "insights-616",
         "private_key_id": "df3e129a722a865cc3539b4e69507bad",
         "private_key": "-----BEGIN PRIVATE KEY-----\nTHISISTHEKEY==\n-----END PRIVATE KEY-----\n",
-        "client_email": "hog-pubsub-test@insights-301601.iam.gserviceaccount.com",
+        "client_email": "fn-pubsub-test@insights-301601.iam.gserviceaccount.com",
         "client_id": "11223344556677889900",
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",

@@ -23,7 +23,7 @@ class TestRefreshInsightsFunctions(BaseTest):
                 name="Test Function 1",
                 type="destination",
                 description="Test Description 1",
-                hog="return event",
+                iql="return event",
                 enabled=True,
             )
 
@@ -32,7 +32,7 @@ class TestRefreshInsightsFunctions(BaseTest):
                 name="Test Function 2",
                 type="transformation",
                 description="Test Description 2",
-                hog="return event",
+                iql="return event",
                 enabled=True,
             )
 
@@ -41,7 +41,7 @@ class TestRefreshInsightsFunctions(BaseTest):
                 name="Test Function 3",
                 type="destination",
                 description="Test Description 3",
-                hog="return event",
+                iql="return event",
                 enabled=True,
             )
 

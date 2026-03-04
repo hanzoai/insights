@@ -52,7 +52,7 @@ def get_transpiled_function(insights_function: InsightsFunction) -> str:
 
     response += "return inputs;}\n"
 
-    response += f"const source = {transpile(insights_function.hog, 'site')}();"
+    response += f"const source = {transpile(insights_function.iql, 'site')}();"
 
     # Convert the global filters to code
     filters_expr = insights_function_filters_to_expr(insights_function.filters or {}, insights_function.team, {})

@@ -200,7 +200,7 @@ FILE_SYSTEM_ACTIVITY_CASES: list[tuple[str, FileSystemActivityCase]] = [
                 team=test.team,
                 name="File system custom function",
                 type=InsightsFunctionType.DESTINATION,
-                hog="return []",
+                iql="return []",
                 created_by=test.user,
             ),
             ref_getter=lambda instance: str(instance.id),

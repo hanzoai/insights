@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS cyclotron_jobs (
     vm_state TEXT,
     -- This is meant for workers "talking to themselves", e.g. tracking retries or something
     metadata TEXT,
-    -- This is meant for "the next guy" - hog might fill it with a URL to fetch, for example
+    -- This is meant for "the next guy" - iql might fill it with a URL to fetch, for example
     parameters TEXT
 );
 

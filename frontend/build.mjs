@@ -22,7 +22,7 @@ copyPublicFolder(path.resolve(__dirname, 'public'), path.resolve(__dirname, 'dis
 
 copyPublicFolder(
     path.resolve(__dirname, 'node_modules', '@hanzo', 'mascot-mode', 'assets'),
-    path.resolve(__dirname, 'dist', 'hedgehog-mode')
+    path.resolve(__dirname, 'dist', 'mascot-mode')
 )
 copySnappyWASMFile(__dirname)
 copyRRWebWorkerFiles(__dirname)

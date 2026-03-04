@@ -129,15 +129,15 @@ class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
 
     def get_file_system_representation(self) -> FileSystemRepresentation:
         folder = "Unfiled/Destinations"
-        href = f"/pipeline/destinations/hog-{self.pk}/configuration"
+        href = f"/pipeline/destinations/fn-{self.pk}/configuration"
         type = self.type
 
         if self.type == InsightsFunctionType.SITE_APP:
             folder = "Unfiled/Site apps"
-            href = f"/pipeline/site-apps/hog-{self.pk}/configuration"
+            href = f"/pipeline/site-apps/fn-{self.pk}/configuration"
         elif self.type == InsightsFunctionType.TRANSFORMATION:
             folder = "Unfiled/Transformations"
-            href = f"/pipeline/transformations/hog-{self.pk}/configuration"
+            href = f"/pipeline/transformations/fn-{self.pk}/configuration"
         elif self.type == InsightsFunctionType.SOURCE_WEBHOOK:
             folder = "Unfiled/Sources"
             href = f"/functions/{self.pk}/configuration"
@@ -231,7 +231,7 @@ class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
 
     @property
     def url(self):
-        return absolute_uri(f"/project/{self.team_id}/pipeline/destinations/hog-{str(self.id)}")
+        return absolute_uri(f"/project/{self.team_id}/pipeline/destinations/fn-{str(self.id)}")
 
     def save(self, *args, **kwargs):
         from insights.cdp.filters import compile_filters_bytecode

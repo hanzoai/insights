@@ -2,7 +2,7 @@
 #
 # If these tests get too slow, look at increasing concurrency and re-timing the tests by manually dispatching
 # .github/workflows/ci-backend-update-test-timing.yml action
-name: Hog CI
+name: IQL CI
 on:
     push:
         branches:
@@ -22,13 +22,13 @@ jobs:
     changes:
         runs-on: ubuntu-24.04
         timeout-minutes: 5
-        name: Determine need to run Hog checks
+        name: Determine need to run IQL checks
         permissions:
             contents: read
             pull-requests: read
         # Set job outputs to values from filter step
         outputs:
-            hog: ${{ steps.filter.outputs.iql || 'true' }}
+            iql: ${{ steps.filter.outputs.iql || 'true' }}
         steps:
             # For pull requests it's not necessary to checkout the code, but we
             # also want this to run on master so we need to checkout
@@ -39,21 +39,21 @@ jobs:
               if: github.event_name != 'push' # Run all tests on master push
               with:
                   filters: |
-                      hog:
+                      iql:
                         # Avoid running tests for irrelevant changes
                         - 'common/scriptvm/**/*'
                         - 'insights/insightsql/**/*'
-                        - 'bin/hog'
-                        - 'bin/hoge'
+                        - 'bin/iql'
+                        - 'bin/iqle'
                         - 'package.json'
                         - requirements.txt
                         - requirements-dev.txt
-                        - .github/workflows/ci-hog.yml
+                        - .github/workflows/ci-iql.yml
 
-    hog-tests:
+    iql-tests:
         needs: changes
         timeout-minutes: 30
-        name: Hog tests
+        name: IQL tests
         runs-on: ubuntu-24.04
         if: needs.changes.outputs.iql == 'true'
 
@@ -135,7 +135,7 @@ jobs:
                   pnpm --filter=@hanzo/scriptvm install --frozen-lockfile
                   pnpm --filter=@hanzo/scriptvm test
 
-            - name: Run Hog tests
+            - name: Run IQL tests
               run: |
                   pnpm --filter=@hanzo/scriptvm install --frozen-lockfile
                   pnpm --filter=@hanzo/scriptvm compile:stl
@@ -147,8 +147,8 @@ jobs:
 
     check-package-version:
         name: Check ScriptVM TypeScript package version and detect an update
-        needs: hog-tests
-        if: needs.hog-tests.result == 'success' && needs.changes.outputs.iql == 'true'
+        needs: iql-tests
+        if: needs.iql-tests.result == 'success' && needs.changes.outputs.iql == 'true'
         runs-on: ubuntu-24.04
         outputs:
             committed-version: ${{ steps.check-package-version.outputs.committed-version }}

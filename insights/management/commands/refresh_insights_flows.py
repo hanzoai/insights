@@ -35,7 +35,7 @@ class Command(BaseCommand):
             "--team-id", type=int, help="Team ID to refresh InsightsFlows for (if not provided, processes all teams)"
         )
         parser.add_argument(
-            "--hog-flow-id",
+            "--fn-flow-id",
             type=str,
             help="Specific InsightsFlow ID to refresh (if provided, only this flow is processed)",
         )
