@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use common_types::TeamId;
-use hogvm::{ExecutionContext, Program, StepOutcome, VmError};
+use scriptvm::{ExecutionContext, Program, StepOutcome, VmError};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgConnection;

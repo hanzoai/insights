@@ -102,7 +102,7 @@ struct HoghookAsyncFunctionRequest {
     args: HoghookArgs,
 }
 
-pub async fn post_hoghook(
+pub async fn post_insightshook(
     State(pg_queue): State<PgQueue>,
     body: Bytes,
 ) -> Result<Json<WebhookPostResponse>, (StatusCode, Json<WebhookPostResponse>)> {
@@ -447,7 +447,7 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn hoghook_success(db: PgPool) {
+    async fn insightshook_success(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db.clone()).await;
         let hog_mode = true;
 
@@ -495,7 +495,7 @@ mod tests {
                 .oneshot(
                     Request::builder()
                         .method(http::Method::POST)
-                        .uri("/hoghook")
+                        .uri("/insightshook")
                         .header(http::header::CONTENT_TYPE, "application/json")
                         .body(Body::from(payload.to_owned()))
                         .unwrap(),
@@ -538,7 +538,7 @@ mod tests {
     }
 
     #[sqlx::test(migrations = "../migrations")]
-    async fn hoghook_bad_requests(db: PgPool) {
+    async fn insightshook_bad_requests(db: PgPool) {
         let pg_queue = PgQueue::new_from_pool("test_index", db.clone()).await;
         let hog_mode = true;
 
@@ -573,7 +573,7 @@ mod tests {
                 .oneshot(
                     Request::builder()
                         .method(http::Method::POST)
-                        .uri("/hoghook")
+                        .uri("/insightshook")
                         .header(http::header::CONTENT_TYPE, "application/json")
                         .body(Body::from(payload.to_owned()))
                         .unwrap(),

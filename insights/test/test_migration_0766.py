@@ -8,7 +8,7 @@ pytestmark = pytest.mark.skip("old migrations slow overall test run down")
 
 
 class FixSubTemplateIdsToTemplateIdsMigrationTest(NonAtomicTestMigrations):
-    migrate_from = "0765_hogflows"
+    migrate_from = "0765_insightsflows"
     migrate_to = "0766_fix_sub_template_ids_to_template_ids"
 
     CLASS_DATA_LEVEL_SETUP = False

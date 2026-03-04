@@ -116,7 +116,7 @@ from insights.utils import (
     variables_override_requested_by_client,
 )
 
-from common.scriptvm.python.utils import HogVMException
+from common.scriptvm.python.utils import ScriptVMException
 
 logger = structlog.get_logger(__name__)
 
@@ -875,7 +875,7 @@ class InsightSerializer(InsightBasicSerializer):
                     variables_override=variables_override,
                     tile_filters_override=tile_filters_override,
                 )
-            except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
+            except (ExposedInsightsQLError, ExposedCHQueryError, ScriptVMException) as e:
                 raise ValidationError(str(e), getattr(e, "code_name", None))
             except ConcurrencyLimitExceeded as e:
                 logger.warn(
@@ -1277,7 +1277,7 @@ When set, the specified dashboard's filters and date range override will be appl
 
         try:
             serialized_data = self.get_serializer(instance, context=serializer_context).data
-        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, ScriptVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
 
         if dashboard_tile is not None:
@@ -1412,7 +1412,7 @@ When set, the specified dashboard's filters and date range override will be appl
                     result = self.calculate_trends_insightsql(request)
                 else:
                     result = self.calculate_trends(request)
-        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, ScriptVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
         except UserAccessControlError as e:
             raise ValidationError(str(e))
@@ -1508,7 +1508,7 @@ When set, the specified dashboard's filters and date range override will be appl
                 else:
                     funnel = self.calculate_funnel(request)
 
-        except (ExposedInsightsQLError, ExposedCHQueryError, HogVMException) as e:
+        except (ExposedInsightsQLError, ExposedCHQueryError, ScriptVMException) as e:
             raise ValidationError(str(e), getattr(e, "code_name", None))
 
         if isinstance(funnel["result"], BaseModel):

@@ -65,7 +65,7 @@ pub struct EndpointYaml {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 
-    /// The HogQL query to execute (for simple HogQL queries)
+    /// The InsightsQL query to execute (for simple InsightsQL queries)
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub query: Option<String>,
 
@@ -336,11 +336,11 @@ impl EndpointYaml {
         let mut query = if let Some(query_def) = &self.query_definition {
             // Use the full query definition if provided
             query_def.clone()
-        } else if let Some(hogql) = &self.query {
-            // Build a HogQLQuery from the simple query string
+        } else if let Some(insightsql) = &self.query {
+            // Build a InsightsQLQuery from the simple query string
             let mut q = serde_json::Map::new();
-            q.insert("kind".to_string(), Value::String("HogQLQuery".to_string()));
-            q.insert("query".to_string(), Value::String(hogql.clone()));
+            q.insert("kind".to_string(), Value::String("InsightsQLQuery".to_string()));
+            q.insert("query".to_string(), Value::String(insightsql.clone()));
             Value::Object(q)
         } else {
             // No query specified - this should be caught during validation
@@ -399,8 +399,8 @@ impl EndpointYaml {
     /// Create an EndpointYaml from an API response
     pub fn from_api_response(response: &EndpointResponse) -> Self {
         let (query, query_definition) = if let Some(kind) = response.query.get("kind") {
-            if kind == "HogQLQuery" {
-                // Simple HogQL query - extract just the query string
+            if kind == "InsightsQLQuery" {
+                // Simple InsightsQL query - extract just the query string
                 let query_str = response
                     .query
                     .get("query")
@@ -632,7 +632,7 @@ pub fn compute_changes_for_push(local: &EndpointYaml, remote: &EndpointResponse)
         });
     }
 
-    // Query (for HogQL queries)
+    // Query (for InsightsQL queries)
     let local_query = local.query.as_deref().unwrap_or("");
     let remote_query = remote
         .query
@@ -852,7 +852,7 @@ pub fn fetch_all_endpoints(debug: bool) -> Result<EndpointListResponse> {
 // Variable reference extraction
 // ============================================================================
 
-/// Extract variable references from a HogQL query string.
+/// Extract variable references from a InsightsQL query string.
 /// Looks for patterns like {variables.code_name}
 pub fn extract_variable_references(query: &str) -> Vec<String> {
     let re = regex::Regex::new(r"\{variables\.([a-zA-Z_][a-zA-Z0-9_]*)\}")
@@ -1044,7 +1044,7 @@ materialization:
         let request = endpoint.to_api_request(None);
         assert_eq!(request["name"], "test");
         assert_eq!(request["description"], "Test endpoint");
-        assert_eq!(request["query"]["kind"], "HogQLQuery");
+        assert_eq!(request["query"]["kind"], "InsightsQLQuery");
         assert_eq!(request["query"]["query"], "SELECT 1");
     }
 

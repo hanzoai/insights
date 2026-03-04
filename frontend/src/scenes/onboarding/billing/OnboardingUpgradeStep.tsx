@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { Spinner } from '@hanzo/lemon-ui'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { SupermanHog } from 'lib/components/mascots'
 import { billingLogic } from 'scenes/billing/billingLogic'
 
@@ -38,7 +38,7 @@ export const OnboardingUpgradeStep: OnboardingStepComponentType<OnboardingUpgrad
 OnboardingUpgradeStep.stepKey = OnboardingStepKey.PLANS
 
 const ProductSubscribed = ({ product }: { product: BillingProductV2Type }): JSX.Element => {
-    const { trigger, HogfettiComponent } = useHogfetti({ count: 100, duration: 3000 })
+    const { trigger, ConfettiComponent } = useConfetti({ count: 100, duration: 3000 })
 
     useEffect(() => {
         const run = async (): Promise<void> => {
@@ -54,7 +54,7 @@ const ProductSubscribed = ({ product }: { product: BillingProductV2Type }): JSX.
 
     return (
         <div className="relative flex flex-col items-center text-center">
-            <HogfettiComponent />
+            <ConfettiComponent />
 
             {/* Superman floating animation */}
             <div className="w-40 h-40 animate-float">

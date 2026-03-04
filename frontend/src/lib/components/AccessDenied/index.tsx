@@ -3,7 +3,7 @@ import { useActions } from 'kea'
 import { Link } from 'lib/lemon-ui/Link'
 import { cn } from 'lib/utils/css-classes'
 
-import noAccessNopehog from 'public/no-access-nopehog.png'
+import noAccessNopehog from 'public/no-access.png'
 
 import { supportLogic } from '../Support/supportLogic'
 

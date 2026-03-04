@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { IconCheck, IconExternal, IconLock, IconTarget } from '@hanzo/icons'
 import { LemonButton, LemonSelect, Link } from '@hanzo/lemon-ui'
 
-import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
+import { useConfetti } from 'lib/components/Confetti/Confetti'
 import { SetupTaskId } from 'lib/components/ProductSetup'
 import { Popover } from 'lib/lemon-ui/Popover'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
@@ -92,25 +92,25 @@ export function ProductSetupPopover({
     // Calculate other products with remaining tasks
     const otherProductsWithTasks = useOtherProductsWithTasks(selectedProduct, savedOnboardingTasks)
 
-    // Hogfetti celebration
-    const { trigger: triggerHogfetti, HogfettiComponent } = useHogfetti()
+    // Confetti celebration
+    const { trigger: triggerConfetti, ConfettiComponent } = useConfetti()
     const previouslyComplete = useRef(isSetupComplete)
 
     useEffect(() => {
-        let hogfettiTimeoutHandlers: NodeJS.Timeout[] = []
+        let confettiTimeoutHandlers: NodeJS.Timeout[] = []
 
         if (isSetupComplete && !previouslyComplete.current && visible) {
             setShowCelebration(true)
-            hogfettiTimeoutHandlers = [0, 400, 800].map((delay) => setTimeout(triggerHogfetti, delay))
+            confettiTimeoutHandlers = [0, 400, 800].map((delay) => setTimeout(triggerConfetti, delay))
         }
         if (visible) {
             previouslyComplete.current = isSetupComplete
         }
 
         return () => {
-            hogfettiTimeoutHandlers.forEach((handler) => clearTimeout(handler))
+            confettiTimeoutHandlers.forEach((handler) => clearTimeout(handler))
         }
-    }, [isSetupComplete, visible, triggerHogfetti, setShowCelebration])
+    }, [isSetupComplete, visible, triggerConfetti, setShowCelebration])
 
     // Build product options for the selector
     const productOptions = useMemo(
@@ -206,7 +206,7 @@ export function ProductSetupPopover({
 
     return (
         <>
-            <HogfettiComponent />
+            <ConfettiComponent />
             <Popover
                 visible={visible}
                 onClickOutside={onClickOutside}

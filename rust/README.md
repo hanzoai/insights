@@ -36,9 +36,9 @@ PoC service that will deduplicate events in the ingestion pipeline within a give
 
 Rust services to manage a job queuing service backed by Postgres. Includes NodeJS API bindings and backend state management functionality.
 
-### hogvm
+### scriptvm
 
-A Rust re-implementation of the HogVM stack machine for evaluating compiled InsightsQL bytecode.
+A Rust re-implementation of the ScriptVM stack machine for evaluating compiled InsightsQL bytecode.
 
 ### rusty-hook
 
