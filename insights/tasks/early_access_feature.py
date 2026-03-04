@@ -1,7 +1,7 @@
 from typing import Any
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from celery import shared_task
 
 from insights.insightsql import ast
@@ -14,12 +14,12 @@ from products.early_access_features.backend.models import EarlyAccessFeature
 
 logger = structlog.get_logger(__name__)
 
-POSTHOG_TEAM_ID = 2
+INSIGHTS_TEAM_ID = 2
 
 
 # Mostly here to help with mocks for testing
 def capture_event(event: str, *, distinct_id: str, properties: dict[str, Any]) -> None:
-    posthoganalytics.capture(
+    hanzoanalytics.capture(
         event,
         distinct_id=distinct_id,
         properties=properties,
@@ -32,7 +32,7 @@ def send_events_for_early_access_feature_stage_change(feature_id: str, from_stag
     instance = EarlyAccessFeature.objects.get(id=feature_id)
 
     team_id = instance.team.id
-    send_events_for_change = team_id == POSTHOG_TEAM_ID if is_cloud() else True
+    send_events_for_change = team_id == INSIGHTS_TEAM_ID if is_cloud() else True
     if not send_events_for_change:
         return
 
@@ -76,4 +76,4 @@ def send_events_for_early_access_feature_stage_change(feature_id: str, from_stag
             },
         )
 
-    posthoganalytics.flush()
+    hanzoanalytics.flush()

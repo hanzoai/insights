@@ -8,8 +8,8 @@ import { KafkaProducerObserver } from '~/tests/helpers/mocks/producer.spy'
 
 import { DateTime } from 'luxon'
 
-import { Properties } from '@posthog/plugin-scaffold'
-import { PluginEvent } from '@posthog/plugin-scaffold/src/types'
+import { Properties } from '@hanzo/plugin-scaffold'
+import { PluginEvent } from '@hanzo/plugin-scaffold/src/types'
 
 import { KAFKA_GROUPS } from '~/config/kafka-topics'
 import { createRedisFromConfig } from '~/utils/db/redis'
@@ -173,7 +173,7 @@ describe('processEvent', () => {
 
     // Simple client used to simulate sending events
     // Use state object to simulate stateful clients that keep track of old
-    // distinct id, starting with an anonymous one. I've taken posthog-js as
+    // distinct id, starting with an anonymous one. I've taken insights-js as
     // the reference implementation.
     let state = { currentDistinctId: 'anonymous_id' }
 
@@ -205,7 +205,7 @@ describe('processEvent', () => {
                     }
                   : { url: hub.REDIS_URL }
         )
-        const hooksCacheKey = `@posthog/plugin-server/hooks/${team.id}`
+        const hooksCacheKey = `@hanzo/plugin-server/hooks/${team.id}`
         await redis.del(hooksCacheKey)
         await redis.quit()
 
@@ -899,7 +899,7 @@ describe('processEvent', () => {
     describe('when handling $identify', () => {
         test('we do not alias users if distinct id changes but we are already identified', async () => {
             // This test is in reference to
-            // https://github.com/PostHog/insights/issues/5527 , where we were
+            // https://github.com/hanzoai/insights/issues/5527 , where we were
             // correctly identifying that an anonymous user before login should be
             // aliased to the user they subsequently login as, but incorrectly
             // aliasing on subsequent $identify events. The anonymous case is
@@ -949,7 +949,7 @@ describe('processEvent', () => {
 
         test('we do not alias users if distinct id changes but we are already identified, with no anonymous event', async () => {
             // This test is in reference to
-            // https://github.com/PostHog/insights/issues/5527 , where we were
+            // https://github.com/hanzoai/insights/issues/5527 , where we were
             // correctly identifying that an anonymous user before login should be
             // aliased to the user they subsequently login as, but incorrectly
             // aliasing on subsequent $identify events. The anonymous case is

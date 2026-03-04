@@ -35,7 +35,7 @@ class ShopifySource(SimpleSource[ShopifySourceConfig]):
             name=SchemaExternalDataSourceType.SHOPIFY,
             iconPath="/static/services/shopify.png",
             caption="""Enter your Shopify credentials to automatically pull your Shopify data into the Insights Data warehouse.""",
-            docsUrl="https://posthog.com/docs/data-warehouse/sources/shopify",
+            docsUrl="https://hanzo.ai/docs/data-warehouse/sources/shopify",
             fields=cast(
                 list[FieldType],
                 [

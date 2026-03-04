@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 
-import { Spinner, Tooltip } from '@posthog/lemon-ui'
+import { Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 interface LiveChartCardProps {
     title: string

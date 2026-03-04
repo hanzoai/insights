@@ -29,7 +29,7 @@ function SocialLoginLink({ provider, extraQueryParams, children }: SocialLoginLi
     }
     if (provider === 'saml') {
         // SAML-based login requires an extra param as technically we can support multiple SAML backends
-        loginParams.idp = 'posthog_custom'
+        loginParams.idp = 'insights_custom'
     }
     const loginUrl = combineUrl(`/login/${provider}/`, loginParams).url
     const iframed = window !== window.parent

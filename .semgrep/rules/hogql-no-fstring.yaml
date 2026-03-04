@@ -1,13 +1,13 @@
 rules:
-    # Rule 1: Taint tracking for user input interpolated into HogQL strings
+    # Rule 1: Taint tracking for user input interpolated into InsightsQL strings
     # Only flags when user data is INSIDE an f-string (vulnerable pattern),
     # NOT when user provides the entire expression (safe pattern).
-    - id: hogql-injection-taint
+    - id: insightsql-injection-taint
       mode: taint
       languages: [python]
       severity: WARNING
       message: |
-          User-controlled data interpolated into HogQL string flows to parse function.
+          User-controlled data interpolated into InsightsQL string flows to parse function.
           Use ast.Constant in placeholders: parse_expr("{x}", placeholders={"x": ast.Constant(value=...)})
       pattern-sources:
           # Direct interpolation in f-strings
@@ -15,7 +15,7 @@ rules:
                 - pattern-either:
                       - pattern: self.query.$FIELD
                       - pattern: self.context.includeProperties
-                      - pattern: self.series.math_hogql
+                      - pattern: self.series.math_insightsql
                 - pattern-inside: f"..."
           # Loop variable from taint source used in f-string
           - patterns:
@@ -51,7 +51,7 @@ rules:
               - '**/.semgrep/**'
 
     # Rule 2: Audit rule for f-strings (catch interpolation patterns)
-    - id: hogql-fstring-audit
+    - id: insightsql-fstring-audit
       patterns:
           - pattern-either:
                 - pattern: parse_select(f"...", ...)
@@ -93,7 +93,7 @@ rules:
           # Inline ternary conditions (safe: boolean conditions creating constant strings)
           - pattern-not-regex: "\\{'[^']*'\\s+if\\s+\\w+\\s+else"
           - pattern-not-regex: "\\{\"[^\"]*\"\\s+if\\s+\\w+\\s+else"
-      message: 'HogQL f-string - review if user input is interpolated'
+      message: 'InsightsQL f-string - review if user input is interpolated'
       languages: [python]
       severity: INFO
       metadata:
@@ -133,7 +133,7 @@ rules:
           - pattern: async_execute(...)
       pattern-sanitizers:
           - pattern: escape_clickhouse_identifier(...)
-          - pattern: escape_hogql_identifier(...)
+          - pattern: escape_insightsql_identifier(...)
           - pattern: int(...)
       metadata:
           category: security

@@ -15,7 +15,7 @@ import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 const protocol = new Protocol()
 maplibregl.addProtocol('pmtiles', protocol.tile)
 
-const BASE_URL = 'https://posthog-prod-maps.s3.us-east-1.amazonaws.com'
+const BASE_URL = 'https://insights-prod-maps.s3.us-east-1.amazonaws.com'
 // :TRICKY: The URL absolutely needs to be prefixed with `pmtiles://` to work!
 const PMTILES_URL = `pmtiles://${BASE_URL}/20230913.pmtiles`
 const GLYPH_URL = `${BASE_URL}/fonts/pbf/{fontstack}/{range}.pbf`

@@ -1,11 +1,11 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 
-import { IconSparkles } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconSparkles } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import MaxTool from 'scenes/max/MaxTool'
 import { useOpenAi } from 'scenes/max/useOpenAi'
@@ -79,7 +79,7 @@ export function SurveysEmptyState({ numOfSurveys }: Props): JSX.Element {
             try {
                 await createSurveyFromTemplate(survey)
             } catch (error) {
-                posthog.captureException(error, {
+                insights.captureException(error, {
                     action: 'survey-creation-from-template-failed',
                 })
                 toast.error('Error while creating survey from template. Please try again.')

@@ -32,7 +32,7 @@ from products.marketing_analytics.backend.insightsql_queries.marketing_analytics
 
 TEST_DATE_FROM = "2024-11-01"
 TEST_DATE_TO = "2024-12-31"
-TEST_BUCKET_BASE = "test_storage_bucket-posthog.marketing_analytics"
+TEST_BUCKET_BASE = "test_storage_bucket-insights.marketing_analytics"
 DEFAULT_LIMIT = 100
 
 

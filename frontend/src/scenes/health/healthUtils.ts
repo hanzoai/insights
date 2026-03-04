@@ -1,4 +1,4 @@
-import type { LemonTagType } from '@posthog/lemon-ui'
+import type { LemonTagType } from '@hanzo/lemon-ui'
 
 import { KIND_LABELS } from './healthCategories'
 import type { HealthIssueSeverity } from './types'

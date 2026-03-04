@@ -30,19 +30,19 @@ SELECT_QUERY_TEMPLATE = """
 
 DELETE_QUERY_PERSON_DISTINCT_IDS = """
     WITH to_delete AS ({select_query})
-    DELETE FROM posthog_persondistinctid
+    DELETE FROM insights_persondistinctid
     WHERE person_id IN (SELECT id FROM to_delete);
 """
 
 DELETE_QUERY_PERSON_OVERRIDE = """
     WITH to_delete AS ({select_query})
-    DELETE FROM posthog_personoverride
+    DELETE FROM insights_personoverride
     WHERE (old_person_id IN (SELECT id FROM to_delete) OR override_person_id IN (SELECT id FROM to_delete));
 """
 
 DELETE_QUERY_COHORT_PEOPLE = """
     WITH to_delete AS ({select_query})
-    DELETE FROM posthog_cohortpeople
+    DELETE FROM insights_cohortpeople
     WHERE person_id IN (SELECT id FROM to_delete);
 """
 

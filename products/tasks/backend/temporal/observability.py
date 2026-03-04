@@ -2,7 +2,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any, Optional
 
-import posthoganalytics
+import hanzoanalytics
 from temporalio import activity, workflow
 
 from insights.temporal.common.logger import get_logger
@@ -169,7 +169,7 @@ def track_event(
                 }
             )
 
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=distinct_id,
             event=event_name,
             properties=enriched_properties,

@@ -1,8 +1,8 @@
 import { actions, connect, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api, { PaginatedResponse } from 'lib/api'
 import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
@@ -153,7 +153,7 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
             // in the case where we are scheduling a materialized view, send an event
             if (payload && payload.lifecycle && payload.sync_frequency) {
                 // this function exists as an upsert, so we need to check if the view was created or updated
-                posthog.capture(`materialized view ${payload.lifecycle === 'update' ? 'updated' : 'created'}`, {
+                insights.capture(`materialized view ${payload.lifecycle === 'update' ? 'updated' : 'created'}`, {
                     sync_frequency: payload.sync_frequency,
                 })
             }
@@ -194,7 +194,7 @@ export const dataWarehouseViewsLogic = kea<dataWarehouseViewsLogicType>([
             try {
                 await api.dataWarehouseSavedQueries.materialize(viewId)
                 lemonToast.success('View materialized successfully')
-                posthog.capture('materialized view created', {
+                insights.capture('materialized view created', {
                     sync_frequency: '24hour',
                 })
                 actions.loadDataWarehouseSavedQueries()

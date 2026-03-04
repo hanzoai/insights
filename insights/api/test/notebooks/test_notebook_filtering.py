@@ -127,7 +127,7 @@ class TestNotebooksFiltering(APIBaseTest, QueryMatchingTest):
             assert sorted([r["id"] for r in results]) == sorted([notebook_ids[i] for i in expected_match_indexes])
 
     def test_filters_based_on_params(self) -> None:
-        other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "password")
+        other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "password")
         notebook_one = Notebook.objects.create(team=self.team, created_by=self.user)
         notebook_two = Notebook.objects.create(team=self.team, created_by=self.user)
         other_users_notebook = Notebook.objects.create(team=self.team, created_by=other_user)

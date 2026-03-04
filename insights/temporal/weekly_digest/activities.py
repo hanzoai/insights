@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 from django.utils import timezone
 
 import redis.asyncio as redis
-from posthoganalytics import Posthog
+from hanzoanalytics import Insights
 from pydantic import ValidationError
 from structlog.contextvars import bind_contextvars
 from temporalio import activity
@@ -542,10 +542,10 @@ async def send_weekly_digest_batch(input: SendWeeklyDigestBatchInput) -> None:
         empty_user_digest_count = 0
 
         # Only US deployment forwards email events to customer.io
-        ph_client: Posthog = get_ph_client(region="US", sync_mode=True)
+        ph_client: Insights = get_ph_client(region="US", sync_mode=True)
 
         if not ph_client and not input.dry_run:
-            logger.error("Failed to set up Posthog client")
+            logger.error("Failed to set up Insights client")
             return
 
         messaging_record_batch: list[MessagingRecord] = []

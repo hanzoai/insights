@@ -22,7 +22,7 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.feature_enabled")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.feature_enabled")
     @patch("insights.helpers.two_factor_session.check_esp_suppression")
     def test_suppressed_user_skips_email_mfa(
         self, mock_check_suppression, mock_feature_enabled, mock_http_available, mock_email_available, mock_dev_mode
@@ -45,7 +45,7 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.feature_enabled")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.feature_enabled")
     @patch("insights.helpers.two_factor_session.check_esp_suppression")
     def test_non_suppressed_user_proceeds_with_email_mfa(
         self, mock_check_suppression, mock_feature_enabled, mock_http_available, mock_email_available, mock_dev_mode
@@ -65,9 +65,9 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.feature_enabled")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.feature_enabled")
     @patch("insights.helpers.two_factor_session.check_esp_suppression")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.capture")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.capture")
     def test_analytics_event_captured_on_suppression_bypass(
         self,
         mock_capture,
@@ -96,9 +96,9 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.feature_enabled")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.feature_enabled")
     @patch("insights.helpers.two_factor_session.check_esp_suppression")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.capture")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.capture")
     def test_analytics_event_includes_correct_properties(
         self,
         mock_capture,
@@ -126,9 +126,9 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.feature_enabled")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.feature_enabled")
     @patch("insights.helpers.two_factor_session.check_esp_suppression")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.capture")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.capture")
     def test_api_failure_fallback_bypasses_mfa_and_captures_event(
         self,
         mock_capture,
@@ -160,7 +160,7 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.feature_enabled")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.feature_enabled")
     @patch("insights.helpers.two_factor_session.check_esp_suppression")
     def test_returns_email_mfa_check_result(
         self, mock_check_suppression, mock_feature_enabled, mock_http_available, mock_email_available, mock_dev_mode
@@ -182,7 +182,7 @@ class TestEmailMFAVerifierSuppressionIntegration(SimpleTestCase):
     @patch("insights.helpers.two_factor_session.is_dev_mode")
     @patch("insights.helpers.two_factor_session.is_email_available")
     @patch("insights.helpers.two_factor_session.is_http_email_service_available")
-    @patch("insights.helpers.two_factor_session.posthoganalytics.capture")
+    @patch("insights.helpers.two_factor_session.hanzoanalytics.capture")
     def test_no_http_service_bypasses_mfa(self, mock_capture, mock_http_available, mock_email_available, mock_dev_mode):
         mock_dev_mode.return_value = False
         mock_email_available.return_value = True

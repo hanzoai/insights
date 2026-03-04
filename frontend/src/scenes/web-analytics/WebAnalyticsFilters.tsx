@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useState } from 'react'
 
-import { IconFilter, IconGlobe, IconPhone, IconPlus } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonDivider, LemonInput, LemonSelect, Popover, Tooltip } from '@posthog/lemon-ui'
+import { IconFilter, IconGlobe, IconPhone, IconPlus } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonDivider, LemonInput, LemonSelect, Popover, Tooltip } from '@hanzo/lemon-ui'
 
 import { baseModifier } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'
@@ -122,7 +122,7 @@ export const WebAnalyticsFilters = ({ tabs }: { tabs: JSX.Element }): JSX.Elemen
                             <WebAnalyticsDomainSelector />
                             <WebAnalyticsDeviceToggle />
                             <LiveUserCount
-                                docLink="https://posthog.com/docs/web-analytics/faq#i-am-online-but-the-online-user-count-is-not-reflecting-my-user"
+                                docLink="https://hanzo.ai/docs/web-analytics/faq#i-am-online-but-the-online-user-count-is-not-reflecting-my-user"
                                 dataAttr="web-analytics-live-user-count"
                             />
                         </>

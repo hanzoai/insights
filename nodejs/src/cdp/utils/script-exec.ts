@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { Counter } from 'prom-client'
 
-import { DEFAULT_TIMEOUT_MS, ExecOptions, ExecResult, exec } from '@insights/scriptvm'
+import { DEFAULT_TIMEOUT_MS, ExecOptions, ExecResult, exec } from '@hanzo/scriptvm'
 
 import { instrumentFn } from '~/common/tracing/tracing-utils'
 

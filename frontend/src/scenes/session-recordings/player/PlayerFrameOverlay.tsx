@@ -2,7 +2,7 @@ import './PlayerFrameOverlay.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconEmoji, IconPlay, IconRewindPlay, IconWarning } from '@posthog/icons'
+import { IconEmoji, IconPlay, IconRewindPlay, IconWarning } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { IconSkipBackward } from 'lib/lemon-ui/icons'
@@ -98,7 +98,7 @@ const PlayerFrameOverlayContent = (): JSX.Element | null => {
                 </LemonButton>
                 <LemonButton
                     targetBlank
-                    to="https://posthog.com/support?utm_medium=in-product&utm_campaign=recording-not-found"
+                    to="https://hanzo.ai/support?utm_medium=in-product&utm_campaign=recording-not-found"
                     type="secondary"
                     fullWidth
                     center

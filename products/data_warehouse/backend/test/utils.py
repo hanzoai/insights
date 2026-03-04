@@ -56,7 +56,7 @@ def create_data_warehouse_table_from_csv(
 
     # Guarantee prefix is valid
     if source_prefix is None:
-        source_prefix = "posthog_test_"
+        source_prefix = "insights_test_"
     table_name = f"{source_prefix}{table_name}"
 
     # Write CSV directly to S3

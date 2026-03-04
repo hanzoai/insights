@@ -21,7 +21,7 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install posthog
+                            pip install insights
                         `}
                     />
                 </>
@@ -53,7 +53,7 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a Insights `AsyncOpenAI`
+                        settings](https://insights.hanzo.ai/settings/project), then create a Insights `AsyncOpenAI`
                         wrapper, pass it to an `OpenAIProvider`, and use that with Pydantic AI's `OpenAIChatModel`.
                     </Markdown>
 
@@ -63,17 +63,17 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
                             from pydantic_ai import Agent
                             from pydantic_ai.models.openai import OpenAIChatModel
                             from pydantic_ai.providers.openai import OpenAIProvider
-                            from posthog.ai.openai import AsyncOpenAI
-                            from posthog import Posthog
+                            from insights.ai.openai import AsyncOpenAI
+                            from insights import Insights
 
-                            posthog = Posthog(
+                            insights = Insights(
                                 "<ph_project_api_key>",
                                 host="<ph_client_api_host>"
                             )
 
                             openai_client = AsyncOpenAI(
                                 api_key="your_openai_api_key",
-                                posthog_client=posthog
+                                insights_client=insights
                             )
 
                             provider = OpenAIProvider(openai_client=openai_client)

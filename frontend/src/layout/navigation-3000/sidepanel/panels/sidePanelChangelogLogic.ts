@@ -6,7 +6,7 @@ import { SceneConfig } from 'scenes/sceneTypes'
 import { sidePanelStateLogic } from '../sidePanelStateLogic'
 import type { sidePanelChangelogLogicType } from './sidePanelChangelogLogicType'
 
-const CHANGELOG_BASE_URL = 'https://posthog.com/changelog'
+const CHANGELOG_BASE_URL = 'https://hanzo.ai/changelog'
 
 export const sidePanelChangelogLogic = kea<sidePanelChangelogLogicType>([
     path(['scenes', 'navigation', 'sidepanel', 'sidePanelChangelogLogic']),

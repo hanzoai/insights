@@ -868,7 +868,7 @@ async def insert_into_postgres_activity_from_stage(inputs: PostgresInsertInputs)
                     "Insufficient privileges to get table columns for table '%s.%s'; "
                     "will assume all columns are present. If this results in an error, please grant SELECT "
                     "permissions on this table or ensure the destination table is using the latest schema "
-                    "as described in the docs: https://posthog.com/docs/cdp/batch-exports/postgres",
+                    "as described in the docs: https://hanzo.ai/docs/cdp/batch-exports/postgres",
                     inputs.schema,
                     inputs.table_name,
                 )

@@ -1,7 +1,7 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { Replayer, canvasMutation } from '@posthog/rrweb'
-import { ReplayPlugin } from '@posthog/rrweb'
+import { Replayer, canvasMutation } from '@hanzo/rrweb'
+import { ReplayPlugin } from '@hanzo/rrweb'
 import {
     CanvasArg,
     EventType,
@@ -9,7 +9,7 @@ import {
     canvasMutationData,
     canvasMutationParam,
     eventWithTime,
-} from '@posthog/rrweb-types'
+} from '@hanzo/rrweb-types'
 
 import { debounce } from 'lib/utils'
 
@@ -362,7 +362,7 @@ export const CanvasReplayerPlugin = (events: eventWithTime[]): ReplayPlugin => {
 }
 
 const handleMutationError = (error: unknown): void => {
-    posthog.captureException(error)
+    insights.captureException(error)
 }
 
 const objectUrlsById = new Map<number, Set<string>>()

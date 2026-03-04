@@ -1,13 +1,13 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonCheckbox, LemonLabel } from '@posthog/lemon-ui'
+import { LemonCheckbox, LemonLabel } from '@hanzo/lemon-ui'
 
 import { insightVizDataLogic } from 'scenes/insights/insightVizDataLogic'
 
 import { LifecycleFilter } from '~/queries/schema/schema-general'
 import { EditorFilterProps, LifecycleToggle } from '~/types'
 
-// Tooltip explanations taken from https://posthog.com/docs/product-analytics/lifecycle#interpreting-your-lifecycle
+// Tooltip explanations taken from https://hanzo.ai/docs/product-analytics/lifecycle#interpreting-your-lifecycle
 const lifecycles: { name: LifecycleToggle; tooltip: string; color: string }[] = [
     {
         name: 'new',

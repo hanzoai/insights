@@ -1,5 +1,5 @@
-import { IconArrowRight, IconFunnels } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconArrowRight, IconFunnels } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { NodeKind } from '~/queries/schema/schema-general'
 import { InsightType } from '~/types'

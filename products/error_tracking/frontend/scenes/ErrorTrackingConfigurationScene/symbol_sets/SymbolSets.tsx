@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { IconCheckCircle, IconRevert, IconSort, IconTrash, IconUpload, IconWarning } from '@posthog/icons'
+import { IconCheckCircle, IconRevert, IconSort, IconTrash, IconUpload, IconWarning } from '@hanzo/icons'
 import {
     LemonButton,
     LemonDialog,
@@ -11,7 +11,7 @@ import {
     LemonTableColumns,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { ErrorTrackingSymbolSet, SymbolSetStatusFilter } from 'lib/components/Errors/types'
 import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
@@ -178,7 +178,7 @@ const SymbolSetTable = (): JSX.Element => {
             <div className="font-semibold">No symbol sets found</div>
             <div className="text-secondary">
                 Learn how to upload them from the{' '}
-                <Link to="https://posthog.com/docs/error-tracking/upload-source-maps">docs</Link>
+                <Link to="https://hanzo.ai/docs/error-tracking/upload-source-maps">docs</Link>
             </div>
         </div>
     )

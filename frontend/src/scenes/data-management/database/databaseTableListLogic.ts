@@ -54,10 +54,10 @@ export const databaseTableListLogic = kea<databaseTableListLogicType>([
     }),
     reducers({ searchTerm: ['', { setSearchTerm: (_, { searchTerm }) => searchTerm }] }),
     selectors({
-        allPosthogTables: [
+        allInsightsTables: [
             (s) => [s.allTables],
             (allTables: DatabaseSchemaTable[]): DatabaseSchemaTable[] => {
-                return allTables.filter((n) => n.type === 'posthog')
+                return allTables.filter((n) => n.type === 'insights')
             },
             { resultEqualityCheck: objectsEqual },
         ],
@@ -86,17 +86,17 @@ export const databaseTableListLogic = kea<databaseTableListLogicType>([
             (allTables: DatabaseSchemaTable[]): Record<string, DatabaseSchemaTable> => toMapByName(allTables),
             { resultEqualityCheck: objectsEqual },
         ],
-        posthogTables: [
-            (s) => [s.allPosthogTables],
-            (allPosthogTables: DatabaseSchemaTable[]): DatabaseSchemaTable[] => {
-                const visiblePosthogTableNames = new Set(['events', 'groups', 'persons', 'sessions'])
-                return allPosthogTables.filter((table) => visiblePosthogTableNames.has(table.name))
+        insightsTables: [
+            (s) => [s.allInsightsTables],
+            (allInsightsTables: DatabaseSchemaTable[]): DatabaseSchemaTable[] => {
+                const visibleInsightsTableNames = new Set(['events', 'groups', 'persons', 'sessions'])
+                return allInsightsTables.filter((table) => visibleInsightsTableNames.has(table.name))
             },
             { resultEqualityCheck: objectsEqual },
         ],
-        posthogTablesMap: [
-            (s) => [s.posthogTables],
-            (posthogTables: DatabaseSchemaTable[]): Record<string, DatabaseSchemaTable> => toMapByName(posthogTables),
+        insightsTablesMap: [
+            (s) => [s.insightsTables],
+            (insightsTables: DatabaseSchemaTable[]): Record<string, DatabaseSchemaTable> => toMapByName(insightsTables),
             { resultEqualityCheck: objectsEqual },
         ],
         systemTables: [

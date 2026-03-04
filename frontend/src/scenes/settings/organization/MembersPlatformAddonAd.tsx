@@ -1,9 +1,9 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect } from 'react'
 
-import { LemonBanner } from '@posthog/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { DetectiveHog, JudgeHog, SpaceHog, ThreeBearsHogs } from 'lib/components/mascots'
 import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
@@ -32,7 +32,7 @@ export function MembersPlatformAddonAd(): JSX.Element | null {
 
     useEffect(() => {
         if (shouldShowPlatformAddonAd && !isDismissed) {
-            posthog.capture('members page platform addon ad shown', {
+            insights.capture('members page platform addon ad shown', {
                 ad_key: platformAddonAdConfig.key,
             })
         }
@@ -45,13 +45,13 @@ export function MembersPlatformAddonAd(): JSX.Element | null {
     const PlatformAddonAdIllustration = platformAddonAdIllustrations[platformAddonAdConfig.key]
 
     const handleCtaClick = (): void => {
-        posthog.capture('members page platform addon ad cta clicked', {
+        insights.capture('members page platform addon ad cta clicked', {
             ad_key: platformAddonAdConfig.key,
         })
     }
 
     const handleDismiss = (): void => {
-        posthog.capture('members page platform addon ad dismissed', {
+        insights.capture('members page platform addon ad dismissed', {
             ad_key: platformAddonAdConfig.key,
         })
         dismiss()

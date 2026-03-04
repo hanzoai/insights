@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCalendar } from '@posthog/icons'
+import { IconCalendar } from '@hanzo/icons'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { FEATURE_FLAGS } from 'lib/constants'

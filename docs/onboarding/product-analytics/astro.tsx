@@ -13,7 +13,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             badge: 'required',
             content: (
                 <>
-                    <Markdown>In your `src/components` folder, create a `posthog.astro` file:</Markdown>
+                    <Markdown>In your `src/components` folder, create a `insights.astro` file:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -22,7 +22,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 code: dedent`
                                     cd ./src/components
                                     # or 'cd ./src && mkdir components && cd ./components' if your components folder doesn't exist
-                                    touch posthog.astro
+                                    touch insights.astro
                                 `,
                             },
                         ]}
@@ -35,14 +35,14 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                         blocks={[
                             {
                                 language: 'html',
-                                file: 'src/components/posthog.astro',
+                                file: 'src/components/insights.astro',
                                 code: dedent`
                                     ---
-                                    // src/components/posthog.astro
+                                    // src/components/insights.astro
                                     ---
                                     <script is:inline>
-                                        !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-                                        posthog.init('<ph_project_api_key>', {
+                                        !function(t,e){var o,n,p,r;e.__SV||(window.insights=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host.replace(".i.hanzo.ai","-assets.i.hanzo.ai")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="insights",u.people=u.people||[],u.toString=function(t){var e="insights";return"insights"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group identify setPersonProperties setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags resetGroups onFeatureFlags addFeatureFlagsHandler onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.insights||[]);
+                                        insights.init('<ph_project_api_key>', {
                                             api_host: '<ph_client_api_host>',
                                             defaults: '2026-01-30'
                                         })
@@ -60,7 +60,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Create a layout where we will use `posthog.astro`. Create a new file `InsightsLayout.astro` in
+                        Create a layout where we will use `insights.astro`. Create a new file `InsightsLayout.astro` in
                         your `src/layouts` folder:
                     </Markdown>
                     <CodeBlock
@@ -84,7 +84,7 @@ export const getAstroSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 file: 'src/layouts/InsightsLayout.astro',
                                 code: dedent`
                                     ---
-                                    import Insights from '../components/posthog.astro'
+                                    import Insights from '../components/insights.astro'
                                     ---
                                     <head>
                                         <Insights />

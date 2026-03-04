@@ -36,7 +36,7 @@ class ResumableSourceManager(Generic[ResumableData]):
 
     @property
     def _key(self) -> str:
-        return f"posthog:data_warehouse:resumable_source:{self._inputs.team_id}:{self._inputs.job_id}"
+        return f"insights:data_warehouse:resumable_source:{self._inputs.team_id}:{self._inputs.job_id}"
 
     def _dump_json(self, data: ResumableData) -> str:
         data_dict = dataclasses.asdict(data)

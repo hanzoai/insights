@@ -1,8 +1,8 @@
 import { LogicWrapper, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonDialog, LemonInput, LemonLabel, lemonToast } from '@posthog/lemon-ui'
+import { IconCheck, IconPencil, IconPlus, IconTrash, IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonDialog, LemonInput, LemonLabel, lemonToast } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { cn } from 'lib/utils/css-classes'

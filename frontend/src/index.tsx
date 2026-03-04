@@ -3,8 +3,8 @@ import '~/styles'
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
 import { polyfillCountryFlagEmojis } from 'country-flag-emoji-polyfill'
 import { getContext } from 'kea'
-import posthog from 'posthog-js'
-import { PostHogProvider } from 'posthog-js/react'
+import insights from '@hanzo/insights'
+import { InsightsProvider } from '@hanzo/insights/react'
 import { createRoot } from 'react-dom/client'
 
 import { App } from 'scenes/App'
@@ -41,11 +41,11 @@ function renderApp(): void {
     if (root) {
         createRoot(root).render(
             <ErrorBoundary>
-                <PostHogProvider client={posthog}>
+                <InsightsProvider client={insights}>
                     <BaseTooltip.Provider delay={500} closeDelay={0} timeout={400}>
                         <App />
                     </BaseTooltip.Provider>
-                </PostHogProvider>
+                </InsightsProvider>
             </ErrorBoundary>
         )
     } else {

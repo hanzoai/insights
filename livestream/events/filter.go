@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/posthog/posthog/livestream/metrics"
+	"github.com/hanzoai/insights/livestream/metrics"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -32,7 +32,7 @@ type Subscription struct {
 }
 
 //easyjson:json
-type ResponsePostHogEvent struct {
+type ResponseInsightsEvent struct {
 	Uuid       string                 `json:"uuid"`
 	Timestamp  interface{}            `json:"timestamp"`
 	DistinctId string                 `json:"distinct_id"`
@@ -51,17 +51,17 @@ type ResponseGeoEvent struct {
 }
 
 type Filter struct {
-	inboundChan chan PostHogEvent
+	inboundChan chan InsightsEvent
 	SubChan     chan Subscription
 	UnSubChan   chan Subscription
 	subs        []Subscription
 }
 
-func NewFilter(subChan chan Subscription, unSubChan chan Subscription, inboundChan chan PostHogEvent) *Filter {
+func NewFilter(subChan chan Subscription, unSubChan chan Subscription, inboundChan chan InsightsEvent) *Filter {
 	return &Filter{SubChan: subChan, UnSubChan: unSubChan, inboundChan: inboundChan, subs: make([]Subscription, 0)}
 }
 
-func convertToResponseGeoEvent(event PostHogEvent) *ResponseGeoEvent {
+func convertToResponseGeoEvent(event InsightsEvent) *ResponseGeoEvent {
 	return &ResponseGeoEvent{
 		Lat:         event.Lat,
 		Lng:         event.Lng,
@@ -71,7 +71,7 @@ func convertToResponseGeoEvent(event PostHogEvent) *ResponseGeoEvent {
 	}
 }
 
-func convertToResponsePostHogEvent(event PostHogEvent, teamId int, columns []string) *ResponsePostHogEvent {
+func convertToResponseInsightsEvent(event InsightsEvent, teamId int, columns []string) *ResponseInsightsEvent {
 	var properties map[string]interface{}
 	if columns == nil {
 		properties = event.Properties
@@ -84,7 +84,7 @@ func convertToResponsePostHogEvent(event PostHogEvent, teamId int, columns []str
 		}
 	}
 
-	return &ResponsePostHogEvent{
+	return &ResponseInsightsEvent{
 		Uuid:       event.Uuid,
 		Timestamp:  event.Timestamp,
 		DistinctId: event.DistinctId,
@@ -160,7 +160,7 @@ func (c *Filter) Run() {
 						}
 					}
 				} else {
-					responseEvent := convertToResponsePostHogEvent(event, sub.TeamId, sub.Columns)
+					responseEvent := convertToResponseInsightsEvent(event, sub.TeamId, sub.Columns)
 
 					select {
 					case sub.EventChan <- *responseEvent:

@@ -11,7 +11,7 @@ from typing import Optional
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from playwright.sync_api import (
     Browser,
     Page,
@@ -399,7 +399,7 @@ class PlaywrightRecorder(_ReplayVideoRecorder):
                 resolution = page.wait_for_function(
                     """
                     () => {
-                    const r = (window).__POSTHOG_RESOLUTION__;
+                    const r = (window).__INSIGHTS_RESOLUTION__;
                     if (!r) return false;
                     const w = Number(r.width), h = Number(r.height);
                     return (w > 0 && h > 0) ? {width: w, height: h} : false;
@@ -441,7 +441,7 @@ class PlaywrightRecorder(_ReplayVideoRecorder):
             inactivity_periods_raw = page.wait_for_function(
                 """
                 () => {
-                    const r = (window).__POSTHOG_INACTIVITY_PERIODS__;
+                    const r = (window).__INSIGHTS_INACTIVITY_PERIODS__;
                     if (!r) return [];
                     return r.map(p => ({
                         ts_from_s: Number(p.ts_from_s),
@@ -508,11 +508,11 @@ class PlaywrightRecorder(_ReplayVideoRecorder):
                 result = page.wait_for_function(
                     f"""
                     () => {{
-                        if (window.__POSTHOG_RECORDING_ENDED__) return {{ ended: true }};
-                        const counter = window.__POSTHOG_SEGMENT_COUNTER__ || 0;
+                        if (window.__INSIGHTS_RECORDING_ENDED__) return {{ ended: true }};
+                        const counter = window.__INSIGHTS_SEGMENT_COUNTER__ || 0;
                         if (counter > {last_counter}) return {{
                             counter: counter,
-                            segment_start_ts: window.__POSTHOG_CURRENT_SEGMENT_START_TS__
+                            segment_start_ts: window.__INSIGHTS_CURRENT_SEGMENT_START_TS__
                         }};
                         return null;
                     }}
@@ -769,10 +769,10 @@ def record_replay_to_file(
             shutil.move(temp_output_path, opts.image_path)
         return result.inactivity_periods
     except Exception as e:
-        with posthoganalytics.new_context():
-            posthoganalytics.tag("url_to_render", opts.url_to_render)
-            posthoganalytics.tag("video_target_path", opts.image_path)
-            posthoganalytics.capture_exception(e)
+        with hanzoanalytics.new_context():
+            hanzoanalytics.tag("url_to_render", opts.url_to_render)
+            hanzoanalytics.tag("video_target_path", opts.image_path)
+            hanzoanalytics.capture_exception(e)
         raise
     finally:
         if temp_dir_ctx:

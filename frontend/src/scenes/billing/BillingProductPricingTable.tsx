@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconArrowRightDown, IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonTable, LemonTableColumns, Tooltip } from '@posthog/lemon-ui'
+import { IconArrowRightDown, IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonTable, LemonTableColumns, Tooltip } from '@hanzo/lemon-ui'
 
 import {
     BillingProductV2AddonType,

@@ -11,7 +11,7 @@ from django.conf import settings
 
 import structlog
 import temporalio
-import posthoganalytics
+import hanzoanalytics
 from dateutil import parser as dateutil_parser
 from redis import Redis
 from temporalio.client import WorkflowExecutionStatus, WorkflowHandle
@@ -683,7 +683,7 @@ async def ensure_llm_single_session_summary(inputs: SingleSessionSummaryInputs):
         raw_segments: list[VideoSegmentOutput] = []
         for result in segment_results:
             if isinstance(result, Exception):
-                posthoganalytics.capture_exception(
+                hanzoanalytics.capture_exception(
                     result,
                     distinct_id=inputs.user_distinct_id_to_log,
                     properties={"$session_id": inputs.session_id},

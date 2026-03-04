@@ -143,10 +143,10 @@ class QueryContext:
     event_property_join_type: str = ""
     event_property_field: str = "NULL"
 
-    # the event name filter is used with and without a posthog_eventproperty_table_join_alias qualifier
+    # the event name filter is used with and without a insights_eventproperty_table_join_alias qualifier
     event_name_join_filter: str = ""
 
-    posthog_eventproperty_table_join_alias = "check_for_matching_event_property"
+    insights_eventproperty_table_join_alias = "check_for_matching_event_property"
 
     params: dict = dataclasses.field(default_factory=dict)
 
@@ -241,7 +241,7 @@ class QueryContext:
             event_names = json.loads(event_names)
 
         if event_names and len(event_names) > 0:
-            event_property_field = f"{self.posthog_eventproperty_table_join_alias}.property IS NOT NULL"
+            event_property_field = f"{self.insights_eventproperty_table_join_alias}.property IS NOT NULL"
             event_name_join_filter = "AND event = ANY(%(event_names)s)"
 
         return dataclasses.replace(
@@ -355,10 +355,10 @@ class QueryContext:
             f"""
             {self.event_property_join_type} (
                 SELECT DISTINCT property
-                FROM posthog_eventproperty
+                FROM insights_eventproperty
                 WHERE coalesce(project_id, team_id) = %(project_id)s {self.event_name_join_filter}
-            ) {self.posthog_eventproperty_table_join_alias}
-            ON {self.posthog_eventproperty_table_join_alias}.property = name
+            ) {self.insights_eventproperty_table_join_alias}
+            ON {self.insights_eventproperty_table_join_alias}.property = name
             """
             if self.should_join_event_property
             else ""
@@ -407,7 +407,7 @@ ALWAYS_EXCLUDED_EVENT_PROPERTIES = set(
         # used for updating properties
         "$set",
         "$set_once",
-        # posthog-js used to send it on events and shouldn't have, now it confuses users
+        # insights-js used to send it on events and shouldn't have, now it confuses users
         "$initial_referrer",
         "$initial_referring_domain",
         # Group Analytics
@@ -567,7 +567,7 @@ class PropertyDefinitionViewSet(
             )
             property_definition_fields = ", ".join(
                 [
-                    f'posthog_propertydefinition."{f.column}"'
+                    f'insights_propertydefinition."{f.column}"'
                     for f in PropertyDefinition._meta.get_fields()
                     if hasattr(f, "column")
                 ]
@@ -624,12 +624,12 @@ class PropertyDefinitionViewSet(
                 QueryContext(
                     project_id=self.project_id,
                     table=(
-                        "ee_enterprisepropertydefinition FULL OUTER JOIN posthog_propertydefinition ON posthog_propertydefinition.id=ee_enterprisepropertydefinition.propertydefinition_ptr_id"
+                        "ee_enterprisepropertydefinition FULL OUTER JOIN insights_propertydefinition ON insights_propertydefinition.id=ee_enterprisepropertydefinition.propertydefinition_ptr_id"
                         if EE_AVAILABLE
-                        else "posthog_propertydefinition"
+                        else "insights_propertydefinition"
                     ),
                     property_definition_fields=property_definition_fields,
-                    property_definition_table="posthog_propertydefinition",
+                    property_definition_table="insights_propertydefinition",
                     limit=limit,
                     offset=offset,
                 )

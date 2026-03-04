@@ -47,6 +47,6 @@ class SurveyAdmin(admin.ModelAdmin):
     def team_link(self, survey: Survey):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[survey.team.pk]),
+            reverse("admin:insights_team_change", args=[survey.team.pk]),
             survey.team.name,
         )

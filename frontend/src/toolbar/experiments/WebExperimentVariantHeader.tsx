@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconTrash } from '@posthog/icons'
+import { IconTrash } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonTag } from 'lib/lemon-ui/LemonTag'

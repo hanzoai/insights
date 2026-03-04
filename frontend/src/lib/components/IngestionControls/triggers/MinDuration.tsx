@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SESSION_REPLAY_MINIMUM_DURATION_OPTIONS } from 'lib/constants'

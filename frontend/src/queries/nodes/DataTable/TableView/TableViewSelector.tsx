@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconChevronDown, IconDownload, IconGear, IconPerson, IconPlus } from '@posthog/icons'
+import { IconChevronDown, IconDownload, IconGear, IconPerson, IconPlus } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -11,7 +11,7 @@ import {
     LemonModal,
     LemonSegmentedButton,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 

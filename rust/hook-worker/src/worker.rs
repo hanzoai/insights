@@ -104,7 +104,7 @@ pub fn build_http_client(
     );
     let mut client_builder = reqwest::Client::builder()
         .default_headers(headers)
-        .user_agent("PostHog Webhook Worker")
+        .user_agent("Insights Webhook Worker")
         .timeout(request_timeout);
     if !allow_internal_ips {
         client_builder = client_builder.dns_resolver(Arc::new(PublicIPv4Resolver {}))

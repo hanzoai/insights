@@ -1,5 +1,5 @@
-import { IconChevronDown, IconChevronRight } from '@posthog/icons'
-import { LemonButton, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronRight } from '@hanzo/icons'
+import { LemonButton, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { getSeriesColor } from 'lib/colors'
 import { urls } from 'scenes/urls'

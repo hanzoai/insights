@@ -1,6 +1,6 @@
 import { actions, afterMount, beforeUnmount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { RecordingDeletedError } from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -192,7 +192,7 @@ export const snapshotDataLogic = kea<snapshotDataLogicType>([
                         await parseEncodedSnapshots(
                             response,
                             props.sessionRecordingId,
-                            posthog,
+                            insights,
                             registerWindowIdCallback
                         )
                     ).sort((a, b) => a.timestamp - b.timestamp)
@@ -350,7 +350,7 @@ export const snapshotDataLogic = kea<snapshotDataLogicType>([
                     sources.length === 1 &&
                     sources[0].source !== SnapshotSourceType.file
                 ) {
-                    posthog.capture('recording_snapshots_v2_empty_response', { source: sources[0] })
+                    insights.capture('recording_snapshots_v2_empty_response', { source: sources[0] })
                 }
 
                 // Build ordered list of (sourceIndex, endMs) for the loaded sources
@@ -399,7 +399,7 @@ export const snapshotDataLogic = kea<snapshotDataLogicType>([
             const snapshots = snapshotsData?.snapshots || []
 
             if (!snapshots.length && sources?.length === 1 && sources[0].source !== SnapshotSourceType.file) {
-                posthog.capture('recording_snapshots_v2_empty_response', { source: sources[0] })
+                insights.capture('recording_snapshots_v2_empty_response', { source: sources[0] })
             }
 
             actions.loadNextSnapshotSource()

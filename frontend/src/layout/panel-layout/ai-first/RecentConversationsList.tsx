@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
 import { useEffect, useState } from 'react'
 
-import { IconMessage } from '@posthog/icons'
-import { Link, Spinner } from '@posthog/lemon-ui'
+import { IconMessage } from '@hanzo/icons'
+import { Link, Spinner } from '@hanzo/lemon-ui'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { WrappingLoadingSkeleton } from 'lib/ui/WrappingLoadingSkeleton/WrappingLoadingSkeleton'

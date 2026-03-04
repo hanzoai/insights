@@ -27,8 +27,8 @@ from insights.insightsql_queries.utils.query_date_range import QueryDateRange
 from insights.models.filters.mixins.utils import cached_property
 from insights.models.team.team import Team
 
-BREAKDOWN_OTHER_STRING_LABEL = "$$_posthog_breakdown_other_$$"
-BREAKDOWN_NULL_STRING_LABEL = "$$_posthog_breakdown_null_$$"
+BREAKDOWN_OTHER_STRING_LABEL = "$$_insights_breakdown_other_$$"
+BREAKDOWN_NULL_STRING_LABEL = "$$_insights_breakdown_null_$$"
 BREAKDOWN_OTHER_DISPLAY = "Other (i.e. all remaining values)"
 BREAKDOWN_NULL_DISPLAY = "None (i.e. no value)"
 BREAKDOWN_NUMERIC_ALL_VALUES_PLACEHOLDER = '["",""]'

@@ -71,10 +71,10 @@ class AsyncMigrationDefinition:
     name: str
 
     # the migration cannot be run before this version
-    posthog_min_version = "0.0.0"
+    insights_min_version = "0.0.0"
 
     # the migration _must_ be run before this version
-    posthog_max_version = "10000.0.0"
+    insights_max_version = "10000.0.0"
 
     # use this to add information about why this migration is needed to self-hosted users
     description = ""

@@ -1,6 +1,6 @@
 # Ingestion Acceptance Tests
 
-End-to-end tests that verify the Insights ingestion pipeline is functioning correctly. These tests capture real events via the Insights SDK and query them back via the HogQL API to ensure the full pipeline works as expected.
+End-to-end tests that verify the Insights ingestion pipeline is functioning correctly. These tests capture real events via the Insights SDK and query them back via the InsightsQL API to ensure the full pipeline works as expected.
 
 ## Goal
 
@@ -28,7 +28,7 @@ Detect ingestion pipeline issues in production before users notice them. The tes
                     ┌───────────────┴───────────────┐
                     ▼                               ▼
            ┌──────────────┐                ┌──────────────┐
-           │ Insights SDK  │                │  HogQL API   │
+           │ Insights SDK  │                │  InsightsQL API   │
            │  (capture)   │                │   (query)    │
            └──────────────┘                └──────────────┘
                     │                               │
@@ -87,10 +87,10 @@ All configuration is loaded from environment variables with the `INGESTION_ACCEP
 
 | Variable                | Required | Default | Description                                       |
 | ----------------------- | -------- | ------- | ------------------------------------------------- |
-| `API_HOST`              | Yes      | -       | Insights API host (e.g., `https://us.posthog.com`) |
+| `API_HOST`              | Yes      | -       | Insights API host (e.g., `https://insights.hanzo.ai`) |
 | `PROJECT_API_KEY`       | Yes      | -       | Project API key for capturing events              |
 | `PROJECT_ID`            | Yes      | -       | Project ID for querying events                    |
-| `PERSONAL_API_KEY`      | Yes      | -       | Personal API key for HogQL queries                |
+| `PERSONAL_API_KEY`      | Yes      | -       | Personal API key for InsightsQL queries                |
 | `EVENT_TIMEOUT_SECONDS` | No       | 90      | Max time to wait for events to appear             |
 | `POLL_INTERVAL_SECONDS` | No       | 10.0    | Interval between query attempts                   |
 | `SLACK_WEBHOOK_URL`     | No       | -       | Slack incoming webhook for failure notifications  |
@@ -99,13 +99,13 @@ All configuration is loaded from environment variables with the `INGESTION_ACCEP
 
 ```bash
 # Set required environment variables
-export INGESTION_ACCEPTANCE_TEST_API_HOST="https://us.posthog.com"
+export INGESTION_ACCEPTANCE_TEST_API_HOST="https://insights.hanzo.ai"
 export INGESTION_ACCEPTANCE_TEST_PROJECT_API_KEY="phc_xxx"
 export INGESTION_ACCEPTANCE_TEST_PROJECT_ID="12345"
 export INGESTION_ACCEPTANCE_TEST_PERSONAL_API_KEY="phx_xxx"
 
 # Run directly
-python -m posthog.temporal.ingestion_acceptance_test
+python -m insights.temporal.ingestion_acceptance_test
 ```
 
 ## File Structure
@@ -115,7 +115,7 @@ ingestion_acceptance_test/
 ├── __init__.py
 ├── __main__.py              # CLI entry point for local runs
 ├── activities.py            # Temporal activity definition
-├── client.py                # Insights SDK wrapper with HTTP retry and HogQL queries
+├── client.py                # Insights SDK wrapper with HTTP retry and InsightsQL queries
 ├── config.py                # Pydantic settings for environment config
 ├── results.py               # Test result dataclasses
 ├── runner.py                # Test execution engine
@@ -132,7 +132,7 @@ ingestion_acceptance_test/
     └── acceptance_test_merge.py
 ```
 
-Unit tests are located at `posthog/temporal/tests/ingestion_acceptance_test/`.
+Unit tests are located at `insights/temporal/tests/ingestion_acceptance_test/`.
 
 ## HTTP Resilience
 

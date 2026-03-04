@@ -4,7 +4,7 @@ import { loaders } from 'kea-loaders'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 
 import { toolbarConfigLogic, toolbarFetch } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { captureElementScreenshot, uploadScreenshot } from '~/toolbar/utils/screenshot'
 import { EventDefinition } from '~/types'
 
@@ -122,7 +122,7 @@ export const screenshotUploadLogic = kea<screenshotUploadLogicType>([
             actions.searchEvents({ query: name })
         },
         submitUploadSuccess: () => {
-            toolbarPosthogJS.capture('media preview uploaded', { source: 'toolbar' })
+            toolbarInsightsJS.capture('media preview uploaded', { source: 'toolbar' })
             lemonToast.success('Screenshot uploaded successfully')
             actions.closeModal()
             props.onSuccess?.()

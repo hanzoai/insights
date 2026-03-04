@@ -40,7 +40,7 @@ def get_managed_apps() -> set[str]:
         return get_managed_app_names(Path(settings.BASE_DIR))
     except Exception as e:
         warnings.warn(f"Could not scan product apps for migrations: {e}", stacklevel=2)
-        return {"posthog", "rbac"}
+        return {"insights", "rbac"}
 
 
 def get_app_migrations_dir(app_label: str) -> Path | None:
@@ -279,7 +279,7 @@ class Command(DjangoMigrateCommand):
                                 self.stdout.write(
                                     self.style.WARNING(
                                         "Some migrations are not cached and cannot be auto-rolled back.\n"
-                                        "Run 'hogli migrations:sync' for manual instructions.\n"
+                                        "Run 'insightscli migrations:sync' for manual instructions.\n"
                                     )
                                 )
                             confirm = input("Continue anyway? [y/N] ")
@@ -290,7 +290,7 @@ class Command(DjangoMigrateCommand):
                         # Non-interactive mode: warn but continue
                         self.stdout.write(
                             self.style.WARNING(
-                                "Continuing in non-interactive mode. Run 'hogli migrations:sync' after to clean up."
+                                "Continuing in non-interactive mode. Run 'insightscli migrations:sync' after to clean up."
                             )
                         )
             except Exception as e:

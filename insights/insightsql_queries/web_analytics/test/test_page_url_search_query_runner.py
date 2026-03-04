@@ -20,7 +20,7 @@ class TestPageUrlSearchQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         distinct_ids=[id],
                         properties={
                             "name": id,
-                            **({"email": "test@posthog.com"} if id == "test" else {}),
+                            **({"email": "test@hanzo.ai"} if id == "test" else {}),
                         },
                     )
                 )

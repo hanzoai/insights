@@ -108,7 +108,7 @@ These events are lightweight and processed through the regular pipeline:
 
 Properties that can contain large payloads (marked as "can be stored as blob" above) should be sent as separate multipart parts with names like `event.properties.$ai_input` or `event.properties.$ai_output_choices`. This keeps the event JSON small while allowing arbitrarily large context data to be stored efficiently in S3.
 
-**Reference:** [Insights LLM Analytics Manual Capture Documentation](https://posthog.com/docs/llm-analytics/manual-capture)
+**Reference:** [Insights LLM Analytics Manual Capture Documentation](https://hanzo.ai/docs/llm-analytics/manual-capture)
 
 ## General Architecture
 
@@ -340,16 +340,16 @@ Properties contain S3 URLs with byte range parameters:
 Without retention prefix (default 30 days):
 
 ```text
-s3://posthog-llm-analytics/llma/123/2024-01-15/event_456_x7y9z.multipart
-s3://posthog-llm-analytics/llma/456/2024-01-15/event_789_a3b5c.multipart
+s3://insights-llm-analytics/llma/123/2024-01-15/event_456_x7y9z.multipart
+s3://insights-llm-analytics/llma/456/2024-01-15/event_789_a3b5c.multipart
 ```
 
 With retention prefixes:
 
 ```text
-s3://posthog-llm-analytics/llma/30d/123/2024-01-15/event_012_m2n4p.multipart
-s3://posthog-llm-analytics/llma/90d/456/2024-01-15/event_345_q6r8s.multipart
-s3://posthog-llm-analytics/llma/1y/789/2024-01-15/event_678_t1u3v.multipart
+s3://insights-llm-analytics/llma/30d/123/2024-01-15/event_012_m2n4p.multipart
+s3://insights-llm-analytics/llma/90d/456/2024-01-15/event_345_q6r8s.multipart
+s3://insights-llm-analytics/llma/1y/789/2024-01-15/event_678_t1u3v.multipart
 ```
 
 #### Access Control
@@ -486,7 +486,7 @@ Three approaches for handling data deletion requests:
    - Example: Delete all data for team 123:
 
      ```bash
-     aws s3 rm s3://posthog-llm-analytics/llma/123/ --recursive
+     aws s3 rm s3://insights-llm-analytics/llma/123/ --recursive
      ```
 
      Or using S3 API to delete objects with prefix `llma/123/`

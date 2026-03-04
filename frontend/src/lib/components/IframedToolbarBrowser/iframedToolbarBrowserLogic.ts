@@ -1,5 +1,5 @@
 import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { RefObject } from 'react'
 
 import {
@@ -267,7 +267,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
                         return init()
                     case InsightsAppToolbarEvent.PH_TOOLBAR_READY:
                         if (props.userIntent === 'heatmaps') {
-                            posthog.capture('in-app heatmap frame loaded', {
+                            insights.capture('in-app heatmap frame loaded', {
                                 inapp_heatmap_page_url_visited: values.browserUrl,
                                 inapp_heatmap_filters: values.heatmapFilters,
                                 inapp_heatmap_color_palette: values.heatmapColorPalette,
@@ -331,7 +331,7 @@ export const iframedToolbarBrowserLogic = kea<iframedToolbarBrowserLogicType>([
             cache.disposables.dispose('warnTimeout')
         },
         setIframeBanner: ({ banner }) => {
-            posthog.capture('in-app iFrame banner set', {
+            insights.capture('in-app iFrame banner set', {
                 level: banner?.level,
                 message: banner?.message,
             })

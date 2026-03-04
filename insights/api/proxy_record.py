@@ -3,7 +3,7 @@ import hashlib
 
 from django.conf import settings
 
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -31,7 +31,7 @@ def generate_target_cname(organization_id, domain) -> str:
 
 def _capture_proxy_event(request, record: ProxyRecord, event_type: str) -> None:
     organization = Organization.objects.get(id=record.organization_id)
-    posthoganalytics.capture(
+    hanzoanalytics.capture(
         distinct_id=str(request.user.distinct_id),
         event=f"managed reverse proxy {event_type}",
         properties={

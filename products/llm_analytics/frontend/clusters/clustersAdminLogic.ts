@@ -1,6 +1,6 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -116,7 +116,7 @@ export const clustersAdminLogic = kea<clustersAdminLogicType>([
         },
 
         triggerClusteringRun: () => {
-            posthog.capture('llma clusters admin run triggered', {
+            insights.capture('llma clusters admin run triggered', {
                 level: values.params.analysis_level,
                 method: values.params.clustering_method,
                 normalization: values.params.embedding_normalization,

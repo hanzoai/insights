@@ -119,7 +119,7 @@ def logout(request):
     if is_impersonated_session(request):
         impersonated_user_pk = request.user.pk
         restore_original_login(request)
-        return redirect(f"/admin/posthog/user/{impersonated_user_pk}/change/")
+        return redirect(f"/admin/insights/user/{impersonated_user_pk}/change/")
 
     response = auth_views.logout_then_login(request)
     return response
@@ -204,7 +204,7 @@ class LoginSerializer(serializers.Serializer):
                             return False
                     except BadSignature:
                         # Workaround for signature mismatches due to Django upgrades.
-                        # See https://github.com/PostHog/posthog/issues/19350
+                        # See https://github.com/Hanzo Insights/insights/issues/19350
                         pass
 
         # Has passkeys enabled for 2FA but no TOTP - 2FA still required (passkey will be used)
@@ -848,7 +848,7 @@ class PasswordResetCompleteSerializer(serializers.Serializer):
     def create(self, validated_data):
         # Special handling for E2E tests (note we don't actually change anything in the DB, just simulate the response)
         if settings.E2E_TESTING and validated_data["token"] == "e2e_test_token":
-            return {"email": "test@posthog.com"}
+            return {"email": "test@hanzo.ai"}
 
         try:
             user = User.objects.filter(is_active=True).get(uuid=self.context["view"].kwargs["user_uuid"])

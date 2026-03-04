@@ -48,7 +48,7 @@ When calling the gateway on behalf of end-users with a Personal API Key, **alway
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="https://gateway.us.posthog.com/v1",
+    base_url="https://gateway.insights.hanzo.ai/v1",
     api_key="phx_your_api_key",
 )
 
@@ -65,7 +65,7 @@ response = client.chat.completions.create(
 import OpenAI from 'openai'
 
 const client = new OpenAI({
-  baseURL: 'https://gateway.us.posthog.com/v1',
+  baseURL: 'https://gateway.insights.hanzo.ai/v1',
   apiKey: 'phx_your_api_key',
 })
 
@@ -82,7 +82,7 @@ const response = await client.chat.completions.create({
 import anthropic
 
 client = anthropic.Anthropic(
-    base_url="https://gateway.us.posthog.com/v1",
+    base_url="https://gateway.insights.hanzo.ai/v1",
     api_key="phx_your_api_key",
 )
 
@@ -149,7 +149,7 @@ Errors follow OpenAI's format:
 For calling from Insights Django:
 
 ```python
-from posthog.llm.gateway_client import get_llm_client
+from insights.llm.gateway_client import get_llm_client
 
 client = get_llm_client()
 response = client.chat.completions.create(

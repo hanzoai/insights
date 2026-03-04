@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconShare, IconX } from '@posthog/icons'
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { IconShare, IconX } from '@hanzo/icons'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { colonDelimitedDuration } from 'lib/utils'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

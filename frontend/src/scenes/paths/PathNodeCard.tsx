@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonDropdown } from '@posthog/lemon-ui'
+import { LemonDropdown } from '@hanzo/lemon-ui'
 
 import { FunnelPathsFilter } from '~/queries/schema/schema-general'
 import { InsightLogicProps } from '~/types'

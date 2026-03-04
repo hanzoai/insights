@@ -6,18 +6,18 @@ blank_site_destination: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     type="site_destination",
     id="template-blank-site-destination",
     name="New client-side destination",
-    description="New destination with complex event mapping. Works only with posthog-js when opt_in_site_apps is set to true.",
+    description="New destination with complex event mapping. Works only with insights-js when opt_in_site_apps is set to true.",
     icon_url="",
     category=["Custom", "Analytics"],
     code_language="javascript",
     code="""
-export async function onLoad({ inputs, posthog }) {
+export async function onLoad({ inputs, insights }) {
     console.log('🦔 Loading (takes 1 sec)', { inputs })
     // onEvent will not be called until this function resolves
     await new Promise((resolve) => window.setTimeout(resolve, 1000))
     console.log("🦔 Script loaded")
 }
-export function onEvent({ inputs, posthog }) {
+export function onEvent({ inputs, insights }) {
     console.log(`🦔 Sending event of type ${inputs.eventType}`, inputs.payload)
     // fetch('url', { method: 'POST', body: JSON.stringify(inputs.payload) })
 }
@@ -141,12 +141,12 @@ blank_site_app: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     type="site_app",
     id="template-blank-site-app",
     name="New site app",
-    description="Run custom JavaScript on your website. Works only with posthog-js when opt_in_site_apps is set to true.",
+    description="Run custom JavaScript on your website. Works only with insights-js when opt_in_site_apps is set to true.",
     icon_url="",
     category=["Custom", "Analytics"],
     code_language="javascript",
     code="""
-export function onLoad({ inputs, posthog }) {
+export function onLoad({ inputs, insights }) {
     console.log(`Hello ${inputs.name} from your new Site App!`)
 }
 """.strip(),

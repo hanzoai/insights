@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useRef } from 'react'
 
-import { IconCheckCircle, IconInfo } from '@posthog/icons'
-import { LemonSelectOptions, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconInfo } from '@hanzo/icons'
+import { LemonSelectOptions, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { TRIAL_CANCELLATION_SURVEY_ID, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { humanFriendlyCurrency } from 'lib/utils'
@@ -120,7 +120,7 @@ export const BillingProductAddon = ({ addon }: { addon: BillingProductV2AddonTyp
                         {is_enhanced_persons_og_customer && (
                             <p className="mt-2 mb-0">
                                 <Link
-                                    to="https://posthog.com/changelog/2024#person-profiles-launched-posthog-now-up-to-80percent-cheaper"
+                                    to="https://hanzo.ai/changelog/2024#person-profiles-launched-insights-now-up-to-80percent-cheaper"
                                     className="italic"
                                     target="_blank"
                                     targetBlankIcon

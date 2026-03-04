@@ -14,7 +14,7 @@ from ..core import InsightsQLFunctionMeta
 DATE_TRUNCATION_UNITS = frozenset({"year", "quarter", "month", "week"})
 
 # dates and times
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 DATETIME_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "timeZoneOf": InsightsQLFunctionMeta("timeZoneOf", 1, 1),
     "timeZoneOffset": InsightsQLFunctionMeta("timeZoneOffset", 1, 1),
@@ -213,7 +213,7 @@ DATETIME_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "fromModifiedJulianDay": InsightsQLFunctionMeta("fromModifiedJulianDayOrNull", 1, 1),
 }
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 DATE_GENERATOR_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "now": InsightsQLFunctionMeta(
         "now64",
@@ -257,7 +257,7 @@ DATE_GENERATOR_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # Interval functions
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 INTERVAL_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "toIntervalSecond": InsightsQLFunctionMeta(
         "toIntervalSecond",
@@ -325,7 +325,7 @@ INTERVAL_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     ),
 }
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 POSTGRESQL_DATETIME_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     # PostgreSQL-style date/time functions
     "date_part": InsightsQLFunctionMeta(

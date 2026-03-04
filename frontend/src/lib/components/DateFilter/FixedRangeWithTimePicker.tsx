@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useState } from 'react'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonSwitch } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { LemonCalendar } from 'lib/lemon-ui/LemonCalendar/LemonCalendar'

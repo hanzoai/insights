@@ -67,8 +67,8 @@ def test_google_ads_source_config_loads(customer_id: str, developer_token: str):
     """Test basic case of source configuration loading."""
     private_key = "private_key"
     private_key_id = "id"
-    client_email = "posthog@posthog.com"
-    token_uri = "https://posthog.com"
+    client_email = "insights@hanzo.ai"
+    token_uri = "https://hanzo.ai"
 
     job_inputs = {
         "resource_name": "campaign",
@@ -96,8 +96,8 @@ def test_google_ads_source_config_handles_customer_id_with_dashes(developer_toke
     """Test source configuration handles clean up of customer id."""
     private_key = "private_key"
     private_key_id = "id"
-    client_email = "posthog@posthog.com"
-    token_uri = "https://posthog.com"
+    client_email = "insights@hanzo.ai"
+    token_uri = "https://hanzo.ai"
 
     job_inputs = {
         "resource_name": "campaign",

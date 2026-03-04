@@ -1,6 +1,6 @@
 from typing import Any
 
-import posthoganalytics
+import hanzoanalytics
 import structlog
 
 from llm_gateway.config import get_settings
@@ -16,10 +16,10 @@ def _ensure_initialized() -> bool:
         return True
 
     settings = get_settings()
-    if not settings.posthog_project_token:
+    if not settings.insights_project_token:
         return False
 
-    posthoganalytics.api_key = settings.posthog_project_token
+    hanzoanalytics.api_key = settings.insights_project_token
     _initialized = True
     return True
 
@@ -34,10 +34,10 @@ def capture_exception(
         return
 
     try:
-        posthoganalytics.capture_exception(
+        hanzoanalytics.capture_exception(
             error,
             distinct_id="llm-gateway-service",
             properties=properties if properties else None,
         )
     except Exception as capture_error:
-        logger.warning("failed_to_capture_exception", posthog_error=str(capture_error))
+        logger.warning("failed_to_capture_exception", insights_error=str(capture_error))

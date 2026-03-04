@@ -41,14 +41,14 @@ beforeEach(() => {
 
     const responsesToUrls: Record<string, any> = {
         'https://google.com/results.json?query=fetched': { count: 2, query: 'bla', results: [true, true] },
-        'https://mmdbcdn.posthog.net/': readFileSync(join(__dirname, 'tests', 'assets', 'GeoLite2-City-Test.mmdb.br')),
-        'https://app.posthog.com/api/event?token=THIS+IS+NOT+A+TOKEN+FOR+TEAM+2': { hello: 'world' },
+        'https://mmdbcdn.insights.net/': readFileSync(join(__dirname, 'tests', 'assets', 'GeoLite2-City-Test.mmdb.br')),
+        'https://insights.hanzo.ai/api/event?token=THIS+IS+NOT+A+TOKEN+FOR+TEAM+2': { hello: 'world' },
         'https://onevent.com/': { success: true },
         'https://www.example.com': { example: 'data' },
     }
 
     const headersToUrls: Record<string, Map<string, string>> = {
-        'https://mmdbcdn.posthog.net/': new Map([
+        'https://mmdbcdn.insights.net/': new Map([
             ['content-type', 'vnd.maxmind.maxmind-db'],
             ['content-disposition', `attachment; filename="GeoLite2-City-${DateTime.local().toISODate()}.mmdb"`],
         ]),

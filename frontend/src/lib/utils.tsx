@@ -1,5 +1,5 @@
 import equal from 'fast-deep-equal'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { CSSProperties } from 'react'
 
 import { tagColors } from 'lib/colors'
@@ -1898,7 +1898,7 @@ export function shortTimeZone(timeZone?: string, atDate?: Date): string | null {
             .split(' ')
         return localeTimeStringParts[localeTimeStringParts.length - 1]
     } catch (e) {
-        posthog.captureException(e)
+        insights.captureException(e)
         return null
     }
 }

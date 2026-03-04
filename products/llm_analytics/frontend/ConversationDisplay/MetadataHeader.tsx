@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { lowercaseFirstLetter } from 'lib/utils'

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonInput, LemonSwitch } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonInput, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'
@@ -366,7 +366,7 @@ export function Members(): JSX.Element | null {
                 />
             </PayGateMini>
 
-            {posthog.isFeatureEnabled(FEATURE_FLAGS.MEMBERS_CAN_USE_PERSONAL_API_KEYS) && (
+            {insights.isFeatureEnabled(FEATURE_FLAGS.MEMBERS_CAN_USE_PERSONAL_API_KEYS) && (
                 <>
                     <h3 className="mt-4">Security settings</h3>
                     <PayGateMini feature={AvailableFeature.ORGANIZATION_SECURITY_SETTINGS}>

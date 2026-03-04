@@ -15,14 +15,14 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
             <>
                 <Markdown>
                     {dedent`
-                        Update \`config/initializers/posthog.rb\` to enable automatic exception capture:
+                        Update \`config/initializers/insights.rb\` to enable automatic exception capture:
                     `}
                 </Markdown>
                 <CodeBlock
                     blocks={[
                         {
                             language: 'ruby',
-                            file: 'config/initializers/posthog.rb',
+                            file: 'config/initializers/insights.rb',
                             code: dedent`
                                 Insights::Rails.configure do |config|
                                   config.auto_capture_exceptions = true
@@ -138,7 +138,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                 {dedent`
                     Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

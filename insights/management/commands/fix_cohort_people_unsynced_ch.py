@@ -19,7 +19,7 @@ PROD_US_CUTOFF = "2025-10-01 00:00:00"
 
 class Command(BaseCommand):
     help = (
-        "Sync cohort people records from ClickHouse person_static_cohort table to PostgreSQL posthog_cohortpeople table"
+        "Sync cohort people records from ClickHouse person_static_cohort table to PostgreSQL insights_cohortpeople table"
     )
 
     def add_arguments(self, parser):

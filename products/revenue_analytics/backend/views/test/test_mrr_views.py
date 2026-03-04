@@ -34,9 +34,9 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
 )
 from products.revenue_analytics.backend.views.schemas.mrr import SCHEMA as MRR_SCHEMA
 
-INVOICES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.mrr_views.stripe_invoices"
-CHARGES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.mrr_views.stripe_charges"
-SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.mrr_views.stripe_subscriptions"
+INVOICES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.mrr_views.stripe_invoices"
+CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.mrr_views.stripe_charges"
+SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.mrr_views.stripe_subscriptions"
 
 
 @snapshot_clickhouse_queries
@@ -125,7 +125,7 @@ class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
                     distinct_ids=[distinct_id],
                     properties={
                         "name": distinct_id,
-                        **({"email": "test@posthog.com"} if distinct_id == "test" else {}),
+                        **({"email": "test@hanzo.ai"} if distinct_id == "test" else {}),
                     },
                 )
             event_ids: list[str] = []
@@ -164,7 +164,7 @@ class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
 
         query = ast.SelectQuery(
             select=[ast.Alias(alias="count", expr=ast.Call(name="count", args=[]))],
-            select_from=ast.JoinExpr(table=ast.Field(chain=[f"stripe.posthog_test.{MRR_SCHEMA.source_suffix}"])),
+            select_from=ast.JoinExpr(table=ast.Field(chain=[f"stripe.insights_test.{MRR_SCHEMA.source_suffix}"])),
         )
 
         response = self._execute_query(query)
@@ -195,7 +195,7 @@ class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
     def test_query_output_data_warehouse_tables(self):
         query = ast.SelectQuery(
             select=[ast.Field(chain=["*"])],
-            select_from=ast.JoinExpr(table=ast.Field(chain=[f"stripe.posthog_test.{MRR_SCHEMA.source_suffix}"])),
+            select_from=ast.JoinExpr(table=ast.Field(chain=[f"stripe.insights_test.{MRR_SCHEMA.source_suffix}"])),
         )
 
         response = self._execute_query(query)
@@ -204,12 +204,12 @@ class TestMRRViewsE2E(ClickhouseTestMixin, QueryMatchingTest, APIBaseTest):
         self.assertEqual(
             response.results,
             [
-                ("stripe.posthog_test", "cus_1", "sub_1", Decimal("22.9631447238")),
-                ("stripe.posthog_test", "cus_2", "sub_2", Decimal("40.8052916666")),
-                ("stripe.posthog_test", "cus_3", "sub_3", Decimal("1546.59444")),
-                ("stripe.posthog_test", "cus_4", "sub_4", Decimal("0")),
-                ("stripe.posthog_test", "cus_5", "sub_5", Decimal("0")),
-                ("stripe.posthog_test", "cus_6", "sub_6", Decimal("0")),
+                ("stripe.insights_test", "cus_1", "sub_1", Decimal("22.9631447238")),
+                ("stripe.insights_test", "cus_2", "sub_2", Decimal("40.8052916666")),
+                ("stripe.insights_test", "cus_3", "sub_3", Decimal("1546.59444")),
+                ("stripe.insights_test", "cus_4", "sub_4", Decimal("0")),
+                ("stripe.insights_test", "cus_5", "sub_5", Decimal("0")),
+                ("stripe.insights_test", "cus_6", "sub_6", Decimal("0")),
             ],
         )
 

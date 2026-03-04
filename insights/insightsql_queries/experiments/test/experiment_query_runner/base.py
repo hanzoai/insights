@@ -12,7 +12,7 @@ from insights.models.feature_flag.feature_flag import FeatureFlag
 from products.data_warehouse.backend.models.join import DataWarehouseJoin
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 
-TEST_BUCKET = "test_storage_bucket-posthog.insightsql.experiments.queryrunner"
+TEST_BUCKET = "test_storage_bucket-insights.insightsql.experiments.queryrunner"
 
 
 @override_settings(IN_UNIT_TESTING=True)

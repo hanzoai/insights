@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonLabel, LemonSelect, LemonTag } from '@posthog/lemon-ui'
+import { LemonLabel, LemonSelect, LemonTag } from '@hanzo/lemon-ui'
 
 import { Since } from 'scenes/settings/environment/SessionRecordingSettings'
 

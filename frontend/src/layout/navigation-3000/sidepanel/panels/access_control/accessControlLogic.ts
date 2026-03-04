@@ -1,8 +1,8 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonSelectOption } from '@posthog/lemon-ui'
+import { LemonSelectOption } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { upgradeModalLogic } from 'lib/components/UpgradeModal/upgradeModalLogic'
@@ -102,7 +102,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                         access_level: level,
                     })
 
-                    posthog.capture('access control default access level changed', {
+                    insights.capture('access control default access level changed', {
                         resource: values.resource,
                         access_level: level,
                         old_access_level: values.accessControlDefault?.access_level,
@@ -119,7 +119,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                         })
 
                         const oldAccessControl = values.accessControlRoles.find((ac) => ac.role === role)
-                        posthog.capture('access control role access level changed', {
+                        insights.capture('access control role access level changed', {
                             resource: values.resource,
                             action: oldAccessControl ? (level === null ? 'removed' : 'changed') : 'added',
                             role: role,
@@ -141,7 +141,7 @@ export const accessControlLogic = kea<accessControlLogicType>([
                         const oldAccessControl = values.accessControlMembers.find(
                             (ac) => ac.organization_member === member
                         )
-                        posthog.capture('access control member access level changed', {
+                        insights.capture('access control member access level changed', {
                             resource: values.resource,
                             action: oldAccessControl ? (level === null ? 'removed' : 'changed') : 'added',
                             member: member,

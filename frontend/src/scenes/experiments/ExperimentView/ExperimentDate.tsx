@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconPencil } from '@posthog/icons'
-import { LemonButton, LemonCalendarSelectInput } from '@posthog/lemon-ui'
+import { IconPencil } from '@hanzo/icons'
+import { LemonButton, LemonCalendarSelectInput } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'

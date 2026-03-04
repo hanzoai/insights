@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect } from '@posthog/lemon-ui'
+import { LemonSelect } from '@hanzo/lemon-ui'
 
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { DEFAULT_STEP_LIMIT } from 'scenes/paths/pathsDataLogic'

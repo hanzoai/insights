@@ -16,7 +16,7 @@ import dataclasses
 from datetime import UTC, datetime, timedelta
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 import temporalio.activity
 from temporalio.common import RetryPolicy
 
@@ -70,7 +70,7 @@ class LLMAWorkflowConfig:
 def _get_llma_workflow_config() -> LLMAWorkflowConfig:
     """Read LLMA team-discovery config from the feature flag payload, falling back to defaults."""
     try:
-        payload: dict | None = posthoganalytics.get_feature_flag_payload(  # type: ignore[assignment]
+        payload: dict | None = hanzoanalytics.get_feature_flag_payload(  # type: ignore[assignment]
             FEATURE_FLAG_KEY, "internal_llma_team_discovery"
         )
 

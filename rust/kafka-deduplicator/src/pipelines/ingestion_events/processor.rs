@@ -1,6 +1,6 @@
 //! Batch processor for ingestion events pipeline.
 //!
-//! This processor implements timestamp-based deduplication for PostHog
+//! This processor implements timestamp-based deduplication for Insights
 //! ingestion events (CapturedEvent/RawEvent) using the shared `TimestampDeduplicator`.
 
 use std::sync::Arc;

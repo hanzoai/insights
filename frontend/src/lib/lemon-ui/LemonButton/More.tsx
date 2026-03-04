@@ -1,7 +1,7 @@
 import { LemonButtonWithDropdown } from '.'
 import { forwardRef } from 'react'
 
-import { IconEllipsis } from '@posthog/icons'
+import { IconEllipsis } from '@hanzo/icons'
 
 import { PopoverProps } from '../Popover/Popover'
 import { LemonButtonDropdown, LemonButtonProps } from './LemonButton'

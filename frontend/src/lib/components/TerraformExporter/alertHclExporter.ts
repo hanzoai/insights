@@ -14,7 +14,7 @@ export interface AlertHclExportOptions extends HclExportOptions {
 }
 
 /**
- * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/alert
+ * @see https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/alert
  */
 const ALERT_FIELD_MAPPINGS: FieldMapping<Partial<AlertType>, AlertHclExportOptions>[] = [
     {
@@ -110,7 +110,7 @@ function validateAlert(alert: Partial<AlertType>, options?: AlertHclExportOption
     // Only warn about hardcoded insight id if not using TF reference
     if (!options?.insightTfReference && alert.insight?.id) {
         warnings.push(
-            '`insight id` is hardcoded. Consider referencing the Terraform resource instead (e.g., `posthog_insight.my_insight.id`).'
+            '`insight id` is hardcoded. Consider referencing the Terraform resource instead (e.g., `insights_insight.my_insight.id`).'
         )
     }
 
@@ -124,7 +124,7 @@ function validateAlert(alert: Partial<AlertType>, options?: AlertHclExportOption
 }
 
 const ALERT_EXPORTER: ResourceExporter<Partial<AlertType>, AlertHclExportOptions> = {
-    resourceType: 'posthog_alert',
+    resourceType: 'insights_alert',
     resourceLabel: 'alert',
     fieldMappings: ALERT_FIELD_MAPPINGS,
     validate: validateAlert,

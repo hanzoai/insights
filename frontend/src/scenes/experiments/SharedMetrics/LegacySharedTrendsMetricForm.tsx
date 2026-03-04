@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCheckCircle } from '@posthog/icons'
-import { LemonBanner, LemonTabs, LemonTag } from '@posthog/lemon-ui'
+import { IconCheckCircle } from '@hanzo/icons'
+import { LemonBanner, LemonTabs, LemonTag } from '@hanzo/lemon-ui'
 
 import { TestAccountFilterSwitch } from 'lib/components/TestAccountFiltersSwitch'
 import { EXPERIMENT_DEFAULT_DURATION } from 'lib/constants'

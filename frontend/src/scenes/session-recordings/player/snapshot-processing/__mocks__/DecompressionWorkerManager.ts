@@ -9,10 +9,10 @@ export class DecompressionWorkerManager {
 }
 
 let workerManager: DecompressionWorkerManager | null = null
-let currentPosthog: any | undefined
+let currentInsights: any | undefined
 
-export function getDecompressionWorkerManager(posthog?: any): DecompressionWorkerManager {
-    const configChanged = currentPosthog !== posthog
+export function getDecompressionWorkerManager(insights?: any): DecompressionWorkerManager {
+    const configChanged = currentInsights !== insights
 
     if (configChanged && workerManager) {
         terminateDecompressionWorker()
@@ -20,7 +20,7 @@ export function getDecompressionWorkerManager(posthog?: any): DecompressionWorke
 
     if (!workerManager) {
         workerManager = new DecompressionWorkerManager()
-        currentPosthog = posthog
+        currentInsights = insights
     }
     return workerManager
 }
@@ -30,5 +30,5 @@ export function terminateDecompressionWorker(): void {
         workerManager.terminate()
         workerManager = null
     }
-    currentPosthog = undefined
+    currentInsights = undefined
 }

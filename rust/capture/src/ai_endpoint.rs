@@ -1041,7 +1041,7 @@ mod tests {
     fn test_insert_blob_urls_into_properties() {
         let uploaded = UploadedBlobs {
             base_url: "s3://capture/llma/phc_test_token/abc-def".to_string(),
-            boundary: "----posthog-ai-abc-def".to_string(),
+            boundary: "----insights-ai-abc-def".to_string(),
             parts: vec![
                 BlobPartRange {
                     property_name: "$ai_input".to_string(),

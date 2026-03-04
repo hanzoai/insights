@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconChevronLeft } from '@posthog/icons'
-import { LemonInput, LemonTextArea, Link } from '@posthog/lemon-ui'
+import { IconChevronLeft } from '@hanzo/icons'
+import { LemonInput, LemonTextArea, Link } from '@hanzo/lemon-ui'
 
 import { UserActivityIndicator } from 'lib/components/UserActivityIndicator/UserActivityIndicator'
 import { usersLemonSelectOptions } from 'lib/components/UserSelectItem'
@@ -139,7 +139,7 @@ export function EditSubscription({
                                     If this value is not configured correctly Insights may be unable to correctly send
                                     Subscriptions.{' '}
                                     <Link
-                                        to="https://posthog.com/docs/configuring-posthog/environment-variables?utm_medium=in-product&utm_campaign=subcriptions-system-status-site-url-misconfig"
+                                        to="https://hanzo.ai/docs/configuring-insights/environment-variables?utm_medium=in-product&utm_campaign=subcriptions-system-status-site-url-misconfig"
                                         target="_blank"
                                         targetBlankIcon
                                     >
@@ -165,7 +165,7 @@ export function EditSubscription({
                                             Email subscriptions are not currently possible as this Insights instance
                                             isn't{' '}
                                             <Link
-                                                to="https://posthog.com/docs/self-host/configure/email"
+                                                to="https://hanzo.ai/docs/self-host/configure/email"
                                                 target="_blank"
                                                 targetBlankIcon
                                             >
@@ -214,7 +214,7 @@ export function EditSubscription({
                                             help={
                                                 <>
                                                     Private channels are only shown if you have{' '}
-                                                    <Link to="https://posthog.com/docs/webhooks/slack" target="_blank">
+                                                    <Link to="https://hanzo.ai/docs/webhooks/slack" target="_blank">
                                                         added the Insights Slack App
                                                     </Link>{' '}
                                                     to them. You can also paste the channel ID (e.g.{' '}

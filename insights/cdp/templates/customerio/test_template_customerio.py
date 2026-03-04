@@ -19,7 +19,7 @@ def create_inputs(**kwargs):
         "action": "automatic",
         "include_all_properties": False,
         "identifier_key": "email",
-        "identifier_value": "example@posthog.com",
+        "identifier_value": "example@hanzo.ai",
         "attributes": {"name": "example"},
     }
     inputs.update(kwargs)
@@ -51,7 +51,7 @@ class TestTemplateCustomerio(BaseInsightsFunctionTemplateTest):
                     "type": "person",
                     "action": "page",
                     "name": None,
-                    "identifiers": {"email": "example@posthog.com"},
+                    "identifiers": {"email": "example@hanzo.ai"},
                     "attributes": {"name": "example"},
                     "timestamp": 1704067200,
                 },
@@ -79,7 +79,7 @@ class TestTemplateCustomerio(BaseInsightsFunctionTemplateTest):
                     "type": "person",
                     "action": "page",
                     "name": None,
-                    "identifiers": {"email": "example@posthog.com"},
+                    "identifiers": {"email": "example@hanzo.ai"},
                     "attributes": {
                         "url": "https://example.com/12345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345",
                         "name": "example",
@@ -104,7 +104,7 @@ class TestTemplateCustomerio(BaseInsightsFunctionTemplateTest):
         self.run_function(inputs=create_inputs(include_all_properties=True, action="identify"))
 
         assert self.get_mock_fetch_calls()[0][1]["body"]["attributes"] == {
-            "email": "example@posthog.com",
+            "email": "example@hanzo.ai",
             "name": "example",
         }
 

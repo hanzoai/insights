@@ -123,7 +123,7 @@ impl Team {
                     timezone,
                     conversations_enabled,
                     conversations_settings as "conversations_settings: _"
-                FROM posthog_team
+                FROM insights_team
                 WHERE id = $1
                 LIMIT 1
             "#,
@@ -181,7 +181,7 @@ impl Team {
                     timezone,
                     conversations_enabled,
                     conversations_settings as "conversations_settings: _"
-                FROM posthog_team
+                FROM insights_team
                 WHERE api_token = $1
                 LIMIT 1
             "#,

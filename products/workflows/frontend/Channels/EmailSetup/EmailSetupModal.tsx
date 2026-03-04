@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconCheckCircle, IconCopy, IconQuestion, IconRefresh, IconWarning } from '@posthog/icons'
+import { IconCheckCircle, IconCopy, IconQuestion, IconRefresh, IconWarning } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -11,7 +11,7 @@ import {
     Spinner,
     Tooltip,
     lemonToast,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { DomainConnectBanner } from 'lib/components/DomainConnect'
 import { FlaggedFeature } from 'lib/components/FlaggedFeature'

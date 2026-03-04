@@ -10,9 +10,9 @@ pub mod upload;
 
 #[derive(Subcommand)]
 pub enum SourcemapCommand {
-    /// Inject each bundled chunk with a posthog chunk ID
+    /// Inject each bundled chunk with an insights chunk ID
     Inject(InjectArgs),
-    /// Upload the bundled chunks to PostHog
+    /// Upload the bundled chunks to Insights
     Upload(upload::Args),
     /// Run inject and upload in one command
     Process(ProcessArgs),

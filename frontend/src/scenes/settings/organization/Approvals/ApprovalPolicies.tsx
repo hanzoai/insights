@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconInfo, IconX } from '@posthog/icons'
+import { IconInfo, IconX } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -10,7 +10,7 @@ import {
     LemonSwitch,
     LemonTable,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { useRestrictedArea } from 'lib/components/RestrictedArea'

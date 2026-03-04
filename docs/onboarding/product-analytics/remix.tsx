@@ -16,7 +16,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                     <CalloutBox type="fyi" title="Remix version">
                         <Markdown>
                             This guide is for Remix v2. For Remix v3, see our [React Router v7
-                            docs](https://posthog.com/docs/libraries/react-router).
+                            docs](https://hanzo.ai/docs/libraries/react-router).
                         </Markdown>
                     </CalloutBox>
                     <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
@@ -26,21 +26,21 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -54,7 +54,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Add `posthog-js` and `posthog-js/react` to `ssr.noExternal` in your `vite.config.ts` so they get
+                        Add `insights-js` and `insights-js/react` to `ssr.noExternal` in your `vite.config.ts` so they get
                         bundled for SSR:
                     </Markdown>
                     <CodeBlock
@@ -79,7 +79,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                         tsconfigPaths(),
                                       ],
                                       ssr: {
-                                        noExternal: ["posthog-js", "posthog-js/react"],
+                                        noExternal: ["insights-js", "insights-js/react"],
                                       },
                                     });
                                 `,
@@ -105,14 +105,14 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 file: 'app/provider.tsx',
                                 code: dedent`
                                     import { useEffect, useState } from "react";
-                                    import posthog from "posthog-js";
-                                    import { PostHogProvider } from "posthog-js/react";
+                                    import insights from "insights-js";
+                                    import { InsightsProvider } from "insights-js/react";
 
                                     export function PHProvider({ children }: { children: React.ReactNode }) {
                                       const [hydrated, setHydrated] = useState(false);
 
                                       useEffect(() => {
-                                        posthog.init("<ph_project_api_key>", {
+                                        insights.init("<ph_project_api_key>", {
                                           api_host: "<ph_client_api_host>",
                                           defaults: "2026-01-30"
                                         });
@@ -121,7 +121,7 @@ export const getRemixSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                       }, []);
 
                                       if (!hydrated) return <>{children}</>;
-                                      return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+                                      return <InsightsProvider client={insights}>{children}</InsightsProvider>;
                                     }
                                 `,
                             },

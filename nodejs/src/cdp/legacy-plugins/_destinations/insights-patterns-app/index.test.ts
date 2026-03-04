@@ -1,4 +1,4 @@
-import { createEvent } from '@posthog/plugin-scaffold/test/utils'
+import { createEvent } from '@hanzo/plugin-scaffold/test/utils'
 
 import { PatternsMeta, onEvent, setupPlugin } from './index'
 

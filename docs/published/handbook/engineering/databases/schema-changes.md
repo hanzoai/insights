@@ -14,7 +14,7 @@ For detailed patterns on writing safe Django migrations, see the [Safe Django Mi
 Before making a schema change, consider:
 
 - Do we need the schema change at all? Would this be better solved with an application-level code change instead?
-- Is my change backwards compatible? Both old and new code _will_ be running in parallel in both posthog cloud and self-hosted, so breaking changes can and will cause outages.
+- Is my change backwards compatible? Both old and new code _will_ be running in parallel in both insights cloud and self-hosted, so breaking changes can and will cause outages.
 - Can I deploy my schema change separately from application code change? For non-trivial changes, you want to deploy schema change first to ensure it's easy to roll back and if it's backwards compatible.
 - Am I doing a blocking migration? Migrations which lock huge tables can easily cause outages.
 
@@ -30,13 +30,13 @@ To avoid this pain, **AVOID deleting/renaming models and fields**. Instead:
 
 - if the name is no longer relevant, keep it the same in the database – feel free to change the naming in Python/JS code, but make sure the change ISN'T reflected in the database,
 - if the field itself is no longer relevant, just clearly mark it with a `# DEPRECATED` comment in code
-- make the field not be queried by overriding `get_queryset` in a Manager object. See [this PR](https://github.com/PostHog/posthog/pull/13512) for an example.
+- make the field not be queried by overriding `get_queryset` in a Manager object. See [this PR](https://github.com/Hanzo Insights/insights/pull/13512) for an example.
 
 ## Design for scale
 
 Migrations must run smoothly in local development, self-hosted instances, and Insights Cloud. Avoid migrations that process rows individually on large tables (events, persons, person distinct IDs, logs) - they may take forever or lock the entire table.
 
-> For a quick overview of Cloud scale, see [Vanity Metrics in Metabase](https://metabase.posthog.net/dashboard/1).
+> For a quick overview of Cloud scale, see [Vanity Metrics in Metabase](https://metabase.insights.net/dashboard/1).
 
 ## Tread carefully with ClickHouse schema changes
 

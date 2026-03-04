@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconRefresh } from '@posthog/icons'
-import { LemonButton, LemonDialog } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonButton, LemonDialog } from '@hanzo/lemon-ui'
 
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'

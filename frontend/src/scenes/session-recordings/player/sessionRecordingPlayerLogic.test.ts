@@ -2,9 +2,9 @@ import { MOCK_TEAM_ID } from 'lib/api.mock'
 
 import { router } from 'kea-router'
 import { expectLogic } from 'kea-test-utils'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { EventType, IncrementalSource, eventWithTime } from '@posthog/rrweb-types'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/rrweb-types'
 
 import api from 'lib/api'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -455,18 +455,18 @@ describe('sessionRecordingPlayerLogic', () => {
             logger.logger.warn('[replayer]', 'test2')
             logger.logger.log('[replayer]', 'test3')
 
-            expect((window as any).__posthog_player_warnings).toEqual([
+            expect((window as any).__insights_player_warnings).toEqual([
                 ['[replayer]', 'test'],
                 ['[replayer]', 'test2'],
             ])
-            expect((window as any).__posthog_player_logs).toEqual([['[replayer]', 'test3']])
+            expect((window as any).__insights_player_logs).toEqual([['[replayer]', 'test3']])
 
             jest.runOnlyPendingTimers()
             expect(mockWarn).toHaveBeenCalledWith(
-                '[PostScript REPLayer] 2 warnings (window.__posthog_player_warnings to safely log them)'
+                '[PostScript REPLayer] 2 warnings (window.__insights_player_warnings to safely log them)'
             )
             expect(mockWarn).toHaveBeenCalledWith(
-                '[PostScript REPLayer] 1 logs (window.__posthog_player_logs to safely log them)'
+                '[PostScript REPLayer] 1 logs (window.__insights_player_logs to safely log them)'
             )
         })
     })
@@ -623,7 +623,7 @@ describe('sessionRecordingPlayerLogic', () => {
                 logic.mount()
 
                 const mockCapture = jest.fn()
-                ;(posthog as any).capture = mockCapture
+                ;(insights as any).capture = mockCapture
 
                 logic.actions.setPlay()
                 logic.actions.endBuffer()
@@ -655,7 +655,7 @@ describe('sessionRecordingPlayerLogic', () => {
 
             it('captures "no playtime summary" event when play_time_ms is 0', async () => {
                 const mockCapture = jest.fn()
-                ;(posthog as any).capture = mockCapture
+                ;(insights as any).capture = mockCapture
 
                 logic.unmount()
 
@@ -672,7 +672,7 @@ describe('sessionRecordingPlayerLogic', () => {
 
             it('calculates engagement score based on click count', async () => {
                 const mockCapture = jest.fn()
-                ;(posthog as any).capture = mockCapture
+                ;(insights as any).capture = mockCapture
 
                 logic.actions.incrementClickCount()
                 logic.actions.incrementClickCount()

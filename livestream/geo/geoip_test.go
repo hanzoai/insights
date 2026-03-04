@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/posthog/posthog/livestream/geo"
-	"github.com/posthog/posthog/livestream/mocks"
+	"github.com/hanzoai/insights/livestream/geo"
+	"github.com/hanzoai/insights/livestream/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

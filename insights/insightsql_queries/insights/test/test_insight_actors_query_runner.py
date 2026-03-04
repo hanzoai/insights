@@ -61,7 +61,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     distinct_ids=[id],
                     properties={
                         "name": id,
-                        **({"email": "test@posthog.com"} if id == "p1" else {}),
+                        **({"email": "test@hanzo.ai"} if id == "p1" else {}),
                     },
                 )
             for timestamp in timestamps:
@@ -242,7 +242,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     dateRange=DateRange(date_from="2020-01-09", date_to="2020-01-19"),
                     series=[EventsNode(event="$pageview")],
                     properties=[
-                        PersonPropertyFilter(type="person", key="email", value="tom@posthog.com", operator="is_not")
+                        PersonPropertyFilter(type="person", key="email", value="tom@hanzo.ai", operator="is_not")
                     ],
                 ),
             ),
@@ -265,7 +265,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             <TrendsQuery
                                 dateRange={<DateRange date_from='2020-01-09' date_to='2020-01-19' />}
                                 series={[<EventsNode event='$pageview' />]}
-                                properties={[<PersonPropertyFilter type='person' key='email' value='tom@posthog.com' operator='is_not' />]}
+                                properties={[<PersonPropertyFilter type='person' key='email' value='tom@hanzo.ai' operator='is_not' />]}
                             />
                         </InsightActorsQuery>
                     </ActorsQuery>
@@ -293,7 +293,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             <TrendsQuery
                                 dateRange={<DateRange date_from='2020-01-09' date_to='2020-01-19' />}
                                 series={[<EventsNode event='$pageview' />]}
-                                properties={[<PersonPropertyFilter type='person' key='email' value='tom@posthog.com' operator='is_not' />]}
+                                properties={[<PersonPropertyFilter type='person' key='email' value='tom@hanzo.ai' operator='is_not' />]}
                             />
                         </InsightActorsQuery>
                     </ActorsQuery>
@@ -321,7 +321,7 @@ class TestInsightActorsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                             <TrendsQuery
                                 dateRange={<DateRange date_from='2020-01-09' date_to='2020-01-19' />}
                                 series={[<EventsNode event='$pageview' />]}
-                                properties={[<PersonPropertyFilter type='person' key='email' value='tom@posthog.com' operator='is_not' />]}
+                                properties={[<PersonPropertyFilter type='person' key='email' value='tom@hanzo.ai' operator='is_not' />]}
                             />
                         </InsightActorsQuery>
                     </ActorsQuery>

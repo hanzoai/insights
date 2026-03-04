@@ -15,7 +15,7 @@ from insights.models.user import User
 class TestSlackIntegration:
     @pytest.fixture(autouse=True)
     def setup_integration(self, db):
-        self.user = User.objects.create(email="test@posthog.com")
+        self.user = User.objects.create(email="test@hanzo.ai")
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
 
@@ -210,10 +210,10 @@ class TestEmailIntegration:
     @pytest.fixture(autouse=True)
     def setup_integration(self, db):
         self.valid_config = {
-            "email": "test@posthog.com",
+            "email": "test@hanzo.ai",
             "name": "Test User",
         }
-        self.user = User.objects.create(email="test@posthog.com")
+        self.user = User.objects.create(email="test@hanzo.ai")
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
 
@@ -258,14 +258,14 @@ class TestEmailIntegration:
                 {
                     "type": "verification",
                     "recordType": "TXT",
-                    "recordHostname": "_amazonses.posthog.com",
+                    "recordHostname": "_amazonses.hanzo.ai",
                     "recordValue": "test-verification-token",
                     "status": "pending",
                 },
                 {
                     "type": "dkim",
                     "recordType": "CNAME",
-                    "recordHostname": "token1._domainkey.posthog.com",
+                    "recordHostname": "token1._domainkey.hanzo.ai",
                     "recordValue": "token1.dkim.amazonses.com",
                     "status": "pending",
                 },
@@ -402,7 +402,7 @@ class TestDatabricksIntegration:
     def setup_integration(self, db):
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.user = User.objects.create_and_join(self.organization, "test@posthog.com", "test")
+        self.user = User.objects.create_and_join(self.organization, "test@hanzo.ai", "test")
 
     @patch("insights.models.integration.socket.socket")
     def test_integration_from_config_with_valid_config(
@@ -495,7 +495,7 @@ class TestIntegrationAPIKeyAccess:
     def setup_integration(self, db):
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.user = User.objects.create_and_join(self.organization, "test@posthog.com", "test")
+        self.user = User.objects.create_and_join(self.organization, "test@hanzo.ai", "test")
 
         self.github_integration = Integration.objects.create(
             team=self.team,

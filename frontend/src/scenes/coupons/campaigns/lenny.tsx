@@ -1,5 +1,5 @@
-import { IconX } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { Logo } from 'lib/brand/Logo'
 
@@ -69,7 +69,7 @@ export const lennyCampaign: CampaignConfig = {
     footerNote: (
         <>
             ... and{' '}
-            <Link to="https://posthog.com/platform-packages" target="_blank">
+            <Link to="https://hanzo.ai/platform-packages" target="_blank">
                 many more
             </Link>
             ! Special plans and features are available for 12 months from the date you redeem your coupon. After that

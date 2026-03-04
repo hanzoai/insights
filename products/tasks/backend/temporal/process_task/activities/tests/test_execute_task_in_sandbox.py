@@ -42,7 +42,7 @@ class TestExecuteTaskInSandboxActivity:
         sandbox = None
         try:
             sandbox = Sandbox.create(config)
-            context = self._create_context(github_integration, "PostHog/posthog-js")
+            context = self._create_context(github_integration, "Hanzo Insights/insights-js")
 
             input_data = ExecuteTaskInput(context=context, sandbox_id=sandbox.id)
             result = async_to_sync(activity_environment.run)(execute_task_in_sandbox, input_data)
@@ -55,7 +55,7 @@ class TestExecuteTaskInSandboxActivity:
 
     @pytest.mark.django_db
     def test_execute_task_sandbox_not_found(self, activity_environment, github_integration):
-        context = self._create_context(github_integration, "PostHog/posthog-js")
+        context = self._create_context(github_integration, "Hanzo Insights/insights-js")
         input_data = ExecuteTaskInput(context=context, sandbox_id="non-existent-sandbox-id")
 
         with pytest.raises(SandboxNotFoundError):

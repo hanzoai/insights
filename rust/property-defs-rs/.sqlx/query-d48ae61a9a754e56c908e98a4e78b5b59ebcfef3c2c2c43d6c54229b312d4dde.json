@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT count(*) from posthog_propertydefinition",
+  "query": "SELECT count(*) from insights_propertydefinition",
   "describe": {
     "columns": [
       {

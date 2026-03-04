@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import {
     QuickFilterSelector,

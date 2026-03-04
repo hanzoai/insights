@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { templateToConfiguration } from 'scenes/insights-functions/configuration/insightsFunctionConfigurationLogic'

@@ -16,7 +16,7 @@ import { AppContext, EventDefinition } from '~/types'
 
 import { infiniteListLogic } from './infiniteListLogic'
 
-window.POSTHOG_APP_CONTEXT = {
+window.INSIGHTS_APP_CONTEXT = {
     current_team: { id: MOCK_TEAM_ID },
     current_project: { id: MOCK_TEAM_ID },
 } as unknown as AppContext

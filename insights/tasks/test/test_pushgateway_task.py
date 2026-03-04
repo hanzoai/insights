@@ -34,9 +34,9 @@ class TestPushGatewayTask:
         result = successful_task()
 
         assert result == "done"
-        success_sample = mock_registry.get_sample_value("posthog_celery_successful_task_success")
+        success_sample = mock_registry.get_sample_value("insights_celery_successful_task_success")
         assert success_sample == 1
-        duration_sample = mock_registry.get_sample_value("posthog_celery_successful_task_duration_seconds")
+        duration_sample = mock_registry.get_sample_value("insights_celery_successful_task_duration_seconds")
         assert duration_sample is not None
         assert duration_sample >= 0
 
@@ -50,9 +50,9 @@ class TestPushGatewayTask:
         with pytest.raises(ValueError, match="test error"):
             failing_task()
 
-        success_sample = mock_registry.get_sample_value("posthog_celery_failing_task_success")
+        success_sample = mock_registry.get_sample_value("insights_celery_failing_task_success")
         assert success_sample == 0
-        duration_sample = mock_registry.get_sample_value("posthog_celery_failing_task_duration_seconds")
+        duration_sample = mock_registry.get_sample_value("insights_celery_failing_task_duration_seconds")
         assert duration_sample is not None
         assert duration_sample >= 0
 
@@ -86,7 +86,7 @@ class TestPushGatewayTask:
         with pytest.raises(ValueError):
             duration_on_failure_task()
 
-        duration_sample = mock_registry.get_sample_value("posthog_celery_duration_on_failure_task_duration_seconds")
+        duration_sample = mock_registry.get_sample_value("insights_celery_duration_on_failure_task_duration_seconds")
         assert duration_sample is not None
         assert duration_sample >= 0
 

@@ -1,4 +1,4 @@
-import { getMeta, resetMeta } from '@posthog/plugin-scaffold/test/utils'
+import { getMeta, resetMeta } from '@hanzo/plugin-scaffold/test/utils'
 
 import { EngagePluginEvent, onEvent } from './index'
 

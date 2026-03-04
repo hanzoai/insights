@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPencil } from '@posthog/icons'
-import { LemonSelect, Link } from '@posthog/lemon-ui'
+import { IconPencil } from '@hanzo/icons'
+import { LemonSelect, Link } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -192,7 +192,7 @@ export function Annotations(): JSX.Element {
                         productKey={ProductKey.ANNOTATIONS}
                         thingName="annotation"
                         description="Annotations allow you to mark when certain changes happened so you can easily see how they impacted your metrics."
-                        docsURL="https://posthog.com/docs/data/annotations"
+                        docsURL="https://hanzo.ai/docs/data/annotations"
                         action={() => openModalToCreateAnnotation()}
                         isEmpty={shouldShowEmptyState}
                         customHog={MicrophoneHog}

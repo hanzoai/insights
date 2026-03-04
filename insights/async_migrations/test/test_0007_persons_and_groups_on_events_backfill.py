@@ -28,8 +28,8 @@ MIGRATION_DEFINITION = get_async_migration_definition(MIGRATION_NAME)
 
 
 def run_migration():
-    setup_async_migrations(ignore_posthog_version=True)
-    return start_async_migration(MIGRATION_NAME, ignore_posthog_version=True)
+    setup_async_migrations(ignore_insights_version=True)
+    return start_async_migration(MIGRATION_NAME, ignore_insights_version=True)
 
 
 def query_events() -> list[dict]:

@@ -2,7 +2,7 @@ import { Menu } from '@base-ui/react/menu'
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconChevronRight, IconClock, IconDatabase, IconPeople } from '@posthog/icons'
+import { IconChevronRight, IconClock, IconDatabase, IconPeople } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import { urls } from 'scenes/urls'

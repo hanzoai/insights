@@ -1,6 +1,6 @@
 import './PersonDisplay.scss'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { Link } from 'lib/lemon-ui/Link'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
@@ -22,7 +22,7 @@ export function GroupActorDisplay({ actor }: GroupActorDisplayProps): JSX.Elemen
                         <>
                             Group wasn't identified at the time of the event.{' '}
                             <Link
-                                to="https://posthog.com/docs/product-analytics/group-analytics#how-to-create-groups"
+                                to="https://hanzo.ai/docs/product-analytics/group-analytics#how-to-create-groups"
                                 target="_blank"
                             >
                                 Learn&nbsp;more

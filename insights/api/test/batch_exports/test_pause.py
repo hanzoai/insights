@@ -32,7 +32,7 @@ def test_pause_and_unpause_batch_export(client: HttpClient, temporal, organizati
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -81,7 +81,7 @@ def test_cannot_pause_and_unpause_batch_exports_of_other_organizations(
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -143,7 +143,7 @@ def test_pause_and_unpause_are_partitioned_by_team_id(client: HttpClient, tempor
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -200,7 +200,7 @@ def test_pause_batch_export_that_is_already_paused(client: HttpClient, temporal,
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -249,7 +249,7 @@ def test_unpause_batch_export_that_is_already_unpaused(client: HttpClient, tempo
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -289,7 +289,7 @@ def test_pause_non_existent_batch_export(client: HttpClient, temporal, organizat
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -327,7 +327,7 @@ def test_unpause_can_trigger_a_backfill(client: HttpClient, temporal, organizati
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },

@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import React, { useState } from 'react'
 
-import { IconLock, IconPencil } from '@posthog/icons'
+import { IconLock, IconPencil } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -14,8 +14,8 @@ import {
     LemonTextArea,
     SpinnerOverlay,
     Tooltip,
-} from '@posthog/lemon-ui'
-import { PluginConfigSchema } from '@posthog/plugin-scaffold/src/types'
+} from '@hanzo/lemon-ui'
+import { PluginConfigSchema } from '@hanzo/plugin-scaffold/src/types'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { NotFound } from 'lib/components/NotFound'

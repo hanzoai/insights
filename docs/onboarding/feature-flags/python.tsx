@@ -72,7 +72,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                             language: 'python',
                                             file: 'Python',
                                             code: dedent`
-                                                posthog.capture(
+                                                insights.capture(
                                                     distinct_id="distinct_id_of_the_user",
                                                     event='event_name',
                                                     send_feature_flags=True
@@ -94,7 +94,7 @@ export const getPythonSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                             language: 'python',
                                             file: 'Python',
                                             code: dedent`
-                                                posthog.capture(
+                                                insights.capture(
                                                     "event_name",
                                                     distinct_id="distinct_id_of_the_user",
                                                     properties={

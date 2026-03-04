@@ -100,7 +100,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
             return results
 
     def test_is_not_set_boolean(self):
-        # see https://github.com/PostHog/posthog/issues/18030
+        # see https://github.com/Hanzo Insights/insights/issues/18030
         self._create_boolean_field_test_events()
         results = self._run_boolean_field_query(
             EventPropertyFilter(
@@ -165,7 +165,7 @@ class TestEventsQueryRunner(ClickhouseTestMixin, APIBaseTest):
         query_ast = EventsQueryRunner(query=query, team=self.team).to_query()
         where_expr = cast(ast.CompareOperation, cast(ast.And, query_ast.where).exprs[0])
         right_expr = cast(ast.Constant, where_expr.right)
-        self.assertEqual(right_expr.value, "%posthog.com%")
+        self.assertEqual(right_expr.value, "%hanzo.ai%")
         self.assertEqual(where_expr.op, CompareOperationOp.NotILike)
 
     def test_big_int(self):

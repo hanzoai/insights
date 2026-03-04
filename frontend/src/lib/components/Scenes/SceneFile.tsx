@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFolderMove, IconFolderOpen, IconShortcut } from '@posthog/icons'
+import { IconFolderMove, IconFolderOpen, IconShortcut } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 import {

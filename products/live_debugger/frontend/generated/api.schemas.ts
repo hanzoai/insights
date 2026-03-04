@@ -1,7 +1,7 @@
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
- *   hogli build:openapi
+ *   insightscli build:openapi
  * Questions or issues? #team-devex on Slack
  *
  * Insights API - generated
@@ -40,7 +40,7 @@ export interface ActiveBreakpointApi {
     /** Unique identifier for the breakpoint */
     id: string
     /**
-     * Repository identifier (e.g., 'Insights/posthog')
+     * Repository identifier (e.g., 'Insights/insights')
      * @nullable
      */
     repository?: string | null
@@ -127,7 +127,7 @@ export type LiveDebuggerBreakpointsActiveRetrieveParams = {
      */
     filename?: string
     /**
-     * Filter breakpoints for a specific repository (e.g., 'Insights/posthog')
+     * Filter breakpoints for a specific repository (e.g., 'Insights/insights')
      */
     repository?: string
 }

@@ -29,7 +29,7 @@ def create_organization_with_team(data: PlaywrightWorkspaceSetupData) -> Playwri
 
     # Generate unique email to avoid collisions between parallel tests
     unique_suffix = secrets.token_hex(8)  # 16 character hex string
-    user_email = f"test-{unique_suffix}@posthog.com"
+    user_email = f"test-{unique_suffix}@hanzo.ai"
 
     # Use the working generate_demo_data command to create workspace with demo data
     command = GenerateDemoDataCommand()
@@ -86,7 +86,7 @@ def create_organization_with_team(data: PlaywrightWorkspaceSetupData) -> Playwri
     organization.save()
 
     # Create personal API key for the user
-    api_key_value = f"phx_test_api_key_for_playwright_tests_{unique_suffix}"
+    api_key_value = f"hix_test_api_key_for_playwright_tests_{unique_suffix}"
     secure_value = hash_key_value(api_key_value)
     mask_value = mask_key_value(api_key_value)
     api_key, _ = PersonalAPIKey.objects.get_or_create(

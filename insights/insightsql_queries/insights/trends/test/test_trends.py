@@ -361,19 +361,19 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://hogflix/first"},
+                properties={"$current_url": "http://insightsflix/first"},
             )
             self._create_event(
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://hogflix/first/"},
+                properties={"$current_url": "http://insightsflix/first/"},
             )
             self._create_event(
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "http://hogflix/second"},
+                properties={"$current_url": "http://insightsflix/second"},
             )
 
     def _create_event_count_per_actor_events(self):
@@ -790,7 +790,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[1]["labels"][4], "1-Jan-2020")
         self.assertEqual(response[1]["data"], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0])
 
-        self.assertEqual(response[2]["label"], "$$_posthog_breakdown_null_$$")
+        self.assertEqual(response[2]["label"], "$$_insights_breakdown_null_$$")
         self.assertEqual(response[2]["labels"][4], "1-Jan-2020")
         self.assertEqual(response[2]["data"], [0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0])
 
@@ -814,7 +814,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             )
 
         labels = [item["label"] for item in response]
-        assert sorted(labels) == ["http://hogflix/first", "http://hogflix/second"]
+        assert sorted(labels) == ["http://insightsflix/first", "http://insightsflix/second"]
         breakdown_values = [item["breakdown_value"] for item in response]
         assert sorted(breakdown_values) == sorted(labels)
 
@@ -1770,7 +1770,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         # empty has: 1 seconds
         self.assertEqual(
             [resp["breakdown_value"] for resp in daily_response],
-            ["value2", "value1", "$$_posthog_breakdown_null_$$"],
+            ["value2", "value1", "$$_insights_breakdown_null_$$"],
         )
         self.assertEqual([resp["aggregated_value"] for resp in daily_response], [12.5, 10, 1])
 
@@ -1829,7 +1829,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         # empty has: 1 seconds
         self.assertEqual(
             [resp["breakdown_value"] for resp in daily_response],
-            [["value2"], ["value1"], ["$$_posthog_breakdown_null_$$"]],
+            [["value2"], ["value1"], ["$$_insights_breakdown_null_$$"]],
         )
         self.assertEqual([resp["aggregated_value"] for resp in daily_response], [12.5, 10, 1])
 
@@ -3790,7 +3790,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         self._create_person(
             team_id=self.team.pk,
             distinct_ids=["person1"],
-            properties={"email": "test@posthog.com"},
+            properties={"email": "test@hanzo.ai"},
         )
         self._create_person(
             team_id=self.team.pk,
@@ -5283,7 +5283,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
     @snapshot_clickhouse_queries
     def test_trends_aggregate_by_distinct_id(self):
-        # Stopgap until https://github.com/PostHog/meta/pull/39 is implemented
+        # Stopgap until https://github.com/Hanzo Insights/meta/pull/39 is implemented
 
         self._create_person(
             team_id=self.team.pk,
@@ -5352,7 +5352,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(daily_response[0]["data"][0], 2)
             self.assertEqual(daily_response[0]["label"], "some_val")
             self.assertEqual(daily_response[1]["data"][0], 1)
-            self.assertEqual(daily_response[1]["label"], "$$_posthog_breakdown_null_$$")
+            self.assertEqual(daily_response[1]["label"], "$$_insights_breakdown_null_$$")
 
             # multiple breakdown person props
             with freeze_time("2019-12-31T13:00:01Z"):
@@ -5370,7 +5370,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(daily_response[0]["data"][0], 2)
             self.assertEqual(daily_response[0]["label"], "some_val")
             self.assertEqual(daily_response[1]["data"][0], 1)
-            self.assertEqual(daily_response[1]["label"], "$$_posthog_breakdown_null_$$")
+            self.assertEqual(daily_response[1]["label"], "$$_insights_breakdown_null_$$")
 
             # MAU
             with freeze_time("2019-12-31T13:00:03Z"):
@@ -5576,8 +5576,8 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual(response[0]["label"], "sign up - value")
         self.assertEqual(response[1]["label"], "sign up - other_value")
-        self.assertEqual(response[2]["label"], "sign up - $$_posthog_breakdown_null_$$")
-        self.assertEqual(response[3]["label"], "no events - $$_posthog_breakdown_null_$$")
+        self.assertEqual(response[2]["label"], "sign up - $$_insights_breakdown_null_$$")
+        self.assertEqual(response[3]["label"], "no events - $$_insights_breakdown_null_$$")
 
         self.assertEqual(sum(response[0]["data"]), 2)
         self.assertEqual(sum(response[1]["data"]), 1)
@@ -5599,8 +5599,8 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
         self.assertEqual(response[0]["label"], "sign up - value")
         self.assertEqual(response[1]["label"], "sign up - other_value")
-        self.assertEqual(response[2]["label"], "sign up - $$_posthog_breakdown_null_$$")
-        self.assertEqual(response[3]["label"], "no events - $$_posthog_breakdown_null_$$")
+        self.assertEqual(response[2]["label"], "sign up - $$_insights_breakdown_null_$$")
+        self.assertEqual(response[3]["label"], "no events - $$_insights_breakdown_null_$$")
 
         self.assertEqual(sum(response[0]["data"]), 2)
         self.assertEqual(sum(response[1]["data"]), 1)
@@ -5701,8 +5701,8 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[1]["label"], "sign up - Safari::1")
         self.assertEqual(response[2]["label"], "sign up - Chrome::1")
         self.assertEqual(response[3]["label"], "sign up - Chrome::2")
-        self.assertEqual(response[4]["label"], "sign up - Chrome::$$_posthog_breakdown_null_$$")
-        self.assertEqual(response[5]["label"], "sign up - Safari::$$_posthog_breakdown_null_$$")
+        self.assertEqual(response[4]["label"], "sign up - Chrome::$$_insights_breakdown_null_$$")
+        self.assertEqual(response[5]["label"], "sign up - Safari::$$_insights_breakdown_null_$$")
 
         # should group to "other" breakdowns
         with freeze_time("2020-01-04T13:00:01Z"):
@@ -5719,14 +5719,14 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             )
         self.assertEqual(len(response), 2)
         self.assertEqual(response[0]["label"], "sign up - Safari::2")
-        self.assertEqual(response[1]["label"], "sign up - $$_posthog_breakdown_other_$$::$$_posthog_breakdown_other_$$")
+        self.assertEqual(response[1]["label"], "sign up - $$_insights_breakdown_other_$$::$$_insights_breakdown_other_$$")
 
     @also_test_with_materialized_columns(person_properties=["email"])
     def test_breakdown_filtering_persons(self):
         self._create_person(
             team_id=self.team.pk,
             distinct_ids=["person1"],
-            properties={"email": "test@posthog.com"},
+            properties={"email": "test@hanzo.ai"},
         )
         self._create_person(
             team_id=self.team.pk,
@@ -5778,8 +5778,8 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                 self.team,
             )
             self.assertEqual(response[0]["label"], "test@gmail.com")
-            self.assertEqual(response[1]["label"], "test@posthog.com")
-            self.assertEqual(response[2]["label"], "$$_posthog_breakdown_null_$$")
+            self.assertEqual(response[1]["label"], "test@hanzo.ai")
+            self.assertEqual(response[2]["label"], "$$_insights_breakdown_null_$$")
 
             self.assertEqual(response[0]["count"], 1)
             self.assertEqual(response[1]["count"], 1)
@@ -5791,7 +5791,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         self._create_person(
             team_id=self.team.pk,
             distinct_ids=["person1"],
-            properties={"email": "test@posthog.com"},
+            properties={"email": "test@hanzo.ai"},
         )
         self._create_person(
             team_id=self.team.pk,
@@ -5841,8 +5841,8 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                 self.team,
             )
             self.assertEqual(response[0]["label"], "test@gmail.com")
-            self.assertEqual(response[1]["label"], "test@posthog.com")
-            self.assertEqual(response[2]["label"], "$$_posthog_breakdown_null_$$")
+            self.assertEqual(response[1]["label"], "test@hanzo.ai")
+            self.assertEqual(response[2]["label"], "$$_insights_breakdown_null_$$")
 
             self.assertEqual(response[0]["count"], 1)
             self.assertEqual(response[1]["count"], 1)
@@ -6153,7 +6153,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
             self.assertEqual(event_response[0]["label"], "other_value", breakdown_filter)
             self.assertEqual(event_response[1]["label"], "value", breakdown_filter)
-            self.assertEqual(event_response[2]["label"], "$$_posthog_breakdown_null_$$", breakdown_filter)
+            self.assertEqual(event_response[2]["label"], "$$_insights_breakdown_null_$$", breakdown_filter)
 
             self.assertEqual(sum(event_response[0]["data"]), 1, breakdown_filter)
             self.assertEqual(event_response[0]["data"][5], 1, breakdown_filter)
@@ -6205,7 +6205,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
             self.assertEqual(event_response[0]["label"], "other_value")
             self.assertEqual(event_response[1]["label"], "value")
-            self.assertEqual(event_response[2]["label"], "$$_posthog_breakdown_null_$$")
+            self.assertEqual(event_response[2]["label"], "$$_insights_breakdown_null_$$")
 
             self.assertEqual(sum(event_response[0]["data"]), 1)
             self.assertEqual(event_response[0]["data"][5], 1)
@@ -6264,7 +6264,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
 
     @also_test_with_materialized_columns(event_properties=["$host"], person_properties=["$some_prop"])
     def test_against_clashing_entity_and_property_filter_naming(self):
-        # Regression test for https://github.com/PostHog/posthog/issues/5814
+        # Regression test for https://github.com/Hanzo Insights/insights/issues/5814
         self._create_person(
             team_id=self.team.pk,
             distinct_ids=["blabla", "anonymous_id"],
@@ -6332,7 +6332,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                         {
                             "key": "$current_url",
                             "type": "event",
-                            "value": ["https://posthog.com/feedback/1234"],
+                            "value": ["https://hanzo.ai/feedback/1234"],
                             "operator": "exact",
                         }
                     ],
@@ -6345,7 +6345,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                 team=self.team,
                 event="sign up",
                 distinct_id="blabla",
-                properties={"$current_url": "https://posthog.com/feedback/1234"},
+                properties={"$current_url": "https://hanzo.ai/feedback/1234"},
             )
 
         with freeze_time("2020-01-04T13:01:01Z"):
@@ -6425,7 +6425,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         self._create_person(
             team_id=self.team.pk,
             distinct_ids=["person1"],
-            properties={"email": "test@posthog.com"},
+            properties={"email": "test@hanzo.ai"},
         )
         self._create_person(
             team_id=self.team.pk,
@@ -6472,7 +6472,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                     "properties": [
                         {
                             "key": "email",
-                            "value": "@posthog.com",
+                            "value": "@hanzo.ai",
                             "operator": "not_icontains",
                             "type": "person",
                         },
@@ -6493,7 +6493,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk,
             distinct_ids=["person1"],
             properties={
-                "email": "test@posthog.com",
+                "email": "test@hanzo.ai",
                 "$os": "ios",
                 "$browser": "chrome",
             },
@@ -6507,7 +6507,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk,
             distinct_ids=["person3"],
             properties={
-                "email": "test2@posthog.com",
+                "email": "test2@hanzo.ai",
                 "$os": "android",
                 "$browser": "chrome",
             },
@@ -6517,7 +6517,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk,
             distinct_ids=["person32"],
             properties={
-                "email": "test2@posthog.com",
+                "email": "test2@hanzo.ai",
                 "$os": "android",
                 "$browser": "chrome",
             },
@@ -6526,7 +6526,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk,
             distinct_ids=["person4"],
             properties={
-                "email": "test3@posthog.com",
+                "email": "test3@hanzo.ai",
                 "$os": "android",
                 "$browser": "safari",
             },
@@ -6535,7 +6535,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk,
             distinct_ids=["person5"],
             properties={
-                "email": "test4@posthog.com",
+                "email": "test4@hanzo.ai",
                 "$os": "android",
                 "$browser": "safari",
             },
@@ -6544,7 +6544,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             team_id=self.team.pk,
             distinct_ids=["person6"],
             properties={
-                "email": "test5@posthog.com",
+                "email": "test5@hanzo.ai",
                 "$os": "android",
                 "$browser": "safari",
             },
@@ -6630,7 +6630,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                                 "values": [
                                     {
                                         "key": "email",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "not_icontains",
                                         "type": "person",
                                     },
@@ -6663,10 +6663,10 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         response = sorted(response, key=lambda item: item["breakdown_value"])
         self.assertEqual(len(response), 5)
         # person1 shouldn't be selected because it doesn't match the filter
-        self.assertEqual(response[0]["breakdown_value"], "test2@posthog.com")
-        self.assertEqual(response[1]["breakdown_value"], "test3@posthog.com")
-        self.assertEqual(response[2]["breakdown_value"], "test4@posthog.com")
-        self.assertEqual(response[3]["breakdown_value"], "test5@posthog.com")
+        self.assertEqual(response[0]["breakdown_value"], "test2@hanzo.ai")
+        self.assertEqual(response[1]["breakdown_value"], "test3@hanzo.ai")
+        self.assertEqual(response[2]["breakdown_value"], "test4@hanzo.ai")
+        self.assertEqual(response[3]["breakdown_value"], "test5@hanzo.ai")
         self.assertEqual(response[4]["breakdown_value"], "test@gmail.com")
 
         # now have more strict filters with entity props
@@ -6690,7 +6690,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
                                     {"key": "key", "value": "val"},
                                     {
                                         "key": "email",
-                                        "value": "@posthog.com",
+                                        "value": "@hanzo.ai",
                                         "operator": "icontains",
                                         "type": "person",
                                     },
@@ -6725,7 +6725,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             self.team,
         )
         self.assertEqual(len(response), 1)
-        self.assertEqual(response[0]["breakdown_value"], "test2@posthog.com")
+        self.assertEqual(response[0]["breakdown_value"], "test2@hanzo.ai")
 
     def _create_active_users_events(self):
         self._create_person(team_id=self.team.pk, distinct_ids=["p0"], properties={"name": "p1"})
@@ -8623,7 +8623,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         assert len(daily_response) == 3
         assert daily_response[0]["breakdown_value"] == "red"
         assert daily_response[1]["breakdown_value"] == "blue"
-        assert daily_response[2]["breakdown_value"] == "$$_posthog_breakdown_null_$$"
+        assert daily_response[2]["breakdown_value"] == "$$_insights_breakdown_null_$$"
         assert daily_response[0]["days"] == [
             "2020-01-01",
             "2020-01-02",
@@ -8637,7 +8637,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         assert daily_response[2]["days"] == daily_response[0]["days"]
         assert daily_response[0]["data"] == [1.0, 0.0, 0.0, 1.0, 2.0, 0.0, 0.0]  # red
         assert daily_response[1]["data"] == [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0]  # blue
-        assert daily_response[2]["data"] == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # $$_posthog_breakdown_null_$$
+        assert daily_response[2]["data"] == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # $$_insights_breakdown_null_$$
 
     def test_trends_count_per_user_average_with_person_property_breakdown(self):
         self._create_event_count_per_actor_events()
@@ -8693,10 +8693,10 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         assert len(daily_response) == 3
         assert daily_response[0]["breakdown_value"] == "red"
         assert daily_response[1]["breakdown_value"] == "blue"
-        assert daily_response[2]["breakdown_value"] == "$$_posthog_breakdown_null_$$"
+        assert daily_response[2]["breakdown_value"] == "$$_insights_breakdown_null_$$"
         assert daily_response[0]["aggregated_value"] == 2.0  # red
         assert daily_response[1]["aggregated_value"] == 1.0  # blue
-        assert daily_response[2]["aggregated_value"] == 1.0  # $$_posthog_breakdown_null_$$
+        assert daily_response[2]["aggregated_value"] == 1.0  # $$_insights_breakdown_null_$$
 
     @snapshot_clickhouse_queries
     def test_trends_count_per_user_average_aggregated_with_event_property_breakdown_with_sampling(self):
@@ -8720,12 +8720,12 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
         assert len(daily_response) == 3
         assert daily_response[0]["breakdown_value"] == "red"
         assert daily_response[1]["breakdown_value"] == "blue"
-        assert daily_response[2]["breakdown_value"] == "$$_posthog_breakdown_null_$$"
+        assert daily_response[2]["breakdown_value"] == "$$_insights_breakdown_null_$$"
         assert daily_response[0]["aggregated_value"] == 2.0  # red
         assert daily_response[1]["aggregated_value"] == 1.0  # blue
-        assert daily_response[2]["aggregated_value"] == 1.0  # $$_posthog_breakdown_null_$$
+        assert daily_response[2]["aggregated_value"] == 1.0  # $$_insights_breakdown_null_$$
 
-    # TODO: Add support for avg_count by group indexes (see this Slack thread for more context: https://posthog.slack.com/archives/C0368RPHLQH/p1700484174374229)
+    # TODO: Add support for avg_count by group indexes (see this Slack thread for more context: https://insights.slack.com/archives/C0368RPHLQH/p1700484174374229)
     @pytest.mark.skip(reason="support for avg_count_per_actor not included yet")
     @snapshot_clickhouse_queries
     def test_trends_count_per_group_average_daily(self):
@@ -8776,7 +8776,7 @@ class TestTrends(ClickhouseTestMixin, APIBaseTest):
             0.0,  # No events at all
         ]
 
-    # TODO: Add support for avg_count by group indexes (see this Slack thread for more context: https://posthog.slack.com/archives/C0368RPHLQH/p1700484174374229)
+    # TODO: Add support for avg_count by group indexes (see this Slack thread for more context: https://insights.slack.com/archives/C0368RPHLQH/p1700484174374229)
     @pytest.mark.skip(reason="support for avg_count_per_actor not included yet")
     @snapshot_clickhouse_queries
     def test_trends_count_per_group_average_aggregated(self):

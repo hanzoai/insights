@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconSparkles } from '@posthog/icons'
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+import { IconSparkles } from '@hanzo/icons'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { LemonProgress } from 'lib/lemon-ui/LemonProgress'
 import { pluralize } from 'lib/utils'

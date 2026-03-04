@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton, LemonSnack, Popover } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonSnack, Popover } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TaxonomicFilter } from 'lib/components/TaxonomicFilter/TaxonomicFilter'

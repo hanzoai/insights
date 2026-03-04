@@ -51,7 +51,7 @@ def TRUNCATE_RAW_SESSIONS_TABLE_SQL_V3():
 
 
 def DROP_RAW_SESSION_SHARDED_TABLE_SQL_V3():
-    # sync is added when dropping the sharded table, see https://posthog.slack.com/archives/C076R4753Q8/p1760696004214289?thread_ts=1760695175.656789&cid=C076R4753Q8
+    # sync is added when dropping the sharded table, see https://insights.slack.com/archives/C076R4753Q8/p1760696004214289?thread_ts=1760695175.656789&cid=C076R4753Q8
     return f"DROP TABLE IF EXISTS {SHARDED_RAW_SESSIONS_TABLE_V3()} SYNC"
 
 
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS {table_name}
     viewport_height AggregateFunction(argMin, Nullable(Int64), DateTime64(6, 'UTC')),
 
     -- geoip
-    -- only store the properties we actually use, as there's tons, see https://posthog.com/docs/cdp/geoip-enrichment
+    -- only store the properties we actually use, as there's tons, see https://hanzo.ai/docs/cdp/geoip-enrichment
     geoip_country_code AggregateFunction(argMin, Nullable(String), DateTime64(6, 'UTC')),
     geoip_subdivision_1_code AggregateFunction(argMin, Nullable(String), DateTime64(6, 'UTC')),
     geoip_subdivision_1_name AggregateFunction(argMin, Nullable(String), DateTime64(6, 'UTC')),
@@ -242,7 +242,7 @@ SESSION_V3_LOWER_TIER_AD_IDS = [
 new_line = "\n"
 
 # See https://kb.altinity.com/altinity-kb-queries-and-syntax/jsonextract-to-parse-many-attributes-at-a-time/
-# Or https://posthog.slack.com/archives/C02JQ320FV3/p1721406540313379?thread_ts=1721334861.073739&cid=C02JQ320FV3
+# Or https://insights.slack.com/archives/C02JQ320FV3/p1721406540313379?thread_ts=1721334861.073739&cid=C02JQ320FV3
 PROPERTIES = f"""
         JSONExtract(properties, 'Tuple(
             `$current_url` Nullable(String),

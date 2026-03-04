@@ -1,7 +1,7 @@
 """
 Dagster job to backfill ClickHouse events to DuckLake.
 
-This job exports events from ClickHouse's `posthog.events` table to S3 as Parquet files,
+This job exports events from ClickHouse's `insights.events` table to S3 as Parquet files,
 then registers those files with DuckLake using `ducklake_add_data_files`.
 
 The job is partitioned by date to allow incremental backfilling of historical data.
@@ -180,9 +180,9 @@ def metabase_debug_query_url(run_id: str) -> str | None:
     """Generate a debug URL for viewing ClickHouse query logs for this run."""
     cloud_deployment = getattr(django_settings, "CLOUD_DEPLOYMENT", None)
     if cloud_deployment == "US":
-        return f"https://metabase.prod-us.posthog.dev/question/1671-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-us.insights.dev/question/1671-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     if cloud_deployment == "EU":
-        return f"https://metabase.prod-eu.posthog.dev/question/544-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-eu.insights.dev/question/544-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     sql = f"""
 SELECT
     hostName() as host,
@@ -198,7 +198,7 @@ SELECT
     JSONExtractString(log_comment, 'dagster', 'op_name') AS dagster_op_name,
     exception,
     query
-FROM clusterAllReplicas('posthog', system.query_log)
+FROM clusterAllReplicas('insights', system.query_log)
 WHERE
     dagster_run_id = '{run_id}'
     AND event_date >= today() - 1
@@ -227,7 +227,7 @@ def validate_ducklake_schema(context: AssetExecutionContext) -> None:
             if alias not in str(exc):
                 raise
 
-        result = conn.execute(f"DESCRIBE {alias}.posthog.events").fetchall()
+        result = conn.execute(f"DESCRIBE {alias}.insights.events").fetchall()
         ducklake_columns = {row[0] for row in result}
 
         missing_in_ducklake = EXPECTED_DUCKLAKE_COLUMNS - ducklake_columns
@@ -508,7 +508,7 @@ def register_files_with_ducklake(
                 context.log.info(f"Registering file with DuckLake: {s3_path}")
                 # Use escape() to prevent SQL injection
                 conn.execute(
-                    f"CALL ducklake_add_data_files('{alias}', 'events', '{escape(s3_path)}', schema => 'posthog')"
+                    f"CALL ducklake_add_data_files('{alias}', 'events', '{escape(s3_path)}', schema => 'insights')"
                 )
                 registered_count += 1
                 context.log.info(f"Successfully registered: {s3_path}")

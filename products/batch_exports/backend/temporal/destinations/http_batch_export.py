@@ -157,7 +157,7 @@ async def post_json_file_to_url(url, batch_file, session: aiohttp.ClientSession)
 
     # be strict about which URLs we allow
     # (we do have this validation now at the API level, but we'll be extra careful here)
-    if url not in ("https://us.i.posthog.com/batch/", "https://eu.i.posthog.com/batch/"):
+    if url not in ("https://us.i.hanzo.ai/batch/", "https://eu.i.hanzo.ai/batch/"):
         raise InvalidDestinationURLError(url)
 
     # Disable redirects to prevent SSRF via redirect bypass
@@ -265,14 +265,14 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
         #
         # Why write to a file at all? Because we need to serialize the data anyway, and it's the
         # safest way to stay within batch endpoint payload limits and not waste process memory.
-        posthog_batch_header = """{{"api_key": "{}","historical_migration":true,"batch": [""".format(inputs.token)
-        posthog_batch_footer = "]}"
+        insights_batch_header = """{{"api_key": "{}","historical_migration":true,"batch": [""".format(inputs.token)
+        insights_batch_footer = "]}"
 
         with BatchExportTemporaryFile() as batch_file:
 
             def write_event_to_batch(event):
                 if batch_file.records_since_last_reset == 0:
-                    batch_file.write(posthog_batch_header)
+                    batch_file.write(insights_batch_header)
                 else:
                     batch_file.write(",")
 
@@ -285,7 +285,7 @@ async def insert_into_http_activity(inputs: HttpInsertInputs) -> BatchExportResu
                     batch_file.bytes_since_last_reset,
                 )
 
-                batch_file.write(posthog_batch_footer)
+                batch_file.write(insights_batch_footer)
 
                 await post_json_file_to_url(inputs.url, batch_file, session)
 

@@ -111,7 +111,7 @@ class AnnotationsLimitOffsetPagination(pagination.LimitOffsetPagination):
 @extend_schema(tags=["core"])
 class AnnotationsViewSet(TeamAndOrgViewSetMixin, ForbidDestroyModel, viewsets.ModelViewSet):
     """
-    Create, Read, Update and Delete annotations. [See docs](https://posthog.com/docs/data/annotations) for more information on annotations.
+    Create, Read, Update and Delete annotations. [See docs](https://hanzo.ai/docs/data/annotations) for more information on annotations.
     """
 
     scope_object = "annotation"

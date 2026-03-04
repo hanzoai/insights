@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import React from 'react'
 
-import { IconPlusSmall, IconSparkles, IconWrench } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconPlusSmall, IconSparkles, IconWrench } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 
@@ -22,7 +22,7 @@ export interface MaxToolProps extends Omit<ToolRegistration, 'name' | 'descripti
 }
 
 /**
- * @deprecated MaxTool is deprecated and will be removed soon. Context aware AI will replace it. Talk to team-posthog-ai for future plans.
+ * @deprecated MaxTool is deprecated and will be removed soon. Context aware AI will replace it. Talk to team-insights-ai for future plans.
  */
 
 export function MaxTool({

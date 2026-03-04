@@ -14,7 +14,7 @@ export const getZapierSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <Markdown>
                         Zapier lets you connect Insights to thousands of other apps. You can use it to send events to
                         Insights from other services or trigger actions based on Insights events. Go to the [Insights
-                        integration page](https://zapier.com/apps/posthog/integrations) on Zapier and click **Connect
+                        integration page](https://zapier.com/apps/insights/integrations) on Zapier and click **Connect
                         Insights**. When prompted, enter your Insights project API key:
                     </Markdown>
                     <CodeBlock

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { BindLogic } from 'kea'
 
-import { IconCode2, IconFunnels, IconPlus, IconRetention, IconTrends } from '@posthog/icons'
+import { IconCode2, IconFunnels, IconPlus, IconRetention, IconTrends } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonModal } from 'lib/lemon-ui/LemonModal'

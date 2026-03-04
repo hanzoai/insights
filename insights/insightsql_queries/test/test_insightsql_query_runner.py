@@ -31,7 +31,7 @@ class TestInsightsQLQueryRunner(ClickhouseTestMixin, APIBaseTest):
         for index in range(10):
             _create_person(
                 properties={
-                    "email": f"jacob{index}@{random_uuid}.posthog.com",
+                    "email": f"jacob{index}@{random_uuid}.hanzo.ai",
                     "name": f"Mr Jacob {random_uuid}",
                     "random_uuid": random_uuid,
                     "index": index,

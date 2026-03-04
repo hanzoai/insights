@@ -15,27 +15,27 @@ from insights.models.feature_flag.feature_flag import FeatureFlag
 from insights.redis import get_client, redis
 
 if TYPE_CHECKING:
-    from posthoganalytics import Posthog
+    from hanzoanalytics import Insights
 
-REDIS_LOCK_TOKEN = "posthog:decide_analytics:lock"
+REDIS_LOCK_TOKEN = "insights:decide_analytics:lock"
 CACHE_BUCKET_SIZE = 60 * 2  # duration in seconds
 
 # SDK library names must match the Rust Library::as_str() values in
 # rust/feature-flags/src/handler/types.rs
 SDK_LIBRARIES = [
-    "posthog-js",
-    "posthog-node",
-    "posthog-python",
-    "posthog-php",
-    "posthog-ruby",
-    "posthog-go",
-    "posthog-java",
-    "posthog-dotnet",
-    "posthog-elixir",
-    "posthog-android",
-    "posthog-ios",
-    "posthog-react-native",
-    "posthog-flutter",
+    "insights-js",
+    "insights-node",
+    "hanzo-insights",
+    "insights-php",
+    "insights-ruby",
+    "insights-go",
+    "insights-java",
+    "insights-dotnet",
+    "insights-elixir",
+    "insights-android",
+    "insights-ios",
+    "insights-react-native",
+    "insights-flutter",
     "other",
 ]
 
@@ -45,9 +45,9 @@ SDK_LIBRARIES = [
 
 def get_team_request_key(team_id: int, request_type: FlagRequestType) -> str:
     if request_type == FlagRequestType.DECIDE:
-        return f"posthog:decide_requests:{team_id}"
+        return f"insights:decide_requests:{team_id}"
     elif request_type == FlagRequestType.LOCAL_EVALUATION:
-        return f"posthog:local_evaluation_requests:{team_id}"
+        return f"insights:local_evaluation_requests:{team_id}"
     else:
         raise ValueError(f"Unknown request type: {request_type}")
 
@@ -55,9 +55,9 @@ def get_team_request_key(team_id: int, request_type: FlagRequestType) -> str:
 def get_team_request_library_key(team_id: int, request_type: FlagRequestType, library: str) -> str:
     """Get the Redis key for SDK-specific request counts."""
     if request_type == FlagRequestType.DECIDE:
-        return f"posthog:decide_requests:sdk:{team_id}:{library}"
+        return f"insights:decide_requests:sdk:{team_id}:{library}"
     elif request_type == FlagRequestType.LOCAL_EVALUATION:
-        return f"posthog:local_evaluation_requests:sdk:{team_id}:{library}"
+        return f"insights:local_evaluation_requests:sdk:{team_id}:{library}"
     else:
         raise ValueError(f"Unknown request type: {request_type}")
 
@@ -149,12 +149,12 @@ def _extract_sdk_breakdown_from_redis(
     return sdk_breakdown
 
 
-def capture_usage_for_all_teams(ph_client: "Posthog") -> None:
+def capture_usage_for_all_teams(ph_client: "Insights") -> None:
     for team in Team.objects.exclude(Q(organization__for_internal_metrics=True) | Q(is_demo=True)).only("id", "uuid"):
         capture_team_decide_usage(ph_client, team.id, team.uuid)
 
 
-def capture_team_decide_usage(ph_client: "Posthog", team_id: int, team_uuid: str) -> None:
+def capture_team_decide_usage(ph_client: "Insights", team_id: int, team_uuid: str) -> None:
     try:
         client = get_client()
         total_decide_request_count = 0

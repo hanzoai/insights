@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconInfo, IconTestTube } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconInfo, IconTestTube } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { humanFriendlyDuration, percentage } from 'lib/utils'

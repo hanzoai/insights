@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import { router } from 'kea-router'
 
-import { IconBell } from '@posthog/icons'
+import { IconBell } from '@hanzo/icons'
 
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
 

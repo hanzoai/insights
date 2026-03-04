@@ -46,7 +46,7 @@ def get_insights_to_migrate(inputs: GetInsightsToMigrateActivityInputs) -> GetIn
     where_body = ("\n   OR  ").join(clauses)
     sql = f"""
         SELECT DISTINCT id
-        FROM posthog_dashboarditem
+        FROM insights_dashboarditem
         WHERE ({where_body}) {after_clause}
         ORDER BY id
         LIMIT {inputs.batch_size};

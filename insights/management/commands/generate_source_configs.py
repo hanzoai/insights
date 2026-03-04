@@ -28,10 +28,10 @@ logger.setLevel(logging.INFO)
 
 # Generates `@config.Config` dataclasses to be used by sources to parse inputs from the frontend.
 # The source of the configs come from the sources `get_source_config()` method (inherited from `BaseSource`).
-# For an example, look at posthog/temporal/data_imports/sources/stripe/source.py
+# For an example, look at insights/temporal/data_imports/sources/stripe/source.py
 
 # This file shouldn't often need to be updated unless if we extend what fields sources can have.
-# There exists a test file here: posthog/temporal/data_imports/sources/common/test/test_source_config_generator.py
+# There exists a test file here: insights/temporal/data_imports/sources/common/test/test_source_config_generator.py
 
 # To start SourceConfigGenerator, run `pnpm generate:source-configs`
 

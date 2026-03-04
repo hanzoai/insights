@@ -21,7 +21,7 @@ class PersonQuerySet(models.QuerySet):
     """
     Custom QuerySet that enforces team_id filtering on all Person queries.
 
-    Required for partitioned posthog_person_new table (64 hash partitions by team_id).
+    Required for partitioned insights_person_new table (64 hash partitions by team_id).
     Queries without team_id would scan all 64 partitions causing ~64x performance degradation.
     """
 
@@ -141,7 +141,7 @@ class PersonManager(models.Manager):
             # Use the persons database connection
             with connections[self.db].cursor() as cursor:
                 cursor.execute(
-                    "SELECT nextval('posthog_person_id_seq') FROM generate_series(1, %s)",
+                    "SELECT nextval('insights_person_id_seq') FROM generate_series(1, %s)",
                     [len(objs_needing_ids)],
                 )
                 new_ids = [row[0] for row in cursor.fetchall()]
@@ -158,7 +158,7 @@ class PersonManager(models.Manager):
 
 
 class Person(models.Model):
-    # Note: In posthog_person_new (partitioned table), the PK is composite: (team_id, id)
+    # Note: In insights_person_new (partitioned table), the PK is composite: (team_id, id)
     # Django doesn't fully support composite PKs, so we mark id as primary_key for ORM compatibility
     # but the actual database constraint is on (team_id, id)
     id = models.BigAutoField(primary_key=True)
@@ -199,7 +199,7 @@ class Person(models.Model):
         # Note: Database has composite PK (team_id, id) but Django doesn't support declaring it
         constraints = [
             # Composite PK constraint exists in database but can't be declared in Django
-            # models.UniqueConstraint(fields=["team_id", "id"], name="posthog_person_new_pkey")
+            # models.UniqueConstraint(fields=["team_id", "id"], name="insights_person_new_pkey")
         ]
 
     @property
@@ -224,11 +224,11 @@ class Person(models.Model):
         """
         Override delete to ensure team_id is in WHERE clause for partitioned tables.
 
-        For partitioned tables (posthog_person_new), the default delete generates:
-        DELETE FROM posthog_person WHERE id = X, which scans all 64 partitions.
+        For partitioned tables (insights_person_new), the default delete generates:
+        DELETE FROM insights_person WHERE id = X, which scans all 64 partitions.
 
         This implementation ensures single-partition access:
-        DELETE FROM posthog_person WHERE team_id = Y AND id = X
+        DELETE FROM insights_person WHERE team_id = Y AND id = X
         """
         if self.pk is None:
             raise ValueError(
@@ -244,7 +244,7 @@ class Person(models.Model):
 
         with transaction.atomic(using=using):
             # Delete PersonDistinctId records with explicit team_id for partition pruning.
-            # Django's Collector.delete() generates: DELETE FROM posthog_persondistinctid WHERE person_id IN (...)
+            # Django's Collector.delete() generates: DELETE FROM insights_persondistinctid WHERE person_id IN (...)
             # which misses team_id and would scan all partitions on a partitioned table.
             PersonDistinctId.objects.filter(team_id=person_team_id, person_id=person_pk).delete()
 
@@ -290,7 +290,7 @@ class Person(models.Model):
                         team_id=self.team_id,
                         defaults={
                             # Set version higher than delete events (which use version + 100).
-                            # Keep in sync with: posthog/models/person/util.py:222 (_delete_person)
+                            # Keep in sync with: insights/models/person/util.py:222 (_delete_person)
                             # and plugin-server/src/utils/db/utils.ts:152 (generateKafkaPersonUpdateMessage)
                             "version": original_person_version + 101,
                         },
@@ -320,7 +320,7 @@ class PersonDistinctId(models.Model):
     # DO_NOTHING + db_constraint=False: Team deletion handled manually, may be cross-database
     team = models.ForeignKey("Team", on_delete=models.DO_NOTHING, db_index=False, db_constraint=False)
     # db_constraint=False: FK constraint managed manually at database level as composite key
-    # Database has: FOREIGN KEY (team_id, person_id) REFERENCES posthog_person(team_id, id)
+    # Database has: FOREIGN KEY (team_id, person_id) REFERENCES insights_person(team_id, id)
     # This composite FK enables partition pruning on the partitioned person table
     person = models.ForeignKey(Person, on_delete=models.CASCADE, db_constraint=False)
     distinct_id = models.CharField(max_length=400)
@@ -351,7 +351,7 @@ class PersonlessDistinctId(models.Model):
 
 
 class PersonOverrideMapping(models.Model):
-    # XXX: NOT USED, see https://github.com/PostHog/posthog/pull/23616
+    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
 
     id = models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -366,7 +366,7 @@ class PersonOverrideMapping(models.Model):
 
 
 class PersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/PostHog/posthog/pull/23616
+    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     # DO_NOTHING + db_constraint=False: Team deletion handled manually, may be cross-database
@@ -404,7 +404,7 @@ class PersonOverride(models.Model):
 
 
 class PendingPersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/PostHog/posthog/pull/23616
+    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()
@@ -418,7 +418,7 @@ class PendingPersonOverride(models.Model):
 
 
 class FlatPersonOverride(models.Model):
-    # XXX: NOT USED, see https://github.com/PostHog/posthog/pull/23616
+    # XXX: NOT USED, see https://github.com/Hanzo Insights/insights/pull/23616
 
     id = models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")
     team_id = models.BigIntegerField()

@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	geo "github.com/posthog/posthog/livestream/geo"
+	geo "github.com/hanzoai/insights/livestream/geo"
 	mock "github.com/stretchr/testify/mock"
 )
 

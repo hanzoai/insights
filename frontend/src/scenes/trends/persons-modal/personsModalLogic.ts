@@ -2,7 +2,7 @@ import { actions, afterMount, connect, kea, listeners, path, props, propsChanged
 import { loaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { isGroupType } from 'lib/utils'

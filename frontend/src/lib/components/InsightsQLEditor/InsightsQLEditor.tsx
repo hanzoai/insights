@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -78,7 +78,7 @@ export function InsightsQLEditor({
             </LemonButton>
             <div className="flex mt-1 gap-1">
                 <div className={`w-full text-right select-none ${CLICK_OUTSIDE_BLOCK_CLASS}`}>
-                    <Link to="https://posthog.com/docs/sql" target="_blank">
+                    <Link to="https://hanzo.ai/docs/sql" target="_blank">
                         Learn more about SQL
                     </Link>
                 </div>

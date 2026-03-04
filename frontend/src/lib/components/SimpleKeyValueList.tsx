@@ -32,7 +32,7 @@ export function SimpleKeyValueList({
     useEffect(() => {
         const sortedItems = sortItems
             ? Object.entries(item).sort((a, b) => {
-                  // if this is a posthog property we want to sort by its label
+                  // if this is a insights property we want to sort by its label
                   const left = getCoreFilterDefinition(a[0], TaxonomicFilterGroupType.EventProperties)?.label || a[0]
                   const right = getCoreFilterDefinition(b[0], TaxonomicFilterGroupType.EventProperties)?.label || b[0]
 

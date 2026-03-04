@@ -1,5 +1,5 @@
 import { actions, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { DEFAULT_UNIVERSAL_GROUP_FILTER } from 'lib/components/UniversalFilters/universalFiltersLogic'
 import { dayjs } from 'lib/dayjs'
@@ -136,7 +136,7 @@ export const logsViewerFiltersLogic = kea<logsViewerFiltersLogicType>([
 
     listeners(({ actions, values }) => ({
         zoomDateRange: ({ multiplier }) => {
-            posthog.capture('logs date range zoomed', {
+            insights.capture('logs date range zoomed', {
                 direction: multiplier > 1 ? 'out' : 'in',
                 multiplier,
             })

@@ -29,7 +29,7 @@ def mock_exporter_template(test_func):
     Decorator to mock render_template for sharing tests.
 
     This provides a simplified version of the exporter template that always includes
-    the exported_data in both window.POSTHOG_EXPORTED_DATA and the response body,
+    the exported_data in both window.INSIGHTS_EXPORTED_DATA and the response body,
     simulating what the actual built exporter.html template would do.
     """
 
@@ -45,15 +45,15 @@ def mock_exporter_template(test_func):
                 html_content = f"""<!doctype html>
 <html>
     <head>
-        <script id="posthog-exported-data" type="application/json">{exported_data_str}</script>
+        <script id="insights-exported-data" type="application/json">{exported_data_str}</script>
         <script>
             try {{
-                window.POSTHOG_EXPORTED_DATA = JSON.parse(
-                    JSON.parse(document.getElementById('posthog-exported-data').textContent)
+                window.INSIGHTS_EXPORTED_DATA = JSON.parse(
+                    JSON.parse(document.getElementById('insights-exported-data').textContent)
                 );
             }} catch (e) {{
                 console.error('Failed to parse exported data:', e);
-                window.POSTHOG_EXPORTED_DATA = {{}};
+                window.INSIGHTS_EXPORTED_DATA = {{}};
             }}
         </script>
     </head>

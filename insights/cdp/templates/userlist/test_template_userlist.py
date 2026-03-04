@@ -32,7 +32,7 @@ class TestTemplateUserlist(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://incoming.userlist.com/posthog/users",
+            "https://incoming.userlist.com/insights/users",
             {
                 "method": "POST",
                 "headers": {
@@ -65,7 +65,7 @@ class TestTemplateUserlist(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://incoming.userlist.com/posthog/users",
+            "https://incoming.userlist.com/insights/users",
             {
                 "method": "POST",
                 "headers": {
@@ -98,7 +98,7 @@ class TestTemplateUserlist(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://incoming.userlist.com/posthog/companies",
+            "https://incoming.userlist.com/insights/companies",
             {
                 "method": "POST",
                 "headers": {
@@ -140,7 +140,7 @@ class TestTemplateUserlist(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://incoming.userlist.com/posthog/events",
+            "https://incoming.userlist.com/insights/events",
             {
                 "method": "POST",
                 "headers": {
@@ -182,7 +182,7 @@ class TestTemplateUserlist(BaseInsightsFunctionTemplateTest):
         )
 
         assert self.get_mock_fetch_calls()[0] == (
-            "https://incoming.userlist.com/posthog/users",
+            "https://incoming.userlist.com/insights/users",
             {
                 "method": "POST",
                 "headers": {

@@ -1,6 +1,6 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { EventType } from '@posthog/rrweb-types'
+import { EventType } from '@hanzo/rrweb-types'
 
 import { RecordingSnapshot, SessionRecordingSnapshotSource, SnapshotSourceType } from '~/types'
 
@@ -174,7 +174,7 @@ describe('processAllSnapshots - inline meta patching', () => {
         const snapshots = [createFullSnapshot()]
         const { sources, snapshotsBySource, processingCache } = setupTest(snapshots)
 
-        jest.spyOn(posthog, 'captureException')
+        jest.spyOn(insights, 'captureException')
 
         const result = await processAllSnapshots(
             sources,
@@ -184,7 +184,7 @@ describe('processAllSnapshots - inline meta patching', () => {
             '12345'
         )
 
-        expect(posthog.captureException).toHaveBeenCalledWith(
+        expect(insights.captureException).toHaveBeenCalledWith(
             new Error('No event viewport or meta snapshot found for full snapshot'),
             expect.objectContaining({
                 feature: 'session-recording-meta-patching',
@@ -205,9 +205,9 @@ describe('processAllSnapshots - inline meta patching', () => {
         const sources = [source]
         const snapshots = [createFullSnapshot()]
 
-        jest.spyOn(posthog, 'captureException')
+        jest.spyOn(insights, 'captureException')
 
-        expect(posthog.captureException).toHaveBeenCalledTimes(0)
+        expect(insights.captureException).toHaveBeenCalledTimes(0)
         await processAllSnapshots(
             sources,
             createSnapshotsBySource(source, snapshots),
@@ -215,7 +215,7 @@ describe('processAllSnapshots - inline meta patching', () => {
             mockViewportForTimestampNoData,
             '12345'
         )
-        expect(posthog.captureException).toHaveBeenCalledTimes(1)
+        expect(insights.captureException).toHaveBeenCalledTimes(1)
         await processAllSnapshots(
             sources,
             createSnapshotsBySource(source, snapshots),
@@ -223,7 +223,7 @@ describe('processAllSnapshots - inline meta patching', () => {
             mockViewportForTimestampNoData,
             '12345'
         )
-        expect(posthog.captureException).toHaveBeenCalledTimes(1)
+        expect(insights.captureException).toHaveBeenCalledTimes(1)
         await processAllSnapshots(
             sources,
             createSnapshotsBySource(source, snapshots),
@@ -231,7 +231,7 @@ describe('processAllSnapshots - inline meta patching', () => {
             mockViewportForTimestampNoData,
             '54321'
         )
-        expect(posthog.captureException).toHaveBeenCalledTimes(2)
+        expect(insights.captureException).toHaveBeenCalledTimes(2)
     })
 
     it('caches snapshots with meta events included', async () => {

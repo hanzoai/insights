@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'

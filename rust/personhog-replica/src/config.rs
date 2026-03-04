@@ -12,7 +12,7 @@ pub struct Config {
     pub storage_backend: String,
 
     /// Primary database URL (for writes and strong consistency reads)
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub primary_database_url: String,
 
     /// Replica database URL (for eventual consistency reads)

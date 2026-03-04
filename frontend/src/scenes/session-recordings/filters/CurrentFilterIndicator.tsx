@@ -1,8 +1,8 @@
 import equal from 'fast-deep-equal'
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@posthog/icons'
-import { LemonTag } from '@posthog/lemon-ui'
+import { IconFilter } from '@hanzo/icons'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { sessionRecordingsPlaylistLogic } from '../playlist/sessionRecordingsPlaylistLogic'
 import { sessionRecordingSavedFiltersLogic } from './sessionRecordingSavedFiltersLogic'

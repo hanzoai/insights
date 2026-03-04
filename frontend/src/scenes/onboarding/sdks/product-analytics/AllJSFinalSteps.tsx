@@ -2,7 +2,7 @@ import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 
 function JSEventSnippet(): JSX.Element {
     return (
-        <CodeSnippet language={Language.JavaScript}>{`posthog.capture('my event', { property: 'value' })`}</CodeSnippet>
+        <CodeSnippet language={Language.JavaScript}>{`insights.capture('my event', { property: 'value' })`}</CodeSnippet>
     )
 }
 

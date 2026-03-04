@@ -1,5 +1,5 @@
 {
-    "name": "@posthog/products-experiments",
+    "name": "@hanzo/products-experiments",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ stats/tests -v --tb=short"
     },
@@ -9,7 +9,7 @@
         "kea-router": "catalog:"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
+        "@hanzo/icons": "*",
         "@types/react": "*",
         "clsx": "*",
         "fuse.js": "*",

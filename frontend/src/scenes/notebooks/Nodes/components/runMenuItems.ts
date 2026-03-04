@@ -1,4 +1,4 @@
-import { LemonMenuItems } from '@posthog/lemon-ui'
+import { LemonMenuItems } from '@hanzo/lemon-ui'
 
 export type NotebookRunMode = 'auto' | 'cell_upstream' | 'cell' | 'cell_downstream'
 

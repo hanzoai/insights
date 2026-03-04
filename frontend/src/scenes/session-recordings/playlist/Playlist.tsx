@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { ReactNode, useRef, useState } from 'react'
 
-import { IconMagicWand, IconSidebarClose } from '@posthog/icons'
+import { IconMagicWand, IconSidebarClose } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonBanner,
@@ -15,7 +15,7 @@ import {
     Link,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -502,11 +502,11 @@ const UnusableEventsWarning = (props: { unusableEventsInFilter: string[] }): JSX
             <p>
                 Events have to have a <PropertyKeyInfo value="$session_id" /> to be used to filter recordings. This is
                 added automatically by{' '}
-                <Link to="https://posthog.com/docs/libraries/js" target="_blank">
+                <Link to="https://hanzo.ai/docs/libraries/js" target="_blank">
                     the Web SDK
                 </Link>
                 ,{' '}
-                <Link to="https://posthog.com/docs/libraries" target="_blank">
+                <Link to="https://hanzo.ai/docs/libraries" target="_blank">
                     and the Mobile SDKs (Android, iOS, React Native and Flutter)
                 </Link>
             </p>

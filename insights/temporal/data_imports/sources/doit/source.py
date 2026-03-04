@@ -53,7 +53,7 @@ class DoItSource(SimpleSource[DoItSourceConfig]):
             name=SchemaExternalDataSourceType.DO_IT,
             label="DoIt",
             iconPath="/static/services/doit.svg",
-            docsUrl="https://posthog.com/docs/cdp/sources/doit",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/doit",
             fields=cast(
                 list[FieldType],
                 [

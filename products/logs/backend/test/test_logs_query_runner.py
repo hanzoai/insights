@@ -268,7 +268,7 @@ class TestAttributeFilters(APIBaseTest):
                                 key="service.namespace",
                                 operator=PropertyOperator.IS_NOT,
                                 type=LogPropertyFilterType.LOG_RESOURCE_ATTRIBUTE,
-                                value="posthog",
+                                value="insights",
                             ),
                         ],
                     )

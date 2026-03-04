@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use crate::{api::symbol_sets::SymbolSetUpload, utils::files::SourceFile};
 use anyhow::Result;
 use clap::Subcommand;
-use posthog_symbol_data::{write_symbol_data, ProguardMapping};
+use insights_symbol_data::{write_symbol_data, ProguardMapping};
 
 pub mod upload;
 

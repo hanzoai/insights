@@ -1,9 +1,9 @@
 import { actions, afterMount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { billingLogic } from 'scenes/billing/billingLogic'
@@ -94,13 +94,13 @@ export const couponLogic = kea<couponLogicType>([
                     actions.setClaimed(true)
                     actions.setClaimedDetails(res)
                     actions.loadCouponsOverview()
-                    posthog.capture('billing coupon claimed', {
+                    insights.capture('billing coupon claimed', {
                         campaign: props.campaign,
                         code: formValues.code,
                     })
                 } catch (error: any) {
                     lemonToast.error(error.detail || 'Failed to claim coupon')
-                    posthog.capture('billing coupon claim failed', {
+                    insights.capture('billing coupon claim failed', {
                         campaign: props.campaign,
                         code: formValues.code,
                         error: error.detail || 'Unknown error',

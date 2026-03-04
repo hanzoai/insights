@@ -137,8 +137,8 @@ LIMIT %(limit)s  -- optional
 
 ```sql
 SELECT p.uuid::text, pdi.distinct_id, COALESCE(pdi.version, 0)
-FROM posthog_person p
-JOIN posthog_persondistinctid pdi ON pdi.person_id = p.id
+FROM insights_person p
+JOIN insights_persondistinctid pdi ON pdi.person_id = p.id
 WHERE p.team_id = %(team_id)s
   AND p.uuid = ANY(%(person_uuids)s::uuid[])
 ```

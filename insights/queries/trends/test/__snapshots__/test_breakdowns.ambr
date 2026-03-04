@@ -180,13 +180,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'https://example.com/', 'https://example.com'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'https://example.com/', 'https://example.com'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'https://example.com/', 'https://example.com']), (['$$_posthog_breakdown_null_$$', 'https://example.com/', 'https://example.com']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'https://example.com/', 'https://example.com']), (['$$_insights_breakdown_null_$$', 'https://example.com/', 'https://example.com']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT "$session_id",
@@ -879,13 +879,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'https://example.com', '$$_posthog_breakdown_other_$$'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'https://example.com', '$$_insights_breakdown_other_$$'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'https://example.com', '$$_posthog_breakdown_other_$$']), (['$$_posthog_breakdown_null_$$', 'https://example.com', '$$_posthog_breakdown_other_$$']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'https://example.com', '$$_insights_breakdown_other_$$']), (['$$_insights_breakdown_null_$$', 'https://example.com', '$$_insights_breakdown_other_$$']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'watched movie'
@@ -940,19 +940,19 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'https://example.com'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'https://example.com'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'https://example.com']), (['$$_posthog_breakdown_null_$$', 'https://example.com']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'https://example.com']), (['$$_insights_breakdown_null_$$', 'https://example.com']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'watched movie'
              AND toTimeZone(timestamp, 'UTC') >= toDateTime(toStartOfDay(toDateTime('2020-01-02 00:00:00', 'UTC')), 'UTC')
              AND toTimeZone(timestamp, 'UTC') <= toDateTime('2020-01-12 23:59:59', 'UTC')
-             AND transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'https://example.com']), (['$$_posthog_breakdown_null_$$', 'https://example.com']), '$$_posthog_breakdown_other_$$') in (['$$_posthog_breakdown_null_$$', 'https://example.com'])
+             AND transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'https://example.com']), (['$$_insights_breakdown_null_$$', 'https://example.com']), '$$_insights_breakdown_other_$$') in (['$$_insights_breakdown_null_$$', 'https://example.com'])
            GROUP BY day_start,
                     breakdown_value))
      GROUP BY day_start,
@@ -1002,19 +1002,19 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'https://example.com', 'https://example.com/'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'https://example.com', 'https://example.com/'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'https://example.com', 'https://example.com/']), (['$$_posthog_breakdown_null_$$', 'https://example.com', 'https://example.com/']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'https://example.com', 'https://example.com/']), (['$$_insights_breakdown_null_$$', 'https://example.com', 'https://example.com/']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'watched movie'
              AND toTimeZone(timestamp, 'UTC') >= toDateTime(toStartOfDay(toDateTime('2020-01-02 00:00:00', 'UTC')), 'UTC')
              AND toTimeZone(timestamp, 'UTC') <= toDateTime('2020-01-12 23:59:59', 'UTC')
-             AND transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'https://example.com', 'https://example.com/']), (['$$_posthog_breakdown_null_$$', 'https://example.com', 'https://example.com/']), '$$_posthog_breakdown_other_$$') in (['$$_posthog_breakdown_null_$$', 'https://example.com', 'https://example.com/'])
+             AND transform(ifNull(nullIf(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, '$current_url'), ''), 'null'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'https://example.com', 'https://example.com/']), (['$$_insights_breakdown_null_$$', 'https://example.com', 'https://example.com/']), '$$_insights_breakdown_other_$$') in (['$$_insights_breakdown_null_$$', 'https://example.com', 'https://example.com/'])
            GROUP BY day_start,
                     breakdown_value))
      GROUP BY day_start,

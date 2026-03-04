@@ -55,7 +55,7 @@ func (v *LoginView) View() string {
 
 	content := fmt.Sprintf(
 		"\n\n%s\n\n%s Open your browser to authorize...\n\n%s\n\n%s\n",
-		titleStyle.Render("PostHog Live"),
+		titleStyle.Render("Insights Live"),
 		v.spinner.View(),
 		urlStyle.Render(v.url),
 		mutedStyle.Render("Waiting for authorization from browser..."),

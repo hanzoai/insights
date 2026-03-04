@@ -1,7 +1,7 @@
 import { actions, events, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -303,10 +303,10 @@ export const preflightLogic = kea<preflightLogicType>([
         },
         registerInstrumentationProps: async (_, breakpoint) => {
             await breakpoint(100)
-            if (posthog && values.preflight) {
+            if (insights && values.preflight) {
                 const appContext = getAppContext()
 
-                posthog.register({
+                insights.register({
                     realm: values.realm,
                     email_service_available: values.preflight.email_service_available,
                     slack_service_available: values.preflight.slack_service?.available,
@@ -314,7 +314,7 @@ export const preflightLogic = kea<preflightLogicType>([
                 })
 
                 if (values.preflight.site_url) {
-                    posthog.group('instance', values.preflight.site_url, {
+                    insights.group('instance', values.preflight.site_url, {
                         site_url: values.preflight.site_url,
                     })
                 }

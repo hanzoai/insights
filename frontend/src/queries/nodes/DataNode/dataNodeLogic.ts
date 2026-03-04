@@ -15,7 +15,7 @@ import {
 } from 'kea'
 import { lazyLoaders, loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { ApiMethodOptions } from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -694,7 +694,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                         // Extract count from first row, first column
                         return response?.results?.[0]?.[0] || 0
                     } catch (error) {
-                        posthog.captureException(error, { action: 'load total count in dataNodeLogic' })
+                        insights.captureException(error, { action: 'load total count in dataNodeLogic' })
                         return null
                     }
                 },
@@ -715,7 +715,7 @@ export const dataNodeLogic = kea<dataNodeLogicType>([
                         breakpoint()
                         return response?.results?.[0]?.[0] || 0
                     } catch (error) {
-                        posthog.captureException(error, { action: 'load filtered count in dataNodeLogic' })
+                        insights.captureException(error, { action: 'load filtered count in dataNodeLogic' })
                         return null
                     }
                 },

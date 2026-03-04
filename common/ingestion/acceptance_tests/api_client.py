@@ -7,7 +7,7 @@ import logging
 from typing import Any, Optional
 
 import requests
-from posthoganalytics import Posthog
+from hanzoanalytics import Insights
 
 from .utils import get_service_url
 
@@ -113,7 +113,7 @@ class InsightsTestClient:
         logger.debug("Host: %s", self.base_url)
 
         # Create Insights client instance with the API key
-        posthog_client = Posthog(api_key, host=self.base_url, debug=True)
+        analytics_client = Insights(api_key, host=self.base_url, debug=True)
 
         logger.info("Sending capture event using Insights client")
         logger.debug("Event: %s", event_name)
@@ -124,21 +124,21 @@ class InsightsTestClient:
 
         # Send event using Insights client instance
         if timestamp:
-            posthog_client.capture(
+            analytics_client.capture(
                 distinct_id=distinct_id, event=event_name, properties=properties, timestamp=timestamp
             )
         else:
-            posthog_client.capture(distinct_id=distinct_id, event=event_name, properties=properties)
+            analytics_client.capture(distinct_id=distinct_id, event=event_name, properties=properties)
 
         logger.info("Event sent via Insights client")
 
         # Flush to ensure the event is sent immediately
         logger.debug("Flushing Insights client")
-        posthog_client.flush()
+        analytics_client.flush()
         logger.debug("Insights client flushed")
 
         # Shutdown the client
-        posthog_client.shutdown()
+        analytics_client.shutdown()
 
     def query_events_insightsql(
         self, project_id: str, event_name: Optional[str] = None, distinct_id: Optional[str] = None, limit: int = 100

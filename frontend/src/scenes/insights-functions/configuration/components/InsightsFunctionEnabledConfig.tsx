@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, LemonTag } from '@posthog/lemon-ui'
+import { LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
 
 import { InsightsFunctionStatusIndicator } from 'scenes/insights-functions/misc/InsightsFunctionStatusIndicator'
 import { InsightsFunctionStatusTag } from 'scenes/insights-functions/misc/InsightsFunctionStatusTag'

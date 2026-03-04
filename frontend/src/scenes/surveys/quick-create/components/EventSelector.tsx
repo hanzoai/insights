@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonLabel } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonLabel } from '@hanzo/lemon-ui'
 
 import { AddEventButton } from 'scenes/surveys/AddEventButton'
 import { quickSurveyFormLogic } from 'scenes/surveys/quick-create/quickSurveyFormLogic'

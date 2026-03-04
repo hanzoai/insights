@@ -54,7 +54,7 @@ def team():
         test_account_filters=[
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -186,7 +186,7 @@ def test_snapshot_properties_taxonomy(mock_call_query_runner, mock_context, mock
     # Mock the query runner response
     mock_query_result = MagicMock()
     mock_query_result.results = [
-        EventTaxonomyItem(property="$current_url", sample_values=["https://posthog.com"], sample_count=1),
+        EventTaxonomyItem(property="$current_url", sample_values=["https://hanzo.ai"], sample_count=1),
     ]
     mock_call_query_runner.return_value = mock_query_result
 
@@ -263,7 +263,7 @@ def test_snapshot_events_taxonomy(
     mock_event_taxonomy_query_runner.return_value = MagicMock(
         spec=CachedEventTaxonomyQueryResponse,
         results=[
-            EventTaxonomyItem(property="$current_url", sample_values=["https://posthog.com"], sample_count=1),
+            EventTaxonomyItem(property="$current_url", sample_values=["https://hanzo.ai"], sample_count=1),
         ],
     )
 

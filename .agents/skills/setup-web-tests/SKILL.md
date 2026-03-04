@@ -46,7 +46,7 @@ If the auto-detection doesn't find a URL (e.g., the version is too new), browse 
 ### Install dependencies and run tests
 
 ```bash
-cd /home/user/posthog
+cd /home/user/insights
 uv sync --python /tmp/python-install/python/bin/python3
 source .venv/bin/activate
 
@@ -54,7 +54,7 @@ source .venv/bin/activate
 pytest path/to/test.py::TestClass::test_method -v
 
 # Run all tests in a directory
-pytest posthog/hogql/test/ -v
+pytest insights/insightsql/test/ -v
 ```
 
 ## Docker Services
@@ -109,7 +109,7 @@ The `pytest.ini` sets:
 - `DJANGO_SETTINGS_MODULE = insights.settings`
 - `DEBUG=1`, `TEST=1`
 
-Default ignores: `--ignore=posthog/user_scripts --ignore=services/llm-gateway --ignore=common/ingestion/acceptance_tests`
+Default ignores: `--ignore=insights/user_scripts --ignore=services/llm-gateway --ignore=common/ingestion/acceptance_tests`
 
 ## Debugging Installation Issues
 

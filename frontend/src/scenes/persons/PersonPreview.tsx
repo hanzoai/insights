@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { PropertiesTable } from 'lib/components/PropertiesTable'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
@@ -62,7 +62,7 @@ export function PersonPreview(props: PersonPreviewProps): JSX.Element | null {
                 <p>
                     User profiles allow you to see a detailed view of a user's properties, track users across
                     devices, and more. To create user profiles, see{' '}
-                    <Link to="https://posthog.com/docs/data/persons#capturing-person-profiles">here.</Link>
+                    <Link to="https://hanzo.ai/docs/data/persons#capturing-person-profiles">here.</Link>
                 </p>
                 <div className="flex justify-center mt-2 w-fit">
                     <LemonButton

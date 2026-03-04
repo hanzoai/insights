@@ -955,7 +955,7 @@ describe('SnappySessionRecorder', () => {
             ])
 
             message1.snapshot_source = 'web'
-            message1.snapshot_library = 'posthog-js'
+            message1.snapshot_library = 'insights-js'
 
             message2.snapshot_source = 'mobile'
             message2.snapshot_library = 'insights-android'
@@ -965,7 +965,7 @@ describe('SnappySessionRecorder', () => {
             const result = await recorder.end()
 
             expect(result.snapshotSource).toBe('web')
-            expect(result.snapshotLibrary).toBe('posthog-js')
+            expect(result.snapshotLibrary).toBe('insights-js')
         })
 
         it('should use "web" as default for snapshot source if not provided', async () => {
@@ -978,13 +978,13 @@ describe('SnappySessionRecorder', () => {
             ])
 
             // Keep snapshot_source as null and set library
-            message.snapshot_library = 'posthog-js'
+            message.snapshot_library = 'insights-js'
 
             recorder.recordMessage(message)
             const result = await recorder.end()
 
             expect(result.snapshotSource).toBe('web')
-            expect(result.snapshotLibrary).toBe('posthog-js')
+            expect(result.snapshotLibrary).toBe('insights-js')
         })
     })
 

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconRefresh } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
@@ -34,16 +34,16 @@ export function SdkDoctorScene(): JSX.Element {
     const { loadRawData, snoozeSdkDoctor } = useActions(sidePanelSdkDoctorLogic)
 
     useOnMountEffect(() => {
-        posthog.capture('sdk doctor loaded', { needsUpdatingCount })
+        insights.capture('sdk doctor loaded', { needsUpdatingCount })
     })
 
     const scanEvents = (): void => {
-        posthog.capture('sdk doctor scan events')
+        insights.capture('sdk doctor scan events')
         loadRawData({ forceRefresh: true })
     }
 
     const snoozeWarning = (): void => {
-        posthog.capture('sdk doctor snooze warning')
+        insights.capture('sdk doctor snooze warning')
         snoozeSdkDoctor()
     }
 

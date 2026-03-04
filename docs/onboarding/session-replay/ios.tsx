@@ -32,7 +32,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'Package.swift',
                                 code: dedent`
                                     dependencies: [
-                                      .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
+                                      .package(url: "https://github.com/hanzoai/insights-ios.git", from: "3.0.0")
                                     ]
                                 `,
                             },
@@ -53,7 +53,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
@@ -79,10 +79,10 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
                                         func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-                                            let POSTHOG_API_KEY = "<ph_project_api_key>"
-                                            let POSTHOG_HOST = "<ph_client_api_host>"
+                                            let INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            let INSIGHTS_HOST = "<ph_client_api_host>"
 
-                                            let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+                                            let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
 
                                             // Enable session recording. Requires enabling in your project settings as well.
                                             // Default is false.
@@ -117,7 +117,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     />
                     <Markdown>
                         For more configuration options, see the [iOS session replay
-                        docs](https://posthog.com/docs/session-replay/installation?tab=iOS).
+                        docs](https://hanzo.ai/docs/session-replay/installation?tab=iOS).
                     </Markdown>
                     <CalloutBox type="fyi" title="SwiftUI support">
                         <Markdown>

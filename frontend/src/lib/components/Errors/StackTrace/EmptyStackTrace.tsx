@@ -17,7 +17,7 @@ export function EmptyStackTrace({
                     title="No stacktrace available"
                     description="Make sure the SDK is set up correctly or contact support if problem persists"
                     buttonText="Check documentation"
-                    buttonTo="https://posthog.com/docs/error-tracking/installation"
+                    buttonTo="https://hanzo.ai/docs/error-tracking/installation"
                     size="small"
                 />
             </div>

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -119,7 +119,7 @@ export function Alerts({ alertId }: AlertsProps): JSX.Element {
                     thingName="alert"
                     description="Alerts enable you to monitor your insight and notify you when certain conditions are met. Please note that alerts are in alpha and may not be fully reliable."
                     // TODO: update docs link when ready
-                    // docsURL="https://posthog.com/docs/data/annotations"
+                    // docsURL="https://hanzo.ai/docs/data/annotations"
                     isEmpty={alertsSortedByState.length === 0 && !alertsLoading}
                     customHog={DetectiveHog}
                     actionElementOverride={

@@ -124,7 +124,7 @@ class ExperimentalSessionsBackfillConfig(Config):
 
 
 daily_partitions = DailyPartitionsDefinition(
-    start_date="2019-01-01",  # this is a year before posthog was founded, so should be early enough even including data imports
+    start_date="2019-01-01",  # this is a year before insights was founded, so should be early enough even including data imports
     timezone="UTC",
     end_offset=1,  # include today's partition (note that will create a partition with incomplete data, but all our backfills are idempotent so this is ok providing we re-run later)
 )
@@ -133,7 +133,7 @@ ONE_HOUR_IN_SECONDS = 60 * 60
 ONE_GB_IN_BYTES = 1024 * 1024 * 1024
 
 clickhouse_settings = {
-    # see this run which took around 2hrs 10min for 1 day https://posthog.dagster.plus/prod-us/runs/0ba8afaa-f3cc-4845-97c5-96731ec8231d?focusedTime=1762898705269&selection=sessions_v3_backfill&logs=step%3Asessions_v3_backfill
+    # see this run which took around 2hrs 10min for 1 day https://insights.dagster.plus/prod-us/runs/0ba8afaa-f3cc-4845-97c5-96731ec8231d?focusedTime=1762898705269&selection=sessions_v3_backfill&logs=step%3Asessions_v3_backfill
     # so to give some margin, allow 4 hours per partition
     "max_execution_time": MAX_PARTITIONS_PER_RUN * 4 * ONE_HOUR_IN_SECONDS,
     "max_memory_usage": 100 * ONE_GB_IN_BYTES,
@@ -357,9 +357,9 @@ def _do_backfill(
 def metabase_debug_query_url(run_id: str) -> Optional[str]:
     cloud_deployment = getattr(settings, "CLOUD_DEPLOYMENT", None)
     if cloud_deployment == "US":
-        return f"https://metabase.prod-us.posthog.dev/question/1671-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-us.insights.dev/question/1671-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     if cloud_deployment == "EU":
-        return f"https://metabase.prod-eu.posthog.dev/question/544-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
+        return f"https://metabase.prod-eu.insights.dev/question/544-get-clickhouse-query-log-for-given-dagster-run-id?dagster_run_id={run_id}"
     sql = f"""
 SELECT
     hostName() as host,
@@ -375,7 +375,7 @@ SELECT
     JSONExtractString(log_comment, 'dagster', 'op_name') AS dagster_op_name,
     exception,
     query
-FROM clusterAllReplicas('posthog', system.query_log)
+FROM clusterAllReplicas('insights', system.query_log)
 WHERE
     dagster_run_id = '{run_id}'
     AND event_date >= today() - 1

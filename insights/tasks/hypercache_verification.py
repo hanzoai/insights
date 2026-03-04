@@ -48,7 +48,7 @@ def _run_cache_verification(cache_type: CacheType, chunk_size: int) -> None:
         logger.info("Flags Redis URL not set, skipping cache verification", cache_type=cache_type)
         return
 
-    lock_key = f"posthog:hypercache_verification:{cache_type}:lock"
+    lock_key = f"insights:hypercache_verification:{cache_type}:lock"
 
     # Attempt to acquire lock - cache.add returns False if key already exists
     if not django_cache.add(lock_key, "locked", timeout=LOCK_TIMEOUT_SECONDS):
@@ -105,7 +105,7 @@ def verify_and_fix_flags_cache_task() -> None:
 
     Expected duration: ~8-10 minutes with 250-team batch size.
 
-    Metrics: posthog_hypercache_verify_fixes_total{cache_type="flags", issue_type="..."}
+    Metrics: insights_hypercache_verify_fixes_total{cache_type="flags", issue_type="..."}
     """
     _run_cache_verification("flags", settings.FLAGS_CACHE_VERIFICATION_CHUNK_SIZE)
 
@@ -126,6 +126,6 @@ def verify_and_fix_team_metadata_cache_task() -> None:
 
     Expected duration: ~3-5 minutes with 1000-team batch size.
 
-    Metrics: posthog_hypercache_verify_fixes_total{cache_type="team_metadata", issue_type="..."}
+    Metrics: insights_hypercache_verify_fixes_total{cache_type="team_metadata", issue_type="..."}
     """
     _run_cache_verification("team_metadata", settings.TEAM_METADATA_CACHE_VERIFICATION_CHUNK_SIZE)

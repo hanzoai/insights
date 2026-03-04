@@ -6,14 +6,14 @@ export const MultivariateFlagSnippet = memo(({ language = 'javascript' }: { lang
 
     const snippets: Record<string, string> = {
         javascript: dedent`
-            if (posthog.getFeatureFlag('flag-key') == 'variant-key') { // replace 'variant-key' with the key of your variant
+            if (insights.getFeatureFlag('flag-key') == 'variant-key') { // replace 'variant-key' with the key of your variant
                 // Do something differently for this user
                 // Optional: fetch the payload
-                const matchedFlagPayload = posthog.getFeatureFlagPayload('flag-key')
+                const matchedFlagPayload = insights.getFeatureFlagPayload('flag-key')
             }
         `,
         react: dedent`
-            import { useFeatureFlagVariantKey } from '@posthog/react'
+            import { useFeatureFlagVariantKey } from '@hanzo/react'
 
             function App() {
                 const variantKey = useFeatureFlagVariantKey('show-welcome-message')
@@ -49,11 +49,11 @@ export const MultivariateFlagSnippet = memo(({ language = 'javascript' }: { lang
             }
         `,
         python: dedent`
-            enabled_variant = posthog.get_feature_flag('flag-key', 'distinct_id_of_your_user')
+            enabled_variant = insights.get_feature_flag('flag-key', 'distinct_id_of_your_user')
             if enabled_variant == 'variant-key': # replace 'variant-key' with the key of your variant
                 # Do something differently for this user
                 # Optional: fetch the payload
-                matched_flag_payload = posthog.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
+                matched_flag_payload = insights.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
         `,
         php: dedent`
             $enabledVariant = Insights::getFeatureFlag('flag-key', 'distinct_id_of_your_user')
@@ -62,15 +62,15 @@ export const MultivariateFlagSnippet = memo(({ language = 'javascript' }: { lang
             }
         `,
         ruby: dedent`
-            enabled_variant = posthog.get_feature_flag('flag-key', 'distinct_id_of_your_user')
+            enabled_variant = insights.get_feature_flag('flag-key', 'distinct_id_of_your_user')
             if enabled_variant == 'variant-key' # replace 'variant-key' with the key of your variant
                 # Do something differently for this user
                 # Optional: fetch the payload
-                matched_flag_payload = posthog.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
+                matched_flag_payload = insights.get_feature_flag_payload('flag-key', 'distinct_id_of_your_user')
             end
         `,
         go: dedent`
-            enabledVariant, err := client.GetFeatureFlag(posthog.FeatureFlagPayload{
+            enabledVariant, err := client.GetFeatureFlag(insights.FeatureFlagPayload{
                 Key:        "flag-key",
                 DistinctId: "distinct_id_of_your_user",
             })

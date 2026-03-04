@@ -1,9 +1,9 @@
 import { useValues } from 'kea'
 import { combineUrl, router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconArrowLeft, IconEye, IconPlus, IconShield, IconTarget, IconThumbsUp, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonTag, Link } from '@posthog/lemon-ui'
+import { IconArrowLeft, IconEye, IconPlus, IconShield, IconTarget, IconThumbsUp, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { JudgeHog } from 'lib/components/mascots'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -46,7 +46,7 @@ function TemplateCard({ template }: TemplateCardProps): JSX.Element {
     const { searchParams } = useValues(router)
 
     const handleClick = (): void => {
-        posthog.capture('llm evaluation template selected', {
+        insights.capture('llm evaluation template selected', {
             template_key: isBlank ? 'blank' : template.key,
         })
 
@@ -210,7 +210,7 @@ export function EvaluationTemplatesEmptyState(): JSX.Element {
             description={variant.description}
             showBackButton={false}
             showHog={variant.showHog}
-            learnMoreUrl="https://posthog.com/docs/llm-analytics/evaluations"
+            learnMoreUrl="https://hanzo.ai/docs/llm-analytics/evaluations"
             minHeight="60vh"
         />
     )

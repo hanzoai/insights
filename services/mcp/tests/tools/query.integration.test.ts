@@ -41,15 +41,15 @@ async function executeQuery(context: Context, query: InsightQuery, queryName: st
 function assertQueryResponse(response: any, expectedQueryKind?: string): { results: any; query: any; url: string } {
     expect(response).toHaveProperty('query')
     expect(response).toHaveProperty('results')
-    expect(response).toHaveProperty('_posthogUrl')
-    expect(typeof response._posthogUrl).toBe('string')
-    expect(response._posthogUrl).toMatch(/\/insights\/new\?q=/)
+    expect(response).toHaveProperty('_insightsUrl')
+    expect(typeof response._insightsUrl).toBe('string')
+    expect(response._insightsUrl).toMatch(/\/insights\/new\?q=/)
 
     if (expectedQueryKind) {
         expect(response.query.kind).toBe(expectedQueryKind)
     }
 
-    return { results: response.results, query: response.query, url: response._posthogUrl }
+    return { results: response.results, query: response.query, url: response._insightsUrl }
 }
 
 /**

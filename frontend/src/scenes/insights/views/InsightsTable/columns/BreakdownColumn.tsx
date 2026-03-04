@@ -1,5 +1,5 @@
-import { IconPin, IconPinFilled } from '@posthog/icons'
-import { Link, Tooltip } from '@posthog/lemon-ui'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
+import { Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { parseAliasToReadable } from 'lib/components/PathCleanFilters/PathCleanFilterItem'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'

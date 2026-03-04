@@ -1,6 +1,6 @@
 {% extends "email/base.html" %}
-{% load posthog_assets %}
-{% load posthog_filters %}
+{% load insights_assets %}
+{% load insights_filters %}
 
 {% block preheader %}Data Pipeline Failures Alert{% endblock %}
 
@@ -8,7 +8,7 @@
 
 {% block section %}
 <p>
-    Your data pipelines had significant failures (>1% failure rate) in the last 24 hours in project <strong>{{ team.name }}</strong>. Functions are sorted by criticality with highest failure rates at the top. You can <a href="{% absolute_uri '/settings/user-notifications' %}">manage these notifications in PostHog</a>.
+    Your data pipelines had significant failures (>1% failure rate) in the last 24 hours in project <strong>{{ team.name }}</strong>. Functions are sorted by criticality with highest failure rates at the top. You can <a href="{% absolute_uri '/settings/user-notifications' %}">manage these notifications in Hanzo Insights</a>.
 </p>
 
 
@@ -50,11 +50,11 @@
 
 {% block footer %}
 Need help?
-<a href="https://posthog.com/questions?{{ utm_tags }}"
+<a href="https://hanzo.ai/questions?{{ utm_tags }}"
     target="_blank"><b>Visit support</b></a>
 or
-<a href="https://posthog.com/docs?{{ utm_tags }}"
+<a href="https://hanzo.ai/docs?{{ utm_tags }}"
     target="_blank"><b>read our documentation</b></a>.<br /><br />
 
-<a href="{% absolute_uri '/settings/user-notifications' %}">Manage these notifications in PostHog</a>
+<a href="{% absolute_uri '/settings/user-notifications' %}">Manage these notifications in Hanzo Insights</a>
 {% endblock %}

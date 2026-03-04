@@ -5,7 +5,7 @@
                 "uuid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "uuid",
+                    "insightsql_value": "uuid",
                     "id": null,
                     "name": "uuid",
                     "schema_valid": true,
@@ -15,7 +15,7 @@
                 "event": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "event",
+                    "insightsql_value": "event",
                     "id": null,
                     "name": "event",
                     "schema_valid": true,
@@ -25,7 +25,7 @@
                 "properties": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "properties",
+                    "insightsql_value": "properties",
                     "id": null,
                     "name": "properties",
                     "schema_valid": true,
@@ -35,7 +35,7 @@
                 "timestamp": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "timestamp",
+                    "insightsql_value": "timestamp",
                     "id": null,
                     "name": "timestamp",
                     "schema_valid": true,
@@ -45,7 +45,7 @@
                 "distinct_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "distinct_id",
+                    "insightsql_value": "distinct_id",
                     "id": null,
                     "name": "distinct_id",
                     "schema_valid": true,
@@ -55,7 +55,7 @@
                 "elements_chain": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "elements_chain",
+                    "insightsql_value": "elements_chain",
                     "id": null,
                     "name": "elements_chain",
                     "schema_valid": true,
@@ -65,7 +65,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -75,7 +75,7 @@
                 "$session_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$session_id`",
+                    "insightsql_value": "`$session_id`",
                     "id": null,
                     "name": "$session_id",
                     "schema_valid": true,
@@ -85,7 +85,7 @@
                 "$window_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$window_id`",
+                    "insightsql_value": "`$window_id`",
                     "id": null,
                     "name": "$window_id",
                     "schema_valid": true,
@@ -95,7 +95,7 @@
                 "pdi": {
                     "chain": null,
                     "fields": ["team_id", "distinct_id", "person_id", "person"],
-                    "hogql_value": "pdi",
+                    "insightsql_value": "pdi",
                     "id": "pdi",
                     "name": "pdi",
                     "schema_valid": true,
@@ -105,7 +105,7 @@
                 "poe": {
                     "chain": null,
                     "fields": ["id", "created_at", "properties"],
-                    "hogql_value": "poe",
+                    "insightsql_value": "poe",
                     "id": null,
                     "name": "poe",
                     "schema_valid": true,
@@ -115,7 +115,7 @@
                 "goe_0": {
                     "chain": null,
                     "fields": ["key", "created_at", "properties"],
-                    "hogql_value": "goe_0",
+                    "insightsql_value": "goe_0",
                     "id": null,
                     "name": "goe_0",
                     "schema_valid": true,
@@ -125,7 +125,7 @@
                 "goe_1": {
                     "chain": null,
                     "fields": ["key", "created_at", "properties"],
-                    "hogql_value": "goe_1",
+                    "insightsql_value": "goe_1",
                     "id": null,
                     "name": "goe_1",
                     "schema_valid": true,
@@ -135,7 +135,7 @@
                 "goe_2": {
                     "chain": null,
                     "fields": ["key", "created_at", "properties"],
-                    "hogql_value": "goe_2",
+                    "insightsql_value": "goe_2",
                     "id": null,
                     "name": "goe_2",
                     "schema_valid": true,
@@ -145,7 +145,7 @@
                 "goe_3": {
                     "chain": null,
                     "fields": ["key", "created_at", "properties"],
-                    "hogql_value": "goe_3",
+                    "insightsql_value": "goe_3",
                     "id": null,
                     "name": "goe_3",
                     "schema_valid": true,
@@ -155,7 +155,7 @@
                 "goe_4": {
                     "chain": null,
                     "fields": ["key", "created_at", "properties"],
-                    "hogql_value": "goe_4",
+                    "insightsql_value": "goe_4",
                     "id": null,
                     "name": "goe_4",
                     "schema_valid": true,
@@ -174,7 +174,7 @@
                         "production_stripe_customer",
                         "production_stripe_invoice"
                     ],
-                    "hogql_value": "person",
+                    "insightsql_value": "person",
                     "id": "person",
                     "name": "person",
                     "schema_valid": true,
@@ -184,7 +184,7 @@
                 "person_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "person_id",
+                    "insightsql_value": "person_id",
                     "id": null,
                     "name": "person_id",
                     "schema_valid": true,
@@ -194,7 +194,7 @@
                 "$group_0": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$group_0`",
+                    "insightsql_value": "`$group_0`",
                     "id": null,
                     "name": "$group_0",
                     "schema_valid": true,
@@ -204,7 +204,7 @@
                 "group_0": {
                     "chain": null,
                     "fields": ["index", "team_id", "key", "created_at", "updated_at", "properties"],
-                    "hogql_value": "group_0",
+                    "insightsql_value": "group_0",
                     "id": "group_0",
                     "name": "group_0",
                     "schema_valid": true,
@@ -214,7 +214,7 @@
                 "$group_1": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$group_1`",
+                    "insightsql_value": "`$group_1`",
                     "id": null,
                     "name": "$group_1",
                     "schema_valid": true,
@@ -224,7 +224,7 @@
                 "group_1": {
                     "chain": null,
                     "fields": ["index", "team_id", "key", "created_at", "updated_at", "properties"],
-                    "hogql_value": "group_1",
+                    "insightsql_value": "group_1",
                     "id": "group_1",
                     "name": "group_1",
                     "schema_valid": true,
@@ -234,7 +234,7 @@
                 "$group_2": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$group_2`",
+                    "insightsql_value": "`$group_2`",
                     "id": null,
                     "name": "$group_2",
                     "schema_valid": true,
@@ -244,7 +244,7 @@
                 "group_2": {
                     "chain": null,
                     "fields": ["index", "team_id", "key", "created_at", "updated_at", "properties"],
-                    "hogql_value": "group_2",
+                    "insightsql_value": "group_2",
                     "id": "group_2",
                     "name": "group_2",
                     "schema_valid": true,
@@ -254,7 +254,7 @@
                 "$group_3": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$group_3`",
+                    "insightsql_value": "`$group_3`",
                     "id": null,
                     "name": "$group_3",
                     "schema_valid": true,
@@ -264,7 +264,7 @@
                 "group_3": {
                     "chain": null,
                     "fields": ["index", "team_id", "key", "created_at", "updated_at", "properties"],
-                    "hogql_value": "group_3",
+                    "insightsql_value": "group_3",
                     "id": "group_3",
                     "name": "group_3",
                     "schema_valid": true,
@@ -274,7 +274,7 @@
                 "$group_4": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$group_4`",
+                    "insightsql_value": "`$group_4`",
                     "id": null,
                     "name": "$group_4",
                     "schema_valid": true,
@@ -284,7 +284,7 @@
                 "group_4": {
                     "chain": null,
                     "fields": ["index", "team_id", "key", "created_at", "updated_at", "properties"],
-                    "hogql_value": "group_4",
+                    "insightsql_value": "group_4",
                     "id": "group_4",
                     "name": "group_4",
                     "schema_valid": true,
@@ -343,7 +343,7 @@
                         "$exit_pathname",
                         "$vitals_lcp"
                     ],
-                    "hogql_value": "session",
+                    "insightsql_value": "session",
                     "id": "session",
                     "name": "session",
                     "schema_valid": true,
@@ -353,7 +353,7 @@
                 "elements_chain_href": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "elements_chain_href",
+                    "insightsql_value": "elements_chain_href",
                     "id": null,
                     "name": "elements_chain_href",
                     "schema_valid": true,
@@ -363,7 +363,7 @@
                 "elements_chain_texts": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "elements_chain_texts",
+                    "insightsql_value": "elements_chain_texts",
                     "id": null,
                     "name": "elements_chain_texts",
                     "schema_valid": true,
@@ -373,7 +373,7 @@
                 "elements_chain_ids": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "elements_chain_ids",
+                    "insightsql_value": "elements_chain_ids",
                     "id": null,
                     "name": "elements_chain_ids",
                     "schema_valid": true,
@@ -383,7 +383,7 @@
                 "elements_chain_elements": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "elements_chain_elements",
+                    "insightsql_value": "elements_chain_elements",
                     "id": null,
                     "name": "elements_chain_elements",
                     "schema_valid": true,
@@ -393,7 +393,7 @@
                 "event_person_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "event_person_id",
+                    "insightsql_value": "event_person_id",
                     "id": null,
                     "name": "event_person_id",
                     "schema_valid": true,
@@ -403,7 +403,7 @@
                 "override": {
                     "chain": null,
                     "fields": ["team_id", "distinct_id", "person_id", "person"],
-                    "hogql_value": "override",
+                    "insightsql_value": "override",
                     "id": "override",
                     "name": "override",
                     "schema_valid": true,
@@ -413,7 +413,7 @@
                 "event_issue_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "event_issue_id",
+                    "insightsql_value": "event_issue_id",
                     "id": null,
                     "name": "event_issue_id",
                     "schema_valid": true,
@@ -423,7 +423,7 @@
                 "exception_issue_override": {
                     "chain": null,
                     "fields": ["team_id", "fingerprint", "issue_id"],
-                    "hogql_value": "exception_issue_override",
+                    "insightsql_value": "exception_issue_override",
                     "id": "exception_issue_override",
                     "name": "exception_issue_override",
                     "schema_valid": true,
@@ -433,7 +433,7 @@
                 "issue_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "issue_id",
+                    "insightsql_value": "issue_id",
                     "id": null,
                     "name": "issue_id",
                     "schema_valid": true,
@@ -443,7 +443,7 @@
                 "account": {
                     "chain": ["group_0"],
                     "fields": null,
-                    "hogql_value": "account",
+                    "insightsql_value": "account",
                     "id": null,
                     "name": "account",
                     "schema_valid": true,
@@ -453,7 +453,7 @@
                 "project": {
                     "chain": ["group_1"],
                     "fields": null,
-                    "hogql_value": "project",
+                    "insightsql_value": "project",
                     "id": null,
                     "name": "project",
                     "schema_valid": true,
@@ -463,7 +463,7 @@
                 "organization": {
                     "chain": ["group_2"],
                     "fields": null,
-                    "hogql_value": "organization",
+                    "insightsql_value": "organization",
                     "id": null,
                     "name": "organization",
                     "schema_valid": true,
@@ -473,7 +473,7 @@
                 "instance": {
                     "chain": ["group_3"],
                     "fields": null,
-                    "hogql_value": "instance",
+                    "insightsql_value": "instance",
                     "id": null,
                     "name": "instance",
                     "schema_valid": true,
@@ -483,14 +483,14 @@
             },
             "id": "events",
             "name": "events",
-            "type": "posthog"
+            "type": "insights"
         },
         "groups": {
             "fields": {
                 "index": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "index",
+                    "insightsql_value": "index",
                     "id": null,
                     "name": "index",
                     "schema_valid": true,
@@ -500,7 +500,7 @@
                 "key": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "key",
+                    "insightsql_value": "key",
                     "id": null,
                     "name": "key",
                     "schema_valid": true,
@@ -510,7 +510,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -520,7 +520,7 @@
                 "updated_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "updated_at",
+                    "insightsql_value": "updated_at",
                     "id": null,
                     "name": "updated_at",
                     "schema_valid": true,
@@ -530,7 +530,7 @@
                 "properties": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "properties",
+                    "insightsql_value": "properties",
                     "id": null,
                     "name": "properties",
                     "schema_valid": true,
@@ -540,14 +540,14 @@
             },
             "id": "groups",
             "name": "groups",
-            "type": "posthog"
+            "type": "insights"
         },
         "persons": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -557,7 +557,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -567,7 +567,7 @@
                 "properties": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "properties",
+                    "insightsql_value": "properties",
                     "id": null,
                     "name": "properties",
                     "schema_valid": true,
@@ -577,7 +577,7 @@
                 "is_identified": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "is_identified",
+                    "insightsql_value": "is_identified",
                     "id": null,
                     "name": "is_identified",
                     "schema_valid": true,
@@ -587,7 +587,7 @@
                 "pdi": {
                     "chain": null,
                     "fields": ["team_id", "distinct_id", "person_id"],
-                    "hogql_value": "pdi",
+                    "insightsql_value": "pdi",
                     "id": "pdi",
                     "name": "pdi",
                     "schema_valid": true,
@@ -597,7 +597,7 @@
                 "$virt_initial_referring_domain_type": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$virt_initial_referring_domain_type`",
+                    "insightsql_value": "`$virt_initial_referring_domain_type`",
                     "id": null,
                     "name": "$virt_initial_referring_domain_type",
                     "schema_valid": true,
@@ -607,7 +607,7 @@
                 "$virt_initial_channel_type": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$virt_initial_channel_type`",
+                    "insightsql_value": "`$virt_initial_channel_type`",
                     "id": null,
                     "name": "$virt_initial_channel_type",
                     "schema_valid": true,
@@ -645,7 +645,7 @@
                         "__ph_partition_key",
                         "properties"
                     ],
-                    "hogql_value": "production_stripe_customer",
+                    "insightsql_value": "production_stripe_customer",
                     "id": "production_stripe_customer",
                     "name": "production_stripe_customer",
                     "schema_valid": true,
@@ -725,7 +725,7 @@
                         "__ph_partition_key",
                         "properties"
                     ],
-                    "hogql_value": "production_stripe_invoice",
+                    "insightsql_value": "production_stripe_invoice",
                     "id": "production_stripe_invoice",
                     "name": "production_stripe_invoice",
                     "schema_valid": true,
@@ -735,14 +735,14 @@
             },
             "id": "persons",
             "name": "persons",
-            "type": "posthog"
+            "type": "insights"
         },
         "sessions": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -752,7 +752,7 @@
                 "session_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "session_id",
+                    "insightsql_value": "session_id",
                     "id": null,
                     "name": "session_id",
                     "schema_valid": true,
@@ -762,7 +762,7 @@
                 "session_id_v7": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "session_id_v7",
+                    "insightsql_value": "session_id_v7",
                     "id": null,
                     "name": "session_id_v7",
                     "schema_valid": true,
@@ -772,7 +772,7 @@
                 "distinct_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "distinct_id",
+                    "insightsql_value": "distinct_id",
                     "id": null,
                     "name": "distinct_id",
                     "schema_valid": true,
@@ -782,7 +782,7 @@
                 "$start_timestamp": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$start_timestamp`",
+                    "insightsql_value": "`$start_timestamp`",
                     "id": null,
                     "name": "$start_timestamp",
                     "schema_valid": true,
@@ -792,7 +792,7 @@
                 "$end_timestamp": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$end_timestamp`",
+                    "insightsql_value": "`$end_timestamp`",
                     "id": null,
                     "name": "$end_timestamp",
                     "schema_valid": true,
@@ -802,7 +802,7 @@
                 "$urls": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$urls`",
+                    "insightsql_value": "`$urls`",
                     "id": null,
                     "name": "$urls",
                     "schema_valid": true,
@@ -812,7 +812,7 @@
                 "$num_uniq_urls": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$num_uniq_urls`",
+                    "insightsql_value": "`$num_uniq_urls`",
                     "id": null,
                     "name": "$num_uniq_urls",
                     "schema_valid": true,
@@ -822,7 +822,7 @@
                 "$entry_current_url": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_current_url`",
+                    "insightsql_value": "`$entry_current_url`",
                     "id": null,
                     "name": "$entry_current_url",
                     "schema_valid": true,
@@ -832,7 +832,7 @@
                 "$entry_pathname": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_pathname`",
+                    "insightsql_value": "`$entry_pathname`",
                     "id": null,
                     "name": "$entry_pathname",
                     "schema_valid": true,
@@ -842,7 +842,7 @@
                 "$entry_hostname": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_hostname`",
+                    "insightsql_value": "`$entry_hostname`",
                     "id": null,
                     "name": "$entry_hostname",
                     "schema_valid": true,
@@ -852,7 +852,7 @@
                 "$end_current_url": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$end_current_url`",
+                    "insightsql_value": "`$end_current_url`",
                     "id": null,
                     "name": "$end_current_url",
                     "schema_valid": true,
@@ -862,7 +862,7 @@
                 "$end_pathname": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$end_pathname`",
+                    "insightsql_value": "`$end_pathname`",
                     "id": null,
                     "name": "$end_pathname",
                     "schema_valid": true,
@@ -872,7 +872,7 @@
                 "$end_hostname": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$end_hostname`",
+                    "insightsql_value": "`$end_hostname`",
                     "id": null,
                     "name": "$end_hostname",
                     "schema_valid": true,
@@ -882,7 +882,7 @@
                 "$entry_referring_domain": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_referring_domain`",
+                    "insightsql_value": "`$entry_referring_domain`",
                     "id": null,
                     "name": "$entry_referring_domain",
                     "schema_valid": true,
@@ -892,7 +892,7 @@
                 "$entry_utm_source": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_utm_source`",
+                    "insightsql_value": "`$entry_utm_source`",
                     "id": null,
                     "name": "$entry_utm_source",
                     "schema_valid": true,
@@ -902,7 +902,7 @@
                 "$entry_utm_campaign": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_utm_campaign`",
+                    "insightsql_value": "`$entry_utm_campaign`",
                     "id": null,
                     "name": "$entry_utm_campaign",
                     "schema_valid": true,
@@ -912,7 +912,7 @@
                 "$entry_utm_medium": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_utm_medium`",
+                    "insightsql_value": "`$entry_utm_medium`",
                     "id": null,
                     "name": "$entry_utm_medium",
                     "schema_valid": true,
@@ -922,7 +922,7 @@
                 "$entry_utm_term": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_utm_term`",
+                    "insightsql_value": "`$entry_utm_term`",
                     "id": null,
                     "name": "$entry_utm_term",
                     "schema_valid": true,
@@ -932,7 +932,7 @@
                 "$entry_utm_content": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_utm_content`",
+                    "insightsql_value": "`$entry_utm_content`",
                     "id": null,
                     "name": "$entry_utm_content",
                     "schema_valid": true,
@@ -942,7 +942,7 @@
                 "$entry_gclid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_gclid`",
+                    "insightsql_value": "`$entry_gclid`",
                     "id": null,
                     "name": "$entry_gclid",
                     "schema_valid": true,
@@ -952,7 +952,7 @@
                 "$entry_gad_source": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_gad_source`",
+                    "insightsql_value": "`$entry_gad_source`",
                     "id": null,
                     "name": "$entry_gad_source",
                     "schema_valid": true,
@@ -962,7 +962,7 @@
                 "$entry_gclsrc": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_gclsrc`",
+                    "insightsql_value": "`$entry_gclsrc`",
                     "id": null,
                     "name": "$entry_gclsrc",
                     "schema_valid": true,
@@ -972,7 +972,7 @@
                 "$entry_dclid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_dclid`",
+                    "insightsql_value": "`$entry_dclid`",
                     "id": null,
                     "name": "$entry_dclid",
                     "schema_valid": true,
@@ -982,7 +982,7 @@
                 "$entry_gbraid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_gbraid`",
+                    "insightsql_value": "`$entry_gbraid`",
                     "id": null,
                     "name": "$entry_gbraid",
                     "schema_valid": true,
@@ -992,7 +992,7 @@
                 "$entry_wbraid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_wbraid`",
+                    "insightsql_value": "`$entry_wbraid`",
                     "id": null,
                     "name": "$entry_wbraid",
                     "schema_valid": true,
@@ -1002,7 +1002,7 @@
                 "$entry_fbclid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_fbclid`",
+                    "insightsql_value": "`$entry_fbclid`",
                     "id": null,
                     "name": "$entry_fbclid",
                     "schema_valid": true,
@@ -1012,7 +1012,7 @@
                 "$entry_msclkid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_msclkid`",
+                    "insightsql_value": "`$entry_msclkid`",
                     "id": null,
                     "name": "$entry_msclkid",
                     "schema_valid": true,
@@ -1022,7 +1022,7 @@
                 "$entry_twclid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_twclid`",
+                    "insightsql_value": "`$entry_twclid`",
                     "id": null,
                     "name": "$entry_twclid",
                     "schema_valid": true,
@@ -1032,7 +1032,7 @@
                 "$entry_li_fat_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_li_fat_id`",
+                    "insightsql_value": "`$entry_li_fat_id`",
                     "id": null,
                     "name": "$entry_li_fat_id",
                     "schema_valid": true,
@@ -1042,7 +1042,7 @@
                 "$entry_mc_cid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_mc_cid`",
+                    "insightsql_value": "`$entry_mc_cid`",
                     "id": null,
                     "name": "$entry_mc_cid",
                     "schema_valid": true,
@@ -1052,7 +1052,7 @@
                 "$entry_igshid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_igshid`",
+                    "insightsql_value": "`$entry_igshid`",
                     "id": null,
                     "name": "$entry_igshid",
                     "schema_valid": true,
@@ -1062,7 +1062,7 @@
                 "$entry_ttclid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_ttclid`",
+                    "insightsql_value": "`$entry_ttclid`",
                     "id": null,
                     "name": "$entry_ttclid",
                     "schema_valid": true,
@@ -1072,7 +1072,7 @@
                 "$entry__kx": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry__kx`",
+                    "insightsql_value": "`$entry__kx`",
                     "id": null,
                     "name": "$entry__kx",
                     "schema_valid": true,
@@ -1082,7 +1082,7 @@
                 "$entry_irclid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$entry_irclid`",
+                    "insightsql_value": "`$entry_irclid`",
                     "id": null,
                     "name": "$entry_irclid",
                     "schema_valid": true,
@@ -1092,7 +1092,7 @@
                 "$pageview_count": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$pageview_count`",
+                    "insightsql_value": "`$pageview_count`",
                     "id": null,
                     "name": "$pageview_count",
                     "schema_valid": true,
@@ -1102,7 +1102,7 @@
                 "$autocapture_count": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$autocapture_count`",
+                    "insightsql_value": "`$autocapture_count`",
                     "id": null,
                     "name": "$autocapture_count",
                     "schema_valid": true,
@@ -1112,7 +1112,7 @@
                 "$screen_count": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$screen_count`",
+                    "insightsql_value": "`$screen_count`",
                     "id": null,
                     "name": "$screen_count",
                     "schema_valid": true,
@@ -1122,7 +1122,7 @@
                 "$channel_type": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$channel_type`",
+                    "insightsql_value": "`$channel_type`",
                     "id": null,
                     "name": "$channel_type",
                     "schema_valid": true,
@@ -1132,7 +1132,7 @@
                 "$session_duration": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$session_duration`",
+                    "insightsql_value": "`$session_duration`",
                     "id": null,
                     "name": "$session_duration",
                     "schema_valid": true,
@@ -1142,7 +1142,7 @@
                 "duration": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "duration",
+                    "insightsql_value": "duration",
                     "id": null,
                     "name": "duration",
                     "schema_valid": true,
@@ -1152,7 +1152,7 @@
                 "$is_bounce": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$is_bounce`",
+                    "insightsql_value": "`$is_bounce`",
                     "id": null,
                     "name": "$is_bounce",
                     "schema_valid": true,
@@ -1162,7 +1162,7 @@
                 "$last_external_click_url": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$last_external_click_url`",
+                    "insightsql_value": "`$last_external_click_url`",
                     "id": null,
                     "name": "$last_external_click_url",
                     "schema_valid": true,
@@ -1172,7 +1172,7 @@
                 "$exit_current_url": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$exit_current_url`",
+                    "insightsql_value": "`$exit_current_url`",
                     "id": null,
                     "name": "$exit_current_url",
                     "schema_valid": true,
@@ -1182,7 +1182,7 @@
                 "$exit_pathname": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$exit_pathname`",
+                    "insightsql_value": "`$exit_pathname`",
                     "id": null,
                     "name": "$exit_pathname",
                     "schema_valid": true,
@@ -1192,7 +1192,7 @@
                 "$vitals_lcp": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "`$vitals_lcp`",
+                    "insightsql_value": "`$vitals_lcp`",
                     "id": null,
                     "name": "$vitals_lcp",
                     "schema_valid": true,
@@ -1202,14 +1202,14 @@
             },
             "id": "sessions",
             "name": "sessions",
-            "type": "posthog"
+            "type": "insights"
         },
         "query_log": {
             "fields": {
                 "query_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "query_id",
+                    "insightsql_value": "query_id",
                     "id": null,
                     "name": "query_id",
                     "schema_valid": true,
@@ -1219,7 +1219,7 @@
                 "endpoint": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "endpoint",
+                    "insightsql_value": "endpoint",
                     "id": null,
                     "name": "endpoint",
                     "schema_valid": true,
@@ -1229,7 +1229,7 @@
                 "query": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "query",
+                    "insightsql_value": "query",
                     "id": null,
                     "name": "query",
                     "schema_valid": true,
@@ -1239,7 +1239,7 @@
                 "query_start_time": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "query_start_time",
+                    "insightsql_value": "query_start_time",
                     "id": null,
                     "name": "query_start_time",
                     "schema_valid": true,
@@ -1249,19 +1249,19 @@
                 "query_duration_ms": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "query_duration_ms",
+                    "insightsql_value": "query_duration_ms",
                     "id": null,
                     "name": "query_duration_ms",
                     "schema_valid": true,
                     "table": null,
                     "type": "float"
                 },
-                "hogql_name": {
+                "insightsql_name": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "hogql_name",
+                    "insightsql_value": "insightsql_name",
                     "id": null,
-                    "name": "hogql_name",
+                    "name": "insightsql_name",
                     "schema_valid": true,
                     "table": null,
                     "type": "string"
@@ -1269,7 +1269,7 @@
                 "created_by": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_by",
+                    "insightsql_value": "created_by",
                     "id": null,
                     "name": "created_by",
                     "schema_valid": true,
@@ -1279,7 +1279,7 @@
                 "read_rows": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "read_rows",
+                    "insightsql_value": "read_rows",
                     "id": null,
                     "name": "read_rows",
                     "schema_valid": true,
@@ -1289,7 +1289,7 @@
                 "read_bytes": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "read_bytes",
+                    "insightsql_value": "read_bytes",
                     "id": null,
                     "name": "read_bytes",
                     "schema_valid": true,
@@ -1299,7 +1299,7 @@
                 "result_rows": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "result_rows",
+                    "insightsql_value": "result_rows",
                     "id": null,
                     "name": "result_rows",
                     "schema_valid": true,
@@ -1309,7 +1309,7 @@
                 "result_bytes": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "result_bytes",
+                    "insightsql_value": "result_bytes",
                     "id": null,
                     "name": "result_bytes",
                     "schema_valid": true,
@@ -1319,7 +1319,7 @@
                 "memory_usage": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "memory_usage",
+                    "insightsql_value": "memory_usage",
                     "id": null,
                     "name": "memory_usage",
                     "schema_valid": true,
@@ -1329,7 +1329,7 @@
                 "status": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "status",
+                    "insightsql_value": "status",
                     "id": null,
                     "name": "status",
                     "schema_valid": true,
@@ -1339,7 +1339,7 @@
                 "is_personal_api_key_request": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "is_personal_api_key_request",
+                    "insightsql_value": "is_personal_api_key_request",
                     "id": null,
                     "name": "is_personal_api_key_request",
                     "schema_valid": true,
@@ -1349,14 +1349,14 @@
             },
             "id": "query_log",
             "name": "query_log",
-            "type": "posthog"
+            "type": "insights"
         },
         "stripe.production.balancetransaction": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -1366,7 +1366,7 @@
                 "fee": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "fee",
+                    "insightsql_value": "fee",
                     "id": null,
                     "name": "fee",
                     "schema_valid": true,
@@ -1376,7 +1376,7 @@
                 "net": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "net",
+                    "insightsql_value": "net",
                     "id": null,
                     "name": "net",
                     "schema_valid": true,
@@ -1386,7 +1386,7 @@
                 "type": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "type",
+                    "insightsql_value": "type",
                     "id": null,
                     "name": "type",
                     "schema_valid": true,
@@ -1396,7 +1396,7 @@
                 "amount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount",
+                    "insightsql_value": "amount",
                     "id": null,
                     "name": "amount",
                     "schema_valid": true,
@@ -1406,7 +1406,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -1416,7 +1416,7 @@
                 "source_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "source_id",
+                    "insightsql_value": "source_id",
                     "id": null,
                     "name": "source_id",
                     "schema_valid": true,
@@ -1426,7 +1426,7 @@
                 "status": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "status",
+                    "insightsql_value": "status",
                     "id": null,
                     "name": "status",
                     "schema_valid": true,
@@ -1436,7 +1436,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -1446,7 +1446,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -1456,7 +1456,7 @@
                 "description": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "description",
+                    "insightsql_value": "description",
                     "id": null,
                     "name": "description",
                     "schema_valid": true,
@@ -1466,7 +1466,7 @@
                 "fee_details": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "fee_details",
+                    "insightsql_value": "fee_details",
                     "id": null,
                     "name": "fee_details",
                     "schema_valid": true,
@@ -1476,7 +1476,7 @@
                 "available_on": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "available_on",
+                    "insightsql_value": "available_on",
                     "id": null,
                     "name": "available_on",
                     "schema_valid": true,
@@ -1486,7 +1486,7 @@
                 "reporting_category": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "reporting_category",
+                    "insightsql_value": "reporting_category",
                     "id": null,
                     "name": "reporting_category",
                     "schema_valid": true,
@@ -1513,14 +1513,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d11_0000_8bc9_3ed7f2d6e68f/balance_transaction/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d11_0000_8bc9_3ed7f2d6e68f/balance_transaction/"
         },
         "stripe.production.charge": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -1530,7 +1530,7 @@
                 "paid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "paid",
+                    "insightsql_value": "paid",
                     "id": null,
                     "name": "paid",
                     "schema_valid": true,
@@ -1540,7 +1540,7 @@
                 "amount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount",
+                    "insightsql_value": "amount",
                     "id": null,
                     "name": "amount",
                     "schema_valid": true,
@@ -1550,7 +1550,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -1560,7 +1560,7 @@
                 "source": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "source",
+                    "insightsql_value": "source",
                     "id": null,
                     "name": "source",
                     "schema_valid": true,
@@ -1570,7 +1570,7 @@
                 "status": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "status",
+                    "insightsql_value": "status",
                     "id": null,
                     "name": "status",
                     "schema_valid": true,
@@ -1580,7 +1580,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -1590,7 +1590,7 @@
                 "invoice_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "invoice_id",
+                    "insightsql_value": "invoice_id",
                     "id": null,
                     "name": "invoice_id",
                     "schema_valid": true,
@@ -1600,7 +1600,7 @@
                 "outcome": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "outcome",
+                    "insightsql_value": "outcome",
                     "id": null,
                     "name": "outcome",
                     "schema_valid": true,
@@ -1610,7 +1610,7 @@
                 "captured": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "captured",
+                    "insightsql_value": "captured",
                     "id": null,
                     "name": "captured",
                     "schema_valid": true,
@@ -1620,7 +1620,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -1630,7 +1630,7 @@
                 "customer_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_id",
+                    "insightsql_value": "customer_id",
                     "id": null,
                     "name": "customer_id",
                     "schema_valid": true,
@@ -1640,7 +1640,7 @@
                 "disputed": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "disputed",
+                    "insightsql_value": "disputed",
                     "id": null,
                     "name": "disputed",
                     "schema_valid": true,
@@ -1650,7 +1650,7 @@
                 "livemode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "livemode",
+                    "insightsql_value": "livemode",
                     "id": null,
                     "name": "livemode",
                     "schema_valid": true,
@@ -1660,7 +1660,7 @@
                 "metadata": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "metadata",
+                    "insightsql_value": "metadata",
                     "id": null,
                     "name": "metadata",
                     "schema_valid": true,
@@ -1670,7 +1670,7 @@
                 "refunded": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "refunded",
+                    "insightsql_value": "refunded",
                     "id": null,
                     "name": "refunded",
                     "schema_valid": true,
@@ -1680,7 +1680,7 @@
                 "description": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "description",
+                    "insightsql_value": "description",
                     "id": null,
                     "name": "description",
                     "schema_valid": true,
@@ -1690,7 +1690,7 @@
                 "receipt_url": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "receipt_url",
+                    "insightsql_value": "receipt_url",
                     "id": null,
                     "name": "receipt_url",
                     "schema_valid": true,
@@ -1700,7 +1700,7 @@
                 "failure_code": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "failure_code",
+                    "insightsql_value": "failure_code",
                     "id": null,
                     "name": "failure_code",
                     "schema_valid": true,
@@ -1710,7 +1710,7 @@
                 "fraud_details": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "fraud_details",
+                    "insightsql_value": "fraud_details",
                     "id": null,
                     "name": "fraud_details",
                     "schema_valid": true,
@@ -1720,7 +1720,7 @@
                 "radar_options": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "radar_options",
+                    "insightsql_value": "radar_options",
                     "id": null,
                     "name": "radar_options",
                     "schema_valid": true,
@@ -1730,7 +1730,7 @@
                 "receipt_email": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "receipt_email",
+                    "insightsql_value": "receipt_email",
                     "id": null,
                     "name": "receipt_email",
                     "schema_valid": true,
@@ -1740,7 +1740,7 @@
                 "payment_intent_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "payment_intent_id",
+                    "insightsql_value": "payment_intent_id",
                     "id": null,
                     "name": "payment_intent_id",
                     "schema_valid": true,
@@ -1750,7 +1750,7 @@
                 "payment_method_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "payment_method_id",
+                    "insightsql_value": "payment_method_id",
                     "id": null,
                     "name": "payment_method_id",
                     "schema_valid": true,
@@ -1760,7 +1760,7 @@
                 "amount_captured": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount_captured",
+                    "insightsql_value": "amount_captured",
                     "id": null,
                     "name": "amount_captured",
                     "schema_valid": true,
@@ -1770,7 +1770,7 @@
                 "amount_refunded": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount_refunded",
+                    "insightsql_value": "amount_refunded",
                     "id": null,
                     "name": "amount_refunded",
                     "schema_valid": true,
@@ -1780,7 +1780,7 @@
                 "billing_details": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "billing_details",
+                    "insightsql_value": "billing_details",
                     "id": null,
                     "name": "billing_details",
                     "schema_valid": true,
@@ -1790,7 +1790,7 @@
                 "failure_message": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "failure_message",
+                    "insightsql_value": "failure_message",
                     "id": null,
                     "name": "failure_message",
                     "schema_valid": true,
@@ -1800,7 +1800,7 @@
                 "balance_transaction_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "balance_transaction_id",
+                    "insightsql_value": "balance_transaction_id",
                     "id": null,
                     "name": "balance_transaction_id",
                     "schema_valid": true,
@@ -1810,7 +1810,7 @@
                 "statement_descriptor": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "statement_descriptor",
+                    "insightsql_value": "statement_descriptor",
                     "id": null,
                     "name": "statement_descriptor",
                     "schema_valid": true,
@@ -1820,7 +1820,7 @@
                 "payment_method_details": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "payment_method_details",
+                    "insightsql_value": "payment_method_details",
                     "id": null,
                     "name": "payment_method_details",
                     "schema_valid": true,
@@ -1830,7 +1830,7 @@
                 "calculated_statement_descriptor": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "calculated_statement_descriptor",
+                    "insightsql_value": "calculated_statement_descriptor",
                     "id": null,
                     "name": "calculated_statement_descriptor",
                     "schema_valid": true,
@@ -1850,14 +1850,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d24_0000_2512_5b294f72066f/charge/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d24_0000_2512_5b294f72066f/charge/"
         },
         "stripe.production.customer": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -1867,7 +1867,7 @@
                 "name": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "name",
+                    "insightsql_value": "name",
                     "id": null,
                     "name": "name",
                     "schema_valid": true,
@@ -1877,7 +1877,7 @@
                 "email": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "email",
+                    "insightsql_value": "email",
                     "id": null,
                     "name": "email",
                     "schema_valid": true,
@@ -1887,7 +1887,7 @@
                 "phone": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "phone",
+                    "insightsql_value": "phone",
                     "id": null,
                     "name": "phone",
                     "schema_valid": true,
@@ -1897,7 +1897,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -1907,7 +1907,7 @@
                 "address": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "address",
+                    "insightsql_value": "address",
                     "id": null,
                     "name": "address",
                     "schema_valid": true,
@@ -1917,7 +1917,7 @@
                 "balance": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "balance",
+                    "insightsql_value": "balance",
                     "id": null,
                     "name": "balance",
                     "schema_valid": true,
@@ -1927,7 +1927,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -1937,7 +1937,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -1947,7 +1947,7 @@
                 "discount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "discount",
+                    "insightsql_value": "discount",
                     "id": null,
                     "name": "discount",
                     "schema_valid": true,
@@ -1957,7 +1957,7 @@
                 "livemode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "livemode",
+                    "insightsql_value": "livemode",
                     "id": null,
                     "name": "livemode",
                     "schema_valid": true,
@@ -1967,7 +1967,7 @@
                 "metadata": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "metadata",
+                    "insightsql_value": "metadata",
                     "id": null,
                     "name": "metadata",
                     "schema_valid": true,
@@ -1977,7 +1977,7 @@
                 "shipping": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "shipping",
+                    "insightsql_value": "shipping",
                     "id": null,
                     "name": "shipping",
                     "schema_valid": true,
@@ -1987,7 +1987,7 @@
                 "delinquent": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "delinquent",
+                    "insightsql_value": "delinquent",
                     "id": null,
                     "name": "delinquent",
                     "schema_valid": true,
@@ -1997,7 +1997,7 @@
                 "tax_exempt": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "tax_exempt",
+                    "insightsql_value": "tax_exempt",
                     "id": null,
                     "name": "tax_exempt",
                     "schema_valid": true,
@@ -2007,7 +2007,7 @@
                 "description": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "description",
+                    "insightsql_value": "description",
                     "id": null,
                     "name": "description",
                     "schema_valid": true,
@@ -2017,7 +2017,7 @@
                 "default_source": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "default_source",
+                    "insightsql_value": "default_source",
                     "id": null,
                     "name": "default_source",
                     "schema_valid": true,
@@ -2027,7 +2027,7 @@
                 "invoice_prefix": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "invoice_prefix",
+                    "insightsql_value": "invoice_prefix",
                     "id": null,
                     "name": "invoice_prefix",
                     "schema_valid": true,
@@ -2037,7 +2037,7 @@
                 "invoice_settings": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "invoice_settings",
+                    "insightsql_value": "invoice_settings",
                     "id": null,
                     "name": "invoice_settings",
                     "schema_valid": true,
@@ -2047,7 +2047,7 @@
                 "preferred_locales": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "preferred_locales",
+                    "insightsql_value": "preferred_locales",
                     "id": null,
                     "name": "preferred_locales",
                     "schema_valid": true,
@@ -2057,7 +2057,7 @@
                 "next_invoice_sequence": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "next_invoice_sequence",
+                    "insightsql_value": "next_invoice_sequence",
                     "id": null,
                     "name": "next_invoice_sequence",
                     "schema_valid": true,
@@ -2084,14 +2084,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d19_0000_dd7b_3a5e31f9921c/customer/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d19_0000_dd7b_3a5e31f9921c/customer/"
         },
         "stripe.production.invoice": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -2101,7 +2101,7 @@
                 "tax": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "tax",
+                    "insightsql_value": "tax",
                     "id": null,
                     "name": "tax",
                     "schema_valid": true,
@@ -2111,7 +2111,7 @@
                 "paid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "paid",
+                    "insightsql_value": "paid",
                     "id": null,
                     "name": "paid",
                     "schema_valid": true,
@@ -2121,7 +2121,7 @@
                 "lines": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "lines",
+                    "insightsql_value": "lines",
                     "id": null,
                     "name": "lines",
                     "schema_valid": true,
@@ -2131,7 +2131,7 @@
                 "total": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "total",
+                    "insightsql_value": "total",
                     "id": null,
                     "name": "total",
                     "schema_valid": true,
@@ -2141,7 +2141,7 @@
                 "charge": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "charge",
+                    "insightsql_value": "charge",
                     "id": null,
                     "name": "charge",
                     "schema_valid": true,
@@ -2151,7 +2151,7 @@
                 "issuer": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "issuer",
+                    "insightsql_value": "issuer",
                     "id": null,
                     "name": "issuer",
                     "schema_valid": true,
@@ -2161,7 +2161,7 @@
                 "number": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "number",
+                    "insightsql_value": "number",
                     "id": null,
                     "name": "number",
                     "schema_valid": true,
@@ -2171,7 +2171,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -2181,7 +2181,7 @@
                 "status": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "status",
+                    "insightsql_value": "status",
                     "id": null,
                     "name": "status",
                     "schema_valid": true,
@@ -2191,7 +2191,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -2201,7 +2201,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -2211,7 +2211,7 @@
                 "customer_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_id",
+                    "insightsql_value": "customer_id",
                     "id": null,
                     "name": "customer_id",
                     "schema_valid": true,
@@ -2221,7 +2221,7 @@
                 "discount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "discount",
+                    "insightsql_value": "discount",
                     "id": null,
                     "name": "discount",
                     "schema_valid": true,
@@ -2231,7 +2231,7 @@
                 "due_date": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "due_date",
+                    "insightsql_value": "due_date",
                     "id": null,
                     "name": "due_date",
                     "schema_valid": true,
@@ -2241,7 +2241,7 @@
                 "livemode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "livemode",
+                    "insightsql_value": "livemode",
                     "id": null,
                     "name": "livemode",
                     "schema_valid": true,
@@ -2251,7 +2251,7 @@
                 "metadata": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "metadata",
+                    "insightsql_value": "metadata",
                     "id": null,
                     "name": "metadata",
                     "schema_valid": true,
@@ -2261,7 +2261,7 @@
                 "subtotal": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "subtotal",
+                    "insightsql_value": "subtotal",
                     "id": null,
                     "name": "subtotal",
                     "schema_valid": true,
@@ -2271,7 +2271,7 @@
                 "attempted": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "attempted",
+                    "insightsql_value": "attempted",
                     "id": null,
                     "name": "attempted",
                     "schema_valid": true,
@@ -2281,7 +2281,7 @@
                 "discounts": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "discounts",
+                    "insightsql_value": "discounts",
                     "id": null,
                     "name": "discounts",
                     "schema_valid": true,
@@ -2291,7 +2291,7 @@
                 "rendering": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "rendering",
+                    "insightsql_value": "rendering",
                     "id": null,
                     "name": "rendering",
                     "schema_valid": true,
@@ -2301,7 +2301,7 @@
                 "amount_due": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount_due",
+                    "insightsql_value": "amount_due",
                     "id": null,
                     "name": "amount_due",
                     "schema_valid": true,
@@ -2311,7 +2311,7 @@
                 "period_start_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "period_start_at",
+                    "insightsql_value": "period_start_at",
                     "id": null,
                     "name": "period_start_at",
                     "schema_valid": true,
@@ -2321,7 +2321,7 @@
                 "period_end_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "period_end_at",
+                    "insightsql_value": "period_end_at",
                     "id": null,
                     "name": "period_end_at",
                     "schema_valid": true,
@@ -2331,7 +2331,7 @@
                 "amount_paid": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount_paid",
+                    "insightsql_value": "amount_paid",
                     "id": null,
                     "name": "amount_paid",
                     "schema_valid": true,
@@ -2341,7 +2341,7 @@
                 "description": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "description",
+                    "insightsql_value": "description",
                     "id": null,
                     "name": "description",
                     "schema_valid": true,
@@ -2351,7 +2351,7 @@
                 "invoice_pdf": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "invoice_pdf",
+                    "insightsql_value": "invoice_pdf",
                     "id": null,
                     "name": "invoice_pdf",
                     "schema_valid": true,
@@ -2361,7 +2361,7 @@
                 "account_name": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "account_name",
+                    "insightsql_value": "account_name",
                     "id": null,
                     "name": "account_name",
                     "schema_valid": true,
@@ -2371,7 +2371,7 @@
                 "auto_advance": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "auto_advance",
+                    "insightsql_value": "auto_advance",
                     "id": null,
                     "name": "auto_advance",
                     "schema_valid": true,
@@ -2381,7 +2381,7 @@
                 "effective_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "effective_at",
+                    "insightsql_value": "effective_at",
                     "id": null,
                     "name": "effective_at",
                     "schema_valid": true,
@@ -2391,7 +2391,7 @@
                 "subscription_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "subscription_id",
+                    "insightsql_value": "subscription_id",
                     "id": null,
                     "name": "subscription_id",
                     "schema_valid": true,
@@ -2401,7 +2401,7 @@
                 "attempt_count": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "attempt_count",
+                    "insightsql_value": "attempt_count",
                     "id": null,
                     "name": "attempt_count",
                     "schema_valid": true,
@@ -2411,7 +2411,7 @@
                 "automatic_tax": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "automatic_tax",
+                    "insightsql_value": "automatic_tax",
                     "id": null,
                     "name": "automatic_tax",
                     "schema_valid": true,
@@ -2421,7 +2421,7 @@
                 "customer_name": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_name",
+                    "insightsql_value": "customer_name",
                     "id": null,
                     "name": "customer_name",
                     "schema_valid": true,
@@ -2431,7 +2431,7 @@
                 "billing_reason": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "billing_reason",
+                    "insightsql_value": "billing_reason",
                     "id": null,
                     "name": "billing_reason",
                     "schema_valid": true,
@@ -2441,7 +2441,7 @@
                 "customer_email": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_email",
+                    "insightsql_value": "customer_email",
                     "id": null,
                     "name": "customer_email",
                     "schema_valid": true,
@@ -2451,7 +2451,7 @@
                 "ending_balance": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "ending_balance",
+                    "insightsql_value": "ending_balance",
                     "id": null,
                     "name": "ending_balance",
                     "schema_valid": true,
@@ -2461,7 +2461,7 @@
                 "payment_intent": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "payment_intent",
+                    "insightsql_value": "payment_intent",
                     "id": null,
                     "name": "payment_intent",
                     "schema_valid": true,
@@ -2471,7 +2471,7 @@
                 "account_country": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "account_country",
+                    "insightsql_value": "account_country",
                     "id": null,
                     "name": "account_country",
                     "schema_valid": true,
@@ -2481,7 +2481,7 @@
                 "amount_shipping": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount_shipping",
+                    "insightsql_value": "amount_shipping",
                     "id": null,
                     "name": "amount_shipping",
                     "schema_valid": true,
@@ -2491,7 +2491,7 @@
                 "amount_remaining": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "amount_remaining",
+                    "insightsql_value": "amount_remaining",
                     "id": null,
                     "name": "amount_remaining",
                     "schema_valid": true,
@@ -2501,7 +2501,7 @@
                 "customer_address": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_address",
+                    "insightsql_value": "customer_address",
                     "id": null,
                     "name": "customer_address",
                     "schema_valid": true,
@@ -2511,7 +2511,7 @@
                 "customer_tax_ids": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_tax_ids",
+                    "insightsql_value": "customer_tax_ids",
                     "id": null,
                     "name": "customer_tax_ids",
                     "schema_valid": true,
@@ -2521,7 +2521,7 @@
                 "paid_out_of_band": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "paid_out_of_band",
+                    "insightsql_value": "paid_out_of_band",
                     "id": null,
                     "name": "paid_out_of_band",
                     "schema_valid": true,
@@ -2531,7 +2531,7 @@
                 "payment_settings": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "payment_settings",
+                    "insightsql_value": "payment_settings",
                     "id": null,
                     "name": "payment_settings",
                     "schema_valid": true,
@@ -2541,7 +2541,7 @@
                 "starting_balance": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "starting_balance",
+                    "insightsql_value": "starting_balance",
                     "id": null,
                     "name": "starting_balance",
                     "schema_valid": true,
@@ -2551,7 +2551,7 @@
                 "collection_method": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "collection_method",
+                    "insightsql_value": "collection_method",
                     "id": null,
                     "name": "collection_method",
                     "schema_valid": true,
@@ -2561,7 +2561,7 @@
                 "default_tax_rates": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "default_tax_rates",
+                    "insightsql_value": "default_tax_rates",
                     "id": null,
                     "name": "default_tax_rates",
                     "schema_valid": true,
@@ -2571,7 +2571,7 @@
                 "total_tax_amounts": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "total_tax_amounts",
+                    "insightsql_value": "total_tax_amounts",
                     "id": null,
                     "name": "total_tax_amounts",
                     "schema_valid": true,
@@ -2581,7 +2581,7 @@
                 "hosted_invoice_url": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "hosted_invoice_url",
+                    "insightsql_value": "hosted_invoice_url",
                     "id": null,
                     "name": "hosted_invoice_url",
                     "schema_valid": true,
@@ -2591,7 +2591,7 @@
                 "status_transitions": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "status_transitions",
+                    "insightsql_value": "status_transitions",
                     "id": null,
                     "name": "status_transitions",
                     "schema_valid": true,
@@ -2601,7 +2601,7 @@
                 "customer_tax_exempt": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_tax_exempt",
+                    "insightsql_value": "customer_tax_exempt",
                     "id": null,
                     "name": "customer_tax_exempt",
                     "schema_valid": true,
@@ -2611,7 +2611,7 @@
                 "total_excluding_tax": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "total_excluding_tax",
+                    "insightsql_value": "total_excluding_tax",
                     "id": null,
                     "name": "total_excluding_tax",
                     "schema_valid": true,
@@ -2621,7 +2621,7 @@
                 "subscription_details": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "subscription_details",
+                    "insightsql_value": "subscription_details",
                     "id": null,
                     "name": "subscription_details",
                     "schema_valid": true,
@@ -2631,7 +2631,7 @@
                 "webhooks_delivered_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "webhooks_delivered_at",
+                    "insightsql_value": "webhooks_delivered_at",
                     "id": null,
                     "name": "webhooks_delivered_at",
                     "schema_valid": true,
@@ -2641,7 +2641,7 @@
                 "subtotal_excluding_tax": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "subtotal_excluding_tax",
+                    "insightsql_value": "subtotal_excluding_tax",
                     "id": null,
                     "name": "subtotal_excluding_tax",
                     "schema_valid": true,
@@ -2651,7 +2651,7 @@
                 "total_discount_amounts": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "total_discount_amounts",
+                    "insightsql_value": "total_discount_amounts",
                     "id": null,
                     "name": "total_discount_amounts",
                     "schema_valid": true,
@@ -2661,7 +2661,7 @@
                 "pre_payment_credit_notes_amount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "pre_payment_credit_notes_amount",
+                    "insightsql_value": "pre_payment_credit_notes_amount",
                     "id": null,
                     "name": "pre_payment_credit_notes_amount",
                     "schema_valid": true,
@@ -2671,7 +2671,7 @@
                 "post_payment_credit_notes_amount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "post_payment_credit_notes_amount",
+                    "insightsql_value": "post_payment_credit_notes_amount",
                     "id": null,
                     "name": "post_payment_credit_notes_amount",
                     "schema_valid": true,
@@ -2698,14 +2698,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d22_0000_3d30_376aac220143/invoice/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d22_0000_3d30_376aac220143/invoice/"
         },
         "stripe.production.price": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -2715,7 +2715,7 @@
                 "type": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "type",
+                    "insightsql_value": "type",
                     "id": null,
                     "name": "type",
                     "schema_valid": true,
@@ -2725,7 +2725,7 @@
                 "active": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "active",
+                    "insightsql_value": "active",
                     "id": null,
                     "name": "active",
                     "schema_valid": true,
@@ -2735,7 +2735,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -2745,7 +2745,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -2755,7 +2755,7 @@
                 "product_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "product_id",
+                    "insightsql_value": "product_id",
                     "id": null,
                     "name": "product_id",
                     "schema_valid": true,
@@ -2765,7 +2765,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -2775,7 +2775,7 @@
                 "livemode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "livemode",
+                    "insightsql_value": "livemode",
                     "id": null,
                     "name": "livemode",
                     "schema_valid": true,
@@ -2785,7 +2785,7 @@
                 "metadata": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "metadata",
+                    "insightsql_value": "metadata",
                     "id": null,
                     "name": "metadata",
                     "schema_valid": true,
@@ -2795,7 +2795,7 @@
                 "nickname": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "nickname",
+                    "insightsql_value": "nickname",
                     "id": null,
                     "name": "nickname",
                     "schema_valid": true,
@@ -2805,7 +2805,7 @@
                 "recurring": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "recurring",
+                    "insightsql_value": "recurring",
                     "id": null,
                     "name": "recurring",
                     "schema_valid": true,
@@ -2815,7 +2815,7 @@
                 "tiers_mode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "tiers_mode",
+                    "insightsql_value": "tiers_mode",
                     "id": null,
                     "name": "tiers_mode",
                     "schema_valid": true,
@@ -2825,7 +2825,7 @@
                 "tiers": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "tiers",
+                    "insightsql_value": "tiers",
                     "id": null,
                     "name": "tiers",
                     "schema_valid": true,
@@ -2835,7 +2835,7 @@
                 "unit_amount": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "unit_amount",
+                    "insightsql_value": "unit_amount",
                     "id": null,
                     "name": "unit_amount",
                     "schema_valid": true,
@@ -2845,7 +2845,7 @@
                 "tax_behavior": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "tax_behavior",
+                    "insightsql_value": "tax_behavior",
                     "id": null,
                     "name": "tax_behavior",
                     "schema_valid": true,
@@ -2855,7 +2855,7 @@
                 "billing_scheme": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "billing_scheme",
+                    "insightsql_value": "billing_scheme",
                     "id": null,
                     "name": "billing_scheme",
                     "schema_valid": true,
@@ -2865,7 +2865,7 @@
                 "unit_amount_decimal": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "unit_amount_decimal",
+                    "insightsql_value": "unit_amount_decimal",
                     "id": null,
                     "name": "unit_amount_decimal",
                     "schema_valid": true,
@@ -2892,14 +2892,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d1f_0000_88b2_43179d46f0e0/price/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d1f_0000_88b2_43179d46f0e0/price/"
         },
         "stripe.production.product": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -2909,7 +2909,7 @@
                 "name": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "name",
+                    "insightsql_value": "name",
                     "id": null,
                     "name": "name",
                     "schema_valid": true,
@@ -2919,7 +2919,7 @@
                 "type": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "type",
+                    "insightsql_value": "type",
                     "id": null,
                     "name": "type",
                     "schema_valid": true,
@@ -2929,7 +2929,7 @@
                 "active": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "active",
+                    "insightsql_value": "active",
                     "id": null,
                     "name": "active",
                     "schema_valid": true,
@@ -2939,7 +2939,7 @@
                 "images": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "images",
+                    "insightsql_value": "images",
                     "id": null,
                     "name": "images",
                     "schema_valid": true,
@@ -2949,7 +2949,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -2959,7 +2959,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -2969,7 +2969,7 @@
                 "updated_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "updated_at",
+                    "insightsql_value": "updated_at",
                     "id": null,
                     "name": "updated_at",
                     "schema_valid": true,
@@ -2979,7 +2979,7 @@
                 "features": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "features",
+                    "insightsql_value": "features",
                     "id": null,
                     "name": "features",
                     "schema_valid": true,
@@ -2989,7 +2989,7 @@
                 "livemode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "livemode",
+                    "insightsql_value": "livemode",
                     "id": null,
                     "name": "livemode",
                     "schema_valid": true,
@@ -2999,7 +2999,7 @@
                 "metadata": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "metadata",
+                    "insightsql_value": "metadata",
                     "id": null,
                     "name": "metadata",
                     "schema_valid": true,
@@ -3009,7 +3009,7 @@
                 "tax_code": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "tax_code",
+                    "insightsql_value": "tax_code",
                     "id": null,
                     "name": "tax_code",
                     "schema_valid": true,
@@ -3019,7 +3019,7 @@
                 "attributes": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "attributes",
+                    "insightsql_value": "attributes",
                     "id": null,
                     "name": "attributes",
                     "schema_valid": true,
@@ -3029,7 +3029,7 @@
                 "description": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "description",
+                    "insightsql_value": "description",
                     "id": null,
                     "name": "description",
                     "schema_valid": true,
@@ -3039,7 +3039,7 @@
                 "default_price_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "default_price_id",
+                    "insightsql_value": "default_price_id",
                     "id": null,
                     "name": "default_price_id",
                     "schema_valid": true,
@@ -3066,14 +3066,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d1b_0000_fa74_f93bfb3dc44b/product/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d1b_0000_fa74_f93bfb3dc44b/product/"
         },
         "stripe.production.subscription": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -3083,7 +3083,7 @@
                 "plan": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "plan",
+                    "insightsql_value": "plan",
                     "id": null,
                     "name": "plan",
                     "schema_valid": true,
@@ -3093,7 +3093,7 @@
                 "items": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "items",
+                    "insightsql_value": "items",
                     "id": null,
                     "name": "items",
                     "schema_valid": true,
@@ -3103,7 +3103,7 @@
                 "object": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "object",
+                    "insightsql_value": "object",
                     "id": null,
                     "name": "object",
                     "schema_valid": true,
@@ -3113,7 +3113,7 @@
                 "status": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "status",
+                    "insightsql_value": "status",
                     "id": null,
                     "name": "status",
                     "schema_valid": true,
@@ -3123,7 +3123,7 @@
                 "created_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "created_at",
+                    "insightsql_value": "created_at",
                     "id": null,
                     "name": "created_at",
                     "schema_valid": true,
@@ -3133,7 +3133,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -3143,7 +3143,7 @@
                 "customer_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_id",
+                    "insightsql_value": "customer_id",
                     "id": null,
                     "name": "customer_id",
                     "schema_valid": true,
@@ -3153,7 +3153,7 @@
                 "ended_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "ended_at",
+                    "insightsql_value": "ended_at",
                     "id": null,
                     "name": "ended_at",
                     "schema_valid": true,
@@ -3163,7 +3163,7 @@
                 "livemode": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "livemode",
+                    "insightsql_value": "livemode",
                     "id": null,
                     "name": "livemode",
                     "schema_valid": true,
@@ -3173,7 +3173,7 @@
                 "metadata": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "metadata",
+                    "insightsql_value": "metadata",
                     "id": null,
                     "name": "metadata",
                     "schema_valid": true,
@@ -3183,7 +3183,7 @@
                 "quantity": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "quantity",
+                    "insightsql_value": "quantity",
                     "id": null,
                     "name": "quantity",
                     "schema_valid": true,
@@ -3193,7 +3193,7 @@
                 "start_date": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "start_date",
+                    "insightsql_value": "start_date",
                     "id": null,
                     "name": "start_date",
                     "schema_valid": true,
@@ -3203,7 +3203,7 @@
                 "canceled_at": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "canceled_at",
+                    "insightsql_value": "canceled_at",
                     "id": null,
                     "name": "canceled_at",
                     "schema_valid": true,
@@ -3213,7 +3213,7 @@
                 "automatic_tax": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "automatic_tax",
+                    "insightsql_value": "automatic_tax",
                     "id": null,
                     "name": "automatic_tax",
                     "schema_valid": true,
@@ -3223,7 +3223,7 @@
                 "latest_invoice_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "latest_invoice_id",
+                    "insightsql_value": "latest_invoice_id",
                     "id": null,
                     "name": "latest_invoice_id",
                     "schema_valid": true,
@@ -3233,7 +3233,7 @@
                 "trial_settings": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "trial_settings",
+                    "insightsql_value": "trial_settings",
                     "id": null,
                     "name": "trial_settings",
                     "schema_valid": true,
@@ -3243,7 +3243,7 @@
                 "invoice_settings": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "invoice_settings",
+                    "insightsql_value": "invoice_settings",
                     "id": null,
                     "name": "invoice_settings",
                     "schema_valid": true,
@@ -3253,7 +3253,7 @@
                 "payment_settings": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "payment_settings",
+                    "insightsql_value": "payment_settings",
                     "id": null,
                     "name": "payment_settings",
                     "schema_valid": true,
@@ -3263,7 +3263,7 @@
                 "collection_method": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "collection_method",
+                    "insightsql_value": "collection_method",
                     "id": null,
                     "name": "collection_method",
                     "schema_valid": true,
@@ -3273,7 +3273,7 @@
                 "default_tax_rates": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "default_tax_rates",
+                    "insightsql_value": "default_tax_rates",
                     "id": null,
                     "name": "default_tax_rates",
                     "schema_valid": true,
@@ -3283,7 +3283,7 @@
                 "current_period_start": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "current_period_start",
+                    "insightsql_value": "current_period_start",
                     "id": null,
                     "name": "current_period_start",
                     "schema_valid": true,
@@ -3293,7 +3293,7 @@
                 "current_period_end": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "current_period_end",
+                    "insightsql_value": "current_period_end",
                     "id": null,
                     "name": "current_period_end",
                     "schema_valid": true,
@@ -3303,7 +3303,7 @@
                 "billing_cycle_anchor": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "billing_cycle_anchor",
+                    "insightsql_value": "billing_cycle_anchor",
                     "id": null,
                     "name": "billing_cycle_anchor",
                     "schema_valid": true,
@@ -3313,7 +3313,7 @@
                 "cancel_at_period_end": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "cancel_at_period_end",
+                    "insightsql_value": "cancel_at_period_end",
                     "id": null,
                     "name": "cancel_at_period_end",
                     "schema_valid": true,
@@ -3323,7 +3323,7 @@
                 "cancellation_details": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "cancellation_details",
+                    "insightsql_value": "cancellation_details",
                     "id": null,
                     "name": "cancellation_details",
                     "schema_valid": true,
@@ -3333,7 +3333,7 @@
                 "trial_end": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "trial_end",
+                    "insightsql_value": "trial_end",
                     "id": null,
                     "name": "trial_end",
                     "schema_valid": true,
@@ -3343,7 +3343,7 @@
                 "trial_start": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "trial_start",
+                    "insightsql_value": "trial_start",
                     "id": null,
                     "name": "trial_start",
                     "schema_valid": true,
@@ -3363,14 +3363,14 @@
                 "status": "Running"
             },
             "type": "data_warehouse",
-            "url_pattern": "https://posthog-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d16_0000_9001_db7a3d6475ec/subscription/"
+            "url_pattern": "https://insights-s3-datawarehouse-us-east-1-dev.s3.amazonaws.com/dlt/team_1_stripe_01961cd0_5d16_0000_9001_db7a3d6475ec/subscription/"
         },
         "stripe.production.charge_revenue_view": {
             "fields": {
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -3380,7 +3380,7 @@
                 "timestamp": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "timestamp",
+                    "insightsql_value": "timestamp",
                     "id": null,
                     "name": "timestamp",
                     "schema_valid": true,
@@ -3390,7 +3390,7 @@
                 "customer_id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "customer_id",
+                    "insightsql_value": "customer_id",
                     "id": null,
                     "name": "customer_id",
                     "schema_valid": true,
@@ -3400,7 +3400,7 @@
                 "original_currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "original_currency",
+                    "insightsql_value": "original_currency",
                     "id": null,
                     "name": "original_currency",
                     "schema_valid": true,
@@ -3410,7 +3410,7 @@
                 "enable_currency_aware_divider": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "enable_currency_aware_divider",
+                    "insightsql_value": "enable_currency_aware_divider",
                     "id": null,
                     "name": "enable_currency_aware_divider",
                     "schema_valid": true,
@@ -3420,7 +3420,7 @@
                 "currency": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "currency",
+                    "insightsql_value": "currency",
                     "id": null,
                     "name": "currency",
                     "schema_valid": true,
@@ -3433,7 +3433,7 @@
             "query": {
                 "explain": null,
                 "filters": null,
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "modifiers": null,
                 "name": null,
                 "query": "SELECT id AS id, created_at AS timestamp, customer_id AS customer_id, toDecimal(amount_captured, 10) AS original_amount, upper(currency) AS original_currency, in(original_currency, ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF']) AS enable_currency_aware_divider, if(enable_currency_aware_divider, toDecimal(1, 10), toDecimal(100, 10)) AS currency_aware_divider, divideDecimal(original_amount, currency_aware_divider) AS currency_aware_amount, 'USD' AS currency, convertCurrency(original_currency, currency, currency_aware_amount, _toDate(ifNull(timestamp, toDateTime(0)))) AS amount FROM production_stripe_charge WHERE equals(status, 'succeeded')",
@@ -3448,7 +3448,7 @@
                 "id": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "id",
+                    "insightsql_value": "id",
                     "id": null,
                     "name": "id",
                     "schema_valid": true,
@@ -3458,7 +3458,7 @@
                 "timestamp": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "timestamp",
+                    "insightsql_value": "timestamp",
                     "id": null,
                     "name": "timestamp",
                     "schema_valid": true,
@@ -3468,7 +3468,7 @@
                 "name": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "name",
+                    "insightsql_value": "name",
                     "id": null,
                     "name": "name",
                     "schema_valid": true,
@@ -3478,7 +3478,7 @@
                 "email": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "email",
+                    "insightsql_value": "email",
                     "id": null,
                     "name": "email",
                     "schema_valid": true,
@@ -3488,7 +3488,7 @@
                 "phone": {
                     "chain": null,
                     "fields": null,
-                    "hogql_value": "phone",
+                    "insightsql_value": "phone",
                     "id": null,
                     "name": "phone",
                     "schema_valid": true,
@@ -3501,7 +3501,7 @@
             "query": {
                 "explain": null,
                 "filters": null,
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "modifiers": null,
                 "name": null,
                 "query": "SELECT id AS id, created_at AS timestamp, name AS name, email AS email, phone AS phone FROM production_stripe_customer",

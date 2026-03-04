@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useMemo, useRef, useState } from 'react'
 
-import { Popover } from '@posthog/lemon-ui'
+import { Popover } from '@hanzo/lemon-ui'
 
 import { ScaleOptions, TooltipModel } from 'lib/Chart'
 import { getColorVar } from 'lib/colors'

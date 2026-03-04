@@ -196,7 +196,7 @@ async fn it_redacts_ip_address_of_capture_internal_events() -> Result<()> {
 }
 
 #[tokio::test]
-async fn it_captures_a_posthogjs_array() -> Result<()> {
+async fn it_captures_a_insightsjs_array() -> Result<()> {
     setup_tracing();
     let token = random_string("token", 16);
     let distinct_id1 = random_string("id", 16);

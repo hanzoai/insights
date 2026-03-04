@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo } from 'react'
 
-import { IconHome, IconInfo } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonModal, LemonSelect, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconHome, IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonModal, LemonSelect, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { getAccessControlTooltip } from 'lib/utils/accessControlUtils'
 

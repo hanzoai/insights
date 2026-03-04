@@ -1,5 +1,5 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { buildAlertFilterConfig } from 'lib/utils/alertUtils'
@@ -37,7 +37,7 @@ async function fetchAlertsForInsights(insights: InsightModel[]): Promise<Map<num
             const response = await api.alerts.list(insight.id)
             return { insightId: insight.id, alerts: response.results }
         } catch (e) {
-            posthog.captureException(e instanceof Error ? e : new Error(String(e)), {
+            insights.captureException(e instanceof Error ? e : new Error(String(e)), {
                 extra: { context: 'TerraformExporter', operation: 'fetchAlertsForInsights', insightId: insight.id },
             })
             return { insightId: insight.id, alerts: [] }
@@ -70,7 +70,7 @@ async function fetchInsightsFunctionsForAlerts(alerts: AlertType[]): Promise<Map
             })
             return { alertId: alert.id, insightsFunctions: response.results }
         } catch (e) {
-            posthog.captureException(e instanceof Error ? e : new Error(String(e)), {
+            insights.captureException(e instanceof Error ? e : new Error(String(e)), {
                 extra: { context: 'TerraformExporter', operation: 'fetchInsightsFunctionsForAlerts', alertId: alert.id },
             })
             return { alertId: alert.id, insightsFunctions: [] }
@@ -229,7 +229,7 @@ export function useTerraformExport(resource: TerraformExportResource, isOpen: bo
                     setState({ loading: false, error: null, result })
                 }
             } catch (e) {
-                posthog.captureException(e instanceof Error ? e : new Error(String(e)), {
+                insights.captureException(e instanceof Error ? e : new Error(String(e)), {
                     extra: { context: 'TerraformExporter', resourceType: resource.type, resourceId: resource.data.id },
                 })
                 if (!isStale()) {

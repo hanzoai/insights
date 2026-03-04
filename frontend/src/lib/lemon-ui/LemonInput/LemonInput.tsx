@@ -4,8 +4,8 @@ import { useMergeRefs } from '@floating-ui/react'
 import clsx from 'clsx'
 import React, { useRef, useState } from 'react'
 
-import { IconEye, IconSearch, IconX } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconEye, IconSearch, IconX } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonTag } from 'lib/lemon-ui/LemonTag'

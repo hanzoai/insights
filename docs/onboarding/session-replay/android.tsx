@@ -20,7 +20,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'build.gradle',
                                 code: dedent`
                                     dependencies {
-                                        implementation("com.posthog:posthog-android:3.+")
+                                        implementation("com.insights:insights-android:3.+")
                                     }
                                 `,
                             },
@@ -41,7 +41,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://insights.hanzo.ai/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                 </>
@@ -64,16 +64,16 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     class SampleApp : Application() {
 
                                         companion object {
-                                            const val POSTHOG_API_KEY = "<ph_project_api_key>"
-                                            const val POSTHOG_HOST = "<ph_client_api_host>"
+                                            const val INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            const val INSIGHTS_HOST = "<ph_client_api_host>"
                                         }
 
                                         override fun onCreate() {
                                             super.onCreate()
 
                                             val config = InsightsAndroidConfig(
-                                                apiKey = POSTHOG_API_KEY,
-                                                host = POSTHOG_HOST
+                                                apiKey = INSIGHTS_API_KEY,
+                                                host = INSIGHTS_HOST
                                             )
 
                                             // Enable session recording. Requires enabling in your project settings as well.
@@ -107,7 +107,7 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     />
                     <Markdown>
                         For more configuration options, see the [Android session replay
-                        docs](https://posthog.com/docs/session-replay/installation?tab=Android).
+                        docs](https://hanzo.ai/docs/session-replay/installation?tab=Android).
                     </Markdown>
                     <CalloutBox type="fyi" title="Requirements">
                         <Markdown>

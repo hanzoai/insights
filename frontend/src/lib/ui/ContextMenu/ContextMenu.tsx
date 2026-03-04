@@ -3,7 +3,7 @@
 import * as ContextMenuPrimitive from '@radix-ui/react-context-menu'
 import * as React from 'react'
 
-import { IconCheckCircle } from '@posthog/icons'
+import { IconCheckCircle } from '@hanzo/icons'
 
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { cn } from 'lib/utils/css-classes'

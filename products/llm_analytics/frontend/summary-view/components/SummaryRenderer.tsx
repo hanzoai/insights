@@ -3,7 +3,7 @@
  */
 import { useActions, useValues } from 'kea'
 
-import { Tooltip } from '@posthog/lemon-ui'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { LLMTrace, LLMTraceEvent } from '~/queries/schema/schema-general'
 

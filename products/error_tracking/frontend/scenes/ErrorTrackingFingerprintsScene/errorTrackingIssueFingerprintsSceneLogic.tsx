@@ -1,7 +1,7 @@
 import { actions, connect, defaults, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ErrorTrackingFingerprint } from 'lib/components/Errors/types'

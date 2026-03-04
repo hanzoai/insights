@@ -2,7 +2,7 @@
 
 ## Setting up your environment
 
-1. Follow the [local development guide](https://posthog.com/handbook/engineering/developing-locally) to set up your environment.
+1. Follow the [local development guide](https://hanzo.ai/handbook/engineering/developing-locally) to set up your environment.
 2. Run `python manage.py generate_random_surveys` to generate a survey with responses for testing. By default, this creates 1 survey with 50 responses covering all actionable question types (open, rating, single choice with open-ended, multiple choice with open-ended).
 
    Available parameters:
@@ -15,17 +15,17 @@
 
 ### Insights App Changes (Backend/Frontend)
 
-- Run the app locally following the [local development guide](https://posthog.com/handbook/engineering/developing-locally)
+- Run the app locally following the [local development guide](https://hanzo.ai/handbook/engineering/developing-locally)
 - Write tests for logic changes, especially in `surveyLogic.tsx` or `surveysLogic.tsx`
 
 ### JS SDK Changes
 
-Most survey logic lives in the [Insights JS SDK](https://github.com/PostHog/posthog-js/). To test changes:
+Most survey logic lives in the [Insights JS SDK](https://github.com/Hanzo Insights/insights-js/). To test changes:
 
 First, build the package with hot-reload:
 
 ```bash
-cd posthog-js # root of repo
+cd insights-js # root of repo
 pnpm package:watch # generates tarballs with hot-reload
 ```
 
@@ -35,10 +35,10 @@ This watches for changes and rebuilds automatically. Now pick your testing envir
 
 The playground is the fastest way to iterate on SDK changes.
 
-1. Import the surveys module in `playground/nextjs/src/posthog.ts`:
+1. Import the surveys module in `playground/nextjs/src/insights.ts`:
 
 ```typescript
-import 'posthog-js/dist/surveys'
+import 'insights-js/dist/surveys'
 ```
 
 2. (Optional) Disable consent checks to simplify testing:
@@ -61,16 +61,16 @@ export const configForConsent = (): Partial<InsightsConfig> => {
 ```json
 {
   "dependencies": {
-    "posthog-js": "file:/path/to/posthog-js/target/posthog-js.tgz"
+    "insights-js": "file:/path/to/insights-js/target/insights-js.tgz"
   }
 }
 ```
 
-**Or via script** (run from posthog-js root):
+**Or via script** (run from insights-js root):
 
 ```bash
-TGZ_PATH="$(pwd)/target/posthog-js.tgz"
-sed -i '' "s|\"posthog-js\": \".*\"|\"posthog-js\": \"file:$TGZ_PATH\"|" playground/nextjs/package.json
+TGZ_PATH="$(pwd)/target/insights-js.tgz"
+sed -i '' "s|\"insights-js\": \".*\"|\"insights-js\": \"file:$TGZ_PATH\"|" playground/nextjs/package.json
 ```
 
 4. Clean & run:
@@ -91,7 +91,7 @@ Changes are picked up automatically via `package:watch`.
 ```json
 {
   "dependencies": {
-    "posthog-js": "file:/path/to/posthog-js/target/posthog-js.tgz"
+    "insights-js": "file:/path/to/insights-js/target/insights-js.tgz"
   }
 }
 ```
@@ -100,11 +100,11 @@ Changes are picked up automatically via `package:watch`.
 
 ```bash
 # Adjust these paths to match your setup
-POSTHOG_JS_DIR=~/src/posthog-js
+INSIGHTS_JS_DIR=~/src/insights-js
 DOTCOM_DIR=~/src/dotcom
 
-TGZ_PATH="$POSTHOG_JS_DIR/target/posthog-js.tgz"
-sed -i '' "s|\"posthog-js\": \".*\"|\"posthog-js\": \"file:$TGZ_PATH\"|" "$DOTCOM_DIR/frontend/package.json"
+TGZ_PATH="$INSIGHTS_JS_DIR/target/insights-js.tgz"
+sed -i '' "s|\"insights-js\": \".*\"|\"insights-js\": \"file:$TGZ_PATH\"|" "$DOTCOM_DIR/frontend/package.json"
 cd "$DOTCOM_DIR" && pnpm install
 # restart the frontend
 ```
@@ -113,8 +113,8 @@ cd "$DOTCOM_DIR" && pnpm install
 
 **Quick context:**
 
-- The external survey template is in the main repo at `posthog/templates/surveys/public_survey.html`
-- This template is served from the backend at `posthog/api/survey.py`
+- The external survey template is in the main repo at `insights/templates/surveys/public_survey.html`
+- This template is served from the backend at `insights/api/survey.py`
   - Look for function: `public_survey_page(request, survey_id: str)`
 
 **How to test**
@@ -124,10 +124,10 @@ cd "$DOTCOM_DIR" && pnpm install
 2. Copy the dist file to the main repo:
 
 ```bash
-cp /path/to/posthog-js/packages/browser/dist/array.full.js /path/to/posthog/frontend/dist/
+cp /path/to/insights-js/packages/browser/dist/array.full.js /path/to/insights/frontend/dist/
 ```
 
-3. Update `posthog/templates/surveys/public_survey.html` to load your local SDK file:
+3. Update `insights/templates/surveys/public_survey.html` to load your local SDK file:
 
 ```html
 <!-- keep this project config script as-is -->
@@ -148,7 +148,7 @@ cp /path/to/posthog-js/packages/browser/dist/array.full.js /path/to/posthog/fron
 </script>
 ```
 
-4. Start the backend services however you normally do, e.g. `hogli start`
+4. Start the backend services however you normally do, e.g. `insightscli start`
 
 5. You should be able to see a survey with your local SDK changes on port `8010` or `8000`, e.g.:
 
@@ -171,24 +171,24 @@ tunnels:
     proto: http
     addr: 8010
     host_header: rewrite
-    subdomain: posthog-web-test
+    subdomain: insights-web-test
   app:
     proto: http
     addr: 3000
-    subdomain: posthog-app-test
+    subdomain: insights-app-test
 ```
 
 2. Add this `.env` configuration:
 
 ```env
 # Core URLs
-SITE_URL=https://posthog-web-test.ngrok.io
-JS_URL=https://posthog-web-test.ngrok.io
+SITE_URL=https://insights-web-test.ngrok.io
+JS_URL=https://insights-web-test.ngrok.io
 
 # CORS and security
 CORS_ALLOW_ALL_ORIGINS=true
 CORS_ALLOW_CREDENTIALS=True
-ALLOWED_HOSTS=*,localhost,localhost:8010,127.0.0.1,127.0.0.1:8010,posthog-web-test
+ALLOWED_HOSTS=*,localhost,localhost:8010,127.0.0.1,127.0.0.1:8010,insights-web-test
 DISABLE_SECURE_SSL_REDIRECT=True
 SECURE_COOKIES=False
 
@@ -213,13 +213,13 @@ One caveat: **reserved ngrok domains are only available for paid ngrok users.**
 
 ### Testing survey usage_report
 
-The function [get_teams_with_survey_responses_count_in_period](https://github.com/PostHog/posthog/blob/master/posthog/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
+The function [get_teams_with_survey_responses_count_in_period](https://github.com/Hanzo Insights/insights/blob/master/insights/tasks/usage_report.py#L790) is used to get the number of survey responses in a given period. We use that for billing.
 
 Here's how to run it in the Django shell:
 
 ```python
 # In python manage.py shell
-from posthog.tasks.usage_report import get_teams_with_survey_responses_count_in_period
+from insights.tasks.usage_report import get_teams_with_survey_responses_count_in_period
 from datetime import datetime, timedelta, UTC
 
 # Define the period for the last 60 days
@@ -233,15 +233,15 @@ print(results)
 
 ## Debugging
 
-### posthog-js logs
+### insights-js logs
 
-We [added some logging on the JS SDK](https://github.com/PostHog/posthog-js/pull/1663) to help debug issues with surveys.
+We [added some logging on the JS SDK](https://github.com/Hanzo Insights/insights-js/pull/1663) to help debug issues with surveys.
 
-However, those logs are only enabled when posthog-js (v1.117.0 and higher) is set with debug=true.
+However, those logs are only enabled when insights-js (v1.117.0 and higher) is set with debug=true.
 
-For customer issues, if you need it, you can add the query parameter `__posthog_debug=true` to force the JS SDK to be loaded with debugging mode.
+For customer issues, if you need it, you can add the query parameter `__insights_debug=true` to force the JS SDK to be loaded with debugging mode.
 
-Example: `https://posthog.com/?__posthog_debug=true`
+Example: `https://hanzo.ai/?__insights_debug=true`
 
 If you ever need more logs, please create a PR and add them.
 
@@ -268,7 +268,7 @@ When to use:
 
 ```python
 # In Django shell (python manage.py shell_plus)
-from posthog.models.surveys.debug import (
+from insights.models.surveys.debug import (
     check_team_cache_consistency,
     fix_team_cache_consistency,
     find_teams_with_cache_inconsistencies,
@@ -292,17 +292,17 @@ fix_all_teams_cache_consistency()
 
 Access the database via Django admin, you can do so by opening:
 
-https://{eu|us}.posthog.com/admin/posthog/survey/{survey_id}/change/
+https://{eu|us}.hanzo.ai/admin/insights/survey/{survey_id}/change/
 
 Access the database via Metabase, you can do so by opening:
 
-- [EU](https://metabase.prod-eu.posthog.dev/browse/databases/34-posthog-postgres-prod-eu) - Posthog Survey
-- [US](https://metabase.prod-us.posthog.dev/browse/databases/34-posthog-postgres-prod-us-aurora) - Posthog Survey
+- [EU](https://metabase.prod-eu.insights.dev/browse/databases/34-insights-postgres-prod-eu) - Insights Survey
+- [US](https://metabase.prod-us.insights.dev/browse/databases/34-insights-postgres-prod-us-aurora) - Insights Survey
 
 You can execute SQL queries directly in Metabase.
 
 ```sql
-select * from posthog_survey
+select * from insights_survey
  where id = '{survey_id}'
 ```
 

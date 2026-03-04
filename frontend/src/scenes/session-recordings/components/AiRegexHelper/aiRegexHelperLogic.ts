@@ -1,5 +1,5 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { lemonToast } from 'lib/lemon-ui/LemonToast/LemonToast'
@@ -53,7 +53,7 @@ export const aiRegexHelperLogic = kea<aiRegexHelperLogicType>([
     }),
     listeners(({ actions, values }) => ({
         handleGenerateRegex: async () => {
-            posthog.capture('ai_regex_helper_generate_regex')
+            insights.capture('ai_regex_helper_generate_regex')
             actions.setIsLoading(true)
             actions.setError('')
             actions.setGeneratedRegex('')
@@ -62,17 +62,17 @@ export const aiRegexHelperLogic = kea<aiRegexHelperLogicType>([
                 const content = await api.recordings.aiRegex(values.input)
 
                 if (content.hasOwnProperty('result') && content.result === 'success') {
-                    posthog.capture('ai_regex_helper_generate_regex_success')
+                    insights.capture('ai_regex_helper_generate_regex_success')
                     actions.setGeneratedRegex(content.data.output)
                 } else if (content.hasOwnProperty('result') && content.result === 'error') {
-                    posthog.capture('ai_regex_helper_generate_regex_error')
+                    insights.capture('ai_regex_helper_generate_regex_error')
                     actions.setError(content.data.output)
                 } else {
-                    posthog.capture('ai_regex_helper_generate_regex_unknown_error')
+                    insights.capture('ai_regex_helper_generate_regex_unknown_error')
                     actions.setError('Failed to generate regex. Try again?')
                 }
             } catch {
-                posthog.capture('ai_regex_helper_generate_regex_unknown_error')
+                insights.capture('ai_regex_helper_generate_regex_unknown_error')
                 actions.setError('Failed to generate regex. Try again?')
             }
 

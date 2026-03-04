@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonInput, LemonSelect, LemonSelectOption, LemonSelectSection, Link } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonInput, LemonSelect, LemonSelectOption, LemonSelectSection, Link } from '@hanzo/lemon-ui'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -34,7 +34,7 @@ export const commonActionFilterProps = {
     ],
 }
 
-// Forked from https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/insights/filters/AggregationSelect.tsx
+// Forked from https://github.com/hanzoai/insights/blob/master/frontend/src/scenes/insights/filters/AggregationSelect.tsx
 export function FunnelAggregationSelect({
     value,
     onChange,
@@ -116,7 +116,7 @@ export function FunnelAggregationSelect({
     )
 }
 
-// Forked from https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/insights/views/Funnels/FunnelConversionWindowFilter.tsx
+// Forked from https://github.com/hanzoai/insights/blob/master/frontend/src/scenes/insights/views/Funnels/FunnelConversionWindowFilter.tsx
 export function FunnelConversionWindowFilter({
     funnelWindowInterval,
     funnelWindowIntervalUnit,
@@ -172,7 +172,7 @@ export function FunnelConversionWindowFilter({
     )
 }
 
-// Forked from https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/insights/EditorFilters/AttributionFilter.tsx
+// Forked from https://github.com/hanzoai/insights/blob/master/frontend/src/scenes/insights/EditorFilters/AttributionFilter.tsx
 export function FunnelAttributionSelect({
     value,
     onChange,
@@ -212,7 +212,7 @@ export function FunnelAttributionSelect({
                             </ul>
                             <div>
                                 Read more in the{' '}
-                                <Link to="https://posthog.com/docs/product-analytics/funnels#attribution-types">
+                                <Link to="https://hanzo.ai/docs/product-analytics/funnels#attribution-types">
                                     documentation.
                                 </Link>
                             </div>

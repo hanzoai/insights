@@ -47,7 +47,7 @@ Make sure to grant the following read permissions:
 - Profiles
 """,
             iconPath="/static/services/klaviyo.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/klaviyo",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/klaviyo",
             fields=cast(
                 list[FieldType],
                 [

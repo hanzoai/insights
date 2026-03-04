@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React from 'react'
 
-import { IconMagicWand } from '@posthog/icons'
-import { LemonButton, LemonSwitch, Link } from '@posthog/lemon-ui'
+import { IconMagicWand } from '@hanzo/icons'
+import { LemonButton, LemonSwitch, Link } from '@hanzo/lemon-ui'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { heatmapDateOptions } from 'lib/components/IframedToolbarBrowser/utils'
@@ -25,19 +25,19 @@ import { joinWithUiHost } from '~/toolbar/utils'
 import { toolbarConfigLogic } from '../toolbarConfigLogic'
 
 const HeatmapsJSWarning = (): JSX.Element | null => {
-    const { posthog, uiHost } = useValues(toolbarConfigLogic)
+    const { insights, uiHost } = useValues(toolbarConfigLogic)
 
-    if (!posthog || posthog?.heatmaps?.isEnabled) {
+    if (!insights || insights?.heatmaps?.isEnabled) {
         return null
     }
 
     return (
         <p className="my-2 bg-danger-highlight border border-danger rounded p-2">
-            {!posthog.heatmaps ? (
-                <>The version of posthog-js you are using does not support collecting heatmap data.</>
-            ) : !posthog.heatmaps.isEnabled ? (
+            {!insights.heatmaps ? (
+                <>The version of insights-js you are using does not support collecting heatmap data.</>
+            ) : !insights.heatmaps.isEnabled ? (
                 <>
-                    You can enable heatmap collection in your posthog-js configuration or{' '}
+                    You can enable heatmap collection in your insights-js configuration or{' '}
                     <Link
                         to={joinWithUiHost(uiHost, urls.settings('environment-heatmaps', 'heatmaps'))}
                         target="_blank"
@@ -228,7 +228,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                 <div className="flex items-center gap-1">
                                     <LemonLabel
                                         info="Sampling computes the result on a proportion of data of the users in the dataset, making click maps load significantly faster."
-                                        infoLink="https://posthog.com/docs/product-analytics/sampling"
+                                        infoLink="https://hanzo.ai/docs/product-analytics/sampling"
                                     >
                                         Sampling
                                     </LemonLabel>
@@ -237,11 +237,11 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                         onChange={(checked) => {
                                             if (checked) {
                                                 setSamplingFactor(0.1)
-                                                posthog.capture('sampling_enabled_on_heatmap')
+                                                insights.capture('sampling_enabled_on_heatmap')
                                                 return
                                             }
                                             setSamplingFactor(1)
-                                            posthog.capture('sampling_disabled_on_heatmap')
+                                            insights.capture('sampling_disabled_on_heatmap')
                                         }}
                                         checked={samplingFactor !== 1}
                                     />
@@ -256,7 +256,7 @@ export const HeatmapToolbarMenu = (): JSX.Element => {
                                             value={samplingFactor}
                                             onChange={(newValue) => {
                                                 setSamplingFactor(newValue)
-                                                posthog.capture('sampling_percentage_updated_on_heatmap', {
+                                                insights.capture('sampling_percentage_updated_on_heatmap', {
                                                     samplingFactor: newValue,
                                                 })
                                             }}

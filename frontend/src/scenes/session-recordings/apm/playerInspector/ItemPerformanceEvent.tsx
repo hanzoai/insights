@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonDivider, LemonTabs, LemonTag, LemonTagType, Link } from '@posthog/lemon-ui'
+import { LemonDivider, LemonTabs, LemonTag, LemonTagType, Link } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
@@ -394,7 +394,7 @@ export function BodyDisplay({
             <p>
                 This content was redacted by Insights to protect sensitive data.{' '}
                 <Link
-                    to="https://posthog.com/docs/session-replay/network-recording?utm_medium=in-product"
+                    to="https://hanzo.ai/docs/session-replay/network-recording?utm_medium=in-product"
                     target="_blank"
                 >
                     Learn how to override Insights's automatic redaction code.

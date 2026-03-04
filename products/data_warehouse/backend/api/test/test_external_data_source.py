@@ -472,7 +472,7 @@ class TestExternalDataSource(APIBaseTest):
                             "private_key": "my_private_key",
                             "private_key_id": "my_private_key_id",
                             "token_uri": "https://google.com",
-                            "client_email": "test@posthog.com",
+                            "client_email": "test@hanzo.ai",
                         },
                     },
                 },
@@ -499,7 +499,7 @@ class TestExternalDataSource(APIBaseTest):
                     "key_file": {
                         "project_id": "my_project",
                         "token_uri": "https://google.com",
-                        "client_email": "test@posthog.com",
+                        "client_email": "test@hanzo.ai",
                     },
                 },
             },
@@ -645,7 +645,7 @@ class TestExternalDataSource(APIBaseTest):
         with postgres_connection.cursor() as cursor:
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS posthog_test (
+                CREATE TABLE IF NOT EXISTS insights_test (
                     id SERIAL PRIMARY KEY,
                     name VARCHAR(50)
                 );
@@ -671,12 +671,12 @@ class TestExternalDataSource(APIBaseTest):
         self.assertEqual(response.status_code, 200)
 
         table_names = [table["table"] for table in results]
-        self.assertTrue("posthog_test" in table_names)
+        self.assertTrue("insights_test" in table_names)
 
         with postgres_connection.cursor() as cursor:
             cursor.execute(
                 """
-                DROP TABLE posthog_test;
+                DROP TABLE insights_test;
                 """
             )
             postgres_connection.commit()

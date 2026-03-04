@@ -1,4 +1,4 @@
-import { LemonBanner, Link } from '@posthog/lemon-ui'
+import { LemonBanner, Link } from '@hanzo/lemon-ui'
 
 import type { ResultBreakdownRenderProps } from './types'
 
@@ -18,7 +18,7 @@ export const ResultsInsightInfoBanner = ({ exposureDifference }: SafeResultsInsi
                     Insight results may be slightly different from exposure results due to a difference in data
                     processing methods. We're actively working on fixing this.&nbsp;
                     <Link
-                        to="https://posthog.com/docs/experiments/common-questions"
+                        to="https://hanzo.ai/docs/experiments/common-questions"
                         className="font-semibold text-primary hover:text-primary-dark"
                     >
                         Learn more in our docs

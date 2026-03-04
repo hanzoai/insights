@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -14,7 +14,7 @@ import {
     LemonTag,
     LemonTagType,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'

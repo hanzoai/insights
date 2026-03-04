@@ -1,10 +1,10 @@
 import './AnnotationsOverlay.scss'
 
 import { BindLogic, useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { IconPencil, IconPlusSmall, IconTrash } from '@posthog/icons'
+import { IconPencil, IconPlusSmall, IconTrash } from '@hanzo/icons'
 
 import { Chart } from 'lib/Chart'
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
@@ -230,7 +230,7 @@ function AnnotationsPopover({
             isPopoverShown &&
             popoverAnnotations.some((annotation: AnnotationType) => annotation.id === -1 || annotation.id === -2)
         ) {
-            posthog.capture('person_property_incident_annotation_viewed', {
+            insights.capture('person_property_incident_annotation_viewed', {
                 annotation_count: popoverAnnotations.length,
                 has_system_annotation: true,
             })

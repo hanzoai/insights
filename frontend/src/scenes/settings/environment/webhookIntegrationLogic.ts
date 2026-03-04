@@ -10,7 +10,7 @@ import type { webhookIntegrationLogicType } from './webhookIntegrationLogicType'
 
 function adjustDiscordWebhook(webhookUrl: string): string {
     // We need Discord webhook URLs to end with /slack for proper handling, this ensures that
-    return webhookUrl.replace(/\/*(?:posthog|slack)?\/?$/, '/slack')
+    return webhookUrl.replace(/\/*(?:insights|slack)?\/?$/, '/slack')
 }
 
 export const webhookIntegrationLogic = kea<webhookIntegrationLogicType>([

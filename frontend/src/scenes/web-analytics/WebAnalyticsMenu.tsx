@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconEllipsis, IconSearch } from '@posthog/icons'
+import { IconEllipsis, IconSearch } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

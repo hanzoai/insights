@@ -1,9 +1,9 @@
 {
     "name": "Advanced GeoIP",
-    "url": "https://github.com/paolodamico/posthog-app-advanced-geoip",
+    "url": "https://github.com/paolodamico/insights-app-advanced-geoip",
     "description": "Advanced GeoIP filtering app for Insights",
     "main": "index.ts",
-    "posthogVersion": ">=1.25.0",
+    "insightsVersion": ">=1.25.0",
     "config": [
         {
             "key": "discardIp",
@@ -17,7 +17,7 @@
             "key": "discardLibs",
             "name": "Discard GeoIP for libraries",
             "type": "string",
-            "hint": "Comma-separated list of libraries ($lib) for which GeoIP should be ignored (e.g. `posthog-node,posthog-python`)",
+            "hint": "Comma-separated list of libraries ($lib) for which GeoIP should be ignored (e.g. `insights-node,insights-python`)",
             "required": false
         }
     ]

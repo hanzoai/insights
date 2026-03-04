@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonInput, LemonModal, LemonTable, LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonInput, LemonModal, LemonTable, LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { OrganizationMembershipLevel } from 'lib/constants'
 import { detailedTime, humanFriendlyDetailedTime, isNotNil } from 'lib/utils'

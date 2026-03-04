@@ -16,7 +16,7 @@ describe('stripMarkdown', () => {
 
         // Links with URL preserved
         ['[click here](https://example.com)', 'click here (https://example.com)'],
-        ['[Insights](https://posthog.com/docs)', 'Insights (https://posthog.com/docs)'],
+        ['[Insights](https://hanzo.ai/docs)', 'Insights (https://hanzo.ai/docs)'],
 
         // Link without text
         ['[](https://example.com)', 'https://example.com'],

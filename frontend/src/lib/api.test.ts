@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { ApiRequest } from 'lib/api'
 
@@ -14,10 +14,10 @@ describe('API helper', () => {
         fakeFetch.mockResolvedValue({ ok: true, json: () => Promise.resolve(FAKE_FETCH_RESULT) })
         window.fetch = fakeFetch
 
-        jest.spyOn(posthog, 'capture').mockImplementation(() => {
+        jest.spyOn(insights, 'capture').mockImplementation(() => {
             return undefined
         })
-        jest.spyOn(posthog, 'get_session_id').mockReturnValue('fake-session-id')
+        jest.spyOn(insights, 'get_session_id').mockReturnValue('fake-session-id')
     })
 
     describe('events', () => {
@@ -42,7 +42,7 @@ describe('API helper', () => {
                 {
                     signal: undefined,
                     headers: {
-                        'X-POSTHOG-SESSION-ID': 'fake-session-id',
+                        'X-INSIGHTS-SESSION-ID': 'fake-session-id',
                     },
                 }
             )

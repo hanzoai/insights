@@ -3,7 +3,7 @@ import equal from 'fast-deep-equal'
 import { BuiltLogic, actions, afterMount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { combineUrl, router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
 import api from 'lib/api'
@@ -872,7 +872,7 @@ export const sceneLogic = kea<sceneLogicType>([
             const newTab = values.tabs.find((tab) => tab.id === tabId)
             const fallbackUrl = combineUrl(href || '/new')
             const openSource = options?.source ?? 'unknown'
-            posthog.capture('tab opened', {
+            insights.capture('tab opened', {
                 tab_id: tabId,
                 pathname: newTab?.pathname ?? fallbackUrl.pathname,
                 search: newTab?.search ?? fallbackUrl.search,
@@ -940,7 +940,7 @@ export const sceneLogic = kea<sceneLogicType>([
         },
         removeTab: ({ tab, options }) => {
             const closeSource = options?.source ?? 'unknown'
-            posthog.capture('tab closed', {
+            insights.capture('tab closed', {
                 tab_id: tab.id,
                 pathname: tab.pathname,
                 search: tab.search,
@@ -1071,7 +1071,7 @@ export const sceneLogic = kea<sceneLogicType>([
                 JSON.stringify(lastParams.searchParams) !== JSON.stringify(params.searchParams) // `equal` crashes here
             ) {
                 const productKey = values.activeSceneProductKey
-                posthog.capture('$pageview', productKey ? { product_key: productKey } : undefined)
+                insights.capture('$pageview', productKey ? { product_key: productKey } : undefined)
             }
 
             if (tabId !== lastTabId) {
@@ -1520,7 +1520,7 @@ export const sceneLogic = kea<sceneLogicType>([
                     cache.initialNavigationTabCreated || values.tabs.some((tab) => !tab.pinned)
                 const tabCount = values.tabs.length
                 if (cache.lastRegisteredTabCount !== tabCount) {
-                    posthog.register({ tab_count: tabCount })
+                    insights.register({ tab_count: tabCount })
                     cache.lastRegisteredTabCount = tabCount
                 }
                 const { tabIds } = values

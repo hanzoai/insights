@@ -121,7 +121,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 description: 'Go beyond autocapture by tracking specific actions that matter.',
                 taskType: 'explore',
                 requiresManualCompletion: true,
-                docsUrl: 'https://posthog.com/tutorials/event-tracking-guide#setting-up-custom-events',
+                docsUrl: 'https://hanzo.ai/tutorials/event-tracking-guide#setting-up-custom-events',
                 targetSelector: '[data-attr="help-button"]',
             },
             {
@@ -165,7 +165,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 description: 'Track Core Web Vitals (LCP, FID, CLS) to monitor site performance.',
                 taskType: 'setup',
                 getUrl: () => urls.settings('environment-autocapture'),
-                targetSelector: '#posthog-autocapture-web-vitals-switch',
+                targetSelector: '#insights-autocapture-web-vitals-switch',
             },
             {
                 id: SetupTaskId.ReviewWebAnalyticsDashboard,
@@ -278,7 +278,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 taskType: 'onboarding',
                 requiresManualCompletion: true,
                 dependsOn: [SetupTaskId.CreateFeatureFlag],
-                docsUrl: 'https://posthog.com/docs/feature-flags/installation',
+                docsUrl: 'https://hanzo.ai/docs/feature-flags/installation',
                 targetSelector: '[data-attr="help-button"]',
             },
             {
@@ -287,7 +287,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 description: 'Target specific users or percentages with your flag.',
                 taskType: 'explore',
                 dependsOn: [SetupTaskId.CreateFeatureFlag],
-                docsUrl: 'https://posthog.com/docs/feature-flags/creating-feature-flags#release-conditions',
+                docsUrl: 'https://hanzo.ai/docs/feature-flags/creating-feature-flags#release-conditions',
             },
             {
                 id: SetupTaskId.CreateMultivariateFlag,
@@ -303,7 +303,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 title: 'Use flag payloads',
                 description: 'Pass dynamic configuration to your feature flags.',
                 taskType: 'explore',
-                docsUrl: 'https://posthog.com/docs/feature-flags/creating-feature-flags#payloads',
+                docsUrl: 'https://hanzo.ai/docs/feature-flags/creating-feature-flags#payloads',
             },
             {
                 id: SetupTaskId.SetUpFlagEvaluationRuntimes,
@@ -311,7 +311,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 description: 'Control where your feature flags can be evaluated.',
                 taskType: 'explore',
                 docsUrl:
-                    'https://posthog.com/docs/feature-flags/creating-feature-flags#step-5-configure-evaluation-runtime-and-contexts-optional',
+                    'https://hanzo.ai/docs/feature-flags/creating-feature-flags#step-5-configure-evaluation-runtime-and-contexts-optional',
             },
         ],
     },
@@ -337,7 +337,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 taskType: 'onboarding',
                 requiresManualCompletion: true,
                 dependsOn: [SetupTaskId.CreateExperiment],
-                docsUrl: 'https://posthog.com/docs/experiments/installation',
+                docsUrl: 'https://hanzo.ai/docs/experiments/installation',
             },
             {
                 id: SetupTaskId.LaunchExperiment,
@@ -450,7 +450,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 skipWarning: "Without source maps, stack traces won't be readable.",
                 taskType: 'setup',
                 requiresManualCompletion: true,
-                docsUrl: 'https://posthog.com/docs/error-tracking/upload-source-maps',
+                docsUrl: 'https://hanzo.ai/docs/error-tracking/upload-source-maps',
                 targetSelector: '[data-attr="help-button"]',
             },
             {
@@ -567,7 +567,7 @@ export const PRODUCT_SETUP_REGISTRY: Partial<Record<ProductKey, ProductSetupConf
                 description: 'Start sending logs from your application to Insights.',
                 taskType: 'setup',
                 requiresManualCompletion: true,
-                docsUrl: 'https://posthog.com/docs/logs',
+                docsUrl: 'https://hanzo.ai/docs/logs',
             },
             {
                 id: SetupTaskId.ViewFirstLogs,

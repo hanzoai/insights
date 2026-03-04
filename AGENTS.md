@@ -15,17 +15,17 @@
 - Tests:
   - All tests: `pytest`
   - Single test: `pytest path/to/test.py::TestClass::test_method`
-  - Product tests (Turbo): `pnpm turbo run backend:test --filter=@posthog/products-<name>`
-  - Frontend: `pnpm --filter=@posthog/frontend test`
-  - Single frontend test: `pnpm --filter=@posthog/frontend jest <test_file>`
+  - Product tests (Turbo): `pnpm turbo run backend:test --filter=@hanzo/products-<name>`
+  - Frontend: `pnpm --filter=@hanzo/frontend test`
+  - Single frontend test: `pnpm --filter=@hanzo/frontend jest <test_file>`
 - Lint:
   - Python:
     - `ruff check . --fix` and `ruff format .`
     - Do not run mypy for type checks. It takes too long.
-  - Frontend: `pnpm --filter=@posthog/frontend format`
-  - TypeScript check: `pnpm --filter=@posthog/frontend typescript:check`
+  - Frontend: `pnpm --filter=@hanzo/frontend format`
+  - TypeScript check: `pnpm --filter=@hanzo/frontend typescript:check`
 - Build:
-  - Frontend: `pnpm --filter=@posthog/frontend build`
+  - Frontend: `pnpm --filter=@hanzo/frontend build`
   - Start dev: `./bin/start`
 - LSP: Pyright is configured against the flox venv. Prefer LSP (`goToDefinition`, `findReferences`, `hover`) over grep when navigating or refactoring Python code.
 
@@ -66,7 +66,7 @@ Examples:
 - **Never** use f-strings with user-controlled values in SQL queries - this creates SQL injection vulnerabilities
 - Use parameterized queries for all VALUES: `cursor.execute("SELECT * FROM t WHERE id = %s", [id])`
 - Table/column names from Django ORM metadata (`model._meta.db_table`) are trusted sources
-- For ClickHouse identifiers, use `escape_clickhouse_identifier()` from `insights/hogql/escape_sql.py`
+- For ClickHouse identifiers, use `escape_clickhouse_identifier()` from `insights/insightsql/escape_sql.py`
 - When raw SQL is necessary with dynamic table/column names:
 
   ```python
@@ -76,11 +76,11 @@ Examples:
   cursor.execute(query, [team_id])  # Values always parameterized
   ```
 
-### HogQL Security
+### InsightsQL Security
 
-HogQL queries use `parse_expr()`, `parse_select()`, and `parse_order_expr()`. Two patterns exist:
+InsightsQL queries use `parse_expr()`, `parse_select()`, and `parse_order_expr()`. Two patterns exist:
 
-**Vulnerable pattern** - User data interpolated INTO a HogQL template:
+**Vulnerable pattern** - User data interpolated INTO a InsightsQL template:
 
 ```python
 # User data embedded in f-string - can escape context!
@@ -91,13 +91,13 @@ parse_expr(f"field = '{self.query.value}'")  # VULNERABLE
 
 ```python
 # User provides ENTIRE expression - no context to escape
-parse_expr(self.query.expression)  # SAFE - HogQL parser validates syntax
+parse_expr(self.query.expression)  # SAFE - InsightsQL parser validates syntax
 
 # User data wrapped in ast.Constant placeholder
 parse_expr("{x}", placeholders={"x": ast.Constant(value=self.query.field)})  # SAFE
 ```
 
-**Why direct pass-through is safe**: When users provide the entire HogQL expression (not data embedded in a template), there's no string context to escape from. The HogQL parser validates syntax and rejects malformed input.
+**Why direct pass-through is safe**: When users provide the entire InsightsQL expression (not data embedded in a template), there's no string context to escape from. The InsightsQL parser validates syntax and rejects malformed input.
 
 **Sanitizers** (for use in placeholders):
 
@@ -106,12 +106,12 @@ parse_expr("{x}", placeholders={"x": ast.Constant(value=self.query.field)})  # S
 
 ### Semgrep Rules
 
-Run `semgrep --config .semgrep/rules/hogql-no-fstring.yaml .` to check for HogQL injection issues.
+Run `semgrep --config .semgrep/rules/insightsql-no-fstring.yaml .` to check for InsightsQL injection issues.
 
 Two rules:
 
-1. `hogql-injection-taint` - Flags user data (`self.query.*`, etc.) interpolated into f-strings passed to parse functions (HIGH confidence)
-2. `hogql-fstring-audit` - Flags all f-strings in parse functions for manual review (LOW confidence)
+1. `insightsql-injection-taint` - Flags user data (`self.query.*`, etc.) interpolated into f-strings passed to parse functions (HIGH confidence)
+2. `insightsql-fstring-audit` - Flags all f-strings in parse functions for manual review (LOW confidence)
 
 **When semgrep flags your code:**
 
@@ -131,7 +131,7 @@ docker run --rm -v "${PWD}:/src" semgrep/semgrep semgrep --test /src/.semgrep/ru
 ## Architecture guidelines
 
 - API views should declare request/response schemas — prefer `@validated_request` from `insights.api.mixins` or `@extend_schema` from drf-spectacular
-- Django serializers are the source of truth for frontend API types — `hogli build:openapi` generates TypeScript via drf-spectacular + Orval. Generated files (`api.schemas.ts`, `api.ts`) live in `frontend/src/generated/core/` and `products/{product}/frontend/generated/` — don't edit them manually, change serializers and rerun. See `docs/published/type-system.md` for the full pipeline
+- Django serializers are the source of truth for frontend API types — `insightscli build:openapi` generates TypeScript via drf-spectacular + Orval. Generated files (`api.schemas.ts`, `api.ts`) live in `frontend/src/generated/core/` and `products/{product}/frontend/generated/` — don't edit them manually, change serializers and rerun. See `docs/published/type-system.md` for the full pipeline
 - New features should live in `products/` — read [products/README.md](products/README.md) for layout and setup. When _creating a new_ product, follow [products/architecture.md](products/architecture.md) (DTOs, facades, isolation). Most existing products are legacy moves and don't use this architecture yet — match the patterns already in the product you're editing
 - Always filter querysets by `team_id` — in serializers, access the team via `self.context["get_team"]()`
 - **Do not add domain-specific fields to the `Team` model.** Use a Team Extension model instead — see `insights/models/team/README.md` for the pattern and helpers

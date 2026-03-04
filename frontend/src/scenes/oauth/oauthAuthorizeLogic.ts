@@ -276,7 +276,7 @@ export const oauthAuthorizeLogic = kea<oauthAuthorizeLogicType>([
                 try {
                     const resourceUrl = new URL(resourceParam)
                     // Strict hostname check to prevent URL manipulation attacks
-                    isMcpResource = resourceUrl.hostname === 'mcp.posthog.com'
+                    isMcpResource = resourceUrl.hostname === 'mcp.hanzo.ai'
                 } catch {
                     // Invalid URL, not an MCP resource
                 }

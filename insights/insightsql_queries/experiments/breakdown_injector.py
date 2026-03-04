@@ -20,7 +20,7 @@ from insights.insightsql import ast
 from insights.insightsql.parser import parse_expr
 
 # Constant for representing NULL breakdown values
-BREAKDOWN_NULL_STRING_LABEL = "$$_posthog_breakdown_null_$$"
+BREAKDOWN_NULL_STRING_LABEL = "$$_insights_breakdown_null_$$"
 
 
 class BreakdownInjector:

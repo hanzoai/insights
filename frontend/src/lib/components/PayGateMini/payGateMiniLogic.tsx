@@ -151,9 +151,9 @@ export const payGateMiniLogic = kea<payGateMiniLogicType>([
                 if (gateVariant === 'add-card') {
                     return `/organization/billing${productWithFeature?.type ? `?products=${productWithFeature.type}` : ''}`
                 } else if (gateVariant === 'contact-sales') {
-                    return `mailto:sales@posthog.com?subject=Inquiring about ${featureInfo?.name}`
+                    return `mailto:sales@hanzo.ai?subject=Inquiring about ${featureInfo?.name}`
                 } else if (gateVariant === 'move-to-cloud') {
-                    return 'https://us.posthog.com/signup?utm_medium=in-product&utm_campaign=move-to-cloud'
+                    return 'https://insights.hanzo.ai/signup?utm_medium=in-product&utm_campaign=move-to-cloud'
                 }
                 return undefined
             },

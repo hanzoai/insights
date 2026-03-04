@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { IconHeatmap } from 'lib/lemon-ui/icons'
 import { addProductIntentForCrossSell } from 'lib/utils/product-intents'

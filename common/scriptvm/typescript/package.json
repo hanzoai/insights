@@ -1,5 +1,5 @@
 {
-    "name": "@insights/scriptvm",
+    "name": "@hanzo/scriptvm",
     "version": "1.0.67",
     "description": "Insights Script Virtual Machine",
     "types": "dist/index.d.ts",

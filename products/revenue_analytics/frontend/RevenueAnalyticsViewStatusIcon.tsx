@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconCheckCircle, IconClock, IconInfo, IconRefresh, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonTable, Link, Popover } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconClock, IconInfo, IconRefresh, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonTable, Link, Popover } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { humanFriendlyDuration } from 'lib/utils'

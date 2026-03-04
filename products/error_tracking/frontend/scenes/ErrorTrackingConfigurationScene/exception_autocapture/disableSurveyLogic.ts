@@ -1,5 +1,5 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { SurveyQuestion } from '~/types'
 
@@ -63,13 +63,13 @@ export const disableSurveyLogic = kea<disableSurveyLogicType>([
                 clearTimeout(cache.hideTimeout)
                 cache.hideTimeout = null
             }
-            posthog.getSurveys((surveys) => {
+            insights.getSurveys((surveys) => {
                 const survey = surveys.find((s) => s.id === SURVEY_ID)
                 if (survey) {
                     actions.setSurveyQuestions(survey.questions as unknown as SurveyQuestion[])
                 }
             })
-            posthog.capture('survey shown', {
+            insights.capture('survey shown', {
                 $survey_id: SURVEY_ID,
             })
         },
@@ -83,7 +83,7 @@ export const disableSurveyLogic = kea<disableSurveyLogicType>([
             if (values.openResponse.trim()) {
                 payload.$survey_response_1 = values.openResponse
             }
-            posthog.capture('survey sent', payload)
+            insights.capture('survey sent', payload)
             cache.hideTimeout = setTimeout(() => {
                 actions.hideSurvey()
                 cache.hideTimeout = null

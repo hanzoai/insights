@@ -33,7 +33,7 @@ class TestLookupDistinctId:
     def test_returns_row_when_found_tuple(self):
         cursor = _make_cursor(fetchone_values=[(PDI_ID, PDI_VERSION, PERSON_PK, UUID(PERSON_UUID))])
 
-        result = _lookup_distinct_id(cursor, TEAM_ID, "$posthog_cookieless")
+        result = _lookup_distinct_id(cursor, TEAM_ID, "$insights_cookieless")
 
         assert result is not None
         assert result["pdi_id"] == PDI_ID
@@ -46,7 +46,7 @@ class TestLookupDistinctId:
             fetchone_values=[{"id": PDI_ID, "version": PDI_VERSION, "person_id": PERSON_PK, "uuid": UUID(PERSON_UUID)}]
         )
 
-        result = _lookup_distinct_id(cursor, TEAM_ID, "$posthog_cookieless")
+        result = _lookup_distinct_id(cursor, TEAM_ID, "$insights_cookieless")
 
         assert result is not None
         assert result["pdi_id"] == PDI_ID
@@ -117,12 +117,12 @@ class TestPublishDeletionToKafka:
     def test_publishes_with_version_plus_100(self):
         producer = MagicMock()
 
-        _publish_deletion_to_kafka(producer, TEAM_ID, "$posthog_cookieless", PERSON_UUID, PDI_VERSION)
+        _publish_deletion_to_kafka(producer, TEAM_ID, "$insights_cookieless", PERSON_UUID, PDI_VERSION)
 
         producer.produce.assert_called_once_with(
             topic=KAFKA_PERSON_DISTINCT_ID,
             data={
-                "distinct_id": "$posthog_cookieless",
+                "distinct_id": "$insights_cookieless",
                 "person_id": PERSON_UUID,
                 "team_id": TEAM_ID,
                 "version": PDI_VERSION + 100,
@@ -135,7 +135,7 @@ class TestPublishDeletionToKafka:
 class TestInsertChOverride:
     @patch("insights.dags.detach_distinct_id.sync_execute")
     def test_inserts_override_row(self, mock_sync_execute):
-        _insert_ch_override(TEAM_ID, "$posthog_cookieless", DUMMY_OVERRIDE_UUID, PDI_VERSION + 100)
+        _insert_ch_override(TEAM_ID, "$insights_cookieless", DUMMY_OVERRIDE_UUID, PDI_VERSION + 100)
 
         mock_sync_execute.assert_called_once()
         sql = mock_sync_execute.call_args.args[0]
@@ -145,7 +145,7 @@ class TestInsertChOverride:
         assert len(rows) == 1
         row = rows[0]
         assert row[0] == TEAM_ID
-        assert row[1] == "$posthog_cookieless"
+        assert row[1] == "$insights_cookieless"
         assert row[2] == DUMMY_OVERRIDE_UUID
         assert row[3] == 0  # is_deleted
         assert row[4] == PDI_VERSION + 100  # version
@@ -178,7 +178,7 @@ class TestDetachDistinctIdJob:
     def _run_config(self, *, dry_run: bool = True, override_person_id: str | None = None) -> dict:
         config: dict = {
             "team_id": TEAM_ID,
-            "distinct_id": "$posthog_cookieless",
+            "distinct_id": "$insights_cookieless",
             "expected_person_id": PERSON_UUID,
             "dry_run": dry_run,
         }
@@ -221,7 +221,7 @@ class TestDetachDistinctIdJob:
         # Kafka deletion
         producer.produce.assert_called_once()
         kafka_data = producer.produce.call_args.kwargs["data"]
-        assert kafka_data["distinct_id"] == "$posthog_cookieless"
+        assert kafka_data["distinct_id"] == "$insights_cookieless"
         assert kafka_data["person_id"] == PERSON_UUID
         assert kafka_data["is_deleted"] == 1
         assert kafka_data["version"] == PDI_VERSION + 100
@@ -231,7 +231,7 @@ class TestDetachDistinctIdJob:
         mock_sync_execute.assert_called_once()
         override_rows = mock_sync_execute.call_args.args[1]
         assert override_rows[0][0] == TEAM_ID
-        assert override_rows[0][1] == "$posthog_cookieless"
+        assert override_rows[0][1] == "$insights_cookieless"
         assert override_rows[0][2] == DUMMY_OVERRIDE_UUID
         assert override_rows[0][4] == PDI_VERSION + 100
 
@@ -333,12 +333,12 @@ class TestDetachDistinctIdIntegration:
         person = Person.objects.create(team_id=team.id, version=1)
         pdi_keep = PersonDistinctId.objects.create(team=team, person=person, distinct_id="keep_this", version=0)
         pdi_detach = PersonDistinctId.objects.create(
-            team=team, person=person, distinct_id="$posthog_cookieless", version=3
+            team=team, person=person, distinct_id="$insights_cookieless", version=3
         )
         return person, pdi_keep, pdi_detach
 
     @staticmethod
-    def _run_config(team_id: int, person_uuid: str, *, dry_run: bool, distinct_id: str = "$posthog_cookieless") -> dict:
+    def _run_config(team_id: int, person_uuid: str, *, dry_run: bool, distinct_id: str = "$insights_cookieless") -> dict:
         return {
             "ops": {
                 "detach_distinct_id_op": {
@@ -399,7 +399,7 @@ class TestDetachDistinctIdIntegration:
         # Kafka deletion published
         producer.produce.assert_called_once()
         kafka_data = producer.produce.call_args.kwargs["data"]
-        assert kafka_data["distinct_id"] == "$posthog_cookieless"
+        assert kafka_data["distinct_id"] == "$insights_cookieless"
         assert kafka_data["person_id"] == str(person.uuid)
         assert kafka_data["team_id"] == team.id
         assert kafka_data["is_deleted"] == 1
@@ -409,7 +409,7 @@ class TestDetachDistinctIdIntegration:
         mock_sync_execute.assert_called_once()
         override_rows = mock_sync_execute.call_args.args[1]
         assert override_rows[0][0] == team.id
-        assert override_rows[0][1] == "$posthog_cookieless"
+        assert override_rows[0][1] == "$insights_cookieless"
 
     @patch("insights.dags.detach_distinct_id.sync_execute")
     def test_fails_on_person_id_mismatch(self, mock_sync_execute, team, person_with_two_distinct_ids):
@@ -432,7 +432,7 @@ class TestDetachDistinctIdIntegration:
         from insights.models.person import Person, PersonDistinctId
 
         person = Person.objects.create(team_id=team.id, version=1)
-        PersonDistinctId.objects.create(team=team, person=person, distinct_id="$posthog_cookieless", version=3)
+        PersonDistinctId.objects.create(team=team, person=person, distinct_id="$insights_cookieless", version=3)
         producer = MagicMock()
 
         result = detach_distinct_id_job.execute_in_process(

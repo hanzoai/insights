@@ -827,11 +827,11 @@ describe('sessionRecordingsPlaylistLogic', () => {
         it('should parse even the most complex queries', () => {
             const result = convertLegacyFiltersToUniversalFilters(
                 {
-                    events: [{ key: 'email', value: ['email@posthog.com'], operator: 'exact', type: 'person' }],
+                    events: [{ key: 'email', value: ['email@hanzo.ai'], operator: 'exact', type: 'person' }],
                 },
                 {
                     date_from: '-7d',
-                    events: [{ key: 'email', value: ['test@posthog.com'], operator: 'exact', type: 'person' }],
+                    events: [{ key: 'email', value: ['test@hanzo.ai'], operator: 'exact', type: 'person' }],
                     console_logs: ['info', 'warn'],
                     console_search_query: 'this is a query log',
                     filter_test_accounts: true,
@@ -861,8 +861,8 @@ describe('sessionRecordingsPlaylistLogic', () => {
                         {
                             type: 'AND',
                             values: [
-                                { key: 'email', value: ['email@posthog.com'], operator: 'exact', type: 'person' },
-                                { key: 'email', value: ['test@posthog.com'], operator: 'exact', type: 'person' },
+                                { key: 'email', value: ['email@hanzo.ai'], operator: 'exact', type: 'person' },
+                                { key: 'email', value: ['test@hanzo.ai'], operator: 'exact', type: 'person' },
                                 {
                                     key: 'level',
                                     operator: 'exact',

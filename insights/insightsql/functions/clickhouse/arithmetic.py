@@ -2,7 +2,7 @@ from insights.insightsql.ast import DateTimeType, DecimalType, FloatType, Intege
 
 from ..core import InsightsQLFunctionMeta
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 ARITHMETIC_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "plus": InsightsQLFunctionMeta(
         "plus",

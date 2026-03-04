@@ -9,7 +9,7 @@ from semantic_version.base import Version
 
 from insights.async_migrations.runner import complete_migration, is_migration_dependency_fulfilled, start_async_migration
 from insights.async_migrations.setup import ALL_ASYNC_MIGRATIONS, setup_async_migrations, setup_model
-from insights.constants import FROZEN_POSTHOG_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 from insights.models.async_migration import (
     AsyncMigration,
     AsyncMigrationError,
@@ -31,7 +31,7 @@ def get_necessary_migrations() -> Sequence[AsyncMigration]:
 
         sm = setup_model(migration_name, definition)
 
-        if FROZEN_POSTHOG_VERSION > Version(sm.posthog_max_version):
+        if FROZEN_INSIGHTS_VERSION > Version(sm.insights_max_version):
             necessary_migrations.append(sm)
 
     return necessary_migrations
@@ -58,7 +58,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        setup_async_migrations(ignore_posthog_version=True)
+        setup_async_migrations(ignore_insights_version=True)
         necessary_migrations = get_necessary_migrations()
 
         if options["check"]:
@@ -82,7 +82,7 @@ def handle_check(necessary_migrations: Sequence[AsyncMigration]):
                     "Stopping Insights!",
                     f"Required async migration{' is' if len(necessary_migrations) == 1 else 's are'} not completed:",
                     *(f"- {migration.get_name_with_requirements()}" for migration in necessary_migrations),
-                    "See more in Docs: https://posthog.com/docs/self-host/configure/async-migrations/overview",
+                    "See more in Docs: https://hanzo.ai/docs/self-host/configure/async-migrations/overview",
                 ]
             )
         )
@@ -95,7 +95,7 @@ def handle_check(necessary_migrations: Sequence[AsyncMigration]):
                 [
                     "Stopping Insights!",
                     f"Async migration {running_migrations[0].name} is currently running. If you're trying to update Insights, wait for it to finish before proceeding",
-                    "See more in Docs: https://posthog.com/docs/self-host/configure/async-migrations/overview",
+                    "See more in Docs: https://hanzo.ai/docs/self-host/configure/async-migrations/overview",
                 ]
             )
         )
@@ -109,7 +109,7 @@ def handle_check(necessary_migrations: Sequence[AsyncMigration]):
                     f"Stopping Insights!",
                     "Some async migrations are currently in an 'Errored' state. If you're trying to update Insights, please make sure they complete successfully first:",
                     *(f"- {migration.name}" for migration in errored_migrations),
-                    "See more in Docs: https://posthog.com/docs/self-host/configure/async-migrations/overview",
+                    "See more in Docs: https://hanzo.ai/docs/self-host/configure/async-migrations/overview",
                 ]
             )
         )
@@ -119,7 +119,7 @@ def handle_check(necessary_migrations: Sequence[AsyncMigration]):
 def handle_run(necessary_migrations: Sequence[AsyncMigration]):
     for migration in necessary_migrations:
         logger.info(f"Applying async migration {migration.name}")
-        started_successfully = start_async_migration(migration.name, ignore_posthog_version=True)
+        started_successfully = start_async_migration(migration.name, ignore_insights_version=True)
         migration.refresh_from_db()
         if not started_successfully or migration.status != MigrationStatus.CompletedSuccessfully:
             last_error = AsyncMigrationError.objects.filter(async_migration=migration).last()

@@ -103,7 +103,7 @@ class TestQueryStatusManager(SimpleTestCase):
 
 class TestExecuteProcessQuery(TestCase):
     def setUp(self):
-        self.user = User.objects.create(email="test@posthog.com")
+        self.user = User.objects.create(email="test@hanzo.ai")
         self.organization = Organization.objects.create(name="test")
         self.team = Team.objects.create(organization=self.organization)
         self.query_id = "test_query_id"
@@ -137,7 +137,7 @@ class TestExecuteProcessQuery(TestCase):
 
 class ClickhouseClientTestCase(TestCase, ClickhouseTestMixin):
     def setUp(self):
-        self.user = User.objects.create(email="test@posthog.com", id=1337)
+        self.user = User.objects.create(email="test@hanzo.ai", id=1337)
         self.organization: Organization = Organization.objects.create(name="test")
         self.team: Team = Team.objects.create(organization=self.organization)
         self.team_id: int = self.team.pk

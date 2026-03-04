@@ -1,6 +1,6 @@
 import { useActions } from 'kea'
 
-import { LemonButton } from '@posthog/lemon-ui'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { FilmCameraHog } from 'lib/components/mascots'
 

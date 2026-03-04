@@ -67,7 +67,7 @@ SETTINGS
     index_granularity = 8192,
     ttl_only_drop_parts = 1;
 
-create or replace TABLE logs AS logs31 ENGINE = Distributed('posthog', 'default', 'logs31');
+create or replace TABLE logs AS logs31 ENGINE = Distributed('insights', 'default', 'logs31');
 
 create or replace table default.log_attributes
 

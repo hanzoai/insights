@@ -63,7 +63,7 @@ class TestWebGoalsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 timestamp=self.EVENT_TIMESTAMP,
                 properties={
                     "$pathname": "/project/2/web",
-                    "$current_url": "https://us.posthog.com/project/2/web",
+                    "$current_url": "https://insights.hanzo.ai/project/2/web",
                     "$session_id": session_id or person.uuid,
                 },
             )
@@ -112,7 +112,7 @@ class TestWebGoalsQueryRunner(ClickhouseTestMixin, APIBaseTest):
                 steps_json=[
                     {
                         "event": "$pageview",
-                        "url": "https://(app|eu|us)\\.posthog\\.com/project/\\d+/web.*",
+                        "url": "https://(app|eu|us)\\.insights\\.com/project/\\d+/web.*",
                         "url_matching": "regex",
                     }
                 ],

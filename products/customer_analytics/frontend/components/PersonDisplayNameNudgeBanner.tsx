@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { LemonBanner, LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonBanner, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { isUUIDLike } from 'lib/utils'
 import { personsSceneLogic } from 'scenes/persons/personsSceneLogic'

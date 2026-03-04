@@ -26,7 +26,7 @@ class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchin
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -47,7 +47,7 @@ class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchin
             "properties": [
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "icontains",
                     "type": "person",
                 },
@@ -165,7 +165,7 @@ class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchin
             "_H",
             INSIGHTSQL_BYTECODE_VERSION,
             32,
-            "%@posthog.com%",
+            "%@hanzo.ai%",
             32,
             "email",
             32,
@@ -199,7 +199,7 @@ class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchin
             "_H",
             INSIGHTSQL_BYTECODE_VERSION,
             32,
-            "%@posthog.com%",
+            "%@hanzo.ai%",
             32,
             "email",
             32,
@@ -213,7 +213,7 @@ class TestInsightsFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchin
             1,
             20,
             32,
-            "%@posthog.com%",
+            "%@hanzo.ai%",
             32,
             "email",
             32,

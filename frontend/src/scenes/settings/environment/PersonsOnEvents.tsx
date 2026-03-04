@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonRadio, LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
@@ -60,7 +60,7 @@ export function PersonsOnEvents(): JSX.Element {
 
     const handleChange = (mode: PoEMode): void => {
         updateCurrentTeam({ modifiers: { ...currentTeam?.modifiers, personsOnEventsMode: mode } })
-        posthog.capture('user changed personsOnEventsMode setting', { personsOnEventsMode: mode })
+        insights.capture('user changed personsOnEventsMode setting', { personsOnEventsMode: mode })
         reportPoEModeUpdated(mode)
     }
 

@@ -28,8 +28,8 @@ For local dev the defaults are:
 - `DUCKLAKE_RDS_HOST=localhost`
 - `DUCKLAKE_RDS_PORT=5432`
 - `DUCKLAKE_RDS_DATABASE=ducklake_catalog`
-- `DUCKLAKE_RDS_USERNAME=posthog`
-- `DUCKLAKE_RDS_PASSWORD=posthog`
+- `DUCKLAKE_RDS_USERNAME=insights`
+- `DUCKLAKE_RDS_PASSWORD=insights`
 - `DUCKLAKE_BUCKET=ducklake-dev`
 - `DUCKLAKE_BUCKET_REGION=us-east-1`
 - `DUCKLAKE_S3_ACCESS_KEY=object_storage_root_user`
@@ -78,7 +78,7 @@ Follow these checklists to exercise the DuckLake copy workflows on a local check
 ### Testing Data Modeling workflow
 
 1. **Start the dev stack**
-   Run `hogli start` (or `bin/start`) so Postgres, MinIO, Temporal, and all DuckLake defaults are up. Make sure the `ducklake-data-modeling-copy-workflow` feature flag is enabled for the team you plan to use.
+   Run `insightscli start` (or `bin/start`) so Postgres, MinIO, Temporal, and all DuckLake defaults are up. Make sure the `ducklake-data-modeling-copy-workflow` feature flag is enabled for the team you plan to use.
 
 2. **Trigger a model materialization from the app**
    In the Insights UI, open Data Warehouse → Views, pick (or create) a view, open the Materialization section, enable it if needed, and click **Sync now**. This schedules the `data-modeling-run` workflow for that team/view.
@@ -102,7 +102,7 @@ Follow these checklists to exercise the DuckLake copy workflows on a local check
      SET s3_secret_access_key='object_storage_root_password';
      SET s3_url_style='path';
 
-     ATTACH 'ducklake:postgres:dbname=ducklake_catalog host=localhost user=posthog password=posthog'
+     ATTACH 'ducklake:postgres:dbname=ducklake_catalog host=localhost user=insights password=insights'
        AS ducklake (DATA_PATH 's3://ducklake-dev/');
 
      -- Discover available schemas
@@ -119,7 +119,7 @@ Follow these checklists to exercise the DuckLake copy workflows on a local check
 ### Testing Data Imports workflow
 
 1. **Start the dev stack**
-   Run `hogli start` (or `bin/start`) so Postgres, MinIO, Temporal, and all DuckLake defaults are up. Make sure the `ducklake-data-imports-copy-workflow` feature flag is enabled for the team you plan to use.
+   Run `insightscli start` (or `bin/start`) so Postgres, MinIO, Temporal, and all DuckLake defaults are up. Make sure the `ducklake-data-imports-copy-workflow` feature flag is enabled for the team you plan to use.
 
 2. **Trigger a data import sync from the app**
    In the Insights UI, open Data Warehouse → Sources, connect a source (e.g., Stripe, Hubspot), select the schemas to sync, and click **Sync**. This schedules the `external-data-job` workflow.
@@ -143,7 +143,7 @@ Follow these checklists to exercise the DuckLake copy workflows on a local check
      SET s3_secret_access_key='object_storage_root_password';
      SET s3_url_style='path';
 
-     ATTACH 'ducklake:postgres:dbname=ducklake_catalog host=localhost user=posthog password=posthog'
+     ATTACH 'ducklake:postgres:dbname=ducklake_catalog host=localhost user=insights password=insights'
        AS ducklake (DATA_PATH 's3://ducklake-dev/');
 
      -- Discover available schemas

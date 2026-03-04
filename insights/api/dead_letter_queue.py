@@ -8,7 +8,7 @@ from insights.clickhouse.client import sync_execute
 from insights.permissions import IsStaffUser
 from insights.utils import relative_date_parse
 
-# keep in sync with posthog/frontend/src/scenes/instance/DeadLetterQueue/MetricsTab.tsx
+# keep in sync with insights/frontend/src/scenes/instance/DeadLetterQueue/MetricsTab.tsx
 ROWS_LIMIT = 10
 
 DEAD_LETTER_QUEUE_METRICS = {

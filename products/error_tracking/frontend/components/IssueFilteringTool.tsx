@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconFilter } from '@posthog/icons'
+import { IconFilter } from '@hanzo/icons'
 
 import { taxonomicFilterLogic } from 'lib/components/TaxonomicFilter/taxonomicFilterLogic'
 import MaxTool from 'scenes/max/MaxTool'

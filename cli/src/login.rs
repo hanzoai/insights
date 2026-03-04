@@ -37,7 +37,7 @@ struct PollResponse {
 
 pub fn login(host_override: Option<String>) -> Result<()> {
     if !io::stdout().is_terminal() {
-        bail!("Failed to login. If you are running on a CI, skip this step and use POSTHOG_CLI_HOST, POSTHOG_CLI_PROJECT_ID, POSTHOG_CLI_API_KEY env variables when running commands")
+        bail!("Failed to login. If you are running on a CI, skip this step and use INSIGHTS_CLI_HOST, INSIGHTS_CLI_PROJECT_ID, INSIGHTS_CLI_API_KEY env variables when running commands")
     }
     login_with_use_cases(host_override, vec!["schema", "error_tracking", "endpoints"])
 }
@@ -49,13 +49,13 @@ pub fn login_with_use_cases(host_override: Option<String>, use_cases: Vec<&str>)
     } else {
         // Prompt user to select region or manual login
         let options = vec!["US", "EU", "Manual"];
-        let selection = Select::new("Select your PostHog region:", options)
-            .with_help_message("Choose the region where your PostHog data is hosted, or 'Manual' to enter your own details")
+        let selection = Select::new("Select your Insights region:", options)
+            .with_help_message("Choose the region where your Insights data is hosted, or 'Manual' to enter your own details")
             .prompt()?;
 
         match selection {
-            "US" => "https://us.posthog.com".to_string(),
-            "EU" => "https://eu.posthog.com".to_string(),
+            "US" => "https://us.insights.hanzo.ai".to_string(),
+            "EU" => "https://eu.insights.hanzo.ai".to_string(),
             "Manual" => {
                 return manual_login();
             }
@@ -257,7 +257,7 @@ fn complete_login(provider: &HomeDirProvider, command_name: &str) -> Result<(), 
     println!("Credentials saved to: {}", provider.report_location());
     println!();
     println!("You can now use the CLI:");
-    println!("  posthog-cli schema pull");
+    println!("  insights-cli schema pull");
     println!();
 
     Ok(())
@@ -266,12 +266,12 @@ fn complete_login(provider: &HomeDirProvider, command_name: &str) -> Result<(), 
 fn manual_login() -> Result<(), Error> {
     info!("🔐 Manual login...");
 
-    let host = Text::new("Enter the PostHog host URL")
-        .with_default("https://us.posthog.com")
+    let host = Text::new("Enter the Insights host URL")
+        .with_default("https://us.insights.hanzo.ai")
         .with_validator(host_validator)
         .prompt()?;
 
-    let env_id = Text::new("Enter your project ID (the number in your PostHog homepage URL)")
+    let env_id = Text::new("Enter your project ID")
         .with_validator(env_id_validator)
         .prompt()?;
 
@@ -279,7 +279,7 @@ fn manual_login() -> Result<(), Error> {
         "Enter your personal API token",
     )
     .with_validator(token_validator)
-    .with_help_message("See posthog.com/docs/api#private-endpoint-authentication. It will need to have the 'error tracking write' scope.")
+    .with_help_message("See insights.hanzo.ai/docs/api#private-endpoint-authentication. It will need to have the 'error tracking write' scope.")
     .prompt()?;
 
     let token = Token {

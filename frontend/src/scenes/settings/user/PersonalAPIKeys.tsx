@@ -3,8 +3,8 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { Fragment, useEffect } from 'react'
 
-import { IconWarning } from '@posthog/icons'
-import { IconEllipsis, IconInfo, IconPlus } from '@posthog/icons'
+import { IconWarning } from '@hanzo/icons'
+import { IconEllipsis, IconInfo, IconPlus } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonDialog,
@@ -19,7 +19,7 @@ import {
     LemonTag,
     Link,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonField } from 'lib/lemon-ui/LemonField'

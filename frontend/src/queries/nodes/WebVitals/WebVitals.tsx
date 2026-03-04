@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { IconOpenInNew } from 'lib/lemon-ui/icons'
@@ -105,7 +105,7 @@ export function WebVitals(props: {
                 </div>
                 <span className="text-xs text-text-tertiary self-center sm:self-end">
                     Metrics above are from the last day in the selected time range.{' '}
-                    <Link to="https://posthog.com/docs/web-analytics/web-vitals#web-vitals-dashboard" target="_blank">
+                    <Link to="https://hanzo.ai/docs/web-analytics/web-vitals#web-vitals-dashboard" target="_blank">
                         Learn more in the Docs.
                     </Link>
                 </span>

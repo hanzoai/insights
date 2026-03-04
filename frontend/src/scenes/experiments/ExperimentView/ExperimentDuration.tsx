@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconArrowRight } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconArrowRight } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'

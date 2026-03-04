@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -e
+
+# This script copies the following built files from insights-js so that they can served on Insights's CDN
+
+cp node_modules/insights-js/dist/array.js* dist/
+cp node_modules/insights-js/dist/array.full.js* dist/
+cp node_modules/insights-js/dist/array.full.es5.js* dist/
+cp node_modules/insights-js/dist/surveys.js* dist/
+cp node_modules/insights-js/dist/logs.js* dist/
+cp node_modules/insights-js/dist/exception-autocapture.js* dist/
+cp node_modules/insights-js/dist/web-vitals.js* dist/
+cp node_modules/insights-js/dist/tracing-headers.js* dist/
+cp node_modules/insights-js/dist/dead-clicks-autocapture.js* dist/
+cp node_modules/insights-js/dist/customizations.full.js* dist/
+# there are multiple external integrations that we use, so we need to copy them all
+cp node_modules/insights-js/dist/*integration.js* dist/ 2>/dev/null || true
+# there are multiple recorder files that we use, so we need to copy them all
+cp node_modules/insights-js/dist/*recorder*.js* dist/ 2>/dev/null || true
+cp node_modules/insights-js/dist/product-tours.js* dist/
+cp node_modules/insights-js/dist/conversations.js* dist/

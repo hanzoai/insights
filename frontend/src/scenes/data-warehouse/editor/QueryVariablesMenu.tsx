@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconBrackets, IconChevronRight, IconExternal, IconGear } from '@posthog/icons'
+import { IconBrackets, IconChevronRight, IconExternal, IconGear } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -10,7 +10,7 @@ import {
     LemonMenuItems,
     LemonMenuSection,
     LemonTag,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CLICK_OUTSIDE_BLOCK_CLASS } from 'lib/hooks/useOutsideClickHandler'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

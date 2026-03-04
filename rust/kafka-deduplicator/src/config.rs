@@ -292,7 +292,7 @@ pub struct Config {
     #[envconfig(from = "OTEL_TRACES_SAMPLER_ARG", default = "0.001")]
     pub otel_sampling_rate: f64,
 
-    #[envconfig(from = "OTEL_SERVICE_NAME", default = "posthog-kafka-deduplicator")]
+    #[envconfig(from = "OTEL_SERVICE_NAME", default = "insights-kafka-deduplicator")]
     pub otel_service_name: String,
 
     #[envconfig(from = "OTEL_LOG_LEVEL", default = "info")]

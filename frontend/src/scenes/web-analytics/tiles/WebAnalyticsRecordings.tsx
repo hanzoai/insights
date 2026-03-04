@@ -51,7 +51,7 @@ export function WebAnalyticsRecordingsTile({ tile }: { tile: ReplayTile }): JSX.
                 title: 'There are no recordings matching this date range',
                 description: 'Make sure you have the javascript snippet setup in your website.',
                 buttonText: 'Learn more',
-                buttonTo: 'https://posthog.com/docs/user-guides/recordings',
+                buttonTo: 'https://hanzo.ai/docs/user-guides/recordings',
             }
     return (
         <>

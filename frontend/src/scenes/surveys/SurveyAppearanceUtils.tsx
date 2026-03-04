@@ -4,7 +4,7 @@ import { useMemo, useRef } from 'react'
 import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter'
 import markup from 'react-syntax-highlighter/dist/esm/languages/prism/markup'
 
-import { LemonBanner, LemonTabs, LemonTextArea } from '@posthog/lemon-ui'
+import { LemonBanner, LemonTabs, LemonTextArea } from '@hanzo/lemon-ui'
 
 import { darkTheme, lightTheme } from 'lib/components/CodeSnippet/theme'
 

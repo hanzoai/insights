@@ -1,4 +1,4 @@
-import { LemonCollapse, LemonTag, Link } from '@posthog/lemon-ui'
+import { LemonCollapse, LemonTag, Link } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { stripMarkdown } from 'lib/utils/stripMarkdown'

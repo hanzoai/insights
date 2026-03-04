@@ -17,7 +17,7 @@ logger = structlog.get_logger(__name__)
 
 
 @csrf_exempt
-@timed("posthog_cloud_csp_event_endpoint")
+@timed("insights_cloud_csp_event_endpoint")
 def get_csp_event(request):
     # we want to handle this as early as possible and avoid any processing
     if request.method == "OPTIONS":

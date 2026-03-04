@@ -364,8 +364,8 @@ mod tests {
     #[test]
     fn test_emit_with_all_fields_populated() {
         let mut log = FlagsCanonicalLogLine::new(Uuid::new_v4(), "10.0.0.1".to_string());
-        log.user_agent = Some("posthog-python/1.0.0".to_string());
-        log.lib = Some("posthog-python");
+        log.user_agent = Some("insights-python/1.0.0".to_string());
+        log.lib = Some("insights-python");
         log.lib_version = Some("1.0.0".to_string());
         log.api_version = Some("3".to_string());
         log.team_id = Some(123);

@@ -27,7 +27,7 @@ message HashKeyOverrideContext {
 message GetHashKeyOverrideContextRequest {
   int64 team_id = 1;
   repeated string distinct_ids = 2;
-  // When true, only returns results for persons that exist in posthog_person table
+  // When true, only returns results for persons that exist in insights_person table
   bool check_person_exists = 3;
   ReadOptions read_options = 4;
 }

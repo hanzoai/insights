@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBug, IconQuestion } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconBug, IconQuestion } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { SupportTicketKind, SupportTicketTargetArea, supportLogic } from 'lib/components/Support/supportLogic'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'

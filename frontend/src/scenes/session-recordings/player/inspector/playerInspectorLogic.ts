@@ -9,7 +9,7 @@ import {
     eventWithTime,
     fullSnapshotEvent,
     pluginEvent,
-} from '@posthog/rrweb-types'
+} from '@hanzo/rrweb-types'
 
 import api from 'lib/api'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
@@ -240,7 +240,7 @@ function estimateSize(snapshot: unknown): number {
 }
 
 function getPayloadFor(customEvent: customEvent, tag: string): Record<string, any> {
-    if (tag === '$posthog_config') {
+    if (tag === '$insights_config') {
         return (customEvent.data.payload as any)?.config as Record<string, any>
     }
 
@@ -836,7 +836,7 @@ export const playerInspectorLogic = kea<playerInspectorLogicType>([
                 // Pre-compute categorizations during item creation
                 const items: InspectorListItem[] = []
                 const itemsByMiniFilterKey: Record<MiniFilterKey, InspectorListItem[]> = {
-                    'events-posthog': [],
+                    'events-insights': [],
                     'events-custom': [],
                     'events-pageview': [],
                     'events-autocapture': [],

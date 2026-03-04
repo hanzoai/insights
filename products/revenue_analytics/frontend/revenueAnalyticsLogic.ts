@@ -1,7 +1,7 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { router } from 'kea-router'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { tabAwareActionToUrl } from 'lib/logic/scenes/tabAwareActionToUrl'
@@ -74,7 +74,7 @@ const INITIAL_DATE_FILTER = {
     interval: INITIAL_INTERVAL,
 }
 
-const teamId = window.POSTHOG_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 const persistConfig = { persist: true, prefix: `${teamId}_v2__` }
 
 const wrapWithDataTableNodeIfNeeded = (

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch, Link } from '@posthog/lemon-ui'
+import { LemonSwitch, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { urls } from 'scenes/urls'

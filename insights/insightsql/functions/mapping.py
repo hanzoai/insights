@@ -17,7 +17,7 @@ from .clickhouse.mathematical import MATH_FUNCTIONS
 from .clickhouse.strings import STRINGS_FUNCTIONS
 from .config import INSIGHTSQL_PERMITTED_PARAMETRIC_FUNCTIONS
 from .core import InsightsQLFunctionMeta
-from .posthog import INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
+from .insights import INSIGHTSQL_POSTINSIGHTS_FUNCTIONS
 from .udfs import UDFS
 
 INSIGHTSQL_COMPARISON_MAPPING: dict[str, ast.CompareOperationOp] = {

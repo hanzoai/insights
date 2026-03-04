@@ -11,7 +11,7 @@ import {
     ProfilePicture,
     lemonToast,
     usePagination,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { activityLogLogic } from 'lib/components/ActivityLog/activityLogLogic'
 import { ActivityLogItem, userNameForLogItem } from 'lib/components/ActivityLog/humanizeActivity'

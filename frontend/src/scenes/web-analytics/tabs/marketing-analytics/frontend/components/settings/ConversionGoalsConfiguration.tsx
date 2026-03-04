@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useMemo, useState } from 'react'
 
-import { IconCheck, IconPencil, IconPlusSmall, IconTrash, IconWarning, IconX } from '@posthog/icons'
-import { LemonButton, LemonInput } from '@posthog/lemon-ui'
+import { IconCheck, IconPencil, IconPlusSmall, IconTrash, IconWarning, IconX } from '@hanzo/icons'
+import { LemonButton, LemonInput } from '@hanzo/lemon-ui'
 
 import { LemonTable } from 'lib/lemon-ui/LemonTable'
 import { uuid } from 'lib/utils'

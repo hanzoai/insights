@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconInfo, IconPlus, IconX } from '@posthog/icons'
+import { IconInfo, IconPlus, IconX } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -11,7 +11,7 @@ import {
     LemonSegmentedButton,
     LemonSelect,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertyFilters } from 'lib/components/PropertyFilters/PropertyFilters'

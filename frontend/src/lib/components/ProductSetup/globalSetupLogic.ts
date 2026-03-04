@@ -1,6 +1,6 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { SetupTaskId } from 'lib/components/ProductSetup'
 import { sceneLogic } from 'scenes/sceneLogic'
@@ -148,7 +148,7 @@ export const globalSetupLogic = kea<globalSetupLogicType>([
 
             // Track analytics for each task
             for (const taskId of taskIds) {
-                posthog.capture('product setup task completed', { task: taskId })
+                insights.capture('product setup task completed', { task: taskId })
             }
 
             // Persist to server in the background
@@ -183,7 +183,7 @@ export const globalSetupLogic = kea<globalSetupLogicType>([
 
             // Track analytics for each task
             for (const taskId of taskIds) {
-                posthog.capture('product setup task skipped', { task: taskId })
+                insights.capture('product setup task skipped', { task: taskId })
             }
 
             const onboardingTasks = { ...currentTeam.onboarding_tasks, ...optimisticStatuses }
@@ -198,7 +198,7 @@ export const globalSetupLogic = kea<globalSetupLogicType>([
 
             // Track analytics for each task
             for (const taskId of taskIds) {
-                posthog.capture('product setup task uncompleted', { task: taskId })
+                insights.capture('product setup task uncompleted', { task: taskId })
             }
 
             // Persist to server in the background
@@ -228,7 +228,7 @@ export const globalSetupLogic = kea<globalSetupLogicType>([
 
             // Track analytics for each task
             for (const taskId of taskIds) {
-                posthog.capture('product setup task unskipped', { task: taskId })
+                insights.capture('product setup task unskipped', { task: taskId })
             }
 
             // Persist to server in the background

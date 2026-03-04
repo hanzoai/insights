@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCdCase, IconDocument, IconPlug, IconUser } from '@posthog/icons'
+import { IconCdCase, IconDocument, IconPlug, IconUser } from '@hanzo/icons'
 
 import { SearchAutocomplete } from 'lib/components/SearchAutocomplete/SearchAutocomplete'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

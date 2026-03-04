@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	geoIPURL = "https://mmdbcdn.posthog.net/"
+	geoIPURL = "https://mmdbcdn.insights.hanzo.ai/"
 	shareDir = "./share"
 	mmdbFile = "./share/GeoLite2-City.mmdb"
 	jsonFile = "./share/GeoLite2-City.json"

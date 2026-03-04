@@ -2,8 +2,8 @@ import { useValues } from 'kea'
 import React, { useMemo } from 'react'
 import { match } from 'ts-pattern'
 
-import { IconPerson } from '@posthog/icons'
-import { ProfilePicture } from '@posthog/lemon-ui'
+import { IconPerson } from '@hanzo/icons'
+import { ProfilePicture } from '@hanzo/lemon-ui'
 
 import { UnexpectedNeverError, fullName } from 'lib/utils'
 import { cn } from 'lib/utils/css-classes'

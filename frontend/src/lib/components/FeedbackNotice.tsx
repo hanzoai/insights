@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBug } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconBug } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { IconFeedback } from 'lib/lemon-ui/icons'

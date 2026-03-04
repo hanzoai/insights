@@ -23,7 +23,7 @@ export function shouldSkipAiHighlight(query: string, realItems: SearchItem[]): b
     const wordCount = trimmedQuery.split(/\s+/).length
 
     // Guard: explicit AI intent - keep AI highlighted
-    const aiIntentPatterns = ['ai', 'max', 'posthog ai', 'ask ai', 'ask posthog']
+    const aiIntentPatterns = ['ai', 'max', 'insights ai', 'ask ai', 'ask insights']
     if (aiIntentPatterns.some((pattern) => queryLower === pattern)) {
         return false
     }
@@ -123,9 +123,9 @@ export function shouldSkipAiHighlight(query: string, realItems: SearchItem[]): b
         '/data-management/',
         'http://',
         'https://',
-        'app.posthog.com',
-        'us.posthog.com',
-        'eu.posthog.com',
+        'insights.hanzo.ai',
+        'insights.hanzo.ai',
+        'insights.hanzo.ai',
     ]
     if (urlPathPrefixes.some((prefix) => trimmedQuery.startsWith(prefix) || trimmedQuery.includes(prefix))) {
         return true

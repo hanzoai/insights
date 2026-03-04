@@ -198,7 +198,7 @@ class Command(BaseCommand):
                 [None, "https://youtube.com/watch?v=example", "https://github.com/example"]
             ),
             "$device": random.choice(["iPhone", "Android", "Desktop", "iPad"]),
-            "token": f"phc_{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=40))}",
+            "token": f"hi_{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', k=40))}",
         }
 
         # Add some geoip properties
@@ -261,11 +261,11 @@ class Command(BaseCommand):
         """Generate realistic error details"""
         error_types = [
             {
-                "message": 'Event ingestion failed. Error: insert or update on table "posthog_person" violates foreign key constraint "posthog_person_team_id_325c1b73_fk_posthog_team_id"',
+                "message": 'Event ingestion failed. Error: insert or update on table "insights_person" violates foreign key constraint "insights_person_team_id_325c1b73_fk_insights_team_id"',
                 "location": "plugin_server_ingest_event:processPersonsStep",
             },
             {
-                "message": 'Event ingestion failed. Error: duplicate key value violates unique constraint "posthog_person_distinct_id_team_id_key"',
+                "message": 'Event ingestion failed. Error: duplicate key value violates unique constraint "insights_person_distinct_id_team_id_key"',
                 "location": "plugin_server_ingest_event:processPersonsStep",
             },
             {

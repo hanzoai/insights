@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { LemonDialog, LemonInput, LemonSelect, LemonTag, Tooltip, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, LemonInput, LemonSelect, LemonTag, Tooltip, lemonToast } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
@@ -222,7 +222,7 @@ const ExperimentsTable = ({
                                 {isLegacyExperiment(experiment) && (
                                     <Tooltip
                                         title="This experiment uses the legacy engine, so some features and improvements may be missing."
-                                        docLink="https://posthog.com/docs/experiments/new-experimentation-engine"
+                                        docLink="https://hanzo.ai/docs/experiments/new-experimentation-engine"
                                     >
                                         <LemonTag type="warning" className="ml-1">
                                             Legacy
@@ -452,7 +452,7 @@ const ExperimentsTable = ({
                         productKey={ProductKey.EXPERIMENTS}
                         thingName="experiment"
                         description={EXPERIMENTS_PRODUCT_DESCRIPTION}
-                        docsURL="https://posthog.com/docs/experiments"
+                        docsURL="https://hanzo.ai/docs/experiments"
                         action={() => router.actions.push(urls.experiment('new'))}
                         isEmpty={shouldShowEmptyState}
                         customHog={ExperimentsHog}

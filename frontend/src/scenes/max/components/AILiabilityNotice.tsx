@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, Link } from '@posthog/lemon-ui'
+import { LemonBanner, Link } from '@hanzo/lemon-ui'
 
 import { organizationLogic } from 'scenes/organizationLogic'
 import { urls } from 'scenes/urls'
@@ -31,7 +31,7 @@ export function AILiabilityNotice(): JSX.Element | null {
                         .
                     </>
                 )}{' '}
-                <Link to="https://posthog.com/docs/posthog-ai/faq" target="_blank" disableDocsPanel>
+                <Link to="https://hanzo.ai/docs/insights-ai/faq" target="_blank" disableDocsPanel>
                     Learn more
                 </Link>
             </LemonBanner>

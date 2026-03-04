@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectSection } from '@posthog/lemon-ui'
+import { LemonSelect, LemonSelectSection } from '@hanzo/lemon-ui'
 
 import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'

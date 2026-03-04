@@ -7,19 +7,19 @@ from django.conf import settings
 import jwt
 
 
-class PosthogJwtAudience(Enum):
-    UNSUBSCRIBE = "posthog:unsubscribe"
-    EXPORTED_ASSET = "posthog:exported_asset"
-    IMPERSONATED_USER = "posthog:impersonted_user"  # This is used by background jobs on behalf of the user e.g. exports
-    LIVESTREAM = "posthog:livestream"
-    SHARING_PASSWORD_PROTECTED = "posthog:sharing_password_protected"
+class InsightsJwtAudience(Enum):
+    UNSUBSCRIBE = "insights:unsubscribe"
+    EXPORTED_ASSET = "insights:exported_asset"
+    IMPERSONATED_USER = "insights:impersonted_user"  # This is used by background jobs on behalf of the user e.g. exports
+    LIVESTREAM = "insights:livestream"
+    SHARING_PASSWORD_PROTECTED = "insights:sharing_password_protected"
 
 
-def encode_jwt(payload: dict, expiry_delta: timedelta, audience: PosthogJwtAudience) -> str:
+def encode_jwt(payload: dict, expiry_delta: timedelta, audience: InsightsJwtAudience) -> str:
     """
     Create a JWT ensuring that the correct audience and signing token is used
     """
-    if not isinstance(audience, PosthogJwtAudience):
+    if not isinstance(audience, InsightsJwtAudience):
         raise Exception("Audience must be in the list of Insights-supported audiences")
 
     encoded_jwt = jwt.encode(
@@ -35,7 +35,7 @@ def encode_jwt(payload: dict, expiry_delta: timedelta, audience: PosthogJwtAudie
     return encoded_jwt
 
 
-def decode_jwt(token: str, audience: PosthogJwtAudience) -> dict[str, Any]:
+def decode_jwt(token: str, audience: InsightsJwtAudience) -> dict[str, Any]:
     info = jwt.decode(token, settings.SECRET_KEY, audience=audience.value, algorithms=["HS256"])
 
     return info

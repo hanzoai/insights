@@ -1,7 +1,7 @@
 import { connect, events, kea, key, path, props, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { BREAKDOWN_OTHER_DISPLAY } from 'scenes/insights/utils'
@@ -49,7 +49,7 @@ export const miniBreakdownsLogic = kea<miniBreakdownsLogicType>([
                         { refresh: 'blocking' }
                     )
 
-                    posthog.capture(BreakdownsEvents.MiniBreakdownsLoaded, {
+                    insights.capture(BreakdownsEvents.MiniBreakdownsLoaded, {
                         issueId: props.issueId,
                         dateRange: values.dateRange,
                         filterTestAccounts: values.filterTestAccounts,

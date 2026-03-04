@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { ReactNode } from 'react'
 
-import { LemonButton, LemonDialog } from '@posthog/lemon-ui'
+import { LemonButton, LemonDialog } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { SdkVersionWarnings } from 'scenes/surveys/components/SdkVersionWarnings'

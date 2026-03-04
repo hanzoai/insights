@@ -1,4 +1,4 @@
-import { PostHogFeature } from 'posthog-js/react'
+import { InsightsFeature } from '@hanzo/insights/react'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 
@@ -19,12 +19,12 @@ export function ErrorTrackingIntegrations(): JSX.Element {
                 <h3>GitLab</h3>
                 <GitLabIntegration />
             </div>
-            <PostHogFeature flag={FEATURE_FLAGS.ERROR_TRACKING_JIRA_INTEGRATION} match={true}>
+            <InsightsFeature flag={FEATURE_FLAGS.ERROR_TRACKING_JIRA_INTEGRATION} match={true}>
                 <div>
                     <h3>Jira</h3>
                     <JiraIntegration />
                 </div>
-            </PostHogFeature>
+            </InsightsFeature>
         </div>
     )
 }

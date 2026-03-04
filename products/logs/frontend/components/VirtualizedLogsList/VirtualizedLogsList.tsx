@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { CSSProperties, useCallback, useEffect, useMemo, useRef } from 'react'
 import { List, getScrollbarSize, useDynamicRowHeight, useListRef } from 'react-window'
 
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { AutoSizer } from 'lib/components/AutoSizer'
 import { SizeProps } from 'lib/components/AutoSizer/AutoSizer'
@@ -303,7 +303,7 @@ export function VirtualizedLogsList({
                     <p className="text-muted text-sm mt-1 mb-0 max-w-80">
                         Try adjusting your filters, expanding the time range, or checking that your app is sending logs.
                     </p>
-                    <Link to="https://posthog.com/docs/logs/" target="_blank">
+                    <Link to="https://hanzo.ai/docs/logs/" target="_blank">
                         View documentation
                     </Link>
                 </div>

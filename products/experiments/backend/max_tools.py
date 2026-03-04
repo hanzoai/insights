@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from textwrap import dedent
 from typing import Any, Literal
 
-from posthoganalytics import capture_exception
+from hanzoanalytics import capture_exception
 from pydantic import BaseModel, Field
 
 from insights.schema import MaxExperimentMetricResult

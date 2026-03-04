@@ -6,7 +6,7 @@ import { useValues } from 'kea'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Root, createRoot } from 'react-dom/client'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 
 import { Chart, ChartDataset, ChartOptions, TooltipModel } from 'lib/Chart'
 import { getSeriesColor } from 'lib/colors'

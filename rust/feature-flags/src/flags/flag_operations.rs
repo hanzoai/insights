@@ -990,8 +990,8 @@ mod tests {
             .await
             .expect("Failed to insert team in pg");
 
-        // Use Django-compatible key format: posthog:1:cache/teams/{team_id}/feature_flags/flags.json
-        let django_key = format!("posthog:1:cache/teams/{}/feature_flags/flags.json", team.id);
+        // Use Django-compatible key format: insights:1:cache/teams/{team_id}/feature_flags/flags.json
+        let django_key = format!("insights:1:cache/teams/{}/feature_flags/flags.json", team.id);
         redis_client
             .set(django_key, "not a json".to_string())
             .await

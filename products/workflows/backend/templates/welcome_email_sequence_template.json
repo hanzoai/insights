@@ -11,9 +11,9 @@
         "distinct_id": "uj7OTxlPu8iREKCa4ef4Z76YmVszvv2jBPMIbbnwyEH",
         "first_name": "Abe",
         "last_name": "Basu",
-        "email": "abe@posthog.com",
+        "email": "abe@hanzo.ai",
         "is_email_verified": true,
-        "hedgehog_config": null,
+        "mascot_config": null,
         "role_at_organization": null
     },
     "updated_at": "2025-12-30T12:39:09.987420Z",

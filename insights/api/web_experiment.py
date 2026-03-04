@@ -57,7 +57,7 @@ def validate_no_xss(content: str, field_name: str) -> None:
 
 class WebExperimentsAPISerializer(serializers.ModelSerializer):
     """
-    Serializer for the exposed /api/web_experiments endpoint, to be used in posthog-js and for headless APIs.
+    Serializer for the exposed /api/web_experiments endpoint, to be used in insights-js and for headless APIs.
     """
 
     feature_flag_key = serializers.CharField(source="feature_flag.key", read_only=True)

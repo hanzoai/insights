@@ -54,7 +54,7 @@ pub struct FlagRequest {
     pub geoip_disable: Option<bool>,
     // Web and mobile clients can configure this parameter to disable flags for a request.
     // It's mostly used for folks who want to save money on flag evaluations while still using
-    // `/flags` to load the rest of their PostHog configuration.
+    // `/flags` to load the rest of their Insights configuration.
     pub disable_flags: Option<bool>,
     #[serde(default, alias = "$properties")]
     pub person_properties: Option<HashMap<String, Value>>,

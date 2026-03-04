@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { BaseIcon, IconCheck, IconChevronDown, IconEye, IconHide, IconLogomark, IconVideoCamera } from '@posthog/icons'
+import { BaseIcon, IconCheck, IconChevronDown, IconEye, IconHide, IconLogomark, IconVideoCamera } from '@hanzo/icons'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { SimpleKeyValueList } from 'lib/components/SimpleKeyValueList'
@@ -82,10 +82,10 @@ export const EventDebugMenu = (): JSX.Element => {
     const showEventsMenuItems = [
         checkableMenuItem(
             'Insights Events',
-            searchFilteredEventsCount['posthog'],
+            searchFilteredEventsCount['insights'],
             <IconLogomark />,
-            selectedEventTypes.includes('posthog'),
-            () => setSelectedEventType('posthog', !selectedEventTypes.includes('posthog'))
+            selectedEventTypes.includes('insights'),
+            () => setSelectedEventType('insights', !selectedEventTypes.includes('insights'))
         ),
         checkableMenuItem(
             'Custom Events',

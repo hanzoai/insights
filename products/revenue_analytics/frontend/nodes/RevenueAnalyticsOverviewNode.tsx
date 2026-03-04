@@ -1,7 +1,7 @@
 import { BuiltLogic, LogicWrapper, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { useAttachedLogic } from 'lib/logic/scenes/useAttachedLogic'
 import { cn } from 'lib/utils/css-classes'

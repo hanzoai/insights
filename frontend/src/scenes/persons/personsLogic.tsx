@@ -326,8 +326,8 @@ export const personsLogic = kea<personsLogicType>([
             () => [(_, props) => props.cohort],
             (cohort: PersonsLogicProps['cohort']) =>
                 cohort
-                    ? 'https://posthog.com/docs/api/cohorts#get-api-projects-project_id-cohorts-id-persons'
-                    : 'https://posthog.com/docs/api/persons',
+                    ? 'https://hanzo.ai/docs/api/cohorts#get-api-projects-project_id-cohorts-id-persons'
+                    : 'https://hanzo.ai/docs/api/persons',
         ],
         cohortId: [() => [(_, props) => props.cohort], (cohort: PersonsLogicProps['cohort']) => cohort],
         currentTab: [(s) => [s.activeTab, s.defaultTab], (activeTab, defaultTab) => activeTab || defaultTab],

@@ -188,7 +188,7 @@ class OrganizationDomain(ModelActivityMixin, UUIDTModel):
         """
         try:
             # TODO: Should we manually validate DNSSEC?
-            dns_response = dns.resolver.resolve(f"_posthog-challenge.{self.domain}", "TXT")
+            dns_response = dns.resolver.resolve(f"_insights-challenge.{self.domain}", "TXT")
         except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
             pass
         else:

@@ -50,9 +50,9 @@ runs:
           shell: bash
           env:
               CLICKHOUSE_SERVER_IMAGE: ${{ inputs.clickhouse-server-image }}
-              DOCKER_REGISTRY_PREFIX: 'us-east1-docker.pkg.dev/posthog-301601/mirror/'
+              DOCKER_REGISTRY_PREFIX: 'us-east1-docker.pkg.dev/insights-301601/mirror/'
           run: |
-              cp posthog/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
+              cp insights/user_scripts/latest_user_defined_function.xml docker/clickhouse/user_defined_function.xml
 
               max_attempts=3
               attempt=1
@@ -130,8 +130,8 @@ runs:
           if: inputs.skip-plugin-transpiler != 'true'
           shell: bash
           run: |
-              pnpm --filter=@posthog/plugin-transpiler... install --frozen-lockfile
-              bin/turbo --filter=@posthog/plugin-transpiler build
+              pnpm --filter=@hanzo/plugin-transpiler... install --frozen-lockfile
+              bin/turbo --filter=@hanzo/plugin-transpiler build
 
         - name: Install Python dependencies
           shell: bash
@@ -218,13 +218,13 @@ runs:
               pytest_targets="$PYTEST_TARGETS_INPUT"
               if [ -z "$pytest_targets" ]; then
                   if [ "$PERSON_ON_EVENTS_V2_ENABLED" = "true" ]; then
-                      pytest_targets="./posthog/clickhouse/ ./posthog/queries/ ./posthog/api/test/test_insight* ./posthog/api/test/dashboards/test_dashboard.py"
+                      pytest_targets="./insights/clickhouse/ ./insights/queries/ ./insights/api/test/test_insight* ./insights/api/test/dashboards/test_dashboard.py"
                   else
-                      pytest_targets="posthog products"
+                      pytest_targets="insights products"
                   fi
               fi
               pytest $pytest_targets -m "not async_migrations" \
-                  --ignore=posthog/temporal \
+                  --ignore=insights/temporal \
                   --ignore=common/scriptvm/python/test \
                   --splits "$CONCURRENCY" --group "$GROUP" \
                   --durations=100 --durations-min=1.0 --store-durations --clean-durations \
@@ -245,7 +245,7 @@ runs:
               CONCURRENCY: ${{ inputs.concurrency }}
               GROUP: ${{ inputs.group }}
           run: |
-              pytest posthog/temporal -m "not async_migrations" \
+              pytest insights/temporal -m "not async_migrations" \
                   --splits "$CONCURRENCY" --group "$GROUP" \
                   --durations=100 --durations-min=1.0 --store-durations --clean-durations \
                   $PYTEST_ARGS

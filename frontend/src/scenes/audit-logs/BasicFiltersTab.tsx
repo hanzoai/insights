@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCollapse, IconExpand, IconInfo } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonSelect, Tooltip } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand, IconInfo } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonSelect, Tooltip } from '@hanzo/lemon-ui'
 
 import { humanizeActivity, humanizeScope } from 'lib/components/ActivityLog/humanizeActivity'
 import { AnimatedCollapsible } from 'lib/components/AnimatedCollapsible'

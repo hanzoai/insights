@@ -16,14 +16,14 @@ class TestCheckProxyIsLive(TestCase):
     def setUp(self):
         self.organization = Organization.objects.create(name="Test Org")
         self.proxy_record = ProxyRecord.objects.create(
-            organization=self.organization, domain="us.i.posthog.com", status="active"
+            organization=self.organization, domain="us.i.hanzo.ai", status="active"
         )
         self.input = CheckActivityInput(proxy_record_id=self.proxy_record.id)
 
     @pytest.mark.asyncio
     @patch("insights.temporal.proxy_service.monitor.get_record")
     async def test_check_proxy_is_live_success_live(self, mock_get_record):
-        """Live test against us.i.posthog.com"""
+        """Live test against us.i.hanzo.ai"""
         mock_get_record.return_value = self.proxy_record
 
         result = await check_proxy_is_live(self.input)

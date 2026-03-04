@@ -169,7 +169,7 @@ async def insert_event_values_in_clickhouse(
 async def insert_sessions_in_clickhouse(client: ClickHouseClient, table: str = "sharded_events"):
     generate_sessions_query = RAW_SESSION_TABLE_BACKFILL_SELECT_SQL()
     if table == "events_recent":
-        generate_sessions_query = generate_sessions_query.replace("posthog_test.events", "posthog_test.events_recent")
+        generate_sessions_query = generate_sessions_query.replace("insights_test.events", "insights_test.events_recent")
         generate_sessions_query = generate_sessions_query.replace(
             "`$session_id`", "JSONExtractString(properties, '$session_id')"
         )

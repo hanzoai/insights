@@ -1,5 +1,5 @@
-import { IconChevronDown, IconGear, IconGraph, IconPulse } from '@posthog/icons'
-import { LemonCollapse, LemonTag } from '@posthog/lemon-ui'
+import { IconChevronDown, IconGear, IconGraph, IconPulse } from '@hanzo/icons'
+import { LemonCollapse, LemonTag } from '@hanzo/lemon-ui'
 
 import { HealthCheck, HealthCheckCategory } from '../healthCheckTypes'
 import { HealthCheckItem } from './HealthCheckItem'

@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconBookmark } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconBookmark } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { DataTableNode } from '~/queries/schema/schema-general'
 

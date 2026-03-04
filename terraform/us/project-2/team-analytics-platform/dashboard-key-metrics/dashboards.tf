@@ -1,22 +1,22 @@
 # =============================================================================
-# PostHog Dashboards Configuration
+# Insights Dashboards Configuration
 # =============================================================================
 #
-# This file demonstrates how to manage PostHog dashboards using Terraform.
+# This file demonstrates how to manage Insights dashboards using Terraform.
 #
 # For more information, see:
-#   https://registry.terraform.io/providers/PostHog/posthog/latest/docs/resources/dashboard
+#   https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/dashboard
 # =============================================================================
 
-# Terraform configuration for PostHog dashboard
-# Compatible with posthog provider v1.0
+# Terraform configuration for Insights dashboard
+# Compatible with insights provider v1.0
 # Source dashboard ID: 636477
 import {
-  to = posthog_dashboard.team_analytics_platform_key_metrics
+  to = insights_dashboard.team_analytics_platform_key_metrics
   id = "636477"
 }
 
-resource "posthog_dashboard" "team_analytics_platform_key_metrics" {
+resource "insights_dashboard" "team_analytics_platform_key_metrics" {
   name = "[team-analytics-platform] Key metrics"
   pinned = true
   tags = ["managed-by:terraform"]

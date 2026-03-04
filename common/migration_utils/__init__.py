@@ -1,8 +1,8 @@
 """Shared utilities for Django migration management.
 
 This module contains common constants, patterns, and functions used by both:
-- hogli/migrations.py (CLI tool)
-- posthog/management/commands/migrate.py (Django command extension)
+- insightscli/migrations.py (CLI tool)
+- insights/management/commands/migrate.py (Django command extension)
 
 Centralizing this code ensures consistent validation and caching behavior.
 """
@@ -18,7 +18,7 @@ from pathlib import Path
 
 # Cache directory for migration files
 # Used for storing migration files so they can be rolled back after branch switching
-MIGRATION_CACHE_DIR = Path.home() / ".cache" / "posthog-migrations"
+MIGRATION_CACHE_DIR = Path.home() / ".cache" / "insights-migrations"
 
 # Pattern to validate migration names (without .py extension)
 # Must start with 4 digits, underscore, then alphanumeric/underscores only
@@ -27,7 +27,7 @@ MIGRATION_NAME_PATTERN = re.compile(r"^(\d{4})_[a-zA-Z0-9_]+$")
 
 # Pattern to validate app names (valid Python package names)
 # Must start with letter, then letters/numbers/underscores
-# Examples: "posthog", "ee", "web_analytics"
+# Examples: "insights", "ee", "web_analytics"
 APP_NAME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
 
@@ -39,7 +39,7 @@ def validate_migration_path_components(app: str, name: str) -> None:
     files outside the cache directory.
 
     Args:
-        app: The Django app label (e.g., "posthog", "ee")
+        app: The Django app label (e.g., "insights", "ee")
         name: The migration name without .py extension (e.g., "0001_initial")
 
     Raises:
@@ -137,7 +137,7 @@ def cache_migration_file(app: str, name: str, source_path: Path) -> bool:
 
 # Core Insights apps that have migrations we manage
 # These are always included; product apps are discovered dynamically
-CORE_MANAGED_APPS = frozenset({"posthog", "ee", "rbac"})
+CORE_MANAGED_APPS = frozenset({"insights", "ee", "rbac"})
 
 
 def discover_product_apps(base_dir: Path) -> set[str]:
@@ -182,9 +182,9 @@ def get_managed_app_paths(base_dir: Path) -> dict[str, Path]:
         Dict mapping app names to their migration directories
     """
     apps = {
-        "posthog": base_dir / "posthog" / "migrations",
+        "insights": base_dir / "insights" / "migrations",
         "ee": base_dir / "ee" / "migrations",
-        "rbac": base_dir / "posthog" / "rbac" / "migrations",
+        "rbac": base_dir / "insights" / "rbac" / "migrations",
     }
 
     # Add product apps using the shared discovery function

@@ -1,6 +1,6 @@
 import { BindLogic, BuiltLogic, Logic, LogicWrapper, useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { DebugCHQueries } from 'lib/components/AppShortcuts/utils/DebugCHQueries'

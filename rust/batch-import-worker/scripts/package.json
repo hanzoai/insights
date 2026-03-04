@@ -1,7 +1,7 @@
 {
-  "name": "@posthog/batch-import-worker-scripts",
+  "name": "@hanzo/batch-import-worker-scripts",
   "version": "1.0.0",
-  "description": "Test scripts and utilities for PostHog batch import worker",
+  "description": "Test scripts and utilities for Hanzo Insights batch import worker",
   "main": "amplitude-test-generator.js",
   "scripts": {
     "generate": "node amplitude-test-generator.js",
@@ -9,14 +9,14 @@
     "test": "node --test *.test.js"
   },
   "keywords": [
-    "posthog",
+    "insights",
     "batch-import-worker",
     "amplitude",
     "testing",
     "test-data",
     "rust"
   ],
-  "author": "PostHog Team",
+  "author": "Hanzo Insights Team",
   "license": "MIT",
   "dependencies": {
     "@amplitude/analytics-node": "^1.3.8"
@@ -27,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/PostHog/posthog.git",
+    "url": "https://github.com/hanzoai/insights.git",
     "directory": "rust/batch-import-worker/scripts"
   }
 }

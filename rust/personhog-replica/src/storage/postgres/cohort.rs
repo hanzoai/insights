@@ -32,7 +32,7 @@ impl CohortStorage for PostgresStorage {
         let member_ids: Vec<i32> = sqlx::query_scalar(
             r#"
             SELECT cohort_id
-            FROM posthog_cohortpeople
+            FROM insights_cohortpeople
             WHERE person_id = $1 AND cohort_id = ANY($2)
             "#,
         )

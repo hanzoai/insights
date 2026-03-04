@@ -11,7 +11,7 @@ from django.conf import settings
 import structlog
 import temporalio
 from google.genai import types
-from posthoganalytics.ai.gemini import genai
+from hanzoanalytics.ai.gemini import genai
 from temporalio.exceptions import ApplicationError
 
 from insights.temporal.ai.session_summary.types.video import (
@@ -116,10 +116,10 @@ async def _call_llm_to_consolidate_segments(
                     response_mime_type="application/json",
                     response_json_schema=ConsolidatedVideoAnalysis.model_json_schema(),
                 ),
-                posthog_distinct_id=inputs.user_distinct_id_to_log,
-                posthog_trace_id=trace_id,
-                posthog_properties={"$session_id": inputs.session_id},
-                posthog_groups={"project": str(inputs.team_id)},
+                insights_distinct_id=inputs.user_distinct_id_to_log,
+                insights_trace_id=trace_id,
+                insights_properties={"$session_id": inputs.session_id},
+                insights_groups={"project": str(inputs.team_id)},
             )
 
             response_text = response.text

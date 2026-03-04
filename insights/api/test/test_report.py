@@ -445,17 +445,17 @@ class TestCspReport(BaseTest):
 
         safari_report = {
             "type": "csp-violation",
-            "url": "https://us.posthog.com/signup?next=%2F&__posthog.debug=true",
+            "url": "https://insights.hanzo.ai/signup?next=%2F&__insights.debug=true",
             "body": {
-                "documentURL": "https://us.posthog.com/signup?next=%2F&__posthog.debug=true",
+                "documentURL": "https://insights.hanzo.ai/signup?next=%2F&__insights.debug=true",
                 "disposition": "report",
                 "referrer": "",
                 "effectiveDirective": "script-src-elem",
                 "blockedURL": "inline",
-                "originalPolicy": "default-src 'self'; style-src 'self' 'unsafe-inline' https://*.posthog.com",
+                "originalPolicy": "default-src 'self'; style-src 'self' 'unsafe-inline' https://*.hanzo.ai",
                 "statusCode": 200,
                 "sample": "",
-                "sourceFile": "https://us.posthog.com/signup?next=%2F&__posthog.debug=true",
+                "sourceFile": "https://insights.hanzo.ai/signup?next=%2F&__insights.debug=true",
                 "lineNumber": 53,
                 "columnNumber": 1,
             },

@@ -99,9 +99,9 @@ const createMockContext = (scopes: string[]): Context => ({
     cache: {} as any,
     env: {
         INKEEP_API_KEY: undefined,
-        POSTHOG_API_BASE_URL: undefined,
-        POSTHOG_MCP_APPS_ANALYTICS_BASE_URL: undefined,
-        POSTHOG_UI_APPS_TOKEN: undefined,
+        INSIGHTS_API_BASE_URL: undefined,
+        INSIGHTS_MCP_APPS_ANALYTICS_BASE_URL: undefined,
+        INSIGHTS_UI_APPS_TOKEN: undefined,
     },
     stateManager: {
         getApiKey: async () => ({ scopes }),

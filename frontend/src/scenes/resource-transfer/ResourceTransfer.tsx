@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useCallback } from 'react'
 
-import { LemonButton, LemonInputSelect, LemonSelect, LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonButton, LemonInputSelect, LemonSelect, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { SceneExport } from 'scenes/sceneTypes'
 import { urls } from 'scenes/urls'

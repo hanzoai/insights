@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconGraph, IconInfo } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTable } from '@posthog/lemon-ui'
+import { IconGraph, IconInfo } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTable } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'

@@ -5,13 +5,13 @@ High-level structure of the Insights monorepo. Some directories are aspirational
 ## Directory structure
 
 ```text
-posthog/               # Legacy monolith code
+insights/               # Legacy monolith code
   api/                 # DRF views, serializers
   models/              # Django models
-  queries/             # HogQL query runners
+  queries/             # InsightsQL query runners
   ...
 
-ee/                    # Enterprise features (being migrated to products/ and posthog/)
+ee/                    # Enterprise features (being migrated to products/ and insights/)
 
 products/              # Product-specific apps
   <product>/
@@ -25,7 +25,7 @@ services/              # Independent backend services
   mcp/                 # Model Context Protocol service
 
 common/                # Shared code (exists today)
-  hogli/               # Developer CLI tooling
+  insightscli/               # Developer CLI tooling
   insightsql_parser/   # InsightsQL parser
 
 platform/              # Shared platform code (aspirational - not yet created)
@@ -80,8 +80,8 @@ That destroys the "platform is foundational" property and makes boundaries britt
 
 ### Common
 
-Shared code that exists today: `hogli` (developer CLI), `insightsql_parser`, and other cross-cutting utilities. Some of this may eventually move to `platform/` or `tools/` as the structure matures.
+Shared code that exists today: `insightscli` (developer CLI), `insightsql_parser`, and other cross-cutting utilities. Some of this may eventually move to `platform/` or `tools/` as the structure matures.
 
 ### Tools (aspirational)
 
-Developer tooling: CLIs, linters, formatters, code generators, scaffolding scripts. Not imported by runtime code. Can be standalone packages or internal utilities. Currently `common/hogli/` serves this purpose.
+Developer tooling: CLIs, linters, formatters, code generators, scaffolding scripts. Not imported by runtime code. Can be standalone packages or internal utilities. Currently `common/insightscli/` serves this purpose.

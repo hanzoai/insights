@@ -1,4 +1,4 @@
-import { IconDownload, IconWarning } from '@posthog/icons'
+import { IconDownload, IconWarning } from '@hanzo/icons'
 
 import { CodeSnippet, Language } from '~/lib/components/CodeSnippet/CodeSnippet'
 import { LemonBanner } from '~/lib/lemon-ui/LemonBanner'
@@ -30,9 +30,9 @@ function getBaseName(resource: TerraformExportResource): string {
 }
 
 function getDescription(resource: TerraformExportResource, result: TerraformExportResult | null): JSX.Element {
-    const providerDocsUrl = 'https://registry.terraform.io/providers/Insights/posthog/latest/docs'
+    const providerDocsUrl = 'https://registry.terraform.io/providers/Insights/insights/latest/docs'
     const exampleRepoUrl =
-        'https://github.com/PostHog/posthog/tree/master/terraform/us/project-2/team-analytics-platform'
+        'https://github.com/hanzoai/insights/tree/master/terraform/us/project-2/team-analytics-platform'
 
     const getExportPrefix = (): string => {
         const hasRelatedResources =

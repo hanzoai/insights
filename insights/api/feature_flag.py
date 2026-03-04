@@ -11,7 +11,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Prefetch, Q, QuerySet, deletion
 
-import posthoganalytics
+import hanzoanalytics
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter, OpenApiResponse
 from prometheus_client import Counter
@@ -90,13 +90,13 @@ BEHAVIOURAL_COHORT_FOUND_ERROR_CODE = "behavioral_cohort_found"
 MAX_PROPERTY_VALUES = 1000
 
 LOCAL_EVALUATION_REQUEST_COUNTER = Counter(
-    "posthog_local_evaluation_request_total",
+    "insights_local_evaluation_request_total",
     "Local evaluation API requests",
     labelnames=["send_cohorts"],
 )
 
 LOCAL_EVALUATION_ETAG_COUNTER = Counter(
-    "posthog_local_evaluation_etag_total",
+    "insights_local_evaluation_etag_total",
     "Local evaluation ETag cache results",
     labelnames=["result"],  # "hit" (304), "miss" (200), "none" (no client etag)
 )
@@ -281,7 +281,7 @@ class EvaluationTagsChecker:
 
         # Check FLAG_EVALUATION_TAGS feature flag
         try:
-            return posthoganalytics.feature_enabled(
+            return hanzoanalytics.feature_enabled(
                 "flag-evaluation-tags",
                 request.user.distinct_id,
                 groups={"organization": str(request.user.organization.id)},
@@ -1485,7 +1485,7 @@ class FeatureFlagViewSet(
     viewsets.ModelViewSet,
 ):
     """
-    Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+    Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
     If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
     """
@@ -2215,20 +2215,20 @@ class FeatureFlagViewSet(
                             (
                                 (
                                     EXISTS (
-                                        SELECT 1 FROM jsonb_array_elements(posthog_featureflag.filters->'groups') AS elem
+                                        SELECT 1 FROM jsonb_array_elements(insights_featureflag.filters->'groups') AS elem
                                         WHERE elem->>'rollout_percentage' = '100'
                                         AND (elem->'properties')::text = '[]'::text
                                     )
-                                    AND (posthog_featureflag.filters->>'multivariate' IS NULL OR jsonb_array_length(posthog_featureflag.filters->'multivariate'->'variants') = 0)
+                                    AND (insights_featureflag.filters->>'multivariate' IS NULL OR jsonb_array_length(insights_featureflag.filters->'multivariate'->'variants') = 0)
                                 )
                                 OR
                                 (
                                     EXISTS (
-                                        SELECT 1 FROM jsonb_array_elements(posthog_featureflag.filters->'multivariate'->'variants') AS variant
+                                        SELECT 1 FROM jsonb_array_elements(insights_featureflag.filters->'multivariate'->'variants') AS variant
                                         WHERE variant->>'rollout_percentage' = '100'
                                     )
                                     AND EXISTS (
-                                        SELECT 1 FROM jsonb_array_elements(posthog_featureflag.filters->'groups') AS elem
+                                        SELECT 1 FROM jsonb_array_elements(insights_featureflag.filters->'groups') AS elem
                                         WHERE elem->>'rollout_percentage' = '100'
                                         AND (elem->'properties')::text = '[]'::text
                                     )
@@ -2236,14 +2236,14 @@ class FeatureFlagViewSet(
                                 OR
                                 (
                                     EXISTS (
-                                        SELECT 1 FROM jsonb_array_elements(posthog_featureflag.filters->'groups') AS elem
+                                        SELECT 1 FROM jsonb_array_elements(insights_featureflag.filters->'groups') AS elem
                                         WHERE elem->>'rollout_percentage' = '100'
                                         AND (elem->'properties')::text = '[]'::text
                                         AND elem->'variant' IS NOT NULL
                                     )
-                                    AND (posthog_featureflag.filters->>'multivariate' IS NOT NULL AND jsonb_array_length(posthog_featureflag.filters->'multivariate'->'variants') > 0)
+                                    AND (insights_featureflag.filters->>'multivariate' IS NOT NULL AND jsonb_array_length(insights_featureflag.filters->'multivariate'->'variants') > 0)
                                 )
-                                OR (posthog_featureflag.filters IS NULL OR posthog_featureflag.filters = '{}'::jsonb)
+                                OR (insights_featureflag.filters IS NULL OR insights_featureflag.filters = '{}'::jsonb)
                             )
                             """
                         ]

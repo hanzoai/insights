@@ -1,4 +1,4 @@
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { TASK_STATUS_CONFIG } from '../lib/task-status'
 import { Task } from '../types'

@@ -84,9 +84,6 @@ export interface InsightsEvent {
     properties: Properties
 }
 
-/** @deprecated Use InsightsEvent */
-export type PostHogEvent = InsightsEvent
-
 
 export interface PluginAttachment {
     content_type: string
@@ -351,5 +348,3 @@ export interface InsightsExtension {
     api: ApiExtension
 }
 
-/** @deprecated Use InsightsExtension */
-export type PostHogExtension = InsightsExtension

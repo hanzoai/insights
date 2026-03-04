@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useMemo } from 'react'
 
-import { IconSparkles, IconWarning } from '@posthog/icons'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconSparkles, IconWarning } from '@hanzo/icons'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { LemonButton, LemonButtonProps } from 'lib/lemon-ui/LemonButton'
 
@@ -71,7 +71,7 @@ export function FixErrorButton({ type, size, contentOverride, source }: FixError
             icon={icon}
             onClick={() => {
                 fixInsightsQLErrors(queryInput ?? '', queryError)
-                posthog.capture(`sql-editor-fix-error-click`, { source })
+                insights.capture(`sql-editor-fix-error-click`, { source })
             }}
         >
             {content}

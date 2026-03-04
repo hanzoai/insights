@@ -49,11 +49,11 @@ from products.revenue_analytics.backend.insightsql_queries.test.data.structure i
     STRIPE_SUBSCRIPTION_COLUMNS,
 )
 
-CHARGES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_charges"
-INVOICES_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_invoices"
-PRODUCTS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_products"
-CUSTOMERS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_customers"
-SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-posthog.revenue_analytics.insights_query_runner.stripe_subscriptions"
+CHARGES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_charges"
+INVOICES_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_invoices"
+PRODUCTS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_products"
+CUSTOMERS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_customers"
+SUBSCRIPTIONS_TEST_BUCKET = "test_storage_bucket-insights.revenue_analytics.insights_query_runner.stripe_subscriptions"
 
 ALL_MONTHS_DAYS = [
     "2024-11-30",
@@ -123,7 +123,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     distinct_ids=[distinct_id],
                     properties={
                         "name": distinct_id,
-                        **({"email": "test@posthog.com"} if distinct_id == "test" else {}),
+                        **({"email": "test@hanzo.ai"} if distinct_id == "test" else {}),
                     },
                 )
             event_ids: list[str] = []
@@ -350,7 +350,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             results[0].total,
             {
-                "label": "stripe.posthog_test",
+                "label": "stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -374,11 +374,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     0,
                     0,
                 ],
-                "breakdown": {"property": "stripe.posthog_test", "kind": None},
+                "breakdown": {"property": "stripe.insights_test", "kind": None},
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "stripe.posthog_test",
-                    "name": "stripe.posthog_test",
+                    "id": "stripe.insights_test",
+                    "name": "stripe.insights_test",
                 },
             },
         )
@@ -386,7 +386,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             results[0].new,
             {
-                "label": "New | stripe.posthog_test",
+                "label": "New | stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -410,11 +410,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     0,
                     0,
                 ],
-                "breakdown": {"property": "stripe.posthog_test", "kind": "New"},
+                "breakdown": {"property": "stripe.insights_test", "kind": "New"},
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "New | stripe.posthog_test",
-                    "name": "New | stripe.posthog_test",
+                    "id": "New | stripe.insights_test",
+                    "name": "New | stripe.insights_test",
                 },
             },
         )
@@ -422,7 +422,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             results[0].expansion,
             {
-                "label": "Expansion | stripe.posthog_test",
+                "label": "Expansion | stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -446,11 +446,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     0,
                     0,
                 ],
-                "breakdown": {"property": "stripe.posthog_test", "kind": "Expansion"},
+                "breakdown": {"property": "stripe.insights_test", "kind": "Expansion"},
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "Expansion | stripe.posthog_test",
-                    "name": "Expansion | stripe.posthog_test",
+                    "id": "Expansion | stripe.insights_test",
+                    "name": "Expansion | stripe.insights_test",
                 },
             },
         )
@@ -458,7 +458,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             results[0].contraction,
             {
-                "label": "Contraction | stripe.posthog_test",
+                "label": "Contraction | stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -482,11 +482,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     0,
                     0,
                 ],
-                "breakdown": {"property": "stripe.posthog_test", "kind": "Contraction"},
+                "breakdown": {"property": "stripe.insights_test", "kind": "Contraction"},
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "Contraction | stripe.posthog_test",
-                    "name": "Contraction | stripe.posthog_test",
+                    "id": "Contraction | stripe.insights_test",
+                    "name": "Contraction | stripe.insights_test",
                 },
             },
         )
@@ -494,7 +494,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             results[0].churn,
             {
-                "label": "Churn | stripe.posthog_test",
+                "label": "Churn | stripe.insights_test",
                 "days": ALL_MONTHS_DAYS,
                 "labels": ALL_MONTHS_LABELS,
                 "data": [
@@ -518,11 +518,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                     0,
                     0,
                 ],
-                "breakdown": {"property": "stripe.posthog_test", "kind": "Churn"},
+                "breakdown": {"property": "stripe.insights_test", "kind": "Churn"},
                 "action": {
                     "days": ALL_MONTHS_FAKEDATETIMES,
-                    "id": "Churn | stripe.posthog_test",
-                    "name": "Churn | stripe.posthog_test",
+                    "id": "Churn | stripe.insights_test",
+                    "name": "Churn | stripe.insights_test",
                 },
             },
         )
@@ -544,7 +544,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             previous = results[0].total["data"][i]
 
     def test_with_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             self._create_managed_viewsets()
 
             # Use huge date range to collect all data
@@ -557,7 +557,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(
                 results[0].total,
                 {
-                    "label": "stripe.posthog_test",
+                    "label": "stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -581,11 +581,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                         0,
                     ],
-                    "breakdown": {"property": "stripe.posthog_test", "kind": None},
+                    "breakdown": {"property": "stripe.insights_test", "kind": None},
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "stripe.posthog_test",
-                        "name": "stripe.posthog_test",
+                        "id": "stripe.insights_test",
+                        "name": "stripe.insights_test",
                     },
                 },
             )
@@ -593,7 +593,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(
                 results[0].new,
                 {
-                    "label": "New | stripe.posthog_test",
+                    "label": "New | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -617,11 +617,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                         0,
                     ],
-                    "breakdown": {"property": "stripe.posthog_test", "kind": "New"},
+                    "breakdown": {"property": "stripe.insights_test", "kind": "New"},
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "New | stripe.posthog_test",
-                        "name": "New | stripe.posthog_test",
+                        "id": "New | stripe.insights_test",
+                        "name": "New | stripe.insights_test",
                     },
                 },
             )
@@ -629,7 +629,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(
                 results[0].expansion,
                 {
-                    "label": "Expansion | stripe.posthog_test",
+                    "label": "Expansion | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -653,11 +653,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                         0,
                     ],
-                    "breakdown": {"property": "stripe.posthog_test", "kind": "Expansion"},
+                    "breakdown": {"property": "stripe.insights_test", "kind": "Expansion"},
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Expansion | stripe.posthog_test",
-                        "name": "Expansion | stripe.posthog_test",
+                        "id": "Expansion | stripe.insights_test",
+                        "name": "Expansion | stripe.insights_test",
                     },
                 },
             )
@@ -665,7 +665,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(
                 results[0].contraction,
                 {
-                    "label": "Contraction | stripe.posthog_test",
+                    "label": "Contraction | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -689,11 +689,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                         0,
                     ],
-                    "breakdown": {"property": "stripe.posthog_test", "kind": "Contraction"},
+                    "breakdown": {"property": "stripe.insights_test", "kind": "Contraction"},
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Contraction | stripe.posthog_test",
-                        "name": "Contraction | stripe.posthog_test",
+                        "id": "Contraction | stripe.insights_test",
+                        "name": "Contraction | stripe.insights_test",
                     },
                 },
             )
@@ -701,7 +701,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(
                 results[0].churn,
                 {
-                    "label": "Churn | stripe.posthog_test",
+                    "label": "Churn | stripe.insights_test",
                     "days": ALL_MONTHS_DAYS,
                     "labels": ALL_MONTHS_LABELS,
                     "data": [
@@ -725,11 +725,11 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         0,
                         0,
                     ],
-                    "breakdown": {"property": "stripe.posthog_test", "kind": "Churn"},
+                    "breakdown": {"property": "stripe.insights_test", "kind": "Churn"},
                     "action": {
                         "days": ALL_MONTHS_FAKEDATETIMES,
-                        "id": "Churn | stripe.posthog_test",
-                        "name": "Churn | stripe.posthog_test",
+                        "id": "Churn | stripe.insights_test",
+                        "name": "Churn | stripe.insights_test",
                     },
                 },
             )
@@ -760,7 +760,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(
                 results[0].total,
                 {
-                    "label": "stripe.posthog_test",
+                    "label": "stripe.insights_test",
                     # May 1st because we use end of interval
                     "days": ["2025-02-28", "2025-03-31", "2025-04-30", "2025-05-01"],
                     "labels": ["Feb 2025", "Mar 2025", "Apr 2025", "May 2025"],
@@ -771,8 +771,8 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         Decimal("2297.8366613331"),
                         Decimal("2297.8366613331"),
                     ],
-                    "breakdown": {"property": "stripe.posthog_test", "kind": None},
-                    "action": {"days": [ANY] * 4, "id": "stripe.posthog_test", "name": "stripe.posthog_test"},
+                    "breakdown": {"property": "stripe.insights_test", "kind": None},
+                    "action": {"days": [ANY] * 4, "id": "stripe.insights_test", "name": "stripe.insights_test"},
                 },
             )
 
@@ -789,12 +789,12 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(
             results[0].total,
             {
-                "label": "stripe.posthog_test",
+                "label": "stripe.insights_test",
                 "days": a_lot_of_anys,
                 "labels": a_lot_of_anys,
                 "data": a_lot_of_anys,
-                "breakdown": {"property": "stripe.posthog_test", "kind": None},
-                "action": {"days": a_lot_of_anys, "id": "stripe.posthog_test", "name": "stripe.posthog_test"},
+                "breakdown": {"property": "stripe.insights_test", "kind": None},
+                "action": {"days": a_lot_of_anys, "id": "stripe.insights_test", "name": "stripe.insights_test"},
             },
         )
 
@@ -866,12 +866,12 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 6)
 
         expected_products = [
-            "stripe.posthog_test - Product A",
-            "stripe.posthog_test - Product B",
-            "stripe.posthog_test - Product C",
-            "stripe.posthog_test - Product D",
-            "stripe.posthog_test - Product E",
-            "stripe.posthog_test - Product F",
+            "stripe.insights_test - Product A",
+            "stripe.insights_test - Product B",
+            "stripe.insights_test - Product C",
+            "stripe.insights_test - Product D",
+            "stripe.insights_test - Product E",
+            "stripe.insights_test - Product F",
         ]
         self.assertEqual([result.total["label"] for result in results], expected_products)
 
@@ -947,18 +947,18 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(len(results), 12)
 
         expected_breakdowns = [
-            "stripe.posthog_test - 2025-01 - Product A",
-            "stripe.posthog_test - 2025-01 - Product B",
-            "stripe.posthog_test - 2025-01 - Product C",
-            "stripe.posthog_test - 2025-01 - Product D",
-            "stripe.posthog_test - 2025-01 - Product E",
-            "stripe.posthog_test - 2025-01 - Product F",
-            "stripe.posthog_test - 2025-02 - Product A",
-            "stripe.posthog_test - 2025-02 - Product B",
-            "stripe.posthog_test - 2025-02 - Product C",
-            "stripe.posthog_test - 2025-02 - Product D",
-            "stripe.posthog_test - 2025-02 - Product E",
-            "stripe.posthog_test - 2025-02 - Product F",
+            "stripe.insights_test - 2025-01 - Product A",
+            "stripe.insights_test - 2025-01 - Product B",
+            "stripe.insights_test - 2025-01 - Product C",
+            "stripe.insights_test - 2025-01 - Product D",
+            "stripe.insights_test - 2025-01 - Product E",
+            "stripe.insights_test - 2025-01 - Product F",
+            "stripe.insights_test - 2025-02 - Product A",
+            "stripe.insights_test - 2025-02 - Product B",
+            "stripe.insights_test - 2025-02 - Product C",
+            "stripe.insights_test - 2025-02 - Product D",
+            "stripe.insights_test - 2025-02 - Product E",
+            "stripe.insights_test - 2025-02 - Product F",
         ]
         self.assertEqual([result.total["label"] for result in results], expected_breakdowns)
 
@@ -1044,7 +1044,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ).results
 
         self.assertEqual(len(results), 1)
-        self.assertEqual([result.total["label"] for result in results], ["stripe.posthog_test"])
+        self.assertEqual([result.total["label"] for result in results], ["stripe.insights_test"])
         self.assertEqual([result.total["data"] for result in results], expected_data)
 
         # When grouping results should be exactly the same, just the label changes
@@ -1060,7 +1060,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ).results
 
         self.assertEqual(len(results), 1)
-        self.assertEqual([result.total["label"] for result in results], ["stripe.posthog_test - Product C"])
+        self.assertEqual([result.total["label"] for result in results], ["stripe.insights_test - Product C"])
         self.assertEqual([result.total["data"] for result in results], expected_data)
 
     def test_with_country_filter(self):
@@ -1075,7 +1075,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         ).results
 
         self.assertEqual(len(results), 1)
-        self.assertEqual([result.total["label"] for result in results], ["stripe.posthog_test"])
+        self.assertEqual([result.total["label"] for result in results], ["stripe.insights_test"])
         self.assertEqual(
             [result.total["data"] for result in results],
             [
@@ -1218,7 +1218,7 @@ class TestRevenueAnalyticsMRRQueryRunner(ClickhouseTestMixin, APIBaseTest):
         )
 
     def test_with_events_data_with_managed_viewsets_ff(self):
-        with patch("posthoganalytics.feature_enabled", return_value=True):
+        with patch("hanzoanalytics.feature_enabled", return_value=True):
             s1 = str(uuid7("2025-01-25"))
             s2 = str(uuid7("2025-02-03"))
             s3 = str(uuid7("2025-02-05"))

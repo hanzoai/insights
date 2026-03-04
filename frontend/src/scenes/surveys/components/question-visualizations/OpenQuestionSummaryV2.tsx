@@ -1,5 +1,5 @@
 import { useValues } from 'kea'
-import { useThumbSurvey } from 'posthog-js/react/surveys'
+import { useThumbSurvey } from '@hanzo/insights/react/surveys'
 import { useCallback, useEffect, useState } from 'react'
 
 import {
@@ -10,8 +10,8 @@ import {
     IconThumbsDownFilled,
     IconThumbsUp,
     IconThumbsUpFilled,
-} from '@posthog/icons'
-import { LemonButton, LemonSkeleton } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'

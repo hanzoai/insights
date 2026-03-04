@@ -1,6 +1,6 @@
 //Parse method copied from https://github.com/brianc/node-postgres/tree/master/packages/pg-connection-string
 //Copyright (c) 2010-2014 Brian Carlson (brian.m.carlson@gmail.com)
-//Adapted & Repurposed for TypeScript by Peter Hicks (peter.h@posthog.com)
+//Adapted & Repurposed for TypeScript by Peter Hicks (peter.h@hanzo.ai)
 //MIT License
 
 interface Config {

@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 
-import { IconSort } from '@posthog/icons'
+import { IconSort } from '@hanzo/icons'
 
 import { IconArrowDown, IconArrowUp } from 'lib/lemon-ui/icons'
 

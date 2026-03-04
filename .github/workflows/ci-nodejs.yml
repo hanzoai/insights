@@ -12,7 +12,7 @@ env:
     OBJECT_STORAGE_ACCESS_KEY_ID: 'object_storage_root_user'
     OBJECT_STORAGE_SECRET_ACCESS_KEY: 'object_storage_root_password'
     OBJECT_STORAGE_SESSION_RECORDING_FOLDER: 'session_recordings'
-    OBJECT_STORAGE_BUCKET: 'posthog'
+    OBJECT_STORAGE_BUCKET: 'insights'
     # set the max buffer size small enough that the functional tests behave the same in CI as when running locally
     SESSION_RECORDING_MAX_BUFFER_SIZE_KB: 1024
 
@@ -82,14 +82,14 @@ jobs:
                   npm_config_fetch_retry_mintimeout: 10000
                   npm_config_fetch_retry_maxtimeout: 60000
               run: |
-                  pnpm --filter=@posthog/nodejs... install --frozen-lockfile
-                  bin/turbo --filter=@posthog/nodejs prepare
+                  pnpm --filter=@hanzo/nodejs... install --frozen-lockfile
+                  bin/turbo --filter=@hanzo/nodejs prepare
 
             - name: Check formatting with prettier
-              run: pnpm --filter=@posthog/nodejs prettier:check
+              run: pnpm --filter=@hanzo/nodejs prettier:check
 
             - name: Lint with ESLint
-              run: pnpm --filter=@posthog/nodejs lint
+              run: pnpm --filter=@hanzo/nodejs lint
 
     build:
         if: needs.changes.outputs.nodejs == 'true'
@@ -119,11 +119,11 @@ jobs:
                   npm_config_fetch_retry_mintimeout: 10000
                   npm_config_fetch_retry_maxtimeout: 60000
               run: |
-                  pnpm --filter=@posthog/nodejs... install --frozen-lockfile
-                  bin/turbo --filter=@posthog/nodejs prepare
+                  pnpm --filter=@hanzo/nodejs... install --frozen-lockfile
+                  bin/turbo --filter=@hanzo/nodejs prepare
 
             - name: Check builds correctly
-              run: pnpm --filter=@posthog/nodejs build
+              run: pnpm --filter=@hanzo/nodejs build
 
             - name: Sanity check output
               run: |
@@ -151,7 +151,7 @@ jobs:
         env:
             REDIS_URL: 'redis://localhost'
             CLICKHOUSE_HOST: 'localhost'
-            CLICKHOUSE_DATABASE: 'posthog_test'
+            CLICKHOUSE_DATABASE: 'insights_test'
             KAFKA_HOSTS: 'kafka:9092'
 
         steps:
@@ -237,7 +237,7 @@ jobs:
                   npm_config_fetch_retries: 3
                   npm_config_fetch_retry_mintimeout: 10000
                   npm_config_fetch_retry_maxtimeout: 60000
-              run: pnpm --filter=@posthog/nodejs... install --frozen-lockfile
+              run: pnpm --filter=@hanzo/nodejs... install --frozen-lockfile
 
             - name: Wait for Clickhouse, Redis, Kafka, Localstack
               run: docker compose -f docker-compose.dev.yml up kafka redis7 clickhouse maildev localstack -d --wait
@@ -261,20 +261,20 @@ jobs:
               env:
                   TEST: 'true'
                   SECRET_KEY: 'abcdef' # unsafe - for testing only
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
-                  BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/test_behavioral_cohorts'
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
+                  BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://insights:insights@localhost:5432/test_behavioral_cohorts'
                   GH_TOKEN: ${{ github.token }}
               run: |
                   # Download pre-migrated schema from CI
-                  ./bin/hogli db:download-schema
+                  ./bin/insightscli db:download-schema
 
                   # Create test databases
-                  docker compose -f docker-compose.dev.yml exec -T db psql -U posthog -c "DROP DATABASE IF EXISTS test_posthog;"
-                  docker compose -f docker-compose.dev.yml exec -T db psql -U posthog -c "CREATE DATABASE test_posthog;"
+                  docker compose -f docker-compose.dev.yml exec -T db psql -U insights -c "DROP DATABASE IF EXISTS test_insights;"
+                  docker compose -f docker-compose.dev.yml exec -T db psql -U insights -c "CREATE DATABASE test_insights;"
 
                   # Restore schema to test database
-                  echo "Restoring schema to test_posthog database..."
-                  gunzip -c .postgres-backups/schema-latest.sql.gz | docker compose -f docker-compose.dev.yml exec -T db psql -q -U posthog test_posthog
+                  echo "Restoring schema to test_insights database..."
+                  gunzip -c .postgres-backups/schema-latest.sql.gz | docker compose -f docker-compose.dev.yml exec -T db psql -q -U insights test_insights
                   echo "✅ Schema restored"
 
                   # Run Rust migrations for test databases
@@ -288,17 +288,17 @@ jobs:
               env:
                   TEST: 'true'
                   SECRET_KEY: 'abcdef' # unsafe - for testing only
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/posthog'
-                  BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/test_behavioral_cohorts'
-              run: pnpm --filter=@posthog/nodejs setup:test
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/insights'
+                  BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://insights:insights@localhost:5432/test_behavioral_cohorts'
+              run: pnpm --filter=@hanzo/nodejs setup:test
 
             - name: Test with Jest
               env:
                   # Below DB name has `test_` prepended, as that's how Django (ran above) creates the test DB
-                  DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/test_posthog'
-                  BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/test_behavioral_cohorts'
-                  PERSONS_DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/test_persons'
-                  PERSONS_READONLY_DATABASE_URL: 'postgres://posthog:posthog@localhost:5432/test_persons'
+                  DATABASE_URL: 'postgres://insights:insights@localhost:5432/test_insights'
+                  BEHAVIORAL_COHORTS_DATABASE_URL: 'postgres://insights:insights@localhost:5432/test_behavioral_cohorts'
+                  PERSONS_DATABASE_URL: 'postgres://insights:insights@localhost:5432/test_persons'
+                  PERSONS_READONLY_DATABASE_URL: 'postgres://insights:insights@localhost:5432/test_persons'
                   REDIS_URL: 'redis://localhost'
                   NODE_OPTIONS: '--max_old_space_size=4096'
                   SHARD_INDEX: ${{ matrix.shard }}
@@ -306,7 +306,7 @@ jobs:
                   LOG_LEVEL: info
                   # Enable localstack integration tests for DynamoDB/KMS
                   LOCALSTACK_ENABLED: '1'
-              run: bin/turbo run test --filter=@posthog/nodejs
+              run: bin/turbo run test --filter=@hanzo/nodejs
 
             - name: Output logs on failure
               if: failure()

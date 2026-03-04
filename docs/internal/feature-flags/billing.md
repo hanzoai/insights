@@ -48,8 +48,8 @@ The service stores counts in Redis hashes using time-bucketed fields:
 
 | Request Type     | Team Key                                      | SDK Key                                                      |
 | ---------------- | --------------------------------------------- | ------------------------------------------------------------ |
-| `/decide`        | `posthog:decide_requests:{team_id}`           | `posthog:decide_requests:sdk:{team_id}:{sdk_name}`           |
-| Local evaluation | `posthog:local_evaluation_requests:{team_id}` | `posthog:local_evaluation_requests:sdk:{team_id}:{sdk_name}` |
+| `/decide`        | `insights:decide_requests:{team_id}`           | `insights:decide_requests:sdk:{team_id}:{sdk_name}`           |
+| Local evaluation | `insights:local_evaluation_requests:{team_id}` | `insights:local_evaluation_requests:sdk:{team_id}:{sdk_name}` |
 
 ### Time bucketing
 
@@ -83,19 +83,19 @@ The service extracts the SDK type from the request's user-agent header and incre
 
 | SDK Name               | Description             |
 | ---------------------- | ----------------------- |
-| `posthog-js`           | Web browsers            |
-| `posthog-node`         | Server-side Node.js     |
-| `posthog-python`       | Python SDK              |
-| `posthog-php`          | PHP SDK                 |
-| `posthog-ruby`         | Ruby SDK                |
-| `posthog-go`           | Go SDK                  |
-| `posthog-java`         | Java SDK                |
-| `posthog-dotnet`       | .NET SDK                |
-| `posthog-elixir`       | Elixir SDK              |
-| `posthog-android`      | Android SDK             |
-| `posthog-ios`          | iOS SDK                 |
-| `posthog-react-native` | React Native SDK        |
-| `posthog-flutter`      | Flutter SDK             |
+| `insights-js`           | Web browsers            |
+| `insights-node`         | Server-side Node.js     |
+| `insights-python`       | Python SDK              |
+| `insights-php`          | PHP SDK                 |
+| `insights-ruby`         | Ruby SDK                |
+| `insights-go`           | Go SDK                  |
+| `insights-java`         | Java SDK                |
+| `insights-dotnet`       | .NET SDK                |
+| `insights-elixir`       | Elixir SDK              |
+| `insights-android`      | Android SDK             |
+| `insights-ios`          | iOS SDK                 |
+| `insights-react-native` | React Native SDK        |
+| `insights-flutter`      | Flutter SDK             |
 | `other`                | Unknown or unrecognized |
 
 ### Redis pipelining
@@ -126,14 +126,14 @@ A Celery task aggregates Redis counters and emits Insights events every 30 minut
 
 **Source files:**
 
-- `posthog/models/feature_flag/flag_analytics.py` - Aggregation logic
-- `posthog/tasks/tasks.py` - Task definition (`calculate_decide_usage`)
-- `posthog/tasks/scheduled.py` - Schedule configuration
+- `insights/models/feature_flag/flag_analytics.py` - Aggregation logic
+- `insights/tasks/tasks.py` - Task definition (`calculate_decide_usage`)
+- `insights/tasks/scheduled.py` - Schedule configuration
 
 ### Task schedule
 
 ```python
-# posthog/tasks/scheduled.py
+# insights/tasks/scheduled.py
 sender.add_periodic_task(
     crontab(minute="*/30"),
     calculate_decide_usage.s(),
@@ -145,7 +145,7 @@ sender.add_periodic_task(
 
 For each team (excluding internal metrics and demo teams):
 
-1. **Acquire distributed lock**: `posthog:decide_analytics:lock:{team_id}` with 60-second timeout
+1. **Acquire distributed lock**: `insights:decide_analytics:lock:{team_id}` with 60-second timeout
 2. **Extract counters**: Read all time buckets except the current one (still being filled)
 3. **Extract SDK breakdown**: Read all SDK-specific counters using pipelining
 4. **Consume buckets**: Delete processed buckets from Redis
@@ -183,9 +183,9 @@ The aggregation task emits events to Insights's internal analytics instance.
   "max_time": 1705001800,
   "token": "<billing_token>",
   "sdk_breakdown": {
-    "posthog-js": 800,
-    "posthog-python": 300,
-    "posthog-node": 134
+    "insights-js": 800,
+    "insights-python": 300,
+    "insights-node": 134
   }
 }
 ```
@@ -207,7 +207,7 @@ Events are stored in ClickHouse under a specific team based on region:
 
 The usage report task queries ClickHouse for aggregated billing data.
 
-**Source file:** `posthog/tasks/usage_report.py`
+**Source file:** `insights/tasks/usage_report.py`
 
 ### Billable calculation
 
@@ -244,7 +244,7 @@ AND has([%(validity_token)s], replaceRegexpAll(JSONExtractRaw(properties, 'token
 
 ## Billing service processing
 
-The usage report is sent daily to the billing service (`billing.posthog.com`), which:
+The usage report is sent daily to the billing service (`billing.hanzo.ai`), which:
 
 1. **Extracts** `billable_feature_flag_requests_count_in_period` from the report
 2. **Stores** it as `feature_flag_requests` in the `UsageReport` model
@@ -260,11 +260,11 @@ The SDK breakdown (`sdk_breakdown` property) is stored in the events but not use
 
 ```bash
 # View current counters for a team
-redis-cli HGETALL "posthog:decide_requests:123"
-redis-cli HGETALL "posthog:decide_requests:sdk:123:posthog-js"
+redis-cli HGETALL "insights:decide_requests:123"
+redis-cli HGETALL "insights:decide_requests:sdk:123:insights-js"
 
 # View all SDK keys for a team
-redis-cli KEYS "posthog:decide_requests:sdk:123:*"
+redis-cli KEYS "insights:decide_requests:sdk:123:*"
 ```
 
 ### Query usage events
@@ -286,9 +286,9 @@ LIMIT 100
 ### Force aggregation for a team
 
 ```python
-from posthog.models.feature_flag.flag_analytics import capture_team_decide_usage
-from posthoganalytics import Posthog
+from insights.models.feature_flag.flag_analytics import capture_team_decide_usage
+from insightsanalytics import Insights
 
-ph_client = Posthog(project_api_key='...', host='...')
+ph_client = Insights(project_api_key='...', host='...')
 capture_team_decide_usage(ph_client, team_id=123, team_uuid='...')
 ```

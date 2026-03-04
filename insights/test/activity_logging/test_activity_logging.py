@@ -77,7 +77,7 @@ class TestActivityLogModel(BaseTest):
             ActivityLog.objects.create()
 
         self.assertIn(
-            'new row for relation "posthog_activitylog" violates check constraint "must_have_team_or_organization_id',
+            'new row for relation "insights_activitylog" violates check constraint "must_have_team_or_organization_id',
             error.exception.args[0],
         )
 

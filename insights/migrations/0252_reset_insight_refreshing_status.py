@@ -4,7 +4,7 @@ from django.db import migrations
 
 
 def reset_insight_refreshing_status(apps, _) -> None:
-    # https://github.com/PostHog/posthog/pull/10960 introduced a bug.
+    # https://github.com/hanzoai/insights/pull/10960 introduced a bug.
     # That set all Insights and DashboardTiles to have refreshing = True
     # Which meant they couldn't be refreshed
     # This migration fixed that. And has now been made a no-op as it has done its job

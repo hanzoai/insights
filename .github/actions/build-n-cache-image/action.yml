@@ -86,12 +86,12 @@ runs:
               REGISTRY: ${{ steps.aws-ecr.outputs.registry }}
               PR_NUMBER: ${{ inputs.pr-number }}
           run: |
-              TAGS="posthog/posthog:$COMMIT_SHA"
+              TAGS="insights/insights:$COMMIT_SHA"
               if [[ -n "$REGISTRY" ]]; then
-                TAGS="$TAGS,$REGISTRY/posthog-cloud:$COMMIT_SHA"
+                TAGS="$TAGS,$REGISTRY/insights-cloud:$COMMIT_SHA"
               fi
               if [[ "$PR_NUMBER" != "" ]]; then
-                TAGS="$TAGS,$REGISTRY/posthog-cloud:pr-$PR_NUMBER"
+                TAGS="$TAGS,$REGISTRY/insights-cloud:pr-$PR_NUMBER"
               fi
               echo "tag=$TAGS" >> $GITHUB_OUTPUT
 

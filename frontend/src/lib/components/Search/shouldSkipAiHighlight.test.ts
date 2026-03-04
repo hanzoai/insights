@@ -20,7 +20,7 @@ describe('shouldSkipAiHighlight', () => {
             expect(shouldSkipAiHighlight(query, items)).toBe(false)
         })
 
-        it.each(['ai', 'max', 'posthog ai', 'ask ai', 'ask posthog', 'AI', 'MAX'])(
+        it.each(['ai', 'max', 'insights ai', 'ask ai', 'ask insights', 'AI', 'MAX'])(
             'returns false for explicit AI intent: "%s"',
             (query) => {
                 expect(shouldSkipAiHighlight(query, [createItem()])).toBe(false)
@@ -93,7 +93,7 @@ describe('shouldSkipAiHighlight', () => {
             expect(shouldSkipAiHighlight(query, [])).toBe(true) // Even without results
         })
 
-        it.each(['user@example.com', 'test.user@posthog.com', 'john+tag@company.co.uk'])(
+        it.each(['user@example.com', 'test.user@hanzo.ai', 'john+tag@company.co.uk'])(
             'returns true for email pattern: "%s"',
             (query) => {
                 expect(shouldSkipAiHighlight(query, [])).toBe(true) // Even without results
@@ -111,7 +111,7 @@ describe('shouldSkipAiHighlight', () => {
             '/feature_flags/my-flag',
             '/experiments/test-exp',
             '/cohorts/123',
-            'https://app.posthog.com/insights/abc',
+            'https://insights.hanzo.ai/insights/abc',
             'http://localhost/dashboard/1',
         ])('returns true for URL/path pattern: "%s"', (query) => {
             expect(shouldSkipAiHighlight(query, [])).toBe(true)

@@ -22,7 +22,7 @@ const meta: Meta<typeof ActivityLog> = {
                 '/api/users/@me': () => [
                     200,
                     {
-                        email: 'test@posthog.com',
+                        email: 'test@hanzo.ai',
                         first_name: 'Test Mascot',
                         organization: {
                             ...organizationCurrent,
@@ -110,7 +110,7 @@ export function WithoutAuditLogsFeaure(): JSX.Element {
             '/api/users/@me': () => [
                 200,
                 {
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                     first_name: 'Test Mascot',
                     organization: {
                         ...organizationCurrent,

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconExternal } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonLabel, LemonSelect } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { LemonField } from 'lib/lemon-ui/LemonField'
@@ -72,14 +72,14 @@ function generateTerminalExample(endpoint: EndpointVersionType, selectedVersion:
     // If no payload and no version, omit the -d flag entirely
     if (!hasPayload && !versionParam) {
         return `curl -X POST ${getEndpointUrl(endpoint.endpoint_path)} \\
-  -H "Authorization: Bearer $POSTHOG_PERSONAL_API_KEY"`
+  -H "Authorization: Bearer $INSIGHTS_PERSONAL_API_KEY"`
     }
 
     const payloadBody = formatPayloadForCodeExample(payload)
     const dataContent = [payloadBody, versionParam].filter(Boolean).join(',\n')
 
     return `curl -X POST ${getEndpointUrl(endpoint.endpoint_path)} \\
-  -H "Authorization: Bearer $POSTHOG_PERSONAL_API_KEY" \\
+  -H "Authorization: Bearer $INSIGHTS_PERSONAL_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
 ${dataContent}
@@ -101,7 +101,7 @@ function generatePythonExample(endpoint: EndpointVersionType, selectedVersion: n
 url = "${getEndpointUrl(endpoint.endpoint_path)}"
 
 headers = {
-    'Authorization': 'Bearer {POSTHOG_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 }
 
 response = requests.post(url, headers=headers)
@@ -118,7 +118,7 @@ url = "${getEndpointUrl(endpoint.endpoint_path)}"
 
 headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer {POSTHOG_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 }
 
 payload = {
@@ -144,7 +144,7 @@ function generateNodeExample(endpoint: EndpointVersionType, selectedVersion: num
 const url = '${getEndpointUrl(endpoint.endpoint_path)}';
 
 const headers = {
-    'Authorization': 'Bearer {POSTHOG_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 };
 
 fetch(url, {
@@ -165,7 +165,7 @@ const url = '${getEndpointUrl(endpoint.endpoint_path)}';
 
 const headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer {POSTHOG_PERSONAL_API_KEY}'
+    'Authorization': 'Bearer {INSIGHTS_PERSONAL_API_KEY}'
 };
 
 const payload = {

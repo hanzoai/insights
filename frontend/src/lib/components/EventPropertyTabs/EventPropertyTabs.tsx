@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { INTERNAL_EXCEPTION_PROPERTY_KEYS } from '@posthog/products-error-tracking/frontend/utils'
+import { INTERNAL_EXCEPTION_PROPERTY_KEYS } from '@hanzo/products-error-tracking/frontend/utils'
 
 import { eventPropertyFilteringLogic } from 'lib/components/EventPropertyTabs/eventPropertyFilteringLogic'
 import { HTMLElementsDisplay } from 'lib/components/HTMLElementsDisplay/HTMLElementsDisplay'
@@ -9,7 +9,7 @@ import { dayjs } from 'lib/dayjs'
 import { LemonTab, LemonTabs, LemonTabsProps } from 'lib/lemon-ui/LemonTabs'
 import { AutocaptureImageTab, autocaptureToImage } from 'lib/utils/autocapture-previews'
 
-import { CORE_FILTER_DEFINITIONS_BY_GROUP, POSTHOG_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
+import { CORE_FILTER_DEFINITIONS_BY_GROUP, INSIGHTS_EVENT_PROMOTED_PROPERTIES } from '~/taxonomy/taxonomy'
 import { EventType, RecordingEventType } from '~/types'
 
 import { ErrorEventType } from '../Errors/types'
@@ -71,7 +71,7 @@ export const EventPropertyTabs = ({
                   : 'properties'
     )
 
-    const promotedKeys = POSTHOG_EVENT_PROMOTED_PROPERTIES[event.event]
+    const promotedKeys = INSIGHTS_EVENT_PROMOTED_PROPERTIES[event.event]
 
     let properties = {}
     const featureFlagProperties = {}

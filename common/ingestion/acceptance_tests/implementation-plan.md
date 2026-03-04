@@ -9,7 +9,7 @@ Python-based acceptance tests for the LLM Analytics capture pipeline, testing ag
 ### Local Development
 
 - User starts Insights stack manually (using docker-compose or other method)
-- Set POSTHOG_TEST_BASE_URL environment variable to Insights instance URL
+- Set INSIGHTS_TEST_BASE_URL environment variable to Insights instance URL
 - Run acceptance tests: `python run_tests.py`
 
 ### GitHub Actions
@@ -77,7 +77,7 @@ Python-based acceptance tests for the LLM Analytics capture pipeline, testing ag
 docker-compose -f docker-compose.dev-full.yml up -d
 
 # Set environment variable
-export POSTHOG_TEST_BASE_URL=http://localhost:8010
+export INSIGHTS_TEST_BASE_URL=http://localhost:8010
 
 # Run tests
 cd common/ingestion/acceptance_tests

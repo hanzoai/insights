@@ -6,7 +6,7 @@ from django.conf import settings
 
 import structlog
 from dateutil import parser
-from posthoganalytics.client import Client
+from hanzoanalytics.client import Client
 
 from insights.cloud_utils import is_cloud
 from insights.exceptions_capture import capture_exception
@@ -38,7 +38,7 @@ def get_org_owner_or_first_user(organization_id: str) -> Optional[User]:
 
 def capture_event(
     *,
-    pha_client: Client,
+    hia_client: Client,
     name: str,
     organization_id: Optional[str] = None,
     team_id: Optional[int] = None,
@@ -75,7 +75,7 @@ def capture_event(
             organization_id=organization_id,
         )
 
-        pha_client.capture(
+        hia_client.capture(
             distinct_id=distinct_id,
             event=name,
             properties={**properties, "scope": "user"},
@@ -83,7 +83,7 @@ def capture_event(
             timestamp=timestamp,
         )
     else:
-        pha_client.capture(
+        hia_client.capture(
             distinct_id=get_machine_id(),
             event=name,
             properties={**properties, "scope": "machine"},

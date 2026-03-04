@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { memo } from 'react'
 
-import { LemonSkeleton, LemonSwitch } from '@posthog/lemon-ui'
+import { LemonSkeleton, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { dayjs } from 'lib/dayjs'

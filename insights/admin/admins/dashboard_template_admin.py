@@ -27,6 +27,6 @@ class DashboardTemplateAdmin(admin.ModelAdmin):
             return None
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[template.team.pk]),
+            reverse("admin:insights_team_change", args=[template.team.pk]),
             template.team.name,
         )

@@ -1,4 +1,4 @@
-import { LemonButton, LemonMenuOverlay } from '@posthog/lemon-ui'
+import { LemonButton, LemonMenuOverlay } from '@hanzo/lemon-ui'
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 

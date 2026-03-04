@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconArrowRight, IconCheckCircle, IconDatabase, IconPieChart, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonCard, Link } from '@posthog/lemon-ui'
+import { IconArrowRight, IconCheckCircle, IconDatabase, IconPieChart, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -352,7 +352,7 @@ export function InlineSetup({ completeOnboarding, initialSetupView }: InlineSetu
             <div className="text-center">
                 <p className="text-xs text-muted-alt">
                     Need help? Check our{' '}
-                    <Link to="https://posthog.com/docs/revenue-analytics" target="_blank">
+                    <Link to="https://hanzo.ai/docs/revenue-analytics" target="_blank">
                         documentation
                     </Link>
                 </p>

@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from django.conf import settings
 
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import filters, request, response, serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -84,12 +84,12 @@ class NodePagination(PageNumberPagination):
 
 # TODO: consolidate graph traversal logic. similar implementations exist in:
 # - products/data_warehouse/backend/api/lineage.py (get_upstream_dag) should be deleted after new system takes over
-# - posthog/temporal/data_modeling/workflows/execute_dag.py (_get_edge_lookup, _get_downstream_lookup)
+# - insights/temporal/data_modeling/workflows/execute_dag.py (_get_edge_lookup, _get_downstream_lookup)
 # shared utility should exist and used between node viewset and workflow
 
 
 def _is_v2_backend_enabled(user: User, team: Team) -> bool:
-    return posthoganalytics.feature_enabled(
+    return hanzoanalytics.feature_enabled(
         "data-modeling-backend-v2",
         str(user.distinct_id),
         groups={
@@ -152,7 +152,7 @@ class NodeViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         return super().get_serializer_context()
 
     def safely_get_queryset(self, queryset):
-        return queryset.filter(team_id=self.team_id, dag_id_text=f"posthog_{self.team_id}").order_by(self.ordering)
+        return queryset.filter(team_id=self.team_id, dag_id_text=f"insights_{self.team_id}").order_by(self.ordering)
 
     @action(methods=["POST"], detail=True)
     def run(self, req: request.Request, *args, **kwargs) -> response.Response:

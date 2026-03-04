@@ -13,7 +13,7 @@ from insights.models.user import User
 class _Base(APIBaseTest):
     def setUp(self) -> None:  # noqa: D401
         super().setUp()
-        self.user_2: User = User.objects.create_and_join(self.organization, "rookie@posthog.com", None)
+        self.user_2: User = User.objects.create_and_join(self.organization, "rookie@hanzo.ai", None)
 
 
 class TestPersistedFolderModel(_Base):

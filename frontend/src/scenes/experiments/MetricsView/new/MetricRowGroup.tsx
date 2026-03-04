@@ -4,7 +4,7 @@ import { useActions } from 'kea'
 import React, { useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { IconTrending } from '@posthog/icons'
+import { IconTrending } from '@hanzo/icons'
 
 import { LemonCollapse } from 'lib/lemon-ui/LemonCollapse'
 import { IconTrendingDown } from 'lib/lemon-ui/icons'

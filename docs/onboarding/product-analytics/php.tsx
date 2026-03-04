@@ -18,7 +18,7 @@ export const getPHPSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                composer require posthog/posthog-php
+                                composer require insights/insights-php
                             `,
                             },
                         ]}

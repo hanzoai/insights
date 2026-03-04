@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -149,7 +149,7 @@ export const groupsListLogic = kea<groupsListLogicType>([
                         queryOverrides[paramName] = parsedParam
                     }
                 } catch (error: any) {
-                    posthog.captureException('Failed to parse query overrides from URL', error)
+                    insights.captureException('Failed to parse query overrides from URL', error)
                 }
             }
 

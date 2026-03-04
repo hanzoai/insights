@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown, IconPlay } from '@posthog/icons'
-import { LemonButton, LemonMenuItems, LemonMenuOverlay } from '@posthog/lemon-ui'
+import { IconChevronDown, IconPlay } from '@hanzo/icons'
+import { LemonButton, LemonMenuItems, LemonMenuOverlay } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'

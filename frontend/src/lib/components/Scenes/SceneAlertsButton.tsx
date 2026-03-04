@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconWarning } from '@posthog/icons'
+import { IconWarning } from '@hanzo/icons'
 
 import { IconWithCount } from 'lib/lemon-ui/icons/icons'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'
