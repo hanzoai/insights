@@ -75,7 +75,7 @@ class AsyncMessageReader:
     def parse_body_size(self, metadata_flatbuffer: bytes | bytearray | memoryview) -> int:
         """Parse body size from metadata flatbuffer.
 
-        See: https://github.com/dvidelabs/flatcc/blob/master/doc/binary-format.md#internals.
+        See: https://github.com/hanzoai/flatcc/blob/main/doc/binary-format.md#internals.
         """
         # All content is little endian, and most offsets are 4 bytes.
         # The first location points to root table.

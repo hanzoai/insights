@@ -32,7 +32,7 @@ from insights.insightsql.visitor import CloningVisitor, TraversingVisitor, clone
 
 from insights.models.utils import UUIDT
 
-# https://github.com/ClickHouse/ClickHouse/issues/23194 - "Describe how identifiers in SELECT queries are resolved"
+# https://github.com/hanzoai/datastore/issues/23194 - "Describe how identifiers in SELECT queries are resolved"
 
 # To quickly disable global joins, switch this to False
 USE_GLOBAL_JOINS = False
@@ -479,7 +479,7 @@ class Resolver(CloningVisitor):
                     while next_join:
                         if self._is_next_s3(next_join):
                             is_global = True
-                        # Use GLOBAL joins for nested subqueries for S3 tables until https://github.com/ClickHouse/ClickHouse/pull/85839 is in
+                        # Use GLOBAL joins for nested subqueries for S3 tables until https://github.com/hanzoai/datastore/pull/85839 is in
                         elif isinstance(next_join.type, ast.SelectQueryAliasType):
                             select_query_type = next_join.type.select_query_type
                             tables = self._extract_tables_from_query_type(select_query_type)

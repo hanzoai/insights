@@ -198,7 +198,7 @@ class CHQueryErrorInvalidJoinOnExpression(InternalCHQueryError):
 
 
 #
-# From https://github.com/ClickHouse/ClickHouse/blob/v25.8.12.129-lts/src/Common/ErrorCodes.cpp#L17-L650
+# From https://github.com/hanzoai/datastore/blob/v25.8.12.129-lts/src/Common/ErrorCodes.cpp#L17-L650
 #
 # Please keep this list up to date at each ClickHouse upgrade.
 #

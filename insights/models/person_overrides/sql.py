@@ -89,7 +89,7 @@ KAFKA_PERSON_OVERRIDES_TABLE_SQL = f"""
     -- Take the types from the `person_overrides` table, except for the
     -- `created_at`, which we want to use the DEFAULT now() from the
     -- `person_overrides` definition. See
-    -- https://github.com/ClickHouse/ClickHouse/pull/38272 for details of `EMPTY
+    -- https://github.com/hanzoai/datastore/pull/38272 for details of `EMPTY
     -- AS SELECT`
     EMPTY AS SELECT
         team_id,
