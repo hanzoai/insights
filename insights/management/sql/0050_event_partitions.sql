@@ -135,7 +135,7 @@ DECLARE
     row RECORD;
 BEGIN 
     
-    -- If there is no master table then don't create
+    -- If there is no parent table then don't create
     IF NOT EXISTS
         (SELECT 1
         FROM   information_schema.tables 
