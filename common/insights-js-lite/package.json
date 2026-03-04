@@ -3,7 +3,7 @@
     "version": "6.0.0",
     "description": "Hanzo Insights Lite JavaScript SDK",
     "author": "Hanzo AI <dev@hanzo.ai>",
-    "repository": "https://github.com/hanzo-js/insights-js-lite",
+    "repository": "https://github.com/hanzoai/insights",
     "license": "MIT",
     "main": "index.js",
     "types": "index.d.ts",
@@ -12,6 +12,6 @@
         "index.d.ts"
     ],
     "dependencies": {
-        "_insights-js-lite-upstream": "4.2.2"
+        "insights-lite-upstream": "npm:@hanzo/insights-lite@4.2.2"
     }
 }

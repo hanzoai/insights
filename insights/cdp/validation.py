@@ -442,7 +442,7 @@ def topological_sort(nodes: list[str], edges: dict[str, list[str]]) -> list[str]
 
 
 def compile_script(fn: str, script_type: str, in_repl: Optional[bool] = False) -> list[Any]:
-    # Attempt to compile the hog
+    # Attempt to compile the script
     try:
         program = parse_program(fn)
 

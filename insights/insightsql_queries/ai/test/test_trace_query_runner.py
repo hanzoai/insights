@@ -321,7 +321,7 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
             properties={
                 "$ai_latency": 10.5,
                 "$ai_provider": "insights",
-                "$ai_model": "hog-destroyer",
+                "$ai_model": "fn-destroyer",
                 "$ai_http_status": 200,
                 "$ai_base_url": "https://insights.hanzo.ai",
             },
@@ -338,7 +338,7 @@ class TestTraceQueryRunner(ClickhouseTestMixin, BaseTest):
             {
                 "$ai_latency": 10.5,
                 "$ai_provider": "insights",
-                "$ai_model": "hog-destroyer",
+                "$ai_model": "fn-destroyer",
                 "$ai_http_status": 200,
                 "$ai_base_url": "https://insights.hanzo.ai",
             }.items(),

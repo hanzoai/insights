@@ -41,7 +41,7 @@ impl From<LocalCallable> for Callable {
     }
 }
 
-// hog has "primitives", which are copied by e.g, "get_local", and "objects", which are passed around by reference. This is distinct from the
+// iql has "primitives", which are copied by e.g, "get_local", and "objects", which are passed around by reference. This is distinct from the
 // "Heap" allocated stuff, which is used for things which must outlive all references to themselves on the stack, e.g. upvalues.
 
 #[derive(Debug, Clone, PartialEq)]
@@ -62,13 +62,13 @@ pub enum HogValue {
     Ref(HeapReference),
 }
 
-// Basically, for anything we want to be able to cheaply convert try and convert a hog value into, e.g.
+// Basically, for anything we want to be able to cheaply convert try and convert a iql value into, e.g.
 // a bool or an int, but also for ref types, like a &str or a &[HogValue]
 pub trait FromHogRef {
     fn from_ref(value: &HogLiteral) -> Result<&Self, VmError>;
 }
 
-// For anything where we want to deconstruct the hog value, like a String or an Array
+// For anything where we want to deconstruct the iql value, like a String or an Array
 pub trait FromHogLiteral: Sized {
     fn from_val(value: HogLiteral) -> Result<Self, VmError>;
 }
@@ -81,7 +81,7 @@ impl HogValue {
         literal.type_name()
     }
 
-    pub fn deref<'a, 'b: 'a>(&'a self, heap: &'b VmHeap) -> Result<&'a HogLiteral, VmError> {
+    pub fn deref<'a, 'b: 'a>(&'a self, heap: &'b VmHeap) -> Result<&'an IQLLiteral, VmError> {
         match self {
             HogValue::Lit(lit) => Ok(lit),
             HogValue::Ref(ptr) => heap.get(*ptr),
@@ -93,7 +93,7 @@ impl HogValue {
         &'a self,
         chain: &[HogValue],
         heap: &'b VmHeap,
-    ) -> Result<Option<&'a HogValue>, VmError> {
+    ) -> Result<Option<&'an IQLValue>, VmError> {
         if chain.is_empty() {
             return Ok(Some(self));
         }
@@ -321,7 +321,7 @@ impl FromHogLiteral for String {
     }
 }
 
-// TODO - hog values are actually "truthy", as in, will coerce to boolean
+// TODO - iql values are actually "truthy", as in, will coerce to boolean
 // true for all non-null values
 impl FromHogRef for bool {
     fn from_ref(value: &HogLiteral) -> Result<&Self, VmError> {
@@ -622,7 +622,7 @@ impl Display for Closure {
 /// correctly laid out in VM-memory space, and pushing it directly onto the
 /// stack is undefined behavior. It's designed for use within native function
 /// extensions, where you don't have mutable access to a VM's heap, but still
-/// need to construct a HogValue from a JSON value.
+/// need to construct an IQLValue from a JSON value.
 ///
 /// `ExecutionContext::execute_native_function_call` correctly maps the return
 /// value of the native function call to the VM's memory space, making values
@@ -630,7 +630,7 @@ impl Display for Closure {
 pub fn construct_free_standing(current: JsonValue, depth: usize) -> Result<HogValue, VmError> {
     if depth > MAX_JSON_SERDE_DEPTH {
         return Err(VmError::OutOfResource(
-            "json->hog deserialization depth".to_string(),
+            "json->iql deserialization depth".to_string(),
         ));
     }
 

@@ -330,7 +330,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                     // Parse strings as json, if a string was passed
                     HogLiteral::String(s) => serde_json::from_str(s)
                         .map_err(|e| VmError::NativeCallFailed(e.to_string()))?,
-                    // Otherwise just convert the hog to a json object
+                    // Otherwise just convert the iql to a json object
                     _ => vm.hog_to_json(&args[0])?,
                 };
                 // JSONExtract must be provided a return type as the final argument (as per the clickhouse implementation). We

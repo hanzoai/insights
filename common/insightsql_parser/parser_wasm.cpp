@@ -241,7 +241,7 @@ string parse_string_literal_text_wasm(const string& input) {
 
 // EMSCRIPTEN BINDINGS
 
-EMSCRIPTEN_BINDINGS(hogql_parser) {
+EMSCRIPTEN_BINDINGS(insightsql_parser) {
   emscripten::function("parseExpr", &parse_expr);
   emscripten::function("parseOrderExpr", &parse_order_expr);
   emscripten::function("parseSelect", &parse_select);

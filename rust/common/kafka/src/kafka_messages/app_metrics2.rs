@@ -48,7 +48,7 @@ mod tests {
             team_id: 123,
             timestamp: Utc.with_ymd_and_hms(2023, 12, 14, 12, 2, 0).unwrap(),
             app_source: Source::Hoghooks,
-            app_source_id: "hog-function-1".to_owned(),
+            app_source_id: "fn-function-1".to_owned(),
             instance_id: Some("hash".to_owned()),
             metric_kind: Kind::Success,
             metric_name: "fetch".to_owned(),
@@ -57,7 +57,7 @@ mod tests {
 
         let serialized_json = serde_json::to_string(&app_metric).unwrap();
 
-        let expected_json = r#"{"team_id":123,"timestamp":"2023-12-14 12:02:00","app_source":"insightshooks","app_source_id":"hog-function-1","instance_id":"hash","metric_kind":"success","metric_name":"fetch","count":456}"#;
+        let expected_json = r#"{"team_id":123,"timestamp":"2023-12-14 12:02:00","app_source":"insightshooks","app_source_id":"fn-function-1","instance_id":"hash","metric_kind":"success","metric_name":"fetch","count":456}"#;
 
         assert_eq!(serialized_json, expected_json);
     }

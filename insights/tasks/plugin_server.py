@@ -24,7 +24,7 @@ def fatal_plugin_error(
     send_fatal_plugin_error.delay(plugin_config_id, plugin_config_updated_at, error, is_system_error)
 
 
-# Called from plugin-server/../hog-watcher.service.ts
+# Called from plugin-server/../fn-watcher.service.ts
 @shared_task(ignore_result=True, queue=queue)
 def insights_function_state_transition(insights_function_id: str, state: int) -> None:
     logger.info("insights_function_state_transition (disabled)", insights_function_id=insights_function_id, state=state)
@@ -44,7 +44,7 @@ def insights_function_state_transition(insights_function_id: str, state: int) ->
     #     "custom function state changed",
     #     {
     #         "insights_function_id": insights_function_id,
-    #         "insights_function_url": f"{settings.SITE_URL}/project/{insights_function.team.id}/pipeline/destinations/hog-{insights_function_id}",
+    #         "insights_function_url": f"{settings.SITE_URL}/project/{insights_function.team.id}/pipeline/destinations/fn-{insights_function_id}",
     #         "state": state,
     #     },
     # )

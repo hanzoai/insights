@@ -204,7 +204,7 @@ export function InsightsFunctionTest(): JSX.Element {
 
                     {inactive ? (
                         <LemonButton
-                            data-attr="expand-hog-testing"
+                            data-attr="expand-fn-testing"
                             type="secondary"
                             onClick={() => {
                                 toggleExpanded()
@@ -223,7 +223,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                     type="primary"
                                     onClick={() => setTestResult(null)}
                                     loading={isTestInvocationSubmitting}
-                                    data-attr="clear-hog-test-result"
+                                    data-attr="clear-fn-test-result"
                                 >
                                     Clear test result
                                 </LemonButton>
@@ -240,7 +240,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                                 <LemonSwitch
                                                                     onChange={(v) => onChange(!v)}
                                                                     checked={!value}
-                                                                    data-attr="toggle-hog-test-mocking"
+                                                                    data-attr="toggle-fn-test-mocking"
                                                                     className="px-2 py-1"
                                                                     label={
                                                                         <Tooltip
@@ -268,7 +268,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 {savedGlobals.map(({ name, globals }, index) => (
                                                     <div className="flex justify-between w-full" key={index}>
                                                         <LemonButton
-                                                            data-attr="open-hog-test-data"
+                                                            data-attr="open-fn-test-data"
                                                             key={index}
                                                             onClick={() => setSampleGlobals(globals)}
                                                             fullWidth
@@ -277,7 +277,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                             {name}
                                                         </LemonButton>
                                                         <LemonButton
-                                                            data-attr="delete-hog-test-data"
+                                                            data-attr="delete-fn-test-data"
                                                             size="small"
                                                             icon={<IconX />}
                                                             onClick={() => deleteSavedGlobals(index)}
@@ -288,7 +288,7 @@ export function InsightsFunctionTest(): JSX.Element {
                                                 {testInvocation.globals && (
                                                     <LemonButton
                                                         fullWidth
-                                                        data-attr="save-hog-test-data"
+                                                        data-attr="save-fn-test-data"
                                                         onClick={() => {
                                                             const name = prompt('Name this test data')
                                                             if (name) {
@@ -339,7 +339,7 @@ export function InsightsFunctionTest(): JSX.Element {
 
                             {expanded && (
                                 <LemonButton
-                                    data-attr="hide-hog-testing"
+                                    data-attr="hide-fn-testing"
                                     icon={<IconX />}
                                     onClick={() => toggleExpanded()}
                                     tooltip="Hide testing"
