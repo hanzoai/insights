@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 
-import { IconCheck } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { IconCheck } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { WEB_SAFE_FONTS } from 'scenes/surveys/constants'
@@ -138,7 +138,7 @@ export function SurveyContainerAppearance({
                 label="Position"
                 info={
                     surveyType === SurveyType.Widget && appearance.widgetType === SurveyWidgetType.Selector
-                        ? 'The "next to feedback button" option requires posthog.js version 1.235.2 or higher.'
+                        ? 'The "next to feedback button" option requires insights.js version 1.235.2 or higher.'
                         : undefined
                 }
                 className="gap-1 col-span-full"
@@ -182,7 +182,7 @@ export function SurveyContainerAppearance({
             </LemonField.Pure>
             <LemonField.Pure
                 label="Font family"
-                info="Custom font selection requires at least version 1.223.4 of posthog-js"
+                info="Custom font selection requires at least version 1.223.4 of insights-js"
                 className="gap-1"
             >
                 <LemonSelect

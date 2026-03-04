@@ -54,7 +54,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -95,7 +95,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -107,7 +107,7 @@
                 "method": "GET",
                 "duration": 266,
                 "status": 404,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -145,7 +145,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -186,7 +186,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -194,7 +194,7 @@
                     "8929-insight-editor-panels": false
                 },
                 "$console_log_recording_enabled_server_side": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$performance_page_loaded": 585.1,
@@ -234,7 +234,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -275,7 +275,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -285,7 +285,7 @@
                 "$console_log_recording_enabled_server_side": true,
                 "$feature_flag": "insightsql",
                 "$feature_flag_response": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -323,7 +323,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -364,7 +364,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -377,7 +377,7 @@
                 "$group_set": {
                     "site_url": "http://localhost:8000"
                 },
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -415,7 +415,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -456,7 +456,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -466,7 +466,7 @@
                 "$console_log_recording_enabled_server_side": true,
                 "$feature_flag": "example-flag",
                 "$feature_flag_response": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -504,7 +504,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -545,7 +545,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -555,7 +555,7 @@
                 "$console_log_recording_enabled_server_side": true,
                 "$feature_flag": "secondary-onboarding-experiment",
                 "$feature_flag_response": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -593,7 +593,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -634,7 +634,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -644,7 +644,7 @@
                 "$console_log_recording_enabled_server_side": true,
                 "$feature_flag": "cloud-announcement",
                 "$feature_flag_response": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -682,7 +682,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -723,7 +723,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -733,7 +733,7 @@
                 "$console_log_recording_enabled_server_side": true,
                 "$feature_flag": "hog-book",
                 "$feature_flag_response": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -771,7 +771,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],
@@ -812,7 +812,7 @@
                 "$feature/cloud-announcement": true,
                 "$feature/4562-nps": true,
                 "$feature/insightsql": true,
-                "posthog_version": "1.42.0",
+                "insights_version": "1.42.0",
                 "realm": "hosted-clickhouse",
                 "email_service_available": false,
                 "slack_service_available": false,
@@ -822,7 +822,7 @@
                 "$console_log_recording_enabled_server_side": true,
                 "$feature_flag": "feedback-button",
                 "$feature_flag_response": true,
-                "token": "phc_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
+                "token": "hi_1xVqdrnef7Sa0UzqpacMkBLKCE2yIoqJ0Y4STVddVCR",
                 "$session_id": "184daa3b4cf1fd0-053cd064009e46-18525635-201b88-184daa3b4d0c12",
                 "$window_id": "184daa3b4d15eb-0da9460623abb4-18525635-201b88-184daa3b4d2253",
                 "$set_once": {
@@ -860,7 +860,7 @@
                 "is_identified": true,
                 "distinct_ids": ["184ae069d181757-0c7310c8ee02fe-18525635-201b88-184ae069d192e7c"],
                 "properties": {
-                    "email": "marius@posthog.com"
+                    "email": "marius@hanzo.ai"
                 }
             },
             "elements": [],

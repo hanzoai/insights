@@ -396,7 +396,7 @@ class TestPropertyDefinitionAPI(APIBaseTest):
         if expected_names:
             assert [r["name"] for r in response.json()["results"]] == expected_names
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_delete_property_definition(self, mock_capture):
         property_definition = PropertyDefinition.objects.create(
             team=self.team, name="test_property", property_type="String"

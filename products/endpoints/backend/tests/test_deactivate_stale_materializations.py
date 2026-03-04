@@ -81,7 +81,7 @@ class TestDeactivateStaleMaterializationsTask(BaseTest):
         version.refresh_from_db()
         assert version.saved_query is None
 
-        saved_query = DataWarehouseSavedQuery.objects.get(name__startswith="POSTHOG_DELETED_")
+        saved_query = DataWarehouseSavedQuery.objects.get(name__startswith="INSIGHTS_DELETED_")
         assert saved_query.deleted is True
         assert saved_query.is_materialized is False
 

@@ -5,7 +5,7 @@ description: ClickHouse migration patterns and rules. Use when creating or modif
 
 # ClickHouse Migrations
 
-Read `posthog/clickhouse/migrations/AGENTS.md` for comprehensive patterns, cluster setup, examples, and ingestion layer details.
+Read `insights/clickhouse/migrations/AGENTS.md` for comprehensive patterns, cluster setup, examples, and ingestion layer details.
 
 ## Quick reference
 

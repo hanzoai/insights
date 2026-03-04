@@ -1,7 +1,7 @@
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
- *   hogli build:openapi
+ *   insightscli build:openapi
  * Questions or issues? #team-devex on Slack
  *
  * Insights API - generated
@@ -67,7 +67,7 @@ export const featureFlagsCopyFlagsCreate = async (organizationId: string, option
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -99,7 +99,7 @@ export const featureFlagsList = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -121,7 +121,7 @@ export const featureFlagsCreate = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -141,7 +141,7 @@ export const featureFlagsRetrieve2 = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -164,7 +164,7 @@ export const featureFlagsUpdate = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -201,7 +201,7 @@ export const featureFlagsDestroy = async (projectId: string, id: number, options
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -238,7 +238,7 @@ export const featureFlagsActivityRetrieve2 = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -261,7 +261,7 @@ export const featureFlagsCreateStaticCohortForFlagCreate = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -302,7 +302,7 @@ export const featureFlagsDependentFlagsRetrieve = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -325,7 +325,7 @@ export const featureFlagsEnrichUsageDashboardCreate = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -345,7 +345,7 @@ export const featureFlagsRemoteConfigRetrieve = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -365,7 +365,7 @@ export const featureFlagsStatusRetrieve = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -447,7 +447,7 @@ export const featureFlagsBulkKeysCreate = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -482,7 +482,7 @@ export const featureFlagsEvaluationReasonsRetrieve = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -533,7 +533,7 @@ export const featureFlagsMatchingIdsRetrieve = async (projectId: string, options
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */
@@ -565,7 +565,7 @@ export const featureFlagsMyFlagsRetrieve = async (
 }
 
 /**
- * Create, read, update and delete feature flags. [See docs](https://posthog.com/docs/feature-flags) for more information on feature flags.
+ * Create, read, update and delete feature flags. [See docs](https://hanzo.ai/docs/feature-flags) for more information on feature flags.
 
 If you're looking to use feature flags on your application, you can either use our JavaScript Library or our dedicated endpoint to check if feature flags are enabled for a given user.
  */

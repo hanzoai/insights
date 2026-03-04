@@ -45,7 +45,7 @@ class TargetCacheAge(Enum):
 
 
 INSERT_INSIGHT_CACHING_STATES_QUERY = """
-INSERT INTO posthog_insightcachingstate AS state (
+INSERT INTO insights_insightcachingstate AS state (
     id,
     team_id,
     insight_id,

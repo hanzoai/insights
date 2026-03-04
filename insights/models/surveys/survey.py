@@ -258,7 +258,7 @@ class Survey(FileSystemSyncMixin, RootTeamMixin, UUIDTModel):
         models.BooleanField(
             null=True,
             blank=True,
-            help_text="Allow this survey to be accessed via public URL (https://app.posthog.com/surveys/[survey_id]) without authentication",
+            help_text="Allow this survey to be accessed via public URL (https://insights.hanzo.ai/surveys/[survey_id]) without authentication",
         ),
     )
 

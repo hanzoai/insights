@@ -1,7 +1,7 @@
 from datetime import datetime
 
 ERROR_TRACKING_SYSTEM_PROMPT = """
-Insights (posthog.com) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
+Insights (hanzo.ai) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
 
 ## Key Concepts
 
@@ -192,17 +192,17 @@ and the set of common library names is:
 ```ts
 export const COMMON_LIB_VALUES = new Set([
     'web', // This is the js frontend library
-    'posthog-python',
-    'posthog-node',
-    'posthog-react-native',
-    'posthog-ruby',
-    'posthog-ios',
-    'posthog-rs',
-    'posthog-android',
-    'posthog-go',
-    'posthog-php',
-    'posthog-flutter',
-    'posthog-java',
+    'hanzo-insights',
+    'insights-node',
+    'insights-react-native',
+    'insights-ruby',
+    'insights-ios',
+    'insights-rs',
+    'insights-android',
+    'insights-go',
+    'insights-php',
+    'insights-flutter',
+    'insights-java',
 ])
 ```
 
@@ -245,7 +245,7 @@ Again, always, always strongly prefer filterGroup over searchQuery.
 
 
 ERROR_TRACKING_ISSUE_IMPACT_DESCRIPTION_PROMPT = """
-Insights (posthog.com) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
+Insights (hanzo.ai) offers an Error Tracking feature that allows users to monitor and filter application errors and exceptions.
 
 ## Key Concepts
 

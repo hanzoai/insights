@@ -5,7 +5,7 @@ description = "LLM Gateway"
 readme = "README.md"
 requires-python = ">=3.14"
 authors = [
-    { name = "PostHog", email = "hey@posthog.com" },
+    { name = "Hanzo Insights", email = "hey@insights.com" },
 ]
 dependencies = [
     "fastapi>=0.115.0",
@@ -21,7 +21,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator>=7.0.0",
     "structlog>=24.4.0",
     "httpx>=0.28.0",
-    "posthoganalytics>=3.0.0",
+    "hanzoanalytics>=3.0.0",
     "cachetools>=5.5.0",
     "python-multipart>=0.0.9",
 ]
@@ -96,3 +96,6 @@ warn_unused_ignores = true
 
 [tool.uv]
 managed = true
+
+[tool.uv.sources]
+hanzoanalytics = { path = "../../common/hanzoanalytics" }

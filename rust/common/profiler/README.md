@@ -17,8 +17,8 @@ The core output format and tooling for all of the above is [pprof](https://githu
 This library can be integrated into your Rust workspace project in a couple steps:
 
 1. Add the `common/profiler` dependency to your service. **Replace `common/alloc` dependency if present**
-2. Add the `used_with_profiling!()` macro to your `main.rs`, or replace `common/alloc`'s `used!()` invocation - [example here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L26) as [defined here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/lib.rs#L13-L22)
-3. Add the profiling trigger endpoints to your Axum server's `Router` - [example here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L129-L133) as [defined here](https://github.com/PostHog/posthog/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/router.rs#L8-L14)
+2. Add the `used_with_profiling!()` macro to your `main.rs`, or replace `common/alloc`'s `used!()` invocation - [example here](https://github.com/Hanzo Insights/insights/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L26) as [defined here](https://github.com/Hanzo Insights/insights/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/lib.rs#L13-L22)
+3. Add the profiling trigger endpoints to your Axum server's `Router` - [example here](https://github.com/Hanzo Insights/insights/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/kafka-deduplicator/src/main.rs#L129-L133) as [defined here](https://github.com/Hanzo Insights/insights/blob/b76f90ce684d8ff955074ae19d5d8ef49f4181ca/rust/common/profiler/src/router.rs#L8-L14)
 
 ...and that's about it! Deploy your service and use the instructions below to get started
 
@@ -29,13 +29,13 @@ This library can be integrated into your Rust workspace project in a couple step
 Set up k8s port forwarding on your local machine from your service's load balancer or a particular pod. Note this is a **blocking operation** - you can background it, or leave it running in foreground and start a new session for next steps.
 
 ```bash
-# Set local k8s env (posthog-prod, posthog-prod-eu, dev)
-$ kubectl config use-context posthog-prod-eu
+# Set local k8s env (insights-prod, insights-prod-eu, dev)
+$ kubectl config use-context insights-prod-eu
 
 # Notes:
 # - You can also use "pod/kafka-deduplicator-2" (pod name) to select a specific pod
 # - Ensure you forward the HTTP port that your Axum server exposes in k8s
-$ kubectl port-forward --namespace posthog service/kafka-deduplicator 8000:8000
+$ kubectl port-forward --namespace insights service/kafka-deduplicator 8000:8000
 ```
 
 `curl` the pprof endpoint and pipe the resulting GZIP'd output to your local filesystem.
@@ -71,7 +71,7 @@ $ go tool pprof -http=localhost:<PORT> profile.pb
 $ go tool pprof profile.pb
 
 # Include service binary for additional symbol translation (YMMV, can add this arg to any of the commands listed here)
-$ go tool pprof posthog/rust/target/debug/kafka-deduplicator profile.pb
+$ go tool pprof insights/rust/target/debug/kafka-deduplicator profile.pb
 
 # Open web browser with SVG image of profile report
 $ go tool pprof -web profile.pb

@@ -144,9 +144,9 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                             ? undefined
                             : {
                                   label: 'View installation guide',
-                                  to: 'https://posthog.com/docs/libraries/js',
+                                  to: 'https://hanzo.ai/docs/libraries/js',
                               },
-                        docsUrl: 'https://posthog.com/docs/product-analytics/capture-events',
+                        docsUrl: 'https://hanzo.ai/docs/product-analytics/capture-events',
                         urgent: true,
                     },
                     {
@@ -161,9 +161,9 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                             ? undefined
                             : {
                                   label: 'View installation guide',
-                                  to: 'https://posthog.com/docs/libraries/js',
+                                  to: 'https://hanzo.ai/docs/libraries/js',
                               },
-                        docsUrl: 'https://posthog.com/docs/web-analytics/dashboard#bounce-rate',
+                        docsUrl: 'https://hanzo.ai/docs/web-analytics/dashboard#bounce-rate',
                     },
                     {
                         id: HealthCheckId.SCROLL_DEPTH,
@@ -177,9 +177,9 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                             ? undefined
                             : {
                                   label: 'View installation guide',
-                                  to: 'https://posthog.com/docs/libraries/js',
+                                  to: 'https://hanzo.ai/docs/libraries/js',
                               },
-                        docsUrl: 'https://posthog.com/docs/web-analytics/scroll-depth',
+                        docsUrl: 'https://hanzo.ai/docs/web-analytics/scroll-depth',
                     },
                 ]
             },
@@ -207,9 +207,9 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                               ? undefined
                               : {
                                     label: 'Set up reverse proxy',
-                                    to: 'https://posthog.com/docs/advanced/proxy',
+                                    to: 'https://hanzo.ai/docs/advanced/proxy',
                                 },
-                          docsUrl: 'https://posthog.com/docs/advanced/proxy',
+                          docsUrl: 'https://hanzo.ai/docs/advanced/proxy',
                           urgent: true,
                       }
 
@@ -225,7 +225,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                         action: hasAuthorizedUrls
                             ? { label: 'Manage domains', to: urls.settings('environment-web-analytics') }
                             : { label: 'Add domains', to: urls.settings('environment-web-analytics') },
-                        docsUrl: 'https://posthog.com/docs/web-analytics/authorized-urls',
+                        docsUrl: 'https://hanzo.ai/docs/web-analytics/authorized-urls',
                     },
                     reverseProxyCheck,
                 ]
@@ -263,7 +263,7 @@ export const webAnalyticsHealthLogic = kea<webAnalyticsHealthLogicType>([
                                       label: 'Enable Web Vitals',
                                       to: urls.settings('environment-web-analytics', 'web-vitals-autocapture'),
                                   },
-                        docsUrl: 'https://posthog.com/docs/web-analytics/web-vitals',
+                        docsUrl: 'https://hanzo.ai/docs/web-analytics/web-vitals',
                     },
                 ]
             },

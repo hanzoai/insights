@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { IconChevronRight } from '@posthog/icons'
+import { IconChevronRight } from '@hanzo/icons'
 
 function segmentsToPath(segments: string[]): string {
     return segments

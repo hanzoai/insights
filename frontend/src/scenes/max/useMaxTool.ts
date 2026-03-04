@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import React, { useEffect } from 'react'
 
-import { IconWrench } from '@posthog/icons'
+import { IconWrench } from '@hanzo/icons'
 
 import { sidePanelLogic } from '~/layout/navigation-3000/sidepanel/sidePanelLogic'
 import { SidePanelTab } from '~/types'

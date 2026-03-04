@@ -13,7 +13,7 @@ export function droppedFramesForDelta(deltaMs: number): number {
     return Math.max(0, Math.round(deltaMs / EXPECTED_FRAME_TIME_MS) - 1)
 }
 
-export function startFramerateTracking(posthog: Capturable): void {
+export function startFramerateTracking(insights: Capturable): void {
     let rafId: number | null = null
     let captureIntervalId: number | null = null
     let previousTimestamp: number | null = null
@@ -41,7 +41,7 @@ export function startFramerateTracking(posthog: Capturable): void {
             return
         }
         const elapsed = performance.now() - measurementStart
-        posthog.capture('react_framerate', {
+        insights.capture('react_framerate', {
             avg_fps: Math.round((frameCount / elapsed) * 1000),
             avg_frame_time_ms: Math.round((frameTimeSum / frameCount) * 100) / 100,
             min_frame_time_ms: Math.round(shortestFrame * 100) / 100,

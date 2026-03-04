@@ -90,7 +90,7 @@ describe('ActionMatcher', () => {
                   )
                 : null,
         }
-        await insertRow(hub.postgres, 'posthog_action', action)
+        await insertRow(hub.postgres, 'insights_action', action)
         await actionManager.reloadAction(action.team_id, action.id)
 
         return {

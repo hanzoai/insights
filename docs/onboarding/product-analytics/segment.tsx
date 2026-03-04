@@ -59,7 +59,7 @@ export const getSegmentSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     </Markdown>
                     <CalloutBox type="fyi" title="Learn more">
                         <Markdown>
-                            See the [Segment integration docs](https://posthog.com/docs/libraries/segment) for more
+                            See the [Segment integration docs](https://hanzo.ai/docs/libraries/segment) for more
                             details.
                         </Markdown>
                     </CalloutBox>

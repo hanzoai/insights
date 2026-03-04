@@ -118,8 +118,8 @@ impl From<&HttpMethod> for http::Method {
 }
 
 /// `JobParameters` required for the `WebhookWorker` to execute a webhook.
-/// These parameters should match the exported Webhook interface that PostHog plugins.
-/// implement. See: https://github.com/PostHog/plugin-scaffold/blob/main/src/types.ts#L15.
+/// These parameters should match the exported Webhook interface that Insights plugins.
+/// implement. See: https://github.com/hanzoai/plugin-scaffold/blob/main/src/types.ts#L15.
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct WebhookJobParameters {
     pub body: String,

@@ -14,8 +14,8 @@ Temporal provides us with abstractions that handle the distributed execution whi
 
 That being said, if you do decide to develop an application or feature with Temporal, this README will guide you through how we develop with Temporal, common pitfalls, and useful additional abstractions we have developed over time.
 
-> DuckLake copy workflow configuration lives in `posthog/ducklake/README.md`.
-> DuckLake copy workflow configuration lives in `posthog/ducklake/TEMPORAL.md`.
+> DuckLake copy workflow configuration lives in `insights/ducklake/README.md`.
+> DuckLake copy workflow configuration lives in `insights/ducklake/TEMPORAL.md`.
 
 ## Temporal concepts
 
@@ -127,7 +127,7 @@ from temporalio.client import (
     ScheduleState,
 )
 
-from posthog.temporal.common.schedule import a_create_schedule
+from insights.temporal.common.schedule import a_create_schedule
 from products.my_product.workflows import my_workflow, MyWorkflowInputs
 
 
@@ -214,7 +214,7 @@ Every activity **must** have at least one of schedule-to-close and start-to-clos
 
 However, for long-running activities, these two timeouts are not enough: Imagine an activity that we expect to take 1 hour to complete, so we set a `start_to_close` timeout of 1 hour. If the worker crashes as soon as the activity begins, we will need to wait almost the full hour until the time out expires and the service re-schedules it. This is too long: We essentially wasted that whole hour, and potentially are now backed up as the new hour begins and we have a new workflow starting. This is why heartbeating and heartbeat timeouts are strongly recommended for any long running activities. By emitting heartbeats, the activities let the service know that they are still alive, and when they stop heartbeating for the duration of the timeout the service knows that the worker has likely crashed and the activity can be retried immediately, without waiting the full start-to-close timeout.
 
-Implementing heartbeating is very easy with the help of the `posthog.temporal.common.heartbeat.Heartbeater` class. This can be used as a context manager to wrap your long running work. `Heartbeater` will schedule a task that issues a heartbeat to the Temporal service within your configured `heartbeat_timeout`.
+Implementing heartbeating is very easy with the help of the `insights.temporal.common.heartbeat.Heartbeater` class. This can be used as a context manager to wrap your long running work. `Heartbeater` will schedule a task that issues a heartbeat to the Temporal service within your configured `heartbeat_timeout`.
 
 Hearbeats can include additional arbitrary information in them. This is known as the heartbeat's details. Anything passed is persisted in Temporal and can be obtained later. This can enable progress tracking using heartbeats, but keep in mind that heartbeat delivery is buffered and not guaranteed. For general tracking purposes including details in the heartbeat can be useful, but for precise controls we recommend looking somewhere else.
 
@@ -242,7 +242,7 @@ import datetime as dt
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.heartbeat import Heartbeater
+from insights.temporal.common.heartbeat import Heartbeater
 
 
 class FatalError(Exception):
@@ -302,7 +302,7 @@ class HelloWorldWorkflow:
 
 ### Logging
 
-Like the rest of Insights, logging in Temporal is configured to use [structlog](https://www.structlog.org/en/stable/). In contrast to the rest of Insights, the structlog configuration defined in `posthog/temporal/common/logger.py` is more complex as it supports two logging modes:
+Like the rest of Insights, logging in Temporal is configured to use [structlog](https://www.structlog.org/en/stable/). In contrast to the rest of Insights, the structlog configuration defined in `insights/temporal/common/logger.py` is more complex as it supports two logging modes:
 
 - Write: Logs are written to stdout. These are logs meant to be ingested by internal logging parsers and monitoring systems.
 - Produce: Logs are produced to Kafka and later consumed by ClickHouse in the `log_entries` table. This enables querying of logs in Insights to, for example, communicate to users directly from a Temporal activity or workflow. As an example of this, check how the batch exports logs tab is used to offer debug information to users to allow them to fix configuration errors.
@@ -313,11 +313,11 @@ By default, the logger you get from `structlog.get_logger` is configured to do b
 > Do note that producing logs requires extra configuration to fit the `log_entries` table schema:
 >
 > - A `team_id` must be set somewhere in the context.
-> - The function `resolve_log_source` in `posthog/temporal/common/logger.py` must be configured to resolve a `log_source` from your workflow's ID and type.
+> - The function `resolve_log_source` in `insights/temporal/common/logger.py` must be configured to resolve a `log_source` from your workflow's ID and type.
 >   That being said, we want logging to be there when you need it, but otherwise get out of the way. For this reason, writing logs to stdout will always work, regardless of whether the requirements for log production are met or not. Moreover, if the requirements for log production are not met, log production will not crash your workflows.
 
 > [!TIP]
-> If you don't care about log production, you can use `get_write_only_logger` from `posthog/temporal/common/logger.py` to obtain a logger that only writes to stdout. `get_produce_only_logger` works analogously.
+> If you don't care about log production, you can use `get_write_only_logger` from `insights/temporal/common/logger.py` to obtain a logger that only writes to stdout. `get_produce_only_logger` works analogously.
 
 `get_logger` is meant to be called only **once** at the top of your module. If you are going to be logging several times, call `bind` on the global loggers at the top of your activity and/or workflow to avoid the global lookup. The `bind` method also allows binding variables to the logger itself.
 
@@ -388,7 +388,7 @@ Locally, the logs are rendered by structlog using [Rich](https://rich.readthedoc
 
 As part of normal operations, Temporal workers are often shutdown and restarted (for example, when a new deployment is triggered). When a shutdown request is emitted, workers will wait for activities running in them to finish. However, they won't wait forever: There is a timeout that can range from a few minutes to hours, as configured in the deployment, and after the timeout fires, all activities will be forcibly killed.
 
-Particularly when working with long-running activities, it may be useful to keep track of when workers are shutting down. For example, your activity may choose to save any in-progress state, and exit early, to avoid being forcibly killed and lose all progress. For this scenario, we recommend using the `ShutdownMonitor` utility available in `posthog.temporal.common.shutdown`. This is a context manager that offers a `is_worker_shutdown` method to check whether the worker we are running on is shutting down. It also offers methods to wait for worker shutdown.
+Particularly when working with long-running activities, it may be useful to keep track of when workers are shutting down. For example, your activity may choose to save any in-progress state, and exit early, to avoid being forcibly killed and lose all progress. For this scenario, we recommend using the `ShutdownMonitor` utility available in `insights.temporal.common.shutdown`. This is a context manager that offers a `is_worker_shutdown` method to check whether the worker we are running on is shutting down. It also offers methods to wait for worker shutdown.
 
 However, short running activities in general won't need to concern themselves with this.
 
@@ -400,9 +400,9 @@ Once workflows and activities are finished, there are a few more steps required 
 
 Once your workflow and activities have been written, it's time to decide which workers will run them. At Insights, we have multiple sets of Temporal workers running. Each set of workers listens to a particular task queue, which is how we coordinate which workflows and activities will each worker run: By executing your workflows and activities in a certain task queue, only workers from the set of workers configured to poll that task queue will pick up the work.
 
-Since each product has its own requirements when it comes to worker resources and behavior, each product has its own set of workers, and the product team manages the deployment of said workers. For in-development workflows and activities, there exists a set of workers listening on a shared task queue (called `general-purpose-task-queue`). Anybody may use this general task queue, so you can assign your workflows to it while they are still in development. Once your workflows have moved past the prototyping stage, I recommend looking in the [charts](https://github.com/PostHog/charts) repository for the `temporal-worker` package you can use to create your own deployment. With your own set of workers, you can define resource limits of your own, and avoid conflicts with other workflows running in the shared task queue.
+Since each product has its own requirements when it comes to worker resources and behavior, each product has its own set of workers, and the product team manages the deployment of said workers. For in-development workflows and activities, there exists a set of workers listening on a shared task queue (called `general-purpose-task-queue`). Anybody may use this general task queue, so you can assign your workflows to it while they are still in development. Once your workflows have moved past the prototyping stage, I recommend looking in the [charts](https://github.com/Hanzo Insights/charts) repository for the `temporal-worker` package you can use to create your own deployment. With your own set of workers, you can define resource limits of your own, and avoid conflicts with other workflows running in the shared task queue.
 
-Regardless of which task queue and workers are chosen to run your workflows, all workers are configured right here in the code. So, you need to get your workflow classes and your activity functions in the worker configuration based on the task queue you have chosen. This is done by adding your workflows and activities to mappings in the `posthog/management/command/start_temporal_worker.py` script. I recommend that you group all your workflows and activities in a single collection at the top level `__init__.py` of your product package, so that then they can be imported in `start_temporal_worker.py` and added to the mappings.
+Regardless of which task queue and workers are chosen to run your workflows, all workers are configured right here in the code. So, you need to get your workflow classes and your activity functions in the worker configuration based on the task queue you have chosen. This is done by adding your workflows and activities to mappings in the `insights/management/command/start_temporal_worker.py` script. I recommend that you group all your workflows and activities in a single collection at the top level `__init__.py` of your product package, so that then they can be imported in `start_temporal_worker.py` and added to the mappings.
 
 For example, let's say I have implemented a product in `products/travelling_salesman_solver/` my `products/travelling_salesman_solver/__init__.py` looks like:
 
@@ -491,6 +491,6 @@ As you run workflows, you will be able to see the logs in the worker's logs, and
 
 ## Examples in Insights
 
-- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/PostHog/posthog/tree/master/products/batch_exports/backend/temporal/destinations).
-- [Examples on unit testing Temporal workflows](https://github.com/PostHog/posthog/tree/master/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
+- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/Hanzo Insights/insights/tree/master/products/batch_exports/backend/temporal/destinations).
+- [Examples on unit testing Temporal workflows](https://github.com/Hanzo Insights/insights/tree/master/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
 - DuckLake data modeling writes leverage Temporal too; follow the [DuckLake copy workflow configuration guide](../ducklake/README.md) to see how we configure environment variables, bucket layouts, and IAM perms for the copy workflow.

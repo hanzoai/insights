@@ -1,4 +1,4 @@
-import { LemonBanner, LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { LemonBanner, LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import {
     ExperimentFunnelsQuery,

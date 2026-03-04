@@ -78,11 +78,11 @@ QUESTION_TEMPLATES: QuestionTemplates = {
     "link": [
         {
             "question": "Would you like to learn more about {feature}?",
-            "link": "https://posthog.com/docs/feature",
+            "link": "https://hanzo.ai/docs/feature",
         },
         {
             "question": "Check out our guide on {feature}",
-            "link": "https://posthog.com/tutorials/feature",
+            "link": "https://hanzo.ai/tutorials/feature",
         },
     ],
 }
@@ -811,7 +811,7 @@ class Command(BaseCommand):
         if not persons_data:
             self.stdout.write(
                 self.style.WARNING(
-                    "No persons found in the database. Run 'hogli dev:demo-data' first to generate persons."
+                    "No persons found in the database. Run 'insightscli dev:demo-data' first to generate persons."
                 )
             )
             return 0, 0, 0
@@ -1006,7 +1006,7 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(
                     self.style.WARNING(
-                        "No persons found in the database. Run 'hogli dev:demo-data' first to generate persons."
+                        "No persons found in the database. Run 'insightscli dev:demo-data' first to generate persons."
                     )
                 )
 

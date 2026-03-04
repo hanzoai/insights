@@ -28,7 +28,7 @@ EXAMPLE_FULL = {
     "name": "HogHook",
     "fn": "fetch(inputs.url, {\n  'headers': inputs.headers,\n  'body': inputs.payload,\n  'method': inputs.method\n});",
     "type": "destination",
-    "code_language": "hog",
+    "code_language": "iql",
     "enabled": True,
     "inputs_schema": [
         {"key": "url", "type": "string", "label": "Webhook URL", "required": True},
@@ -133,7 +133,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(ClickhouseTestMixin, APIBas
             "name": "Webhook",
             "template_id": "template-webhook",
             "inputs": {
-                "url": {"value": "https://example.com/posthog-webhook-updated"},
+                "url": {"value": "https://example.com/insights-webhook-updated"},
             },
         }
 
@@ -143,7 +143,7 @@ class TestInsightsFunctionAPIWithoutAvailableFeature(ClickhouseTestMixin, APIBas
         )
 
         assert update_response.status_code == status.HTTP_200_OK, update_response.json()
-        assert update_response.json()["inputs"]["url"]["value"] == "https://example.com/posthog-webhook-updated"
+        assert update_response.json()["inputs"]["url"]["value"] == "https://example.com/insights-webhook-updated"
 
     def test_internal_destinations_can_be_managed_without_addon(self):
         self.organization.available_product_features = []
@@ -274,7 +274,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -310,7 +310,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
             "status": "beta",
             "icon_url": webhook_template["icon_url"],
             "category": webhook_template["category"],
-            "code_language": "hog",
+            "code_language": "iql",
             "inputs_schema": webhook_template["inputs_schema"],
             "code": webhook_template["code"].strip(),
             "filters": None,
@@ -392,7 +392,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -409,7 +409,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -681,7 +681,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -698,7 +698,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -804,7 +804,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -832,7 +832,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "_H",
                 INSIGHTSQL_BYTECODE_VERSION,
                 32,
-                "%@posthog.com%",
+                "%@hanzo.ai%",
                 32,
                 "email",
                 32,
@@ -893,7 +893,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
             "bytecode": ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "email", 32, "properties", 32, "person", 1, 3],
         }
 
-    @patch("insights.permissions.posthoganalytics.feature_enabled", return_value=True)
+    @patch("insights.permissions.hanzoanalytics.feature_enabled", return_value=True)
     def test_loads_status_when_enabled_and_available(self, *args):
         with patch("insights.plugins.plugin_server_api.requests.get") as mock_get:
             mock_get.return_value.status_code = status.HTTP_200_OK
@@ -991,7 +991,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -1016,7 +1016,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -1033,7 +1033,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "item_id": id,
                 "scope": "InsightsFunction",
                 "user": {
-                    "email": "user1@posthog.com",
+                    "email": "user1@hanzo.ai",
                     "first_name": "",
                 },
             },
@@ -1061,7 +1061,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         self.team.test_account_filters = [
             {
                 "key": "email",
-                "value": "@posthog.com",
+                "value": "@hanzo.ai",
                 "operator": "not_icontains",
                 "type": "person",
             }
@@ -1471,7 +1471,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                         "_H",
                         1,
                         32,
-                        "%@posthog.com%",
+                        "%@hanzo.ai%",
                         32,
                         "email",
                         32,
@@ -2210,7 +2210,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         assert len(response.json()["results"]) == 50, "With limit=50 and offset=100, should return last 50 items"
         assert response.json()["count"] == 150, "Total count should still be 150"
 
-    @patch("insights.api.insights_function.posthoganalytics.feature_enabled", return_value=False)
+    @patch("insights.api.insights_function.hanzoanalytics.feature_enabled", return_value=False)
     def test_enable_backfills_blocked_without_feature_flag(self, mock_feature_enabled):
         """Test that enable_backfills is blocked when the feature flag is disabled."""
         # Create a custom function

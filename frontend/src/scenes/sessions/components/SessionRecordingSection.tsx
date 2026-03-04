@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand, IconVideoCamera } from '@posthog/icons'
-import { LemonButton, LemonCard, Spinner } from '@posthog/lemon-ui'
+import { IconCollapse, IconExpand, IconVideoCamera } from '@hanzo/icons'
+import { LemonButton, LemonCard, Spinner } from '@hanzo/lemon-ui'
 
 import { SessionRecordingPlayer } from 'scenes/session-recordings/player/SessionRecordingPlayer'
 import { SessionRecordingPlayerMode } from 'scenes/session-recordings/player/sessionRecordingPlayerLogic'

@@ -5,7 +5,7 @@ from django.db import connection
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -45,7 +45,7 @@ class InstanceStatusViewSet(viewsets.ViewSet):
             metrics: list[dict[str, Union[str, bool, int, float, dict[str, Any]]]] = []
 
             metrics.append(
-                {"key": "posthog_git_sha", "metric": "Insights Git SHA", "value": get_git_commit_short() or "unknown"}
+                {"key": "insights_git_sha", "metric": "Insights Git SHA", "value": get_git_commit_short() or "unknown"}
             )
 
             helm_info = get_helm_info_env()
@@ -188,7 +188,7 @@ class InstanceStatusViewSet(viewsets.ViewSet):
                     }
                 )
         except Exception as e:
-            posthoganalytics.capture_exception(e)
+            hanzoanalytics.capture_exception(e)
             return Response({"error": "unknown error"}, status=500)
 
         return Response({"results": {"overview": metrics}})

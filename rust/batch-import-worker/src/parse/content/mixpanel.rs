@@ -11,7 +11,7 @@ use uuid::Uuid;
 /// UUID namespace for generating deterministic UUIDs from Mixpanel $insert_id values.
 /// This allows deduplication of events that may be imported multiple times.
 /// Generated using `uuidgen` - this is a random UUID that serves as our namespace.
-const MIXPANEL_INSERT_ID_NAMESPACE: Uuid = Uuid::from_bytes(*b"posthog_mixpanel");
+const MIXPANEL_INSERT_ID_NAMESPACE: Uuid = Uuid::from_bytes(*b"insights_mixpanel");
 
 use super::TransformContext;
 use crate::parse::format::{extract_between, extract_field_name, UserFacingParseError};
@@ -179,7 +179,7 @@ impl MixpanelEvent {
     }
 }
 
-// Maps mixpanel event names to posthog event names
+// Maps mixpanel event names to insights event names
 pub fn map_event_names(event: String) -> String {
     // TODO - add more as you find them
     match event.as_str() {

@@ -13,7 +13,7 @@ import structlog
 from rest_framework.exceptions import NotFound
 
 from insights.exceptions_capture import capture_exception
-from insights.jwt import PosthogJwtAudience, decode_jwt, encode_jwt
+from insights.jwt import InsightsJwtAudience, decode_jwt, encode_jwt
 from insights.models.utils import UUIDT
 from insights.settings import DEBUG
 from insights.storage import object_storage
@@ -179,12 +179,12 @@ def get_public_access_token(asset: ExportedAsset, expiry_delta: Optional[timedel
     return encode_jwt(
         {"id": asset.id},
         expiry_delta=expiry_delta,
-        audience=PosthogJwtAudience.EXPORTED_ASSET,
+        audience=InsightsJwtAudience.EXPORTED_ASSET,
     )
 
 
 def asset_for_token(token: str) -> ExportedAsset:
-    info = decode_jwt(token, audience=PosthogJwtAudience.EXPORTED_ASSET)
+    info = decode_jwt(token, audience=InsightsJwtAudience.EXPORTED_ASSET)
     asset = ExportedAsset.objects.select_related("dashboard", "insight").get(pk=info["id"])
 
     return asset

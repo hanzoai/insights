@@ -80,7 +80,7 @@ export const dashboardsModel = kea<dashboardsModelType>([
             {
                 loadDashboards: async (url?: string) => {
                     // looking at a fully exported dashboard, return its contents
-                    const exportedDashboard = window.POSTHOG_EXPORTED_DATA?.dashboard
+                    const exportedDashboard = window.INSIGHTS_EXPORTED_DATA?.dashboard
                     if (exportedDashboard?.id && exportedDashboard?.tiles) {
                         return {
                             count: 1,

@@ -37,21 +37,21 @@ function getPublicUrl(request: Request): URL {
 // instead fetches /.well-known/oauth-authorization-server directly from the MCP server.
 // See: https://github.com/anthropics/claude-code/issues/2267
 //
-// By using a separate subdomain (mcp-eu.posthog.com), Claude Code's request to
+// By using a separate subdomain (mcp-insights.hanzo.ai), Claude Code's request to
 // /.well-known/oauth-authorization-server will hit our server with the EU hostname,
 // allowing us to redirect to the correct EU OAuth server.
 function getRegionFromHostname(request: Request): CloudRegion | undefined {
     const publicUrl = getPublicUrl(request)
 
     // DNS hostnames are case-insensitive, so normalize to lowercase
-    if (publicUrl.hostname.toLowerCase() === 'mcp-eu.posthog.com') {
+    if (publicUrl.hostname.toLowerCase() === 'mcp-insights.hanzo.ai') {
         return 'eu'
     }
 
     return undefined
 }
 
-// Detect region from hostname (mcp-eu.posthog.com) or query param (?region=eu)
+// Detect region from hostname (mcp-insights.hanzo.ai) or query param (?region=eu)
 // Hostname takes precedence as it's the workaround for Claude Code's OAuth bug
 function getRegionFromRequest(request: Request): CloudRegion | null {
     const hostnameRegion = getRegionFromHostname(request)
@@ -91,7 +91,7 @@ const handleRequest = async (
         })
     }
 
-    // Detect region from hostname (mcp-eu.posthog.com) or query param (?region=eu)
+    // Detect region from hostname (mcp-insights.hanzo.ai) or query param (?region=eu)
     // Hostname takes precedence as it's the workaround for Claude Code's OAuth bug
     const effectiveRegion = getRegionFromRequest(request)
     log.extend({ region: effectiveRegion })
@@ -116,8 +116,8 @@ const handleRequest = async (
     //
     // Per RFC 9728, the well-known URL is constructed by inserting /.well-known/oauth-protected-resource
     // between the host and the path. For example:
-    // - Resource: https://mcp.posthog.com/mcp → Well-known: https://mcp.posthog.com/.well-known/oauth-protected-resource/mcp
-    // - Resource: https://mcp.posthog.com/sse → Well-known: https://mcp.posthog.com/.well-known/oauth-protected-resource/sse
+    // - Resource: https://mcp.hanzo.ai/mcp → Well-known: https://mcp.hanzo.ai/.well-known/oauth-protected-resource/mcp
+    // - Resource: https://mcp.hanzo.ai/sse → Well-known: https://mcp.hanzo.ai/.well-known/oauth-protected-resource/sse
     //
     // OAuth flow for MCP:
     // 1. Client connects to MCP server without a token
@@ -135,7 +135,7 @@ const handleRequest = async (
         resourceUrl.search = ''
 
         // Determine authorization server based on hostname or region param.
-        // POSTHOG_API_BASE_URL takes precedence for self-hosted, otherwise routes to US/EU.
+        // INSIGHTS_API_BASE_URL takes precedence for self-hosted, otherwise routes to US/EU.
         const authorizationServer = getAuthorizationServerUrl(effectiveRegion)
 
         return new Response(
@@ -181,7 +181,7 @@ const handleRequest = async (
         )
     }
 
-    if (!token.startsWith('phx_') && !token.startsWith('pha_')) {
+    if (!token.startsWith('hix_') && !token.startsWith('hia_')) {
         log.extend({ authError: 'invalid_token_format' })
         return new Response(
             `Invalid token, please provide a valid API token. View the documentation for more information: ${MCP_DOCS_URL}`,
@@ -192,8 +192,8 @@ const handleRequest = async (
     // Organization and project IDs can be provided via headers or query params.
     // When set, they pin the MCP session to a specific org/project and remove the switch tools.
     const organizationId =
-        request.headers.get('x-posthog-organization-id') || url.searchParams.get('organization_id') || undefined
-    const projectId = request.headers.get('x-posthog-project-id') || url.searchParams.get('project_id') || undefined
+        request.headers.get('x-insights-organization-id') || url.searchParams.get('organization_id') || undefined
+    const projectId = request.headers.get('x-insights-project-id') || url.searchParams.get('project_id') || undefined
 
     Object.assign(ctx.props, {
         apiToken: token,
@@ -214,7 +214,7 @@ const handleRequest = async (
     // This is set by the wizard based on user's cloud region selection during MCP setup.
     const regionParam = url.searchParams.get('region') || undefined
 
-    const version = Number(request.headers.get('x-posthog-mcp-version') || url.searchParams.get('v')) || 1
+    const version = Number(request.headers.get('x-insights-mcp-version') || url.searchParams.get('v')) || 1
 
     Object.assign(ctx.props, { features, region: regionParam, version })
     log.extend({ features, version })

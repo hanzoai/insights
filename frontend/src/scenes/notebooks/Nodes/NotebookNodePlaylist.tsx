@@ -1,5 +1,5 @@
 import { BuiltLogic, useActions, useValues } from 'kea'
-import { PostHogErrorBoundary } from 'posthog-js/react'
+import { InsightsErrorBoundary } from '@hanzo/insights/react'
 import { useEffect, useMemo } from 'react'
 
 import { JSONContent } from 'lib/components/RichContentEditor/types'
@@ -118,9 +118,9 @@ export const Settings = ({
     }
 
     return (
-        <PostHogErrorBoundary>
+        <InsightsErrorBoundary>
             <RecordingsUniversalFiltersEmbed filters={filters} setFilters={setFilters} />
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }
 

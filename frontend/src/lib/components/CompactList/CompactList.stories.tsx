@@ -53,7 +53,7 @@ export function CompactList_({ loading }: { loading: boolean }): JSX.Element {
                         title: 'There are no recordings for this project',
                         description: 'Make sure you have the javascript snippet setup in your website.',
                         buttonText: 'Learn more',
-                        buttonTo: 'https://posthog.com/docs/user-guides/recordings',
+                        buttonTo: 'https://hanzo.ai/docs/user-guides/recordings',
                     }}
                     items={[]}
                     renderRow={(person, index) => (

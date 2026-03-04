@@ -32,7 +32,7 @@ logger = structlog.get_logger(__name__)
 
 # Blocked words in client names to prevent confusion attacks
 # These prevent malicious apps from impersonating official Insights applications
-BLOCKED_CLIENT_NAME_PREFIXES = ["posthog"]  # Block names starting with these
+BLOCKED_CLIENT_NAME_PREFIXES = ["insights"]  # Block names starting with these
 BLOCKED_CLIENT_NAME_WORDS = ["official", "verified", "trusted"]  # Block names containing these
 
 

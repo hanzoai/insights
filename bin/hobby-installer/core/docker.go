@@ -152,7 +152,7 @@ func DockerComposePull() error {
 
 func DockerComposeUpWithRetry(maxAttempts int) error {
 	logger := GetLogger()
-	logger.WriteString("Starting PostHog containers...\n")
+	logger.WriteString("Starting Insights containers...\n")
 
 	cmd, args := GetDockerComposeCommand()
 	fullArgs := append(args, "-f", "docker-compose.yml", "up", "-d", "--no-build", "--pull", "always")
@@ -194,7 +194,7 @@ func RunAsyncMigrationsCheck() error {
 
 func WaitForHealth(timeout time.Duration) error {
 	logger := GetLogger()
-	logger.WriteString("Waiting for PostHog to start...\n")
+	logger.WriteString("Waiting for Insights to start...\n")
 	logger.Debug("WaitForHealth timeout=%v", timeout)
 
 	deadline := time.Now().Add(timeout)
@@ -207,7 +207,7 @@ func WaitForHealth(timeout time.Duration) error {
 		if err == nil {
 			_ = resp.Body.Close()
 			if resp.StatusCode == 200 {
-				logger.WriteString("PostHog is healthy!\n")
+				logger.WriteString("Insights is healthy!\n")
 				logger.Debug("Health check passed after %d attempts", attempt)
 				return nil
 			}
@@ -219,14 +219,14 @@ func WaitForHealth(timeout time.Duration) error {
 		}
 
 		if (attempt % 5) == 0 {
-			logger.WriteString("Waiting for PostHog to be healthy, this might take several minutes...\n")
+			logger.WriteString("Waiting for Insights to be healthy, this might take several minutes...\n")
 		}
 
 		time.Sleep(5 * time.Second)
 	}
 
 	logger.Debug("WaitForHealth timed out after %d attempts", attempt)
-	return fmt.Errorf("timeout waiting for PostHog to be healthy")
+	return fmt.Errorf("timeout waiting for Insights to be healthy")
 }
 
 func CheckDockerVolumes() (bool, bool) {
@@ -280,7 +280,7 @@ func DockerExec(container string, command ...string) (string, error) {
 
 func BackupPostgres(outputFile string) error {
 	cmd, args := GetDockerComposeCommand()
-	fullArgs := append(args, "exec", "-T", "db", "pg_dumpall", "--clean", "-U", "posthog")
+	fullArgs := append(args, "exec", "-T", "db", "pg_dumpall", "--clean", "-U", "insights")
 
 	shellCmd := fmt.Sprintf("%s %s | gzip > %s", cmd, joinArgs(fullArgs), outputFile)
 	return exec.Command("sh", "-c", shellCmd).Run()
@@ -288,7 +288,7 @@ func BackupPostgres(outputFile string) error {
 
 func RestorePostgres(inputFile string) error {
 	cmd, args := GetDockerComposeCommand()
-	fullArgs := append(args, "exec", "-T", "db", "psql", "-U", "posthog")
+	fullArgs := append(args, "exec", "-T", "db", "psql", "-U", "insights")
 
 	shellCmd := fmt.Sprintf("gunzip -c %s | %s %s", inputFile, cmd, joinArgs(fullArgs))
 	return exec.Command("sh", "-c", shellCmd).Run()

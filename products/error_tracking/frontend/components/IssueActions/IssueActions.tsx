@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDialog, LemonSelect } from '@posthog/lemon-ui'
+import { LemonButton, LemonDialog, LemonSelect } from '@hanzo/lemon-ui'
 
 import { useHogfetti } from 'lib/components/Hogfetti/Hogfetti'
 import { sceneLogic } from 'scenes/sceneLogic'

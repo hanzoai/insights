@@ -25,10 +25,10 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                             file: 'Vue',
                             code: dedent`
                               <script>
-                                const { $posthog } = useNuxtApp()
-                                if ($posthog) {
-                                  const posthog = $posthog()
-                                  posthog.captureException(new Error("Important error message"))
+                                const { $insights } = useNuxtApp()
+                                if ($insights) {
+                                  const insights = $insights()
+                                  insights.captureException(new Error("Important error message"))
                                 }
                               </script>
                             `,
@@ -37,7 +37,7 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                 />
                 <Markdown>
                     {dedent`
-                        On the server side, you can use the \`posthog\` object directly.
+                        On the server side, you can use the \`insights\` object directly.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -47,17 +47,17 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                             file: 'server/api/example.js',
                             code: dedent`
                               const runtimeConfig = useRuntimeConfig()
-                              const posthog = new Insights(
-                                runtimeConfig.public.posthogPublicKey,
+                              const insights = new Insights(
+                                runtimeConfig.public.insightsPublicKey,
                                 {
-                                  host: runtimeConfig.public.posthogHost,
+                                  host: runtimeConfig.public.insightsHost,
                                 }
                               );
                               try {
                                 const results = await DB.query.users.findMany()
                                 return results
                               } catch (error) {
-                                posthog.captureException(error)
+                                insights.captureException(error)
                               }
                             `,
                         },
@@ -74,7 +74,7 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        Update your \`posthog.client.js\` to add an error hook.
+                        Update your \`insights.client.js\` to add an error hook.
                     `}
                 </Markdown>
                 <CodeBlock
@@ -86,7 +86,7 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                               export default defineNuxtPlugin((nuxtApp) => {
                                   ...
                                   nuxtApp.hook('vue:error', (error) => {
-                                      posthogClient.captureException(error)
+                                      insightsClient.captureException(error)
                                   })
                                   ...
                               })
@@ -107,7 +107,7 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                 {dedent`
                     Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://insights.hanzo.ai/activity/explore)
                 `}
             </Markdown>
         ),

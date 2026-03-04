@@ -267,7 +267,7 @@ async fn test_experience_continuity_with_merge() -> Result<()> {
     // Use an ID that would naturally evaluate to false to prove the override is working
     let mut conn = context.get_persons_connection().await?;
     sqlx::query(
-        "INSERT INTO posthog_persondistinctid (team_id, person_id, distinct_id, version)
+        "INSERT INTO insights_persondistinctid (team_id, person_id, distinct_id, version)
          VALUES ($1, $2, $3, 0)",
     )
     .bind(team.id)

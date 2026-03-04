@@ -52,7 +52,7 @@ class MSSQLSource(SimpleSource[MSSQLSourceConfig], SSHTunnelMixin, ValidateDatab
             label="Microsoft SQL Server",
             caption="Enter your Microsoft SQL Server/Azure SQL Server credentials to automatically pull your SQL data into the Insights Data warehouse.",
             iconPath="/static/services/sql-azure.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/azure-db",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/azure-db",
             fields=cast(
                 list[FieldType],
                 [

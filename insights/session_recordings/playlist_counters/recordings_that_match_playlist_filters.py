@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import Count, F, Q
 from django.utils import timezone
 
-import posthoganalytics
+import hanzoanalytics
 from celery import shared_task
 from prometheus_client import Counter, Gauge, Histogram
 from pydantic import ValidationError
@@ -457,7 +457,7 @@ def count_recordings_that_match_playlist_filters(playlist_id: int) -> None:
             playlist.save(update_fields=["last_counted_at"])
 
             REPLAY_TEAM_PLAYLIST_COUNT_SUCCEEDED.inc()
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=f"playlist_counting_for_team_{playlist.team.pk}",
                 event="replay_playlist_saved_filters_counted",
                 properties={
@@ -482,12 +482,12 @@ def count_recordings_that_match_playlist_filters(playlist_id: int) -> None:
         except Exception:
             query_json = {"malformed": True}
 
-        posthoganalytics.capture_exception(
+        hanzoanalytics.capture_exception(
             e,
             properties={
                 "playlist_id": playlist_id,
                 "playlist_short_id": playlist.short_id if playlist else None,
-                "posthog_feature": "session_replay_playlist_counters",
+                "insights_feature": "session_replay_playlist_counters",
             },
         )
         logger.exception(

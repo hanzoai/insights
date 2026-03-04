@@ -1,7 +1,7 @@
 import { Menu } from '@base-ui/react/menu'
 import { useActions, useValues } from 'kea'
 
-import { IconGear, IconLeave, IconPlusSmall, IconReceipt } from '@posthog/icons'
+import { IconGear, IconLeave, IconPlusSmall, IconReceipt } from '@hanzo/icons'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { Link } from 'lib/lemon-ui/Link/Link'

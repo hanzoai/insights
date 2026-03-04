@@ -3,7 +3,7 @@ import './FeatureFlag.scss'
 import { useActions, useValues } from 'kea'
 import { Form, Group } from 'kea-forms'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useState } from 'react'
 
 import {
@@ -16,8 +16,8 @@ import {
     IconRewind,
     IconServer,
     IconTrash,
-} from '@posthog/icons'
-import { LemonDialog, LemonSegmentedButton, LemonSkeleton, LemonSwitch } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonDialog, LemonSegmentedButton, LemonSkeleton, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { approvalsGateLogic } from 'lib/approvals/approvalsGateLogic'
 import { AccessControlAction } from 'lib/components/AccessControlAction'
@@ -389,7 +389,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             <span className="text-warning">
                                                 <b>Warning! </b>Changing this key will
                                                 <Link
-                                                    to={`https://posthog.com/docs/feature-flags${UTM_TAGS}#feature-flag-persistence`}
+                                                    to={`https://hanzo.ai/docs/feature-flags${UTM_TAGS}#feature-flag-persistence`}
                                                     target="_blank"
                                                     targetBlankIcon
                                                 >
@@ -518,7 +518,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                                 Depending on your setup, this option might not always be suitable. This
                                                 feature requires creating profiles for anonymous users.{' '}
                                                 <Link
-                                                    to="https://posthog.com/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
+                                                    to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#persisting-feature-flags-across-authentication-steps"
                                                     target="_blank"
                                                 >
                                                     Learn more
@@ -537,7 +537,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                             to use a flag in a runtime where it's not allowed (e.g., using a server-only
                                             flag in client-side code), it won't evaluate.{' '}
                                             <Link
-                                                to="https://posthog.com/docs/feature-flags/creating-feature-flags#step-5-configure-evaluation-runtime-and-contexts-optional"
+                                                to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#step-5-configure-evaluation-runtime-and-contexts-optional"
                                                 target="_blank"
                                                 targetBlankIcon
                                             >
@@ -616,7 +616,7 @@ export function FeatureFlag({ id }: FeatureFlagLogicProps): JSX.Element {
                                         <strong>evaluation contexts</strong> to control when flags can be evaluated –
                                         flags will only evaluate when the SDK provides matching evaluation contexts.{' '}
                                         <Link
-                                            to="https://posthog.com/docs/feature-flags/evaluation-environments"
+                                            to="https://hanzo.ai/docs/feature-flags/evaluation-environments"
                                             target="_blank"
                                             targetBlankIcon
                                         >
@@ -971,7 +971,7 @@ function UsageTab({ featureFlag }: { featureFlag: FeatureFlagType }): JSX.Elemen
                         <LemonBanner type="info" className="mb-3" onClose={() => closeEnrichAnalyticsNotice()}>
                             Get richer insights automatically by{' '}
                             <Link
-                                to="https://posthog.com/docs/libraries/js/features#enriched-flag-analytics"
+                                to="https://hanzo.ai/docs/libraries/js/features#enriched-flag-analytics"
                                 target="_blank"
                             >
                                 enabling enriched analytics for flags{' '}
@@ -1103,7 +1103,7 @@ function FeatureFlagRollout({
         if (variantKey) {
             properties.variant_key = variantKey
         }
-        posthog.capture('viewed recordings from feature flag', properties)
+        insights.capture('viewed recordings from feature flag', properties)
     }
 
     const canEditVariant = (index: number): boolean => {
@@ -1323,7 +1323,7 @@ function FeatureFlagRollout({
                                 <span>
                                     Remote config flags provide runtime configuration values in your app. Read more in
                                     the{' '}
-                                    <Link to="https://posthog.com/docs/feature-flags/remote-config">
+                                    <Link to="https://hanzo.ai/docs/feature-flags/remote-config">
                                         remote config flags documentation
                                     </Link>
                                     .
@@ -1377,7 +1377,7 @@ function FeatureFlagRollout({
                                                 <>
                                                     Specify a valid JSON payload to be returned for the config flag.
                                                     Read more in the{' '}
-                                                    <Link to="https://posthog.com/docs/feature-flags/creating-feature-flags#payloads">
+                                                    <Link to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#payloads">
                                                         payload documentation
                                                     </Link>
                                                     .
@@ -1390,7 +1390,7 @@ function FeatureFlagRollout({
                                                         <code>true</code>
                                                     </strong>
                                                     . Read more in the{' '}
-                                                    <Link to="https://posthog.com/docs/feature-flags/creating-feature-flags#payloads">
+                                                    <Link to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#payloads">
                                                         payload documentation
                                                     </Link>
                                                     .
@@ -1572,7 +1572,7 @@ function FeatureFlagRollout({
                                         <>
                                             Specify a valid JSON payload to be returned for the config flag. Read more
                                             in the{' '}
-                                            <Link to="https://posthog.com/docs/feature-flags/creating-feature-flags#payloads">
+                                            <Link to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#payloads">
                                                 payload documentation
                                             </Link>
                                             .
@@ -1585,7 +1585,7 @@ function FeatureFlagRollout({
                                                 <code>true</code>
                                             </strong>
                                             . Read more in the{' '}
-                                            <Link to="https://posthog.com/docs/feature-flags/creating-feature-flags#payloads">
+                                            <Link to="https://hanzo.ai/docs/feature-flags/creating-feature-flags#payloads">
                                                 payload documentation
                                             </Link>
                                             .

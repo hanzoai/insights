@@ -1,5 +1,5 @@
-{% extends "email/base.html" %} {% load posthog_assets %} {% load posthog_filters %}
-{% block heading %}A PostHog app has experienced a fatal error{% endblock %}
+{% extends "email/base.html" %} {% load insights_assets %} {% load insights_filters %}
+{% block heading %}A Hanzo Insights app has experienced a fatal error{% endblock %}
 {% block section %}
 <!-- prettier-ignore -->
 <p>
@@ -10,7 +10,7 @@
     <a class="button" href="{{ hog_function.url }}">Go to destination</a>
 </div>
 <p>
-    If the issue persists, please contact the PostHog team for help.
+    If the issue persists, please contact the Hanzo Insights team for help.
 </p>
 <div class="mt">
     <p>
@@ -22,12 +22,12 @@
 
 {% block footer %}
 Need help?
-<a href="https://posthog.com/questions?{{ utm_tags }}"
+<a href="https://hanzo.ai/questions?{{ utm_tags }}"
     target="_blank"><b>Visit support</b></a>
 or
-<a href="https://posthog.com/docs?{{ utm_tags }}"
+<a href="https://hanzo.ai/docs?{{ utm_tags }}"
     target="_blank"><b>read our documentation</b></a>.<br /><br />
 
-<a href="{% absolute_uri '/settings/user-notifications' %}">Manage these notifications in PostHog</a>
+<a href="{% absolute_uri '/settings/user-notifications' %}">Manage these notifications in Hanzo Insights</a>
 
 {% endblock %}

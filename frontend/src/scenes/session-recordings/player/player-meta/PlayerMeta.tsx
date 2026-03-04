@@ -3,7 +3,7 @@ import './PlayerMeta.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { LemonSelect, LemonSelectOption, Link } from '@posthog/lemon-ui'
+import { LemonSelect, LemonSelectOption, Link } from '@hanzo/lemon-ui'
 
 import { Logo } from 'lib/brand/Logo'
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
@@ -113,7 +113,7 @@ export function PlayerMeta(): JSX.Element {
                 <div className="flex justify-between items-center m-2">
                     {!whitelabel ? (
                         <Tooltip title="Powered by Insights" placement="right">
-                            <Link to="https://posthog.com" className="flex items-center" target="blank">
+                            <Link to="https://hanzo.ai" className="flex items-center" target="blank">
                                 <Logo />
                             </Link>
                         </Tooltip>

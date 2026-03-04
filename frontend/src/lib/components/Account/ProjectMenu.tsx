@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSnack } from '@posthog/lemon-ui'
+import { LemonSnack } from '@hanzo/lemon-ui'
 
 import { ButtonPrimitive, ButtonPrimitiveProps } from 'lib/ui/Button/ButtonPrimitives'
 import { MenuOpenIndicator } from 'lib/ui/Menus/Menus'

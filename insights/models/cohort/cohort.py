@@ -12,7 +12,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 
 from insights.clickhouse.client import sync_execute
 from insights.constants import PropertyOperatorType
@@ -51,11 +51,11 @@ REALTIME_COHORT_MAX_PERSON_COUNT = 20_000_000
 logger = structlog.get_logger(__name__)
 
 DELETE_QUERY = """
-DELETE FROM "posthog_cohortpeople" WHERE "cohort_id" = {cohort_id}
+DELETE FROM "insights_cohortpeople" WHERE "cohort_id" = {cohort_id}
 """
 
 UPDATE_QUERY = """
-INSERT INTO "posthog_cohortpeople" ("person_id", "cohort_id", "version")
+INSERT INTO "insights_cohortpeople" ("person_id", "cohort_id", "version")
 {values_query}
 ON CONFLICT DO NOTHING
 """
@@ -489,7 +489,7 @@ class Cohort(FileSystemSyncMixin, RootTeamMixin, models.Model):
             flush_persons_and_events()
 
         # Check feature flag once for the entire import process
-        use_clickhouse = posthoganalytics.feature_enabled(
+        use_clickhouse = hanzoanalytics.feature_enabled(
             "cohort-email-lookup-clickhouse",
             str(team_id),
             groups={"project": str(team_id)},

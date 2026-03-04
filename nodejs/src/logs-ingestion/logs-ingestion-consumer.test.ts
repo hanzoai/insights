@@ -383,7 +383,7 @@ describe('LogsIngestionConsumer', () => {
             // Update team with custom logs settings
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `UPDATE posthog_team
+                `UPDATE insights_team
                  SET logs_settings = $1
                  WHERE id = $2`,
                 [JSON.stringify({ json_parse_logs: false, retention_days: 30 }), team.id],

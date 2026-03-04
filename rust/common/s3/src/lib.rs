@@ -1,4 +1,4 @@
-//! Common S3 client abstraction for PostHog Rust services
+//! Common S3 client abstraction for Insights Rust services
 //!
 //! This crate provides a simple wrapper around AWS S3 operations
 //! that enables testing with mocks and consistent error handling across services.

@@ -1,6 +1,6 @@
 from ..core import InsightsQLFunctionMeta
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 MATHEMATICAL_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "e": InsightsQLFunctionMeta("e"),
     "pi": InsightsQLFunctionMeta("pi"),
@@ -42,7 +42,7 @@ MATHEMATICAL_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "width_bucket": InsightsQLFunctionMeta("width_bucket", 4, 4),
 }
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 ROUNDING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "floor": InsightsQLFunctionMeta("floor", 1, 2, case_sensitive=False),
     "ceil": InsightsQLFunctionMeta("ceil", 1, 2, case_sensitive=False),
@@ -55,7 +55,7 @@ ROUNDING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "roundDown": InsightsQLFunctionMeta("roundDown", 2, 2),
 }
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 RANDOM_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "rand": InsightsQLFunctionMeta("rand", 0, 0),
 }

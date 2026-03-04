@@ -11,7 +11,7 @@ Insights has two type generation systems that keep frontend and backend in sync.
 | Flow               | Source of truth        | Generated output     | Used for                                                  |
 | ------------------ | ---------------------- | -------------------- | --------------------------------------------------------- |
 | Backend → Frontend | Django serializers     | TypeScript (Orval)   | API responses                                             |
-| Frontend → Backend | TypeScript `schema.ts` | Pydantic `schema.py` | Query types (HogQL, filters, insights), some legacy types |
+| Frontend → Backend | TypeScript `schema.ts` | Pydantic `schema.py` | Query types (InsightsQL, filters, insights), some legacy types |
 
 These are independent systems. Don't conflate them.
 
@@ -48,7 +48,7 @@ This prevents name collisions between generated and manual types.
 Run after changing serializers, viewsets, or `@extend_schema` decorators:
 
 ```bash
-hogli build:openapi
+insightscli build:openapi
 ```
 
 CI will fail if generated types are stale.
@@ -57,7 +57,7 @@ CI will fail if generated types are stale.
 
 1. Ensure `products/your_product/frontend/` directory exists
 2. Put your ViewSet in `products/your_product/backend/`
-3. Run `hogli build:openapi`
+3. Run `insightscli build:openapi`
 4. Types appear in `products/your_product/frontend/generated/`
 
 ViewSets in `products/*/backend/` are **automatically tagged** based on their module path. Manual `@extend_schema(tags=[...])` is not needed for products.
@@ -69,7 +69,7 @@ Serializers are the source of truth for response types. Use explicit field types
 For endpoints with query parameters, use `@validated_request` (WIP pattern):
 
 ```python
-from posthog.api.utils import validated_request
+from insights.api.utils import validated_request
 
 class MyQuerySerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["active", "archived"], required=False)
@@ -93,7 +93,7 @@ This validates inputs AND documents the endpoint for OpenAPI. Use `request.valid
 
 **Wrong type shapes?** The serializer is the source of truth. Use `@extend_schema_field` for custom `SerializerMethodField` types.
 
-**CI failing?** Run `hogli build:openapi` locally and commit the regenerated files.
+**CI failing?** Run `insightscli build:openapi` locally and commit the regenerated files.
 
 ### Design decisions
 
@@ -105,18 +105,18 @@ This validates inputs AND documents the endpoint for OpenAPI. Use `request.valid
 
 ## Frontend → Backend (query types)
 
-Query types like `TrendsQuery`, `FunnelsQuery`, and HogQL filters are defined in TypeScript and generated to Python.
+Query types like `TrendsQuery`, `FunnelsQuery`, and InsightsQL filters are defined in TypeScript and generated to Python.
 
 ### How it works
 
 1. **Source:** `frontend/src/queries/schema.ts` (TypeScript interfaces)
 2. **Intermediate:** `frontend/src/queries/schema.json` (JSON Schema)
-3. **Output:** `posthog/schema.py` (Pydantic models)
+3. **Output:** `insights/schema.py` (Pydantic models)
 
 ### Regenerating
 
 ```bash
-hogli build:schema
+insightscli build:schema
 ```
 
 This runs:
@@ -130,7 +130,7 @@ Add to `schema.ts` when you need a type that:
 
 - Is sent from frontend to backend as a query/filter
 - Needs validation on the backend
-- Is part of HogQL or insight definitions
+- Is part of InsightsQL or insight definitions
 - Do not add types that are only used in the frontend UI
 - Do not add types just because you need a type in Python – use handwritten types for backend-only logic
 

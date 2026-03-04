@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { Fragment } from 'react'
 import { toast } from 'react-toastify'
 
-import { IconInfo, IconPlusSmall, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSelect } from '@posthog/lemon-ui'
+import { IconInfo, IconPlusSmall, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonInput, LemonSelect } from '@hanzo/lemon-ui'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { getOrdinalSuffix } from 'lib/utils'

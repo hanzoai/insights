@@ -280,10 +280,10 @@ def test_use_distributed_events_recent_table(test_data: dict[str, typing.Any]):
         ),
         (
             [
-                {"key": "$current_url", "operator": "icontains", "type": "event", "value": "https://posthog.com"},
+                {"key": "$current_url", "operator": "icontains", "type": "event", "value": "https://hanzo.ai"},
             ],
             """ifNull(ilike(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^"|"$', '')), %(insightsql_val_1)s), 0)""",
-            {"insightsql_val_0": "$current_url", "insightsql_val_1": "%https://posthog.com%"},
+            {"insightsql_val_0": "$current_url", "insightsql_val_1": "%https://hanzo.ai%"},
         ),
         (
             [

@@ -13,10 +13,10 @@ Use this skill when auditing survey feature support across Insights SDKs for `su
 
 Before starting, verify the SDK paths are accessible. Run `ls` on each path:
 
-- `$POSTHOG_JS_PATH`
-- `$POSTHOG_IOS_PATH`
-- `$POSTHOG_ANDROID_PATH`
-- `$POSTHOG_FLUTTER_PATH`
+- `$INSIGHTS_JS_PATH`
+- `$INSIGHTS_IOS_PATH`
+- `$INSIGHTS_ANDROID_PATH`
+- `$INSIGHTS_FLUTTER_PATH`
 
 If any path is empty or doesn't exist, ask the user: "I need the path to [SDK repo] on your machine. Where is it located?"
 
@@ -25,21 +25,21 @@ Once you have all paths, ask the user if they'd like to save them for future ses
 ```json
 {
   "env": {
-    "POSTHOG_JS_PATH": "/path/to/posthog-js",
-    "POSTHOG_IOS_PATH": "/path/to/posthog-ios",
-    "POSTHOG_ANDROID_PATH": "/path/to/posthog-android",
-    "POSTHOG_FLUTTER_PATH": "/path/to/posthog-flutter"
+    "INSIGHTS_JS_PATH": "/path/to/insights-js",
+    "INSIGHTS_IOS_PATH": "/path/to/insights-ios",
+    "INSIGHTS_ANDROID_PATH": "/path/to/insights-android",
+    "INSIGHTS_FLUTTER_PATH": "/path/to/insights-flutter"
   },
   "permissions": {
     "allow": [
-      "Read(/path/to/posthog-js/**)",
-      "Read(/path/to/posthog-ios/**)",
-      "Read(/path/to/posthog-android/**)",
-      "Read(/path/to/posthog-flutter/**)",
-      "Grep(/path/to/posthog-js/**)",
-      "Grep(/path/to/posthog-ios/**)",
-      "Grep(/path/to/posthog-android/**)",
-      "Grep(/path/to/posthog-flutter/**)"
+      "Read(/path/to/insights-js/**)",
+      "Read(/path/to/insights-ios/**)",
+      "Read(/path/to/insights-android/**)",
+      "Read(/path/to/insights-flutter/**)",
+      "Grep(/path/to/insights-js/**)",
+      "Grep(/path/to/insights-ios/**)",
+      "Grep(/path/to/insights-android/**)",
+      "Grep(/path/to/insights-flutter/**)"
     ]
   }
 }
@@ -49,7 +49,7 @@ Once you have all paths, ask the user if they'd like to save them for future ses
 
 ## Using SDK Paths in Commands
 
-**IMPORTANT**: Environment variables like `$POSTHOG_JS_PATH` do NOT expand reliably in Bash tool commands.
+**IMPORTANT**: Environment variables like `$INSIGHTS_JS_PATH` do NOT expand reliably in Bash tool commands.
 
 Instead of bash commands, prefer:
 
@@ -59,7 +59,7 @@ Instead of bash commands, prefer:
 If you must use bash, first expand the variable:
 
 ```bash
-echo $POSTHOG_JS_PATH
+echo $INSIGHTS_JS_PATH
 ```
 
 Then use the echoed path directly in subsequent commands.
@@ -67,7 +67,7 @@ Then use the echoed path directly in subsequent commands.
 ## Tracking Issue
 
 All survey SDK feature parity work is tracked in:
-**https://github.com/PostHog/posthog/issues/45658**
+**https://github.com/Hanzo Insights/insights/issues/45658**
 
 When creating new issues for missing features:
 
@@ -75,7 +75,7 @@ When creating new issues for missing features:
 2. Add the issue to the tracking issue's "Tracked Issues" section as a task list item:
 
    ```markdown
-   - [ ] https://github.com/PostHog/repo/issues/123
+   - [ ] https://github.com/Hanzo Insights/repo/issues/123
    ```
 
    Note: GitHub automatically expands issue links to show titles, so no description is needed.
@@ -87,7 +87,7 @@ To update the tracking issue body:
 **Step 1**: Fetch the current body to a temp file:
 
 ```bash
-gh api repos/Insights/posthog/issues/45658 --jq '.body' > /tmp/tracking_issue_body.md
+gh api repos/Insights/insights/issues/45658 --jq '.body' > /tmp/tracking_issue_body.md
 ```
 
 **Step 2**: Use the Edit tool to modify `/tmp/tracking_issue_body.md`. This ensures the user can review the diff of your changes before proceeding.
@@ -95,7 +95,7 @@ gh api repos/Insights/posthog/issues/45658 --jq '.body' > /tmp/tracking_issue_bo
 **Step 3**: After the user has approved the edits, push the update:
 
 ```bash
-gh api repos/Insights/posthog/issues/45658 -X PATCH -f body="$(cat /tmp/tracking_issue_body.md)"
+gh api repos/Insights/insights/issues/45658 -X PATCH -f body="$(cat /tmp/tracking_issue_body.md)"
 ```
 
 **Important**: Always use the Edit tool on the temp file rather than writing directly. This gives the user visibility into exactly what changes are being made to the tracking issue.
@@ -104,18 +104,18 @@ gh api repos/Insights/posthog/issues/45658 -X PATCH -f body="$(cat /tmp/tracking
 
 | SDK                  | Code Path                                | Changelog                                             |
 | -------------------- | ---------------------------------------- | ----------------------------------------------------- |
-| posthog-js (browser) | `$POSTHOG_JS_PATH/packages/browser`      | `$POSTHOG_JS_PATH/packages/browser/CHANGELOG.md`      |
-| posthog-react-native | `$POSTHOG_JS_PATH/packages/react-native` | `$POSTHOG_JS_PATH/packages/react-native/CHANGELOG.md` |
-| posthog-ios          | `$POSTHOG_IOS_PATH`                      | `$POSTHOG_IOS_PATH/CHANGELOG.md`                      |
-| posthog-android      | `$POSTHOG_ANDROID_PATH`                  | `$POSTHOG_ANDROID_PATH/CHANGELOG.md`                  |
-| posthog-flutter      | `$POSTHOG_FLUTTER_PATH`                  | `$POSTHOG_FLUTTER_PATH/CHANGELOG.md`                  |
+| insights-js (browser) | `$INSIGHTS_JS_PATH/packages/browser`      | `$INSIGHTS_JS_PATH/packages/browser/CHANGELOG.md`      |
+| insights-react-native | `$INSIGHTS_JS_PATH/packages/react-native` | `$INSIGHTS_JS_PATH/packages/react-native/CHANGELOG.md` |
+| insights-ios          | `$INSIGHTS_IOS_PATH`                      | `$INSIGHTS_IOS_PATH/CHANGELOG.md`                      |
+| insights-android      | `$INSIGHTS_ANDROID_PATH`                  | `$INSIGHTS_ANDROID_PATH/CHANGELOG.md`                  |
+| insights-flutter      | `$INSIGHTS_FLUTTER_PATH`                  | `$INSIGHTS_FLUTTER_PATH/CHANGELOG.md`                  |
 
 ## Flutter Native Dependencies
 
 Flutter wraps native SDKs. Check dependency versions in:
 
-- iOS: `$POSTHOG_FLUTTER_PATH/ios/posthog_flutter.podspec` (look for `s.dependency 'Insights'`)
-- Android: `$POSTHOG_FLUTTER_PATH/android/build.gradle` (look for `posthog-android` dependency)
+- iOS: `$INSIGHTS_FLUTTER_PATH/ios/insights_flutter.podspec` (look for `s.dependency 'Insights'`)
+- Android: `$INSIGHTS_FLUTTER_PATH/android/build.gradle` (look for `insights-android` dependency)
 
 ## Audit Process
 
@@ -150,7 +150,7 @@ git tag --contains COMMIT_HASH | sort -V | head -3
 
 ```bash
 # Find when Flutter started requiring iOS version X.Y.Z
-cd $POSTHOG_FLUTTER_PATH && git log --oneline -p -- "ios/posthog_flutter.podspec" | grep -B10 "X.Y.Z"
+cd $INSIGHTS_FLUTTER_PATH && git log --oneline -p -- "ios/insights_flutter.podspec" | grep -B10 "X.Y.Z"
 
 # Get the Flutter version for that commit
 git tag --contains COMMIT_HASH | sort -V | head -1
@@ -162,12 +162,12 @@ git tag --contains COMMIT_HASH | sort -V | head -1
 
 Key files to check for survey filtering logic:
 
-- **posthog-js (browser)**: `$POSTHOG_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - utility functions like `canActivateRepeatedly`, `getSurveySeen`, `hasEvents`
-- **posthog-js (browser)**: `$POSTHOG_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
-- **posthog-react-native**: `$POSTHOG_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
-- **posthog-react-native**: `$POSTHOG_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
-- **posthog-ios**: `$POSTHOG_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
-- **posthog-android**: `$POSTHOG_ANDROID_PATH/posthog-android/src/main/java/com/posthog/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
+- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys/surveys-extension-utils.tsx` - utility functions like `canActivateRepeatedly`, `getSurveySeen`, `hasEvents`
+- **insights-js (browser)**: `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys.tsx` - main survey logic
+- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts` - main filtering logic
+- **insights-react-native**: `$INSIGHTS_JS_PATH/packages/react-native/src/surveys/surveys-utils.ts` - utility functions like `canActivateRepeatedly`, `hasEvents`
+- **insights-ios**: `$INSIGHTS_IOS_PATH/Insights/Surveys/InsightsSurveyIntegration.swift` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly` computed property
+- **insights-android**: `$INSIGHTS_ANDROID_PATH/insights-android/src/main/java/com/insights/android/surveys/InsightsSurveysIntegration.kt` → `getActiveMatchingSurveys()` method, `canActivateRepeatedly()` function
 
 **Key utility functions to compare across SDKs:**
 
@@ -188,12 +188,12 @@ What to look for:
 
 ## Reference Implementation
 
-**posthog-js browser is the canonical implementation** - it has every feature and is the source of truth for how things are supposed to work.
+**insights-js browser is the canonical implementation** - it has every feature and is the source of truth for how things are supposed to work.
 
 When auditing a feature:
 
-1. First check `$POSTHOG_JS_PATH/packages/browser/src/extensions/surveys.ts` to understand the complete, correct behavior
-2. Then compare mobile SDKs against posthog-react-native (`$POSTHOG_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts`) which is the reference for mobile-specific implementations
+1. First check `$INSIGHTS_JS_PATH/packages/browser/src/extensions/surveys.ts` to understand the complete, correct behavior
+2. Then compare mobile SDKs against insights-react-native (`$INSIGHTS_JS_PATH/packages/react-native/src/surveys/getActiveMatchingSurveys.ts`) which is the reference for mobile-specific implementations
 
 ## Web-Only vs Cross-Platform Features
 
@@ -211,14 +211,14 @@ For each feature, produce:
 {
     feature: 'Feature Name',
     sdkVersions: {
-        'posthog-js': 'X.Y.Z',
-        'posthog-react-native': 'X.Y.Z',  // or omit if unsupported
-        'posthog-ios': 'X.Y.Z',
-        'posthog-android': 'X.Y.Z',
-        'posthog_flutter': 'X.Y.Z',  // add comment: first version to require native SDK >= X.Y
+        'insights-js': 'X.Y.Z',
+        'insights-react-native': 'X.Y.Z',  // or omit if unsupported
+        'insights-ios': 'X.Y.Z',
+        'insights-android': 'X.Y.Z',
+        'insights_flutter': 'X.Y.Z',  // add comment: first version to require native SDK >= X.Y
     },
     unsupportedSdks: [
-        { sdk: 'sdk-name', issue: 'https://github.com/PostHog/repo/issues/123' },  // needs implementation
+        { sdk: 'sdk-name', issue: 'https://github.com/Hanzo Insights/repo/issues/123' },  // needs implementation
         { sdk: 'sdk-name', issue: false },  // not applicable (e.g., web-only feature)
     ],
     check: (s) => ...,
@@ -231,39 +231,39 @@ For each feature, produce:
 
 ```bash
 # Search in the SDK-specific repo
-gh issue list --repo Insights/posthog-ios --search "FEATURE_KEYWORD" --state all --limit 20
-gh issue list --repo Insights/posthog-android --search "FEATURE_KEYWORD" --state all --limit 20
-gh issue list --repo Insights/posthog-flutter --search "FEATURE_KEYWORD" --state all --limit 20
+gh issue list --repo Insights/insights-ios --search "FEATURE_KEYWORD" --state all --limit 20
+gh issue list --repo Insights/insights-android --search "FEATURE_KEYWORD" --state all --limit 20
+gh issue list --repo Insights/insights-flutter --search "FEATURE_KEYWORD" --state all --limit 20
 
 # Also search with broader terms
-gh issue list --repo Insights/posthog-ios --search "survey feature flag" --state all --limit 20
+gh issue list --repo Insights/insights-ios --search "survey feature flag" --state all --limit 20
 ```
 
-Always search issues in the main repo `Insights/posthog` AND the SDK-specific repo(s) to ensure an issue does not already exist anywhere.
+Always search issues in the main repo `Insights/insights` AND the SDK-specific repo(s) to ensure an issue does not already exist anywhere.
 
 ### Labels by Repository
 
 | Repository              | Labels for Survey Features |
 | ----------------------- | -------------------------- |
-| Insights/posthog-js      | `feature/surveys`          |
-| Insights/posthog-ios     | `Survey`, `enhancement`    |
-| Insights/posthog-android | `Survey`, `enhancement`    |
-| Insights/posthog-flutter | `Survey`, `enhancement`    |
+| Insights/insights-js      | `feature/surveys`          |
+| Insights/insights-ios     | `Survey`, `enhancement`    |
+| Insights/insights-android | `Survey`, `enhancement`    |
+| Insights/insights-flutter | `Survey`, `enhancement`    |
 
 ### Issue Creation Command
 
 ```bash
-# posthog-js (covers browser and react-native)
-gh issue create --repo Insights/posthog-js --label "feature/surveys" --title "..." --body "..."
+# insights-js (covers browser and react-native)
+gh issue create --repo Insights/insights-js --label "feature/surveys" --title "..." --body "..."
 
-# posthog-ios
-gh issue create --repo Insights/posthog-ios --label "Survey" --label "enhancement" --title "..." --body "..."
+# insights-ios
+gh issue create --repo Insights/insights-ios --label "Survey" --label "enhancement" --title "..." --body "..."
 
-# posthog-android
-gh issue create --repo Insights/posthog-android --label "Survey" --label "enhancement" --title "..." --body "..."
+# insights-android
+gh issue create --repo Insights/insights-android --label "Survey" --label "enhancement" --title "..." --body "..."
 
-# posthog-flutter
-gh issue create --repo Insights/posthog-flutter --label "Survey" --label "enhancement" --title "..." --body "..."
+# insights-flutter
+gh issue create --repo Insights/insights-flutter --label "Survey" --label "enhancement" --title "..." --body "..."
 ```
 
 ### Issue Template
@@ -271,7 +271,7 @@ gh issue create --repo Insights/posthog-flutter --label "Survey" --label "enhanc
 ```markdown
 ## 🚨 IMPORTANT
 
-This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/PostHog/posthog/blob/master/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
+This issue is likely user-facing in the main Insights app, see [`surveyVersionRequirements.ts`](https://github.com/Hanzo Insights/insights/blob/master/frontend/src/scenes/surveys/surveyVersionRequirements.ts). If you delete or close this issue, be sure to update the version requirements list here.
 
 ## Summary
 
@@ -287,12 +287,12 @@ The [SDK] SDK does not support [feature] for surveys.
 
 ## Reference Implementation
 
-See posthog-js browser: `packages/browser/src/extensions/surveys.ts`
-For mobile-specific patterns, see posthog-react-native: `packages/react-native/src/surveys/getActiveMatchingSurveys.ts`
+See insights-js browser: `packages/browser/src/extensions/surveys.ts`
+For mobile-specific patterns, see insights-react-native: `packages/react-native/src/surveys/getActiveMatchingSurveys.ts`
 
 ## Tracking
 
-This is tracked in the survey SDK feature parity issue: https://github.com/PostHog/posthog/issues/45658
+This is tracked in the survey SDK feature parity issue: https://github.com/Hanzo Insights/insights/issues/45658
 
 _This issue was generated by Claude using the `/survey-sdk-audit` skill._
 ```
@@ -310,7 +310,7 @@ Before finishing the audit, verify all steps are complete:
 - [ ] **Search for existing issues** - Before creating new ones
 - [ ] **Create GitHub issues** - For any unsupported SDKs (with proper labels)
 - [ ] **Update surveyVersionRequirements.ts** - Fix versions and add issue links to unsupportedSdks
-- [ ] **Update tracking issue** - Add new issues to https://github.com/PostHog/posthog/issues/45658
+- [ ] **Update tracking issue** - Add new issues to https://github.com/Hanzo Insights/insights/issues/45658
 
 ## Common Pitfalls
 

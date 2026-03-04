@@ -494,7 +494,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         # empty string values are considered "None"
         self.assertEqual(response[3]["data"], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 400.0, 0.0])
         self.assertEqual(response[3]["label"], "Formula (A + B)")
-        self.assertEqual(response[3]["breakdown_value"], "$$_posthog_breakdown_null_$$")
+        self.assertEqual(response[3]["breakdown_value"], "$$_insights_breakdown_null_$$")
 
     def test_breakdown_counts_of_different_events_one_without_events(self):
         with freeze_time("2020-01-04T13:01:01Z"):
@@ -641,7 +641,7 @@ class TestFormula(ClickhouseTestMixin, APIBaseTest):
         self.assertEqual(response[1]["data"], [0, 0, 0, 0, 0, 2, 0, 0])
         self.assertEqual(response[2]["breakdown_value"], "Belo Horizonte")
         self.assertEqual(response[2]["data"], [0, 0, 0, 0, 0, 0, 1, 0])
-        self.assertEqual(response[3]["breakdown_value"], "$$_posthog_breakdown_null_$$")
+        self.assertEqual(response[3]["breakdown_value"], "$$_insights_breakdown_null_$$")
         self.assertEqual(response[3]["data"], [0, 0, 0, 0, 0, 0, 1, 0])
 
     def test_global_properties(self):

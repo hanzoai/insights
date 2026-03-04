@@ -2,7 +2,7 @@ import { kea, path, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'
@@ -74,7 +74,7 @@ export const passwordResetLogic = kea<passwordResetLogicType>([
                     await api.create('api/reset/', { email })
                 } catch (e: any) {
                     actions.setRequestPasswordResetManualErrors({ email: e.detail ?? 'An error occurred' })
-                    posthog.captureException('Failed to reset password', { extra: { error: e } })
+                    insights.captureException('Failed to reset password', { extra: { error: e } })
                     throw e
                 }
             },

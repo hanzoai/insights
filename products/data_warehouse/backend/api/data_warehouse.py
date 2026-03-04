@@ -164,9 +164,9 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                                COALESCE(edj.rows_synced, 0) as rows, edj.created_at,
                                edj.finished_at, edj.latest_error, edj.workflow_run_id,
                                null as origin
-                        FROM posthog_externaldatajob edj
-                        LEFT JOIN posthog_externaldataschema eds ON edj.schema_id = eds.id
-                        LEFT JOIN posthog_externaldatasource edsrc ON eds.source_id = edsrc.id
+                        FROM insights_externaldatajob edj
+                        LEFT JOIN insights_externaldataschema eds ON edj.schema_id = eds.id
+                        LEFT JOIN insights_externaldatasource edsrc ON eds.source_id = edsrc.id
                         WHERE edj.team_id = %s AND edj.status = 'Running' AND edj.created_at >= %s
                     ),
                     modeling_jobs AS (
@@ -174,8 +174,8 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                                COALESCE(dmj.rows_materialized, 0) as rows, dmj.created_at,
                                dmj.last_run_at as finished_at, dmj.error as latest_error, dmj.workflow_run_id,
                                dwsq.origin as origin
-                        FROM posthog_datamodelingjob dmj
-                        LEFT JOIN posthog_datawarehousesavedquery dwsq ON dmj.saved_query_id = dwsq.id
+                        FROM insights_datamodelingjob dmj
+                        LEFT JOIN insights_datawarehousesavedquery dwsq ON dmj.saved_query_id = dwsq.id
                         WHERE dmj.team_id = %s AND dmj.status = 'Running' AND dmj.created_at >= %s
                     )
                     SELECT * FROM external_jobs
@@ -242,9 +242,9 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                                COALESCE(edj.rows_synced, 0) as rows, edj.created_at,
                                edj.finished_at, edj.latest_error, edj.workflow_run_id,
                                null as origin
-                        FROM posthog_externaldatajob edj
-                        LEFT JOIN posthog_externaldataschema eds ON edj.schema_id = eds.id
-                        LEFT JOIN posthog_externaldatasource edsrc ON eds.source_id = edsrc.id
+                        FROM insights_externaldatajob edj
+                        LEFT JOIN insights_externaldataschema eds ON edj.schema_id = eds.id
+                        LEFT JOIN insights_externaldatasource edsrc ON eds.source_id = edsrc.id
                         WHERE edj.team_id = %s AND edj.status = 'Completed' AND edj.created_at >= %s
                     ),
                     modeling_jobs AS (
@@ -252,8 +252,8 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                                COALESCE(dmj.rows_materialized, 0) as rows, dmj.created_at,
                                dmj.last_run_at as finished_at, dmj.error as latest_error, dmj.workflow_run_id,
                                dwsq.origin
-                        FROM posthog_datamodelingjob dmj
-                        LEFT JOIN posthog_datawarehousesavedquery dwsq ON dmj.saved_query_id = dwsq.id
+                        FROM insights_datamodelingjob dmj
+                        LEFT JOIN insights_datawarehousesavedquery dwsq ON dmj.saved_query_id = dwsq.id
                         WHERE dmj.team_id = %s AND dmj.status = 'Completed' AND dmj.created_at >= %s
                     )
                     SELECT * FROM external_jobs

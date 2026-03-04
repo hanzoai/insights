@@ -132,7 +132,7 @@ class TestUtils(BaseTest):
             assert query == "(id = ANY (%(named_key)s::uuid[]))"
             assert ids == ordered_expected_ids
 
-    # keep in sync with posthog/plugin-server/tests/utils.test.ts::safeClickhouseString
+    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeClickhouseString
     def test_safe_clickhouse_string_valid_strings(self):
         valid_strings = [
             "$autocapture",
@@ -158,14 +158,14 @@ class TestUtils(BaseTest):
         for s in valid_strings:
             self.assertEqual(safe_clickhouse_string(s), s)
 
-    # keep in sync with posthog/plugin-server/tests/utils.test.ts::safeClickhouseString
+    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeClickhouseString
     def test_safe_clickhouse_string_surrogates(self):
         # flake8: noqa
         self.assertEqual(safe_clickhouse_string("foo \ud83d\ bar"), "foo \\ud83d\\ bar")
         self.assertEqual(safe_clickhouse_string("\ud83d\ bar"), "\\ud83d\\ bar")
         self.assertEqual(safe_clickhouse_string("\ud800\ \ud803\ "), "\\ud800\\ \\ud803\\ ")
 
-    # keep in sync with posthog/plugin-server/tests/utils.test.ts::safeClickhouseString
+    # keep in sync with insights/plugin-server/tests/utils.test.ts::safeClickhouseString
     def test_safe_clickhouse_string_unicode_non_surrogates(self):
         self.assertEqual(safe_clickhouse_string("✨"), "✨")
         self.assertEqual(safe_clickhouse_string("foo \u2728\ bar"), "foo \u2728\ bar")
@@ -174,9 +174,9 @@ class TestUtils(BaseTest):
     def test_raise_if_user_provided_url_unsafe(self):
         # Sync test cases with plugin-server/src/utils/fetch.test.ts
         raise_if_user_provided_url_unsafe("https://google.com?q=20")  # Safe
-        raise_if_user_provided_url_unsafe("https://posthog.com")  # Safe
-        raise_if_user_provided_url_unsafe("https://posthog.com/foo/bar")  # Safe, with path
-        raise_if_user_provided_url_unsafe("https://posthog.com:443")  # Safe, good port
+        raise_if_user_provided_url_unsafe("https://hanzo.ai")  # Safe
+        raise_if_user_provided_url_unsafe("https://hanzo.ai/foo/bar")  # Safe, with path
+        raise_if_user_provided_url_unsafe("https://hanzo.ai:443")  # Safe, good port
         raise_if_user_provided_url_unsafe("https://1.1.1.1")  # Safe, public IP
         self.assertRaisesMessage(ValueError, "No hostname", lambda: raise_if_user_provided_url_unsafe(""))
         self.assertRaisesMessage(ValueError, "No hostname", lambda: raise_if_user_provided_url_unsafe("@@@"))
@@ -188,7 +188,7 @@ class TestUtils(BaseTest):
         self.assertRaisesMessage(
             ValueError,
             "Scheme must be either HTTP or HTTPS",
-            lambda: raise_if_user_provided_url_unsafe("ftp://posthog.com"),
+            lambda: raise_if_user_provided_url_unsafe("ftp://hanzo.ai"),
         )
         self.assertRaisesMessage(
             ValueError,
@@ -247,11 +247,11 @@ class TestUtils(BaseTest):
             ("needle is absent", ["http://localhost"], None, False),
             ("single element matches", ["http://localhost"], "http://localhost:8123", True),
             ("single element matches but is url encoded", ["http://localhost"], "http%3A%2F%2Flocalhost:8123", True),
-            ("multi element matches", ["http://localhost", "http://posthog.com"], "http://localhost:8123", True),
+            ("multi element matches", ["http://localhost", "http://hanzo.ai"], "http://localhost:8123", True),
             ("scheme should be ignored", ["ftp://localhost"], "https://localhost:8123", True),
-            ("needle is not in allowlist", ["http://localhost"], "http://posthog.com:8123", False),
+            ("needle is not in allowlist", ["http://localhost"], "http://hanzo.ai:8123", False),
             ("regex needle is not in allowlist", ["http://*.com"], "http://localhost:8123", False),
-            ("regex needle is in allowlist", ["http://*.com"], "http://posthog.com:8123", True),
+            ("regex needle is in allowlist", ["http://*.com"], "http://hanzo.ai:8123", True),
         ]
     )
     def test_unparsed_hostname_in_allowed_url_list(

@@ -2,8 +2,8 @@
 
 set -e
 
-echo "Upgrading PostHog. This will cause a few minutes of downtime."
-read -r -p "Do you want to upgrade PostHog? [y/N] " response
+echo "Upgrading Insights. This will cause a few minutes of downtime."
+read -r -p "Do you want to upgrade Insights? [y/N] " response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
 then
     echo "OK!"
@@ -13,10 +13,10 @@ fi
 
 if [ "$REGISTRY_URL" == "" ]
 then
-export REGISTRY_URL="posthog/posthog"
+export REGISTRY_URL="hanzoai/insights"
 fi
 
-export POSTHOG_APP_TAG="${POSTHOG_APP_TAG:-latest}"
+export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest}"
 
 echo "Checking for named postgres and clickhouse volumes to avoid data loss when upgrading from < 1.39"
 if docker volume ls | grep -Pzoq 'clickhouse-data\n(.|\n)*postgres-data\n'
@@ -33,10 +33,10 @@ else
     echo ""
     echo ""
     echo "We were unable to find named clickhouse and postgres volumes."
-    echo "If you created your PostHog stack PRIOR TO August 12th, 2022 / v1.39.0, the Postgres and Clickhouse containers did NOT have persistent named volumes by default."
+    echo "If you created your Insights stack PRIOR TO August 12th, 2022 / v1.39.0, the Postgres and Clickhouse containers did NOT have persistent named volumes by default."
     echo "If you choose to upgrade, you 💣 will likely lose data 💣 contained in these anonymous volumes."
     echo ""
-    echo "See the discussion here for more information: https://github.com/PostHog/posthog/pull/11256"
+    echo "See the discussion here for more information: https://github.com/hanzoai/insights/pull/11256"
     echo ""
     echo "WE STRONGLY RECOMMEND YOU:"
     echo ""
@@ -45,7 +45,7 @@ else
     echo "✅ Specifically back up the contents of :"
     echo "  ☑ /var/lib/postgresql/data in the postgres (*_db_1) container"
     echo "  ☑ /var/lib/clickhouse in the clickhouse (*_clickhouse_1) container"
-    echo "and be ready to check/recopy the data before you boot PostHog next."
+    echo "and be ready to check/recopy the data before you boot Insights next."
     read -r -p "Do you want to proceed anyway? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
     then
@@ -86,7 +86,7 @@ if [[ -f ".env" ]]; then
     . ./.env         # or: source .env
     set +a
 else
-    echo "No .env file found. Please create it with POSTHOG_SECRET and DOMAIN set."
+    echo "No .env file found. Please create it with INSIGHTS_SECRET and DOMAIN set."
     exit 1
 fi
 
@@ -118,7 +118,7 @@ if ! grep -q "SESSION_RECORDING_STORAGE_MIGRATED_TO_SEAWEEDFS" .env; then
   echo "📦 SESSION RECORDING STORAGE UPDATE"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
-  echo "PostHog now uses SeaweedFS for session recording storage."
+  echo "Insights now uses SeaweedFS for session recording storage."
   echo "Your existing session recordings are stored in MinIO."
   echo ""
   echo "You have TWO options:"
@@ -172,17 +172,17 @@ if ! grep -q "SESSION_RECORDING_STORAGE_MIGRATED_TO_SEAWEEDFS" .env; then
   source .env
 fi
 
-export POSTHOG_APP_TAG="${POSTHOG_APP_TAG:-latest-release}"
+export INSIGHTS_APP_TAG="${INSIGHTS_APP_TAG:-latest-release}"
 
 # Check if current compose file uses postgres:12-alpine (needs migration before upgrade)
-if grep -qE 'postgres:12-alpine|postgres:12' posthog/docker-compose.hobby.yml 2>/dev/null; then
+if grep -qE 'postgres:12-alpine|postgres:12' insights/docker-compose.hobby.yml 2>/dev/null; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "🐘 PostgreSQL 12 → 15 UPGRADE REQUIRED"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
     echo "Your docker-compose stack is using postgres:12-alpine."
-    echo "The new PostHog version requires PostgreSQL 15."
+    echo "The new Insights version requires PostgreSQL 15."
     echo ""
     echo "⚠️  This migration deletes data, and isn't tested in your envronment. Reject auto-update to receive manual upgrade instructions."
     echo ""
@@ -192,7 +192,7 @@ if grep -qE 'postgres:12-alpine|postgres:12' posthog/docker-compose.hobby.yml 2>
         echo "Step 1: Creating backup..."
         BACKUP_FILE="backup_pg12_$(date +%Y%m%d_%H%M%S).sql.gz"
 
-        if ! docker-compose exec -T db pg_dumpall --clean -U posthog | gzip > "$BACKUP_FILE"; then
+        if ! docker-compose exec -T db pg_dumpall --clean -U insights | gzip > "$BACKUP_FILE"; then
             echo "❌ Backup command failed!"
             rm -f "$BACKUP_FILE"
             exit 1
@@ -231,7 +231,7 @@ if grep -qE 'postgres:12-alpine|postgres:12' posthog/docker-compose.hobby.yml 2>
         # Save backup filename to a flag file for restore after git pull
         echo "$BACKUP_FILE" > .pg12_migration_pending
         echo ""
-        echo "✅ Backup saved. Continuing with PostHog upgrade..."
+        echo "✅ Backup saved. Continuing with Insights upgrade..."
         echo "   Data will be restored after the new database starts."
         echo ""
     else
@@ -241,7 +241,7 @@ if grep -qE 'postgres:12-alpine|postgres:12' posthog/docker-compose.hobby.yml 2>
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
         echo "  1. Backup:"
-        echo "     docker-compose exec -T db pg_dumpall --clean -U posthog | gzip > backup.sql.gz"
+        echo "     docker-compose exec -T db pg_dumpall --clean -U insights | gzip > backup.sql.gz"
         echo ""
         echo "  2. Stop:"
         echo "     docker-compose down"
@@ -249,23 +249,23 @@ if grep -qE 'postgres:12-alpine|postgres:12' posthog/docker-compose.hobby.yml 2>
         echo "  3. Remove volume:"
         echo "     docker volume rm postgres-data"
         echo ""
-        echo "  4. Upgrade PostHog code (git pull - pulls postgres:15 compose files)"
+        echo "  4. Upgrade Insights code (git pull - pulls postgres:15 compose files)"
         echo ""
         echo "  5. Start:"
         echo "     docker-compose up -d db"
         echo ""
         echo "  6. Restore:"
-        echo "     gunzip -c backup.sql.gz | docker-compose exec -T db psql -U posthog"
+        echo "     gunzip -c backup.sql.gz | docker-compose exec -T db psql -U insights"
         echo ""
         echo "  7. Upgrade password to SCRAM-SHA-256:"
-        echo "     docker compose exec -T db psql -U posthog -c \"ALTER USER posthog WITH PASSWORD 'posthog';\" > /dev/null 2>&1"
+        echo "     docker compose exec -T db psql -U insights -c \"ALTER USER insights WITH PASSWORD 'insights';\" > /dev/null 2>&1"
         echo ""
         echo "Please complete the manual upgrade before continuing."
         exit 1
     fi
 fi
 
-cd posthog
+cd insights
 git pull --prune
 cd ../
 
@@ -283,7 +283,7 @@ apt-get update &&
 apt-get install -y --no-install-recommends curl ca-certificates brotli && 
 mkdir -p ./share && 
 if [ ! -f ./share/GeoLite2-City.mmdb ]; then 
-    curl -L 'https://mmdbcdn.posthog.net/' --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb && 
+    curl -L 'https://mmdbcdn.insights.hanzo.ai/' --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb && 
     echo '{\"date\": \"'$(date +%Y-%m-%d)'\"}' > ./share/GeoLite2-City.json && 
     chmod 644 ./share/GeoLite2-City.mmdb &&
     chmod 644 ./share/GeoLite2-City.json
@@ -296,8 +296,8 @@ sudo curl -L "https://github.com/docker/compose/releases/download/v2.33.1/docker
 sudo chmod +x /usr/local/bin/docker-compose
 
 rm -f docker-compose.yml
-cp posthog/docker-compose.base.yml docker-compose.base.yml
-cp posthog/docker-compose.hobby.yml docker-compose.yml.tmpl
+cp insights/docker-compose.base.yml docker-compose.base.yml
+cp insights/docker-compose.hobby.yml docker-compose.yml.tmpl
 envsubst < docker-compose.yml.tmpl > docker-compose.yml
 rm docker-compose.yml.tmpl
 
@@ -333,7 +333,7 @@ then
     echo ""
 fi
 
-read -r -p "Do you want to restart the PostHog stack now ? (docker-compose up) [y/N] " response
+read -r -p "Do you want to restart the Insights stack now ? (docker-compose up) [y/N] " response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]
 then
     echo "OK, Restarting the stack!"
@@ -357,12 +357,12 @@ if [ -f ".pg12_migration_pending" ]; then
     sleep 20
 
     echo "Restoring data from $PG12_BACKUP_FILE..."
-    if gunzip -c "$PG12_BACKUP_FILE" | docker-compose exec -T db psql -U posthog; then
+    if gunzip -c "$PG12_BACKUP_FILE" | docker-compose exec -T db psql -U insights; then
         echo "✅ Data restored successfully!"
 
         echo ""
         echo "Upgrading password to SCRAM-SHA-256..."
-        docker-compose exec -T db psql -U posthog -c "ALTER USER posthog WITH PASSWORD 'posthog';" > /dev/null 2>&1
+        docker-compose exec -T db psql -U insights -c "ALTER USER insights WITH PASSWORD 'insights';" > /dev/null 2>&1
 
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -378,11 +378,11 @@ if [ -f ".pg12_migration_pending" ]; then
         echo "Your backup is saved at: $PG12_BACKUP_FILE"
         echo ""
         echo "To manually restore, run:"
-        echo "  gunzip -c $PG12_BACKUP_FILE | docker-compose exec -T db psql -U posthog"
+        echo "  gunzip -c $PG12_BACKUP_FILE | docker-compose exec -T db psql -U insights"
         echo ""
         exit 1
     fi
 fi
 
 echo "Consider running 'docker system prune -a' to clean up old images and free disk space"
-echo "PostHog upgraded successfully!"
+echo "Insights upgraded successfully!"

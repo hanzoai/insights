@@ -16,7 +16,7 @@ import {
 import { loaders } from 'kea-loaders'
 import { router } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api, { ApiError } from 'lib/api'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
@@ -683,7 +683,7 @@ export const maxThreadLogic = kea<maxThreadLogicType>([
                                 'Something is wrong with our servers. Please try again later.'
                         }
                     } else {
-                        posthog.captureException(e)
+                        insights.captureException(e)
                         console.error(e)
                     }
 

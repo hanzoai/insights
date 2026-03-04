@@ -44,7 +44,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_select_insightsql_expressions(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -151,7 +151,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_insightsql_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -216,7 +216,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_event_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -290,7 +290,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_person_property_filter(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -337,7 +337,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
                     PersonPropertyFilter(
                         type="person",
                         key="email",
-                        value="tom@posthog.com",
+                        value="tom@hanzo.ai",
                         operator=PropertyOperator.EXACT,
                     )
                 ],
@@ -375,7 +375,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_property_filter_aggregations(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -422,7 +422,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_select_event_person(self):
         with freeze_time("2020-01-10 12:00:00"):
             person = _create_person(
-                properties={"name": "Tom", "email": "tom@posthog.com"},
+                properties={"name": "Tom", "email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -465,7 +465,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(response["results"][1][2], {"distinct_id": "3"})
             expected_user = {
                 "uuid": str(person.uuid),
-                "properties": {"name": "Tom", "email": "tom@posthog.com"},
+                "properties": {"name": "Tom", "email": "tom@hanzo.ai"},
                 "distinct_id": "2",
                 "created_at": "2020-01-10T12:00:00Z",
             }
@@ -477,7 +477,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_events_query_all_time_date(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"name": "Tom", "email": "tom@posthog.com"},
+                properties={"name": "Tom", "email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -529,7 +529,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_full_insightsql_query(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -788,7 +788,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_full_insightsql_query_view(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,
@@ -853,7 +853,7 @@ class TestQuery(ClickhouseTestMixin, APIBaseTest):
     def test_full_insightsql_query_async(self):
         with freeze_time("2020-01-10 12:00:00"):
             _create_person(
-                properties={"email": "tom@posthog.com"},
+                properties={"email": "tom@hanzo.ai"},
                 distinct_ids=["2", "some-random-uid"],
                 team=self.team,
                 immediate=True,

@@ -1,7 +1,7 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { Link } from '@posthog/lemon-ui'
+import { Link } from '@hanzo/lemon-ui'
 
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -25,7 +25,7 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                             type="primary"
                             size="xsmall"
                             onClick={() => {
-                                posthog.capture('historical_sync_banner_learn_more_clicked')
+                                insights.capture('historical_sync_banner_learn_more_clicked')
                                 setShowModal(true)
                             }}
                         >
@@ -43,10 +43,10 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                 footer={
                     <div className="flex items-center justify-between gap-2 w-full">
                         <Link
-                            to="https://posthog.com/docs/cdp/sources"
+                            to="https://hanzo.ai/docs/cdp/sources"
                             target="_blank"
                             onClick={() => {
-                                posthog.capture('historical_sync_banner_docs_link_clicked')
+                                insights.capture('historical_sync_banner_docs_link_clicked')
                             }}
                         >
                             View documentation
@@ -56,7 +56,7 @@ export function FreeHistoricalSyncsBanner({ hideGetStarted }: { hideGetStarted?:
                                 type="primary"
                                 to={urls.dataWarehouseSourceNew()}
                                 onClick={() => {
-                                    posthog.capture('historical_sync_banner_new_source_clicked')
+                                    insights.capture('historical_sync_banner_new_source_clicked')
                                     setShowModal(false)
                                 }}
                             >

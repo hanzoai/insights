@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconX } from '@posthog/icons'
-import { LemonButton, LemonInput, ProfilePicture } from '@posthog/lemon-ui'
+import { IconX } from '@hanzo/icons'
+import { LemonButton, LemonInput, ProfilePicture } from '@hanzo/lemon-ui'
 
 import { UserAssignee, userSelectLogic } from './userSelectLogic'
 

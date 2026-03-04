@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useMemo } from 'react'
 
-import { IconAI } from '@posthog/icons'
+import { IconAI } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { addProductIntent } from 'lib/utils/product-intents'
@@ -50,7 +50,7 @@ function useSurveyAnalysisMaxTool(): ReturnType<typeof useMaxTool> {
             })
 
             if (toolOutput?.error) {
-                posthog.captureException(
+                insights.captureException(
                     toolOutput?.error || 'Undefined error when analyzing survey responses with Insights AI',
                     {
                         action: 'max-ai-survey-analysis-failed',

@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { IconAI } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconAI } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { ExplainCSPViolationButton } from 'lib/components/LLMButton/ExplainCSPViolationButton'
@@ -10,7 +10,7 @@ import ViewRecordingButton, { RecordingPlayerType } from 'lib/components/ViewRec
 
 import { LightErrorBoundary } from '~/layout/ErrorBoundary/ErrorBoundary'
 
-// NB!!! Sync this list with posthog/insightsql/insightsqlx.py
+// NB!!! Sync this list with insights/insightsql/insightsqlx.py
 // These tags only get the `key` and `children` attributes.
 const INSIGHTSQLX_TAGS_NO_ATTRIBUTES = [
     'em',

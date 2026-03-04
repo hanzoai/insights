@@ -1,10 +1,10 @@
 import clsx from 'clsx'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 import { TextMorph } from 'torph/react'
 
-import { IconChevronRight, IconInfo } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconChevronRight, IconInfo } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { TitleWithIcon } from 'lib/components/TitleWithIcon'
@@ -46,7 +46,7 @@ export function TemplateLinkSection({
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         } catch (e) {
-            posthog.captureException(new Error('unexpected template link clipboard error: ' + (e as Error).message))
+            insights.captureException(new Error('unexpected template link clipboard error: ' + (e as Error).message))
         }
     }
 

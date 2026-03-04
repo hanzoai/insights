@@ -1,4 +1,4 @@
-# posthog/test/test_otel_instrumentation.py
+# insights/test/test_otel_instrumentation.py
 import os
 import logging
 

@@ -129,7 +129,7 @@ class AllowIPMiddleware:
                 if get_geoip_properties(ip).get("$geoip_country_code", None) not in settings.BLOCKED_GEOIP_REGIONS:
                     return response
         return HttpResponse(
-            "Insights is not available in your region. If you think this is in error, please contact tim@posthog.com.",
+            "Insights is not available in your region. If you think this is in error, please contact tim@hanzo.ai.",
             status=403,
         )
 
@@ -186,7 +186,7 @@ class AutoProjectMiddleware:
             if (
                 len(path_parts) >= 2
                 and path_parts[0] == "project"
-                and (path_parts[1].startswith(("hi_", "phc_")) or path_parts[1] in self.token_allowlist)
+                and (path_parts[1].startswith(("hi_", "hi_")) or path_parts[1] in self.token_allowlist)
             ):
 
                 def do_redirect():
@@ -286,7 +286,7 @@ class AutoProjectMiddleware:
         user.current_team = new_team
         user.current_organization_id = new_team.organization_id
         user.save()
-        # Information for POSTHOG_APP_CONTEXT
+        # Information for INSIGHTS_APP_CONTEXT
         request.switched_team = old_team_id  # type: ignore
 
     def can_switch_to_team(self, new_team: Team, request: HttpRequest):
@@ -434,8 +434,8 @@ def per_request_logging_context_middleware(
     def middleware(request: HttpRequest) -> HttpResponse:
         # Add in the host header, and the x-forwarded-for header if it exists.
         # We add these such that we can see if there are any requests on cloud
-        # that do not use Host header app.posthog.com. This is important as we
-        # roll out CloudFront in front of app.posthog.com. We can get the host
+        # that do not use Host header insights.hanzo.ai. This is important as we
+        # roll out CloudFront in front of insights.hanzo.ai. We can get the host
         # header from NGINX, but we really want to have a way to get to the
         # team_id given a host header, and we can't do that with NGINX.
         structlog.contextvars.bind_contextvars(
@@ -722,46 +722,46 @@ class CSPMiddleware:
                 "frame-ancestors 'none'",
                 "manifest-src 'none'",
                 # used by the error page
-                "frame-src https://posthog.com",
+                "frame-src https://hanzo.ai",
                 "base-uri 'self'",
-                "report-uri https://us.i.posthog.com/report/?token=sTMFPsFhdP1Ssg&v=2",
-                "report-to posthog",
+                "report-uri https://us.i.hanzo.ai/report/?token=sTMFPsFhdP1Ssg&v=2",
+                "report-to insights",
             ]
 
             response.headers["Reporting-Endpoints"] = (
-                'posthog="https://us.i.posthog.com/report/?token=sTMFPsFhdP1Ssg&v=2"'
+                'insights="https://us.i.hanzo.ai/report/?token=sTMFPsFhdP1Ssg&v=2"'
             )
             response.headers["Content-Security-Policy"] = "; ".join(csp_parts)
         else:
-            resource_url = "https://*.posthog.com"
+            resource_url = "https://*.hanzo.ai"
             if settings.DEBUG or settings.TEST:
                 resource_url = "http://localhost:8234"
-            elif settings.SITE_URL.endswith(".dev.posthog.dev"):
-                resource_url = "https://*.dev.posthog.dev"
+            elif settings.SITE_URL.endswith(".dev.insights.dev"):
+                resource_url = "https://*.dev.insights.dev"
 
             connect_debug_url = "ws://localhost:8234" if settings.DEBUG or settings.TEST else ""
             csp_parts = [
                 "default-src 'self'",
                 f"style-src 'self' 'unsafe-inline' {resource_url} https://fonts.googleapis.com",
-                f"script-src 'self' 'nonce-{nonce}' {resource_url} https://*.i.posthog.com",
-                f"font-src 'self' {resource_url} https://app-static.eu.posthog.com https://app-static-prod.posthog.com https://d1sdjtjk6xzm7.cloudfront.net https://fonts.gstatic.com https://cdn.jsdelivr.net https://assets.faircado.com https://use.typekit.net",
+                f"script-src 'self' 'nonce-{nonce}' {resource_url} https://*.i.hanzo.ai",
+                f"font-src 'self' {resource_url} https://app-static.insights.hanzo.ai https://app-static-prod.hanzo.ai https://d1sdjtjk6xzm7.cloudfront.net https://fonts.gstatic.com https://cdn.jsdelivr.net https://assets.faircado.com https://use.typekit.net",
                 "worker-src 'self'",
                 "child-src 'none'",
                 "object-src 'none'",
                 "media-src https://res.cloudinary.com",
-                f"img-src 'self' data: {resource_url} https://posthog.com https://www.gravatar.com https://res.cloudinary.com https://platform.slack-edge.com https://raw.githubusercontent.com",
-                "frame-ancestors https://posthog.com https://preview.posthog.com https://vercel.com",
-                f"connect-src 'self' https://www.posthogstatus.com {resource_url} {connect_debug_url} https://raw.githubusercontent.com https://api.github.com",
+                f"img-src 'self' data: {resource_url} https://hanzo.ai https://www.gravatar.com https://res.cloudinary.com https://platform.slack-edge.com https://raw.githubusercontent.com",
+                "frame-ancestors https://hanzo.ai https://preview.hanzo.ai https://vercel.com",
+                f"connect-src 'self' https://www.insightsstatus.com {resource_url} {connect_debug_url} https://raw.githubusercontent.com https://api.github.com",
                 # allow all sites for displaying heatmaps
                 "frame-src https:",
                 "manifest-src 'self'",
                 "base-uri 'self'",
-                "report-uri https://us.i.posthog.com/report/?token=sTMFPsFhdP1Ssg&sample_rate=0.1&v=2",
-                "report-to posthog",
+                "report-uri https://us.i.hanzo.ai/report/?token=sTMFPsFhdP1Ssg&sample_rate=0.1&v=2",
+                "report-to insights",
             ]
 
             response.headers["Reporting-Endpoints"] = (
-                'posthog="https://us.i.posthog.com/report/?token=sTMFPsFhdP1Ssg&sample_rate=0.1&v=2"'
+                'insights="https://us.i.hanzo.ai/report/?token=sTMFPsFhdP1Ssg&sample_rate=0.1&v=2"'
             )
             response.headers["Content-Security-Policy-Report-Only"] = "; ".join(csp_parts)
 
@@ -1001,4 +1001,4 @@ def impersonated_session_logout(request: HttpRequest) -> HttpResponse:
 
     impersonated_user_pk = request.user.pk
     restore_original_login(request)
-    return redirect(f"/admin/posthog/user/{impersonated_user_pk}/change/")
+    return redirect(f"/admin/insights/user/{impersonated_user_pk}/change/")

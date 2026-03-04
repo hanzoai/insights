@@ -6,8 +6,8 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { IconEmoji, IconPlusSmall, IconRevert, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTag } from '@posthog/lemon-ui'
+import { IconEmoji, IconPlusSmall, IconRevert, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCheckbox, LemonInput, LemonSwitch, LemonTag } from '@hanzo/lemon-ui'
 
 import { EditableField } from 'lib/components/EditableField/EditableField'
 import { SortableDragIcon } from 'lib/lemon-ui/icons'

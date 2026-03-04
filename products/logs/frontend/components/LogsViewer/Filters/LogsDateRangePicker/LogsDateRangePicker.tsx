@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconCalendar, IconClock } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput, Popover } from '@posthog/lemon-ui'
+import { IconCalendar, IconClock } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput, Popover } from '@hanzo/lemon-ui'
 
 import { RollingDateRangeFilter } from 'lib/components/DateFilter/RollingDateRangeFilter'
 import { dayjs } from 'lib/dayjs'

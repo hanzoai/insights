@@ -51,7 +51,7 @@ import {
     captureToolResult,
     identifyUser,
     initInsights,
-} from '../analytics/posthog'
+} from '../analytics/insights'
 import { extractAnalytics } from '../types'
 
 export interface UseToolResultOptions {

@@ -89,7 +89,7 @@ class DesktopRecordingAdmin(admin.ModelAdmin):
         if obj.team:
             return format_html(
                 '<a href="{}">{}</a>',
-                reverse("admin:posthog_team_change", args=[obj.team.pk]),
+                reverse("admin:insights_team_change", args=[obj.team.pk]),
                 obj.team.name,
             )
         return "-"
@@ -99,7 +99,7 @@ class DesktopRecordingAdmin(admin.ModelAdmin):
         if obj.created_by:
             return format_html(
                 '<a href="{}">{}</a>',
-                reverse("admin:posthog_user_change", args=[obj.created_by.pk]),
+                reverse("admin:insights_user_change", args=[obj.created_by.pk]),
                 obj.created_by.email,
             )
         return "-"

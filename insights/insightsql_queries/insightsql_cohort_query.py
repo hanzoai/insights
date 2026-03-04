@@ -4,7 +4,7 @@ from datetime import datetime
 from numbers import Number
 from typing import Literal, Optional, Union, cast
 
-import posthoganalytics
+import hanzoanalytics
 from rest_framework.exceptions import ValidationError
 
 from insights.schema import (
@@ -382,7 +382,7 @@ class InsightsQLCohortQuery:
     def get_person_condition(self, prop: Property) -> ast.SelectQuery:
         # key = $sample_field
         # type = "person"
-        # value = test@posthog.com
+        # value = test@hanzo.ai
         actors_query = ActorsQuery(
             properties=[
                 PersonPropertyFilter(key=prop.key, value=prop.value, operator=prop.operator or PropertyOperator.EXACT)
@@ -443,7 +443,7 @@ class InsightsQLCohortQuery:
             raise ValueError(f"Invalid property type for Cohort queries: {prop.type}")
 
     def _should_combine_person_properties_and(self) -> bool:
-        return posthoganalytics.feature_enabled(
+        return hanzoanalytics.feature_enabled(
             "insightsql-cohort-combine-person-properties",
             str(self.team.uuid),
             groups={
@@ -463,7 +463,7 @@ class InsightsQLCohortQuery:
         )
 
     def _should_combine_person_properties_or(self) -> bool:
-        return posthoganalytics.feature_enabled(
+        return hanzoanalytics.feature_enabled(
             "insightsql-cohort-combine-person-properties-or",
             str(self.team.uuid),
             groups={

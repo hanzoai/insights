@@ -37,7 +37,7 @@ Events flow through several systems before they're queryable:
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                 │
 │   Client SDK                                                                    │
-│   (posthog-js, posthog-node, etc.)                                             │
+│   (insights-js, insights-node, etc.)                                             │
 │                                                                                 │
 └─────────────────────────────────┬───────────────────────────────────────────────┘
                                   │
@@ -94,7 +94,7 @@ Events flow through several systems before they're queryable:
                                   ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                 │
-│   HogQL / Query Engine                                                          │
+│   InsightsQL / Query Engine                                                          │
 │   - Translates queries to ClickHouse SQL                                        │
 │   - Handles person joins based on PoE (Persons on Events) mode                  │
 │   - Applies person_distinct_id_overrides when needed                            │
@@ -167,7 +167,7 @@ Instead, we use a two-part strategy, which involves
 #### How squashing works
 
 1. When a distinct_id's person mapping changes (during merge) with `version > 0`, a row is inserted into `person_distinct_id_overrides`
-2. A scheduled job (`posthog/dags/person_overrides.py`) periodically:
+2. A scheduled job (`insights/dags/person_overrides.py`) periodically:
    - Creates a snapshot of pending overrides
    - Uses a ClickHouse dictionary to efficiently look up the new person_id
    - Runs an `ALTER TABLE ... UPDATE` mutation to rewrite person_ids in the events table
@@ -258,15 +258,15 @@ The ingestion pipeline processes events in batches. For person processing:
 
 For events with `$process_person_profile: false`:
 
-- Batch-inserts into `posthog_personlessdistinctid` table
+- Batch-inserts into `insights_personlessdistinctid` table
 - Checks and caches whether the distinct_id was already merged (`is_merged` flag)
 
 ```sql
 -- nodejs/src/worker/ingestion/persons/repositories/postgres-person-repository.ts
-INSERT INTO posthog_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
+INSERT INTO insights_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
 VALUES ($1, $2, false, now())
 ON CONFLICT (team_id, distinct_id) DO UPDATE
-SET is_merged = posthog_personlessdistinctid.is_merged
+SET is_merged = insights_personlessdistinctid.is_merged
 RETURNING is_merged
 ```
 
@@ -314,14 +314,14 @@ async mergeDistinctIds(
 
 **When are overrides created?**
 
-An override is needed when events exist in ClickHouse with a person_id that's now incorrect (because of a merge). The `version` field in `posthog_persondistinctid` controls this:
+An override is needed when events exist in ClickHouse with a person_id that's now incorrect (because of a merge). The `version` field in `insights_persondistinctid` controls this:
 
 - `version = 0`: No override - this distinct_id's events already have the correct person_id (e.g. the first `$identify` for a user, due to the deterministic UUID v5)
 - `version >= 1`: Override created - events exist with an old person_id that needs rewriting
 
 ### 4. PostgreSQL tables
 
-**`posthog_person`**: The source of truth for person data
+**`insights_person`**: The source of truth for person data
 
 - `id`: Internal integer ID
 - `uuid`: The person's UUID (deterministic from primary distinct_id)
@@ -330,14 +330,14 @@ An override is needed when events exist in ClickHouse with a person_id that's no
 - `is_identified`: Whether `$identify` was called
 - `version`: Incremented on updates (for ClickHouse consistency)
 
-**`posthog_persondistinctid`**: Maps distinct_ids to persons
+**`insights_persondistinctid`**: Maps distinct_ids to persons
 
 - `distinct_id`: The distinct ID string
-- `person_id`: FK to posthog_person
+- `person_id`: FK to insights_person
 - `team_id`: Which team
 - `version`: 0 for primary, >=1 for merged (triggers override)
 
-**`posthog_personlessdistinctid`**: Tracks distinct_ids used in personless mode
+**`insights_personlessdistinctid`**: Tracks distinct_ids used in personless mode
 
 - `distinct_id`: The distinct ID
 - `team_id`: Which team
@@ -372,28 +372,28 @@ After person processing, updates are produced to Kafka:
 - Populated via materialized view that filters for `version > 0`
 - Small table, used for query-time corrections until squashing completes
 
-### 7. HogQL / Query engine
+### 7. InsightsQL / Query engine
 
-HogQL is Insights's query language - a dialect of SQL that provides useful abstractions over raw ClickHouse queries. It serves two main purposes (and many others):
+InsightsQL is Insights's query language - a dialect of SQL that provides useful abstractions over raw ClickHouse queries. It serves two main purposes (and many others):
 
-1. **Abstractions**: HogQL handles complexity like person overrides, property access, and table relationships so you don't have to write complex JOINs manually
-2. **Multi-tenancy**: HogQL automatically adds `team_id` filters to all queries, ensuring customers can only access their own data - this lets us safely expose SQL access to users
+1. **Abstractions**: InsightsQL handles complexity like person overrides, property access, and table relationships so you don't have to write complex JOINs manually
+2. **Multi-tenancy**: InsightsQL automatically adds `team_id` filters to all queries, ensuring customers can only access their own data - this lets us safely expose SQL access to users
 
-HogQL is smart about when to add JOINs - it only adds them when you actually need them.
+InsightsQL is smart about when to add JOINs - it only adds them when you actually need them.
 
 #### Automatic override JOIN
 
-If your query doesn't reference `person_id`, HogQL won't add the overrides JOIN:
+If your query doesn't reference `person_id`, InsightsQL won't add the overrides JOIN:
 
 ```sql
 -- This query doesn't need the overrides JOIN
 SELECT count() FROM events WHERE event = '$pageview'
 ```
 
-But if you reference `events.person_id` or `events.person.id`, HogQL automatically adds the LEFT JOIN to `person_distinct_id_overrides`:
+But if you reference `events.person_id` or `events.person.id`, InsightsQL automatically adds the LEFT JOIN to `person_distinct_id_overrides`:
 
 ```sql
--- HogQL adds: LEFT JOIN person_distinct_id_overrides ON ...
+-- InsightsQL adds: LEFT JOIN person_distinct_id_overrides ON ...
 SELECT count() FROM events WHERE events.person.id = 'some-uuid'
 ```
 
@@ -437,7 +437,7 @@ Most queries should use `person.properties` for performance. Use `pdi.person.pro
 #### PoE mode settings
 
 It is possible to change `person.properties` to use the PDI properties instead, using the PoE mode setting. This can be set at both the query level and the team level, though we would like to remove the team-level setting soon.
-This is set through the `HogQLQueryModifiers` class.
+This is set through the `InsightsQLQueryModifiers` class.
 
 If this setting is overridden, you can access PoE properties regardless of the PoE mode by using `poe.properties.X`
 
@@ -465,7 +465,7 @@ WHERE team_id = X AND distinct_id IN ('anon-123', 'user@example.com')
 
 ```sql
 -- Run against PostgreSQL
-SELECT * FROM posthog_personlessdistinctid
+SELECT * FROM insights_personlessdistinctid
 WHERE team_id = X AND distinct_id = 'anon-123'
 ```
 
@@ -473,7 +473,7 @@ WHERE team_id = X AND distinct_id = 'anon-123'
 
 ```sql
 -- Run against PostgreSQL
-SELECT * FROM posthog_persondistinctid
+SELECT * FROM insights_persondistinctid
 WHERE team_id = X AND distinct_id = 'anon-123'
 -- version = 0 means primary, no override
 -- version >= 1 means override should exist
@@ -506,24 +506,24 @@ WHERE team_id = X AND distinct_id = 'anon-123'
 
 | File                              | Purpose                                                       |
 | --------------------------------- | ------------------------------------------------------------- |
-| `posthog/models/person/person.py` | Django models: Person, PersonDistinctId, PersonlessDistinctId |
+| `insights/models/person/person.py` | Django models: Person, PersonDistinctId, PersonlessDistinctId |
 
 ### ClickHouse schema (Python)
 
 | File                           | Purpose                                                                    |
 | ------------------------------ | -------------------------------------------------------------------------- |
-| `posthog/models/person/sql.py` | Person, person_distinct_id, person_distinct_id_overrides table definitions |
+| `insights/models/person/sql.py` | Person, person_distinct_id, person_distinct_id_overrides table definitions |
 
 ### Squashing job (Python)
 
 | File                               | Purpose                                       |
 | ---------------------------------- | --------------------------------------------- |
-| `posthog/dags/person_overrides.py` | Dagster job that squashes person_id overrides |
+| `insights/dags/person_overrides.py` | Dagster job that squashes person_id overrides |
 
-### HogQL (Python)
+### InsightsQL (Python)
 
 | File                                                            | Purpose                                    |
 | --------------------------------------------------------------- | ------------------------------------------ |
-| `posthog/hogql/database/schema/persons.py`                      | HogQL schema for persons table             |
-| `posthog/hogql/database/schema/person_distinct_ids.py`          | HogQL schema for person_distinct_id tables |
-| `posthog/hogql/database/schema/person_distinct_id_overrides.py` | HogQL schema for overrides table           |
+| `insights/insightsql/database/schema/persons.py`                      | InsightsQL schema for persons table             |
+| `insights/insightsql/database/schema/person_distinct_ids.py`          | InsightsQL schema for person_distinct_id tables |
+| `insights/insightsql/database/schema/person_distinct_id_overrides.py` | InsightsQL schema for overrides table           |

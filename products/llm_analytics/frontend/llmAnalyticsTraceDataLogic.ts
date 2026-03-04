@@ -1,6 +1,6 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { dayjs } from 'lib/dayjs'
 import { getAppContext } from 'lib/utils/getAppContext'
@@ -393,7 +393,7 @@ export const llmAnalyticsTraceDataLogic = kea<llmAnalyticsTraceDataLogicType>([
             const traceQueryRunnerLoadDurationMs = values.elapsedTime ?? null
             const timing = getSingleTraceLoadTiming(trace, nowTimestamp, traceQueryRunnerLoadDurationMs)
 
-            posthog.capture(SINGLE_TRACE_PAGE_LOADED_EVENT, {
+            insights.capture(SINGLE_TRACE_PAGE_LOADED_EVENT, {
                 trace_id: trace.id,
                 team_id: appContext?.current_team?.id ?? null,
                 project_id: appContext?.current_team?.project_id ?? null,

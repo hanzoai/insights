@@ -19,6 +19,6 @@ class UserScenePersonalisation(UUIDTModel, RootTeamMixin):
         constraints = [
             models.UniqueConstraint(
                 fields=["team", "user", "scene"],
-                name="posthog_unique_scene_personalisation",
+                name="insights_unique_scene_personalisation",
             )
         ]

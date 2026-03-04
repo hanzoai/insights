@@ -3,9 +3,9 @@ import { actions, connect, events, kea, listeners, path, reducers, selectors } f
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 
-import { IconBolt, IconCode2, IconDatabase, IconDocument, IconPlug, IconPlus } from '@posthog/icons'
-import { LemonMenuItem } from '@posthog/lemon-ui'
-import { Spinner } from '@posthog/lemon-ui'
+import { IconBolt, IconCode2, IconDatabase, IconDocument, IconPlug, IconPlus } from '@hanzo/icons'
+import { LemonMenuItem } from '@hanzo/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { TreeItem } from 'lib/components/DatabaseTableTree/DatabaseTableTree'
@@ -50,7 +50,7 @@ const isDataWarehouseTable = (
 const isInsightsTable = (
     table: DatabaseSchemaDataWarehouseTable | DatabaseSchemaTable | DataWarehouseSavedQuery
 ): table is DatabaseSchemaTable => {
-    return 'type' in table && table.type === 'posthog'
+    return 'type' in table && table.type === 'insights'
 }
 
 const isSystemTable = (
@@ -103,7 +103,7 @@ const FUSE_OPTIONS: Fuse.IFuseOptions<any> = {
     includeMatches: true,
 }
 
-const posthogTablesFuse = new Fuse<DatabaseSchemaTable>([], FUSE_OPTIONS)
+const insightsTablesFuse = new Fuse<DatabaseSchemaTable>([], FUSE_OPTIONS)
 const systemTablesFuse = new Fuse<DatabaseSchemaTable>([], FUSE_OPTIONS)
 const dataWarehouseTablesFuse = new Fuse<DatabaseSchemaDataWarehouseTable>([], FUSE_OPTIONS)
 const savedQueriesFuse = new Fuse<DataWarehouseSavedQuery>([], FUSE_OPTIONS)
@@ -689,14 +689,14 @@ const createSavedQueryLookupEntry = (view: DataWarehouseSavedQuery): TableLookup
 }
 
 const createTableLookup = ({
-    posthogTables,
+    insightsTables,
     systemTables,
     dataWarehouseTables,
     dataWarehouseSavedQueries,
     managedViews,
     savedQuerySchemaTables,
 }: {
-    posthogTables: DatabaseSchemaTable[]
+    insightsTables: DatabaseSchemaTable[]
     systemTables: DatabaseSchemaTable[]
     dataWarehouseTables: DatabaseSchemaDataWarehouseTable[]
     dataWarehouseSavedQueries: DataWarehouseSavedQuery[]
@@ -705,7 +705,7 @@ const createTableLookup = ({
 }): TableLookup => {
     return Object.fromEntries(
         [
-            ...posthogTables.map((table) => [table.name, { name: table.name, fields: table.fields }]),
+            ...insightsTables.map((table) => [table.name, { name: table.name, fields: table.fields }]),
             ...systemTables.map((table) => [table.name, { name: table.name, fields: table.fields }]),
             ...dataWarehouseTables.map((table) => [table.name, { name: table.name, fields: table.fields }]),
             ...dataWarehouseSavedQueries.map((view) => {
@@ -927,8 +927,8 @@ const createSourceFolderNode = (
     }
 
     const sourceFolderId = isSearch
-        ? `search-${sourceType === 'Insights' ? 'posthog' : sourceType}`
-        : `source-${sourceType === 'Insights' ? 'posthog' : sourceType}`
+        ? `search-${sourceType === 'Insights' ? 'insights' : sourceType}`
+        : `source-${sourceType === 'Insights' ? 'insights' : sourceType}`
 
     return {
         id: sourceFolderId,
@@ -1063,10 +1063,10 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
             ['joins', 'joinsLoading'],
             databaseTableListLogic,
             [
-                'allPosthogTables',
-                'posthogTables',
+                'allInsightsTables',
+                'insightsTables',
                 'dataWarehouseTables',
-                'posthogTablesMap',
+                'insightsTablesMap',
                 'dataWarehouseTablesMap',
                 'viewsMapById',
                 'managedViews',
@@ -1119,7 +1119,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 'views',
                 'managed-views',
                 'endpoints',
-                'search-posthog',
+                'search-insights',
                 'search-system',
                 'search-datawarehouse',
                 'search-views',
@@ -1197,24 +1197,24 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
         ],
     })),
     selectors(({ actions }) => ({
-        hasNonPosthogSources: [
+        hasNonInsightsSources: [
             (s) => [s.dataWarehouseTables],
             (dataWarehouseTables: DatabaseSchemaDataWarehouseTable[]): boolean => {
                 return dataWarehouseTables.length > 0
             },
         ],
-        relevantPosthogTables: [
-            (s) => [s.posthogTables, s.searchTerm],
+        relevantInsightsTables: [
+            (s) => [s.insightsTables, s.searchTerm],
             (
-                posthogTables: DatabaseSchemaTable[],
+                insightsTables: DatabaseSchemaTable[],
                 searchTerm: string
             ): [DatabaseSchemaTable, FuseSearchMatch[] | null][] => {
                 if (searchTerm) {
-                    return posthogTablesFuse
+                    return insightsTablesFuse
                         .search(searchTerm)
                         .map((result) => [result.item, result.matches as FuseSearchMatch[]])
                 }
-                return posthogTables.map((table) => [table, null])
+                return insightsTables.map((table) => [table, null])
             },
         ],
         relevantSystemTables: [
@@ -1303,12 +1303,12 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
         ],
         searchTreeData: [
             (s) => [
-                s.allPosthogTables,
+                s.allInsightsTables,
                 s.systemTables,
                 s.dataWarehouseTables,
                 s.dataWarehouseSavedQueries,
                 s.managedViews,
-                s.relevantPosthogTables,
+                s.relevantInsightsTables,
                 s.relevantSystemTables,
                 s.relevantDataWarehouseTables,
                 s.relevantSavedQueries,
@@ -1321,12 +1321,12 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 s.allTablesMap,
             ],
             (
-                allPosthogTables: DatabaseSchemaTable[],
+                allInsightsTables: DatabaseSchemaTable[],
                 systemTables: DatabaseSchemaTable[],
                 dataWarehouseTables: DatabaseSchemaDataWarehouseTable[],
                 dataWarehouseSavedQueries: DataWarehouseSavedQuery[],
                 managedViews: DatabaseSchemaManagedViewTable[],
-                relevantPosthogTables: [DatabaseSchemaTable, FuseSearchMatch[] | null][],
+                relevantInsightsTables: [DatabaseSchemaTable, FuseSearchMatch[] | null][],
                 relevantSystemTables: [DatabaseSchemaTable, FuseSearchMatch[] | null][],
                 relevantDataWarehouseTables: [DatabaseSchemaDataWarehouseTable, FuseSearchMatch[] | null][],
                 relevantSavedQueries: [DataWarehouseSavedQuery, FuseSearchMatch[] | null][],
@@ -1343,7 +1343,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 }
 
                 const tableLookup = createTableLookup({
-                    posthogTables: allPosthogTables,
+                    insightsTables: allInsightsTables,
                     systemTables,
                     dataWarehouseTables,
                     dataWarehouseSavedQueries,
@@ -1356,13 +1356,13 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 const tableNodeOptions = { expandedLazyNodeIds }
 
                 // Add Insights tables
-                if (relevantPosthogTables.length > 0) {
-                    expandedIds.push('search-posthog')
+                if (relevantInsightsTables.length > 0) {
+                    expandedIds.push('search-insights')
                     sourcesChildren.push(
                         createSourceFolderNode(
                             'Insights',
                             [],
-                            relevantPosthogTables,
+                            relevantInsightsTables,
                             true,
                             tableLookup,
                             tableNodeOptions
@@ -1479,8 +1479,8 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
         ],
         treeData: [
             (s) => [
-                s.allPosthogTables,
-                s.posthogTables,
+                s.allInsightsTables,
+                s.insightsTables,
                 s.systemTables,
                 s.dataWarehouseTables,
                 s.dataWarehouseSavedQueries,
@@ -1497,8 +1497,8 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 s.allTablesMap,
             ],
             (
-                allPosthogTables: DatabaseSchemaTable[],
-                posthogTables: DatabaseSchemaTable[],
+                allInsightsTables: DatabaseSchemaTable[],
+                insightsTables: DatabaseSchemaTable[],
                 systemTables: DatabaseSchemaTable[],
                 dataWarehouseTables: DatabaseSchemaDataWarehouseTable[],
                 dataWarehouseSavedQueries: DataWarehouseSavedQuery[],
@@ -1516,7 +1516,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
             ): TreeDataItem[] => {
                 const sourcesChildren: TreeDataItem[] = []
                 const tableLookup = createTableLookup({
-                    posthogTables: allPosthogTables,
+                    insightsTables: allInsightsTables,
                     systemTables,
                     dataWarehouseTables,
                     dataWarehouseSavedQueries,
@@ -1527,7 +1527,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 const tableNodeOptions = { expandedLazyNodeIds }
 
                 // Add loading indicator for sources if still loading
-                if (databaseLoading && posthogTables.length === 0 && dataWarehouseTables.length === 0) {
+                if (databaseLoading && insightsTables.length === 0 && dataWarehouseTables.length === 0) {
                     sourcesChildren.push({
                         id: 'sources-loading/',
                         name: 'Loading...',
@@ -1538,9 +1538,9 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                     })
                 } else {
                     // Add Insights tables
-                    if (posthogTables.length > 0) {
+                    if (insightsTables.length > 0) {
                         sourcesChildren.push(
-                            createSourceFolderNode('Insights', posthogTables, [], false, tableLookup, tableNodeOptions)
+                            createSourceFolderNode('Insights', insightsTables, [], false, tableLookup, tableNodeOptions)
                         )
                     }
 
@@ -1747,7 +1747,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
         sidebarOverlayTreeItems: [
             (s) => [
                 s.selectedSchema,
-                s.posthogTablesMap,
+                s.insightsTablesMap,
                 s.systemTablesMap,
                 s.dataWarehouseTablesMap,
                 s.dataWarehouseSavedQueryMapById,
@@ -1756,7 +1756,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
             ],
             (
                 selectedSchema,
-                posthogTablesMap,
+                insightsTablesMap,
                 systemTablesMap,
                 dataWarehouseTablesMap,
                 dataWarehouseSavedQueryMapById,
@@ -1769,7 +1769,7 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
                 let table: DatabaseSchemaDataWarehouseTable | DatabaseSchemaTable | DataWarehouseSavedQuery | null =
                     null
                 if (isInsightsTable(selectedSchema)) {
-                    table = posthogTablesMap[selectedSchema.name]
+                    table = insightsTablesMap[selectedSchema.name]
                 } else if (isSystemTable(selectedSchema)) {
                     table = systemTablesMap[selectedSchema.name]
                 } else if (isDataWarehouseTable(selectedSchema)) {
@@ -1859,8 +1859,8 @@ export const queryDatabaseLogic = kea<queryDatabaseLogicType>([
         },
     })),
     subscriptions({
-        posthogTables: (posthogTables: DatabaseSchemaTable[]) => {
-            posthogTablesFuse.setCollection(posthogTables)
+        insightsTables: (insightsTables: DatabaseSchemaTable[]) => {
+            insightsTablesFuse.setCollection(insightsTables)
         },
         systemTables: (systemTables: DatabaseSchemaTable[]) => {
             systemTablesFuse.setCollection(systemTables)

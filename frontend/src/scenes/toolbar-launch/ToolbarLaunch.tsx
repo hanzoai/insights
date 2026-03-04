@@ -1,7 +1,7 @@
 import './ToolbarLaunch.scss'
 
-import { IconFlag, IconFlask, IconPieChart, IconSearch } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconFlag, IconFlask, IconPieChart, IconSearch } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { AuthorizedUrlList } from 'lib/components/AuthorizedUrlList/AuthorizedUrlList'
 import { AuthorizedUrlListType } from 'lib/components/AuthorizedUrlList/authorizedUrlListLogic'
@@ -75,7 +75,7 @@ export function ToolbarLaunch(): JSX.Element {
                 <AuthorizedUrlList type={AuthorizedUrlListType.TOOLBAR_URLS} addText="Add authorized URL" />
                 <LemonBanner type="info">
                     Make sure you're using the <Link to={`${urls.settings('project')}#snippet`}>HTML snippet</Link> or
-                    the latest <code>posthog-js</code> version.
+                    the latest <code>insights-js</code> version.
                 </LemonBanner>
             </SceneSection>
 

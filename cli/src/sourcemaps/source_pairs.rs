@@ -3,7 +3,7 @@ use crate::{
     sourcemaps::content::{MinifiedSourceFile, SourceMapFile},
 };
 use anyhow::{anyhow, Context, Result};
-use posthog_symbol_data::{write_symbol_data, SourceAndMap};
+use insights_symbol_data::{write_symbol_data, SourceAndMap};
 use tracing::{debug, info, warn};
 use walkdir::DirEntry;
 

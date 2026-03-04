@@ -31,7 +31,7 @@ from insights.auth import SharingAccessTokenAuthentication, SharingPasswordProte
 from insights.clickhouse.client.async_task_chain import task_chain_context
 from insights.constants import AvailableFeature
 from insights.exceptions_capture import capture_exception
-from insights.jwt import PosthogJwtAudience, encode_jwt
+from insights.jwt import InsightsJwtAudience, encode_jwt
 from insights.models import InsightViewed, SessionRecording, SharePassword, SharingConfiguration, Team
 from insights.models.activity_logging.activity_log import Change, Detail, log_activity
 from insights.models.dashboard import Dashboard
@@ -184,7 +184,7 @@ def get_global_themes():
 def build_shared_app_context(team: Team, request: Request) -> dict[str, Any]:
     """
     Build app context for shared dashboards/insights similar to what render_template creates.
-    This provides the same structure as window.POSTHOG_APP_CONTEXT.
+    This provides the same structure as window.INSIGHTS_APP_CONTEXT.
     """
     from django.conf import settings
 
@@ -660,7 +660,7 @@ class SharingViewerPageViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
                 # JWT authenticated (via cookie or Bearer) - render full app context
 
                 # Include the JWT token from the cookie so frontend can use it for API calls
-                jwt_token = request.COOKIES.get("posthog_sharing_token")
+                jwt_token = request.COOKIES.get("insights_sharing_token")
                 if jwt_token:
                     exported_data["shareToken"] = jwt_token
                 # Continue processing to add dashboard/insight data to exported_data
@@ -683,7 +683,7 @@ class SharingViewerPageViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
                 # Extract the base path without any file extensions (e.g., "/shared/token.png" -> "/shared/token")
                 cookie_path = request.path.split(".")[0]
                 response_data.set_cookie(
-                    "posthog_sharing_token",
+                    "insights_sharing_token",
                     jwt_token,
                     max_age=24 * 60 * 60,  # 24 hours in seconds
                     path=cookie_path,
@@ -775,7 +775,7 @@ class SharingViewerPageViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
                     export_access_token = encode_jwt(
                         {"id": resource.created_by.id},
                         timedelta(minutes=5),  # 5 mins should be enough for the export to complete
-                        PosthogJwtAudience.IMPERSONATED_USER,
+                        InsightsJwtAudience.IMPERSONATED_USER,
                     )
 
                 asset_title = "Session Recording"
@@ -828,7 +828,7 @@ class SharingViewerPageViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
                     export_access_token = encode_jwt(
                         {"id": resource.created_by.id},
                         timedelta(minutes=5),
-                        PosthogJwtAudience.IMPERSONATED_USER,
+                        InsightsJwtAudience.IMPERSONATED_USER,
                     )
 
                 asset_title = "Heatmap"

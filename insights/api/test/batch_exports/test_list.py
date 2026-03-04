@@ -29,7 +29,7 @@ def test_list_batch_exports(client: HttpClient, organization, team, user):
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -70,7 +70,7 @@ def test_cannot_list_batch_exports_for_other_organizations(client: HttpClient, o
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -106,7 +106,7 @@ def test_list_is_partitioned_by_team(client: HttpClient, organization, team, use
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },
@@ -134,7 +134,7 @@ def test_list_is_partitioned_by_team(client: HttpClient, organization, team, use
 @pytest.fixture
 def enable_backfilling_workflows(team):
     with mock.patch(
-        "insights.batch_exports.http.posthoganalytics.feature_enabled", return_value=True
+        "insights.batch_exports.http.hanzoanalytics.feature_enabled", return_value=True
     ) as feature_enabled:
         yield
 
@@ -163,7 +163,7 @@ def test_list_filters_workflows_destination(client: HttpClient, organization, te
         "config": {
             "bucket_name": "my-production-s3-bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "abc123",
             "aws_secret_access_key": "secret",
         },

@@ -19,14 +19,14 @@ echo "$new_snapshots"
 echo ""
 
 # Extract unique test files from snapshot paths
-# snapshot path: posthog/hogql/database/test/__snapshots__/test_database.ambr
-# test path:     posthog/hogql/database/test/test_database.py
+# snapshot path: insights/insightsql/database/test/__snapshots__/test_database.ambr
+# test path:     insights/insightsql/database/test/test_database.py
 declare -A test_files
 
 while IFS= read -r ambr_file; do
     # Get the test file path
-    dir=$(dirname "$ambr_file")          # posthog/hogql/database/test/__snapshots__
-    test_dir=$(dirname "$dir")            # posthog/hogql/database/test
+    dir=$(dirname "$ambr_file")          # insights/insightsql/database/test/__snapshots__
+    test_dir=$(dirname "$dir")            # insights/insightsql/database/test
     basename=$(basename "$ambr_file" .ambr)  # test_database
 
     # Construct test file path

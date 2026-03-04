@@ -3,12 +3,12 @@ import { isSafeProtocol } from './NotebookMarkLink'
 describe('NotebookMarkLink', () => {
     describe('isSafeProtocol', () => {
         test.each([
-            { href: 'https://posthog.com', expected: true },
+            { href: 'https://hanzo.ai', expected: true },
             { href: 'https://example.com/path?query=1', expected: true },
             { href: 'http://localhost:8000', expected: true },
             { href: 'HTTP://EXAMPLE.COM', expected: true },
             { href: 'HTTPS://EXAMPLE.COM', expected: true },
-            { href: 'mailto:support@posthog.com', expected: true },
+            { href: 'mailto:support@hanzo.ai', expected: true },
             { href: 'MAILTO:test@example.com', expected: true },
         ])('allows safe protocol: $href', ({ href, expected }) => {
             expect(isSafeProtocol(href)).toBe(expected)

@@ -1,4 +1,4 @@
-const { createEvent } = require('@posthog/plugin-scaffold/test/utils.js')
+const { createEvent } = require('@hanzo/plugin-scaffold/test/utils.js')
 const { processEvent } = require('./index')
 
 const nestedEventProperties = {

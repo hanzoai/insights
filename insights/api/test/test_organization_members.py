@@ -11,8 +11,8 @@ from insights.models.user import User
 
 class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
     def test_list_organization_members(self):
-        User.objects.create_and_join(self.organization, "1@posthog.com", None)
-        User.objects.create_and_join(self.organization, "2@posthog.com", None, is_active=False)
+        User.objects.create_and_join(self.organization, "1@hanzo.ai", None)
+        User.objects.create_and_join(self.organization, "2@hanzo.ai", None, is_active=False)
 
         response = self.client.get("/api/organizations/@current/members/")
         response_data = response.json()["results"]
@@ -31,7 +31,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
 
     #     assert len(response.json()["results"]) == 1
 
-    #     User.objects.create_and_join(self.organization, "1@posthog.com", None)
+    #     User.objects.create_and_join(self.organization, "1@hanzo.ai", None)
 
     #     with self.assertNumQueries(9), snapshot_postgres_queries_context(self):
     #         response = self.client.get("/api/organizations/@current/members/")
@@ -40,7 +40,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
 
     def test_cant_list_members_for_an_alien_organization(self):
         org = Organization.objects.create(name="Alien Org")
-        user = User.objects.create(email="another_user@posthog.com")
+        user = User.objects.create(email="another_user@hanzo.ai")
         user.join(organization=org)
 
         response = self.client.get(f"/api/organizations/{org.id}/members/")
@@ -52,7 +52,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(response.json(), self.permission_denied_response())
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     @patch("insights.models.user.User.update_billing_organization_users")
     def test_delete_organization_member(self, mock_update_billing_organization_users, mock_capture):
         user = User.objects.create_and_join(self.organization, "test@x.com", None, "X")
@@ -216,7 +216,7 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
         self.assertEqual(response_data["has_keys_active_last_week"], False)
         self.assertEqual(response_data["keys"], [])
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     @patch("insights.models.user.User.update_billing_organization_users")
     def test_leave_organization(self, mock_update_billing_organization_users, mock_capture):
         membership_queryset = OrganizationMembership.objects.filter(user=self.user, organization=self.organization)
@@ -403,14 +403,14 @@ class TestOrganizationMembersAPI(APIBaseTest, QueryMatchingTest):
 
     def test_list_organization_members_filter_by_email(self):
         # Create additional users
-        user1 = User.objects.create_and_join(self.organization, "specific@posthog.com", None)
-        User.objects.create_and_join(self.organization, "another@posthog.com", None)
+        user1 = User.objects.create_and_join(self.organization, "specific@hanzo.ai", None)
+        User.objects.create_and_join(self.organization, "another@hanzo.ai", None)
 
         # Test filtering by email
-        response = self.client.get("/api/organizations/@current/members/?email=specific@posthog.com")
+        response = self.client.get("/api/organizations/@current/members/?email=specific@hanzo.ai")
         response_data = response.json()["results"]
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_data), 1)
-        self.assertEqual(response_data[0]["user"]["email"], "specific@posthog.com")
+        self.assertEqual(response_data[0]["user"]["email"], "specific@hanzo.ai")
         self.assertEqual(response_data[0]["user"]["uuid"], str(user1.uuid))

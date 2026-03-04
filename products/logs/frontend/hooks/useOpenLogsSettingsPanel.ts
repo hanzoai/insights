@@ -1,5 +1,5 @@
 import { useActions } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { teamLogic } from 'scenes/teamLogic'
 
@@ -11,7 +11,7 @@ export function useOpenLogsSettingsPanel(): () => void {
     const { openSettingsPanel } = useActions(sidePanelSettingsLogic)
 
     return () => {
-        posthog.capture('logs settings opened')
+        insights.capture('logs settings opened')
         addProductIntent({
             product_type: ProductKey.LOGS,
             intent_context: ProductIntentContext.LOGS_SETTINGS_OPENED,

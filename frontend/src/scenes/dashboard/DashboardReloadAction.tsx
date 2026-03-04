@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconCheck, IconX } from '@posthog/icons'
-import { IconRefresh } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonSwitch, Spinner } from '@posthog/lemon-ui'
+import { IconCheck, IconX } from '@hanzo/icons'
+import { IconRefresh } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonSwitch, Spinner } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

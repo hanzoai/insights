@@ -13,7 +13,7 @@ pub trait FeatureFlagStorage: Send + Sync {
     /// override information for each person.
     ///
     /// When `check_person_exists` is true, only returns results for persons that
-    /// exist in the posthog_person table. This uses an EXISTS subquery against
+    /// exist in the insights_person table. This uses an EXISTS subquery against
     /// the person table.
     ///
     /// ## Consistency

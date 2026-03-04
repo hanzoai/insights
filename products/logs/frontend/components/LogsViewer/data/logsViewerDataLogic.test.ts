@@ -1,14 +1,14 @@
 import { expectLogic } from 'kea-test-utils'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { useMocks } from '~/mocks/jest'
 import { initKeaTests } from '~/test/init'
 
 import { logsViewerDataLogic } from './logsViewerDataLogic'
 
-jest.mock('@posthog/lemon-ui', () => ({
-    ...jest.requireActual('@posthog/lemon-ui'),
+jest.mock('@hanzo/lemon-ui', () => ({
+    ...jest.requireActual('@hanzo/lemon-ui'),
     lemonToast: {
         error: jest.fn(),
     },

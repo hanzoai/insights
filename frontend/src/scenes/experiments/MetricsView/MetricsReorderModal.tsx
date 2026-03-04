@@ -6,8 +6,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useState } from 'react'
 
-import { IconDrag } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonModal, LemonTag } from '@posthog/lemon-ui'
+import { IconDrag } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonModal, LemonTag } from '@hanzo/lemon-ui'
 
 import { ExperimentMetric } from '~/queries/schema/schema-general'
 

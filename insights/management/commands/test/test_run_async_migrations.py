@@ -7,7 +7,7 @@ from django.core.management import call_command
 from semantic_version.base import Version
 
 from insights.async_migrations.setup import ALL_ASYNC_MIGRATIONS
-from insights.constants import FROZEN_POSTHOG_VERSION
+from insights.constants import FROZEN_INSIGHTS_VERSION
 
 pytestmark = pytest.mark.django_db
 
@@ -19,15 +19,15 @@ def test_run_async_migrations_doesnt_raise():
 def test_plan_includes_all_migrations_except_past_max_version(caplog):
     """
     Plan should give us all the migrations that haven't run. But it also should
-    not return migrations that are still within the posthog_min_version,
-    posthog_max_version range. This is to ensure that the application is able to
+    not return migrations that are still within the insights_min_version,
+    insights_max_version range. This is to ensure that the application is able to
     boot within the version range and thus the administrator is able to trigger
     migrations via the UI.
     """
     call_command("run_async_migrations", "--plan")
     output = "\n".join([rec.message for rec in caplog.records])
     for migration_name, migration in ALL_ASYNC_MIGRATIONS.items():
-        if FROZEN_POSTHOG_VERSION > Version(migration.posthog_max_version):
+        if FROZEN_INSIGHTS_VERSION > Version(migration.insights_max_version):
             assert migration_name in output
         else:
             assert migration_name not in output

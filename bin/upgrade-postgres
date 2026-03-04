@@ -19,12 +19,12 @@ For HOBBY DEPLOYMENTS with production data:
 - Large databases (> 1GB): Manual pg_upgrade recommended for faster migration
 
 Manual upgrade steps for hobby (large databases):
-  1. Backup: docker-compose exec -T db pg_dumpall --clean -U posthog | gzip > backup.sql.gz
+  1. Backup: docker-compose exec -T db pg_dumpall --clean -U insights | gzip > backup.sql.gz
   2. Stop: docker-compose down
   3. Remove volume: docker volume rm postgres-data
-  4. Upgrade PostHog code (pulls postgres:15 compose files)
+  4. Upgrade Insights code (pulls postgres:15 compose files)
   5. Start: docker-compose up -d db
-  6. Restore: gunzip -c backup.sql.gz | docker-compose exec -T db psql -U posthog
+  6. Restore: gunzip -c backup.sql.gz | docker-compose exec -T db psql -U insights
 
 For large hobby databases, consider using pg_upgrade for faster in-place migration.
 
@@ -143,7 +143,7 @@ migrate_volume() {
     fi
 
     mkdir -p .postgres-backups
-    BACKUP_FILE=".postgres-backups/posthog_pg12_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
+    BACKUP_FILE=".postgres-backups/insights_pg12_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
 
     # Check if db container is already running with this volume
     RUNNING_CONTAINER=$(docker ps --filter "volume=$SOURCE_VOLUME" --filter "label=com.docker.compose.service=db" --format "{{.ID}}" | head -1)
@@ -153,7 +153,7 @@ migrate_volume() {
         echo "Step 1: Dumping from running db container..."
         echo "Step 2: Backing up data to $BACKUP_FILE (compressed)..."
 
-        if docker exec "$RUNNING_CONTAINER" pg_dumpall --clean -U posthog | gzip > "$BACKUP_FILE"; then
+        if docker exec "$RUNNING_CONTAINER" pg_dumpall --clean -U insights | gzip > "$BACKUP_FILE"; then
             BACKUP_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
             echo "✅ Backup complete! Size: $BACKUP_SIZE (compressed)"
         else
@@ -167,9 +167,9 @@ migrate_volume() {
         echo "Step 1: Creating temporary postgres:12 container to dump data..."
         TEMP_CONTAINER=$(docker run -d \
             -v "$SOURCE_VOLUME:/var/lib/postgresql/data" \
-            -e POSTGRES_USER=posthog \
-            -e POSTGRES_DB=posthog \
-            -e POSTGRES_PASSWORD=posthog \
+            -e POSTGRES_USER=insights \
+            -e POSTGRES_DB=insights \
+            -e POSTGRES_PASSWORD=insights \
             postgres:12-alpine)
 
         echo "Waiting for database to be ready..."
@@ -177,7 +177,7 @@ migrate_volume() {
 
         echo ""
         echo "Step 2: Backing up data to $BACKUP_FILE (compressed)..."
-        if docker exec "$TEMP_CONTAINER" pg_dumpall --clean -U posthog | gzip > "$BACKUP_FILE"; then
+        if docker exec "$TEMP_CONTAINER" pg_dumpall --clean -U insights | gzip > "$BACKUP_FILE"; then
             BACKUP_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
             echo "✅ Backup complete! Size: $BACKUP_SIZE (compressed)"
         else
@@ -286,7 +286,7 @@ case "${1:-}" in
         # Check if already on postgres:15
         DB_RUNNING=$(docker compose -f "$COMPOSE_FILE" ps db --quiet 2>/dev/null || true)
         if [ -n "$DB_RUNNING" ]; then
-            PG_VERSION=$(docker compose -f "$COMPOSE_FILE" exec -T db psql -U posthog -t -c "SHOW server_version;" 2>/dev/null | head -n1 | xargs || true)
+            PG_VERSION=$(docker compose -f "$COMPOSE_FILE" exec -T db psql -U insights -t -c "SHOW server_version;" 2>/dev/null | head -n1 | xargs || true)
             if [[ "$PG_VERSION" == 15.* ]]; then
                 echo "✅ Already running PostgreSQL 15!"
                 exit 0

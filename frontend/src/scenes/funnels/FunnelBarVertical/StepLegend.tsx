@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock } from '@posthog/icons'
+import { IconClock } from '@hanzo/icons'
 
 import { EntityFilterInfo } from 'lib/components/EntityFilterInfo'
 import { LemonRow } from 'lib/lemon-ui/LemonRow'

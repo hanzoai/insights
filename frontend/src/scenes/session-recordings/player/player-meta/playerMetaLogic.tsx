@@ -2,10 +2,10 @@ import { aiSummaryMock } from './ai-summary.mock'
 
 import { createParser } from 'eventsource-parser'
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React from 'react'
 
-import { IconClock, IconCursorClick, IconHourglass, IconKeyboard, IconWarning } from '@posthog/icons'
+import { IconClock, IconCursorClick, IconHourglass, IconKeyboard, IconWarning } from '@hanzo/icons'
 
 import api from 'lib/api'
 import { PropertyFilterIcon } from 'lib/components/PropertyFilters/components/PropertyFilterIcon'
@@ -399,7 +399,7 @@ export const playerMetaLogic = kea<playerMetaLogicType>([
             }
         },
         sessionSummaryFeedback: ({ feedback }) => {
-            posthog.capture('session summary feedback', {
+            insights.capture('session summary feedback', {
                 feedback,
                 session_summary: values.sessionSummary,
                 summarized_session_id: props.sessionRecordingId,

@@ -17,7 +17,7 @@ const AVAILABLE_WORKERS = Object.freeze({
 
 async function main() {
     let poolConfig = {
-        db_url: 'postgresql://posthog:posthog@localhost:5432/cyclotron',
+        db_url: 'postgresql://insights:insights@localhost:5432/cyclotron',
     }
 
     let managerConfig = {

@@ -27,11 +27,11 @@ class TestOrganizationFeatureFlagGet(APIBaseTest, QueryMatchingTest):
         self.team_3 = Team.objects.create(organization=self.organization)
 
         # Set deterministic API tokens to ensure stable query snapshots
-        self.team_1.api_token = "phc_test_token_1"
+        self.team_1.api_token = "hi_test_token_1"
         self.team_1.save()
-        self.team_2.api_token = "phc_test_token_2"
+        self.team_2.api_token = "hi_test_token_2"
         self.team_2.save()
-        self.team_3.api_token = "phc_test_token_3"
+        self.team_3.api_token = "hi_test_token_3"
         self.team_3.save()
 
         self.feature_flag_key = "key-1"
@@ -125,9 +125,9 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         self.team_2 = Team.objects.create(organization=self.organization)
 
         # Set deterministic API tokens to ensure stable query snapshots
-        self.team_1.api_token = "phc_test_copy_token_1"
+        self.team_1.api_token = "hi_test_copy_token_1"
         self.team_1.save()
-        self.team_2.api_token = "phc_test_copy_token_2"
+        self.team_2.api_token = "hi_test_copy_token_2"
         self.team_2.save()
 
         self.feature_flag_key = "copied-flag-key"
@@ -318,7 +318,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
         target_project = self.team_2
         target_project_2 = Team.objects.create(organization=self.organization)
         # Set deterministic API token for newly created team
-        target_project_2.api_token = "phc_test_copy_token_3"
+        target_project_2.api_token = "hi_test_copy_token_3"
         target_project_2.save()
         rollout_percentage_existing = 99
 
@@ -837,7 +837,7 @@ class TestOrganizationFeatureFlagCopy(APIBaseTest, QueryMatchingTest):
 
         # Create third team for testing multiple targets
         team_3 = Team.objects.create(organization=self.organization)
-        team_3.api_token = "phc_test_copy_token_3"
+        team_3.api_token = "hi_test_copy_token_3"
         team_3.save()
 
         # Create a flag with encrypted payloads
@@ -884,9 +884,9 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
         self.team_1 = self.team
         self.team_2 = Team.objects.create(organization=self.organization)
 
-        self.team_1.api_token = "phc_test_schedule_token_1"
+        self.team_1.api_token = "hi_test_schedule_token_1"
         self.team_1.save()
-        self.team_2.api_token = "phc_test_schedule_token_2"
+        self.team_2.api_token = "hi_test_schedule_token_2"
         self.team_2.save()
 
         self.feature_flag_key = "flag-with-schedules"
@@ -1193,7 +1193,7 @@ class TestOrganizationFeatureFlagCopySchedules(APIBaseTest):
     def test_copy_flag_to_multiple_projects_with_schedules(self):
         """Schedules should be copied to all target projects."""
         team_3 = Team.objects.create(organization=self.organization)
-        team_3.api_token = "phc_test_schedule_token_3"
+        team_3.api_token = "hi_test_schedule_token_3"
         team_3.save()
 
         scheduled_time = timezone.now() + timedelta(days=1)

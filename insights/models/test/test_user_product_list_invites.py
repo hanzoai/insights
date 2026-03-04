@@ -13,10 +13,10 @@ class TestUserProductListInvites(BaseTest):
         """Test that when a user accepts an invite, they get products from team colleagues"""
         # Create existing team members with products
         colleague1 = User.objects.create_user(
-            email="colleague1@posthog.com", password="password", first_name="Colleague1"
+            email="colleague1@hanzo.ai", password="password", first_name="Colleague1"
         )
         colleague2 = User.objects.create_user(
-            email="colleague2@posthog.com", password="password", first_name="Colleague2"
+            email="colleague2@hanzo.ai", password="password", first_name="Colleague2"
         )
         colleague1.join(organization=self.organization)
         colleague2.join(organization=self.organization)
@@ -29,13 +29,13 @@ class TestUserProductListInvites(BaseTest):
 
         # Create new user to invite
         new_user = User.objects.create_user(
-            email="newuser@posthog.com", password="password", first_name="New", allow_sidebar_suggestions=True
+            email="newuser@hanzo.ai", password="password", first_name="New", allow_sidebar_suggestions=True
         )
 
         # Create invite with access to the team
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="newuser@posthog.com",
+            target_email="newuser@hanzo.ai",
             private_project_access=[{"id": self.team.id, "level": "member"}],
         )
 
@@ -65,7 +65,7 @@ class TestUserProductListInvites(BaseTest):
 
         # Create user and add them to other organization
         user = User.objects.create_user(
-            email="existing@posthog.com", password="password", first_name="Existing", allow_sidebar_suggestions=True
+            email="existing@hanzo.ai", password="password", first_name="Existing", allow_sidebar_suggestions=True
         )
         user.join(organization=other_org)
 
@@ -76,7 +76,7 @@ class TestUserProductListInvites(BaseTest):
         # Create invite to new team in different organization
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="existing@posthog.com",
+            target_email="existing@hanzo.ai",
             private_project_access=[{"id": self.team.id, "level": "member"}],
         )
 
@@ -96,13 +96,13 @@ class TestUserProductListInvites(BaseTest):
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="Other Team")
         user = User.objects.create_user(
-            email="combined@posthog.com", password="password", first_name="Combined", allow_sidebar_suggestions=True
+            email="combined@hanzo.ai", password="password", first_name="Combined", allow_sidebar_suggestions=True
         )
         user.join(organization=other_org)
         UserProductList.objects.create(user=user, team=other_team, product_path="product_analytics", enabled=True)
 
         # Create colleagues with products
-        colleague = User.objects.create_user(email="colleague@posthog.com", password="password", first_name="Colleague")
+        colleague = User.objects.create_user(email="colleague@hanzo.ai", password="password", first_name="Colleague")
         colleague.join(organization=self.organization)
         UserProductList.objects.create(user=colleague, team=self.team, product_path="session_replay", enabled=True)
         UserProductList.objects.create(user=colleague, team=self.team, product_path="feature_flags", enabled=True)
@@ -110,7 +110,7 @@ class TestUserProductListInvites(BaseTest):
         # Create invite
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="combined@posthog.com",
+            target_email="combined@hanzo.ai",
             private_project_access=[{"id": self.team.id, "level": "member"}],
         )
 
@@ -129,13 +129,13 @@ class TestUserProductListInvites(BaseTest):
     def test_invite_user_respects_allow_sidebar_suggestions(self):
         """Test that users with allow_sidebar_suggestions=False don't get products synced"""
         # Create colleagues with products
-        colleague = User.objects.create_user(email="colleague@posthog.com", password="password", first_name="Colleague")
+        colleague = User.objects.create_user(email="colleague@hanzo.ai", password="password", first_name="Colleague")
         colleague.join(organization=self.organization)
         UserProductList.objects.create(user=colleague, team=self.team, product_path="product_analytics", enabled=True)
 
         # Create user with suggestions disabled
         user = User.objects.create_user(
-            email="nosuggestions@posthog.com",
+            email="nosuggestions@hanzo.ai",
             password="password",
             first_name="NoSuggestions",
             allow_sidebar_suggestions=False,
@@ -144,7 +144,7 @@ class TestUserProductListInvites(BaseTest):
         # Create invite
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="nosuggestions@posthog.com",
+            target_email="nosuggestions@hanzo.ai",
             private_project_access=[{"id": self.team.id, "level": "member"}],
         )
 
@@ -161,7 +161,7 @@ class TestUserProductListInvites(BaseTest):
         """Test that existing products are not duplicated when syncing"""
         # Create user with existing product
         user = User.objects.create_user(
-            email="existingproducts@posthog.com",
+            email="existingproducts@hanzo.ai",
             password="password",
             first_name="Existing",
             allow_sidebar_suggestions=True,
@@ -171,14 +171,14 @@ class TestUserProductListInvites(BaseTest):
         UserProductList.objects.create(user=user, team=self.team, product_path="product_analytics", enabled=True)
 
         # Create colleagues with same product
-        colleague = User.objects.create_user(email="colleague@posthog.com", password="password", first_name="Colleague")
+        colleague = User.objects.create_user(email="colleague@hanzo.ai", password="password", first_name="Colleague")
         colleague.join(organization=self.organization)
         UserProductList.objects.create(user=colleague, team=self.team, product_path="product_analytics", enabled=True)
 
         # Create invite
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="existingproducts@posthog.com",
+            target_email="existingproducts@hanzo.ai",
             private_project_access=[{"id": self.team.id, "level": "member"}],
         )
 
@@ -197,7 +197,7 @@ class TestUserProductListInvites(BaseTest):
         colleagues = []
         for i in range(5):
             colleague = User.objects.create_user(
-                email=f"colleague{i}@posthog.com", password="password", first_name=f"Colleague{i}"
+                email=f"colleague{i}@hanzo.ai", password="password", first_name=f"Colleague{i}"
             )
             colleague.join(organization=self.organization)
             colleagues.append(colleague)
@@ -221,13 +221,13 @@ class TestUserProductListInvites(BaseTest):
 
         # Create new user
         new_user = User.objects.create_user(
-            email="newuser@posthog.com", password="password", first_name="New", allow_sidebar_suggestions=True
+            email="newuser@hanzo.ai", password="password", first_name="New", allow_sidebar_suggestions=True
         )
 
         # Create invite
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="newuser@posthog.com",
+            target_email="newuser@hanzo.ai",
             private_project_access=[],
         )
 
@@ -252,7 +252,7 @@ class TestUserProductListInvitesWithoutPrivateProjectAccess(BaseTest):
     def test_invite_user_without_private_project_access_syncs_products(self):
         """Test that when a user accepts an invite without private_project_access, they still get products synced"""
         # Create existing team members with products
-        colleague = User.objects.create_user(email="colleague@posthog.com", password="password", first_name="Colleague")
+        colleague = User.objects.create_user(email="colleague@hanzo.ai", password="password", first_name="Colleague")
         colleague.join(organization=self.organization)
 
         # Create products for colleague
@@ -261,13 +261,13 @@ class TestUserProductListInvitesWithoutPrivateProjectAccess(BaseTest):
 
         # Create new user to invite
         new_user = User.objects.create_user(
-            email="newuser@posthog.com", password="password", first_name="New", allow_sidebar_suggestions=True
+            email="newuser@hanzo.ai", password="password", first_name="New", allow_sidebar_suggestions=True
         )
 
         # Create invite WITHOUT private_project_access
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="newuser@posthog.com",
+            target_email="newuser@hanzo.ai",
             private_project_access=None,
         )
 
@@ -289,7 +289,7 @@ class TestUserProductListInvitesWithoutPrivateProjectAccess(BaseTest):
 
         # Create user and add them to other organization
         user = User.objects.create_user(
-            email="existing@posthog.com", password="password", first_name="Existing", allow_sidebar_suggestions=True
+            email="existing@hanzo.ai", password="password", first_name="Existing", allow_sidebar_suggestions=True
         )
         user.join(organization=other_org)
 
@@ -299,7 +299,7 @@ class TestUserProductListInvitesWithoutPrivateProjectAccess(BaseTest):
         # Create invite WITHOUT private_project_access
         invite = OrganizationInvite.objects.create(
             organization=self.organization,
-            target_email="existing@posthog.com",
+            target_email="existing@hanzo.ai",
             private_project_access=None,
         )
 
@@ -318,7 +318,7 @@ class TestUserProductListTeamCreation(BaseTest):
         """Test that when a user creates a team, products are backfilled from their other teams"""
         # Create user with products in existing team
         user = User.objects.create_user(
-            email="creator@posthog.com", password="password", first_name="Creator", allow_sidebar_suggestions=True
+            email="creator@hanzo.ai", password="password", first_name="Creator", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -340,7 +340,7 @@ class TestUserProductListTeamCreation(BaseTest):
         """Test that backfill doesn't happen if user has no products in other teams"""
         # Create user without any products
         user = User.objects.create_user(
-            email="noproducts@posthog.com", password="password", first_name="NoProducts", allow_sidebar_suggestions=True
+            email="noproducts@hanzo.ai", password="password", first_name="NoProducts", allow_sidebar_suggestions=True
         )
         user.join(organization=self.organization)
 
@@ -355,10 +355,10 @@ class TestUserProductListTeamCreation(BaseTest):
         """Test that when a new team is created, all org members get products synced"""
         # Create existing org members with products in the existing team
         member1 = User.objects.create_user(
-            email="member1@posthog.com", password="password", first_name="Member1", allow_sidebar_suggestions=True
+            email="member1@hanzo.ai", password="password", first_name="Member1", allow_sidebar_suggestions=True
         )
         member2 = User.objects.create_user(
-            email="member2@posthog.com", password="password", first_name="Member2", allow_sidebar_suggestions=True
+            email="member2@hanzo.ai", password="password", first_name="Member2", allow_sidebar_suggestions=True
         )
         member1.join(organization=self.organization)
         member2.join(organization=self.organization)
@@ -369,7 +369,7 @@ class TestUserProductListTeamCreation(BaseTest):
 
         # Create a new team (without specifying initiating_user to test all members sync)
         creator = User.objects.create_user(
-            email="creator@posthog.com", password="password", first_name="Creator", allow_sidebar_suggestions=True
+            email="creator@hanzo.ai", password="password", first_name="Creator", allow_sidebar_suggestions=True
         )
         creator.join(organization=self.organization)
         new_team = Team.objects.create_with_data(
@@ -393,7 +393,7 @@ class TestUserProductListTeamCreation(BaseTest):
         other_org = Organization.objects.create(name="Other Org")
         other_team = Team.objects.create(organization=other_org, name="Other Team")
         user = User.objects.create_user(
-            email="signal@posthog.com", password="password", first_name="Signal", allow_sidebar_suggestions=True
+            email="signal@hanzo.ai", password="password", first_name="Signal", allow_sidebar_suggestions=True
         )
         user.join(organization=other_org)
         UserProductList.objects.create(user=user, team=other_team, product_path="product_analytics", enabled=True)
@@ -403,7 +403,7 @@ class TestUserProductListTeamCreation(BaseTest):
         membership = OrganizationMembership.objects.get(organization=self.organization, user=user)
 
         # Create colleagues with products
-        colleague = User.objects.create_user(email="colleague@posthog.com", password="password", first_name="Colleague")
+        colleague = User.objects.create_user(email="colleague@hanzo.ai", password="password", first_name="Colleague")
         colleague.join(organization=self.organization)
         UserProductList.objects.create(user=colleague, team=self.team, product_path="session_replay", enabled=True)
         UserProductList.objects.create(user=colleague, team=self.team, product_path="feature_flags", enabled=True)

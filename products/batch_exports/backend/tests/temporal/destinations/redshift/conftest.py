@@ -36,7 +36,7 @@ def redshift_config():
     return {
         "user": user,
         "password": password,
-        "database": "posthog_batch_exports_test_2",
+        "database": "insights_batch_exports_test_2",
         "schema": "exports_test_schema",
         "host": host,
         "port": port,

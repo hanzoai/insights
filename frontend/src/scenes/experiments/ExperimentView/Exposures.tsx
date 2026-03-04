@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useState } from 'react'
 
-import { IconCheckCircle, IconCorrelationAnalysis, IconPencil, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonCollapse, LemonTable, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconCorrelationAnalysis, IconPencil, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonCollapse, LemonTable, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { getSeriesBackgroundColor, getSeriesColor } from 'lib/colors'
 import { FEATURE_FLAGS } from 'lib/constants'

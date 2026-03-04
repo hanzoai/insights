@@ -3,8 +3,8 @@ import './CorrelationMatrix.scss'
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle } from '@posthog/icons'
-import { LemonButton, LemonModal } from '@posthog/lemon-ui'
+import { IconCheckCircle } from '@hanzo/icons'
+import { LemonButton, LemonModal } from '@hanzo/lemon-ui'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'

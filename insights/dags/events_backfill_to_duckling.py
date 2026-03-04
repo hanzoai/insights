@@ -1,7 +1,7 @@
 """
 Dagster job to backfill ClickHouse events to customer-specific ducklings.
 
-This job exports events from ClickHouse's `posthog.events` table to customer S3 buckets
+This job exports events from ClickHouse's `insights.events` table to customer S3 buckets
 as Parquet files, then registers those files with their DuckLake catalog.
 
 Unlike the main DuckLake backfill (events_backfill_to_ducklake.py) which targets Insights's
@@ -184,7 +184,7 @@ duckling_persons_partitions_def = DynamicPartitionsDefinition(name="duckling_per
 # SQL for creating the events table in DuckLake if it doesn't exist
 # Uses TIMESTAMPTZ because ClickHouse exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
 EVENTS_TABLE_DDL = """
-CREATE TABLE IF NOT EXISTS {catalog}.posthog.events (
+CREATE TABLE IF NOT EXISTS {catalog}.insights.events (
     uuid VARCHAR,
     event VARCHAR,
     properties VARCHAR,
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS {catalog}.posthog.events (
 # Uses TIMESTAMPTZ because ClickHouse exports DateTime64 as TIMESTAMP WITH TIME ZONE in Parquet.
 # Note: person_version uses UBIGINT to match ClickHouse's UInt64 type.
 PERSONS_TABLE_DDL = """
-CREATE TABLE IF NOT EXISTS {catalog}.posthog.persons (
+CREATE TABLE IF NOT EXISTS {catalog}.insights.persons (
     team_id BIGINT,
     distinct_id VARCHAR,
     id VARCHAR,
@@ -481,7 +481,7 @@ def _set_table_partitioning(
 
     context.log.info(f"Setting partitioning on {table} table...")
     try:
-        conn.execute(f"ALTER TABLE {alias}.posthog.{table} SET PARTITIONED BY ({partition_expr})")
+        conn.execute(f"ALTER TABLE {alias}.insights.{table} SET PARTITIONED BY ({partition_expr})")
         context.log.info(f"Successfully set partitioning on {table} table")
         logger.info(
             "duckling_table_partitioning_set",
@@ -534,8 +534,8 @@ def ensure_events_table_exists(
             )
             return False
 
-        context.log.info("Creating posthog schema if it doesn't exist...")
-        conn.execute(f"CREATE SCHEMA IF NOT EXISTS {alias}.posthog")
+        context.log.info("Creating insights schema if it doesn't exist...")
+        conn.execute(f"CREATE SCHEMA IF NOT EXISTS {alias}.insights")
 
         context.log.info("Creating events table in duckling catalog...")
         ddl = EVENTS_TABLE_DDL.format(catalog=alias)
@@ -595,7 +595,7 @@ def ensure_persons_table_exists(
         configure_cross_account_connection(conn, destinations=[destination])
         attach_catalog(conn, catalog_config, alias=alias)
 
-        if table_exists(conn, alias, "posthog", "persons"):
+        if table_exists(conn, alias, "insights", "persons"):
             context.log.info("Persons table already exists in duckling catalog")
             # Ensure partitioning is set even on existing tables (idempotent)
             _set_table_partitioning(
@@ -603,8 +603,8 @@ def ensure_persons_table_exists(
             )
             return False
 
-        context.log.info("Creating posthog schema if it doesn't exist...")
-        conn.execute(f"CREATE SCHEMA IF NOT EXISTS {alias}.posthog")
+        context.log.info("Creating insights schema if it doesn't exist...")
+        conn.execute(f"CREATE SCHEMA IF NOT EXISTS {alias}.insights")
 
         context.log.info("Creating persons table in duckling catalog...")
         ddl = PERSONS_TABLE_DDL.format(catalog=alias)
@@ -612,7 +612,7 @@ def ensure_persons_table_exists(
             conn.execute(ddl)
         except duckdb.CatalogException as exc:
             # Check if this was a race condition (another worker created the table)
-            if table_exists(conn, alias, "posthog", "persons"):
+            if table_exists(conn, alias, "insights", "persons"):
                 context.log.info("Persons table was created by another worker")
                 # Ensure partitioning is set even when another worker created the table
                 _set_table_partitioning(
@@ -664,7 +664,7 @@ def delete_events_table(
 
         context.log.warning("Deleting events table from duckling catalog...")
         _validate_identifier(alias)
-        conn.execute(f"DROP TABLE {alias}.posthog.events")
+        conn.execute(f"DROP TABLE {alias}.insights.events")
         context.log.warning("Successfully deleted events table")
         logger.warning(
             "duckling_events_table_deleted",
@@ -696,13 +696,13 @@ def delete_persons_table(
         configure_cross_account_connection(conn, destinations=[destination])
         attach_catalog(conn, catalog_config, alias=alias)
 
-        if not table_exists(conn, alias, "posthog", "persons"):
+        if not table_exists(conn, alias, "insights", "persons"):
             context.log.info("Persons table does not exist, nothing to delete")
             return False
 
         context.log.warning("Deleting persons table from duckling catalog...")
         _validate_identifier(alias)
-        conn.execute(f"DROP TABLE {alias}.posthog.persons")
+        conn.execute(f"DROP TABLE {alias}.insights.persons")
         context.log.warning("Successfully deleted persons table")
         logger.warning(
             "duckling_persons_table_deleted",
@@ -733,7 +733,7 @@ def validate_duckling_schema(
         configure_cross_account_connection(conn, destinations=[destination])
         attach_catalog(conn, catalog_config, alias=alias)
 
-        result = conn.execute(f"DESCRIBE {alias}.posthog.events").fetchall()
+        result = conn.execute(f"DESCRIBE {alias}.insights.events").fetchall()
         ducklake_columns = {row[0] for row in result}
 
         missing_in_ducklake = EXPECTED_DUCKLAKE_COLUMNS - ducklake_columns
@@ -782,7 +782,7 @@ def validate_duckling_persons_schema(
         configure_cross_account_connection(conn, destinations=[destination])
         attach_catalog(conn, catalog_config, alias=alias)
 
-        result = conn.execute(f"DESCRIBE {alias}.posthog.persons").fetchall()
+        result = conn.execute(f"DESCRIBE {alias}.insights.persons").fetchall()
         ducklake_columns = {row[0] for row in result}
 
         missing_in_ducklake = EXPECTED_DUCKLAKE_PERSONS_COLUMNS - ducklake_columns
@@ -874,7 +874,7 @@ def delete_events_partition_data(
     # to a single day's partition instead of scanning all data files.
     next_date_str = (partition_date + timedelta(days=1)).strftime("%Y-%m-%d")
     delete_sql = f"""
-    DELETE FROM {alias}.posthog.events
+    DELETE FROM {alias}.insights.events
     WHERE team_id = $1
       AND timestamp >= $2
       AND timestamp < $3
@@ -962,7 +962,7 @@ def delete_persons_partition_data(
 
     if partition_date is None:
         delete_sql = f"""
-        DELETE FROM {alias}.posthog.persons
+        DELETE FROM {alias}.insights.persons
         WHERE team_id = $1
         """
         delete_params: list[Any] = [team_id]
@@ -970,7 +970,7 @@ def delete_persons_partition_data(
         date_str = partition_date.strftime("%Y-%m-%d")
         next_date_str = (partition_date + timedelta(days=1)).strftime("%Y-%m-%d")
         delete_sql = f"""
-        DELETE FROM {alias}.posthog.persons
+        DELETE FROM {alias}.insights.persons
         WHERE team_id = $1
           AND _timestamp >= $2
           AND _timestamp < $3
@@ -1154,7 +1154,7 @@ def register_file_with_duckling(
             attach_catalog(conn, catalog_config, alias=alias)
 
             context.log.info(f"Registering file with DuckLake: {s3_path}")
-            conn.execute(f"CALL ducklake_add_data_files('{alias}', 'events', '{escape(s3_path)}', schema => 'posthog')")
+            conn.execute(f"CALL ducklake_add_data_files('{alias}', 'events', '{escape(s3_path)}', schema => 'insights')")
 
             context.log.info(f"Successfully registered: {s3_path}")
             logger.info("duckling_file_registered", s3_path=s3_path, team_id=catalog.team_id)
@@ -1375,7 +1375,7 @@ def register_persons_file_with_duckling(
 
             context.log.info(f"Registering persons file with DuckLake: {s3_path}")
             conn.execute(
-                f"CALL ducklake_add_data_files('{alias}', 'persons', '{escape(s3_path)}', schema => 'posthog')"
+                f"CALL ducklake_add_data_files('{alias}', 'persons', '{escape(s3_path)}', schema => 'insights')"
             )
 
             context.log.info(f"Successfully registered persons: {s3_path}")

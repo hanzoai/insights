@@ -46,7 +46,7 @@ pytestmark = [
     pytest.mark.django_db,
 ]
 
-TEST_URL = "https://us.i.posthog.com/batch/"
+TEST_URL = "https://us.i.hanzo.ai/batch/"
 TEST_TOKEN = "abcdef123456"
 
 

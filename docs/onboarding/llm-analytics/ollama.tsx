@@ -29,14 +29,14 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'Python',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install @posthog/ai posthog-node
+                                    npm install @hanzo/ai insights-node
                                 `,
                             },
                         ]}
@@ -80,7 +80,7 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <Markdown>
                         We call Ollama through the OpenAI client and generate a response. We'll use Insights's OpenAI
                         provider to capture all the details of the call. Initialize Insights with your Insights project API
-                        key and host from [your project settings](https://app.posthog.com/settings/project), then pass the
+                        key and host from [your project settings](https://insights.hanzo.ai/settings/project), then pass the
                         Insights client along with the Ollama config (the base URL) to our OpenAI wrapper.
                     </Markdown>
 
@@ -90,10 +90,10 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog.ai.openai import OpenAI
-                                    from posthog import Posthog
+                                    from insights.ai.openai import OpenAI
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         "<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
@@ -101,7 +101,7 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     client = OpenAI(
                                         base_url="http://localhost:11434/v1",
                                         api_key="ollama",
-                                        posthog_client=posthog
+                                        insights_client=insights
                                     )
                                 `,
                             },
@@ -109,8 +109,8 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { OpenAI } from '@posthog/ai'
-                                    import { Insights } from 'posthog-node'
+                                    import { OpenAI } from '@hanzo/ai'
+                                    import { Insights } from 'insights-node'
 
                                     const phClient = new Insights(
                                       '<ph_project_api_key>',
@@ -120,7 +120,7 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     const openai = new OpenAI({
                                       baseURL: 'http://localhost:11434/v1',
                                       apiKey: 'ollama',
-                                      posthog: phClient,
+                                      insights: phClient,
                                     });
 
                                     // ... your code here ...
@@ -141,7 +141,7 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but you
                             will need to capture the data in the right format. See the schema in the [manual capture
-                            section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
+                            section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -169,11 +169,11 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                         messages=[
                                             {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
-                                        posthog_distinct_id="user_123", # optional
-                                        posthog_trace_id="trace_123", # optional
-                                        posthog_properties={"conversation_id": "abc123", "paid": True}, # optional
-                                        posthog_groups={"company": "company_id_in_your_db"},  # optional
-                                        posthog_privacy_mode=False # optional
+                                        insights_distinct_id="user_123", # optional
+                                        insights_trace_id="trace_123", # optional
+                                        insights_properties={"conversation_id": "abc123", "paid": True}, # optional
+                                        insights_groups={"company": "company_id_in_your_db"},  # optional
+                                        insights_privacy_mode=False # optional
                                     )
 
                                     print(response.choices[0].message.content)
@@ -186,11 +186,11 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     const completion = await openai.chat.completions.create({
                                         model: "llama3.2",
                                         messages: [{ role: "user", content: "Tell me a fun fact about mascots" }],
-                                        posthogDistinctId: "user_123", // optional
-                                        posthogTraceId: "trace_123", // optional
-                                        posthogProperties: { conversation_id: "abc123", paid: true }, // optional
-                                        posthogGroups: { company: "company_id_in_your_db" }, // optional
-                                        posthogPrivacyMode: false // optional
+                                        insightsDistinctId: "user_123", // optional
+                                        insightsTraceId: "trace_123", // optional
+                                        insightsProperties: { conversation_id: "abc123", paid: true }, // optional
+                                        insightsGroups: { company: "company_id_in_your_db" }, // optional
+                                        insightsPrivacyMode: false // optional
                                     });
 
                                     console.log(completion.choices[0].message.content)
@@ -207,7 +207,7 @@ export const getOllamaSteps = (ctx: OnboardingComponentsContext): StepDefinition
                             - This works with responses where \`stream=True\`.
                             - If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request.
 
-                            See our docs on [anonymous vs identified events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            See our docs on [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                             `}
                         </Markdown>
                     </Blockquote>

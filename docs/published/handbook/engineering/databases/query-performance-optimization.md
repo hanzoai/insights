@@ -71,7 +71,7 @@ To find and debug slow queries in production you have a few options available:
   - Slowest execution time
   - Slowest I/O
 - You can also use Heroku's [Diagnose](https://blog.heroku.com/pg-diagnose) feature by running `heroku pg:diagnose` to get a breakdown of long running queries, long transactions, among other diagnostics.
-- For a more raw approach you can access real time logs from Heroku by executing `heroku logs --app posthog --ps postgres`
+- For a more raw approach you can access real time logs from Heroku by executing `heroku logs --app insights --ps postgres`
 - With any logs pulled from PostgreSQL you can use [pgbadger](https://github.com/darold/pgbadger) to find exactly the queries that are consuming the most time and resources.
 
 ### How-to fix slow queries
@@ -163,12 +163,12 @@ To find and debug slow queries in production you have several options available
 
 ##### Grafana
 
-The [Clickhouse queries - by endpoint](https://metrics.posthog.com/d/vo7oCVZ7z/clickhouse-queries-by-endpoint) dashboard gives a breakdown of how things are looking reliability and performance-wise.
+The [Clickhouse queries - by endpoint](https://metrics.hanzo.ai/d/vo7oCVZ7z/clickhouse-queries-by-endpoint) dashboard gives a breakdown of how things are looking reliability and performance-wise.
 Highly used and slow/unreliable endpoints often indicate issues with queries.
 
 ##### Insights `instance/status` dashboard
 
-Under https://app.posthog.com/instance/status/internal_metrics you will find various metrics and query logs.
+Under https://insights.hanzo.ai/instance/status/internal_metrics you will find various metrics and query logs.
 Note: if you are a staff user you can also analyze queries by clicking on them (or copying your own queries).
 
 This analysis will output:
@@ -182,8 +182,8 @@ These can be useful for figuring out _why_ certain queries are performing slow.
 
 ##### Metabase
 
-Need more granular access to queries than these dashboards provide? Take a look at [this Metabase query](https://metabase.posthog.net/question/97). The ClickHouse `system` tables (e.g. `system.query_log`) provide a lot of useful information for identifying and diagnosing slow queries.
+Need more granular access to queries than these dashboards provide? Take a look at [this Metabase query](https://metabase.insights.net/question/97). The ClickHouse `system` tables (e.g. `system.query_log`) provide a lot of useful information for identifying and diagnosing slow queries.
 
 ### How-to fix slow queries
 
-See [ClickHouse manual](https://posthog.com/handbook/engineering/clickhouse/) for tips and tricks.
+See [ClickHouse manual](https://hanzo.ai/handbook/engineering/clickhouse/) for tips and tricks.

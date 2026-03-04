@@ -6,7 +6,7 @@ import { Field, Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { LemonButton, LemonDivider, LemonInput, Link } from '@posthog/lemon-ui'
+import { LemonButton, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { RestrictionScope, useRestrictedArea } from 'lib/components/RestrictedArea'
 import { supportLogic } from 'lib/components/Support/supportLogic'
@@ -104,7 +104,7 @@ export function Billing(): JSX.Element {
                             submit a bug report
                         </Link>
                     ) : (
-                        <Link to="mailto:sales@posthog.com">contact sales@posthog.com</Link>
+                        <Link to="mailto:sales@hanzo.ai">contact sales@hanzo.ai</Link>
                     )}
                     .
                 </LemonBanner>

@@ -69,14 +69,14 @@ class TestFeatureFlagAnalytics(BaseTest, QueryMatchingTest):
 
             # redis returns encoded bytes
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:{team_id}"),
+                client.hgetall(f"insights:decide_requests:{team_id}"),
                 {b"165192618": b"10", b"165192619": b"5"},
             )
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:{other_team_id}"),
+                client.hgetall(f"insights:decide_requests:{other_team_id}"),
                 {b"165192618": b"7", b"165192619": b"3"},
             )
-            self.assertEqual(client.hgetall(f"posthog:decide_requests:other"), {})
+            self.assertEqual(client.hgetall(f"insights:decide_requests:other"), {})
 
     @patch("insights.models.feature_flag.flag_analytics.CACHE_BUCKET_SIZE", 10)
     def test_capture_team_decide_usage(self):
@@ -200,7 +200,7 @@ class TestFeatureFlagAnalytics(BaseTest, QueryMatchingTest):
 
             client = redis.get_client()
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:{team_id}"),
+                client.hgetall(f"insights:decide_requests:{team_id}"),
                 {b"165192620": b"5"},
             )
 
@@ -386,15 +386,15 @@ class TestFeatureFlagAnalytics(BaseTest, QueryMatchingTest):
             # check that the increments made it through
             # and no extra requests were counted
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:{team_id}"),
+                client.hgetall(f"insights:decide_requests:{team_id}"),
                 {b"165192620": b"8"},
             )
             self.assertEqual(
-                client.hgetall(f"posthog:local_evaluation_requests:{team_id}"),
+                client.hgetall(f"insights:local_evaluation_requests:{team_id}"),
                 {b"165192620": b"8"},
             )
-            self.assertEqual(client.hgetall(f"posthog:decide_requests:{other_team_id}"), {})
-            self.assertEqual(client.hgetall(f"posthog:local_evaluation_requests:{other_team_id}"), {})
+            self.assertEqual(client.hgetall(f"insights:decide_requests:{other_team_id}"), {})
+            self.assertEqual(client.hgetall(f"insights:local_evaluation_requests:{other_team_id}"), {})
 
     @pytest.mark.skip(
         reason="This works locally, but causes issues in CI because the freeze_time applies to threads as well in unrelated tests, causing timeouts."
@@ -554,10 +554,10 @@ class TestFeatureFlagAnalytics(BaseTest, QueryMatchingTest):
             # check that the increments made it through
             # and no extra requests were counted
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:{team_id}"),
+                client.hgetall(f"insights:decide_requests:{team_id}"),
                 {b"165192620": b"8"},
             )
-            self.assertEqual(client.hgetall(f"posthog:decide_requests:{other_team_id}"), {})
+            self.assertEqual(client.hgetall(f"insights:decide_requests:{other_team_id}"), {})
 
 
 class TestSdkBreakdown(BaseTest):
@@ -569,18 +569,18 @@ class TestSdkBreakdown(BaseTest):
 
     def test_get_team_request_library_key_decide(self):
         self.assertEqual(
-            get_team_request_library_key(123, FlagRequestType.DECIDE, "posthog-js"),
-            "posthog:decide_requests:sdk:123:posthog-js",
+            get_team_request_library_key(123, FlagRequestType.DECIDE, "insights-js"),
+            "insights:decide_requests:sdk:123:insights-js",
         )
         self.assertEqual(
-            get_team_request_library_key(456, FlagRequestType.DECIDE, "posthog-node"),
-            "posthog:decide_requests:sdk:456:posthog-node",
+            get_team_request_library_key(456, FlagRequestType.DECIDE, "insights-node"),
+            "insights:decide_requests:sdk:456:insights-node",
         )
 
     def test_get_team_request_library_key_local_evaluation(self):
         self.assertEqual(
-            get_team_request_library_key(123, FlagRequestType.LOCAL_EVALUATION, "posthog-python"),
-            "posthog:local_evaluation_requests:sdk:123:posthog-python",
+            get_team_request_library_key(123, FlagRequestType.LOCAL_EVALUATION, "hanzo-insights"),
+            "insights:local_evaluation_requests:sdk:123:hanzo-insights",
         )
 
     def test_sdk_libraries_matches_rust_library_enum(self):
@@ -591,22 +591,22 @@ class TestSdkBreakdown(BaseTest):
         rust/feature-flags/src/handler/types.rs
 
         If this test fails after adding a new SDK to Rust, update SDK_LIBRARIES
-        in posthog/models/feature_flag/flag_analytics.py to match.
+        in insights/models/feature_flag/flag_analytics.py to match.
         """
         expected_libraries = [
-            "posthog-js",
-            "posthog-node",
-            "posthog-python",
-            "posthog-php",
-            "posthog-ruby",
-            "posthog-go",
-            "posthog-java",
-            "posthog-dotnet",
-            "posthog-elixir",
-            "posthog-android",
-            "posthog-ios",
-            "posthog-react-native",
-            "posthog-flutter",
+            "insights-js",
+            "insights-node",
+            "hanzo-insights",
+            "insights-php",
+            "insights-ruby",
+            "insights-go",
+            "insights-java",
+            "insights-dotnet",
+            "insights-elixir",
+            "insights-android",
+            "insights-ios",
+            "insights-react-native",
+            "insights-flutter",
             "other",
         ]
         self.assertEqual(SDK_LIBRARIES, expected_libraries)
@@ -628,29 +628,29 @@ class TestSdkBreakdown(BaseTest):
         with freeze_time("2022-05-07 12:23:07") as frozen_datetime:
             # Set up SDK-specific data in Redis in first bucket
             time_bucket_1 = "165192618"
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-js", time_bucket_1, 100)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-node", time_bucket_1, 50)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-js", time_bucket_1, 100)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-node", time_bucket_1, 50)
 
             # Move to second bucket - each SDK key needs 2+ buckets for extraction
             frozen_datetime.tick(datetime.timedelta(seconds=10))
             time_bucket_2 = "165192619"
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-js", time_bucket_2, 10)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-node", time_bucket_2, 5)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-js", time_bucket_2, 10)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-node", time_bucket_2, 5)
 
             # Move time forward so bucket 2 is no longer "current"
             frozen_datetime.tick(datetime.timedelta(seconds=15))
 
             result = _extract_sdk_breakdown_from_redis(client, team_id, FlagRequestType.DECIDE)
             # Only bucket 1 should be extracted (bucket 2 is skipped as it's most recent)
-            self.assertEqual(result, {"posthog-js": 100, "posthog-node": 50})
+            self.assertEqual(result, {"insights-js": 100, "insights-node": 50})
 
             # Bucket 1 should be consumed, bucket 2 should still exist
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:sdk:{team_id}:posthog-js"),
+                client.hgetall(f"insights:decide_requests:sdk:{team_id}:insights-js"),
                 {b"165192619": b"10"},
             )
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:sdk:{team_id}:posthog-node"),
+                client.hgetall(f"insights:decide_requests:sdk:{team_id}:insights-node"),
                 {b"165192619": b"5"},
             )
 
@@ -668,18 +668,18 @@ class TestSdkBreakdown(BaseTest):
 
             # Set up aggregate counts in first bucket
             time_bucket_1 = "165192618"
-            client.hincrby(f"posthog:decide_requests:{team_id}", time_bucket_1, 150)
+            client.hincrby(f"insights:decide_requests:{team_id}", time_bucket_1, 150)
 
             # Set up SDK-specific counts (simulating what Rust would write)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-js", time_bucket_1, 100)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-node", time_bucket_1, 50)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-js", time_bucket_1, 100)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-node", time_bucket_1, 50)
 
             # Move to second bucket - each key needs 2+ buckets for extraction
             frozen_datetime.tick(datetime.timedelta(seconds=10))
             time_bucket_2 = "165192619"
-            client.hincrby(f"posthog:decide_requests:{team_id}", time_bucket_2, 1)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-js", time_bucket_2, 1)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-node", time_bucket_2, 1)
+            client.hincrby(f"insights:decide_requests:{team_id}", time_bucket_2, 1)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-js", time_bucket_2, 1)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-node", time_bucket_2, 1)
 
             # Move time forward so bucket 2 is no longer "current"
             frozen_datetime.tick(datetime.timedelta(seconds=15))
@@ -696,7 +696,7 @@ class TestSdkBreakdown(BaseTest):
                     "min_time": 1651926180,
                     "max_time": 1651926180,
                     "token": "token",
-                    "sdk_breakdown": {"posthog-js": 100, "posthog-node": 50},
+                    "sdk_breakdown": {"insights-js": 100, "insights-node": 50},
                 },
             )
 
@@ -714,12 +714,12 @@ class TestSdkBreakdown(BaseTest):
 
             # Set up only aggregate counts in first bucket (no SDK-specific data)
             time_bucket_1 = "165192618"
-            client.hincrby(f"posthog:decide_requests:{team_id}", time_bucket_1, 100)
+            client.hincrby(f"insights:decide_requests:{team_id}", time_bucket_1, 100)
 
             # Move to second bucket (extraction requires 2+ buckets)
             frozen_datetime.tick(datetime.timedelta(seconds=10))
             time_bucket_2 = "165192619"
-            client.hincrby(f"posthog:decide_requests:{team_id}", time_bucket_2, 1)
+            client.hincrby(f"insights:decide_requests:{team_id}", time_bucket_2, 1)
 
             frozen_datetime.tick(datetime.timedelta(seconds=15))
 
@@ -753,16 +753,16 @@ class TestSdkBreakdown(BaseTest):
 
             # Set up data in first bucket
             time_bucket_1 = "165192618"
-            client.hincrby(f"posthog:local_evaluation_requests:{team_id}", time_bucket_1, 80)
-            client.hincrby(f"posthog:local_evaluation_requests:sdk:{team_id}:posthog-python", time_bucket_1, 50)
-            client.hincrby(f"posthog:local_evaluation_requests:sdk:{team_id}:posthog-node", time_bucket_1, 30)
+            client.hincrby(f"insights:local_evaluation_requests:{team_id}", time_bucket_1, 80)
+            client.hincrby(f"insights:local_evaluation_requests:sdk:{team_id}:hanzo-insights", time_bucket_1, 50)
+            client.hincrby(f"insights:local_evaluation_requests:sdk:{team_id}:insights-node", time_bucket_1, 30)
 
             # Move to second bucket - each key needs 2+ buckets for extraction
             frozen_datetime.tick(datetime.timedelta(seconds=10))
             time_bucket_2 = "165192619"
-            client.hincrby(f"posthog:local_evaluation_requests:{team_id}", time_bucket_2, 1)
-            client.hincrby(f"posthog:local_evaluation_requests:sdk:{team_id}:posthog-python", time_bucket_2, 1)
-            client.hincrby(f"posthog:local_evaluation_requests:sdk:{team_id}:posthog-node", time_bucket_2, 1)
+            client.hincrby(f"insights:local_evaluation_requests:{team_id}", time_bucket_2, 1)
+            client.hincrby(f"insights:local_evaluation_requests:sdk:{team_id}:hanzo-insights", time_bucket_2, 1)
+            client.hincrby(f"insights:local_evaluation_requests:sdk:{team_id}:insights-node", time_bucket_2, 1)
 
             frozen_datetime.tick(datetime.timedelta(seconds=15))
 
@@ -778,7 +778,7 @@ class TestSdkBreakdown(BaseTest):
                     "min_time": 1651926180,
                     "max_time": 1651926180,
                     "token": "token",
-                    "sdk_breakdown": {"posthog-python": 50, "posthog-node": 30},
+                    "sdk_breakdown": {"hanzo-insights": 50, "insights-node": 30},
                 },
             )
 
@@ -798,23 +798,23 @@ class TestSdkBreakdown(BaseTest):
 
             # Set up data for multiple SDKs (simulating real-world usage)
             test_sdks = {
-                "posthog-js": 1000,
-                "posthog-node": 500,
-                "posthog-python": 300,
-                "posthog-android": 200,
-                "posthog-ios": 150,
+                "insights-js": 1000,
+                "insights-node": 500,
+                "hanzo-insights": 300,
+                "insights-android": 200,
+                "insights-ios": 150,
                 "other": 50,
             }
 
             for sdk, count in test_sdks.items():
-                client.hincrby(f"posthog:decide_requests:sdk:{team_id}:{sdk}", time_bucket_1, count)
+                client.hincrby(f"insights:decide_requests:sdk:{team_id}:{sdk}", time_bucket_1, count)
 
             # Move to second bucket - extraction requires 2+ buckets
             frozen_datetime.tick(datetime.timedelta(seconds=10))
             time_bucket_2 = "165192619"
 
             for sdk in test_sdks:
-                client.hincrby(f"posthog:decide_requests:sdk:{team_id}:{sdk}", time_bucket_2, 1)
+                client.hincrby(f"insights:decide_requests:sdk:{team_id}:{sdk}", time_bucket_2, 1)
 
             # Move time forward so bucket 2 is no longer "current"
             frozen_datetime.tick(datetime.timedelta(seconds=15))
@@ -826,7 +826,7 @@ class TestSdkBreakdown(BaseTest):
 
             # Verify bucket 1 was consumed for all SDKs, bucket 2 remains
             for sdk in test_sdks:
-                remaining = client.hgetall(f"posthog:decide_requests:sdk:{team_id}:{sdk}")
+                remaining = client.hgetall(f"insights:decide_requests:sdk:{team_id}:{sdk}")
                 self.assertEqual(remaining, {b"165192619": b"1"}, f"SDK {sdk} should only have bucket 2 remaining")
 
     @patch("insights.models.feature_flag.flag_analytics.CACHE_BUCKET_SIZE", 10)
@@ -841,8 +841,8 @@ class TestSdkBreakdown(BaseTest):
             time_bucket = "165192618"
 
             # Set up data with only one bucket per SDK
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-js", time_bucket, 100)
-            client.hincrby(f"posthog:decide_requests:sdk:{team_id}:posthog-node", time_bucket, 50)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-js", time_bucket, 100)
+            client.hincrby(f"insights:decide_requests:sdk:{team_id}:insights-node", time_bucket, 50)
 
             result = _extract_sdk_breakdown_from_redis(client, team_id, FlagRequestType.DECIDE)
 
@@ -851,7 +851,7 @@ class TestSdkBreakdown(BaseTest):
 
             # Data should still be in Redis (not consumed)
             self.assertEqual(
-                client.hgetall(f"posthog:decide_requests:sdk:{team_id}:posthog-js"),
+                client.hgetall(f"insights:decide_requests:sdk:{team_id}:insights-js"),
                 {b"165192618": b"100"},
             )
 

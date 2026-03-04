@@ -135,7 +135,7 @@ function buildToolbarParams(options?: BuildToolbarParamsOptions): ToolbarParams 
     return {
         userIntent: _buildToolbarUserIntent(options),
         // Keeping this as backward compatibility, but we don't use it anymore in the toolbar
-        // and instead depend on the `posthog`'s instance configuration
+        // and instead depend on the `insights`'s instance configuration
         apiURL: apiHostOrigin(),
         ...(options?.actionId ? { actionId: options.actionId } : {}),
         ...(options?.experimentId ? { experimentId: options.experimentId } : {}),
@@ -157,7 +157,7 @@ export function appEditorUrl(
     }
 ): string {
     const params = buildToolbarParams(options) as Record<string, unknown>
-    // See https://github.com/PostHog/posthog-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
+    // See https://github.com/hanzoai/insights-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
     // are passed. `appUrl` is an extra `redirect_to_site` param.
     params['appUrl'] = appUrl
     params['generateOnly'] = options?.generateOnly
@@ -451,10 +451,10 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
         loadManualLaunchParamsSuccess: async ({ manualLaunchParams }) => {
             if (manualLaunchParams) {
                 const templateScript = `
-                if (!window?.posthog) {
-                    console.warn('Insights must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your posthog init code.')
+                if (!window?.insights) {
+                    console.warn('Insights must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your insights init code.')
                 } else {
-                    window.posthog.loadToolbar(${manualLaunchParams})
+                    window.insights.loadToolbar(${manualLaunchParams})
                 }
                 `
                 await copyToClipboard(templateScript, 'code to paste into the console')

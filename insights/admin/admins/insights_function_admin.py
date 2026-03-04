@@ -37,7 +37,7 @@ class InsightsFunctionAdmin(admin.ModelAdmin):
         "inputs_schema",
         "filters",
         "bytecode",
-        "hog",
+        "iql",
         "team",
         "created_by",
         "team_link",
@@ -50,7 +50,7 @@ class InsightsFunctionAdmin(admin.ModelAdmin):
         "state",
         "created_by",
         "icon_url",
-        "hog",
+        "iql",
         "bytecode",
         "inputs_schema",
         "inputs",
@@ -62,7 +62,7 @@ class InsightsFunctionAdmin(admin.ModelAdmin):
     def team_link(self, insights_function):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[insights_function.team.pk]),
+            reverse("admin:insights_team_change", args=[insights_function.team.pk]),
             insights_function.team.name,
         )
 

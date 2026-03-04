@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 
-import { IconGear, IconPlusSmall, IconTrash } from '@posthog/icons'
+import { IconGear, IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonColorGlyph,
@@ -14,7 +14,7 @@ import {
     LemonTabs,
     LemonTag,
     Popover,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { getSeriesColor, getSeriesColorPalette } from 'lib/colors'
 import { LemonField } from 'lib/lemon-ui/LemonField'

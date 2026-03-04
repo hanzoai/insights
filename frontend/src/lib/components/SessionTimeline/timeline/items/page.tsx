@@ -1,7 +1,7 @@
 import { ItemCategory, ItemRenderer, TimelineItem } from '..'
 
-import { IconEye } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconEye } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { ErrorTrackingRuntime } from 'lib/components/Errors/types'
 import { getRuntimeFromLib } from 'lib/components/Errors/utils'

@@ -12,7 +12,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--skip-capture-event",
             type=str,
-            help="Skip the posthog capture events - for retrying to billing service",
+            help="Skip the insights capture events - for retrying to billing service",
         )
         parser.add_argument("--async", type=bool, help="Run the task asynchronously")
         parser.add_argument(

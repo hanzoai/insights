@@ -4,7 +4,7 @@ import { useActions, useValues } from 'kea'
 import { Field, Form } from 'kea-forms'
 import { useState } from 'react'
 
-import { IconCollapse, IconExpand } from '@posthog/icons'
+import { IconCollapse, IconExpand } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -17,7 +17,7 @@ import {
     LemonSearchableSelect,
     LemonSelect,
     LemonTag,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { InsightsQLDropdown } from 'lib/components/InsightsQLDropdown/InsightsQLDropdown'
@@ -617,7 +617,7 @@ export function ViewLinkFormWithPreview({ mode }: ViewLinkModalProps): JSX.Eleme
                                 type="secondary"
                                 onClick={() => {
                                     window.open(
-                                        'https://posthog.com/support?utm_medium=in-product&utm_campaign=join-modal-validation-error',
+                                        'https://hanzo.ai/support?utm_medium=in-product&utm_campaign=join-modal-validation-error',
                                         '_blank'
                                     )
                                 }}

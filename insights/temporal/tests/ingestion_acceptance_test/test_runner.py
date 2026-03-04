@@ -11,10 +11,10 @@ from insights.temporal.ingestion_acceptance_test.test_cases_discovery import Tes
 @pytest.fixture
 def config() -> Config:
     return Config(
-        api_host="https://test.posthog.com",
-        project_api_key="phc_test_key",
+        api_host="https://test.hanzo.ai",
+        project_api_key="hi_test_key",
         project_id="12345",
-        personal_api_key="phx_personal_key",
+        personal_api_key="hix_personal_key",
     )
 
 
@@ -146,7 +146,7 @@ class TestRunTests:
 
         result = run_tests(config, tests, mock_client, executor)
 
-        assert result.environment["api_host"] == "https://test.posthog.com"
+        assert result.environment["api_host"] == "https://test.hanzo.ai"
         assert result.environment["project_id"] == "12345"
 
     @patch("insights.temporal.ingestion_acceptance_test.runner.as_completed")

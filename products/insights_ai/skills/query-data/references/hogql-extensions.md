@@ -1,6 +1,6 @@
-# HogQL syntax extensions
+# InsightsQL syntax extensions
 
-These functions are unique to HogQL and not available in standard ClickHouse.
+These functions are unique to InsightsQL and not available in standard ClickHouse.
 
 ## Visualization
 
@@ -89,7 +89,7 @@ SELECT
 
 ## HTML rendering
 
-HogQL supports limited HTML tags for rich output in table visualizations. For security, no attributes are supported except for `<a>` tags.
+InsightsQL supports limited HTML tags for rich output in table visualizations. For security, no attributes are supported except for `<a>` tags.
 
 ### Supported tags
 
@@ -107,7 +107,7 @@ Create clickable links. URLs in Table visualization are automatically clickable,
 ```sql
 SELECT
     properties.$pathname,
-    <a href={f'https://posthog.com/{properties.$pathname}'} target='_blank'>Link</a> as link
+    <a href={f'https://hanzo.ai/{properties.$pathname}'} target='_blank'>Link</a> as link
 FROM events
 WHERE event = '$pageview'
 ```

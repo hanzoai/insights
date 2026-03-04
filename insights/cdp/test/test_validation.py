@@ -421,7 +421,7 @@ class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatc
 
     def test_validate_filters_builds_bytecode(self):
         filters = {
-            "properties": [{"key": "email", "value": ["test@posthog.com"], "operator": "exact", "type": "person"}],
+            "properties": [{"key": "email", "value": ["test@hanzo.ai"], "operator": "exact", "type": "person"}],
             "events": [{"id": "$pageview", "type": "events", "name": "$pageview", "order": 0}],
         }
 
@@ -431,12 +431,12 @@ class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatc
         assert value == {
             "source": "events",
             "events": [{"id": "$pageview", "type": "events", "name": "$pageview", "order": 0}],
-            "properties": [{"key": "email", "value": ["test@posthog.com"], "operator": "exact", "type": "person"}],
+            "properties": [{"key": "email", "value": ["test@hanzo.ai"], "operator": "exact", "type": "person"}],
             "bytecode": [
                 "_H",
                 1,
                 32,
-                "test@posthog.com",
+                "test@hanzo.ai",
                 32,
                 "email",
                 32,
@@ -461,7 +461,7 @@ class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatc
     def test_validate_filters_person_updates_only_allows_properties(self):
         filters = {
             "source": "person-updates",
-            "properties": [{"key": "email", "value": ["test@posthog.com"], "operator": "exact", "type": "person"}],
+            "properties": [{"key": "email", "value": ["test@hanzo.ai"], "operator": "exact", "type": "person"}],
             "events": [{"id": "$pageview", "type": "events", "name": "$pageview", "order": 0}],
         }
 
@@ -470,8 +470,8 @@ class TestInsightsFunctionValidation(ClickhouseTestMixin, APIBaseTest, QueryMatc
         value = json.loads(json.dumps(serializer.validated_data))
         assert value == {
             "source": "person-updates",
-            "properties": [{"key": "email", "value": ["test@posthog.com"], "operator": "exact", "type": "person"}],
-            "bytecode": ["_H", 1, 32, "test@posthog.com", 32, "email", 32, "properties", 32, "person", 1, 3, 11],
+            "properties": [{"key": "email", "value": ["test@hanzo.ai"], "operator": "exact", "type": "person"}],
+            "bytecode": ["_H", 1, 32, "test@hanzo.ai", 32, "email", 32, "properties", 32, "person", 1, 3, 11],
         }
 
     @parameterized.expand(

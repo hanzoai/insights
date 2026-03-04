@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { IconCopy } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonDivider, LemonModal } from '@posthog/lemon-ui'
+import { IconCopy } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonDivider, LemonModal } from '@hanzo/lemon-ui'
 
 import { SHARING_MODAL_WIDTH } from 'lib/components/Sharing/SharingModal'
 import { base64Encode } from 'lib/utils'
@@ -29,7 +29,7 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
     const [interestTracked, setInterestTracked] = useState(false)
 
     const trackInterest = (): void => {
-        posthog.capture('pressed interested in notebook sharing', { url: notebookUrl })
+        insights.capture('pressed interested in notebook sharing', { url: notebookUrl })
     }
 
     return (

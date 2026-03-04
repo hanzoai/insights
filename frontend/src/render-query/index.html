@@ -2,15 +2,15 @@
 <html>
     <head>
         <meta name="robots" content="noindex" />
-        {{ render_query_payload|json_script:"posthog-render-query" }}
+        {{ render_query_payload|json_script:"insights-render-query" }}
         <script nonce="{{ request.csp_nonce }}">
             try {
-                window.POSTHOG_RENDER_QUERY_PAYLOAD = JSON.parse(
-                    document.getElementById('posthog-render-query').textContent
+                window.INSIGHTS_RENDER_QUERY_PAYLOAD = JSON.parse(
+                    document.getElementById('insights-render-query').textContent
                 )
             } catch (e) {
                 console.error('Failed to parse render query payload:', e)
-                window.POSTHOG_RENDER_QUERY_PAYLOAD = {}
+                window.INSIGHTS_RENDER_QUERY_PAYLOAD = {}
             }
         </script>
         {% include "head.html" %}
@@ -22,7 +22,7 @@
                 div.style.color = '#fef6f6'
                 div.style.background = '#920c0c'
                 div.style.padding = '5px 10px'
-                div.innerHTML = 'You are using a really old browser. Please upgrade to fully enjoy PostHog!'
+                div.innerHTML = 'You are using a really old browser. Please upgrade to fully enjoy Hanzo Insights!'
                 document.body.prepend(div)
             }
             if (!window.process) {

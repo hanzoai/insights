@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, LemonSwitch, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, LemonSwitch, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconBranch } from 'lib/lemon-ui/icons/icons'
 import { urls } from 'scenes/urls'
@@ -31,7 +31,7 @@ export const PathCleaningToggle = ({
                         Path cleaning helps standardize URLs by removing unnecessary parameters and fragments.
                     </p>
                     <div className="mb-2">
-                        <Link to="https://posthog.com/docs/product-analytics/paths#path-cleaning-rules">
+                        <Link to="https://hanzo.ai/docs/product-analytics/paths#path-cleaning-rules">
                             Learn more about path cleaning rules
                         </Link>
                     </div>

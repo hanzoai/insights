@@ -24,7 +24,7 @@ MAX_RETRY_ATTEMPTS = 5
 
 # Prometheus metric for tracking missed scheduled executions
 SCHEDULED_CHANGE_MISSED_EXECUTIONS = Counter(
-    "posthog_scheduled_change_missed_executions_total",
+    "insights_scheduled_change_missed_executions_total",
     "Number of scheduled change executions that were skipped due to delayed processing",
     ["interval"],
 )

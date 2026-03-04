@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronRight, IconExpand } from '@posthog/icons'
-import { LemonBadge, LemonButton, LemonSkeleton, LemonTag, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronRight, IconExpand } from '@hanzo/icons'
+import { LemonBadge, LemonButton, LemonSkeleton, LemonTag, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import ViewRecordingButton from 'lib/components/ViewRecordingButton/ViewRecordingButton'

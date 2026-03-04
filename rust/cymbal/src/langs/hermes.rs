@@ -227,7 +227,7 @@ mod test {
 
     use chrono::Utc;
     use mockall::predicate;
-    use posthog_symbol_data::write_symbol_data;
+    use insights_symbol_data::write_symbol_data;
     use regex::Regex;
     use sqlx::PgPool;
     use uuid::Uuid;
@@ -347,7 +347,7 @@ mod test {
     }
 
     fn get_symbol_data_bytes() -> Vec<u8> {
-        write_symbol_data(posthog_symbol_data::HermesMap {
+        write_symbol_data(insights_symbol_data::HermesMap {
             sourcemap: HERMES_MAP.to_string(),
         })
         .unwrap()

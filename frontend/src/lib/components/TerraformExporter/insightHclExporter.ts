@@ -31,7 +31,7 @@ export interface InsightExportResult extends HclExportResult {
 }
 
 /**
- * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/insight
+ * @see https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/insight
  */
 const INSIGHT_FIELD_MAPPINGS: FieldMapping<Partial<InsightModel>, InsightHclExportOptions>[] = [
     {
@@ -91,7 +91,7 @@ function validateInsight(insight: Partial<InsightModel>, options?: InsightHclExp
         const hasUnresolvedIds = insight.dashboards.some((id) => !options?.dashboardIdReplacements?.has(id))
         if (hasUnresolvedIds) {
             warnings.push(
-                'Some `dashboard_ids` are hardcoded. After exporting, consider referencing the Terraform resource instead (for example, `posthog_dashboard.my_dashboard.id`) so the dashboard is managed alongside this configuration.'
+                'Some `dashboard_ids` are hardcoded. After exporting, consider referencing the Terraform resource instead (for example, `insights_dashboard.my_dashboard.id`) so the dashboard is managed alongside this configuration.'
             )
         }
     }
@@ -100,7 +100,7 @@ function validateInsight(insight: Partial<InsightModel>, options?: InsightHclExp
 }
 
 const INSIGHT_EXPORTER: ResourceExporter<Partial<InsightModel>, InsightHclExportOptions> = {
-    resourceType: 'posthog_insight',
+    resourceType: 'insights_insight',
     resourceLabel: 'insight',
     fieldMappings: INSIGHT_FIELD_MAPPINGS,
     validate: validateInsight,

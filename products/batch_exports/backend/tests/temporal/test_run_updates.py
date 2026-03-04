@@ -50,7 +50,7 @@ def destination(team):
         config={
             "bucket_name": "bucket",
             "region": "us-east-1",
-            "prefix": "posthog-events/",
+            "prefix": "insights-events/",
             "aws_access_key_id": "key_id",
             "aws_secret_access_key": "secret",
         },

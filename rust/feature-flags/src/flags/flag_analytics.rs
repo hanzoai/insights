@@ -12,9 +12,9 @@ const CACHE_BUCKET_SIZE: u64 = 60 * 2; // duration in seconds
 
 pub fn get_team_request_key(team_id: i32, request_type: FlagRequestType) -> String {
     match request_type {
-        FlagRequestType::Decide => format!("posthog:decide_requests:{team_id}"),
+        FlagRequestType::Decide => format!("insights:decide_requests:{team_id}"),
         FlagRequestType::FlagDefinitions => {
-            format!("posthog:local_evaluation_requests:{team_id}")
+            format!("insights:local_evaluation_requests:{team_id}")
         }
     }
 }
@@ -26,10 +26,10 @@ pub fn get_team_request_library_key(
 ) -> String {
     match request_type {
         FlagRequestType::Decide => {
-            format!("posthog:decide_requests:sdk:{team_id}:{library}")
+            format!("insights:decide_requests:sdk:{team_id}:{library}")
         }
         FlagRequestType::FlagDefinitions => {
-            format!("posthog:local_evaluation_requests:sdk:{team_id}:{library}")
+            format!("insights:local_evaluation_requests:sdk:{team_id}:{library}")
         }
     }
 }
@@ -81,45 +81,45 @@ mod tests {
     async fn test_get_team_request_key() {
         assert_eq!(
             get_team_request_key(123, FlagRequestType::Decide),
-            "posthog:decide_requests:123"
+            "insights:decide_requests:123"
         );
         assert_eq!(
             get_team_request_key(456, FlagRequestType::FlagDefinitions),
-            "posthog:local_evaluation_requests:456"
+            "insights:local_evaluation_requests:456"
         );
     }
 
     #[tokio::test]
     async fn test_get_team_request_library_key() {
         assert_eq!(
-            get_team_request_library_key(123, FlagRequestType::Decide, Library::PosthogNode),
-            "posthog:decide_requests:sdk:123:posthog-node"
+            get_team_request_library_key(123, FlagRequestType::Decide, Library::InsightsNode),
+            "insights:decide_requests:sdk:123:insights-node"
         );
         assert_eq!(
-            get_team_request_library_key(456, FlagRequestType::FlagDefinitions, Library::PosthogJs),
-            "posthog:local_evaluation_requests:sdk:456:posthog-js"
+            get_team_request_library_key(456, FlagRequestType::FlagDefinitions, Library::InsightsJs),
+            "insights:local_evaluation_requests:sdk:456:insights-js"
         );
         assert_eq!(
-            get_team_request_library_key(789, FlagRequestType::Decide, Library::PosthogAndroid),
-            "posthog:decide_requests:sdk:789:posthog-android"
+            get_team_request_library_key(789, FlagRequestType::Decide, Library::InsightsAndroid),
+            "insights:decide_requests:sdk:789:insights-android"
         );
         // Test new SDK variants
         assert_eq!(
-            get_team_request_library_key(100, FlagRequestType::Decide, Library::PosthogDotnet),
-            "posthog:decide_requests:sdk:100:posthog-dotnet"
+            get_team_request_library_key(100, FlagRequestType::Decide, Library::InsightsDotnet),
+            "insights:decide_requests:sdk:100:insights-dotnet"
         );
         assert_eq!(
             get_team_request_library_key(
                 101,
                 FlagRequestType::FlagDefinitions,
-                Library::PosthogElixir
+                Library::InsightsElixir
             ),
-            "posthog:local_evaluation_requests:sdk:101:posthog-elixir"
+            "insights:local_evaluation_requests:sdk:101:insights-elixir"
         );
         // Test Other variant
         assert_eq!(
             get_team_request_library_key(102, FlagRequestType::Decide, Library::Other),
-            "posthog:decide_requests:sdk:102:other"
+            "insights:decide_requests:sdk:102:other"
         );
     }
 
@@ -200,7 +200,7 @@ mod tests {
 
         let decide_key = get_team_request_key(team_id, FlagRequestType::Decide);
         let library_key =
-            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::PosthogNode);
+            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::InsightsNode);
 
         redis_client.del(decide_key.clone()).await.unwrap();
         redis_client.del(library_key.clone()).await.unwrap();
@@ -210,7 +210,7 @@ mod tests {
             team_id,
             count,
             FlagRequestType::Decide,
-            Some(Library::PosthogNode),
+            Some(Library::InsightsNode),
         )
         .await
         .unwrap();
@@ -251,7 +251,7 @@ mod tests {
         let decide_key = get_team_request_key(team_id, FlagRequestType::Decide);
         // Use a sample library key to verify it doesn't get created
         let library_key =
-            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::PosthogNode);
+            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::InsightsNode);
 
         redis_client.del(decide_key.clone()).await.unwrap();
         redis_client.del(library_key.clone()).await.unwrap();
@@ -304,9 +304,9 @@ mod tests {
 
         let decide_key = get_team_request_key(team_id, FlagRequestType::Decide);
         let js_key =
-            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::PosthogJs);
+            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::InsightsJs);
         let node_key =
-            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::PosthogNode);
+            get_team_request_library_key(team_id, FlagRequestType::Decide, Library::InsightsNode);
 
         redis_client.del(decide_key.clone()).await.unwrap();
         redis_client.del(js_key.clone()).await.unwrap();
@@ -317,7 +317,7 @@ mod tests {
             team_id,
             count,
             FlagRequestType::Decide,
-            Some(Library::PosthogJs),
+            Some(Library::InsightsJs),
         )
         .await
         .unwrap();
@@ -327,7 +327,7 @@ mod tests {
             team_id,
             count,
             FlagRequestType::Decide,
-            Some(Library::PosthogNode),
+            Some(Library::InsightsNode),
         )
         .await
         .unwrap();

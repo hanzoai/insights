@@ -41,7 +41,7 @@ from insights.test.test_utils import create_group_type_mapping_without_created_a
 
 from products.data_warehouse.backend.test.utils import create_data_warehouse_table_from_csv
 
-TEST_BUCKET = "test_storage_bucket-posthog.insightsql_queries.insights.funnels.breakdown_cases"
+TEST_BUCKET = "test_storage_bucket-insights.insightsql_queries.insights.funnels.breakdown_cases"
 
 
 @dataclass(frozen=True)
@@ -1298,18 +1298,18 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     {
                         "event": "user signed up",
                         "timestamp": datetime(2020, 1, 2, 14),
-                        "properties": {"$current_url": "https://posthog.com/docs/x"},
+                        "properties": {"$current_url": "https://hanzo.ai/docs/x"},
                     },
                     {
                         "event": "paid",
                         "timestamp": datetime(2020, 1, 10, 14),
-                        "properties": {"$current_url": "https://posthog.com/docs/x"},
+                        "properties": {"$current_url": "https://hanzo.ai/docs/x"},
                     },
                 ]
             }
             # Dummy events to make sure that breakdown is not confused
             # It was confused before due to the nature of fetching breakdown values with a LIMIT based on value popularity
-            # See https://github.com/PostHog/posthog/pull/5496
+            # See https://github.com/Hanzo Insights/insights/pull/5496
             for current_url_letter in ascii_lowercase[:20]:
                 # Twenty dummy breakdown values
                 for _ in range(2):
@@ -1319,7 +1319,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                         {
                             "event": "user signed up",
                             "timestamp": datetime(2020, 1, 2, 14),
-                            "properties": {"$current_url": f"https://posthog.com/blog/{current_url_letter}"},
+                            "properties": {"$current_url": f"https://hanzo.ai/blog/{current_url_letter}"},
                         }
                     )
 
@@ -1338,7 +1338,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                                 "key": "$current_url",
                                 "operator": "icontains",
                                 "type": "event",
-                                "value": "https://posthog.com/docs",
+                                "value": "https://hanzo.ai/docs",
                             }
                         ],
                     },
@@ -1359,14 +1359,14 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     FunnelStepResult(
                         name="user signed up",
                         count=1,
-                        breakdown=["https://posthog.com/docs/x"],
+                        breakdown=["https://hanzo.ai/docs/x"],
                     ),
                     FunnelStepResult(
                         name="paid",
                         count=1,
                         average_conversion_time=691200.0,
                         median_conversion_time=691200.0,
-                        breakdown=["https://posthog.com/docs/x"],
+                        breakdown=["https://hanzo.ai/docs/x"],
                     ),
                 ],
             )
@@ -1381,12 +1381,12 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     {
                         "event": "user signed up",
                         "timestamp": datetime(2020, 1, 2, 14),
-                        "properties": {"$current_url": "https://posthog.com/docs/x"},
+                        "properties": {"$current_url": "https://hanzo.ai/docs/x"},
                     },
                     {
                         "event": "paid",
                         "timestamp": datetime(2020, 1, 10, 14),
-                        "properties": {"$current_url": "https://posthog.com/docs/x"},
+                        "properties": {"$current_url": "https://hanzo.ai/docs/x"},
                     },
                 ]
             }
@@ -1396,7 +1396,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                         {
                             "event": "user signed up",
                             "timestamp": datetime(2020, 1, 2, 14),
-                            "properties": {"$current_url": f"https://posthog.com/blog/{current_url_letter}"},
+                            "properties": {"$current_url": f"https://hanzo.ai/blog/{current_url_letter}"},
                         }
                     )
 
@@ -1414,7 +1414,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                                 "key": "$current_url",
                                 "operator": "icontains",
                                 "type": "event",
-                                "value": "https://posthog.com/docs",
+                                "value": "https://hanzo.ai/docs",
                             }
                         ],
                     }
@@ -1435,7 +1435,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     FunnelStepResult(
                         name="user signed up",
                         count=1,
-                        breakdown=["https://posthog.com/docs/x"],
+                        breakdown=["https://hanzo.ai/docs/x"],
                         type="actions",
                         action_id=user_signed_up_action.id,
                     ),
@@ -1444,7 +1444,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                         count=1,
                         average_conversion_time=691200.0,
                         median_conversion_time=691200.0,
-                        breakdown=["https://posthog.com/docs/x"],
+                        breakdown=["https://hanzo.ai/docs/x"],
                     ),
                 ],
             )
@@ -2861,7 +2861,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     [
                         FunnelStepResult(name="$pageview", count=1, breakdown=["Chrome"]),
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=1,
                             breakdown=["Chrome"],
                             type="data_warehouse",
@@ -2920,7 +2920,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     [
                         FunnelStepResult(name="$pageview", count=1, breakdown=["Firefox"]),
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=0,
                             breakdown=["Firefox"],
                             type="data_warehouse",
@@ -3004,7 +3004,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     [
                         FunnelStepResult(name="$pageview", count=1, breakdown=["val1"]),
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=1,
                             breakdown=["val1"],
                             type="data_warehouse",
@@ -3063,7 +3063,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     [
                         FunnelStepResult(name="$pageview", count=1, breakdown=["val2"]),
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=0,
                             breakdown=["val2"],
                             type="data_warehouse",
@@ -3133,7 +3133,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     results[0],
                     [
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=1,
                             breakdown=["payment_succeeded"],
                             type="data_warehouse",
@@ -3162,7 +3162,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     results[1],
                     [
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=3,
                             breakdown=[""],
                             type="data_warehouse",
@@ -3193,7 +3193,7 @@ def funnel_breakdown_test_factory(funnel_order_type: FunnelOrderType):
                     results[2],
                     [
                         FunnelStepResult(
-                            name="posthog_test_test_table_1.toUUID(user_id)",
+                            name="insights_test_test_table_1.toUUID(user_id)",
                             count=1,
                             breakdown=["payment_failed"],
                             type="data_warehouse",

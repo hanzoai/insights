@@ -47,7 +47,7 @@ def filter_mssql_incremental_fields(columns: list[tuple[str, str]]) -> list[tupl
 def get_schemas(
     host: str, user: str, password: str, database: str, schema: str, port: int
 ) -> dict[str, list[tuple[str, str]]]:
-    # Importing pymssql requires mssql drivers to be installed locally - see posthog/warehouse/README.md
+    # Importing pymssql requires mssql drivers to be installed locally - see insights/warehouse/README.md
     import pymssql
 
     connection = pymssql.connect(

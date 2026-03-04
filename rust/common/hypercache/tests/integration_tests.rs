@@ -36,7 +36,7 @@ async fn setup_integration_clients() -> anyhow::Result<TestClients> {
         "integration_test".to_string(),
         "flags".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     config.s3_endpoint = Some("http://localhost:19000".to_string());
 
@@ -270,7 +270,7 @@ async fn test_hypercache_token_based_cache_key() -> anyhow::Result<()> {
         "integration_test".to_string(),
         "flags".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     config.token_based = true;
     config.s3_endpoint = Some("http://localhost:19000".to_string());
@@ -351,7 +351,7 @@ async fn test_hypercache_keytype_variants() -> anyhow::Result<()> {
         "integration_test".to_string(),
         "flags".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     config_token.token_based = true;
     config_token.s3_endpoint = Some("http://localhost:19000".to_string());

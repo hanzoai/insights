@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl } from 'kea-router'
 
-import { IconShare, IconTrash } from '@posthog/icons'
+import { IconShare, IconTrash } from '@hanzo/icons'
 import {
     LemonBadge,
     LemonButton,
@@ -10,7 +10,7 @@ import {
     LemonTableColumn,
     LemonTableColumns,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'

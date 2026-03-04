@@ -2,9 +2,9 @@ import clsx from 'clsx'
 import Fuse from 'fuse.js'
 import { BuiltLogic, actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { combineUrl } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { IconFlag, IconServer } from '@posthog/icons'
+import { IconFlag, IconServer } from '@hanzo/icons'
 
 import { infiniteListLogic } from 'lib/components/TaxonomicFilter/infiniteListLogic'
 import { infiniteListLogicType } from 'lib/components/TaxonomicFilter/infiniteListLogicType'
@@ -1193,7 +1193,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                     const hasName = item && item.name && item.name.trim().length > 0
                     const hasSwappedIn = hasOriginalQuery && hasName && item.name !== originalQuery
                     if (hasSwappedIn) {
-                        posthog.capture('selected swapped in query in taxonomic filter', {
+                        insights.capture('selected swapped in query in taxonomic filter', {
                             group: group.type,
                             value: value,
                             itemName: item.name,
@@ -1202,7 +1202,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         })
                     }
                     if (isQuickFilterItem(item)) {
-                        posthog.capture('taxonomic suggested filter selected', {
+                        insights.capture('taxonomic suggested filter selected', {
                             query: originalQuery,
                             filterName: item.name,
                             propertyKey: item.propertyKey,
@@ -1213,7 +1213,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
                         })
                     }
                 } catch (e) {
-                    posthog.captureException(e, { posthog_feature: 'taxonomic_filter_swapped_in_query' })
+                    insights.captureException(e, { insights_feature: 'taxonomic_filter_swapped_in_query' })
                 }
                 props.onChange?.(group, value, item, originalQuery)
             } else if (group.type === TaxonomicFilterGroupType.InsightsQLExpression && value) {
@@ -1302,7 +1302,7 @@ export const taxonomicFilterLogic = kea<taxonomicFilterLogicType>([
 
             await breakpoint(500)
             if (searchQuery) {
-                posthog.capture('taxonomic_filter_search_query', {
+                insights.capture('taxonomic_filter_search_query', {
                     searchQuery,
                     groupType: activeTaxonomicGroup?.type,
                 })

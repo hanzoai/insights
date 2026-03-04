@@ -1,4 +1,4 @@
-import { IconPerson } from '@posthog/icons'
+import { IconPerson } from '@hanzo/icons'
 
 import { JSONViewer } from 'lib/components/JSONViewer'
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'

@@ -4,7 +4,7 @@ import { Scene } from 'scenes/sceneTypes'
 
 import type { appShortcutLogicType } from './appShortcutLogicType'
 
-const DISABLED_SHORTCUTS_KEY = 'posthog-disabled-shortcuts'
+const DISABLED_SHORTCUTS_KEY = 'insights-disabled-shortcuts'
 
 function loadDisabledShortcuts(): string[] {
     try {

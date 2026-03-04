@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonInput, LemonLabel } from '@posthog/lemon-ui'
+import { LemonBanner, LemonInput, LemonLabel } from '@hanzo/lemon-ui'
 
 import { HeatmapsForbiddenURL } from 'scenes/heatmaps/components/HeatmapsForbiddenURL'
 import { heatmapLogic } from 'scenes/heatmaps/scenes/heatmap/heatmapLogic'

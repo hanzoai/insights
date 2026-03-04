@@ -54,13 +54,13 @@ export interface IncidentIoSummary {
 // Normalized status for display
 export type NormalizedStatus = 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage'
 
-export const INCIDENT_IO_STATUS_PAGE_BASE = 'https://www.posthogstatus.com'
+export const INCIDENT_IO_STATUS_PAGE_BASE = 'https://www.insightsstatus.com'
 export const REFRESH_INTERVAL = 60 * 1000 * 5 // 5 minutes
 
 // Map hostname to the group_name used in incident.io
 const RELEVANT_GROUP_NAME_MAP: Record<string, string> = {
-    'us.posthog.com': 'US Cloud 🇺🇸',
-    'eu.posthog.com': 'EU Cloud 🇪🇺',
+    'insights.hanzo.ai': 'US Cloud 🇺🇸',
+    'insights.hanzo.ai': 'EU Cloud 🇪🇺',
     localhost: 'US Cloud 🇺🇸', // Default to US for local dev
 }
 

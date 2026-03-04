@@ -1,7 +1,7 @@
 /**
  * Auto-generated from the Django backend OpenAPI schema.
  * To modify these types, update the Django serializers or views, then run:
- *   hogli build:openapi
+ *   insightscli build:openapi
  * Questions or issues? #team-devex on Slack
  *
  * Insights API - generated
@@ -54,7 +54,7 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>]
     : DistributeReadOnlyOverUnions<T>
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsListUrl = (projectId: string, params?: PersonsListParams) => {
     const normalizedParams = new URLSearchParams()
@@ -84,7 +84,7 @@ export const personsList = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsRetrieveUrl = (projectId: string, id: number, params?: PersonsRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -151,7 +151,7 @@ export const personsUpdate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsPartialUpdateUrl = (projectId: string, id: number, params?: PersonsPartialUpdateParams) => {
     const normalizedParams = new URLSearchParams()
@@ -185,7 +185,7 @@ export const personsPartialUpdate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsActivityRetrieve2Url = (
     projectId: string,
@@ -220,7 +220,7 @@ export const personsActivityRetrieve2 = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsDeletePropertyCreateUrl = (
     projectId: string,
@@ -258,7 +258,7 @@ export const personsDeletePropertyCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsPropertiesTimelineRetrieveUrl = (
     projectId: string,
@@ -293,7 +293,7 @@ export const personsPropertiesTimelineRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsSplitCreateUrl = (projectId: string, id: number, params?: PersonsSplitCreateParams) => {
     const normalizedParams = new URLSearchParams()
@@ -327,7 +327,7 @@ export const personsSplitCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsUpdatePropertyCreateUrl = (
     projectId: string,
@@ -365,7 +365,7 @@ export const personsUpdatePropertyCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsActivityRetrieveUrl = (projectId: string, params?: PersonsActivityRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -395,7 +395,7 @@ export const personsActivityRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsBatchByDistinctIdsCreateUrl = (
     projectId: string,
@@ -464,7 +464,7 @@ export const personsBulkDeleteCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsCohortsRetrieveUrl = (projectId: string, params?: PersonsCohortsRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -494,7 +494,7 @@ export const personsCohortsRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsFunnelRetrieveUrl = (projectId: string, params?: PersonsFunnelRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -524,7 +524,7 @@ export const personsFunnelRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsFunnelCreateUrl = (projectId: string, params?: PersonsFunnelCreateParams) => {
     const normalizedParams = new URLSearchParams()
@@ -557,7 +557,7 @@ export const personsFunnelCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsFunnelCorrelationRetrieveUrl = (
     projectId: string,
@@ -590,7 +590,7 @@ export const personsFunnelCorrelationRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsFunnelCorrelationCreateUrl = (
     projectId: string,
@@ -626,7 +626,7 @@ export const personsFunnelCorrelationCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsLifecycleRetrieveUrl = (projectId: string, params?: PersonsLifecycleRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -692,7 +692,7 @@ export const personsResetPersonDistinctIdCreate = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsStickinessRetrieveUrl = (projectId: string, params?: PersonsStickinessRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -722,7 +722,7 @@ export const personsStickinessRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsTrendsRetrieveUrl = (projectId: string, params?: PersonsTrendsRetrieveParams) => {
     const normalizedParams = new URLSearchParams()
@@ -752,7 +752,7 @@ export const personsTrendsRetrieve = async (
 }
 
 /**
- * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+ * This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
  */
 export const getPersonsValuesRetrieveUrl = (projectId: string, params?: PersonsValuesRetrieveParams) => {
     const normalizedParams = new URLSearchParams()

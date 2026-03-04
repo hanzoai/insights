@@ -1,6 +1,6 @@
 import { Fragment, forwardRef, useEffect, useRef, useState } from 'react'
 
-import { IconInfo, IconMinusSmall, IconSearch, IconX } from '@posthog/icons'
+import { IconInfo, IconMinusSmall, IconSearch, IconX } from '@hanzo/icons'
 
 import { LemonInput } from 'lib/lemon-ui/LemonInput'
 import { ButtonPrimitive } from 'lib/ui/Button/ButtonPrimitives'

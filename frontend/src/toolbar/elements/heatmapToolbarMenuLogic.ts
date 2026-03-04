@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { encodeParams } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { windowValues } from 'kea-window-values'
-import { PostHog } from 'posthog-js'
+import { Insights } from '~/lib/insights-browser'
 import { collectAllElementsDeep, querySelectorAllDeep } from 'query-selector-shadow-dom'
 
 import { elementToSelector } from 'lib/actionUtils'
@@ -14,7 +14,7 @@ import { createVersionChecker } from 'lib/utils/semver'
 import { buildDOMIndex, matchEventToElementUsingIndex } from '~/toolbar/elements/domElementIndex'
 import { currentPageLogic } from '~/toolbar/stats/currentPageLogic'
 import { toolbarConfigLogic, toolbarFetch } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { CountedHTMLElement, ElementsEventType } from '~/toolbar/types'
 import { elementIsVisible, trimElement } from '~/toolbar/utils'
 import { FilterType, PropertyFilterType, PropertyOperator } from '~/types'
@@ -78,7 +78,7 @@ export const heatmapToolbarMenuLogic = kea<heatmapToolbarMenuLogicType>([
             currentPageLogic,
             ['href', 'wildcardHref'],
             toolbarConfigLogic,
-            ['posthog'],
+            ['insights'],
             heatmapDataLogic,
             [
                 'commonFilters',
@@ -308,24 +308,24 @@ export const heatmapToolbarMenuLogic = kea<heatmapToolbarMenuLogicType>([
                 countedElements ? countedElements.map((e) => e.count).reduce((a, b) => (b > a ? b : a), 0) : 0,
         ],
 
-        scrollDepthPosthogJsError: [
-            (s) => [s.posthog],
-            (posthog: PostHog | null): 'version' | 'disabled' | null => {
-                if (!posthog) {
+        scrollDepthInsightsJsError: [
+            (s) => [s.insights],
+            (insights: Insights | null): 'version' | 'disabled' | null => {
+                if (!insights) {
                     return null
                 }
 
-                const posthogVersion =
-                    posthog?.version ??
-                    posthog?._calculate_event_properties('test', {}, new Date())?.['$lib_version'] ??
+                const insightsVersion =
+                    insights?.version ??
+                    insights?._calculate_event_properties('test', {}, new Date())?.['$lib_version'] ??
                     '0.0.0'
 
-                if (!(posthog as any)?.scrollManager?.scrollY) {
+                if (!(insights as any)?.scrollManager?.scrollY) {
                     return 'version'
                 }
 
-                const isSupported = doesVersionSupportScrollDepth(posthogVersion)
-                const isDisabled = posthog?.config.disable_scroll_properties
+                const isSupported = doesVersionSupportScrollDepth(insightsVersion)
+                const isDisabled = insights?.config.disable_scroll_properties
 
                 return !isSupported ? 'version' : isDisabled ? 'disabled' : null
             },
@@ -418,13 +418,13 @@ export const heatmapToolbarMenuLogic = kea<heatmapToolbarMenuLogicType>([
         enableHeatmap: () => {
             actions.setDataHref(values.href)
             actions.loadAllEnabled()
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'heatmap', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'heatmap', enabled: true })
         },
 
         disableHeatmap: () => {
             actions.resetElementStats()
             actions.resetHeatmapData()
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'heatmap', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'heatmap', enabled: false })
         },
 
         startElementObservation: () => {

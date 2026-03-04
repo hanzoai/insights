@@ -207,7 +207,7 @@ async def test_handle_subscription_value_change_email(
         team=team,
         insight=insight,
         created_by=user,
-        target_value="test_existing@posthog.com,test_new@posthog.com",
+        target_value="test_existing@hanzo.ai,test_new@hanzo.ai",
     )
 
     async def mock_generate_assets_async(subscription):
@@ -229,7 +229,7 @@ async def test_handle_subscription_value_change_email(
                 HandleSubscriptionValueChangeWorkflow.run,
                 DeliverSubscriptionReportActivityInputs(
                     subscription_id=subscription.id,
-                    previous_value="test_existing@posthog.com",
+                    previous_value="test_existing@hanzo.ai",
                     invite_message="My invite message",
                 ),
                 id=str(uuid.uuid4()),
@@ -240,7 +240,7 @@ async def test_handle_subscription_value_change_email(
     assert mock_send_email.call_count == 1
     assert mock_send_email.call_args_list == [
         call(
-            "test_new@posthog.com",
+            "test_new@hanzo.ai",
             subscription,
             [asset],
             invite_message="My invite message",

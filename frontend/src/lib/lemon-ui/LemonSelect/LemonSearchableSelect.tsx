@@ -1,7 +1,7 @@
 import Fuse from 'fuse.js'
 import { useMemo, useState } from 'react'
 
-import { LemonInput } from '@posthog/lemon-ui'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import {
     LemonSelect,

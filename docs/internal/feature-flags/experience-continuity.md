@@ -55,11 +55,11 @@ A flag must have `ensure_experience_continuity = true` to participate in the ove
 
 ### Database Schema
 
-Overrides are stored in `posthog_featureflaghashkeyoverride`:
+Overrides are stored in `insights_featureflaghashkeyoverride`:
 
 ```sql
 -- Schema (simplified)
-CREATE TABLE posthog_featureflaghashkeyoverride (
+CREATE TABLE insights_featureflaghashkeyoverride (
     team_id          INTEGER,
     person_id        INTEGER,      -- FK to Person (required!)
     feature_flag_key VARCHAR(400),
@@ -72,7 +72,7 @@ CREATE TABLE posthog_featureflaghashkeyoverride (
 ### Web SDK (Automatic)
 
 ```text
-1. User calls posthog.identify("user_456")
+1. User calls insights.identify("user_456")
 2. SDK stores previous distinct_id internally
 3. SDK automatically calls /flags with:
    {
@@ -88,7 +88,7 @@ CREATE TABLE posthog_featureflaghashkeyoverride (
 
 ```python
 # You must manually include $anon_distinct_id
-requests.post('https://app.posthog.com/flags/', json={
+requests.post('https://insights.hanzo.ai/flags/', json={
     'token': 'phc_abc123',
     'distinct_id': 'user_456',
     '$anon_distinct_id': 'anon_abc123',  # Top-level, NOT in person_properties
@@ -191,7 +191,7 @@ WITH continuity_flags AS (
             )
             THEN true ELSE false
         END as has_partial_rollout
-    FROM posthog_featureflag
+    FROM insights_featureflag
     WHERE ensure_experience_continuity = true
         AND active = true
         AND deleted = false
@@ -323,7 +323,7 @@ If a flag is configured for `device_id` bucketing but no `$device_id` is provide
 ### Check If Overrides Were Written
 
 ```sql
-SELECT * FROM posthog_featureflaghashkeyoverride
+SELECT * FROM insights_featureflaghashkeyoverride
 WHERE team_id = ?
   AND person_id = ?
   AND feature_flag_key = ?;
@@ -333,7 +333,7 @@ WHERE team_id = ?
 
 ```sql
 SELECT key, ensure_experience_continuity, active, deleted
-FROM posthog_featureflag
+FROM insights_featureflag
 WHERE team_id = ?
   AND ensure_experience_continuity = TRUE
   AND active = TRUE
@@ -370,6 +370,6 @@ Ensure `$anon_distinct_id` is a **top-level field**, not nested in `person_prope
 
 ## See also
 
-- [Creating feature flags](https://posthog.com/docs/feature-flags/creating-feature-flags) - How to enable "persist flag across authentication steps"
-- [Client-side bootstrapping](https://posthog.com/docs/feature-flags/bootstrapping) - Alternative approach (incompatible with experience continuity)
-- [Feature flags troubleshooting](https://posthog.com/docs/feature-flags/common-questions) - Common issues and solutions
+- [Creating feature flags](https://hanzo.ai/docs/feature-flags/creating-feature-flags) - How to enable "persist flag across authentication steps"
+- [Client-side bootstrapping](https://hanzo.ai/docs/feature-flags/bootstrapping) - Alternative approach (incompatible with experience continuity)
+- [Feature flags troubleshooting](https://hanzo.ai/docs/feature-flags/common-questions) - Common issues and solutions

@@ -29,7 +29,7 @@ describe('insightsFunctionHclExporter test', () => {
 
             const hcl = generateInsightsFunctionHCL(insightsFunction).hcl
 
-            expect(hcl).toContain(`resource "posthog_insights_function" "${expected}"`)
+            expect(hcl).toContain(`resource "insights_insights_function" "${expected}"`)
         })
     })
 
@@ -53,7 +53,7 @@ describe('insightsFunctionHclExporter test', () => {
             const result = generateInsightsFunctionHCL(insightsFunction)
             const hcl = result.hcl
 
-            expect(hcl).toContain('resource "posthog_insights_function" "my_test_function"')
+            expect(hcl).toContain('resource "insights_insights_function" "my_test_function"')
             expect(hcl).toContain('name = "My Test Function"')
             expect(hcl).toContain('description = "A test custom function"')
             expect(hcl).toContain('type = "internal_destination"')
@@ -97,7 +97,7 @@ describe('insightsFunctionHclExporter test', () => {
             const hcl = result.hcl
 
             expect(hcl).toContain('import {')
-            expect(hcl).toContain('to = posthog_insights_function.saved_function')
+            expect(hcl).toContain('to = insights_insights_function.saved_function')
             expect(hcl).toContain('id = "1/func-456"')
         })
 
@@ -128,11 +128,11 @@ describe('insightsFunctionHclExporter test', () => {
             })
 
             const result = generateInsightsFunctionHCL(insightsFunction, {
-                alertIdReplacements: new Map([['alert-456', 'posthog_alert.my_alert.id']]),
+                alertIdReplacements: new Map([['alert-456', 'insights_alert.my_alert.id']]),
             })
             const hcl = result.hcl
 
-            expect(hcl).toContain('posthog_alert.my_alert.id')
+            expect(hcl).toContain('insights_alert.my_alert.id')
             expect(hcl).not.toContain('"alert-456"')
             expect(hcl).toContain('"alert-678"')
         })
@@ -145,7 +145,7 @@ describe('insightsFunctionHclExporter test', () => {
 
             const hcl = generateInsightsFunctionHCL(insightsFunction).hcl
 
-            expect(hcl).toMatch(/# Compatible with posthog provider v\d+\.\d+/)
+            expect(hcl).toMatch(/# Compatible with insights provider v\d+\.\d+/)
         })
 
         it('includes execution_order when provided', () => {

@@ -9,7 +9,7 @@ from django.conf import settings
 import snappy
 import aioboto3
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from boto3 import client as boto3_client
 from botocore.client import Config
 
@@ -219,7 +219,7 @@ class SessionRecordingV2ObjectStorage(SessionRecordingV2ObjectStorageBase):
             return snappy.decompress(file_body).decode("utf-8")
 
         except Exception as e:
-            posthoganalytics.tag("bucket", self.bucket)
+            hanzoanalytics.tag("bucket", self.bucket)
             logger.exception(
                 "session_recording_v2_object_storage.fetch_file_failed",
                 bucket=self.bucket,
@@ -239,7 +239,7 @@ class SessionRecordingV2ObjectStorage(SessionRecordingV2ObjectStorageBase):
             s3_response = self.aws_client.get_object(**kwargs)
             return s3_response["Body"].read()
         except Exception as e:
-            posthoganalytics.tag("bucket", self.bucket)
+            hanzoanalytics.tag("bucket", self.bucket)
             logger.exception(
                 "session_recording_v2_object_storage.fetch_file_bytes_failed",
                 bucket=self.bucket,
@@ -475,7 +475,7 @@ class AsyncSessionRecordingV2ObjectStorage:
 
             return snappy.decompress(file_body).decode("utf-8")
         except Exception as e:
-            posthoganalytics.tag("bucket", self.bucket)
+            hanzoanalytics.tag("bucket", self.bucket)
             logger.exception(
                 "async_session_recording_v2_object_storage.fetch_file_failed",
                 bucket=self.bucket,
@@ -495,7 +495,7 @@ class AsyncSessionRecordingV2ObjectStorage:
             s3_response = await self.aws_client.get_object(**kwargs)
             return await s3_response["Body"].read()
         except Exception as e:
-            posthoganalytics.tag("bucket", self.bucket)
+            hanzoanalytics.tag("bucket", self.bucket)
             logger.exception(
                 "async_session_recording_v2_object_storage.fetch_file_bytes_failed",
                 bucket=self.bucket,

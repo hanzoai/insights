@@ -50,8 +50,8 @@ def insights_function_state_transition(insights_function_id: str, state: int) ->
     # )
 
     # # TRICKY: It seems like without this call the events don't get flushed, possibly due to celery worker threads exiting...
-    # logger.info("insights_function_state_transition: Flushing posthoganalytics")
-    # posthoganalytics.flush()
+    # logger.info("insights_function_state_transition: Flushing hanzoanalytics")
+    # hanzoanalytics.flush()
 
     # if state >= 2:  # 2 and 3 are disabled
     #     logger.info("insights_function_state_transition: sending insights_function_disabled email")

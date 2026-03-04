@@ -20,21 +20,21 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -54,8 +54,8 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                 language: 'bash',
                                 file: '.env',
                                 code: dedent`
-                                    VITE_PUBLIC_POSTHOG_KEY=<ph_project_api_key>
-                                    VITE_PUBLIC_POSTHOG_HOST=<ph_client_api_host>
+                                    VITE_PUBLIC_INSIGHTS_KEY=<ph_project_api_key>
+                                    VITE_PUBLIC_INSIGHTS_HOST=<ph_client_api_host>
                                 `,
                             },
                         ]}
@@ -69,7 +69,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             content: (
                 <>
                     <Markdown>
-                        Wrap your app with the `PostHogProvider` component at the root of your application (such as
+                        Wrap your app with the `InsightsProvider` component at the root of your application (such as
                         `main.tsx`):
                     </Markdown>
                     <CodeBlock
@@ -82,18 +82,18 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                                     import { createRoot } from 'react-dom/client'
                                     import './index.css'
                                     import App from './App.jsx'
-                                    import { PostHogProvider } from 'posthog-js/react'
+                                    import { InsightsProvider } from '@hanzo/insights/react'
 
                                     const options = {
-                                      api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+                                      api_host: import.meta.env.VITE_PUBLIC_INSIGHTS_HOST,
                                       defaults: '2026-01-30',
                                     } as const
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_INSIGHTS_KEY} options={options}>
                                           <App />
-                                        </PostHogProvider>
+                                        </InsightsProvider>
                                       </StrictMode>
                                     )
                                 `,
@@ -103,7 +103,7 @@ export const getTanStackSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                     <CalloutBox type="fyi" title="defaults option">
                         <Markdown>
                             The `defaults` option automatically configures Insights with recommended settings for new
-                            projects. See [SDK defaults](https://posthog.com/docs/libraries/js#sdk-defaults) for
+                            projects. See [SDK defaults](https://hanzo.ai/docs/libraries/js#sdk-defaults) for
                             details.
                         </Markdown>
                     </CalloutBox>

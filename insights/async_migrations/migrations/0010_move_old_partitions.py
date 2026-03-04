@@ -77,7 +77,7 @@ class Migration(AsyncMigrationDefinition):
                 CREATE TABLE {backup_table_name}
                 ON CLUSTER 'insights'
                 AS sharded_events
-                ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/posthog.{backup_table_name}', '{replica}', _timestamp)
+                ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{shard}/insights.{backup_table_name}', '{replica}', _timestamp)
                 PARTITION BY toYYYYMM(timestamp)
                 ORDER BY (team_id, toDate(timestamp), event, cityHash64(distinct_id), cityHash64(uuid))
                 SAMPLE BY cityHash64(distinct_id)

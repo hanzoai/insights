@@ -1,6 +1,6 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonBanner, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { EmptyMessage } from 'lib/components/EmptyMessage/EmptyMessage'
 import { ErrorTrackingIssueCard } from 'scenes/max/messages/ErrorTrackingIssueCard'
@@ -23,7 +23,7 @@ export function RelatedErrorsTab({ logUuid, logTimestamp, sessionId }: RelatedEr
                     title="No session ID found"
                     description="To see related errors, link your logs to session replay by including a session ID."
                     buttonText="Learn more"
-                    buttonTo="https://posthog.com/docs/logs/link-session-replay"
+                    buttonTo="https://hanzo.ai/docs/logs/link-session-replay"
                     size="small"
                 />
             </div>

@@ -31,7 +31,7 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Use `posthog-node` to evaluate feature flags on the server. Initialize Insights in your server
+                        Use `insights-node` to evaluate feature flags on the server. Initialize Insights in your server
                         load function:
                     </Markdown>
                     <CodeBlock
@@ -40,9 +40,9 @@ export const getSvelteSteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'javascript',
                                 file: 'src/routes/+page.server.js',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node'
+                                    import { Insights } from 'insights-node'
 
-                                    const posthog = new Insights('<ph_project_api_key>', {
+                                    const insights = new Insights('<ph_project_api_key>', {
                                         host: '<ph_client_api_host>'
                                     })
                                 `,

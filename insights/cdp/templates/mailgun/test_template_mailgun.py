@@ -10,8 +10,8 @@ def create_inputs(overrides: Optional[dict] = None):
         "api_key": "API_KEY",
         "host": "api.mailgun.net",
         "template": {
-            "to": "example@posthog.com",
-            "from": "noreply@posthog.com",
+            "to": "example@hanzo.ai",
+            "from": "noreply@hanzo.ai",
             "subject": "TEST SUBJECT",
             "html": "<h1>Test</h1>",
             "text": "Test",
@@ -42,11 +42,11 @@ class TestTemplateMailgunSendEmail(BaseInsightsFunctionTemplateTest):
 -----011000010111000001101001\r
 Content-Disposition: form-data; name="from"\r
 \r
-noreply@posthog.com\r
+noreply@hanzo.ai\r
 -----011000010111000001101001\r
 Content-Disposition: form-data; name="to"\r
 \r
-example@posthog.com\r
+example@hanzo.ai\r
 -----011000010111000001101001\r
 Content-Disposition: form-data; name="subject"\r
 \r

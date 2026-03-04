@@ -1,7 +1,7 @@
 import { actions, afterMount, beforeUnmount, connect, kea, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { actionToUrl, router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { RefObject } from 'react'
 
 import api from 'lib/api'
@@ -319,7 +319,7 @@ export const heatmapsBrowserLogic = kea<heatmapsBrowserLogicType>([
             actions.setHrefMatchType(isPattern ? 'pattern' : 'exact')
 
             actions.loadHeatmap()
-            posthog.capture('in-app heatmap iframe loaded', {
+            insights.capture('in-app heatmap iframe loaded', {
                 inapp_heatmap_page_url_visited: values.dataUrl,
                 inapp_heatmap_filters: values.heatmapFilters,
                 inapp_heatmap_color_palette: values.heatmapColorPalette,

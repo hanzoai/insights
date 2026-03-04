@@ -2,8 +2,8 @@ import './BreakdownTagMenu.scss'
 
 import { useActions, useValues } from 'kea'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonInput, LemonLabel, LemonSwitch } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonInput, LemonLabel, LemonSwitch } from '@hanzo/lemon-ui'
 
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
 import { insightLogic } from 'scenes/insights/insightLogic'

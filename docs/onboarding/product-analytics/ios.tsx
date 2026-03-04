@@ -31,7 +31,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 file: 'Package.swift',
                                 code: dedent`
                                     dependencies: [
-                                      .package(url: "https://github.com/PostHog/posthog-ios.git", from: "3.0.0")
+                                      .package(url: "https://github.com/hanzoai/insights-ios.git", from: "3.0.0")
                                     ]
                                 `,
                             },
@@ -58,10 +58,10 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
 
                                     class AppDelegate: NSObject, UIApplicationDelegate {
                                         func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-                                            let POSTHOG_API_KEY = "<ph_project_api_key>"
-                                            let POSTHOG_HOST = "<ph_client_api_host>"
+                                            let INSIGHTS_API_KEY = "<ph_project_api_key>"
+                                            let INSIGHTS_HOST = "<ph_client_api_host>"
 
-                                            let config = InsightsConfig(apiKey: POSTHOG_API_KEY, host: POSTHOG_HOST)
+                                            let config = InsightsConfig(apiKey: INSIGHTS_API_KEY, host: INSIGHTS_HOST)
                                             InsightsSDK.shared.setup(config)
 
                                             return true

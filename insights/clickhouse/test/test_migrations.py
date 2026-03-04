@@ -188,6 +188,6 @@ class TestUniqueMigrationPrefixes(TestCase):
                 error_message += f"  Errors: \n\t-{'\n\t-'.join(v['errors'])}\n"
                 error_message += "\n"
 
-            error_message += "For more information, see posthog/clickhouse/migrations/AGENTS.md\n"
+            error_message += "For more information, see insights/clickhouse/migrations/AGENTS.md\n"
 
             self.fail(error_message)

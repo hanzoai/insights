@@ -202,7 +202,7 @@ DROP_METRICS_QUERY_LOG_MV = lambda: f"DROP TABLE metrics_query_log_mv ON CLUSTER
 
 # NOTE Tim May 2024: removed this as it was doing a bunch of queries. Should move this to schema migration if we want to keep it.
 # :KLUDGE: Temporary tooling to make (re)creating this schema easier
-# Invoke via `python manage.py shell <  posthog/models/query_metrics/sql.py`
+# Invoke via `python manage.py shell <  insights/models/query_metrics/sql.py`
 # if __name__ == "django.core.management.commands.shell":
 #     print("To drop query metrics schema:\n")  # noqa: T201
 #     for drop_query in reversed(

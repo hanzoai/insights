@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT enforcement_mode from posthog_eventdefinition",
+  "query": "SELECT enforcement_mode from insights_eventdefinition",
   "describe": {
     "columns": [
       {

@@ -128,7 +128,7 @@ MIDDLEWARE = [
     "insights.middleware.CHQueries",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
     "insights.middleware.InsightsTokenCookieMiddleware",
-    "posthoganalytics.integrations.django.PosthogContextMiddleware",
+    "hanzoanalytics.integrations.django.InsightsContextMiddleware",
 ]
 
 DJANGO_STRUCTLOG_CELERY_ENABLED = True
@@ -371,7 +371,7 @@ EXCEPTIONS_HOG = {"EXCEPTION_REPORTING": "insights.exceptions.exception_reportin
 ####
 # Compression
 
-# see posthog.gzip_middleware.ScopedGZipMiddleware
+# see insights.gzip_middleware.ScopedGZipMiddleware
 # for how adding paths here can add vulnerability to the "breach" attack
 GZIP_POST_RESPONSE_ALLOW_LIST = get_list(
     os.getenv(
@@ -513,7 +513,7 @@ DEV_DISABLE_NAVIGATION_HOOKS = get_from_env("DEV_DISABLE_NAVIGATION_HOOKS", Fals
 
 # temporary flag to control new UUID version setting in insights-js
 # is set to v7 to test new generation but can be set to "og" to revert
-INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", os.getenv("POSTHOG_JS_UUID_VERSION", "v7"))
+INSIGHTS_JS_UUID_VERSION = os.getenv("INSIGHTS_JS_UUID_VERSION", os.getenv("INSIGHTS_JS_UUID_VERSION", "v7"))
 
 # Feature flag to enable InsightsFunctions daily digest email for specific teams
 # Comma-separated list of team IDs that should receive the digest

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonBanner, LemonTabs } from '@posthog/lemon-ui'
+import { LemonBanner, LemonTabs } from '@hanzo/lemon-ui'
 
 import type { SceneTabKey } from '../../types'
 import { type SceneTabConfig, scenesTabsLogic } from './scenesTabsLogic'

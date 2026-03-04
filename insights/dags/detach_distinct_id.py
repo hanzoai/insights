@@ -1,7 +1,7 @@
 """Dagster job to detach a distinct_id from its person.
 
 Three cleanup phases, all required:
-  1. Postgres — delete posthog_persondistinctid row (stops future ingestion lookups).
+  1. Postgres — delete insights_persondistinctid row (stops future ingestion lookups).
   2. Kafka  — publish is_deleted to person_distinct_id2 (stops ClickHouse lookups).
   3. Override — insert into person_distinct_id_overrides so the InsightsQL query layer
      immediately re-attributes historical events whose person_id was baked in at
@@ -11,7 +11,7 @@ Three cleanup phases, all required:
 When no ``override_person_id`` is supplied a random dummy UUID is used, effectively
 orphaning the events (the dummy person has no record in the person table).
 
-Typical use: removing a sentinel ``$posthog_cookieless`` distinct_id that was
+Typical use: removing a sentinel ``$insights_cookieless`` distinct_id that was
 erroneously associated with a real person due to a cookieless-ingestion bug.
 
 Example Dagster launchpad config (run with dry_run: true first!)::
@@ -20,7 +20,7 @@ Example Dagster launchpad config (run with dry_run: true first!)::
       detach_distinct_id_op:
         config:
           team_id: 12345
-          distinct_id: "$posthog_cookieless"
+          distinct_id: "$insights_cookieless"
           expected_person_id: "5e00024e-cb68-59f6-821f-6150fcffc431"
           dry_run: true
 """
@@ -43,7 +43,7 @@ class DetachDistinctIdConfig(dagster.Config):
     """Configuration for the detach distinct_id job."""
 
     team_id: int = pydantic.Field(description="Team ID that owns the distinct_id")
-    distinct_id: str = pydantic.Field(description="The distinct_id to detach (e.g. $posthog_cookieless)")
+    distinct_id: str = pydantic.Field(description="The distinct_id to detach (e.g. $insights_cookieless)")
     expected_person_id: str = pydantic.Field(
         description="UUID of the person we expect the distinct_id to belong to (safety check)"
     )
@@ -67,12 +67,12 @@ def _lookup_distinct_id(
     team_id: int,
     distinct_id: str,
 ) -> dict | None:
-    """Return the posthog_persondistinctid row + person uuid, or None."""
+    """Return the insights_persondistinctid row + person uuid, or None."""
     cursor.execute(
         """
         SELECT pdi.id, pdi.version, pdi.person_id, p.uuid
-        FROM posthog_persondistinctid pdi
-        JOIN posthog_person p ON p.id = pdi.person_id AND p.team_id = pdi.team_id
+        FROM insights_persondistinctid pdi
+        JOIN insights_person p ON p.id = pdi.person_id AND p.team_id = pdi.team_id
         WHERE pdi.team_id = %s AND pdi.distinct_id = %s
         """,
         [team_id, distinct_id],
@@ -106,7 +106,7 @@ def _count_other_distinct_ids(
     cursor.execute(
         """
         SELECT COUNT(*) AS count
-        FROM posthog_persondistinctid
+        FROM insights_persondistinctid
         WHERE team_id = %s AND person_id = %s AND id != %s
         """,
         [team_id, person_pk, exclude_pdi_id],
@@ -119,16 +119,16 @@ def _delete_distinct_id_row(
     cursor: psycopg2.extensions.cursor,
     pdi_id: int,
 ) -> int:
-    """Lock and delete the posthog_persondistinctid row. Returns version."""
+    """Lock and delete the insights_persondistinctid row. Returns version."""
     cursor.execute(
-        "SELECT version FROM posthog_persondistinctid WHERE id = %s FOR UPDATE",
+        "SELECT version FROM insights_persondistinctid WHERE id = %s FOR UPDATE",
         [pdi_id],
     )
     row = cursor.fetchone()
     if row is None:
-        raise RuntimeError(f"posthog_persondistinctid id={pdi_id} disappeared between lookup and delete")
+        raise RuntimeError(f"insights_persondistinctid id={pdi_id} disappeared between lookup and delete")
     version = row["version"] if isinstance(row, dict) else row[0]
-    cursor.execute("DELETE FROM posthog_persondistinctid WHERE id = %s", [pdi_id])
+    cursor.execute("DELETE FROM insights_persondistinctid WHERE id = %s", [pdi_id])
     return version
 
 
@@ -141,7 +141,7 @@ def _publish_deletion_to_kafka(
 ) -> None:
     """Publish an is_deleted message so ClickHouse person_distinct_id2 drops the mapping.
 
-    Uses version + 100, matching _delete_ch_distinct_id in posthog/models/person/util.py.
+    Uses version + 100, matching _delete_ch_distinct_id in insights/models/person/util.py.
     """
     producer.produce(
         topic=KAFKA_PERSON_DISTINCT_ID,
@@ -224,7 +224,7 @@ def detach_distinct_id_op(
 
         # --- 3. Delete in Postgres ---
         if config.dry_run:
-            log.info("[DRY RUN] Would delete posthog_persondistinctid row")
+            log.info("[DRY RUN] Would delete insights_persondistinctid row")
             log.info("[DRY RUN] Would publish Kafka deletion to person_distinct_id2")
             log.info(f"[DRY RUN] Would insert person_distinct_id_overrides -> {override_target}")
             persons_database.rollback()
@@ -232,7 +232,7 @@ def detach_distinct_id_op(
 
         version = _delete_distinct_id_row(cursor, info["pdi_id"])
         persons_database.commit()
-        log.info(f"Deleted posthog_persondistinctid id={info['pdi_id']} (version={version})")
+        log.info(f"Deleted insights_persondistinctid id={info['pdi_id']} (version={version})")
 
     # --- 4. Sync deletion to ClickHouse via Kafka ---
     _publish_deletion_to_kafka(
@@ -257,7 +257,7 @@ def detach_distinct_id_op(
     log.info("--- Verification queries (run manually) ---")
     escaped_did = json.dumps(config.distinct_id)
     log.info(
-        f"Postgres: SELECT * FROM posthog_persondistinctid "
+        f"Postgres: SELECT * FROM insights_persondistinctid "
         f"WHERE team_id = {config.team_id} AND distinct_id = {escaped_did}"
     )
     log.info(

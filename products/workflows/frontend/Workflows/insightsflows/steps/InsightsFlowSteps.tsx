@@ -12,7 +12,7 @@ import {
     IconLetter,
     IconPercentage,
     IconWebhooks,
-} from '@posthog/icons'
+} from '@hanzo/icons'
 
 import { IconTwilio } from 'lib/lemon-ui/icons'
 

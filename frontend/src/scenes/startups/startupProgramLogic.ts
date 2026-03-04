@@ -1,8 +1,8 @@
 import { actions, connect, kea, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -204,7 +204,7 @@ export const startupProgramLogic = kea<startupProgramLogicType>([
                 try {
                     await api.create('api/billing/startups/apply', valuesToSubmit)
                     actions.setFormSubmitted(true)
-                    posthog.capture('startup program application submitted', valuesToSubmit)
+                    insights.capture('startup program application submitted', valuesToSubmit)
                 } catch (error: any) {
                     lemonToast.error(error.detail || 'Failed to submit application')
                     throw error

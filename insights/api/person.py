@@ -105,13 +105,13 @@ class PersonLimitOffsetPagination(LimitOffsetPagination):
                     "type": "string",
                     "nullable": True,
                     "format": "uri",
-                    "example": "https://app.posthog.com/api/projects/{project_id}/accounts/?offset=400&limit=100",
+                    "example": "https://insights.hanzo.ai/api/projects/{project_id}/accounts/?offset=400&limit=100",
                 },
                 "previous": {
                     "type": "string",
                     "nullable": True,
                     "format": "uri",
-                    "example": "https://app.posthog.com/api/projects/{project_id}/accounts/?offset=400&limit=100",
+                    "example": "https://insights.hanzo.ai/api/projects/{project_id}/accounts/?offset=400&limit=100",
                 },
                 "count": {"type": "integer", "example": 400},
                 "results": schema,
@@ -228,7 +228,7 @@ def get_funnel_actor_class(filter: Filter) -> Callable:
 @extend_schema(tags=[ProductKey.PERSONS])
 class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     """
-    This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://posthog.com/docs/api/capture), the `$set` and `$unset` [properties](https://posthog.com/docs/product-analytics/user-properties), or one of our SDKs.
+    This endpoint is meant for reading and deleting persons. To create or update persons, we recommend using the [capture API](https://hanzo.ai/docs/api/capture), the `$set` and `$unset` [properties](https://hanzo.ai/docs/product-analytics/user-properties), or one of our SDKs.
     """
 
     scope_object = "person"
@@ -770,7 +770,7 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
     def create(self, *args, **kwargs):
         raise MethodNotAllowed(
             method="POST",
-            detail="Creating persons via this API is not allowed. Please create persons by sending an $identify event. See https://posthog.com/docs/product-analytics/identify for details.",
+            detail="Creating persons via this API is not allowed. Please create persons by sending an $identify event. See https://hanzo.ai/docs/product-analytics/identify for details.",
         )
 
     def _set_properties(self, properties, user):

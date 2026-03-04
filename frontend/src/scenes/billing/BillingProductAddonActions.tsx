@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCheckCircle, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonButtonProps, LemonTag, Tooltip } from '@posthog/lemon-ui'
+import { IconCheckCircle, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonButtonProps, LemonTag, Tooltip } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS, TRIAL_CANCELLATION_SURVEY_ID, UNSUBSCRIBE_SURVEY_ID } from 'lib/constants'
 import { dayjs } from 'lib/dayjs'
@@ -274,7 +274,7 @@ export const BillingProductAddonActions = ({
         content = renderTrialActions()
     } else if (addon.contact_support) {
         content = (
-            <LemonButton type="secondary" to="https://posthog.com/talk-to-a-human">
+            <LemonButton type="secondary" to="https://hanzo.ai/talk-to-a-human">
                 Contact support
             </LemonButton>
         )

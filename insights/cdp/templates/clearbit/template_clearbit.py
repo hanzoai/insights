@@ -28,7 +28,7 @@ let response := fetch(f'https://person-stream.clearbit.com/v2/combined/find?emai
 })
 if (response.status == 200 and not empty(response.body.person)) {
     print('Clearbit data found - sending event to Insights')
-    postHogCapture({
+    insightsCapture({
         'event': '$set',
         'distinct_id': event.distinct_id,
         'properties': {

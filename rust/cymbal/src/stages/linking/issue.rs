@@ -14,7 +14,7 @@ use crate::{
         IssueFingerprintOverride,
     },
     metric_consts::{ISSUE_CREATED, ISSUE_LINKER_OPERATOR},
-    posthog_utils::capture_issue_created,
+    insights_utils::capture_issue_created,
     stages::{linking::LinkingStage, pipeline::ExceptionEventHandledError},
     teams::TeamManager,
     types::{
@@ -102,7 +102,7 @@ async fn resolve_issue(
         .clone()
         .ok_or(UnhandledError::Other("Missing fingerprint".into()))?;
 
-    let mut conn = context.posthog_pool.acquire().await?;
+    let mut conn = context.insights_pool.acquire().await?;
     // Fast path - just fetch the issue directly, and then reopen it if needed
     let existing_issue = Issue::load_by_fingerprint(&mut *conn, team_id, &fingerprint).await?;
     if let Some(mut issue) = existing_issue {

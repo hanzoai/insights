@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonModal } from '@posthog/lemon-ui'
+import { LemonModal } from '@hanzo/lemon-ui'
 
 import { QuickFilterForm } from './QuickFilterForm'
 import { QuickFiltersModalContent } from './QuickFiltersModalContent'

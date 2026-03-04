@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconTrash } from '@posthog/icons'
-import { LemonBanner, LemonButton, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconTrash } from '@hanzo/icons'
+import { LemonBanner, LemonButton, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { TZLabel } from 'lib/components/TZLabel'

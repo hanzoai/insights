@@ -83,31 +83,31 @@ impl JobModel {
             r#"
             WITH next_job AS (
                 SELECT *, lease_id as previous_lease_id
-                FROM posthog_batchimport
+                FROM insights_batchimport
                 WHERE status = 'running' AND (leased_until IS NULL OR leased_until <= now())
                 ORDER BY created_at
                 LIMIT 1
                 FOR UPDATE SKIP LOCKED
             )
-            UPDATE posthog_batchimport
+            UPDATE insights_batchimport
             SET
                 status = 'running',
                 leased_until = now() + interval '30 minutes', -- We lease for a long time because job init can be quite slow
                 lease_id = $1
             FROM next_job
-            WHERE posthog_batchimport.id = next_job.id
+            WHERE insights_batchimport.id = next_job.id
             RETURNING
-                posthog_batchimport.id,
-                posthog_batchimport.team_id,
-                posthog_batchimport.created_at,
-                posthog_batchimport.updated_at,
-                posthog_batchimport.status_message,
-                posthog_batchimport.display_status_message,
-                posthog_batchimport.state,
-                posthog_batchimport.import_config,
-                posthog_batchimport.secrets,
-                posthog_batchimport.backoff_attempt,
-                posthog_batchimport.backoff_until,
+                insights_batchimport.id,
+                insights_batchimport.team_id,
+                insights_batchimport.created_at,
+                insights_batchimport.updated_at,
+                insights_batchimport.status_message,
+                insights_batchimport.display_status_message,
+                insights_batchimport.state,
+                insights_batchimport.import_config,
+                insights_batchimport.secrets,
+                insights_batchimport.backoff_attempt,
+                insights_batchimport.backoff_until,
                 next_job.previous_lease_id
             "#,
             new_lease_id
@@ -132,7 +132,7 @@ impl JobModel {
                 // If we failed to parse a job, we pause it and leave it for manual intervention
                 sqlx::query!(
                     r#"
-                    UPDATE posthog_batchimport
+                    UPDATE insights_batchimport
                     SET
                         lease_id = null,
                         leased_until = null,
@@ -143,7 +143,7 @@ impl JobModel {
                     "#,
                     id,
                     format!("{:?}", e), // We like context
-                    "Failed to parse source event data into Posthog event data"
+                    "Failed to parse source event data into Insights event data"
                 )
                 .execute(&context.db)
                 .await?;
@@ -177,7 +177,7 @@ impl JobModel {
 
         let rec = sqlx::query(
             r#"
-            UPDATE posthog_batchimport
+            UPDATE insights_batchimport
             SET
                 status = 'running',
                 status_message = $3,
@@ -242,7 +242,7 @@ impl JobModel {
 
         let res = sqlx::query!(
             r#"
-            UPDATE posthog_batchimport
+            UPDATE insights_batchimport
             SET
                 status = $2,
                 status_message = $3,
@@ -292,7 +292,7 @@ impl JobModel {
         self.flush(&context.db, true).await?;
         let rec = sqlx::query(
             r#"
-            UPDATE posthog_batchimport
+            UPDATE insights_batchimport
             SET backoff_attempt = 0, backoff_until = NULL
             WHERE id = $1
             RETURNING updated_at
@@ -314,7 +314,7 @@ impl JobModel {
     pub async fn reset_backoff_in_db(&mut self, pool: &PgPool) -> Result<(), Error> {
         sqlx::query(
             r#"
-            UPDATE posthog_batchimport
+            UPDATE insights_batchimport
             SET backoff_attempt = 0, backoff_until = NULL
             WHERE id = $1
             "#,
@@ -480,7 +480,7 @@ mod tests {
         // Best-effort: if FK constraints fail in local env, skip test
         let inserted = sqlx::query(
             r#"
-            INSERT INTO posthog_batchimport (id, team_id, status, import_config, secrets, lease_id, backoff_attempt)
+            INSERT INTO insights_batchimport (id, team_id, status, import_config, secrets, lease_id, backoff_attempt)
             VALUES ($1, $2, 'running', '{}'::jsonb, '', $3, 0)
             "#,
         )
@@ -507,7 +507,7 @@ mod tests {
 
         let rec = sqlx::query(
             r#"SELECT leased_until, backoff_attempt, backoff_until, status_message, display_status_message
-               FROM posthog_batchimport WHERE id = $1"#,
+               FROM insights_batchimport WHERE id = $1"#,
         )
         .bind(id)
         .fetch_one(&mut *tx)
@@ -544,7 +544,7 @@ mod tests {
         let lease = "test-lease";
         let inserted = sqlx::query(
             r#"
-            INSERT INTO posthog_batchimport (id, team_id, status, import_config, secrets, lease_id, backoff_attempt, backoff_until)
+            INSERT INTO insights_batchimport (id, team_id, status, import_config, secrets, lease_id, backoff_attempt, backoff_until)
             VALUES ($1, $2, 'running', '{}'::jsonb, '', $3, 5, now())
             "#,
         )
@@ -564,7 +564,7 @@ mod tests {
         model.unpause(context.clone()).await?;
 
         let rec = sqlx::query(
-            r#"SELECT backoff_attempt, backoff_until FROM posthog_batchimport WHERE id = $1"#,
+            r#"SELECT backoff_attempt, backoff_until FROM insights_batchimport WHERE id = $1"#,
         )
         .bind(id)
         .fetch_one(&mut *tx)
@@ -592,7 +592,7 @@ mod tests {
         let lease = "test-lease";
         let inserted = sqlx::query(
             r#"
-            INSERT INTO posthog_batchimport (id, team_id, status, import_config, secrets, lease_id, backoff_attempt, backoff_until)
+            INSERT INTO insights_batchimport (id, team_id, status, import_config, secrets, lease_id, backoff_attempt, backoff_until)
             VALUES ($1, $2, 'running', '{}'::jsonb, '', $3, 5, now())
             "#,
         )
@@ -612,7 +612,7 @@ mod tests {
         model.reset_backoff_in_db(&pool).await?;
 
         let rec = sqlx::query(
-            r#"SELECT backoff_attempt, backoff_until FROM posthog_batchimport WHERE id = $1"#,
+            r#"SELECT backoff_attempt, backoff_until FROM insights_batchimport WHERE id = $1"#,
         )
         .bind(id)
         .fetch_one(&mut *tx)

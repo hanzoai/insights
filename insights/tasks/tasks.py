@@ -30,23 +30,23 @@ logger = get_logger(__name__)
 
 # Feature flag last_called_at sync metrics
 FEATURE_FLAG_LAST_CALLED_AT_SYNC_LOCK_CONTENTION_COUNTER = Counter(
-    "posthog_feature_flag_last_called_at_sync_lock_contentions_total",
+    "insights_feature_flag_last_called_at_sync_lock_contentions_total",
     "Times feature flag last_called_at sync was skipped due to lock being held",
 )
 
 FEATURE_FLAG_LAST_CALLED_AT_SYNC_LIMIT_HIT_COUNTER = Counter(
-    "posthog_feature_flag_last_called_at_sync_limit_reached_total",
+    "insights_feature_flag_last_called_at_sync_limit_reached_total",
     "Times the ClickHouse query result limit was reached during feature flag last_called_at sync",
 )
 
 
 COHORT_DELETION_MARK_FAILURE_COUNTER = Counter(
-    "posthog_cohort_deletion_mark_failure_total",
+    "insights_cohort_deletion_mark_failure_total",
     "Times cohort deletion mark failed",
 )
 
 COHORT_DELETION_RUN_FAILURE_COUNTER = Counter(
-    "posthog_cohort_deletion_run_failure_total",
+    "insights_cohort_deletion_run_failure_total",
     "Times cohort deletion run failed",
 )
 
@@ -66,7 +66,7 @@ def clear_expired_sessions() -> None:
 
     with pushed_metrics_registry("celery_clear_expired_sessions") as registry:
         Gauge(
-            "posthog_celery_clear_expired_sessions_deleted_count",
+            "insights_celery_clear_expired_sessions_deleted_count",
             "Number of expired Django sessions deleted",
             registry=registry,
         ).set(deleted_count)
@@ -74,7 +74,7 @@ def clear_expired_sessions() -> None:
 
 @shared_task(ignore_result=True)
 def redis_heartbeat() -> None:
-    get_client().set("POSTHOG_HEARTBEAT", int(time.time()))
+    get_client().set("INSIGHTS_HEARTBEAT", int(time.time()))
 
 
 @shared_task(
@@ -150,7 +150,7 @@ def pg_table_cache_hit_rate() -> None:
             tables = cursor.fetchall()
             with pushed_metrics_registry("celery_pg_table_cache_hit_rate") as registry:
                 hit_rate_gauge = Gauge(
-                    "posthog_celery_pg_table_cache_hit_rate",
+                    "insights_celery_pg_table_cache_hit_rate",
                     "Postgres query cache hit rate per table.",
                     labelnames=["table_name"],
                     registry=registry,
@@ -203,14 +203,14 @@ def pg_plugin_server_query_timing() -> None:
             pass
 
 
-POSTGRES_TABLES = ["posthog_personoverride", "posthog_personoverridemapping"]
+POSTGRES_TABLES = ["insights_personoverride", "insights_personoverridemapping"]
 
 
 @shared_task(ignore_result=True)
 def pg_row_count() -> None:
     with pushed_metrics_registry("celery_pg_row_count") as registry:
         row_count_gauge = Gauge(
-            "posthog_celery_pg_table_row_count",
+            "insights_celery_pg_table_row_count",
             "Number of rows per Postgres table.",
             labelnames=["table_name"],
             registry=registry,
@@ -268,14 +268,14 @@ def ingestion_lag() -> None:
         )
         with pushed_metrics_registry("celery_ingestion_lag") as registry:
             lag_gauge = Gauge(
-                "posthog_celery_observed_ingestion_lag_seconds",
+                "insights_celery_observed_ingestion_lag_seconds",
                 "End-to-end ingestion lag observed through several scenarios. Can be overestimated by up to 60 seconds.",
                 labelnames=["scenario"],
                 registry=registry,
             )
             for event, lag in results:
                 metric = HEARTBEAT_EVENT_TO_INGESTION_LAG_METRIC[event]
-                statsd.gauge(f"posthog_celery_{metric}_lag_seconds_rough_minute_precision", lag)
+                statsd.gauge(f"insights_celery_{metric}_lag_seconds_rough_minute_precision", lag)
                 lag_gauge.labels(scenario=metric).set(lag)
     except:
         pass
@@ -285,7 +285,7 @@ def ingestion_lag() -> None:
             settings.SITE_URL + "/e",
             json={
                 "event": "$heartbeat",
-                "distinct_id": "posthog-celery-heartbeat",
+                "distinct_id": "insights-celery-heartbeat",
                 "token": team.api_token,
                 "properties": {"$timestamp": timezone.now().isoformat()},
             },
@@ -364,7 +364,7 @@ def clickhouse_row_count() -> None:
 
     with pushed_metrics_registry("celery_clickhouse_row_count") as registry:
         row_count_gauge = Gauge(
-            "posthog_celery_clickhouse_table_row_count",
+            "insights_celery_clickhouse_table_row_count",
             "Number of rows per ClickHouse table.",
             labelnames=["table_name"],
             registry=registry,
@@ -377,7 +377,7 @@ def clickhouse_row_count() -> None:
                 rows = sync_execute(query)[0][0]
                 row_count_gauge.labels(table_name=table).set(rows)
                 statsd.gauge(
-                    f"posthog_celery_clickhouse_table_row_count",
+                    f"insights_celery_clickhouse_table_row_count",
                     rows,
                     tags={"table": table},
                 )
@@ -413,7 +413,7 @@ def clickhouse_errors_count() -> None:
     rows = sync_execute(QUERY, params)
     with pushed_metrics_registry("celery_clickhouse_errors") as registry:
         errors_gauge = Gauge(
-            "posthog_celery_clickhouse_errors",
+            "insights_celery_clickhouse_errors",
             "Age of the latest error per ClickHouse errors table.",
             registry=registry,
             labelnames=["replica", "shard", "name"],
@@ -440,7 +440,7 @@ def clickhouse_part_count() -> None:
 
     with pushed_metrics_registry("celery_clickhouse_part_count") as registry:
         parts_count_gauge = Gauge(
-            "posthog_celery_clickhouse_table_parts_count",
+            "insights_celery_clickhouse_table_parts_count",
             "Number of parts per ClickHouse table.",
             labelnames=["table"],
             registry=registry,
@@ -448,7 +448,7 @@ def clickhouse_part_count() -> None:
         for table, parts in rows:
             parts_count_gauge.labels(table=table).set(parts)
             statsd.gauge(
-                f"posthog_celery_clickhouse_table_parts_count",
+                f"insights_celery_clickhouse_table_parts_count",
                 parts,
                 tags={"table": table},
             )
@@ -473,7 +473,7 @@ def clickhouse_mutation_count() -> None:
 
     with pushed_metrics_registry("celery_clickhouse_mutation_count") as registry:
         mutations_count_gauge = Gauge(
-            "posthog_celery_clickhouse_table_mutations_count",
+            "insights_celery_clickhouse_table_mutations_count",
             "Number of mutations per ClickHouse table.",
             labelnames=["table"],
             registry=registry,
@@ -481,7 +481,7 @@ def clickhouse_mutation_count() -> None:
     for table, muts in rows:
         mutations_count_gauge.labels(table=table).set(muts)
         statsd.gauge(
-            f"posthog_celery_clickhouse_table_mutations_count",
+            f"insights_celery_clickhouse_table_mutations_count",
             muts,
             tags={"table": table},
         )
@@ -518,7 +518,7 @@ def redis_celery_queue_depth() -> None:
     try:
         with pushed_metrics_registry("redis_celery_queue_depth_registry") as registry:
             celery_task_queue_depth_gauge = Gauge(
-                "posthog_celery_queue_depth",
+                "insights_celery_queue_depth",
                 "We use this to monitor the depth of the celery queue.",
                 registry=registry,
                 labelnames=["queue_name"],
@@ -1097,8 +1097,8 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
     from insights.clickhouse.client import sync_execute
     from insights.models.feature_flag.feature_flag import FeatureFlag
 
-    FEATURE_FLAG_LAST_CALLED_SYNC_KEY = "posthog:feature_flag_last_called_sync:last_timestamp"
-    LOCK_KEY = "posthog:feature_flag_last_called_sync:lock"
+    FEATURE_FLAG_LAST_CALLED_SYNC_KEY = "insights:feature_flag_last_called_sync:last_timestamp"
+    LOCK_KEY = "insights:feature_flag_last_called_sync:lock"
     LOCK_TIMEOUT = 1800  # 30 minutes = schedule interval (prevents concurrent execution)
 
     # Attempt to acquire lock
@@ -1113,22 +1113,22 @@ def sync_feature_flag_last_called(self: PushGatewayTask) -> None:
 
     # Create metrics gauges for this task run
     updated_count_gauge = Gauge(
-        "posthog_feature_flag_last_called_at_sync_updated_count",
+        "insights_feature_flag_last_called_at_sync_updated_count",
         "Number of feature flags updated in last sync",
         registry=self.metrics_registry,
     )
     events_processed_gauge = Gauge(
-        "posthog_feature_flag_last_called_at_sync_events_processed",
+        "insights_feature_flag_last_called_at_sync_events_processed",
         "Number of events processed in last sync",
         registry=self.metrics_registry,
     )
     clickhouse_results_gauge = Gauge(
-        "posthog_feature_flag_last_called_at_sync_clickhouse_results",
+        "insights_feature_flag_last_called_at_sync_clickhouse_results",
         "Number of results returned from ClickHouse query",
         registry=self.metrics_registry,
     )
     checkpoint_lag_gauge = Gauge(
-        "posthog_feature_flag_last_called_at_sync_checkpoint_lag_seconds",
+        "insights_feature_flag_last_called_at_sync_checkpoint_lag_seconds",
         "Seconds between checkpoint timestamp and current time",
         registry=self.metrics_registry,
     )

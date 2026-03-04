@@ -18,7 +18,7 @@ RELATED_OBJECTS = (
 class TaggedItem(ModelActivityMixin, UUIDTModel):
     """
     Taggable describes global tag-object relationships.
-    Note: This is an EE only feature, however the model exists in posthog so that it is backwards accessible from all
+    Note: This is an EE only feature, however the model exists in insights so that it is backwards accessible from all
     models. Whether we should be able to interact with this table is determined in the `TaggedItemSerializer` which
     imports `EnterpriseTaggedItemSerializer` if the feature is available.
 

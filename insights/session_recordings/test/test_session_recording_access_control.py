@@ -29,9 +29,9 @@ class TestSessionRecordingAccessControl(APIBaseTest):
         self.organization.save()
 
         # Create test users
-        self.viewer_user = User.objects.create_and_join(self.organization, "viewer@posthog.com", "testtest")
-        self.editor_user = User.objects.create_and_join(self.organization, "editor@posthog.com", "testtest")
-        self.no_access_user = User.objects.create_and_join(self.organization, "noaccess@posthog.com", "testtest")
+        self.viewer_user = User.objects.create_and_join(self.organization, "viewer@hanzo.ai", "testtest")
+        self.editor_user = User.objects.create_and_join(self.organization, "editor@hanzo.ai", "testtest")
+        self.no_access_user = User.objects.create_and_join(self.organization, "noaccess@hanzo.ai", "testtest")
 
         # Create a test recording
         self.recording = SessionRecording.objects.create(

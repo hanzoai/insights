@@ -5,8 +5,8 @@ import { router } from 'kea-router'
 import type { editor as importedEditor } from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconMagicWand } from '@posthog/icons'
-import { LemonInput, Link } from '@posthog/lemon-ui'
+import { IconMagicWand } from '@hanzo/icons'
+import { LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -215,7 +215,7 @@ export function InsightsQLQueryEditor(props: InsightsQLQueryEditorProps): JSX.El
                                         <div>
                                             Save a query as a view that can be referenced in another query. This is
                                             useful for modeling data and organizing large queries into readable chunks.{' '}
-                                            <Link to="https://posthog.com/docs/data-warehouse">More Info</Link>{' '}
+                                            <Link to="https://hanzo.ai/docs/data-warehouse">More Info</Link>{' '}
                                         </div>
                                     }
                                 >

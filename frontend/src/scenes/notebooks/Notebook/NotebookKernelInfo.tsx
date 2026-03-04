@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonSelect, LemonTag, Popover } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonSelect, LemonTag, Popover } from '@hanzo/lemon-ui'
 
 import { LemonSlider } from 'lib/lemon-ui/LemonSlider'
 import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea'

@@ -31,7 +31,7 @@ class IngestionWarningsTable(Table):
 
 cohort_calculation_history: PostgresTable = PostgresTable(
     name="cohort_calculation_history",
-    postgres_table_name="posthog_cohortcalculationhistory",
+    postgres_table_name="insights_cohortcalculationhistory",
     fields={
         "id": StringDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -45,7 +45,7 @@ cohort_calculation_history: PostgresTable = PostgresTable(
 
 cohorts: PostgresTable = PostgresTable(
     name="cohorts",
-    postgres_table_name="posthog_cohort",
+    postgres_table_name="insights_cohort",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -69,7 +69,7 @@ cohorts: PostgresTable = PostgresTable(
 
 dashboards: PostgresTable = PostgresTable(
     name="dashboards",
-    postgres_table_name="posthog_dashboard",
+    postgres_table_name="insights_dashboard",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -85,7 +85,7 @@ dashboards: PostgresTable = PostgresTable(
 
 insights: PostgresTable = PostgresTable(
     name="insights",
-    postgres_table_name="posthog_dashboarditem",
+    postgres_table_name="insights_dashboarditem",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "short_id": StringDatabaseField(name="short_id"),
@@ -106,7 +106,7 @@ insights: PostgresTable = PostgresTable(
 
 experiments: PostgresTable = PostgresTable(
     name="experiments",
-    postgres_table_name="posthog_experiment",
+    postgres_table_name="insights_experiment",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -128,7 +128,7 @@ experiments: PostgresTable = PostgresTable(
 
 data_warehouse_sources: PostgresTable = PostgresTable(
     name="data_warehouse_sources",
-    postgres_table_name="posthog_externaldatasource",
+    postgres_table_name="insights_externaldatasource",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -144,7 +144,7 @@ data_warehouse_sources: PostgresTable = PostgresTable(
 
 data_warehouse_tables: PostgresTable = PostgresTable(
     name="data_warehouse_tables",
-    postgres_table_name="posthog_datawarehousetable",
+    postgres_table_name="insights_datawarehousetable",
     fields={
         "id": StringDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -162,7 +162,7 @@ data_warehouse_tables: PostgresTable = PostgresTable(
 
 feature_flags: PostgresTable = PostgresTable(
     name="feature_flags",
-    postgres_table_name="posthog_featureflag",
+    postgres_table_name="insights_featureflag",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -178,7 +178,7 @@ feature_flags: PostgresTable = PostgresTable(
 
 groups: PostgresTable = PostgresTable(
     name="groups",
-    postgres_table_name="posthog_group",
+    postgres_table_name="insights_group",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -191,7 +191,7 @@ groups: PostgresTable = PostgresTable(
 
 group_type_mappings: PostgresTable = PostgresTable(
     name="group_type_mappings",
-    postgres_table_name="posthog_grouptypemapping",
+    postgres_table_name="insights_grouptypemapping",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -203,7 +203,7 @@ group_type_mappings: PostgresTable = PostgresTable(
 
 insight_variables: PostgresTable = PostgresTable(
     name="insight_variables",
-    postgres_table_name="posthog_insightvariable",
+    postgres_table_name="insights_insightvariable",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -217,7 +217,7 @@ insight_variables: PostgresTable = PostgresTable(
 
 surveys: PostgresTable = PostgresTable(
     name="surveys",
-    postgres_table_name="posthog_survey",
+    postgres_table_name="insights_survey",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -233,7 +233,7 @@ surveys: PostgresTable = PostgresTable(
 
 teams: PostgresTable = PostgresTable(
     name="teams",
-    postgres_table_name="posthog_team",
+    postgres_table_name="insights_team",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="id"),
@@ -247,7 +247,7 @@ teams: PostgresTable = PostgresTable(
 
 exports: PostgresTable = PostgresTable(
     name="exports",
-    postgres_table_name="posthog_exportedasset",
+    postgres_table_name="insights_exportedasset",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -259,7 +259,7 @@ exports: PostgresTable = PostgresTable(
 
 actions: PostgresTable = PostgresTable(
     name="actions",
-    postgres_table_name="posthog_action",
+    postgres_table_name="insights_action",
     fields={
         "id": IntegerDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),
@@ -275,7 +275,7 @@ actions: PostgresTable = PostgresTable(
 
 notebooks: PostgresTable = PostgresTable(
     name="notebooks",
-    postgres_table_name="posthog_notebook",
+    postgres_table_name="insights_notebook",
     fields={
         "id": StringDatabaseField(name="id"),
         "short_id": StringDatabaseField(name="short_id"),
@@ -294,7 +294,7 @@ notebooks: PostgresTable = PostgresTable(
 
 error_tracking_issues: PostgresTable = PostgresTable(
     name="error_tracking_issues",
-    postgres_table_name="posthog_errortrackingissue",
+    postgres_table_name="insights_errortrackingissue",
     fields={
         "id": StringDatabaseField(name="id"),
         "team_id": IntegerDatabaseField(name="team_id"),

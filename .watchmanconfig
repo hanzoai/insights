@@ -7,7 +7,7 @@
     "__pycache__",
     ".pytest_cache",
     ".dagster_home",
-    ".posthog",
+    ".insights",
     ".flox"
   ]
 }

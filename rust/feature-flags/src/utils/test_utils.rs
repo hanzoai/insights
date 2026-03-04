@@ -29,9 +29,9 @@ pub fn random_string(prefix: &str, length: usize) -> String {
 }
 
 /// Generate the HyperCache key for team metadata.
-/// Format: posthog:1:cache/team_tokens/{api_token}/team_metadata/full_metadata.json
+/// Format: insights:1:cache/team_tokens/{api_token}/team_metadata/full_metadata.json
 pub fn team_token_hypercache_key(api_token: &str) -> String {
-    format!("posthog:1:cache/team_tokens/{api_token}/team_metadata/full_metadata.json")
+    format!("insights:1:cache/team_tokens/{api_token}/team_metadata/full_metadata.json")
 }
 
 /// Update team data in HyperCache with proper pickle encoding.
@@ -112,8 +112,8 @@ pub async fn insert_flags_for_team_in_redis(
         serde_pickle::to_vec(&json_string, Default::default()).expect("Failed to pickle flags");
 
     // Write to hypercache key format with Django's version prefix
-    // Format: posthog:1:cache/teams/{team_id}/feature_flags/flags.json
-    let cache_key = format!("posthog:1:cache/teams/{team_id}/feature_flags/flags.json");
+    // Format: insights:1:cache/teams/{team_id}/feature_flags/flags.json
+    let cache_key = format!("insights:1:cache/teams/{team_id}/feature_flags/flags.json");
     client.set_bytes(cache_key, pickled_bytes, None).await?;
 
     Ok(())
@@ -152,7 +152,7 @@ pub async fn setup_hypercache_reader(
         "feature_flags".to_string(),
         "flags.json".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     Arc::new(
         HyperCacheReader::new(redis_client, config)
@@ -186,7 +186,7 @@ pub fn setup_hypercache_reader_with_mock_redis(
         "feature_flags".to_string(),
         "flags.json".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     let s3_client: Arc<dyn S3Client + Send + Sync> = Arc::new(DummyS3Client);
     Arc::new(HyperCacheReader::new_with_s3_client(
@@ -206,7 +206,7 @@ pub async fn setup_team_hypercache_reader(
         "team_metadata".to_string(),
         "full_metadata.json".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     config.token_based = true;
     Arc::new(
@@ -226,7 +226,7 @@ pub async fn setup_config_hypercache_reader(
         "array".to_string(),
         "config.json".to_string(),
         "us-east-1".to_string(),
-        "posthog".to_string(),
+        "insights".to_string(),
     );
     config.token_based = true;
     Arc::new(
@@ -237,9 +237,9 @@ pub async fn setup_config_hypercache_reader(
 }
 
 /// Generate the HyperCache key for remote config.
-/// Format: posthog:1:cache/team_tokens/{api_token}/array/config.json
+/// Format: insights:1:cache/team_tokens/{api_token}/array/config.json
 pub fn config_hypercache_key(api_token: &str) -> String {
-    format!("posthog:1:cache/team_tokens/{api_token}/array/config.json")
+    format!("insights:1:cache/team_tokens/{api_token}/array/config.json")
 }
 
 /// Insert remote config data in HyperCache for testing.
@@ -401,7 +401,7 @@ async fn insert_organization_if_not_exists(
     };
 
     sqlx::query(
-        r#"INSERT INTO posthog_organization
+        r#"INSERT INTO insights_organization
         (id, name, slug, created_at, updated_at, plugins_access_level, for_internal_metrics, is_member_join_email_enabled, enforce_2fa, is_hipaa, customer_id, available_product_features, personalization, setup_section_2_completed, domain_whitelist, members_can_use_personal_api_keys, allow_publicly_shared_resources, default_anonymize_ips)
         VALUES
         ($1::uuid, 'Test Organization', $2, '2024-06-17 14:40:49.298579+00:00', '2024-06-17 14:40:49.298593+00:00', 9, false, true, NULL, false, NULL, '{}', '{}', true, '{}', true, true, false)
@@ -431,7 +431,7 @@ async fn insert_team_group_mappings(
 
     for (group_type, group_type_index) in group_types {
         sqlx::query(
-            r#"INSERT INTO posthog_grouptypemapping
+            r#"INSERT INTO insights_grouptypemapping
             (group_type, group_type_index, name_singular, name_plural, team_id, project_id)
             VALUES
             ($1, $2, NULL, NULL, $3, $4)
@@ -477,7 +477,7 @@ pub async fn insert_new_team_in_pg(
 
     let uuid = Uuid::now_v7();
     let res = sqlx::query(
-        r#"INSERT INTO posthog_project
+        r#"INSERT INTO insights_project
         (id, organization_id, name, created_at) VALUES
         ($1, $2::uuid, $3, '2024-06-17 14:40:51.332036+00:00')"#,
     )
@@ -490,7 +490,7 @@ pub async fn insert_new_team_in_pg(
 
     // Insert team without secret tokens
     let res = sqlx::query(
-        r#"INSERT INTO posthog_team
+        r#"INSERT INTO insights_team
         (id, uuid, organization_id, project_id, api_token, name, created_at, updated_at, app_urls, anonymize_ips, completed_snippet_onboarding, ingested_event, session_recording_opt_in, is_demo, access_control, test_account_filters, timezone, data_attributes, plugins_opt_in, opt_out_capture, event_names, event_names_with_usage, event_properties, event_properties_with_usage, event_properties_numerical, cookieless_server_hash_mode, base_currency, session_recording_retention_period, web_analytics_pre_aggregated_tables_enabled) VALUES
         ($1, $2, $3::uuid, $4, $5, $6, '2024-06-17 14:40:51.332036+00:00', '2024-06-17', '{}', false, false, false, false, false, false, '{}', 'UTC', '["data-attr"]', false, false, '[]', '[]', '[]', '[]', '[]', $7, 'USD', '30d', false)"#
     ).bind(team.id).bind(uuid).bind(org_id).bind(team.id).bind(&team.api_token).bind(&team.name).bind(team.cookieless_server_hash_mode.unwrap_or(0)).execute(&mut *non_persons_conn).await?;
@@ -545,7 +545,7 @@ pub async fn insert_flag_for_team_in_pg(
 
     let mut conn = client.get_connection().await?;
     let res = sqlx::query(
-        r#"INSERT INTO posthog_featureflag
+        r#"INSERT INTO insights_featureflag
         (id, team_id, name, key, filters, deleted, active, ensure_experience_continuity, evaluation_runtime, created_at) VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, '2024-06-17')"#
     ).bind(payload_flag.id).bind(team_id).bind(&payload_flag.name).bind(&payload_flag.key).bind(&payload_flag.filters).bind(payload_flag.deleted).bind(payload_flag.active).bind(payload_flag.ensure_experience_continuity).bind(&payload_flag.evaluation_runtime).execute(&mut *conn).await?;
@@ -568,7 +568,7 @@ pub async fn insert_evaluation_tags_for_flag_in_pg(
         let tag_uuid = Uuid::now_v7();
         let tag_id: Uuid = sqlx::query_scalar(
             r#"
-            INSERT INTO posthog_tag (id, name, team_id)
+            INSERT INTO insights_tag (id, name, team_id)
             VALUES ($1, $2, $3)
             ON CONFLICT (name, team_id) DO UPDATE 
             SET name = EXCLUDED.name
@@ -584,7 +584,7 @@ pub async fn insert_evaluation_tags_for_flag_in_pg(
         // Then, create the association
         sqlx::query(
             r#"
-            INSERT INTO posthog_featureflagevaluationtag (feature_flag_id, tag_id, created_at)
+            INSERT INTO insights_featureflagevaluationtag (feature_flag_id, tag_id, created_at)
             VALUES ($1, $2, NOW())
             ON CONFLICT (feature_flag_id, tag_id) DO NOTHING
             "#,
@@ -618,14 +618,14 @@ pub async fn insert_person_for_team_in_pg(
     let row = sqlx::query(
         r#"
         WITH inserted_person AS (
-            INSERT INTO posthog_person (
+            INSERT INTO insights_person (
                 created_at, properties, properties_last_updated_at,
                 properties_last_operation, team_id, is_user_id, is_identified, uuid, version
             )
             VALUES ('2023-04-05', $1, '{}', '{}', $2, NULL, true, $3, 0)
             RETURNING id
         )
-        INSERT INTO posthog_persondistinctid (distinct_id, person_id, team_id, version)
+        INSERT INTO insights_persondistinctid (distinct_id, person_id, team_id, version)
         VALUES ($4, (SELECT id FROM inserted_person), $5, 0)
         RETURNING person_id
         "#,
@@ -669,7 +669,7 @@ pub async fn insert_cohort_for_team_in_pg(
 
     let mut conn = client.get_connection().await?;
     let row: (i32,) = sqlx::query_as(
-        r#"INSERT INTO posthog_cohort
+        r#"INSERT INTO insights_cohort
         (name, description, team_id, deleted, filters, query, version, pending_version, count, is_calculating, is_static, errors_calculating, groups, created_by_id) VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING id"#,
@@ -716,7 +716,7 @@ pub async fn add_person_to_cohort(
 ) -> Result<(), Error> {
     let mut conn = client.get_connection().await?;
     let res = sqlx::query(
-        r#"INSERT INTO posthog_cohortpeople (cohort_id, person_id)
+        r#"INSERT INTO insights_cohortpeople (cohort_id, person_id)
            VALUES ($1, $2)
            ON CONFLICT DO NOTHING"#,
     )
@@ -749,7 +749,7 @@ pub async fn create_group_in_pg(
     // First, retrieve the group_type_index from grouptypemapping
     let mut conn = client.get_connection().await?;
     let row = sqlx::query(
-        r#"SELECT group_type_index FROM posthog_grouptypemapping
+        r#"SELECT group_type_index FROM insights_grouptypemapping
            WHERE team_id = $1 AND group_type = $2"#,
     )
     .bind(team_id)
@@ -760,7 +760,7 @@ pub async fn create_group_in_pg(
 
     // Insert the group with all non-nullable fields
     let res = sqlx::query(
-        r#"INSERT INTO posthog_group
+        r#"INSERT INTO insights_group
            (team_id, group_type_index, group_key, group_properties, created_at, properties_last_updated_at, properties_last_operation, version)
            VALUES ($1, $2, $3, $4, '2024-06-17', '{}'::jsonb, '{}'::jsonb, 0)
            RETURNING id"#,
@@ -829,7 +829,7 @@ pub async fn insert_suppression_rule_in_pg(
     let mut conn = client.get_connection().await?;
     let rule_id = uuid::Uuid::new_v4();
     sqlx::query(
-        r#"INSERT INTO posthog_errortrackingsuppressionrule
+        r#"INSERT INTO insights_errortrackingsuppressionrule
            (id, team_id, filters, created_at, updated_at, order_key)
            VALUES ($1, $2, $3, NOW(), NOW(), 0)"#,
     )
@@ -848,7 +848,7 @@ pub async fn update_team_autocapture_exceptions(
     enabled: bool,
 ) -> Result<(), Error> {
     let mut conn = client.get_connection().await?;
-    sqlx::query("UPDATE posthog_team SET autocapture_exceptions_opt_in = $1 WHERE id = $2")
+    sqlx::query("UPDATE insights_team SET autocapture_exceptions_opt_in = $1 WHERE id = $2")
         .bind(enabled)
         .bind(team_id)
         .execute(&mut *conn)
@@ -1122,7 +1122,7 @@ impl TestContext {
 
         let user_id: i32 = if let Some(team_id) = team_id {
             sqlx::query(
-                "INSERT INTO posthog_user (
+                "INSERT INTO insights_user (
                     password, last_login, email, first_name, last_name, is_active, is_staff, date_joined,
                     events_column_config, current_organization_id, current_team_id, uuid
                  )
@@ -1139,7 +1139,7 @@ impl TestContext {
             .get(0)
         } else {
             sqlx::query(
-                "INSERT INTO posthog_user (
+                "INSERT INTO insights_user (
                     password, last_login, email, first_name, last_name, is_active, is_staff, date_joined,
                     events_column_config, current_organization_id, current_team_id, uuid
                  )
@@ -1195,7 +1195,7 @@ impl TestContext {
         let scopes_vec: Vec<String> = scopes.iter().map(|s| s.to_string()).collect();
 
         let mut query = sqlx::QueryBuilder::new(
-            "INSERT INTO posthog_personalapikey (id, user_id, label, secure_value, created_at, scopes",
+            "INSERT INTO insights_personalapikey (id, user_id, label, secure_value, created_at, scopes",
         );
 
         if scoped_teams.is_some() {
@@ -1268,7 +1268,7 @@ impl TestContext {
 
         let uuid = Uuid::now_v7();
         let res = sqlx::query(
-            r#"INSERT INTO posthog_project
+            r#"INSERT INTO insights_project
             (id, organization_id, name, created_at) VALUES
             ($1, $2::uuid, $3, '2024-06-17 14:40:51.332036+00:00')"#,
         )
@@ -1281,7 +1281,7 @@ impl TestContext {
 
         // Insert team with secret tokens
         let mut query_str = String::from(
-            "INSERT INTO posthog_team (id, uuid, organization_id, project_id, api_token, secret_api_token"
+            "INSERT INTO insights_team (id, uuid, organization_id, project_id, api_token, secret_api_token"
         );
 
         // Add secret_api_token_backup column if provided
@@ -1331,9 +1331,9 @@ impl TestContext {
         redis: Arc<dyn RedisClientTrait + Send + Sync>,
         team_id: i32,
     ) -> Result<(), Error> {
-        // Cache key format: posthog:1:cache/teams/{team_id}/feature_flags/flags_with_cohorts.json
+        // Cache key format: insights:1:cache/teams/{team_id}/feature_flags/flags_with_cohorts.json
         let cache_key =
-            format!("posthog:1:cache/teams/{team_id}/feature_flags/flags_with_cohorts.json");
+            format!("insights:1:cache/teams/{team_id}/feature_flags/flags_with_cohorts.json");
 
         // Create minimal valid flag definitions response
         let flags_data = json!({
@@ -1356,7 +1356,7 @@ impl TestContext {
     pub async fn get_organization_id_for_team(&self, team: &Team) -> Result<uuid::Uuid, Error> {
         let mut conn = self.non_persons_reader.get_connection().await?;
         let org_id: uuid::Uuid =
-            sqlx::query_scalar("SELECT organization_id FROM posthog_project WHERE id = $1")
+            sqlx::query_scalar("SELECT organization_id FROM insights_project WHERE id = $1")
                 .bind(team.id)
                 .fetch_one(&mut *conn)
                 .await?;
@@ -1374,7 +1374,7 @@ impl TestContext {
     /// Generates a unique test email address with an optional prefix
     pub fn generate_test_email(prefix: &str) -> String {
         let unique_id = &uuid::Uuid::new_v4().to_string()[..8];
-        format!("{prefix}_{unique_id}@posthog.com")
+        format!("{prefix}_{unique_id}@hanzo.ai")
     }
 
     /// Adds a user to an organization with a specified membership level
@@ -1386,7 +1386,7 @@ impl TestContext {
     ) -> Result<(), Error> {
         let mut conn = self.non_persons_writer.get_connection().await?;
         sqlx::query(
-            "INSERT INTO posthog_organizationmembership (id, organization_id, user_id, level, joined_at, updated_at)
+            "INSERT INTO insights_organizationmembership (id, organization_id, user_id, level, joined_at, updated_at)
              VALUES ($1, $2, $3, $4, NOW(), NOW())",
         )
         .bind(uuid::Uuid::new_v4())

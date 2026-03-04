@@ -1,11 +1,11 @@
 {
-    "name": "@posthog/products-live-debugger",
+    "name": "@hanzo/products-live-debugger",
     "scripts": {
         "backend:test": "pytest -c ../../pytest.ini --rootdir ../.. backend/ -v --tb=short"
     },
     "peerDependencies": {
-        "@posthog/icons": "*",
-        "@posthog/lemon-ui": "*",
+        "@hanzo/icons": "*",
+        "@hanzo/lemon-ui": "*",
         "@types/react": "*",
         "@types/react-dom": "*",
         "clsx": "*",

@@ -1,6 +1,6 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconRefresh, IconX } from '@posthog/icons'
+import { IconPlusSmall, IconRefresh, IconX } from '@hanzo/icons'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'

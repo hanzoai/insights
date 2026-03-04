@@ -1,4 +1,4 @@
-{% extends "email/base.html" %} {% load posthog_assets %} {% load posthog_filters %}
+{% extends "email/base.html" %} {% load insights_assets %} {% load insights_filters %}
 {% block preheader %}If failures keep occurring we will disable this batch export{% endblock %}
 {% block heading %}Insights batch export {{ name }} has failed{% endblock %}
 {% block section %}
@@ -22,10 +22,10 @@
 
 {% block footer %}
 Need help?
-<a href="https://posthog.com/questions?{{ utm_tags }}"
+<a href="https://hanzo.ai/questions?{{ utm_tags }}"
     target="_blank"><b>Visit support</b></a>
 or
-<a href="https://posthog.com/docs?{{ utm_tags }}"
+<a href="https://hanzo.ai/docs?{{ utm_tags }}"
     target="_blank"><b>read our documentation</b></a>.<br /><br />
 
 <a href="{% absolute_uri '/me/settings/user-customization' %}">Manage these notifications in Insights</a>

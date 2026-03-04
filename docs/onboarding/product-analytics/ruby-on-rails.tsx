@@ -13,7 +13,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <>
                     <Markdown>
                         {dedent`
-                            Add the \`posthog-ruby\` and \`posthog-rails\` gems to your Gemfile:
+                            Add the \`insights-ruby\` and \`insights-rails\` gems to your Gemfile:
                         `}
                     </Markdown>
                     <CodeBlock
@@ -22,8 +22,8 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'ruby',
                                 file: 'Gemfile',
                                 code: dedent`
-                                    gem "posthog-ruby"
-                                    gem "posthog-rails"
+                                    gem "insights-ruby"
+                                    gem "insights-rails"
                                 `,
                             },
                         ]}
@@ -59,14 +59,14 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                    rails generate posthog:install
+                                    rails generate insights:install
                                 `,
                             },
                         ]}
                     />
                     <Markdown>
                         {dedent`
-                            This will create \`config/initializers/posthog.rb\` with sensible defaults and documentation.
+                            This will create \`config/initializers/insights.rb\` with sensible defaults and documentation.
                         `}
                     </Markdown>
                 </>
@@ -79,14 +79,14 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <>
                     <Markdown>
                         {dedent`
-                            Update \`config/initializers/posthog.rb\` with your project API key and host:
+                            Update \`config/initializers/insights.rb\` with your project API key and host:
                         `}
                     </Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'ruby',
-                                file: 'config/initializers/posthog.rb',
+                                file: 'config/initializers/insights.rb',
                                 code: dedent`
                                     Insights.init do |config|
                                       config.api_key = '<ph_project_api_key>'

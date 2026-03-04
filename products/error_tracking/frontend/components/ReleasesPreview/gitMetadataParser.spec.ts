@@ -15,8 +15,8 @@ describe('GitMetadataParser', () => {
             },
             {
                 description: 'should create commit link for gitlab URL',
-                remote_url: 'git@gitlab.com:posthog-bot-group/posthog-bot-project.git',
-                expected: 'https://gitlab.com/posthog-bot-group/posthog-bot-project/-/commit/commit-sha',
+                remote_url: 'git@gitlab.com:insights-bot-group/insights-bot-project.git',
+                expected: 'https://gitlab.com/insights-bot-group/insights-bot-project/-/commit/commit-sha',
             },
             {
                 description: 'should create commit link for gitlab URL',
@@ -48,8 +48,8 @@ describe('GitMetadataParser', () => {
             },
             {
                 description: 'should create commit link for gitlab URL',
-                remote_url: 'git@gitlab.com:posthog-bot-group/posthog-bot-project.git',
-                expected: 'https://gitlab.com/posthog-bot-group/posthog-bot-project/-/tree/branch-name',
+                remote_url: 'git@gitlab.com:insights-bot-group/insights-bot-project.git',
+                expected: 'https://gitlab.com/insights-bot-group/insights-bot-project/-/tree/branch-name',
             },
         ])('$description', ({ remote_url, expected }) => {
             const result = GitMetadataParser.getBranchLink(remote_url, 'branch-name')

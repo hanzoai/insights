@@ -72,7 +72,7 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                             language: 'go',
                                             file: 'Go',
                                             code: dedent`
-                                                client.Enqueue(posthog.Capture{
+                                                client.Enqueue(insights.Capture{
                                                     DistinctId: "distinct_id_of_your_user",
                                                     Event:      "event_name",
                                                     SendFeatureFlags: true,
@@ -94,10 +94,10 @@ export const getGoSteps = (ctx: OnboardingComponentsContext): StepDefinition[] =
                                             language: 'go',
                                             file: 'Go',
                                             code: dedent`
-                                                client.Enqueue(posthog.Capture{
+                                                client.Enqueue(insights.Capture{
                                                     DistinctId: "distinct_id_of_your_user",
                                                     Event:      "event_name",
-                                                    Properties: posthog.NewProperties().
+                                                    Properties: insights.NewProperties().
                                                         Set("$feature/feature-flag-key", "variant-key"), // replace feature-flag-key with your flag key. Replace 'variant-key' with the key of your variant
                                                 })
                                             `,

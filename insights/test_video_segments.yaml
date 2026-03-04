@@ -4499,7 +4499,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019bae5c-a144-737f-979f-94cdbc8d3cba
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2026-01-11T18:41:20.060000+00:00'
       session_duration: 411
       segment:
@@ -6207,7 +6207,7 @@ segments:
       session_start_time: '2026-01-06T10:36:46.226000+00:00'
       session_duration: 436
       segment:
-          title: Blank hedgehog page then escape to homepage
+          title: Blank mascot page then escape to homepage
           start_time: 00:06
           end_time: 00:36
           description: Hedgehog page blank; user moved to homepage
@@ -24303,7 +24303,7 @@ segments:
       session_start_time: '2025-12-19T01:01:19.017000+00:00'
       session_duration: 2498
       segment:
-          title: Signup attempt on us.posthog.com
+          title: Signup attempt on insights.hanzo.ai
           start_time: '33:38'
           end_time: '34:08'
           description: Started signup but load errors and exited before completion
@@ -30246,7 +30246,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b2d30-0404-792b-817a-0832c2dc800e
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-17T16:49:45.162000+00:00'
       session_duration: 2938
       segment:
@@ -38382,7 +38382,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b0e29-653b-7d42-a6d9-7d6c8f50258d
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-11T16:06:21.055000+00:00'
       session_duration: 190
       segment:
@@ -38396,7 +38396,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b0e30-ae93-7f15-aec2-d1981c4a115d
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-11T16:13:57.121000+00:00'
       session_duration: 945
       segment:
@@ -40001,7 +40001,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b0e29-653b-7d42-a6d9-7d6c8f50258d
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-11T16:06:21.055000+00:00'
       session_duration: 190
       segment:
@@ -41592,7 +41592,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b0e29-653b-7d42-a6d9-7d6c8f50258d
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-11T16:06:21.055000+00:00'
       session_duration: 190
       segment:
@@ -41606,7 +41606,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b0e30-ae93-7f15-aec2-d1981c4a115d
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-11T16:13:57.121000+00:00'
       session_duration: 945
       segment:
@@ -43368,7 +43368,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019b0e29-653b-7d42-a6d9-7d6c8f50258d
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-11T16:06:21.055000+00:00'
       session_duration: 190
       segment:
@@ -50186,7 +50186,7 @@ segments:
           abandonment_detected: true
           preview_url: null
     - session_id: 019aef32-da53-744b-85a8-d35f6d4d340c
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-05T15:47:58.766000+00:00'
       session_duration: 61
       segment:
@@ -52644,7 +52644,7 @@ segments:
           abandonment_detected: false
           preview_url: null
     - session_id: 019aef32-da53-744b-85a8-d35f6d4d340c
-      distinct_id: $posthog_cookieless
+      distinct_id: $insights_cookieless
       session_start_time: '2025-12-05T15:47:58.766000+00:00'
       session_duration: 61
       segment:
@@ -72473,7 +72473,7 @@ segments:
       session_start_time: '2025-12-02T13:58:45.806000+00:00'
       session_duration: 2182
       segment:
-          title: First signup attempt on us.posthog.com
+          title: First signup attempt on insights.hanzo.ai
           start_time: '16:06'
           end_time: '16:36'
           description: Signup blocked by Team ID error; flow abandoned

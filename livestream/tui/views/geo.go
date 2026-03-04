@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/posthog/posthog/livestream/tui/sse"
+	"github.com/hanzoai/insights/livestream/tui/sse"
 )
 
 const geoWindowDuration = 60 * time.Second
@@ -124,8 +124,8 @@ func (v *GeoView) aggregated() []countryCount {
 }
 
 var countryColors = []lipgloss.Color{
-	"#F54E00", // PostHog orange
-	"#1D4AFF", // PostHog blue
+	"#F54E00", // Insights orange
+	"#1D4AFF", // Insights blue
 	"#77B96C", // green
 	"#E040FB", // purple
 	"#00BCD4", // cyan

@@ -1,4 +1,4 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useMemo, useState } from 'react'
 
 import api from 'lib/api'
@@ -27,7 +27,7 @@ export function useSurveyLinkedInsights({ skip }: { skip?: boolean }): {
             .list()
             .then((response) => setSurveys(response.results))
             .catch((error) => {
-                posthog.captureException(error, {
+                insights.captureException(error, {
                     action: 'fetch-survey-linked-insights',
                 })
             })

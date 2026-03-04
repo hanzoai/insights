@@ -1,17 +1,17 @@
 # serializer version: 1
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_tgz_with_explicit_index_js_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -19,17 +19,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_tgz_with_explicit_index_js_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'index.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'index.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -38,22 +38,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_tgz_with_explicit_index_js_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_tgz_with_explicit_index_js_works.3
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -61,17 +61,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_tgz_with_explicit_index_js_works.4
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'index.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'index.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -80,22 +80,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_tgz_with_explicit_index_js_works.5
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_with_explicit_index_js_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -103,17 +103,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_with_explicit_index_js_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'index.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'index.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -122,22 +122,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_with_explicit_index_js_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_with_index_ts_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -145,17 +145,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_with_index_ts_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'index.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'index.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -164,22 +164,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_with_index_ts_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_without_index_ts_but_frontend_tsx_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -187,17 +187,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_without_index_ts_but_frontend_tsx_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'frontend.tsx'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'frontend.tsx'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -206,22 +206,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_without_index_ts_but_frontend_tsx_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_without_index_ts_but_site_ts_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -229,17 +229,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_without_index_ts_but_site_ts_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'site.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'site.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -248,22 +248,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_from_zip_without_index_ts_but_site_ts_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -271,17 +271,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'index.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'index.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -290,22 +290,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works.3
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -313,17 +313,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works.4
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'frontend.tsx'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'frontend.tsx'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -332,22 +332,22 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_twice_from_zip_with_index_ts_replaced_by_frontend_tsx_works.5
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_with_subdir_works
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'plugin.json'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'plugin.json'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -355,17 +355,17 @@
 # ---
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_with_subdir_works.1
   '''
-  SELECT "posthog_pluginsourcefile"."id",
-         "posthog_pluginsourcefile"."plugin_id",
-         "posthog_pluginsourcefile"."filename",
-         "posthog_pluginsourcefile"."source",
-         "posthog_pluginsourcefile"."status",
-         "posthog_pluginsourcefile"."transpiled",
-         "posthog_pluginsourcefile"."error",
-         "posthog_pluginsourcefile"."updated_at"
-  FROM "posthog_pluginsourcefile"
-  WHERE ("posthog_pluginsourcefile"."filename" = 'index.ts'
-         AND "posthog_pluginsourcefile"."plugin_id" = 99999)
+  SELECT "insights_pluginsourcefile"."id",
+         "insights_pluginsourcefile"."plugin_id",
+         "insights_pluginsourcefile"."filename",
+         "insights_pluginsourcefile"."source",
+         "insights_pluginsourcefile"."status",
+         "insights_pluginsourcefile"."transpiled",
+         "insights_pluginsourcefile"."error",
+         "insights_pluginsourcefile"."updated_at"
+  FROM "insights_pluginsourcefile"
+  WHERE ("insights_pluginsourcefile"."filename" = 'index.ts'
+         AND "insights_pluginsourcefile"."plugin_id" = 99999)
   LIMIT 21
   FOR
   UPDATE
@@ -374,6 +374,6 @@
 # name: TestPluginSourceFile.test_sync_from_plugin_archive_with_subdir_works.2
   '''
   SELECT COUNT(*) AS "__count"
-  FROM "posthog_pluginsourcefile"
+  FROM "insights_pluginsourcefile"
   '''
 # ---

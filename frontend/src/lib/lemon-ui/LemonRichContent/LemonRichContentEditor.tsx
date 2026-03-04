@@ -6,10 +6,10 @@ import { Placeholder } from '@tiptap/extensions'
 import { EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useRef, useState } from 'react'
 
-import { IconEye, IconImage, IconPencil } from '@posthog/icons'
+import { IconEye, IconImage, IconPencil } from '@hanzo/icons'
 
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
@@ -136,10 +136,10 @@ export function LemonRichContentEditor({
             if (ttEditor) {
                 ttEditor.commands.insertContent(`\n\n![${fileName}](${url})`)
             }
-            posthog.capture('rich text image uploaded', { name: fileName })
+            insights.capture('rich text image uploaded', { name: fileName })
         },
         onError: (detail) => {
-            posthog.capture('rich text image upload failed', { error: detail })
+            insights.capture('rich text image upload failed', { error: detail })
             lemonToast.error(`Error uploading image: ${detail}`)
         },
     })

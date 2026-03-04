@@ -2,14 +2,14 @@
 Python-based feature flag evaluation engine.
 
 IMPORTANT: This module is LEGACY code and should only be used for:
-1. The "Create static cohort from feature flag" background task (posthog/tasks/calculate_cohort.py)
+1. The "Create static cohort from feature flag" background task (insights/tasks/calculate_cohort.py)
 
 All other flag evaluation (decide, toolbar, local evaluation, etc.) now uses the Rust flags service.
 
 DO NOT add new uses of this code. If you need flag evaluation, use the Rust service by calling
 the FEATURE_FLAGS_SERVICE_URL/flags endpoint.
 
-For flag validation in the admin UI, use posthog/models/feature_flag/flag_validation.py instead.
+For flag validation in the admin UI, use insights/models/feature_flag/flag_validation.py instead.
 """
 
 import time
@@ -930,7 +930,7 @@ def get_all_feature_flags_with_details(
     if flag_keys is not None and not only_evaluate_survey_feature_flags:
         flag_keys_set = set(flag_keys)
         feature_flags_to_be_evaluated = [ff for ff in feature_flags_to_be_evaluated if ff.key in flag_keys_set]
-    # NB: this behavior is posthog-js specific, and is controlled by the advanced_only_evaluate_survey_feature_flags config parameter
+    # NB: this behavior is insights-js specific, and is controlled by the advanced_only_evaluate_survey_feature_flags config parameter
     elif only_evaluate_survey_feature_flags:
         feature_flags_to_be_evaluated = [
             ff for ff in feature_flags_to_be_evaluated if ff.key.startswith(SURVEY_TARGETING_FLAG_PREFIX)
@@ -993,7 +993,7 @@ def get_all_feature_flags_with_details(
                 # Step 2: Get existing overrides from persons database
                 with execute_with_timeout(FLAG_MATCHING_QUERY_TIMEOUT_MS, READ_ONLY_DATABASE_FOR_PERSONS) as cursor:
                     override_query = """
-                        SELECT DISTINCT feature_flag_key FROM posthog_featureflaghashkeyoverride
+                        SELECT DISTINCT feature_flag_key FROM insights_featureflaghashkeyoverride
                         WHERE team_id = %(team_id)s AND person_id = ANY(%(person_ids)s)
                     """
                     cursor.execute(override_query, {"team_id": team.id, "person_ids": person_ids})
@@ -1002,8 +1002,8 @@ def get_all_feature_flags_with_details(
                 # Step 3: Get flags with experience continuity from default database
                 with execute_with_timeout(FLAG_MATCHING_QUERY_TIMEOUT_MS, DATABASE_FOR_FLAG_MATCHING) as cursor:
                     flag_query = """
-                        SELECT key FROM posthog_featureflag flag
-                        JOIN posthog_team team ON flag.team_id = team.id
+                        SELECT key FROM insights_featureflag flag
+                        JOIN insights_team team ON flag.team_id = team.id
                         WHERE team.project_id = %(project_id)s
                             AND flag.ensure_experience_continuity = TRUE
                             AND flag.active = TRUE
@@ -1030,7 +1030,7 @@ def get_all_feature_flags_with_details(
                 # In all cases, we simply try to find all personIDs associated with the distinct_id
                 # and the hash_key_override, and add overrides for all these personIDs.
                 # On merge, if a person is deleted, it is fine because the below line in plugin-server will take care of it.
-                # https://github.com/PostHog/posthog/blob/master/plugin-server/src/utils/db/db.ts (updateCohortsAndFeatureFlagsForMerge)
+                # https://github.com/Hanzo Insights/insights/blob/master/plugin-server/src/utils/db/db.ts (updateCohortsAndFeatureFlagsForMerge)
 
                 writing_hash_key_override = set_feature_flag_hash_key_overrides(
                     team, [distinct_id, hash_key_override], hash_key_override
@@ -1128,7 +1128,7 @@ def set_feature_flag_hash_key_overrides(team: Team, distinct_ids: list[str], has
             # Step 2: Get existing overrides from persons database
             with execute_with_timeout(FLAG_MATCHING_QUERY_TIMEOUT_MS, WRITE_DATABASE_FOR_PERSONS) as cursor:
                 override_query = """
-                    SELECT DISTINCT feature_flag_key FROM posthog_featureflaghashkeyoverride
+                    SELECT DISTINCT feature_flag_key FROM insights_featureflaghashkeyoverride
                     WHERE team_id = %(team_id)s AND person_id = ANY(%(person_ids)s)
                 """
                 cursor.execute(override_query, {"team_id": team.id, "person_ids": person_ids})
@@ -1137,8 +1137,8 @@ def set_feature_flag_hash_key_overrides(team: Team, distinct_ids: list[str], has
             # Step 3: Get flags that need overrides from default database
             with execute_with_timeout(FLAG_MATCHING_QUERY_TIMEOUT_MS, DATABASE_FOR_FLAG_MATCHING) as cursor:
                 flag_query = """
-                    SELECT key FROM posthog_featureflag flag
-                    JOIN posthog_team team ON flag.team_id = team.id
+                    SELECT key FROM insights_featureflag flag
+                    JOIN insights_team team ON flag.team_id = team.id
                     WHERE team.project_id = %(project_id)s
                         AND flag.ensure_experience_continuity = TRUE
                         AND flag.active = TRUE
@@ -1170,7 +1170,7 @@ def set_feature_flag_hash_key_overrides(team: Team, distinct_ids: list[str], has
                         params[f"flag_key_{i}"] = flag_key
 
                     insert_query = f"""
-                        INSERT INTO posthog_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
+                        INSERT INTO insights_featureflaghashkeyoverride (team_id, person_id, feature_flag_key, hash_key)
                         VALUES {", ".join(values_placeholders)}
                         ON CONFLICT DO NOTHING
                     """

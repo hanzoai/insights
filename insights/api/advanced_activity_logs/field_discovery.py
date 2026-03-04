@@ -112,7 +112,7 @@ class AdvancedActivityLogFieldDiscovery:
         """Get sampled records using SQL TABLESAMPLE for large datasets."""
         query = f"""
             SELECT scope, detail
-            FROM posthog_activitylog TABLESAMPLE SYSTEM ({SAMPLING_PERCENTAGE})
+            FROM insights_activitylog TABLESAMPLE SYSTEM ({SAMPLING_PERCENTAGE})
             WHERE organization_id = %s
             AND detail IS NOT NULL
             ORDER BY created_at DESC

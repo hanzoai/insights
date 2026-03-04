@@ -19,9 +19,9 @@ function NuxtEnvVarsSnippet(): JSX.Element {
             {`export default defineNuxtConfig({
   runtimeConfig: {
     public: {
-      posthogPublicKey: '${currentTeam?.api_token}',
-      posthogHost: '${apiHostOrigin()}',
-      posthogDefaults: '${SDK_DEFAULTS_DATE}'
+      insightsPublicKey: '${currentTeam?.api_token}',
+      insightsHost: '${apiHostOrigin()}',
+      insightsDefaults: '${SDK_DEFAULTS_DATE}'
     }
   }
 })`}
@@ -35,25 +35,25 @@ function NuxtAppClientCodeSnippet(): JSX.Element {
     return (
         <CodeSnippet language={Language.JavaScript}>
             {`import { defineNuxtPlugin } from '#app'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 export default defineNuxtPlugin(nuxtApp => {
   const runtimeConfig = useRuntimeConfig();
-  const posthogClient = posthog.init(runtimeConfig.public.posthogPublicKey, {
-    api_host: runtimeConfig.public.posthogHost,
-    defaults: runtimeConfig.public.posthogDefaults,
+  const insightsClient = insights.init(runtimeConfig.public.insightsPublicKey, {
+    api_host: runtimeConfig.public.insightsHost,
+    defaults: runtimeConfig.public.insightsDefaults,
     ${
         isPersonProfilesDisabled
             ? ``
             : `person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well`
     }
-    loaded: (posthog) => {
-      if (import.meta.env.MODE === 'development') posthog.debug();
+    loaded: (insights) => {
+      if (import.meta.env.MODE === 'development') insights.debug();
     }
   })
 
   return {
     provide: {
-      posthog: () => posthogClient
+      insights: () => insightsClient
     }
   }
 })`}
@@ -66,9 +66,9 @@ export function SDKInstallNuxtJSInstructions(): JSX.Element {
         <>
             <p>
                 The below guide is for Nuxt v3.0 and above. For Nuxt v2.16 and below, see our{' '}
-                <Link to="https://posthog.com/docs/libraries/nuxt-js#nuxt-v216-and-below">Nuxt docs</Link>
+                <Link to="https://hanzo.ai/docs/libraries/nuxt-js#nuxt-v216-and-below">Nuxt docs</Link>
             </p>
-            <h3>Install posthog-js using your package manager</h3>
+            <h3>Install insights-js using your package manager</h3>
             <JSInstallSnippet />
             <h3>Add environment variables</h3>
             <p>
@@ -78,7 +78,7 @@ export function SDKInstallNuxtJSInstructions(): JSX.Element {
 
             <h3>Create a plugin</h3>
             <p>
-                Create a new plugin by creating a new file <code>posthog.client.js</code> in your{' '}
+                Create a new plugin by creating a new file <code>insights.client.js</code> in your{' '}
                 <Link to="https://nuxt.com/docs/guide/directory-structure/plugins" target="_blank">
                     plugins directory
                 </Link>

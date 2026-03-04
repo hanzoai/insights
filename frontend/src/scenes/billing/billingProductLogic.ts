@@ -1,10 +1,10 @@
 import { actions, connect, events, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { forms } from 'kea-forms'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React from 'react'
 
-import { LemonDialog, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -612,25 +612,25 @@ export const billingProductLogic = kea<billingProductLogicType>([
             )
         },
         reportSurveyShown: ({ surveyID }) => {
-            posthog.capture(SurveyEventName.SHOWN, {
+            insights.capture(SurveyEventName.SHOWN, {
                 $survey_id: surveyID,
             })
             actions.setSurveyID(surveyID)
         },
         reportSurveySent: ({ surveyID, surveyResponse }) => {
-            // @note(zach): this is submitting to https://us.posthog.com/project/2/surveys/018b6e13-590c-0000-decb-c727a2b3f462?edit=true
+            // @note(zach): this is submitting to https://insights.hanzo.ai/project/2/surveys/018b6e13-590c-0000-decb-c727a2b3f462?edit=true
             // $survey_response: open text response
             // $survey_response_1: this is the product type
             // $survey_response_2: list of reasons
             // The order is due to the form being built before reasons we're supported. Please do not change the order.
-            posthog.capture(SurveyEventName.SENT, {
+            insights.capture(SurveyEventName.SENT, {
                 $survey_id: surveyID,
                 ...surveyResponse,
             })
             actions.setSurveyID('')
         },
         reportSurveyDismissed: ({ surveyID }) => {
-            posthog.capture(SurveyEventName.DISMISSED, {
+            insights.capture(SurveyEventName.DISMISSED, {
                 $survey_id: surveyID,
             })
             actions.setSurveyID('')
@@ -685,7 +685,7 @@ export const billingProductLogic = kea<billingProductLogicType>([
                     lemonToast.error(response.error || 'Failed to activate subscription')
                 }
             } catch (error) {
-                posthog.captureException(new Error('payment entry api error - product upgrade error', { cause: error }))
+                insights.captureException(new Error('payment entry api error - product upgrade error', { cause: error }))
                 lemonToast.error('Failed to activate subscription. Please try again.')
             } finally {
                 actions.setBillingProductLoading(null)

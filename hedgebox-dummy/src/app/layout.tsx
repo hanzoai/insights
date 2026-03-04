@@ -3,7 +3,7 @@
 import './globals.css'
 
 import { AuthProvider } from '@/lib/auth'
-import { initInsights } from '@/lib/posthog'
+import { initInsights } from '@/lib/insights'
 import { useEffect } from 'react'
 
 export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {

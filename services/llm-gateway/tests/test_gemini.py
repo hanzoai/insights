@@ -49,7 +49,7 @@ class TestGeminiModels:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=valid_gemini_request,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 200
@@ -85,7 +85,7 @@ class TestGeminiModels:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=vision_request,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
         assert response.status_code == 200
 
@@ -106,7 +106,7 @@ class TestGeminiModels:
         response = authenticated_client.post(
             "/v1/chat/completions",
             json=streaming_request,
-            headers={"Authorization": "Bearer phx_test_key"},
+            headers={"Authorization": "Bearer hix_test_key"},
         )
 
         assert response.status_code == 200

@@ -1,7 +1,7 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 import { windowValues } from 'kea-window-values'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -64,11 +64,11 @@ export const sidePanelStateLogic = kea<sidePanelStateLogicType>([
         // NOTE: We explicitly reference the actions instead of connecting so that people don't accidentally
         // use this logic instead of sidePanelStateLogic
         openSidePanel: ({ tab }) => {
-            posthog.capture('sidebar opened', { tab })
+            insights.capture('sidebar opened', { tab })
             actions.setSidePanelOpen(true)
         },
         closeSidePanel: ({ tab }) => {
-            posthog.capture('sidebar closed', { tab })
+            insights.capture('sidebar closed', { tab })
             if (!tab) {
                 // If we aren't specifiying the tab we always close
                 actions.setSidePanelOpen(false)

@@ -57,8 +57,8 @@ export interface AsyncMigration {
     celery_task_id: string
     started_at: string
     finished_at: string
-    posthog_min_version: string
-    posthog_max_version: string
+    insights_min_version: string
+    insights_max_version: string
     error_count: number
     parameters: Record<string, number>
     parameter_definitions: Record<string, [string | number | null, string]>

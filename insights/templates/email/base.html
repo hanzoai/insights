@@ -1,4 +1,4 @@
-{% load posthog_assets %}
+{% load insights_assets %}
 
 <!DOCTYPE html>
 <html>
@@ -18,7 +18,7 @@
                 <div class="header">
                     {% block header %}
                     <h1 class="text-center">
-                        <a href="{% absolute_uri %}"><img src="{% absolute_asset_url 'posthog-logo.png' %}"
+                        <a href="{% absolute_uri %}"><img src="{% absolute_asset_url 'insights-logo.png' %}"
                                 width="160px" height="31px" alt="Insights" class="logo" /></a>
                     </h1>
                     {% endblock %}
@@ -41,10 +41,10 @@
                     <div class="footer">
                         {% block footer %}
                             Need help?
-                            <a href="https://posthog.com/questions?{{ utm_tags }}"
+                            <a href="https://hanzo.ai/questions?{{ utm_tags }}"
                                 target="_blank"><b>Visit support</b></a>
                             or
-                            <a href="https://posthog.com/docs?{{ utm_tags }}"
+                            <a href="https://hanzo.ai/docs?{{ utm_tags }}"
                                 target="_blank"><b>read our documentation</b></a>
                         {% endblock %}
                     </div>

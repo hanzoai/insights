@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { IconApps, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSelect, LemonSelectOptions, Link } from '@posthog/lemon-ui'
+import { IconApps, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSelect, LemonSelectOptions, Link } from '@hanzo/lemon-ui'
 
 import { ObjectTags } from 'lib/components/ObjectTags/ObjectTags'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -35,7 +35,7 @@ const eventTypeOptions: LemonSelectOptions<EventDefinitionType> = [
     {
         value: EventDefinitionType.EventInsights,
         label: 'Insights events',
-        'data-attr': 'event-type-option-event-posthog',
+        'data-attr': 'event-type-option-event-insights',
     },
 ]
 
@@ -129,7 +129,7 @@ export function EventDefinitionsTable(): JSX.Element {
                 Looking for{' '}
                 {filters.event_type === 'event_custom'
                     ? 'custom '
-                    : filters.event_type === 'event_posthog'
+                    : filters.event_type === 'event_insights'
                       ? 'Insights '
                       : ''}
                 event usage statistics?{' '}
@@ -141,7 +141,7 @@ export function EventDefinitionsTable(): JSX.Element {
                             'WHERE {filters}\n' +
                             (filters.event_type === 'event_custom'
                                 ? "AND event NOT LIKE '$%'\n"
-                                : filters.event_type === 'event_posthog'
+                                : filters.event_type === 'event_insights'
                                   ? "AND event LIKE '$%'\n"
                                   : '') +
                             'GROUP BY event\n' +

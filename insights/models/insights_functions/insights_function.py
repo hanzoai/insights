@@ -35,7 +35,7 @@ DEFAULT_STATE = {"state": 0, "tokens": 0}
 logger = structlog.get_logger(__name__)
 
 GEOIP_TRANSFORMATION_CREATION_FAILED_COUNTER = Counter(
-    "posthog_geoip_transformation_creation_failed_total",
+    "insights_geoip_transformation_creation_failed_total",
     "Number of times GeoIP transformation creation failed for new teams",
 )
 
@@ -92,7 +92,7 @@ class InsightsFunction(FileSystemSyncMixin, UUIDTModel):
     icon_url = models.TextField(null=True, blank=True)
 
     # Script source, except for the "site_*" types, when it contains TypeScript Source
-    hog = models.TextField()
+    iql = models.TextField()
     # Used when the source language is a script (everything except the "site_*" types)
     bytecode = models.JSONField(null=True, blank=True)
     # Transpiled JavasScript. Used with the "site_*" types

@@ -29,7 +29,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                     language: 'tsx',
                                     file: 'App.tsx',
                                     code: dedent`
-                                        import { useInsightsCapture } from 'posthog-react-native'
+                                        import { useInsightsCapture } from 'insights-react-native'
                                         import { NavigationContainer } from '@react-navigation/native'
 
                                         function App() {

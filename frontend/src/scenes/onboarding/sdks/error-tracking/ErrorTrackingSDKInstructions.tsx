@@ -15,8 +15,8 @@ import {
     RubyInstallation,
     RubyOnRailsInstallation,
     SvelteInstallation,
-} from '@posthog/shared-onboarding/error-tracking'
-import { JSEventCapture, PythonEventCapture } from '@posthog/shared-onboarding/product-analytics'
+} from '@hanzo/shared-onboarding/error-tracking'
+import { JSEventCapture, PythonEventCapture } from '@hanzo/shared-onboarding/product-analytics'
 
 import { SDKInstructionsMap, SDKKey } from '~/types'
 

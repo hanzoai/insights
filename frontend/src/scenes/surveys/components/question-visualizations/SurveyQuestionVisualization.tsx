@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { humanFriendlyNumber, pluralize } from 'lib/utils'
 import { StatelessInsightLoadingState } from 'scenes/insights/EmptyStates'

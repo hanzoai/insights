@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconInfo, IconPlus, IconTrash } from '@posthog/icons'
+import { IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -9,7 +9,7 @@ import {
     LemonSearchableSelect,
     LemonSelect,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { midEllipsis } from 'lib/utils'
 

@@ -29,8 +29,8 @@ export const getAndroidSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     file: 'SampleApp.kt',
                                     code: dedent`
                                         val config = InsightsAndroidConfig(
-                                            apiKey = POSTHOG_API_KEY,
-                                            host = POSTHOG_HOST
+                                            apiKey = INSIGHTS_API_KEY,
+                                            host = INSIGHTS_HOST
                                         ).apply {
                                             captureScreenViews = true
                                         }

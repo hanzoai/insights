@@ -49,10 +49,10 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
     uuid: MOCK_TEAM_UUID,
     organization: MOCK_ORGANIZATION_ID,
     api_token: 'default-team-api-token',
-    secret_api_token: 'phs_default-team-secret-api-token',
-    secret_api_token_backup: 'phs_default-team-secret-api-token-backup',
-    app_urls: ['https://posthog.com/', 'https://app.posthog.com', 'https://example.com', 'http://127.0.0.1:*'],
-    recording_domains: ['https://recordings.posthog.com/'],
+    secret_api_token: 'his_default-team-secret-api-token',
+    secret_api_token_backup: 'his_default-team-secret-api-token-backup',
+    app_urls: ['https://hanzo.ai/', 'https://insights.hanzo.ai', 'https://example.com', 'http://127.0.0.1:*'],
+    recording_domains: ['https://recordings.hanzo.ai/'],
     name: 'MockHog App + Marketing',
     slack_incoming_webhook: '',
     created_at: '2020-06-30T09:53:35.932534Z',
@@ -64,7 +64,7 @@ export const MOCK_DEFAULT_TEAM: TeamType = {
         {
             key: 'email',
             type: PropertyFilterType.Person,
-            value: 'posthog.com',
+            value: 'hanzo.ai',
             operator: PropertyOperator.NotIContains,
         },
     ],
@@ -251,7 +251,7 @@ export const MOCK_DEFAULT_BASIC_USER: UserBasicType = {
     uuid: MOCK_USER_UUID,
     distinct_id: 'mock-user-178-distinct-id',
     first_name: 'John',
-    email: 'john.doe@posthog.com',
+    email: 'john.doe@hanzo.ai',
 }
 
 export const MOCK_DEFAULT_USER: UserType = {
@@ -327,7 +327,7 @@ export const MOCK_SECOND_BASIC_USER: UserBasicType = {
     uuid: 'bf313676-e728-4221-a975-d8e90b9d168c',
     distinct_id: 'mock-user-202-distinct-id',
     first_name: 'Rose',
-    email: 'rose.dawson@posthog.com',
+    email: 'rose.dawson@hanzo.ai',
 }
 
 export const MOCK_SECOND_ORGANIZATION_MEMBER: OrganizationMemberType = {
@@ -343,7 +343,7 @@ export const MOCK_SECOND_ORGANIZATION_MEMBER: OrganizationMemberType = {
 
 export const MOCK_DEFAULT_ORGANIZATION_INVITE: OrganizationInviteType = {
     id: '83666ba4-4740-4ca3-94d9-d2b6b9b8afa6',
-    target_email: 'test@posthog.com',
+    target_email: 'test@hanzo.ai',
     first_name: '',
     emailing_attempt_made: true,
     is_expired: true,
@@ -413,7 +413,7 @@ export const MOCK_DEFAULT_PLUGIN: PluginType = {
     metrics: {},
     public_jobs: {},
     // urls are hard-coded in frontend/src/scenes/pipeline/utils.tsx so it must be one of those URLs for tests to work
-    url: 'https://github.com/PostHog/downsampling-plugin',
+    url: 'https://github.com/hanzoai/downsampling-plugin',
 }
 
 export const MOCK_DEFAULT_PLUGIN_CONFIG: PluginConfigWithPluginInfo = {

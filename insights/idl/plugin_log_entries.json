@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "file://posthog/idl/plugin_log_entries.json",
+    "$id": "file://insights/idl/plugin_log_entries.json",
     "title": "plugin_log_entries",
     "description": "Plugin log entries that are destined for ClickHouse",
     "type": "object",

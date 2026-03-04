@@ -8,7 +8,7 @@ from typing import Any, cast
 from django.db.models import F, Q
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 import temporalio.common
 import temporalio.activity
 import temporalio.workflow
@@ -158,7 +158,7 @@ async def batch_embed_actions(
             raise maybe_vector
 
         if isinstance(maybe_vector, BaseException):
-            posthoganalytics.capture_exception(maybe_vector, properties={"tag": "max_ai"})
+            hanzoanalytics.capture_exception(maybe_vector, properties={"tag": "max_ai"})
             logger.exception("Error embedding actions", error=maybe_vector)
             continue
         for action, embedding in zip(action_batch, maybe_vector):

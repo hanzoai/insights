@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { useEffect } from 'react'
 
-import { IconInfo, IconPlayFilled, IconTestTube } from '@posthog/icons'
+import { IconInfo, IconPlayFilled, IconTestTube } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -15,7 +15,7 @@ import {
     ProfilePicture,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonField } from 'lib/lemon-ui/LemonField'
 import { isEmail } from 'lib/utils'

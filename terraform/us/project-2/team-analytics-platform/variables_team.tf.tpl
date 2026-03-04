@@ -19,13 +19,13 @@ variable "analytics_platform_slack_channel_id" {
 }
 
 variable "analytics_platform_slack_workspace_id" {
-  description = "PostHog Slack integration workspace ID"
+  description = "Insights Slack integration workspace ID"
   type        = number
   sensitive   = true
 }
 
 variable "analytics_platform_alert_subscribed_user_ids" {
-  description = "List of PostHog user IDs subscribed to alerts"
+  description = "List of Insights user IDs subscribed to alerts"
   type        = list(number)
   sensitive   = true
   default     = []

@@ -1,6 +1,6 @@
-import { IconExternal } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { urls } from 'scenes/urls'
 

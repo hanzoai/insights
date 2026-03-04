@@ -29,7 +29,7 @@ export interface DashboardExportResult extends HclExportResult {
 }
 
 /**
- * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/dashboard
+ * @see https://registry.terraform.io/providers/Insights/insights/latest/docs/resources/dashboard
  */
 const DASHBOARD_FIELD_MAPPINGS: FieldMapping<Partial<DashboardBasicType>>[] = [
     {
@@ -70,7 +70,7 @@ function validateDashboard(
 }
 
 const DASHBOARD_EXPORTER: ResourceExporter<Partial<DashboardBasicType>, DashboardHclExportOptions> = {
-    resourceType: 'posthog_dashboard',
+    resourceType: 'insights_dashboard',
     resourceLabel: 'dashboard',
     fieldMappings: DASHBOARD_FIELD_MAPPINGS,
     validate: validateDashboard,

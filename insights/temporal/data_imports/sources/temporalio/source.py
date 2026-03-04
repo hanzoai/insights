@@ -69,7 +69,7 @@ class TemporalIOSource(ResumableSource[TemporalIOSourceConfig, TemporalIOResumeC
             name=SchemaExternalDataSourceType.TEMPORAL_IO,
             label="Temporal.io",
             iconPath="/static/services/temporal.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/temporal",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/temporal",
             fields=cast(
                 list[FieldType],
                 [

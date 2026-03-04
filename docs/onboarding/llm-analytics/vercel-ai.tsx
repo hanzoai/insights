@@ -19,7 +19,7 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            npm install @posthog/ai posthog-node
+                            npm install @hanzo/ai insights-node
                         `}
                     />
                 </>
@@ -46,7 +46,7 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
                         <Markdown>
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the background to send the data.
 
-                            You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
+                            You can also use LLM analytics with other SDKs or our API, but you will need to capture the data in the right format. See the schema in the [manual capture section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more details.
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -58,14 +58,14 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
             content: (
                 <>
                     <Markdown>
-                        Initialize Insights with your project API key and host from [your project settings](https://app.posthog.com/settings/project), then pass the Vercel AI OpenAI client and the Insights client to the `withTracing` wrapper.
+                        Initialize Insights with your project API key and host from [your project settings](https://insights.hanzo.ai/settings/project), then pass the Vercel AI OpenAI client and the Insights client to the `withTracing` wrapper.
                     </Markdown>
 
                     <CodeBlock
                         language="typescript"
                         code={dedent`
-                            import { Insights } from "posthog-node";
-                            import { withTracing } from "@posthog/ai"
+                            import { Insights } from "insights-node";
+                            import { withTracing } from "@hanzo/ai"
                             import { generateText } from "ai"
                             import { createOpenAI } from "@ai-sdk/openai"
 
@@ -80,11 +80,11 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
                             });
 
                             const model = withTracing(openaiClient("gpt-4-turbo"), phClient, {
-                              posthogDistinctId: "user_123", // optional
-                              posthogTraceId: "trace_123", // optional
-                              posthogProperties: { conversationId: "abc123", paid: true }, // optional
-                              posthogPrivacyMode: false, // optional
-                              posthogGroups: { company: "companyIdInYourDb" }, // optional
+                              insightsDistinctId: "user_123", // optional
+                              insightsTraceId: "trace_123", // optional
+                              insightsProperties: { conversationId: "abc123", paid: true }, // optional
+                              insightsPrivacyMode: false, // optional
+                              insightsGroups: { company: "companyIdInYourDb" }, // optional
                             });
 
                             phClient.shutdown()
@@ -122,7 +122,7 @@ export const getVercelAISteps = (ctx: OnboardingComponentsContext): StepDefiniti
 
                     <Blockquote>
                         <Markdown>
-                            **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request. See our docs on [anonymous vs identified events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the request. See our docs on [anonymous vs identified events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>
 

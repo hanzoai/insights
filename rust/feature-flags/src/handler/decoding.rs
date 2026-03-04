@@ -211,7 +211,7 @@ pub fn decode_form_data(
         })?;
 
     // Extract base64 part, handling both with and without 'data=' prefix
-    // see https://github.com/PostHog/posthog/blob/master/posthog/utils.py#L693-L699
+    // see https://github.com/hanzoai/insights/blob/main/insights/utils.py#L693-L699
     let base64_str = if decoded_form.starts_with("data=") {
         decoded_form.split('=').nth(1).unwrap_or("")
     } else {
@@ -230,7 +230,7 @@ pub fn decode_form_data(
     };
 
     // Remove whitespace and add padding if necessary
-    // https://github.com/PostHog/posthog/blob/master/posthog/utils.py#L701-L705
+    // https://github.com/hanzoai/insights/blob/main/insights/utils.py#L701-L705
     let mut cleaned_base64 = base64_str.replace(' ', "");
     let padding_needed = cleaned_base64.len() % 4;
     if padding_needed > 0 {
@@ -463,19 +463,19 @@ mod tests {
         use rstest::rstest;
 
         #[rstest]
-        #[case(Some("posthog-js/1.88.0"), "posthog-js")]
-        #[case(Some("posthog-android/3.1.0"), "posthog-android")]
-        #[case(Some("posthog-ios/3.0.0"), "posthog-ios")]
-        #[case(Some("posthog-react-native/2.5.0"), "posthog-react-native")]
-        #[case(Some("posthog-flutter/4.0.0"), "posthog-flutter")]
-        #[case(Some("posthog-python/1.4.0"), "posthog-python")]
-        #[case(Some("posthog-ruby/2.0.0"), "posthog-ruby")]
-        #[case(Some("posthog-php/3.0.0"), "posthog-php")]
-        #[case(Some("posthog-java/1.0.0"), "posthog-java")]
-        #[case(Some("posthog-go/0.1.0"), "posthog-go")]
-        #[case(Some("posthog-node/2.2.0"), "posthog-node")]
-        #[case(Some("posthog-dotnet/1.0.0"), "posthog-dotnet")]
-        #[case(Some("posthog-elixir/0.2.0"), "posthog-elixir")]
+        #[case(Some("insights-js/1.88.0"), "insights-js")]
+        #[case(Some("insights-android/3.1.0"), "insights-android")]
+        #[case(Some("insights-ios/3.0.0"), "insights-ios")]
+        #[case(Some("insights-react-native/2.5.0"), "insights-react-native")]
+        #[case(Some("insights-flutter/4.0.0"), "insights-flutter")]
+        #[case(Some("insights-python/1.4.0"), "insights-python")]
+        #[case(Some("insights-ruby/2.0.0"), "insights-ruby")]
+        #[case(Some("insights-php/3.0.0"), "insights-php")]
+        #[case(Some("insights-java/1.0.0"), "insights-java")]
+        #[case(Some("insights-go/0.1.0"), "insights-go")]
+        #[case(Some("insights-node/2.2.0"), "insights-node")]
+        #[case(Some("insights-dotnet/1.0.0"), "insights-dotnet")]
+        #[case(Some("insights-elixir/0.2.0"), "insights-elixir")]
         #[case(
             Some("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"),
             "browser"

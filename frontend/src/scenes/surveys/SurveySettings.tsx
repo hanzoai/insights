@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { DeepPartialMap, ValidationErrorType } from 'kea-forms'
 import { useState } from 'react'
 
-import { IconGear } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonSwitch, Link } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonSwitch, Link } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'
@@ -186,12 +186,12 @@ export function SurveysDisabledBanner(): JSX.Element | null {
         >
             Surveys are currently disabled for this project. Re-enable them in the settings, otherwise surveys will not
             be rendered in your app (either automatically or{' '}
-            <Link to="https://posthog.com/docs/surveys/implementing-custom-surveys#rendering-surveys-programmatically">
+            <Link to="https://hanzo.ai/docs/surveys/implementing-custom-surveys#rendering-surveys-programmatically">
                 using the <code>renderSurvey</code> function
             </Link>
             ). Surveys API is enabled if you are{' '}
             <Link
-                to="https://posthog.com/docs/surveys/implementing-custom-surveys#fetching-surveys-manually"
+                to="https://hanzo.ai/docs/surveys/implementing-custom-surveys#fetching-surveys-manually"
                 target="_blank"
             >
                 fetching and rendering them manually

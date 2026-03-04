@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { forwardRef } from 'react'
 
-import { IconTarget } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconTarget } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
 import { useAppShortcut } from 'lib/components/AppShortcuts/useAppShortcut'

@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useEffect, useRef } from 'react'
 
-import { IconHome } from '@posthog/icons'
-import { LemonButton, LemonSelect, LemonSkeleton } from '@posthog/lemon-ui'
+import { IconHome } from '@hanzo/icons'
+import { LemonButton, LemonSelect, LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 

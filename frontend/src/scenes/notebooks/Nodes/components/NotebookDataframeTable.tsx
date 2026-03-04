@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import { LemonButton, LemonSelect, LemonTable, Spinner } from '@posthog/lemon-ui'
+import { LemonButton, LemonSelect, LemonTable, Spinner } from '@hanzo/lemon-ui'
 
 import { LemonTableColumn } from 'lib/lemon-ui/LemonTable'
 

@@ -252,7 +252,7 @@ class TestOAuthModels(TestCase):
     valid_custom_scheme_uris = [
         ("simple custom scheme", "twig://callback"),
         ("custom scheme with path", "myapp://oauth/callback"),
-        ("reverse domain style", "com.posthog.twig://oauth"),
+        ("reverse domain style", "com.insights.twig://oauth"),
         ("cursor scheme", "cursor://oauth"),
         ("vscode scheme", "vscode://oauth"),
     ]

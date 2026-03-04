@@ -3,8 +3,8 @@ import './FunnelCorrelationTable.scss'
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArchive, IconTrending } from '@posthog/icons'
-import { LemonCheckbox, LemonTable } from '@posthog/lemon-ui'
+import { IconArchive, IconTrending } from '@hanzo/icons'
+import { LemonCheckbox, LemonTable } from '@hanzo/lemon-ui'
 
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
 import { VisibilitySensor } from 'lib/components/VisibilitySensor/VisibilitySensor'
@@ -287,7 +287,7 @@ export function FunnelCorrelationTable(): JSX.Element | null {
                                         <p className="m-auto">
                                             Highlight events which are likely to have affected the conversion rate
                                             within the funnel.{' '}
-                                            <Link to="https://posthog.com/docs/product-analytics/correlation">
+                                            <Link to="https://hanzo.ai/docs/product-analytics/correlation">
                                                 Learn more about correlation analysis.
                                             </Link>
                                         </p>

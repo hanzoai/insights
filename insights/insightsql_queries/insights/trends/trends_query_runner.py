@@ -1083,7 +1083,7 @@ class TrendsQueryRunner(AnalyticsQueryRunner[TrendsQueryResponse]):
         except PropertyDefinition.DoesNotExist:
             return "String"
 
-    # TODO: Move this to posthog/insightsql_queries/legacy_compatibility/query_to_filter.py
+    # TODO: Move this to insights/insightsql_queries/legacy_compatibility/query_to_filter.py
     def _query_to_filter(self) -> dict[str, Any]:
         filter_dict = {
             "insight": "TRENDS",

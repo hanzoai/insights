@@ -17,7 +17,7 @@ import {
     SvelteInstallation,
     VueInstallation,
     WebflowInstallation,
-} from '@posthog/shared-onboarding/session-replay'
+} from '@hanzo/shared-onboarding/session-replay'
 
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'

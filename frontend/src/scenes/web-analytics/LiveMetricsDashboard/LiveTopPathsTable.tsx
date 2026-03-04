@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import { useLayoutEffect, useRef } from 'react'
 
-import { LemonSkeleton, Tooltip } from '@posthog/lemon-ui'
+import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
 
 import { PathItem } from './LiveWebAnalyticsMetricsTypes'
 

@@ -1,6 +1,6 @@
 import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
-import { EarlyAccessFeature, posthog } from 'posthog-js'
+import { EarlyAccessFeature, insights } from '@hanzo/insights'
 
 import { supportLogic } from 'lib/components/Support/supportLogic'
 import { FeatureFlagKey } from 'lib/constants'
@@ -44,7 +44,7 @@ export const featurePreviewsLogic = kea<featurePreviewsLogicType>([
             {
                 loadEarlyAccessFeatures: async () => {
                     return await new Promise((resolve) =>
-                        posthog.getEarlyAccessFeatures((features) => resolve(features), true, ['concept', 'beta'])
+                        insights.getEarlyAccessFeatures((features) => resolve(features), true, ['concept', 'beta'])
                     )
                 },
             },
@@ -84,15 +84,15 @@ export const featurePreviewsLogic = kea<featurePreviewsLogicType>([
             if (window.IMPERSONATED_SESSION) {
                 lemonToast.error('Cannot update early access feature enrollment while impersonating a user')
             } else {
-                posthog.updateEarlyAccessFeatureEnrollment(flagKey, enabled, stage)
+                insights.updateEarlyAccessFeatureEnrollment(flagKey, enabled, stage)
 
                 // Track product intent if user is opting in and payload contains product_intent
                 // The format on the payload should be: { product_intent: ProductKey }
                 if (enabled) {
                     const feature = values.rawEarlyAccessFeatures.find((f) => f.flagKey === flagKey)
 
-                    // TODO: We can stop using this crazy type cast once the companion `posthog-js` PR is merged
-                    // https://github.com/PostHog/posthog-js/pull/2642
+                    // TODO: We can stop using this crazy type cast once the companion `insights-js` PR is merged
+                    // https://github.com/hanzoai/insights-js/pull/2642
                     const payload = (feature as any)?.payload as Record<string, any> | undefined
                     if (payload?.product_intent) {
                         const productIntent = payload.product_intent

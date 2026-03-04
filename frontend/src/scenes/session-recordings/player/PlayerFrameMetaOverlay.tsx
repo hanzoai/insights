@@ -10,10 +10,10 @@ import { sessionRecordingPlayerLogic } from './sessionRecordingPlayerLogic'
 declare global {
     interface Window {
         // Track active/inactive periods to consume from backend later
-        __POSTHOG_INACTIVITY_PERIODS__?: ReplayInactivityPeriod[]
+        __INSIGHTS_INACTIVITY_PERIODS__?: ReplayInactivityPeriod[]
         // Signal segment changes to backend (backend tracks actual video timestamps)
-        __POSTHOG_CURRENT_SEGMENT_START_TS__?: number
-        __POSTHOG_SEGMENT_COUNTER__?: number
+        __INSIGHTS_CURRENT_SEGMENT_START_TS__?: number
+        __INSIGHTS_SEGMENT_COUNTER__?: number
     }
 }
 
@@ -32,12 +32,12 @@ export function PlayerFrameMetaOverlay(): JSX.Element | null {
     // Process all segments at once when available to fill data on all active/inactive periods
     useEffect(() => {
         // Reset segment tracking globals
-        window.__POSTHOG_CURRENT_SEGMENT_START_TS__ = undefined
-        window.__POSTHOG_SEGMENT_COUNTER__ = 0
+        window.__INSIGHTS_CURRENT_SEGMENT_START_TS__ = undefined
+        window.__INSIGHTS_SEGMENT_COUNTER__ = 0
 
         // If no segments available - no periods to track
         if (!recordingSegments || recordingSegments.length === 0) {
-            window.__POSTHOG_INACTIVITY_PERIODS__ = []
+            window.__INSIGHTS_INACTIVITY_PERIODS__ = []
             return
         }
         // Segments use Unix timestamps, so we need to use them also (instead of 0 as a start)
@@ -55,7 +55,7 @@ export function PlayerFrameMetaOverlay(): JSX.Element | null {
             // Ensure to keep only periods with >0 duration
             .filter((p) => p.ts_to_s > p.ts_from_s)
         // Store into the global variable to be used by the backend
-        window.__POSTHOG_INACTIVITY_PERIODS__ = periods
+        window.__INSIGHTS_INACTIVITY_PERIODS__ = periods
     }, [recordingSegments])
 
     // Track when the first playback starts (for VIDEO_T display)
@@ -81,7 +81,7 @@ export function PlayerFrameMetaOverlay(): JSX.Element | null {
         if (!currentSegment || !recordingSegments?.length) {
             return
         }
-        // Track only active segments (inactive segments are tracked via __POSTHOG_INACTIVITY_PERIODS__ above)
+        // Track only active segments (inactive segments are tracked via __INSIGHTS_INACTIVITY_PERIODS__ above)
         if (!currentSegment.isActive) {
             return
         }
@@ -89,8 +89,8 @@ export function PlayerFrameMetaOverlay(): JSX.Element | null {
         const recordingStartTimestamp = recordingSegments[0].startTimestamp
         const segmentTsFromS = (currentSegment.startTimestamp - recordingStartTimestamp) / 1000
         // Update globals to signal segment change to backend
-        window.__POSTHOG_CURRENT_SEGMENT_START_TS__ = segmentTsFromS
-        window.__POSTHOG_SEGMENT_COUNTER__ = (window.__POSTHOG_SEGMENT_COUNTER__ || 0) + 1
+        window.__INSIGHTS_CURRENT_SEGMENT_START_TS__ = segmentTsFromS
+        window.__INSIGHTS_SEGMENT_COUNTER__ = (window.__INSIGHTS_SEGMENT_COUNTER__ || 0) + 1
     }, [currentSegment, recordingSegments])
 
     // Skip rendering if no URL or player time is not available yet

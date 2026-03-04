@@ -94,7 +94,7 @@ export const liveDebuggerLogic = kea<liveDebuggerLogicType>([
 
     reducers({
         currentRepository: [
-            'Insights/posthog' as string,
+            'Insights/insights' as string,
             {
                 setCurrentRepository: (_, { repository }) => repository,
             },

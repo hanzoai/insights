@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { combineUrl, encodeParams, router } from 'kea-router'
 
-import { IconX } from '@posthog/icons'
+import { IconX } from '@hanzo/icons'
 
 import { PathItemSelector } from 'lib/components/PropertyFilters/components/PathItemSelector'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'

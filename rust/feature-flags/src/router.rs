@@ -393,7 +393,7 @@ mod tests {
     async fn test_pool_connection_success() {
         // This test requires a running database
         let database_url = std::env::var("DATABASE_URL")
-            .unwrap_or("postgres://posthog:posthog@localhost:5432/test_database".to_string());
+            .unwrap_or("postgres://insights:insights@localhost:5432/test_database".to_string());
 
         let pool = sqlx::postgres::PgPoolOptions::new()
             .max_connections(1)

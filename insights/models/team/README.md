@@ -26,8 +26,8 @@ import logging
 
 from django.db import models
 
-from posthog.models.team import Team
-from posthog.models.team.extensions import register_team_extension_signal
+from insights.models.team import Team
+from insights.models.team.extensions import register_team_extension_signal
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ Then run `python manage.py makemigrations`.
 Access the extension via the helper — do not add accessors to the Team model:
 
 ```python
-from posthog.models.team.extensions import get_or_create_team_extension
+from insights.models.team.extensions import get_or_create_team_extension
 from .models.team_my_product_config import TeamMyProductConfig
 
 config = get_or_create_team_extension(team, TeamMyProductConfig)

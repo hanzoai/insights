@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 
-import { IconCheck, IconPlus, IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { IconCheck, IconPlus, IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { CyclotronJobInputs } from 'lib/components/CyclotronJob/CyclotronJobInputs'
 import { PayGateButton } from 'lib/components/PayGateMini/PayGateButton'

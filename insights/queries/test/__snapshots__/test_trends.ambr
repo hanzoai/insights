@@ -290,7 +290,7 @@
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(group_properties_0, 'industry'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['finance', 'technology']), (['finance', 'technology']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(group_properties_0, 'industry'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['finance', 'technology']), (['finance', 'technology']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            LEFT JOIN
              (SELECT group_key,
@@ -400,7 +400,7 @@
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(group_properties_0, 'industry'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['finance']), (['finance']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(group_properties_0, 'industry'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['finance']), (['finance']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            LEFT JOIN
              (SELECT group_key,
@@ -474,7 +474,7 @@
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['second url']), (['second url']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$current_url'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['second url']), (['second url']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'sign up'
@@ -547,7 +547,7 @@
   '''
   
   SELECT count(DISTINCT pdi.person_id) AS total,
-         transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['val', 'bor']), (['val', 'bor']), '$$_posthog_breakdown_other_$$') as breakdown_value
+         transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['val', 'bor']), (['val', 'bor']), '$$_insights_breakdown_other_$$') as breakdown_value
   FROM events AS e
   INNER JOIN
     (SELECT distinct_id,
@@ -593,7 +593,7 @@
   '''
   
   SELECT count(DISTINCT pdi.person_id) AS total,
-         transform(ifNull(nullIf("mat_key", ''), '$$_posthog_breakdown_null_$$'), (['val', 'bor']), (['val', 'bor']), '$$_posthog_breakdown_other_$$') as breakdown_value
+         transform(ifNull(nullIf("mat_key", ''), '$$_insights_breakdown_null_$$'), (['val', 'bor']), (['val', 'bor']), '$$_insights_breakdown_other_$$') as breakdown_value
   FROM events AS e
   INNER JOIN
     (SELECT distinct_id,
@@ -699,7 +699,7 @@
               CROSS JOIN
                 (SELECT toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) AS timestamp,
                         pdi.person_id AS person_id,
-                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['val']), (['val']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['val']), (['val']), '$$_insights_breakdown_other_$$') AS breakdown_value
                  FROM events e
                  INNER JOIN
                    (SELECT distinct_id,
@@ -803,7 +803,7 @@
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['uh', 'oh']), (['uh', 'oh']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['uh', 'oh']), (['uh', 'oh']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            LEFT JOIN
              (SELECT group_key,
@@ -897,7 +897,7 @@
                     day_start
            UNION ALL SELECT count(DISTINCT if(notEmpty(overrides.distinct_id), overrides.person_id, e.person_id)) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['uh', 'oh']), (['uh', 'oh']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'key'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['uh', 'oh']), (['uh', 'oh']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            LEFT OUTER JOIN
              (SELECT argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id,
@@ -969,13 +969,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['other_value', '$$_posthog_breakdown_null_$$', 'value'] as breakdown_value) ARRAY
+                (SELECT ['other_value', '$$_insights_breakdown_null_$$', 'value'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(DISTINCT pdi.person_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['other_value', '$$_posthog_breakdown_null_$$', 'value']), (['other_value', '$$_posthog_breakdown_null_$$', 'value']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['other_value', '$$_insights_breakdown_null_$$', 'value']), (['other_value', '$$_insights_breakdown_null_$$', 'value']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e SAMPLE 1.0
            INNER JOIN
              (SELECT distinct_id,
@@ -1037,13 +1037,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['other_value', '$$_posthog_breakdown_null_$$', 'value'] as breakdown_value) ARRAY
+                (SELECT ['other_value', '$$_insights_breakdown_null_$$', 'value'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(DISTINCT pdi.person_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['other_value', '$$_posthog_breakdown_null_$$', 'value']), (['other_value', '$$_posthog_breakdown_null_$$', 'value']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['other_value', '$$_insights_breakdown_null_$$', 'value']), (['other_value', '$$_insights_breakdown_null_$$', 'value']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e SAMPLE 1.0
            INNER JOIN
              (SELECT distinct_id,
@@ -1464,7 +1464,7 @@
               CROSS JOIN
                 (SELECT toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) AS timestamp,
                         pdi.person_id AS person_id,
-                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, '$some_prop'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['some_val2', 'some_val']), (['some_val2', 'some_val']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, '$some_prop'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['some_val2', 'some_val']), (['some_val2', 'some_val']), '$$_insights_breakdown_other_$$') AS breakdown_value
                  FROM events e
                  INNER JOIN
                    (SELECT distinct_id,
@@ -1577,7 +1577,7 @@
               CROSS JOIN
                 (SELECT toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) AS timestamp,
                         if(notEmpty(overrides.distinct_id), overrides.person_id, e.person_id) AS person_id,
-                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_properties, '$some_prop'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['some_val2', 'some_val']), (['some_val2', 'some_val']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_properties, '$some_prop'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['some_val2', 'some_val']), (['some_val2', 'some_val']), '$$_insights_breakdown_other_$$') AS breakdown_value
                  FROM events e
                  LEFT OUTER JOIN
                    (SELECT argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id,
@@ -1695,13 +1695,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -1795,13 +1795,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            LEFT OUTER JOIN
              (SELECT argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id,
@@ -2492,7 +2492,7 @@
                     day_start
            UNION ALL SELECT count(DISTINCT pdi.person_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['Mac']), (['Mac']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['Mac']), (['Mac']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -2708,7 +2708,7 @@
                     day_start
            UNION ALL SELECT count(DISTINCT pdi.person_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'America/Phoenix')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['Mac']), (['Mac']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['Mac']), (['Mac']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -2924,7 +2924,7 @@
                     day_start
            UNION ALL SELECT count(DISTINCT pdi.person_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'Asia/Tokyo')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['Mac']), (['Mac']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['Mac']), (['Mac']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -3593,7 +3593,7 @@
     AND event = 'sign up'
     AND toTimeZone(timestamp, 'UTC') >= toDateTime('2020-01-01 00:00:00', 'UTC')
     AND toTimeZone(timestamp, 'UTC') <= toDateTime('2020-07-01 23:59:59', 'UTC')
-    AND (((NOT (replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', '') ILIKE '%@posthog.com%'))
+    AND (((NOT (replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', '') ILIKE '%@insights.com%'))
           OR (has(['val'], replaceRegexpAll(JSONExtractRaw(e.properties, 'key'), '^"|"$', '')))))
   GROUP BY value
   ORDER BY count DESC, value DESC
@@ -3624,13 +3624,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['test2@posthog.com', 'test@gmail.com', 'test5@posthog.com', 'test4@posthog.com', 'test3@posthog.com'] as breakdown_value) ARRAY
+                (SELECT ['test2@insights.com', 'test@gmail.com', 'test5@insights.com', 'test4@insights.com', 'test3@insights.com'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['test2@posthog.com', 'test@gmail.com', 'test5@posthog.com', 'test4@posthog.com', 'test3@posthog.com']), (['test2@posthog.com', 'test@gmail.com', 'test5@posthog.com', 'test4@posthog.com', 'test3@posthog.com']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['test2@insights.com', 'test@gmail.com', 'test5@insights.com', 'test4@insights.com', 'test3@insights.com']), (['test2@insights.com', 'test@gmail.com', 'test5@insights.com', 'test4@insights.com', 'test3@insights.com']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -3656,7 +3656,7 @@
                     OR (has(['safari'], replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), '$browser'), '^"|"$', ''))))) SETTINGS optimize_aggregation_in_order = 1) person ON person.id = pdi.person_id
            WHERE e.team_id = 99999
              AND event = 'sign up'
-             AND (((NOT (replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', '') ILIKE '%@posthog.com%'))
+             AND (((NOT (replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', '') ILIKE '%@insights.com%'))
                    OR (has(['val'], replaceRegexpAll(JSONExtractRaw(e.properties, 'key'), '^"|"$', '')))))
              AND toTimeZone(timestamp, 'UTC') >= toDateTime(toStartOfDay(toDateTime('2020-01-01 00:00:00', 'UTC')), 'UTC')
              AND toTimeZone(timestamp, 'UTC') <= toDateTime('2020-07-01 23:59:59', 'UTC')
@@ -3694,12 +3694,12 @@
           WHERE team_id = 99999
             AND ((((has(['android'], replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', '')))
                    AND (has(['chrome'], replaceRegexpAll(JSONExtractRaw(properties, '$browser'), '^"|"$', '')))))
-                 AND (replaceRegexpAll(JSONExtractRaw(properties, 'email'), '^"|"$', '') ILIKE '%@posthog.com%')) )
+                 AND (replaceRegexpAll(JSONExtractRaw(properties, 'email'), '^"|"$', '') ILIKE '%@insights.com%')) )
      GROUP BY id
      HAVING max(is_deleted) = 0
      AND ((((has(['android'], replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), '$os'), '^"|"$', '')))
             AND (has(['chrome'], replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), '$browser'), '^"|"$', '')))))
-          AND (replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), 'email'), '^"|"$', '') ILIKE '%@posthog.com%')) SETTINGS optimize_aggregation_in_order = 1) person ON pdi.person_id = person.id
+          AND (replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), 'email'), '^"|"$', '') ILIKE '%@insights.com%')) SETTINGS optimize_aggregation_in_order = 1) person ON pdi.person_id = person.id
   WHERE team_id = 99999
     AND event = 'sign up'
     AND toTimeZone(timestamp, 'UTC') >= toDateTime('2020-01-01 00:00:00', 'UTC')
@@ -3734,13 +3734,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['test2@posthog.com'] as breakdown_value) ARRAY
+                (SELECT ['test2@insights.com'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(*) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['test2@posthog.com']), (['test2@posthog.com']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, 'email'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['test2@insights.com']), (['test2@insights.com']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -3760,12 +3760,12 @@
                    WHERE team_id = 99999
                      AND ((((has(['android'], replaceRegexpAll(JSONExtractRaw(properties, '$os'), '^"|"$', '')))
                             AND (has(['chrome'], replaceRegexpAll(JSONExtractRaw(properties, '$browser'), '^"|"$', '')))))
-                          AND (replaceRegexpAll(JSONExtractRaw(properties, 'email'), '^"|"$', '') ILIKE '%@posthog.com%')) )
+                          AND (replaceRegexpAll(JSONExtractRaw(properties, 'email'), '^"|"$', '') ILIKE '%@insights.com%')) )
               GROUP BY id
               HAVING max(is_deleted) = 0
               AND ((((has(['android'], replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), '$os'), '^"|"$', '')))
                      AND (has(['chrome'], replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), '$browser'), '^"|"$', '')))))
-                   AND (replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), 'email'), '^"|"$', '') ILIKE '%@posthog.com%')) SETTINGS optimize_aggregation_in_order = 1) person ON person.id = pdi.person_id
+                   AND (replaceRegexpAll(JSONExtractRaw(argMax(person.properties, version), 'email'), '^"|"$', '') ILIKE '%@insights.com%')) SETTINGS optimize_aggregation_in_order = 1) person ON person.id = pdi.person_id
            WHERE e.team_id = 99999
              AND event = 'sign up'
              AND ((has(['val'], replaceRegexpAll(JSONExtractRaw(e.properties, 'key'), '^"|"$', ''))))
@@ -3912,13 +3912,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['some_val', '$$_posthog_breakdown_null_$$'] as breakdown_value) ARRAY
+                (SELECT ['some_val', '$$_insights_breakdown_null_$$'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(DISTINCT e.distinct_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, '$some_prop'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['some_val', '$$_posthog_breakdown_null_$$']), (['some_val', '$$_posthog_breakdown_null_$$']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, '$some_prop'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['some_val', '$$_insights_breakdown_null_$$']), (['some_val', '$$_insights_breakdown_null_$$']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            INNER JOIN
              (SELECT distinct_id,
@@ -4071,13 +4071,13 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
            UNION ALL SELECT count(DISTINCT e.distinct_id) as total,
                             toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_prop'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$']), (['$$_posthog_breakdown_null_$$']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_prop'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$']), (['$$_insights_breakdown_null_$$']), '$$_insights_breakdown_other_$$') as breakdown_value
            FROM events e
            WHERE e.team_id = 99999
              AND event = 'sign up'
@@ -4184,7 +4184,7 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
@@ -4196,7 +4196,7 @@
                      min(timestamp) as timestamp,
                      breakdown_value
               FROM
-                (SELECT pdi.person_id as person_id, timestamp, transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                (SELECT pdi.person_id as person_id, timestamp, transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), '$$_insights_breakdown_other_$$') as breakdown_value
                  FROM events e
                  INNER JOIN
                    (SELECT distinct_id,
@@ -4268,7 +4268,7 @@
            CROSS JOIN
              (SELECT breakdown_value
               FROM
-                (SELECT ['$$_posthog_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
+                (SELECT ['$$_insights_breakdown_null_$$', 'value', 'other_value'] as breakdown_value) ARRAY
               JOIN breakdown_value) as sec
            ORDER BY breakdown_value,
                     day_start
@@ -4280,7 +4280,7 @@
                      min(timestamp) as timestamp,
                      breakdown_value
               FROM
-                (SELECT if(notEmpty(overrides.distinct_id), overrides.person_id, e.person_id) as person_id, timestamp, transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), (['$$_posthog_breakdown_null_$$', 'value', 'other_value']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                (SELECT if(notEmpty(overrides.distinct_id), overrides.person_id, e.person_id) as person_id, timestamp, transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), (['$$_insights_breakdown_null_$$', 'value', 'other_value']), '$$_insights_breakdown_other_$$') as breakdown_value
                  FROM events e
                  LEFT OUTER JOIN
                    (SELECT argMax(person_distinct_id_overrides.person_id, person_distinct_id_overrides.version) AS person_id,
@@ -4343,7 +4343,7 @@
      FROM
        (SELECT sessions.$session_id,
                         session_duration,
-                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['value2', 'value1', '$$_posthog_breakdown_null_$$']), (['value2', 'value1', '$$_posthog_breakdown_null_$$']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['value2', 'value1', '$$_insights_breakdown_null_$$']), (['value2', 'value1', '$$_insights_breakdown_null_$$']), '$$_insights_breakdown_other_$$') AS breakdown_value
         FROM events e
         INNER JOIN
           (SELECT "$session_id",
@@ -4400,7 +4400,7 @@
      FROM
        (SELECT sessions.$session_id,
                         session_duration,
-                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['value2', 'value1', '$$_posthog_breakdown_null_$$']), (['value2', 'value1', '$$_posthog_breakdown_null_$$']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['value2', 'value1', '$$_insights_breakdown_null_$$']), (['value2', 'value1', '$$_insights_breakdown_null_$$']), '$$_insights_breakdown_other_$$') AS breakdown_value
         FROM events e
         INNER JOIN
           (SELECT "$session_id",
@@ -4637,7 +4637,7 @@
   FROM
     (SELECT COUNT(*) AS intermediate_count,
             pdi.person_id,
-            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'color'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['red', 'blue', '$$_posthog_breakdown_null_$$']), (['red', 'blue', '$$_posthog_breakdown_null_$$']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+            transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, 'color'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['red', 'blue', '$$_insights_breakdown_null_$$']), (['red', 'blue', '$$_insights_breakdown_null_$$']), '$$_insights_breakdown_other_$$') AS breakdown_value
      FROM events AS e SAMPLE 1.0
      INNER JOIN
        (SELECT distinct_id,
@@ -4856,7 +4856,7 @@
      FROM
        (SELECT sessions.$session_id,
                         session_duration,
-                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, '$some_prop'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['some_val', 'another_val']), (['some_val', 'another_val']), '$$_posthog_breakdown_other_$$') AS breakdown_value
+                        transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(person_props, '$some_prop'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['some_val', 'another_val']), (['some_val', 'another_val']), '$$_insights_breakdown_other_$$') AS breakdown_value
         FROM events e
         INNER JOIN
           (SELECT distinct_id,
@@ -5102,7 +5102,7 @@
                 (SELECT sessions.$session_id,
                                  session_duration,
                                  toStartOfWeek(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC'), 0) as day_start,
-                                 transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['value2', 'value1']), (['value2', 'value1']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                                 transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['value2', 'value1']), (['value2', 'value1']), '$$_insights_breakdown_other_$$') as breakdown_value
                  FROM events AS e
                  INNER JOIN
                    (SELECT "$session_id",
@@ -5193,7 +5193,7 @@
                 (SELECT sessions.$session_id,
                                  session_duration,
                                  toStartOfDay(toTimeZone(toDateTime(timestamp, 'UTC'), 'UTC')) as day_start,
-                                 transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_posthog_breakdown_null_$$'), (['value2', 'value1']), (['value2', 'value1']), '$$_posthog_breakdown_other_$$') as breakdown_value
+                                 transform(ifNull(nullIf(replaceRegexpAll(JSONExtractRaw(properties, '$some_property'), '^"|"$', ''), ''), '$$_insights_breakdown_null_$$'), (['value2', 'value1']), (['value2', 'value1']), '$$_insights_breakdown_other_$$') as breakdown_value
                  FROM events AS e
                  INNER JOIN
                    (SELECT "$session_id",

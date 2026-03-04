@@ -1,5 +1,5 @@
 import { actions, connect, kea, listeners, path } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { isLogEntryPropertyFilter, isValidPropertyFilter } from 'lib/components/PropertyFilters/utils'
 import { isActionFilter, isEventFilter } from 'lib/components/UniversalFilters/utils'
@@ -84,10 +84,10 @@ export const sessionRecordingEventUsageLogic = kea<sessionRecordingEventUsageLog
                 // but for reporting we want to distinguish between not loaded and no value to load
                 snapshot_source: metadata?.snapshot_source || 'unknown',
             }
-            posthog.capture(`recording loaded`, payload)
+            insights.capture(`recording loaded`, payload)
         },
         reportRecordingsListFilterAdded: ({ filterType }) => {
-            posthog.capture('recording list filter added', { filter_type: filterType })
+            insights.capture('recording list filter added', { filter_type: filterType })
         },
         reportRecordingsListFetched: ({ loadTime, filters, defaultDurationFilter }) => {
             try {
@@ -112,48 +112,48 @@ export const sessionRecordingEventUsageLogic = kea<sessionRecordingEventUsageLog
                               hasConsoleLogsFilters: !!consoleLogFilters.length,
                           }
                         : {}
-                posthog.capture('recording list fetched', {
+                insights.capture('recording list fetched', {
                     load_time: loadTime,
                     listing_version: '3',
                     filters,
                     ...filterBreakdown,
                 })
             } catch (e) {
-                posthog.captureException(e, { filters })
+                insights.captureException(e, { filters })
             }
         },
         reportRecordingsListPropertiesFetched: ({ loadTime }) => {
-            posthog.capture('recording list properties fetched', { load_time: loadTime })
+            insights.capture('recording list properties fetched', { load_time: loadTime })
         },
         reportRecordingOpenedFromRecentRecordingList: () => {
-            posthog.capture('recording opened from recent recording list')
+            insights.capture('recording opened from recent recording list')
         },
         reportRecordingPlayerSeekbarEventHovered: () => {
-            posthog.capture('recording player seekbar event hovered')
+            insights.capture('recording player seekbar event hovered')
         },
         reportRecordingInspectorItemExpanded: ({ tab, index }) => {
-            posthog.capture('recording inspector item expanded', { tab: 'replay-4000', type: tab, index })
+            insights.capture('recording inspector item expanded', { tab: 'replay-4000', type: tab, index })
         },
         reportRecordingInspectorMiniFilterViewed: ({ minifilterKey, enabled }) => {
-            posthog.capture('recording inspector minifilter selected', { tab: 'replay-4000', enabled, minifilterKey })
+            insights.capture('recording inspector minifilter selected', { tab: 'replay-4000', enabled, minifilterKey })
         },
         reportNextRecordingTriggered: ({ automatic }) => {
-            posthog.capture('recording next recording triggered', { automatic })
+            insights.capture('recording next recording triggered', { automatic })
         },
         reportRecordingExportedToFile: () => {
-            posthog.capture('recording exported to file')
+            insights.capture('recording exported to file')
         },
         reportRecordingLoadedFromFile: (properties) => {
-            posthog.capture('recording loaded from file', properties)
+            insights.capture('recording loaded from file', properties)
         },
         reportRecordingListVisibilityToggled: (properties) => {
-            posthog.capture('recording list visibility toggled', properties)
+            insights.capture('recording list visibility toggled', properties)
         },
         reportRecordingPinnedToList: (properties) => {
-            posthog.capture('recording pinned to list', properties)
+            insights.capture('recording pinned to list', properties)
         },
         reportRecordingPlaylistCreated: (properties) => {
-            posthog.capture('recording playlist created', properties)
+            insights.capture('recording playlist created', properties)
         },
     })),
 ])

@@ -974,7 +974,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
                 "person_properties",
                 {
                     "key": "email",
-                    "value": "@posthog.com",
+                    "value": "@hanzo.ai",
                     "operator": "not_icontains",
                     "type": "person",
                 },
@@ -1090,7 +1090,7 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
                 groups=[
                     {
                         "properties": [
-                            {"key": "email", "operator": "not_icontains", "value": "@posthog.com", "type": "person"},
+                            {"key": "email", "operator": "not_icontains", "value": "@hanzo.ai", "type": "person"},
                         ]
                     }
                 ],
@@ -1168,13 +1168,13 @@ class TestExperimentQueryRunner(ExperimentQueryRunnerBaseTest):
                 )
 
         # Create persons for all users
-        # Only give some users @posthog.com emails so they get filtered out
+        # Only give some users @hanzo.ai emails so they get filtered out
         for variant, count in [("control", 14), ("test", 16)]:
             for i in range(count):
                 properties = {}
-                # Give @posthog.com emails to specific users that should be filtered out
+                # Give @hanzo.ai emails to specific users that should be filtered out
                 if (variant == "control" and i in [3, 6]) or (variant == "test" and i == 2):
-                    properties = {"email": f"user_{variant}_{i}@posthog.com"}
+                    properties = {"email": f"user_{variant}_{i}@hanzo.ai"}
                 _create_person(
                     team=self.team,
                     distinct_ids=[f"user_{variant}_{i}"],

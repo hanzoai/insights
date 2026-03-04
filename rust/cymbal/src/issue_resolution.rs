@@ -16,7 +16,7 @@ use crate::{
     app_context::AppContext,
     error::UnhandledError,
     metric_consts::{ISSUE_CREATED, ISSUE_REOPENED},
-    posthog_utils::{capture_issue_created, capture_issue_reopened},
+    insights_utils::{capture_issue_created, capture_issue_reopened},
 };
 
 #[derive(Debug, Clone)]
@@ -75,8 +75,8 @@ impl Issue {
             -- the "eligible_for_assignment!" forces sqlx to assume not null, which is correct in this case, but
             -- generally a risky override of sqlx's normal type checking
             SELECT i.id, i.team_id, i.status, i.name, i.description, i.created_at
-            FROM posthog_errortrackingissue i
-            JOIN posthog_errortrackingissuefingerprintv2 f ON i.id = f.issue_id
+            FROM insights_errortrackingissue i
+            JOIN insights_errortrackingissuefingerprintv2 f ON i.id = f.issue_id
             WHERE f.team_id = $1 AND f.fingerprint = $2
             "#,
             team_id,
@@ -99,7 +99,7 @@ impl Issue {
         let res = sqlx::query_as!(
             Issue,
             r#"
-            SELECT id, team_id, status, name, description, created_at FROM posthog_errortrackingissue
+            SELECT id, team_id, status, name, description, created_at FROM insights_errortrackingissue
             WHERE team_id = $1 AND id = $2
             "#,
             team_id,
@@ -133,7 +133,7 @@ impl Issue {
 
         sqlx::query!(
             r#"
-            INSERT INTO posthog_errortrackingissue (id, team_id, status, name, description, created_at)
+            INSERT INTO insights_errortrackingissue (id, team_id, status, name, description, created_at)
             VALUES ($1, $2, $3, $4, $5, $6)
             "#,
             issue.id,
@@ -160,7 +160,7 @@ impl Issue {
 
         let res = sqlx::query_scalar!(
             r#"
-            UPDATE posthog_errortrackingissue
+            UPDATE insights_errortrackingissue
             SET status = 'active'
             WHERE id = $1 AND status != 'active'
             RETURNING id
@@ -189,7 +189,7 @@ impl Issue {
         let assignments = sqlx::query_as!(
             Assignment,
             r#"
-            SELECT id, issue_id, user_id, role_id, created_at FROM posthog_errortrackingissueassignment
+            SELECT id, issue_id, user_id, role_id, created_at FROM insights_errortrackingissueassignment
             WHERE issue_id = $1
             "#,
             self.id
@@ -213,7 +213,7 @@ impl IssueFingerprintOverride {
         let res = sqlx::query_as!(
             IssueFingerprintOverride,
             r#"
-            SELECT id, team_id, issue_id, fingerprint, version FROM posthog_errortrackingissuefingerprintv2
+            SELECT id, team_id, issue_id, fingerprint, version FROM insights_errortrackingissuefingerprintv2
             WHERE team_id = $1 AND fingerprint = $2
             "#,
             team_id,
@@ -238,7 +238,7 @@ impl IssueFingerprintOverride {
         let res = sqlx::query_as!(
             IssueFingerprintOverride,
             r#"
-            INSERT INTO posthog_errortrackingissuefingerprintv2 (id, team_id, issue_id, fingerprint, version, first_seen, created_at)
+            INSERT INTO insights_errortrackingissuefingerprintv2 (id, team_id, issue_id, fingerprint, version, first_seen, created_at)
             VALUES ($1, $2, $3, $4, 0, $5, NOW())
             ON CONFLICT (team_id, fingerprint) DO UPDATE SET team_id = EXCLUDED.team_id -- a no-op update to force a returned row
             RETURNING id, team_id, issue_id, fingerprint, version
@@ -262,7 +262,7 @@ pub async fn resolve_issue(
     event_timestamp: DateTime<Utc>,
     event_properties: FingerprintedErrProps,
 ) -> Result<Issue, UnhandledError> {
-    let mut conn = context.posthog_pool.acquire().await?;
+    let mut conn = context.insights_pool.acquire().await?;
     // Fast path - just fetch the issue directly, and then reopen it if needed
     let existing_issue =
         Issue::load_by_fingerprint(&mut *conn, team_id, &event_properties.fingerprint.value)

@@ -131,7 +131,7 @@ function createKafkaPayload(config: PayloadConfig): {
             $session_id: sessionId,
             $window_id: windowId,
             $snapshot_source: 'web',
-            $lib: 'posthog-js',
+            $lib: 'insights-js',
         },
     }
 
@@ -895,7 +895,7 @@ describe('Session Recording Consumer Integration', () => {
             throw new Error(
                 `Required infrastructure not available: ${missing.join(', ')}.\n` +
                     'To run these tests:\n' +
-                    '  1. Start services: hogli dev:setup (or docker compose -f docker-compose.dev.yml up)\n' +
+                    '  1. Start services: insightscli dev:setup (or docker compose -f docker-compose.dev.yml up)\n' +
                     '  2. Set up test DB: pnpm setup:test (from nodejs directory)\n' +
                     'To skip these tests, use: pnpm jest --testPathIgnorePatterns=e2e'
             )
@@ -923,7 +923,7 @@ describe('Session Recording Consumer Integration', () => {
         // Enable console log capture for the primary team so console log tests work
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'UPDATE posthog_team SET capture_console_log_opt_in = true WHERE id = $1',
+            'UPDATE insights_team SET capture_console_log_opt_in = true WHERE id = $1',
             [team.id],
             'enable-console-log-capture'
         )

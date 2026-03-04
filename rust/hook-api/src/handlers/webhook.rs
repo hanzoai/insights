@@ -217,7 +217,7 @@ fn get_hostname(url_str: &str) -> Result<String, (StatusCode, Json<WebhookPostRe
     }
 }
 
-// TypeScript equivalent: https://github.com/PostHog/posthog/blob/ab059c4f05cbf9736390fc9386234dcade7aea40/plugin-server/src/utils/db/utils.ts#L185
+// TypeScript equivalent: https://github.com/hanzoai/insights/blob/ab059c4f05cbf9736390fc9386234dcade7aea40/plugin-server/src/utils/db/utils.ts#L185
 fn replace_null_characters_in_stringified_json(s: &str) -> String {
     s.replace("\\u0000", "\\uFFFD")
 }

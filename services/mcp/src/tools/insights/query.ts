@@ -29,7 +29,7 @@ export const queryHandler: ToolBase<typeof schema>['handler'] = async (context: 
         throw new Error(`Failed to query insight: ${queryResult.error.message}`)
     }
 
-    const posthogUrl = `${context.api.getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`
+    const insightsUrl = `${context.api.getProjectBaseUrl(projectId)}/insights/${insightResult.data.short_id}`
     const queryInfo = analyzeQuery(insightResult.data.query)
 
     // Format results based on the query type
@@ -39,11 +39,11 @@ export const queryHandler: ToolBase<typeof schema>['handler'] = async (context: 
         return {
             query: queryInfo.innerQuery || insightResult.data.query,
             insight: {
-                url: posthogUrl,
+                url: insightsUrl,
                 ...insightResult.data,
             },
             results: queryResult.data.results,
-            _posthogUrl: posthogUrl,
+            _insightsUrl: insightsUrl,
         }
     }
 
@@ -51,14 +51,14 @@ export const queryHandler: ToolBase<typeof schema>['handler'] = async (context: 
     return {
         query: insightResult.data.query,
         insight: {
-            url: posthogUrl,
+            url: insightsUrl,
             ...insightResult.data,
         },
         results: {
             columns: queryResult.data.columns || [],
             results: queryResult.data.results || [],
         },
-        _posthogUrl: posthogUrl,
+        _insightsUrl: insightsUrl,
     }
 }
 
