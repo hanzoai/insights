@@ -1,6 +1,6 @@
 import { kea } from 'kea'
 import { router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { organizationLogic } from 'scenes/organizationLogic'
@@ -123,7 +123,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                         actions.setApiError(response.error || 'Failed to activate subscription')
                     }
                 } catch (error) {
-                    posthog.captureException(
+                    insights.captureException(
                         new Error('payment entry api error - activate subscription error', { cause: error })
                     )
                     actions.setApiError('Failed to activate subscription. Please try again.')
@@ -149,7 +149,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                 actions.setClientSecret(response.clientSecret)
                 actions.setLoading(false)
             } catch (error) {
-                posthog.captureException(
+                insights.captureException(
                     new Error('payment entry api error - initiate authorization error', { cause: error })
                 )
                 actions.setApiError('Failed to initialize payment')
@@ -191,7 +191,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                         return
                     } else if (status === 'failed') {
                         actions.setApiError(errorMessage)
-                        posthog.captureException(
+                        insights.captureException(
                             new Error('payment entry api error - authorization status failed', {
                                 cause: new Error(errorMessage),
                             })
@@ -204,7 +204,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                         setTimeout(() => void poll(), pollInterval)
                     } else {
                         actions.setApiError('Payment status check timed out')
-                        posthog.captureException(
+                        insights.captureException(
                             new Error('payment entry api error - authorization status timed out', {
                                 cause: new Error(errorMessage),
                             })
@@ -212,7 +212,7 @@ export const paymentEntryLogic = kea<paymentEntryLogicType>({
                     }
                 } catch (error) {
                     actions.setStripeError('Failed to complete. Please refresh the page and try again.')
-                    posthog.captureException(new Error('payment entry api error', { cause: error }))
+                    insights.captureException(new Error('payment entry api error', { cause: error }))
                 } finally {
                     actions.setLoading(false)
                     actions.setClientSecret(null)

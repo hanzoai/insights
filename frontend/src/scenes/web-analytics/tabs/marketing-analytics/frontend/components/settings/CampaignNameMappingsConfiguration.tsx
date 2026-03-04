@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useState } from 'react'
 
-import { IconInfo, IconPlusSmall, IconTrash, IconWarning } from '@posthog/icons'
-import { LemonButton, LemonInputSelect, LemonSelect, LemonTag, LemonTextArea, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconPlusSmall, IconTrash, IconWarning } from '@hanzo/icons'
+import { LemonButton, LemonInputSelect, LemonSelect, LemonTag, LemonTextArea, Tooltip } from '@hanzo/lemon-ui'
 
 import { MatchField, VALID_NATIVE_MARKETING_SOURCES, externalDataSources } from '~/queries/schema/schema-general'
 

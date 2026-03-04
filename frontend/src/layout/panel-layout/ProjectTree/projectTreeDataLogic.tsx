@@ -1,8 +1,8 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { IconDocument, IconFolder, IconPlus } from '@posthog/icons'
-import { LemonDialog } from '@posthog/lemon-ui'
+import { IconDocument, IconFolder, IconPlus } from '@hanzo/icons'
+import { LemonDialog } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { GroupsAccessStatus } from 'lib/introductions/groupsAccessLogic'

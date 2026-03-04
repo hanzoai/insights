@@ -1,6 +1,6 @@
 # Insights Rust Workspace
 
-The `posthog/rust` directory serves as Insights's "Rust monorepo" hosting Rust libraries and service implementations. This is *not* the Rust client library for Insights.
+The `insights/rust` directory serves as Insights's "Rust monorepo" hosting Rust libraries and service implementations. This is *not* the Rust client library for Insights.
 
 ## Catalog
 
@@ -38,7 +38,7 @@ Rust services to manage a job queuing service backed by Postgres. Includes NodeJ
 
 ### hogvm
 
-A Rust re-implementation of the HogVM stack machine for evaluating compiled HogQL bytecode.
+A Rust re-implementation of the HogVM stack machine for evaluating compiled InsightsQL bytecode.
 
 ### rusty-hook
 
@@ -62,7 +62,7 @@ Other useful links for those new to Rust:
 
 ## Local Development
 
-Start up and bootstrap the "top-level" `posthog` repo dev environment, including the Docker-Compose support services. Ensure that `bin/migrate` has run and `bin/start` behaves as expected. Leave the Docker services running when developing in the Rust workspace. The `bin/start` processes are typically optional for running Rust tests or the inner dev loop.
+Start up and bootstrap the "top-level" `insights` repo dev environment, including the Docker-Compose support services. Ensure that `bin/migrate` has run and `bin/start` behaves as expected. Leave the Docker services running when developing in the Rust workspace. The `bin/start` processes are typically optional for running Rust tests or the inner dev loop.
 
 You may optionally seed data using the "top-level" management console scripts:
 
@@ -78,4 +78,4 @@ $ cd rust
 $ cargo test
 ```
 
-Migrations for most Rust workspace subprojects are managed by the [sqlx](https://github.com/launchbadge/sqlx) tool. When running `cargo` or `sqlx` commands from within the `posthog/rust` workspace root directory, the top-level `posthog` Docker Compose database is targeted as specified in the `DATABASE_URL` env var injected by the `rust/.env` file.
+Migrations for most Rust workspace subprojects are managed by the [sqlx](https://github.com/launchbadge/sqlx) tool. When running `cargo` or `sqlx` commands from within the `insights/rust` workspace root directory, the top-level `insights` Docker Compose database is targeted as specified in the `DATABASE_URL` env var injected by the `rust/.env` file.

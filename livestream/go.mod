@@ -1,4 +1,4 @@
-module github.com/posthog/posthog/livestream
+module github.com/hanzoai/insights/livestream
 
 go 1.26
 

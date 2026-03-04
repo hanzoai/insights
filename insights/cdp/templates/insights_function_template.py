@@ -57,7 +57,7 @@ class InsightsFunctionTemplateDC:
     id: str
     name: str
     code: str
-    code_language: Literal["javascript", "hog"]
+    code_language: Literal["javascript", "iql"]
     inputs_schema: list[dict]
     category: list[str]
     description: Optional[str] = None

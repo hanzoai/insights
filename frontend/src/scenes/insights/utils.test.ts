@@ -259,7 +259,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown_type: 'event',
             breakdown_histogram_bin_count: 10,
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
             'Other (i.e. all remaining values)'
         )
     })
@@ -270,7 +270,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown_type: 'event',
             breakdown_histogram_bin_count: 10,
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
             'None (i.e. no value)'
         )
     })
@@ -314,7 +314,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown: 'demographic',
             breakdown_type: 'event',
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_other_$$', breakdownFilter, [], identity)).toEqual(
             'Other (i.e. all remaining values)'
         )
     })
@@ -324,7 +324,7 @@ describe('formatBreakdownLabel()', () => {
             breakdown: 'demographic',
             breakdown_type: 'event',
         }
-        expect(formatBreakdownLabel('$$_posthog_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
+        expect(formatBreakdownLabel('$$_insights_breakdown_null_$$', breakdownFilter, [], identity)).toEqual(
             'None (i.e. no value)'
         )
     })

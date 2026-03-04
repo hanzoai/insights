@@ -44,7 +44,7 @@ Column | Type | Nullable | Description
 `description` | varchar(400) | NULL | Insight description
 `filters` | jsonb | NOT NULL | Filter configuration (legacy, prefer `query`)
 `filters_hash` | varchar(400) | NULL | Hash for caching
-`query` | jsonb | NULL | Modern HogQL query definition (preferred)
+`query` | jsonb | NULL | Modern InsightsQL query definition (preferred)
 `query_metadata` | jsonb | NULL | Extracted query metadata for indexing
 `order` | integer | NULL | Display order
 `deleted` | boolean | NOT NULL | Soft delete flag

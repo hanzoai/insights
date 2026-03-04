@@ -4,8 +4,8 @@ import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconKeyboard } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconKeyboard } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import {
     TaxonomicFilterGroupType,

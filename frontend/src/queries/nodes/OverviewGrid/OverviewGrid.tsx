@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { useValues } from 'kea'
 
-import { IconTrending, IconWarning } from '@posthog/icons'
-import { LemonBanner, LemonSkeleton, Link } from '@posthog/lemon-ui'
+import { IconTrending, IconWarning } from '@hanzo/icons'
+import { LemonBanner, LemonSkeleton, Link } from '@hanzo/lemon-ui'
 
 import { getColorVar } from 'lib/colors'
 import { PreAggregatedBadge } from 'lib/components/PreAggregatedBadge'

@@ -9,7 +9,7 @@ import { heatmapToolbarMenuLogic } from '~/toolbar/elements/heatmapToolbarMenuLo
 import { toolbarConfigLogic } from '../toolbarConfigLogic'
 
 function ScrollDepthMouseInfo(): JSX.Element | null {
-    const { posthog } = useValues(toolbarConfigLogic)
+    const { insights } = useValues(toolbarConfigLogic)
     const { heatmapElements, rawHeatmapLoading } = useValues(heatmapToolbarMenuLogic)
 
     const shiftPressed = useShiftKeyPressed()
@@ -19,7 +19,7 @@ function ScrollDepthMouseInfo(): JSX.Element | null {
         return null
     }
 
-    const scrollOffset = (posthog as any).scrollManager.scrollY()
+    const scrollOffset = (insights as any).scrollManager.scrollY()
     const scrolledMouseY = mouseY + scrollOffset
 
     const elementInMouseY = heatmapElements.find((x, i) => {
@@ -42,20 +42,20 @@ function ScrollDepthMouseInfo(): JSX.Element | null {
 }
 
 export function ScrollDepth(): JSX.Element | null {
-    const { posthog } = useValues(toolbarConfigLogic)
+    const { insights } = useValues(toolbarConfigLogic)
 
-    const { heatmapEnabled, heatmapFilters, heatmapElements, scrollDepthPosthogJsError, heatmapColorPalette } =
+    const { heatmapEnabled, heatmapFilters, heatmapElements, scrollDepthInsightsJsError, heatmapColorPalette } =
         useValues(heatmapToolbarMenuLogic)
 
     if (!heatmapEnabled || !heatmapFilters.enabled || heatmapFilters.type !== 'scrolldepth') {
         return null
     }
 
-    if (scrollDepthPosthogJsError) {
+    if (scrollDepthInsightsJsError) {
         return null
     }
 
-    const scrollOffset = (posthog as any).scrollManager.scrollY()
+    const scrollOffset = (insights as any).scrollManager.scrollY()
 
     // We want to have a fading color from red to orange to green to blue to grey, fading from the highest count to the lowest
     const maxCount = heatmapElements[0]?.count ?? 0

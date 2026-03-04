@@ -18,7 +18,7 @@ class TestFileSystemViewLog(TestCase):
     def setUp(self) -> None:
         self.organization = Organization.objects.create(name="Test Org")
         self.team = Team.objects.create(organization=self.organization, name="Test Team")
-        self.user = User.objects.create_user("user@posthog.com", "password", "User")
+        self.user = User.objects.create_user("user@hanzo.ai", "password", "User")
 
     def test_recent_items_sorting_by_views(self) -> None:
         insight = Insight.objects.create(

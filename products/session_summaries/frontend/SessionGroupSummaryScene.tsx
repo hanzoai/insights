@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconCheck, IconSearch, IconShare, IconSort } from '@posthog/icons'
+import { IconCheck, IconSearch, IconShare, IconSort } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -11,7 +11,7 @@ import {
     LemonSkeleton,
     LemonTag,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { LemonMenu } from 'lib/lemon-ui/LemonMenu'
 import { IconPlayCircle } from 'lib/lemon-ui/icons'

@@ -1021,7 +1021,7 @@ class TestPersonTrends(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             team_id=self.team.pk,
             distinct_ids=["p1"],
-            properties={"email": "ben@posthog.com"},
+            properties={"email": "ben@hanzo.ai"},
         )
         _create_event(
             team=self.team,
@@ -1033,7 +1033,7 @@ class TestPersonTrends(ClickhouseTestMixin, APIBaseTest):
         _create_person(
             team_id=self.team.pk,
             distinct_ids=["p2"],
-            properties={"email": "neil@posthog.com"},
+            properties={"email": "neil@hanzo.ai"},
         )
         _create_event(
             team=self.team,

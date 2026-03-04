@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT group_type, team_id, group_type_index FROM posthog_grouptypemapping\n                 WHERE (group_type, team_id) = ANY(SELECT * FROM UNNEST($1::text[], $2::int[]))",
+  "query": "SELECT group_type, team_id, group_type_index FROM insights_grouptypemapping\n                 WHERE (group_type, team_id) = ANY(SELECT * FROM UNNEST($1::text[], $2::int[]))",
   "describe": {
     "columns": [
       {

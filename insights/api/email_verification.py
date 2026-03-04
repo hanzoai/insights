@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
-import posthoganalytics
+import hanzoanalytics
 from rest_framework import exceptions
 
 from insights.exceptions_capture import capture_exception
@@ -13,7 +13,7 @@ VERIFICATION_DISABLED_FLAG = "email-verification-disabled"
 
 def is_email_verification_disabled(user: User) -> bool:
     # using disabled here so that the default state (if no flag exists) is that verification defaults to ON.
-    return user.organization is not None and posthoganalytics.feature_enabled(
+    return user.organization is not None and hanzoanalytics.feature_enabled(
         VERIFICATION_DISABLED_FLAG,
         str(user.organization.id),
         groups={"organization": str(user.organization.id)},

@@ -22,13 +22,13 @@ from products.data_warehouse.backend.models import DataWarehouseSavedQuery
 @pytest.mark.django_db
 class TestGetDagId(BaseTest):
     def test_get_dag_id_returns_expected_format(self):
-        self.assertEqual(get_dag_id(123), "posthog_123")
-        self.assertEqual(get_dag_id(1), "posthog_1")
+        self.assertEqual(get_dag_id(123), "insights_123")
+        self.assertEqual(get_dag_id(1), "insights_1")
 
     def test_get_conflict_dag_id_has_correct_prefix(self):
         conflict_id = get_conflict_dag_id(123)
         self.assertTrue(conflict_id.startswith("conflict_"))
-        self.assertTrue(conflict_id.endswith("_posthog_123"))
+        self.assertTrue(conflict_id.endswith("_insights_123"))
 
 
 @pytest.mark.django_db
@@ -49,7 +49,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         self.assertEqual(node.type, NodeType.VIEW)
         self.assertEqual(node.saved_query, saved_query)
 
-    def test_sync_creates_table_node_for_posthog_source(self):
+    def test_sync_creates_table_node_for_insights_source(self):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
@@ -66,7 +66,7 @@ class TestSyncSavedQueryToDag(BaseTest):
 
         assert events_node is not None
         self.assertEqual(events_node.type, NodeType.TABLE)
-        self.assertEqual(events_node.properties.get("origin"), "posthog")
+        self.assertEqual(events_node.properties.get("origin"), "insights")
 
         # edge from events -> test_view
         edge = Edge.objects.filter(source=events_node, target=node).first()

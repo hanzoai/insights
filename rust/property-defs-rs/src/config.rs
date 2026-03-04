@@ -11,7 +11,7 @@ pub struct Config {
 
     // this maps to the original, shared CLOUD PG DB instance in production. When
     // we migrate to the new persons DB, this won't change.
-    #[envconfig(default = "postgres://posthog:posthog@localhost:5432/posthog")]
+    #[envconfig(default = "postgres://insights:insights@localhost:5432/insights")]
     pub database_url: String,
 
     // when true, the service will point group type mappings resolution to the new persons DB

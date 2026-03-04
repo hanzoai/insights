@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { useMemo } from 'react'
 
-import { IconInfo } from '@posthog/icons'
-import { LemonSkeleton, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo } from '@hanzo/icons'
+import { LemonSkeleton, Tooltip } from '@hanzo/lemon-ui'
 
 import { webAnalyticsLogic } from 'scenes/web-analytics/webAnalyticsLogic'
 

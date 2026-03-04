@@ -60,7 +60,7 @@ describe('RedisCachedKeyStore', () => {
             expect(mockDelegate.generateKey).toHaveBeenCalledWith('session-123', 1)
             expect(mockRedisPool.acquire).toHaveBeenCalled()
             expect(mockRedisClient.setex).toHaveBeenCalledWith(
-                '@posthog/replay/recording-key:1:session-123',
+                '@hanzo/replay/recording-key:1:session-123',
                 86400,
                 expect.any(String)
             )
@@ -94,7 +94,7 @@ describe('RedisCachedKeyStore', () => {
             const result = await cachedKeyStore.getKey('session-123', 1)
 
             expect(mockRedisPool.acquire).toHaveBeenCalled()
-            expect(mockRedisClient.get).toHaveBeenCalledWith('@posthog/replay/recording-key:1:session-123')
+            expect(mockRedisClient.get).toHaveBeenCalledWith('@hanzo/replay/recording-key:1:session-123')
             expect(mockDelegate.getKey).not.toHaveBeenCalled()
             expect(result.plaintextKey).toEqual(Buffer.from(mockPlaintextKey))
         })
@@ -106,7 +106,7 @@ describe('RedisCachedKeyStore', () => {
 
             expect(mockDelegate.getKey).toHaveBeenCalledWith('session-123', 1)
             expect(mockRedisClient.setex).toHaveBeenCalledWith(
-                '@posthog/replay/recording-key:1:session-123',
+                '@hanzo/replay/recording-key:1:session-123',
                 86400,
                 expect.any(String)
             )
@@ -146,8 +146,8 @@ describe('RedisCachedKeyStore', () => {
             const result1 = await cachedKeyStore.getKey('session-123', 1)
             const result2 = await cachedKeyStore.getKey('session-123', 2)
 
-            expect(mockRedisClient.get).toHaveBeenCalledWith('@posthog/replay/recording-key:1:session-123')
-            expect(mockRedisClient.get).toHaveBeenCalledWith('@posthog/replay/recording-key:2:session-123')
+            expect(mockRedisClient.get).toHaveBeenCalledWith('@hanzo/replay/recording-key:1:session-123')
+            expect(mockRedisClient.get).toHaveBeenCalledWith('@hanzo/replay/recording-key:2:session-123')
             expect(result1.plaintextKey).toEqual(Buffer.from([1, 1, 1]))
             expect(result2.plaintextKey).toEqual(Buffer.from([2, 2, 2]))
         })
@@ -157,7 +157,7 @@ describe('RedisCachedKeyStore', () => {
         it('should clear cache and call delegate', async () => {
             const result = await cachedKeyStore.deleteKey('session-123', 1)
 
-            expect(mockRedisClient.del).toHaveBeenCalledWith('@posthog/replay/recording-key:1:session-123')
+            expect(mockRedisClient.del).toHaveBeenCalledWith('@hanzo/replay/recording-key:1:session-123')
             expect(mockDelegate.deleteKey).toHaveBeenCalledWith('session-123', 1)
             expect(result).toEqual({ deleted: true, deletedAt: 1700000000 })
         })
@@ -171,7 +171,7 @@ describe('RedisCachedKeyStore', () => {
 
             const result = await cachedKeyStore.deleteKey('session-123', 1)
 
-            expect(mockRedisClient.del).toHaveBeenCalledWith('@posthog/replay/recording-key:1:session-123')
+            expect(mockRedisClient.del).toHaveBeenCalledWith('@hanzo/replay/recording-key:1:session-123')
             expect(result).toEqual({ deleted: false, reason: 'already_deleted', deletedAt: 1700000000 })
         })
 
@@ -179,15 +179,15 @@ describe('RedisCachedKeyStore', () => {
             mockDelegate.deleteKey.mockRejectedValue(new Error('Delete failed'))
 
             await expect(cachedKeyStore.deleteKey('session-123', 1)).rejects.toThrow('Delete failed')
-            expect(mockRedisClient.del).toHaveBeenCalledWith('@posthog/replay/recording-key:1:session-123')
+            expect(mockRedisClient.del).toHaveBeenCalledWith('@hanzo/replay/recording-key:1:session-123')
         })
 
         it('should only clear cache for the specified team', async () => {
             await cachedKeyStore.deleteKey('session-123', 1)
 
             // Should only delete team 1's cache key
-            expect(mockRedisClient.del).toHaveBeenCalledWith('@posthog/replay/recording-key:1:session-123')
-            expect(mockRedisClient.del).not.toHaveBeenCalledWith('@posthog/replay/recording-key:2:session-123')
+            expect(mockRedisClient.del).toHaveBeenCalledWith('@hanzo/replay/recording-key:1:session-123')
+            expect(mockRedisClient.del).not.toHaveBeenCalledWith('@hanzo/replay/recording-key:2:session-123')
             expect(mockRedisClient.del).toHaveBeenCalledTimes(1)
         })
     })
@@ -207,7 +207,7 @@ describe('RedisCachedKeyStore', () => {
             await customTtlCachedKeyStore.generateKey('session-123', 1)
 
             expect(mockRedisClient.setex).toHaveBeenCalledWith(
-                '@posthog/replay/recording-key:1:session-123',
+                '@hanzo/replay/recording-key:1:session-123',
                 3600,
                 expect.any(String)
             )

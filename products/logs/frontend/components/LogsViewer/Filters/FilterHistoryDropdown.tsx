@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconClock, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonMenuSection } from '@posthog/lemon-ui'
+import { IconClock, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonMenuSection } from '@hanzo/lemon-ui'
 
 import { dayjs } from 'lib/dayjs'
 import { capitalizeFirstLetter } from 'lib/utils'

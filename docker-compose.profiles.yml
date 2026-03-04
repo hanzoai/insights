@@ -1,6 +1,6 @@
 # Docker Compose profile overlay for intent-based dev environment
 #
-# This file is ONLY used by hogli dev:start to selectively start Docker services.
+# This file is ONLY used by insightscli dev:start to selectively start Docker services.
 # Running `docker compose -f docker-compose.dev.yml up` without this overlay
 # will start ALL services as before (backward compatible).
 #

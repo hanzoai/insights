@@ -9,7 +9,7 @@ from git import Repo
 
 logger = logging.getLogger(__name__)
 
-MIGRATIONS_DIR = "posthog/clickhouse/migrations"
+MIGRATIONS_DIR = "insights/clickhouse/migrations"
 MAX_MIGRATION_FILE = os.path.join(MIGRATIONS_DIR, "max_migration.txt")
 
 # Pre-existing duplicate migration numbers to ignore.

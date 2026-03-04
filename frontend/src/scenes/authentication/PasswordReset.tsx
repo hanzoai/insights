@@ -6,8 +6,8 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useEffect } from 'react'
 
-import { IconCheckCircle } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput, Link } from '@posthog/lemon-ui'
+import { IconCheckCircle } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput, Link } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
@@ -79,7 +79,7 @@ function EmailUnavailable(): JSX.Element {
                     <ul>
                         <li>
                             Password reset is unavailable because email service is not configured.{' '}
-                            <Link to="https://posthog.com/docs/self-host/configure/email?utm_medium=in-product&utm_campaign=password-reset">
+                            <Link to="https://hanzo.ai/docs/self-host/configure/email?utm_medium=in-product&utm_campaign=password-reset">
                                 Read the docs
                             </Link>{' '}
                             on how to set this up.

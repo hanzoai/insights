@@ -2,7 +2,7 @@ import { useActions, useValues } from 'kea'
 import { MouseEvent, useCallback } from 'react'
 import { P, match } from 'ts-pattern'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { TZLabel } from 'lib/components/TZLabel'
 import { Dayjs } from 'lib/dayjs'

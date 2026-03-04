@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonDivider } from '@posthog/lemon-ui'
+import { LemonButton, LemonDivider } from '@hanzo/lemon-ui'
 
 import { More } from 'lib/lemon-ui/LemonButton/More'
 import { LemonDialog } from 'lib/lemon-ui/LemonDialog'

@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "file://posthog/idl/events_dead_letter_queue.json",
+    "$id": "file://insights/idl/events_dead_letter_queue.json",
     "title": "events_dead_letter_queue",
     "description": "Events that failed to be validated or processed and are sent to the DLQ",
     "type": "object",

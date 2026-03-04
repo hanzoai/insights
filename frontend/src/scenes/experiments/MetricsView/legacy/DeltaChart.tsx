@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { createContext, useContext, useState } from 'react'
 
-import { IconGraph } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconGraph } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { modalsLogic } from 'scenes/experiments/modalsLogic'

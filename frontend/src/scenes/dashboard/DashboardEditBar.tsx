@@ -1,8 +1,8 @@
 import clsx from 'clsx'
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconCalendar } from '@posthog/icons'
-import { LemonButton, Popover } from '@posthog/lemon-ui'
+import { IconCalendar } from '@hanzo/icons'
+import { LemonButton, Popover } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'

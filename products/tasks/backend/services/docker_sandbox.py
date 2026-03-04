@@ -29,8 +29,8 @@ from .sandbox import AgentServerResult, ExecutionResult, ExecutionStream, Sandbo
 logger = logging.getLogger(__name__)
 
 WORKING_DIR = "/tmp/workspace"
-DEFAULT_IMAGE_NAME = "posthog-sandbox-base"
-NOTEBOOK_IMAGE_NAME = "posthog-sandbox-notebook"
+DEFAULT_IMAGE_NAME = "insights-sandbox-base"
+NOTEBOOK_IMAGE_NAME = "insights-sandbox-notebook"
 AGENT_SERVER_PORT = 47821  # Arbitrary high port unlikely to conflict with dev servers
 
 
@@ -139,7 +139,7 @@ class DockerSandbox:
     @staticmethod
     def _build_local_image(agent_path: str, shared_path: str, git_path: str) -> None:
         """Build the local sandbox image with local twig packages."""
-        logger.info("Building posthog-sandbox-base-local image with local twig packages...")
+        logger.info("Building insights-sandbox-base-local image with local twig packages...")
         dockerfile_path = os.path.join(
             settings.BASE_DIR, "products/tasks/backend/sandbox/images/Dockerfile.sandbox-local"
         )
@@ -168,7 +168,7 @@ class DockerSandbox:
                     "-f",
                     dockerfile_path,
                     "-t",
-                    "posthog-sandbox-base-local",
+                    "insights-sandbox-base-local",
                     tmpdir,
                 ],
                 check=True,
@@ -193,7 +193,7 @@ class DockerSandbox:
         if local_packages:
             agent_path, shared_path, git_path = local_packages
             DockerSandbox._build_local_image(agent_path, shared_path, git_path)
-            return "posthog-sandbox-base-local"
+            return "insights-sandbox-base-local"
 
         return DEFAULT_IMAGE_NAME
 
@@ -204,7 +204,7 @@ class DockerSandbox:
             try:
                 snapshot = SandboxSnapshot.objects.get(id=config.snapshot_id)
                 if snapshot.status == SandboxSnapshot.Status.COMPLETE:
-                    snapshot_image = f"posthog-sandbox-snapshot:{snapshot.external_id}"
+                    snapshot_image = f"insights-sandbox-snapshot:{snapshot.external_id}"
                     result = DockerSandbox._run(["docker", "images", "-q", snapshot_image])
                     if result.stdout.strip():
                         return snapshot_image
@@ -234,7 +234,7 @@ class DockerSandbox:
             if config.environment_variables:
                 for key, value in config.environment_variables.items():
                     if value is not None:
-                        if key == "POSTHOG_API_URL":
+                        if key == "INSIGHTS_API_URL":
                             value = DockerSandbox._transform_url_for_docker(value)
                         env_args.extend(["-e", f"{key}={value}"])
 
@@ -602,7 +602,7 @@ class DockerSandbox:
 
         try:
             snapshot_id = uuid.uuid4().hex[:12]
-            tag = f"posthog-sandbox-snapshot:{snapshot_id}"
+            tag = f"insights-sandbox-snapshot:{snapshot_id}"
 
             DockerSandbox._run(["docker", "commit", self._container_id, tag], check=True)
 
@@ -629,7 +629,7 @@ class DockerSandbox:
     def delete_snapshot(external_id: str) -> None:
         logger.info(f"Deleting snapshot {external_id}")
         try:
-            DockerSandbox._run(["docker", "rmi", f"posthog-sandbox-snapshot:{external_id}"])
+            DockerSandbox._run(["docker", "rmi", f"insights-sandbox-snapshot:{external_id}"])
             logger.info(f"Snapshot {external_id} deleted")
         except Exception as e:
             logger.warning(f"Failed to delete snapshot {external_id}: {e}")

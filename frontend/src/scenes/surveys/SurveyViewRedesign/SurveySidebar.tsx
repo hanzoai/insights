@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import { getNextSurveyStep } from 'posthog-js/dist/surveys-preview'
+import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { ReactNode } from 'react'
 
-import { IconDownload, IconPlus } from '@posthog/icons'
-import { LemonButton, LemonMenu, LemonSelect, LemonSkeleton, LemonSwitch, Link } from '@posthog/lemon-ui'
+import { IconDownload, IconPlus } from '@hanzo/icons'
+import { LemonButton, LemonMenu, LemonSelect, LemonSkeleton, LemonSwitch, Link } from '@hanzo/lemon-ui'
 
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
 import { TZLabel } from 'lib/components/TZLabel'
@@ -175,7 +175,7 @@ export function SurveyDetailsPanel(): JSX.Element {
                     {survey.type === SurveyType.API && (
                         <div className="flex justify-between">
                             <span className="text-muted">API docs</span>
-                            <Link to="https://posthog.com/docs/surveys/implementing-custom-surveys" target="_blank">
+                            <Link to="https://hanzo.ai/docs/surveys/implementing-custom-surveys" target="_blank">
                                 View docs
                             </Link>
                         </div>

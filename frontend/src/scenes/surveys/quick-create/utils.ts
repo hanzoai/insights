@@ -1,4 +1,4 @@
-import { SurveyQuestionType } from 'posthog-js'
+import { SurveyQuestionType } from '@hanzo/insights'
 
 import { EventsNode } from '~/queries/schema/schema-general'
 import { SurveyMatchType } from '~/types'

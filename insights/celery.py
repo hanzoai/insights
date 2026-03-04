@@ -28,39 +28,39 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "insights.settings")
 app = Celery("insights")
 
 CELERY_TASK_PRE_RUN_COUNTER = Counter(
-    "posthog_celery_task_pre_run",
+    "insights_celery_task_pre_run",
     "task prerun signal is dispatched before a task is executed.",
     labelnames=["task_name"],
 )
 
 CELERY_TASK_SUCCESS_COUNTER = Counter(
-    "posthog_celery_task_success",
+    "insights_celery_task_success",
     "task success signal is dispatched when a task succeeds.",
     labelnames=["task_name"],
 )
 
 CELERY_TASK_FAILURE_COUNTER = Counter(
-    "posthog_celery_task_failure",
+    "insights_celery_task_failure",
     "task failure signal is dispatched when a task succeeds.",
     labelnames=["task_name"],
 )
 
 CELERY_TASK_RETRY_COUNTER = Counter(
-    "posthog_celery_task_retry",
+    "insights_celery_task_retry",
     "task retry signal is dispatched when a task will be retried.",
     labelnames=["task_name", "reason"],  # Attention: Keep reason as low cardinality as possible
 )
 
 
 CELERY_TASK_DURATION_HISTOGRAM = Histogram(
-    "posthog_celery_task_duration_seconds",
+    "insights_celery_task_duration_seconds",
     "Time spent running a task",
     labelnames=["task_name"],
     buckets=(1, 5, 10, 30, 60, 120, 600, 1200, float("inf")),
 )
 
 CELERY_TASK_INITIALIZATION_FAILURE_COUNTER = Counter(
-    "posthog_celery_task_initialization_failure",
+    "insights_celery_task_initialization_failure",
     "Number of times task initialization failed",
 )
 
@@ -134,7 +134,7 @@ def receiver_bind_extra_request_metadata(sender, signal, task=None, logger=None)
 
 @worker_process_init.connect
 def on_worker_start(**kwargs) -> None:
-    from posthoganalytics import setup
+    from hanzoanalytics import setup
     from prometheus_client import start_http_server
 
     setup()  # makes sure things like exception autocapture are initialised

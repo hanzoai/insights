@@ -15,12 +15,12 @@ import {
 import { router, urlToAction } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { delay } from 'kea-test-utils'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { RefObject } from 'react'
 
-import { lemonToast } from '@posthog/lemon-ui'
-import { ReplayPlugin, Replayer, playerConfig } from '@posthog/rrweb'
-import { EventType, IncrementalSource, eventWithTime } from '@posthog/rrweb-types'
+import { lemonToast } from '@hanzo/lemon-ui'
+import { ReplayPlugin, Replayer, playerConfig } from '@hanzo/rrweb'
+import { EventType, IncrementalSource, eventWithTime } from '@hanzo/rrweb-types'
 
 import api from 'lib/api'
 import { exportsLogic } from 'lib/components/ExportButton/exportsLogic'
@@ -1035,7 +1035,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
 
                 // For video export: expose resolution via global variable
                 if (typeof window !== 'undefined') {
-                    ;(window as any).__POSTHOG_RESOLUTION__ = resolution
+                    ;(window as any).__INSIGHTS_RESOLUTION__ = resolution
                 }
 
                 return resolution
@@ -1139,12 +1139,12 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
                 return
             }
             const extra = { fingerprint, playbackSessionId: values.sessionRecordingId }
-            posthog.captureException(error, {
+            insights.captureException(error, {
                 ...extra,
                 feature: 'replayer error swallowed',
             })
-            if (posthog.config.debug) {
-                posthog.capture('replayer error swallowed', extra)
+            if (insights.config.debug) {
+                insights.capture('replayer error swallowed', extra)
             }
             actions.fingerprintReported(fingerprint)
         },
@@ -1153,7 +1153,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
             // then we skip ahead a little to get past the blockage
             // this is a KLUDGE to get around what might be a bug in rrweb
             values.player?.replayer?.play(rrWebPlayerTime + skip)
-            posthog.capture('stuck session player skipped forward', {
+            insights.capture('stuck session player skipped forward', {
                 sessionId: values.sessionRecordingId,
                 rrWebTime: rrWebPlayerTime,
             })
@@ -1209,8 +1209,8 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
                                 clearTimeout(timer)
                             }
                         })
-                        ;(window as any)[`__posthog_player_logs`] = undefined
-                        ;(window as any)[`__posthog_player_warnings`] = undefined
+                        ;(window as any)[`__insights_player_logs`] = undefined
+                        ;(window as any)[`__insights_player_warnings`] = undefined
                     }
                 },
                 'consoleTimers',
@@ -2140,7 +2140,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
         },
         playerError: (value) => {
             if (value) {
-                posthog.capture('recording player error', {
+                insights.capture('recording player error', {
                     watchedSessionId: values.sessionRecordingId,
                     currentTimestamp: values.currentTimestamp,
                     currentSegment: values.currentSegment,
@@ -2203,7 +2203,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
             total_frames: cache.frameCount || undefined,
         }
 
-        posthog.capture(
+        insights.capture(
             playTimeMs === 0 ? 'recording viewed with no playtime summary' : 'recording viewed summary',
             summaryAnalytics
         )

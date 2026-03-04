@@ -1,7 +1,7 @@
 import { BindLogic, actions, connect, kea, key, path, props, reducers, selectors, useActions, useValues } from 'kea'
 import { actionToUrl, router, urlToAction } from 'kea-router'
 
-import { LemonDivider, Link } from '@posthog/lemon-ui'
+import { LemonDivider, Link } from '@hanzo/lemon-ui'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'

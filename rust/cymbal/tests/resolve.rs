@@ -17,7 +17,7 @@ use cymbal::{
     types::{RawErrProps, Stacktrace},
 };
 use httpmock::MockServer;
-use posthog_symbol_data::{read_symbol_data, SourceAndMap};
+use insights_symbol_data::{read_symbol_data, SourceAndMap};
 use symbolic::sourcemapcache::SourcePosition;
 use tokio::sync::Mutex;
 

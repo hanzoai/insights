@@ -113,7 +113,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         ]
     )
     @patch(
-        "insights.insightsql.database.database.posthoganalytics.feature_enabled",
+        "insights.insightsql.database.database.hanzoanalytics.feature_enabled",
         new=MagicMock(return_value=False),
     )
     @snapshot_postgres_queries
@@ -163,7 +163,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
             assert len(results[0]["person"]["distinct_ids"]) == expected_distinct_ids_count
 
     @patch(
-        "insights.insightsql.database.database.posthoganalytics.feature_enabled",
+        "insights.insightsql.database.database.hanzoanalytics.feature_enabled",
         new=MagicMock(return_value=False),
     )
     @snapshot_postgres_queries
@@ -230,7 +230,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         ]
     )
     @patch(
-        "insights.insightsql.database.database.posthoganalytics.feature_enabled",
+        "insights.insightsql.database.database.hanzoanalytics.feature_enabled",
         new=MagicMock(return_value=False),
     )
     @snapshot_postgres_queries
@@ -306,7 +306,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         assert results_[0]["distinct_id"] == "user2"
         assert results_[1]["distinct_id"] in twelve_distinct_ids
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     @patch("insights.session_recordings.session_recording_api.list_recordings_from_query")
     def test_console_log_filters_are_correctly_passed_to_listing(self, mock_query_lister, mock_capture):
         mock_query_lister.return_value = ([], False)
@@ -347,7 +347,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         with (
             freeze_time("2022-06-03T12:00:00.000Z"),
             patch(
-                "insights.insightsql.database.database.posthoganalytics.feature_enabled",
+                "insights.insightsql.database.database.hanzoanalytics.feature_enabled",
                 return_value=False,
             ),
             snapshot_postgres_queries_context(self),
@@ -522,7 +522,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         assert response_data["results"][0]["viewed"] is False
         assert response_data["results"][0]["id"] == "1"
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_update_session_recording_viewed(self, mock_capture: MagicMock):
         session_id = "test_update_viewed_state"
         base_time = (now() - relativedelta(days=1)).replace(microsecond=0)
@@ -569,7 +569,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
         assert len(mock_capture.call_args_list) == 1
         assert mock_capture.call_args_list[0][1]["event"] == "recording viewed"
 
-    @patch("posthoganalytics.capture")
+    @patch("hanzoanalytics.capture")
     def test_update_session_recording_analyzed(self, mock_capture: MagicMock):
         session_id = "test_update_analyzed_state"
         base_time = (now() - relativedelta(days=1)).replace(microsecond=0)
@@ -1964,7 +1964,7 @@ class TestSessionRecordings(APIBaseTest, ClickhouseTestMixin, QueryMatchingTest)
     @patch("insights.session_recordings.session_recording_api.execute_summarize_session")
     @patch("insights.session_recordings.session_recording_api.is_cloud", return_value=True)
     @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"})
-    @patch("posthoganalytics.feature_enabled")
+    @patch("hanzoanalytics.feature_enabled")
     def test_summarize_uses_correct_path_based_on_feature_flag(
         self,
         _name: str,

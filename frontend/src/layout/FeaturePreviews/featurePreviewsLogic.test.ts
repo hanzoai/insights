@@ -1,7 +1,7 @@
 import { MOCK_DEFAULT_USER } from 'lib/api.mock'
 
 import { expectLogic } from 'kea-test-utils'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { userLogic } from 'scenes/userLogic'
@@ -11,14 +11,14 @@ import { initKeaTests } from '~/test/init'
 
 import { featurePreviewsLogic } from './featurePreviewsLogic'
 
-// Mock posthog-js
-jest.mock('posthog-js')
+// Mock insights-js
+jest.mock('insights-js')
 // Mock lemonToast
 jest.mock('lib/lemon-ui/LemonToast')
 
 // Set up the mock methods that various parts of the code need
-const mockedPosthog = posthog as jest.Mocked<typeof posthog>
-mockedPosthog.get_session_replay_url = jest.fn(() => 'http://localhost/replay/123')
+const mockedInsights = insights as jest.Mocked<typeof insights>
+mockedInsights.get_session_replay_url = jest.fn(() => 'http://localhost/replay/123')
 
 describe('featurePreviewsLogic - submitEarlyAccessFeatureFeedback', () => {
     let logic: ReturnType<typeof featurePreviewsLogic.build>
@@ -28,7 +28,7 @@ describe('featurePreviewsLogic - submitEarlyAccessFeatureFeedback', () => {
 
         useMocks({
             post: {
-                'https://posthoghelp.zendesk.com/api/v2/requests.json': [200, {}],
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, {}],
             },
         })
         initKeaTests()
@@ -58,12 +58,12 @@ describe('featurePreviewsLogic - updateEarlyAccessFeatureEnrollment', () => {
     beforeEach(() => {
         jest.clearAllMocks()
 
-        // Set up the mock implementation for posthog
-        ;(posthog as any).updateEarlyAccessFeatureEnrollment = mockUpdateEnrollment
+        // Set up the mock implementation for insights
+        ;(insights as any).updateEarlyAccessFeatureEnrollment = mockUpdateEnrollment
 
         useMocks({
             post: {
-                'https://posthoghelp.zendesk.com/api/v2/requests.json': [200, {}],
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, {}],
             },
         })
         initKeaTests()
@@ -107,12 +107,12 @@ describe('featurePreviewsLogic - updateEarlyAccessFeatureEnrollment (impersonate
         originalImpersonatedSession = window.IMPERSONATED_SESSION
         window.IMPERSONATED_SESSION = true
 
-        // Set up the mock implementation for posthog
-        ;(posthog as any).updateEarlyAccessFeatureEnrollment = mockUpdateEnrollment
+        // Set up the mock implementation for insights
+        ;(insights as any).updateEarlyAccessFeatureEnrollment = mockUpdateEnrollment
 
         useMocks({
             post: {
-                'https://posthoghelp.zendesk.com/api/v2/requests.json': [200, {}],
+                'https://insightshelp.zendesk.com/api/v2/requests.json': [200, {}],
             },
         })
         initKeaTests()

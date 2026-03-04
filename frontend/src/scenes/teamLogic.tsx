@@ -211,7 +211,7 @@ export const teamLogic = kea<teamLogicType>([
                 deleteSecretTokenBackup: async () =>
                     await api.update(`api/environments/${values.currentTeamId}/delete_secret_token_backup`, {}),
                 /**
-                 * If adding a product intent that also represents regular product usage, see explainer in posthog.models.product_intent.product_intent.py.
+                 * If adding a product intent that also represents regular product usage, see explainer in insights.models.product_intent.product_intent.py.
                  * Also, we refresh the list of custom products to show the possible new entry in the sidebar after we've added the intent.
                  */
                 addProductIntent: async (properties: ProductIntentProperties) => {

@@ -68,7 +68,7 @@ class TestPageReportsTimeOnPage(ClickhouseTestMixin, APIBaseTest):
                 distinct_ids=[distinct_id],
                 properties={
                     "name": distinct_id,
-                    **({"email": "test@posthog.com"} if distinct_id == "test" else {}),
+                    **({"email": "test@hanzo.ai"} if distinct_id == "test" else {}),
                 },
             )
             session_id = str(uuid7(person_time))

@@ -25,7 +25,7 @@ Status | Description
 
 ### Key Relationships
 
-- **Fingerprints**: Issues are linked to fingerprints (not queryable via HogQL)
+- **Fingerprints**: Issues are linked to fingerprints (not queryable via InsightsQL)
 - **Cohorts**: Issues can be linked to cohorts via `system.cohorts`
 - **Exception Events**: Query via `events` table with `event = '$exception'` and `issue_id`
 

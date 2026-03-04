@@ -103,7 +103,7 @@ Add a clear, actionable description for your tool, assign it to a feature, speci
     "category": "Feature flags", // This will be displayed in the docs, but not readable by the MCP client
     "feature": "flags",
     "summary": "Creates a new feature flag in the project.", // This will be displayed in the docs, but not readable by the MCP client.
-    "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/PostHog/posthog/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
+    "required_scopes": ["feature_flag:write"], // You can find a list of available scopes here: https://github.com/Hanzo Insights/insights/blob/31082f4bcc4c45a0ac830777b8a3048e7752a1bc/frontend/src/lib/scopes.tsx
     "annotations": {
       "destructiveHint": false, // Does the tool delete or destructively modify data?
       "idempotentHint": false, // Can the tool be safely called multiple times with same result?
@@ -116,17 +116,17 @@ Add a clear, actionable description for your tool, assign it to a feature, speci
 
 **Available Features:**
 
-- `flags` - [Feature flag management](https://posthog.com/docs/feature-flags)
-- `workspace` - [Organization and project management](https://posthog.com/docs/getting-started/cloud)
-- `error-tracking` - [Error monitoring and debugging](https://posthog.com/docs/errors)
-- `dashboards` - [Dashboard creation and management](https://posthog.com/docs/product-analytics/dashboards)
-- `insights` - [Analytics insights and SQL queries](https://posthog.com/docs/product-analytics/insights)
-- `experiments` - [A/B testing experiments](https://posthog.com/docs/experiments)
-- `llm-analytics` - [LLM usage and cost tracking](https://posthog.com/docs/llm-analytics)
+- `flags` - [Feature flag management](https://hanzo.ai/docs/feature-flags)
+- `workspace` - [Organization and project management](https://hanzo.ai/docs/getting-started/cloud)
+- `error-tracking` - [Error monitoring and debugging](https://hanzo.ai/docs/errors)
+- `dashboards` - [Dashboard creation and management](https://hanzo.ai/docs/product-analytics/dashboards)
+- `insights` - [Analytics insights and SQL queries](https://hanzo.ai/docs/product-analytics/insights)
+- `experiments` - [A/B testing experiments](https://hanzo.ai/docs/experiments)
+- `llm-analytics` - [LLM usage and cost tracking](https://hanzo.ai/docs/llm-analytics)
 - `docs` - Insights documentation search
 
 If your tool doesn't fit any of these features, you can create a new feature category yourself.
-If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`. You'll also need to update the `AVAILABLE_FEATURES` list in `https://github.com/posthog/wizard/` so it shows up during feature selection when running `wizard mcp add`.
+If you do add a new feature, make sure to update the `README.md` in the root of the repository to list the new feature and include it in the tests at `typescript/tests/unit/tool-filtering.test.ts`. You'll also need to update the `AVAILABLE_FEATURES` list in `https://github.com/insights/wizard/` so it shows up during feature selection when running `wizard mcp add`.
 
 **Tool Definition Tips:**
 

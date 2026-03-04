@@ -19,7 +19,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                     <CodeBlock
                         language="bash"
                         code={dedent`
-                            pip install posthog
+                            pip install insights
                         `}
                     />
                 </>
@@ -47,7 +47,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but
                             you will need to capture the data in the right format. See the schema in the [manual capture
-                            section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more
+                            section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more
                             details.
                         </Markdown>
                     </CalloutBox>
@@ -61,7 +61,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then call `instrument()` to register
+                        settings](https://insights.hanzo.ai/settings/project), then call `instrument()` to register
                         Insights tracing with the OpenAI Agents SDK. This automatically captures all agent traces,
                         spans, and LLM generations.
                     </Markdown>
@@ -69,16 +69,16 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                     <CodeBlock
                         language="python"
                         code={dedent`
-                            from posthog import Posthog
-                            from posthog.ai.openai_agents import instrument
+                            from insights import Insights
+                            from insights.ai.openai_agents import instrument
 
-                            posthog = Posthog(
+                            insights = Insights(
                                 "<ph_project_api_key>",
                                 host="<ph_client_api_host>"
                             )
 
                             instrument(
-                                client=posthog,
+                                client=insights,
                                 distinct_id="user_123", # optional
                                 privacy_mode=False, # optional
                                 groups={"company": "company_id_in_your_db"}, # optional
@@ -91,7 +91,7 @@ export const getOpenAIAgentsSteps = (ctx: OnboardingComponentsContext): StepDefi
                         <Markdown>
                             **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to
                             `instrument()`. See our docs on [anonymous vs identified
-                            events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>
                 </>

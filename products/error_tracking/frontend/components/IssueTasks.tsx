@@ -1,7 +1,7 @@
 import { useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonDialog, LemonInput, LemonTextArea } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonDialog, LemonInput, LemonTextArea } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ErrorEventType, ErrorTrackingException } from 'lib/components/Errors/types'
@@ -41,7 +41,7 @@ const createTaskForm = (
     selectedEvent: ErrorEventType | null,
     githubIntegrations: IntegrationType[]
 ): void => {
-    const posthogUrl = window.location.origin + window.location.pathname
+    const insightsUrl = window.location.origin + window.location.pathname
 
     let description = ''
 
@@ -137,7 +137,7 @@ const createTaskForm = (
     }
 
     description += `---\n\n`
-    description += `**Insights Error Tracking:** ${posthogUrl}\n`
+    description += `**Insights Error Tracking:** ${insightsUrl}\n`
     description += `**First Seen:** ${new Date(issue.first_seen).toLocaleString()}\n`
 
     const defaultIntegration = githubIntegrations[0]

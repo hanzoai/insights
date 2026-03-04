@@ -16,8 +16,8 @@ import {
     IconThumbsDown,
     IconThumbsUp,
     IconWarning,
-} from '@posthog/icons'
-import { LemonBanner, LemonDivider, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonBanner, LemonDivider, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { usePageVisibility } from 'lib/hooks/usePageVisibility'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
@@ -644,7 +644,7 @@ function LoadSessionSummaryButton(): JSX.Element {
 
     // We need $autocapture events to be able to generate a summary
     const hasEvents = [
-        'events-posthog',
+        'events-insights',
         'events-custom',
         'events-pageview',
         'events-autocapture',

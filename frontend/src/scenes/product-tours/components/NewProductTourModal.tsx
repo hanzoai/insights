@@ -1,8 +1,8 @@
 import classNames from 'classnames'
 import { useState } from 'react'
 
-import { IconCursorClick, IconMegaphone } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonLabel, LemonModal } from '@posthog/lemon-ui'
+import { IconCursorClick, IconMegaphone } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonLabel, LemonModal } from '@hanzo/lemon-ui'
 
 type TourType = 'tour' | 'announcement' | 'banner' | undefined
 

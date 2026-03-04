@@ -1,14 +1,14 @@
 import { useActions, useValues } from 'kea'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { IconFeatures } from '@posthog/icons'
-import { LemonButton, Tooltip } from '@posthog/lemon-ui'
+import { IconFeatures } from '@hanzo/icons'
+import { LemonButton, Tooltip } from '@hanzo/lemon-ui'
 import {
     AssigneeIconDisplay,
     AssigneeLabelDisplay,
     AssigneeResolver,
-} from '@posthog/products-error-tracking/frontend/components/Assignee/AssigneeDisplay'
-import { AssigneeSelect } from '@posthog/products-error-tracking/frontend/components/Assignee/AssigneeSelect'
+} from '@hanzo/products-error-tracking/frontend/components/Assignee/AssigneeDisplay'
+import { AssigneeSelect } from '@hanzo/products-error-tracking/frontend/components/Assignee/AssigneeSelect'
 
 import { DateFilter } from 'lib/components/DateFilter/DateFilter'
 import { DurationPicker } from 'lib/components/DurationPicker/DurationPicker'

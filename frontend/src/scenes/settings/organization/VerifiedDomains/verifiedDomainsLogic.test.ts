@@ -24,7 +24,7 @@ describe('verifiedDomainsLogic', () => {
                     results: [
                         {
                             id: '8db3b0c2-a0ab-490a-9037-14f3358a81bc',
-                            domain: 'my.posthog.com',
+                            domain: 'my.hanzo.ai',
                             jit_provisioning_enabled: true,
                             sso_enforcement: 'google-oauth2',
                             is_verified: true,
@@ -32,7 +32,7 @@ describe('verifiedDomainsLogic', () => {
                         },
                         {
                             id: 'id_will_be_deleted',
-                            domain: 'temp.posthog.com',
+                            domain: 'temp.hanzo.ai',
                             jit_provisioning_enabled: false,
                             sso_enforcement: '',
                             is_verified: false,
@@ -44,7 +44,7 @@ describe('verifiedDomainsLogic', () => {
             post: {
                 '/api/organizations/:organization/domains/': {
                     id: '14f3358a-a0ab-490a-9037-81a0abc',
-                    domain: 'new.posthog.com',
+                    domain: 'new.hanzo.ai',
                     jit_provisioning_enabled: false,
                     sso_enforcement: '',
                     is_verified: false,
@@ -93,11 +93,11 @@ describe('verifiedDomainsLogic', () => {
 
         it('creates domain correctly', async () => {
             await expectLogic(logic).toFinishAllListeners()
-            logic.actions.addVerifiedDomain('new.posthog.com')
+            logic.actions.addVerifiedDomain('new.hanzo.ai')
             await expectLogic(logic).toFinishAllListeners()
             const { verifiedDomains } = logic.values
             expect(verifiedDomains.length).toEqual(3)
-            expect(verifiedDomains[0].domain).toEqual('new.posthog.com') // added at the top
+            expect(verifiedDomains[0].domain).toEqual('new.hanzo.ai') // added at the top
         })
 
         it('deletes domain correctly', async () => {

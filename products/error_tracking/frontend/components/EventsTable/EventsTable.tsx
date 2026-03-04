@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 
-import { IconAI } from '@posthog/icons'
-import { LemonButton, Link } from '@posthog/lemon-ui'
+import { IconAI } from '@hanzo/icons'
+import { LemonButton, Link } from '@hanzo/lemon-ui'
 
 import { ErrorEventType } from 'lib/components/Errors/types'
 import { getExceptionAttributes, getRecordingStatus, getSessionId } from 'lib/components/Errors/utils'

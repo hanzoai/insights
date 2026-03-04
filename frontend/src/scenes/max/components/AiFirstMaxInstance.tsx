@@ -1,7 +1,7 @@
 import { BindLogic, useActions, useValues } from 'kea'
 
-import { IconOpenSidebar, IconShare } from '@posthog/icons'
-import { LemonBanner } from '@posthog/lemon-ui'
+import { IconOpenSidebar, IconShare } from '@hanzo/icons'
+import { LemonBanner } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { copyToClipboard } from 'lib/utils/copyToClipboard'

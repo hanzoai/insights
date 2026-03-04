@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-node'
+import { Insights } from '@hanzo/insights-node'
 
 let _client: Insights | undefined
 
@@ -7,10 +7,10 @@ export enum AnalyticsEvent {
     MCP_TOOL_RESPONSE = 'mcp tool response',
 }
 
-export const getPostHogClient = (): Insights => {
+export const getInsightsClient = (): Insights => {
     if (!_client) {
-        _client = new PostHog('sTMFPsFhdP1Ssg', {
-            host: 'https://us.i.posthog.com',
+        _client = new Insights('sTMFPsFhdP1Ssg', {
+            host: 'https://us.i.hanzo.ai',
             flushAt: 1,
             flushInterval: 0,
         })

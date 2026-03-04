@@ -34,7 +34,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
     def test_filter_events(self):
         _create_person(
-            properties={"email": "tim@posthog.com"},
+            properties={"email": "tim@hanzo.ai"},
             team=self.team,
             distinct_ids=["2", "some-random-uid"],
             is_identified=True,
@@ -68,7 +68,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
         assert response["results"][0]["person"] == {
             "distinct_ids": ["2"],
             "is_identified": True,
-            "properties": {"email": "tim@posthog.com"},
+            "properties": {"email": "tim@hanzo.ai"},
         }
         assert response["results"][0]["elements"][0]["tag_name"] == "button"
         assert response["results"][0]["elements"][0]["order"] == 0
@@ -77,7 +77,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_filter_events_by_event_name(self):
         _create_person(
-            properties={"email": "tim@posthog.com"},
+            properties={"email": "tim@hanzo.ai"},
             team=self.team,
             distinct_ids=["2", "some-random-uid"],
         )
@@ -104,7 +104,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
     @override_settings(PERSON_ON_EVENTS_V2_OVERRIDE=False)
     def test_filter_events_by_properties(self):
         _create_person(
-            properties={"email": "tim@posthog.com"},
+            properties={"email": "tim@hanzo.ai"},
             team=self.team,
             distinct_ids=["2", "some-random-uid"],
         )
@@ -185,7 +185,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
     def test_filter_by_person(self):
         person = _create_person(
-            properties={"email": "tim@posthog.com"},
+            properties={"email": "tim@hanzo.ai"},
             distinct_ids=["2", "some-random-uid"],
             team=self.team,
             immediate=True,
@@ -226,17 +226,17 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
     @freeze_time("2020-01-10")
     def test_event_column_values(self):
         person1 = _create_person(
-            properties={"email": "joe@posthog.com"},
+            properties={"email": "joe@hanzo.ai"},
             team=self.team,
             distinct_ids=["bla"],
         )
         person2 = _create_person(
-            properties={"email": "bob@posthog.com"},
+            properties={"email": "bob@hanzo.ai"},
             team=self.team,
             distinct_ids=["blu"],
         )
         person3 = _create_person(
-            properties={"email": "bill@posthog.com"},
+            properties={"email": "bill@hanzo.ai"},
             team=self.team,
             distinct_ids=["ble"],
         )
@@ -600,7 +600,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
         user = self._create_user("tim")
         self.client.force_login(user)
         _create_person(
-            properties={"email": "tim@posthog.com"},
+            properties={"email": "tim@hanzo.ai"},
             team=self.team,
             distinct_ids=["2", "some-random-uid"],
         )
@@ -825,7 +825,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
     def test_get_event_by_id(self):
         _create_person(
-            properties={"email": "someone@posthog.com"},
+            properties={"email": "someone@hanzo.ai"},
             team=self.team,
             distinct_ids=["1"],
             is_identified=True,
@@ -853,7 +853,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
 
     def test_limit(self):
         _create_person(
-            properties={"email": "tim@posthog.com"},
+            properties={"email": "tim@hanzo.ai"},
             team=self.team,
             distinct_ids=["2", "some-random-uid"],
             is_identified=True,
@@ -889,7 +889,7 @@ class TestEvents(ClickhouseTestMixin, APIBaseTest):
         assert len(response["results"]) == 2
 
     def test_get_events_with_specified_token(self):
-        _, _, user2 = User.objects.bootstrap("Test", "team2@posthog.com", None)
+        _, _, user2 = User.objects.bootstrap("Test", "team2@hanzo.ai", None)
         assert user2.team is not None
         assert self.team is not None
 

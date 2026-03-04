@@ -2,9 +2,9 @@ import { actions, connect, kea, listeners, path, reducers, selectors } from 'kea
 import { FieldNamePath, capitalizeFirstLetter, forms } from 'kea-forms'
 import { lazyLoaders } from 'kea-loaders'
 import { router, urlToAction } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { LemonDialog, Link, lemonToast } from '@posthog/lemon-ui'
+import { LemonDialog, Link, lemonToast } from '@hanzo/lemon-ui'
 
 import api, { getJSONOrNull } from 'lib/api'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -406,7 +406,7 @@ export const billingLogic = kea<billingLogicType>([
 
                         return values.billing as BillingType
                     } catch (error: any) {
-                        posthog.captureException(error)
+                        insights.captureException(error)
                         lemonToast.error(
                             (error && error.detail) ||
                                 'There was an error switching your plan. Please try again or contact support.'
@@ -737,28 +737,28 @@ export const billingLogic = kea<billingLogicType>([
     })),
     listeners(({ actions, values }) => ({
         reportBillingShown: () => {
-            posthog.capture('billing v2 shown')
+            insights.capture('billing v2 shown')
         },
         reportBillingAlertShown: ({ alertConfig }) => {
-            posthog.capture('billing alert shown', {
+            insights.capture('billing alert shown', {
                 ...alertConfig,
             })
         },
         reportBillingAlertActionClicked: ({ alertConfig }) => {
-            posthog.capture('billing alert action clicked', {
+            insights.capture('billing alert action clicked', {
                 ...alertConfig,
             })
         },
         reportCreditsModalShown: () => {
-            posthog.capture('credits modal shown')
+            insights.capture('credits modal shown')
         },
         reportCreditsFormSubmitted: ({ creditInput }) => {
-            posthog.capture('credits modal credit form submitted', {
+            insights.capture('credits modal credit form submitted', {
                 credit_amount_usd: creditInput,
             })
         },
         reportCreditsCTAShown: ({ creditOverview }) => {
-            posthog.capture('credits cta shown', {
+            insights.capture('credits cta shown', {
                 eligible: creditOverview.eligible,
                 status: creditOverview.status,
                 estimated_monthly_credit_amount_usd: creditOverview.estimated_monthly_credit_amount_usd,
@@ -766,7 +766,7 @@ export const billingLogic = kea<billingLogicType>([
         },
         toggleCreditCTAHeroDismissed: ({ isDismissed }) => {
             if (isDismissed) {
-                posthog.capture('credits cta hero dismissed')
+                insights.capture('credits cta hero dismissed')
             }
         },
         switchFlatrateSubscriptionPlan: async (payload) => {
@@ -822,7 +822,7 @@ export const billingLogic = kea<billingLogicType>([
                     return
                 }
 
-                const contactEmail = values.billing.account_owner?.email || 'sales@posthog.com'
+                const contactEmail = values.billing.account_owner?.email || 'sales@hanzo.ai'
                 const contactName = values.billing.account_owner?.name || 'sales'
                 const timeRemaining =
                     remainingHours < 24 ? pluralize(remainingHours, 'hour') : pluralize(remainingDays, 'day')
@@ -957,7 +957,7 @@ export const billingLogic = kea<billingLogicType>([
         },
         registerInstrumentationProps: async (_, breakpoint) => {
             await breakpoint(100)
-            if (posthog && values.billing) {
+            if (insights && values.billing) {
                 const payload: { [key: string]: any } = {
                     has_billing_plan: !!values.billing.has_active_subscription,
                     free_trial_until: values.billing.free_trial_until?.toISOString(),
@@ -985,7 +985,7 @@ export const billingLogic = kea<billingLogicType>([
                     payload['billing_period_start'] = values.billing.billing_period.current_period_start
                     payload['billing_period_end'] = values.billing.billing_period.current_period_end
                 }
-                posthog.register(payload)
+                insights.register(payload)
             }
         },
         showPurchaseCreditsModal: ({ isOpen }) => {

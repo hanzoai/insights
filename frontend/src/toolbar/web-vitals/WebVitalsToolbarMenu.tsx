@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, Link, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { LemonBanner, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 import { urls } from 'scenes/urls'
@@ -23,13 +23,13 @@ const ALL_METRICS: WebVitalsMetric[] = ['INP', 'LCP', 'FCP', 'CLS']
 
 export const WebVitalsToolbarMenu = (): JSX.Element => {
     const { localWebVitals, remoteWebVitals } = useValues(webVitalsToolbarLogic)
-    const { posthog, uiHost } = useValues(toolbarConfigLogic)
+    const { insights, uiHost } = useValues(toolbarConfigLogic)
 
     return (
         <ToolbarMenu>
             <ToolbarMenu.Body>
                 <div className="flex flex-col gap-2">
-                    {!posthog?.webVitalsAutocapture?.isEnabled && !inStorybookTestRunner() && !inStorybook() && (
+                    {!insights?.webVitalsAutocapture?.isEnabled && !inStorybookTestRunner() && !inStorybook() && (
                         <LemonBanner type="warning">
                             Web vitals are not enabled for this project so you won't see any data here. Enable it on the{' '}
                             <Link to={joinWithUiHost(uiHost, urls.settings())} target="_blank">
@@ -80,7 +80,7 @@ export const WebVitalsToolbarMenu = (): JSX.Element => {
                     <Link to={joinWithUiHost(uiHost, urls.webAnalyticsWebVitals())} target="_blank">
                         View all metrics
                     </Link>
-                    <Link to="https://posthog.com/docs/web-analytics/web-vitals" target="_blank">
+                    <Link to="https://hanzo.ai/docs/web-analytics/web-vitals" target="_blank">
                         View web vitals docs
                     </Link>
                 </div>

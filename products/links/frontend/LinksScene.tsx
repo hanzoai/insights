@@ -1,8 +1,8 @@
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonTable, LemonTableColumn, Link } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonTable, LemonTableColumn, Link } from '@hanzo/lemon-ui'
 
 import { AppShortcut } from 'lib/components/AppShortcuts/AppShortcut'
 import { keyBinds } from 'lib/components/AppShortcuts/shortcuts'
@@ -160,7 +160,7 @@ export function LinksScene(): JSX.Element {
                 thingName="link"
                 description="Start creating links for your marketing campaigns, referral programs, and more."
                 action={() => router.actions.push(urls.link('new'))}
-                docsURL="https://posthog.com/docs/links"
+                docsURL="https://hanzo.ai/docs/links"
                 className="my-0"
             />
 

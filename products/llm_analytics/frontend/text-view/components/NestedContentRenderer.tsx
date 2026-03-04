@@ -2,8 +2,8 @@
  * Component for rendering nested content that may contain truncated segments
  * Used for expandable sections within the main text view
  */
-import { IconExternal } from '@posthog/icons'
-import { Tooltip } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { Tooltip } from '@hanzo/lemon-ui'
 
 import { VISIBLE_TOOLS_COUNT } from '../constants'
 import { parseTruncatedSegments } from '../parsing'

@@ -7,7 +7,7 @@ template: InsightsFunctionTemplateDC = InsightsFunctionTemplateDC(
     id="template-hogdesk",
     name="HogDesk",
     description="HogDesk bug reporter",
-    icon_url="https://raw.githubusercontent.com/PostHog/bug-report-app/refs/heads/main/logo.png",
+    icon_url="https://raw.githubusercontent.com/Hanzo Insights/bug-report-app/refs/heads/main/logo.png",
     category=["Custom"],
     code_language="javascript",
     code="""
@@ -157,7 +157,7 @@ const style = (inputs) => `
     }
 `
 
-export function onLoad({ inputs, posthog }) {
+export function onLoad({ inputs, insights }) {
     if (inputs.domains) {
         const domains = inputs.domains.split(',').map((domain) => domain.trim())
         if (domains.length > 0 && domains.indexOf(window.location.hostname) === -1) {
@@ -205,14 +205,14 @@ export function onLoad({ inputs, posthog }) {
     `
 
     const getSessionRecordingUrl = () => {
-        const sessionId = posthog?.sessionRecording?.sessionId
+        const sessionId = insights?.sessionRecording?.sessionId
         const LOOK_BACK = 30
         const recordingStartTime = Math.max(
-            Math.floor((new Date().getTime() - (posthog?.sessionManager?._sessionStartTimestamp || 0)) / 1000) -
+            Math.floor((new Date().getTime() - (insights?.sessionManager?._sessionStartTimestamp || 0)) / 1000) -
                 LOOK_BACK,
             0
         )
-        const api_host = posthog?.config?.api_host || 'https://app.posthog.com'
+        const api_host = insights?.config?.api_host || 'https://insights.hanzo.ai'
         return sessionId ? `${api_host}/recordings/${sessionId}?t=${recordingStartTime}` : undefined
     }
 
@@ -222,7 +222,7 @@ export function onLoad({ inputs, posthog }) {
         onsubmit: function (e) {
             e.preventDefault()
             const sessionRecordingUrl = getSessionRecordingUrl()
-            posthog.capture(inputs.eventName || 'bug Sent', {
+            insights.capture(inputs.eventName || 'bug Sent', {
                 [inputs.bugProperty || '$bug']: this.bug.value,
                 sessionRecordingUrl: sessionRecordingUrl,
                 email: this.email.value
@@ -275,7 +275,7 @@ export function onLoad({ inputs, posthog }) {
         window.addEventListener('click', clickListener)
     }
 
-    console.log('Posthog - latest bug widget')
+    console.log('Insights - latest bug widget')
 
     const thanksElement = Object.assign(document.createElement('div'), {
         className: 'thanks',
@@ -301,21 +301,21 @@ function createShadow(styleSheet: string): ShadowRoot {
         {
             "key": "domains",
             "label": "Domains",
-            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,app.posthog.com"',
+            "description": 'Comma separated list of domains to activate on. Leave blank to enable all. For example: "localhost,insights.hanzo.ai"',
             "type": "string",
             "default": "",
         },
         {
             "key": "selector",
             "label": "Selector",
-            "description": 'CSS selector to activate on. For example: "#my-bug-button" or "[data-attr=\'posthog-bug-button\']"',
+            "description": 'CSS selector to activate on. For example: "#my-bug-button" or "[data-attr=\'insights-bug-button\']"',
             "type": "string",
             "default": "",
         },
         {
             "key": "useButton",
             "label": "Show bug button on the page",
-            "description": "Alternatively, any click on an element with the selector [data-attr='posthog-bug-button'] will open the bug widget",
+            "description": "Alternatively, any click on an element with the selector [data-attr='insights-bug-button'] will open the bug widget",
             "type": "choice",
             "choices": [
                 {
@@ -359,7 +359,7 @@ function createShadow(styleSheet: string): ShadowRoot {
         {
             "key": "footerHTML",
             "label": "Footer HTML",
-            "description": "HTML to show in the footer of the bug widget. For example: \"More questions? <a href='https://posthog.com/questions'>Ask us anything</a>\"",
+            "description": "HTML to show in the footer of the bug widget. For example: \"More questions? <a href='https://hanzo.ai/questions'>Ask us anything</a>\"",
             "type": "string",
             "default": "<strong class='bolded'>Have a specific issue?</strong> Contact support directly!",
         },

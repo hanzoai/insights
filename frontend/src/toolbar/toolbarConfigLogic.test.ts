@@ -26,10 +26,10 @@ describe('toolbar toolbarLogic', () => {
 
     it('normalizes uiHost to not end with a slash', () => {
         const logicWithUiHost = toolbarConfigLogic.build({
-            posthog: { config: { ui_host: 'https://us.posthog.com/' } } as any,
+            insights: { config: { ui_host: 'https://insights.hanzo.ai/' } } as any,
         } as any)
         logicWithUiHost.mount()
         expect(logicWithUiHost.values.uiHost.endsWith('/')).toBe(false)
-        expect(logicWithUiHost.values.uiHost).toBe('https://us.posthog.com')
+        expect(logicWithUiHost.values.uiHost).toBe('https://insights.hanzo.ai')
     })
 })

@@ -20,8 +20,8 @@ import {
     IconSidebarOpen,
     IconSparkles,
     IconToolbar,
-} from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { AccountMenu } from 'lib/components/Account/AccountMenu'
 import { NewAccountMenu } from 'lib/components/Account/NewAccountMenu'
@@ -33,7 +33,7 @@ import { DebugNotice } from 'lib/components/DebugNotice'
 import { HealthMenu } from 'lib/components/HealthMenu/HealthMenu'
 import { HelpMenu } from 'lib/components/HelpMenu/HelpMenu'
 import { NavPanelAdvertisement } from 'lib/components/NavPanelAdvertisement/NavPanelAdvertisement'
-import { PosthogStatusShownOnlyIfNotOperational } from 'lib/components/PosthogStatus/PosthogStatusShownOnlyIfNotOperational'
+import { InsightsStatusShownOnlyIfNotOperational } from 'lib/components/InsightsStatus/InsightsStatusShownOnlyIfNotOperational'
 import { Resizer } from 'lib/components/Resizer/Resizer'
 import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableShadows'
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -211,7 +211,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
             to: urls.activity(),
             onClick: () => handleStaticNavbarItemClick(urls.activity(), true),
             collapsedTooltip: 'Events',
-            documentationUrl: 'https://posthog.com/docs/data/events',
+            documentationUrl: 'https://hanzo.ai/docs/data/events',
         },
         ...(isProductAutonomyEnabled
             ? [
@@ -252,7 +252,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
             },
             showChevron: true,
             collapsedTooltip: ['Open data management', 'Close data management'],
-            documentationUrl: 'https://posthog.com/docs/data',
+            documentationUrl: 'https://hanzo.ai/docs/data',
         },
         {
             identifier: 'People',
@@ -265,7 +265,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
             },
             showChevron: true,
             collapsedTooltip: ['Open people & groups', 'Close people & groups'],
-            documentationUrl: 'https://posthog.com/docs/data/persons',
+            documentationUrl: 'https://hanzo.ai/docs/data/persons',
         },
         {
             identifier: 'Shortcuts',
@@ -559,7 +559,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
                                             handleStaticNavbarItemClick(urls.toolbarLaunch(), true)
                                         }}
                                         tooltip={isLayoutNavCollapsed ? 'Toolbar' : undefined}
-                                        tooltipDocLink="https://posthog.com/docs/toolbar"
+                                        tooltipDocLink="https://hanzo.ai/docs/toolbar"
                                         tooltipPlacement="right"
                                         data-attr="navbar-toolbar"
                                     >
@@ -650,7 +650,7 @@ export function PanelLayoutNavBar({ children }: { children: React.ReactNode }): 
                                     </Link>
                                     <HealthMenu iconOnly={isLayoutNavCollapsed} />
                                     <HelpMenu iconOnly={isLayoutNavCollapsed} />
-                                    <PosthogStatusShownOnlyIfNotOperational iconOnly={isLayoutNavCollapsed} />
+                                    <InsightsStatusShownOnlyIfNotOperational iconOnly={isLayoutNavCollapsed} />
                                 </div>
                             )}
                         </div>

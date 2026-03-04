@@ -16,8 +16,8 @@ import {
     IconShieldLock,
     IconSparkles,
     IconSupport,
-} from '@posthog/icons'
-import { ProfilePicture } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { ProfilePicture } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { Link } from 'lib/lemon-ui/Link/Link'
@@ -121,7 +121,7 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                                 className:
                                                     'flex flex-col gap-1 p-2 border border-primary rounded h-32 items-center justify-center shadow hover:border-accent transition-colors',
                                             }}
-                                            data-attr="help-menu-ask-posthog-ai-button"
+                                            data-attr="help-menu-ask-insights-ai-button"
                                         >
                                             <span className="size-3 [&>svg]:size-4 mb-3">
                                                 <IconSparkles className="text-ai" />
@@ -149,7 +149,7 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                     render={(props) => (
                                         <Link
                                             {...props}
-                                            to="https://posthog.com/docs"
+                                            to="https://hanzo.ai/docs"
                                             buttonProps={{ menuItem: true }}
                                             target="_blank"
                                             targetBlankIcon
@@ -186,7 +186,7 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                             targetBlankIcon
                                             target="_blank"
                                             buttonProps={{ menuItem: true }}
-                                            to="https://posthog.com/changelog"
+                                            to="https://hanzo.ai/changelog"
                                             data-attr="help-menu-changelog-button"
                                         >
                                             <IconLive />
@@ -373,7 +373,7 @@ export function HelpMenu({ iconOnly = false }: { iconOnly?: boolean }): JSX.Elem
                                 {billing?.account_owner?.email && billing?.account_owner?.name && (
                                     <>
                                         <Label intent="menu" className="px-2 mt-2">
-                                            YOUR POSTHOG HUMAN
+                                            YOUR INSIGHTS HUMAN
                                         </Label>
                                         <DropdownMenuSeparator />
                                         <Menu.Item

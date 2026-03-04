@@ -1,5 +1,5 @@
 import { actions, kea, listeners, path, reducers } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import type { logsViewerSettingsLogicType } from './logsViewerSettingsLogicType'
 
@@ -45,13 +45,13 @@ export const logsViewerSettingsLogic = kea<logsViewerSettingsLogicType>([
 
     listeners(() => ({
         setTimezone: ({ timezone }) => {
-            posthog.capture('logs setting changed', { setting: 'timezone', value: timezone })
+            insights.capture('logs setting changed', { setting: 'timezone', value: timezone })
         },
         setWrapBody: ({ wrapBody }) => {
-            posthog.capture('logs setting changed', { setting: 'wrap_body', value: wrapBody })
+            insights.capture('logs setting changed', { setting: 'wrap_body', value: wrapBody })
         },
         setPrettifyJson: ({ prettifyJson }) => {
-            posthog.capture('logs setting changed', { setting: 'prettify_json', value: prettifyJson })
+            insights.capture('logs setting changed', { setting: 'prettify_json', value: prettifyJson })
         },
     })),
 ])

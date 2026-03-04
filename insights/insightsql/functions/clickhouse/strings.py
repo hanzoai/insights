@@ -2,7 +2,7 @@ from insights.insightsql.ast import IntegerType, StringType
 
 from ..core import InsightsQLFunctionMeta
 
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 STRING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "left": InsightsQLFunctionMeta("left", 2, 2, signatures=[((StringType(), IntegerType()), StringType())]),
     "right": InsightsQLFunctionMeta("right", 2, 2, signatures=[((StringType(), IntegerType()), StringType())]),
@@ -40,7 +40,7 @@ STRING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # searching in strings
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 STRING_SEARCH_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "position": InsightsQLFunctionMeta("position", 2, 3, case_sensitive=False),
     "positionCaseInsensitive": InsightsQLFunctionMeta("positionCaseInsensitive", 2, 3),
@@ -108,7 +108,7 @@ STRING_SEARCH_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # replacing in strings
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 STRING_REPLACE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "replace": InsightsQLFunctionMeta("replace", 3, 3, case_sensitive=False),
     "replaceAll": InsightsQLFunctionMeta("replaceAll", 3, 3),
@@ -121,7 +121,7 @@ STRING_REPLACE_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # splitting strings
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 STRING_SPLIT_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "splitByChar": InsightsQLFunctionMeta("splitByChar", 2, 3),
     "splitByString": InsightsQLFunctionMeta("splitByString", 2, 3),
@@ -135,7 +135,7 @@ STRING_SPLIT_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # PostgreSQL-style string functions
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 POSTGRESQL_STRING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     "repeat": InsightsQLFunctionMeta(
         "repeat",
@@ -173,7 +173,7 @@ POSTGRESQL_STRING_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
 }
 
 # PostgreSQL trim functions - using dictionary comprehensions like in the original
-# Keep in sync with the posthog.com repository: contents/docs/sql/clickhouse-functions.mdx
+# Keep in sync with the hanzo.ai repository: contents/docs/sql/clickhouse-functions.mdx
 POSTGRESQL_TRIM_FUNCTIONS: dict[str, InsightsQLFunctionMeta] = {
     **{
         name: InsightsQLFunctionMeta(

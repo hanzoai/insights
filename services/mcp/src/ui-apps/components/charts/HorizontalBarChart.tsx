@@ -22,7 +22,7 @@ export interface HorizontalBarChartProps {
     color?: string | ((index: number, bar: HorizontalBar) => string)
 }
 
-const DEFAULT_COLOR = 'var(--posthog-chart-1, #1d4ed8)'
+const DEFAULT_COLOR = 'var(--insights-chart-1, #1d4ed8)'
 
 export function HorizontalBarChart({ bars, maxValue, color = DEFAULT_COLOR }: HorizontalBarChartProps): ReactElement {
     if (bars.length === 0) {

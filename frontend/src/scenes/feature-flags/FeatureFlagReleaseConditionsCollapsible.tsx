@@ -2,8 +2,8 @@ import { useActions, useValues } from 'kea'
 import { useRef } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
-import { IconCopy, IconInfo, IconPlus, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonCollapse, LemonInput, LemonLabel, LemonSelect, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconCopy, IconInfo, IconPlus, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonCollapse, LemonInput, LemonLabel, LemonSelect, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { allOperatorsToHumanName } from 'lib/components/DefinitionPopover/utils'
 import { EditableField } from 'lib/components/EditableField/EditableField'
@@ -503,7 +503,7 @@ export function FeatureFlagReleaseConditionsCollapsible({
                                                                     Force all matching {aggregationTargetName} to
                                                                     receive a specific variant.{' '}
                                                                     <Link
-                                                                        to="https://posthog.com/docs/feature-flags/testing#method-1-assign-a-user-a-specific-flag-value"
+                                                                        to="https://hanzo.ai/docs/feature-flags/testing#method-1-assign-a-user-a-specific-flag-value"
                                                                         target="_blank"
                                                                     >
                                                                         Learn more

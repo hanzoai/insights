@@ -1,5 +1,5 @@
 from ._internal.template_blank import blank_site_app, blank_site_destination
-from ._siteapps.template_debug_posthog import template as debug_posthog
+from ._siteapps.template_debug_insights import template as debug_insights
 from ._siteapps.template_early_access_features import template as early_access_features
 from ._siteapps.template_hogdesk import template as hogdesk
 from ._siteapps.template_notification_bar import template as notification_bar
@@ -64,9 +64,9 @@ from .make.template_make import template as make
 from .meta_ads.template_meta_ads import template as meta_ads
 from .microsoft_teams.template_microsoft_teams import template as microsoft_teams
 from .onesignal.template_onesignal import template as onesignal
-from .posthog.template_posthog import (
+from .insights.template_insights import (
     TemplateInsightsMigrator,
-    template as posthog,
+    template as insights,
 )
 from .reddit.template_reddit_pixel import template_reddit_pixel as reddit_pixel
 from .rudderstack.template_rudderstack import (
@@ -125,7 +125,7 @@ INSIGHTS_FUNCTION_TEMPLATES = [
     meta_ads,
     microsoft_teams,
     onesignal,
-    posthog,
+    insights,
     reddit_pixel,
     rudderstack,
     salesforce_create,
@@ -140,7 +140,7 @@ INSIGHTS_FUNCTION_TEMPLATES = [
     hogdesk,
     notification_bar,
     pineapple_mode,
-    debug_posthog,
+    debug_insights,
 ]
 
 

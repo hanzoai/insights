@@ -60,7 +60,7 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:169684386827:certificate/698851fd-36de-4d28-8d75-cb75cc7a92f2
-    external-dns.alpha.kubernetes.io/hostname: $HOSTNAME.dev.posthog.dev
+    external-dns.alpha.kubernetes.io/hostname: $HOSTNAME.dev.insights.hanzo.ai
 spec:
   ingressClassName: alb
   rules:

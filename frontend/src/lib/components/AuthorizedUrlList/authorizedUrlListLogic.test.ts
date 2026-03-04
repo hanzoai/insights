@@ -147,7 +147,7 @@ describe('the authorized urls list logic', () => {
         })
         it('gets initial domains from recording_domains on the current team', () => {
             expectLogic(logic).toMatchValues({
-                authorizedUrls: ['https://recordings.posthog.com/'],
+                authorizedUrls: ['https://recordings.hanzo.ai/'],
             })
         })
         it('addUrl the recording_domains on the team', () => {
@@ -156,7 +156,7 @@ describe('the authorized urls list logic', () => {
             expectLogic(logic, () => logic.actions.addUrl('http://*.example.com')).toFinishAllListeners()
 
             expect(api.update).toHaveBeenCalledWith(`api/environments/${MOCK_TEAM_ID}`, {
-                recording_domains: ['https://recordings.posthog.com/', 'http://*.example.com'],
+                recording_domains: ['https://recordings.hanzo.ai/', 'http://*.example.com'],
             })
         })
 

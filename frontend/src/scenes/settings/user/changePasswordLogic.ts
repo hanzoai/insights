@@ -1,7 +1,7 @@
 import { connect, kea, path, selectors } from 'kea'
 import { forms } from 'kea-forms'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { ValidatedPasswordResult, validatePassword } from 'lib/components/PasswordStrength'

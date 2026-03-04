@@ -2,7 +2,7 @@ import equal from 'fast-deep-equal'
 import { actions, beforeUnmount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { Dayjs, dayjs } from 'lib/dayjs'
@@ -91,7 +91,7 @@ AND properties.$lib != 'web'`
                         // but in the same time range
                         // these are probably e.g. backend events for the session
                         // but with no session id
-                        // since posthog-js must always add session id we can also
+                        // since insights-js must always add session id we can also
                         // take advantage of lib being materialized and further filter
                         api.queryInsightsQL(relatedEventsQuery, tags),
                     ])
@@ -185,7 +185,7 @@ AND properties.$lib != 'web'`
                     } catch (e) {
                         // NOTE: This is not ideal but should happen so rarely that it is tolerable.
                         existingEvents.forEach((e) => (e.fullyLoaded = true))
-                        posthog.captureException(e, { feature: 'session-recording-load-full-event-data' })
+                        insights.captureException(e, { feature: 'session-recording-load-full-event-data' })
                     }
 
                     // here we map the events list because we want the result to be a new instance to trigger downstream recalculation

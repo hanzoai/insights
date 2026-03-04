@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconPeople } from '@posthog/icons'
+import { IconPeople } from '@hanzo/icons'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
@@ -123,7 +123,7 @@ export function GroupsScene({ tabId }: { tabId?: string } = {}): JSX.Element {
                     ) : (
                         <>
                             Go to the{' '}
-                            <Link to="https://posthog.com/docs/product-analytics/group-analytics#how-to-create-groups">
+                            <Link to="https://hanzo.ai/docs/product-analytics/group-analytics#how-to-create-groups">
                                 group analytics docs
                             </Link>{' '}
                             to learn what needs to be done

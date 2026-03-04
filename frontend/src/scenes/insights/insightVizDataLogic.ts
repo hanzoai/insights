@@ -1,7 +1,7 @@
 import { actions, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import {
     DISPLAY_TYPES_WITHOUT_DETAILED_RESULTS,
@@ -699,7 +699,7 @@ export const insightVizDataLogic = kea<insightVizDataLogicType>([
                     kind: values.querySource?.kind,
                     scene: sceneLogic.isMounted() ? sceneLogic.values.activeSceneId : null,
                 }
-                posthog.capture('insight timeout message shown', tags)
+                insights.capture('insight timeout message shown', tags)
             }
         },
         loadDataSuccess: () => {

@@ -68,9 +68,9 @@ export function IconAlignRight(): JSX.Element {
 export function InsightsLogo(): JSX.Element {
     return (
         <svg width="77" height="14" viewBox="0 0 77 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g clipPath="url(#posthog-logo-clip)">
+            <g clipPath="url(#insights-logo-clip)">
                 <mask
-                    id="posthog-logo-mask"
+                    id="insights-logo-mask"
                     style={{ maskType: 'luminance' }}
                     maskUnits="userSpaceOnUse"
                     x="0"
@@ -80,7 +80,7 @@ export function InsightsLogo(): JSX.Element {
                 >
                     <path d="M0.5 0H76.5V14H0.5V0Z" fill="white" />
                 </mask>
-                <g mask="url(#posthog-logo-mask)">
+                <g mask="url(#insights-logo-mask)">
                     <path
                         d="M5.77226 8.02931C5.59388 8.37329 5.08474 8.37329 4.90634 8.02931L4.4797 7.20672C4.41155 7.07535 4.41155 6.9207 4.4797 6.78933L4.90634 5.96669C5.08474 5.62276 5.59388 5.62276 5.77226 5.96669L6.19893 6.78933C6.26709 6.9207 6.26709 7.07535 6.19893 7.20672L5.77226 8.02931ZM5.77226 12.6946C5.59388 13.0386 5.08474 13.0386 4.90634 12.6946L4.4797 11.872C4.41155 11.7406 4.41155 11.586 4.4797 11.4546L4.90634 10.632C5.08474 10.288 5.59388 10.288 5.77226 10.632L6.19893 11.4546C6.26709 11.586 6.26709 11.7406 6.19893 11.872L5.77226 12.6946Z"
                         fill="#1D4AFF"
@@ -108,7 +108,7 @@ export function InsightsLogo(): JSX.Element {
                 </g>
             </g>
             <defs>
-                <clipPath id="posthog-logo-clip">
+                <clipPath id="insights-logo-clip">
                     <rect width="76" height="14" fill="white" transform="translate(0.5)" />
                 </clipPath>
             </defs>

@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useState } from 'react'
 
-import { IconPlus } from '@posthog/icons'
-import { Link } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { Link } from '@hanzo/lemon-ui'
 
 import { FEATURE_FLAGS } from 'lib/constants'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'
@@ -100,7 +100,7 @@ export function PlayerSidebarLinkedIssuesTab(): JSX.Element | null {
             to={reference.external_url}
             target="_blank"
             onClick={() => {
-                posthog.capture('session_replay_external_issue_clicked', {
+                insights.capture('session_replay_external_issue_clicked', {
                     session_recording_id: sessionRecordingId,
                     integration_kind: reference.integration.kind,
                 })

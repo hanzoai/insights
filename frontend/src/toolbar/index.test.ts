@@ -56,7 +56,7 @@ describe('Toolbar flag loading', () => {
             }
         )
 
-        // Verify flags were applied to posthog instance with correct format
+        // Verify flags were applied to insights instance with correct format
         expect(mockInsights.featureFlags.overrideFeatureFlags).toHaveBeenCalledWith({ flags: mockFlags })
     })
 

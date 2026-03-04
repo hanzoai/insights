@@ -12,7 +12,7 @@ const mockTable: DatabaseSchemaTable = {
     id: 'dw-events',
     name: 'events',
     format: 'Parquet',
-    url_pattern: 's3://posthog/events/*.parquet',
+    url_pattern: 's3://insights/events/*.parquet',
     fields: {
         event: {
             name: 'event',

@@ -47,7 +47,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
                   styleLink.onload = () => setDidLoadStyles(true)
                   const shadowRoot =
                       shadowRef.current?.shadowRoot || window.document.getElementById(TOOLBAR_ID)?.shadowRoot
-                  shadowRoot?.getElementById('posthog-toolbar-styles')?.appendChild(styleLink)
+                  shadowRoot?.getElementById('insights-toolbar-styles')?.appendChild(styleLink)
               }
     )
 
@@ -56,7 +56,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
     // which conflicts with our toolbar's internal mouse down listeners
     //
     // To workaround that we simply prevent the event from bubbling further than the toolbar
-    // See https://github.com/PostHog/posthog-js/issues/1425
+    // See https://github.com/hanzoai/insights-js/issues/1425
     const onMouseDown = ({ nativeEvent: event }: React.MouseEvent<HTMLDivElement>): void => {
         event.stopImmediatePropagation()
     }
@@ -64,7 +64,7 @@ export function ToolbarApp(props: ToolbarProps = {}): JSX.Element {
     return (
         <>
             <root.div id={TOOLBAR_ID} className="ph-no-capture" ref={shadowRef} onMouseDown={onMouseDown}>
-                <div id="posthog-toolbar-styles" />
+                <div id="insights-toolbar-styles" />
                 {didRender && (didLoadStyles || props.disableExternalStyles) ? <ToolbarContainer /> : null}
                 <ToastContainer
                     autoClose={60000}

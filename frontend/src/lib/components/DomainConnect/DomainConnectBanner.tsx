@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal } from '@posthog/icons'
-import { LemonBanner, LemonButton } from '@posthog/lemon-ui'
+import { IconExternal } from '@hanzo/icons'
+import { LemonBanner, LemonButton } from '@hanzo/lemon-ui'
 
 import { DomainConnectProviderName } from '~/queries/schema/schema-general'
 

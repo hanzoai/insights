@@ -1,4 +1,4 @@
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 
@@ -11,7 +11,7 @@ export const openInAdminPanel = async (email: string): Promise<void> => {
         }
 
         const userId = response.results[0].id
-        window.open(`/admin/posthog/user/${userId}/change/`, '_blank')
+        window.open(`/admin/insights/user/${userId}/change/`, '_blank')
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
         lemonToast.error(`Failed to open admin panel: ${message}`)

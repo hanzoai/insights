@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconArrowRight } from '@posthog/icons'
-import { LemonButton, LemonCard, Link } from '@posthog/lemon-ui'
+import { IconArrowRight } from '@hanzo/icons'
+import { LemonButton, LemonCard, Link } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { FilmCameraHog } from 'lib/components/mascots'
@@ -98,7 +98,7 @@ function WelcomeStep({ onContinue }: { onContinue: () => void }): JSX.Element {
                 </LemonButton>
             }
             isEmpty={true}
-            docsURL="https://posthog.com/docs/web-analytics/marketing-analytics"
+            docsURL="https://hanzo.ai/docs/web-analytics/marketing-analytics"
             customHog={FilmCameraHog}
         />
     )

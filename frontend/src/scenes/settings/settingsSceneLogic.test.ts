@@ -6,7 +6,7 @@ import { initKeaTests } from '~/test/init'
 import { settingsSceneLogic } from './settingsSceneLogic'
 
 // Mock the survey preview functions
-jest.mock('posthog-js/dist/surveys-preview', () => ({
+jest.mock('insights-js/dist/surveys-preview', () => ({
     renderFeedbackWidgetPreview: jest.fn(),
     renderSurveysPreview: jest.fn(),
 }))

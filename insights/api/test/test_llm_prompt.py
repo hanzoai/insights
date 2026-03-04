@@ -8,7 +8,7 @@ from rest_framework import status
 from insights.models.llm_prompt import LLMPrompt
 
 
-@patch("insights.permissions.posthoganalytics.feature_enabled", return_value=True)
+@patch("insights.permissions.hanzoanalytics.feature_enabled", return_value=True)
 class TestLLMPromptAPI(APIBaseTest):
     def test_create_prompt_with_unique_name_succeeds(self, mock_feature_enabled):
         response = self.client.post(

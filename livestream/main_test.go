@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v4"
-	"github.com/posthog/posthog/livestream/events"
-	"github.com/posthog/posthog/livestream/handlers"
+	"github.com/hanzoai/insights/livestream/events"
+	"github.com/hanzoai/insights/livestream/handlers"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -12,7 +12,7 @@ from django.utils.timezone import now
 
 import structlog
 import pydantic_core
-import posthoganalytics
+import hanzoanalytics
 from asgiref.sync import sync_to_async
 from drf_spectacular.utils import extend_schema
 from opentelemetry import trace
@@ -306,7 +306,7 @@ class DashboardSerializer(DashboardMetadataSerializer):
         validated_data = self._update_creation_mode(validated_data, use_template, use_dashboard)
         tags = validated_data.pop("tags", None)  # tags are created separately below as global tag relationships
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
 
         existing_dashboard: Dashboard | None = None
         if use_dashboard:
@@ -592,7 +592,7 @@ class DashboardSerializer(DashboardMetadataSerializer):
         self.user_permissions.set_preloaded_dashboard_tiles(list(tiles))
 
         team = self.context["get_team"]()
-        chained_tile_refresh_enabled = posthoganalytics.feature_enabled(
+        chained_tile_refresh_enabled = hanzoanalytics.feature_enabled(
             "chained_dashboard_tile_refresh",
             str(team.organization_id),
             groups={"organization": str(team.organization_id)},
@@ -897,7 +897,7 @@ class DashboardsViewSet(
     )
     def create_from_template_json(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         current_url = request.headers.get("Referer")
-        session_id = request.headers.get("X-Posthog-Session-Id")
+        session_id = request.headers.get("X-Insights-Session-Id")
         dashboard = Dashboard.objects.create(
             team_id=self.team_id,
             created_by=cast(User, request.user),

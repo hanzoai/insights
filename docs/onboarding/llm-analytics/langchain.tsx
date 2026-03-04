@@ -24,14 +24,14 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'bash',
                                 file: 'Python',
                                 code: dedent`
-                                    pip install posthog
+                                    pip install insights
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install @posthog/ai posthog-node
+                                    npm install @hanzo/ai insights-node
                                 `,
                             },
                         ]}
@@ -62,7 +62,7 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'bash',
                                 file: 'Node',
                                 code: dedent`
-                                    npm install langchain @langchain/core @langchain/openai @posthog/ai
+                                    npm install langchain @langchain/core @langchain/openai @hanzo/ai
                                 `,
                             },
                         ]}
@@ -73,7 +73,7 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                             These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but
                             you will need to capture the data in the right format. See the schema in the [manual capture
-                            section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more
+                            section](https://hanzo.ai/docs/llm-analytics/installation/manual-capture) for more
                             details.
                         </Markdown>
                     </CalloutBox>
@@ -87,9 +87,9 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                 <>
                     <Markdown>
                         Initialize Insights with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then pass it to the LangChain
+                        settings](https://insights.hanzo.ai/settings/project), then pass it to the LangChain
                         `CallbackHandler` wrapper. Optionally, you can provide a user distinct ID, trace ID, Insights
-                        properties, [groups](https://posthog.com/docs/product-analytics/group-analytics), and privacy
+                        properties, [groups](https://hanzo.ai/docs/product-analytics/group-analytics), and privacy
                         mode.
                     </Markdown>
 
@@ -99,18 +99,18 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'python',
                                 file: 'Python',
                                 code: dedent`
-                                    from posthog.ai.langchain import CallbackHandler
+                                    from insights.ai.langchain import CallbackHandler
                                     from langchain_openai import ChatOpenAI
                                     from langchain_core.prompts import ChatPromptTemplate
-                                    from posthog import Posthog
+                                    from insights import Insights
 
-                                    posthog = Posthog(
+                                    insights = Insights(
                                         "<ph_project_api_key>",
                                         host="<ph_client_api_host>"
                                     )
 
                                     callback_handler = CallbackHandler(
-                                        client=posthog, # This is an optional parameter. If it is not provided, a default client will be used.
+                                        client=insights, # This is an optional parameter. If it is not provided, a default client will be used.
                                         distinct_id="user_123", # optional
                                         trace_id="trace_456", # optional
                                         properties={"conversation_id": "abc123"}, # optional
@@ -123,8 +123,8 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { Insights } from 'posthog-node';
-                                    import { LangChainCallbackHandler } from '@posthog/ai';
+                                    import { Insights } from 'insights-node';
+                                    import { LangChainCallbackHandler } from '@hanzo/ai';
                                     import { ChatOpenAI } from '@langchain/openai';
                                     import { ChatPromptTemplate } from '@langchain/core/prompts';
 
@@ -151,7 +151,7 @@ export const getLangChainSteps = (ctx: OnboardingComponentsContext): StepDefinit
                         <Markdown>
                             **Note:** If you want to capture LLM events anonymously, **don't** pass a distinct ID to the
                             `CallbackHandler`. See our docs on [anonymous vs identified
-                            events](https://posthog.com/docs/data/anonymous-vs-identified-events) to learn more.
+                            events](https://hanzo.ai/docs/data/anonymous-vs-identified-events) to learn more.
                         </Markdown>
                     </Blockquote>
                 </>

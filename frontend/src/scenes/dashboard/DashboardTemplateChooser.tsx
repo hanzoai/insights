@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import { useState } from 'react'
 
-import { LemonTag } from '@posthog/lemon-ui'
+import { LemonTag } from '@hanzo/lemon-ui'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
 import { Spinner } from 'lib/lemon-ui/Spinner'

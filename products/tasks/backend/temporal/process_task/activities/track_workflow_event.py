@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-import posthoganalytics
+import hanzoanalytics
 from temporalio import activity
 
 from insights.temporal.common.logger import get_logger
@@ -20,7 +20,7 @@ class TrackWorkflowEventInput:
 def track_workflow_event(input: TrackWorkflowEventInput) -> None:
     """Track workflow-level events to Insights."""
     try:
-        posthoganalytics.capture(
+        hanzoanalytics.capture(
             distinct_id=input.distinct_id,
             event=input.event_name,
             properties=input.properties,

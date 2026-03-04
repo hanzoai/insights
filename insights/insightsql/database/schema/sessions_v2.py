@@ -565,7 +565,7 @@ def get_lazy_session_table_properties_v2(search: Optional[str]):
     return results
 
 
-# NOTE: Keep the AD IDs in sync with `posthog.insightsql_queries.web_analytics.session_attribution_explorer_query_runner.py`
+# NOTE: Keep the AD IDs in sync with `insights.insightsql_queries.web_analytics.session_attribution_explorer_query_runner.py`
 SESSION_PROPERTY_TO_RAW_SESSIONS_EXPR_MAP = {
     "$entry_referring_domain": "finalizeAggregation(initial_referring_domain)",
     "$entry_utm_source": "finalizeAggregation(initial_utm_source)",

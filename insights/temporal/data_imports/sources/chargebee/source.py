@@ -77,7 +77,7 @@ class ChargebeeSource(SimpleSource[ChargebeeSourceConfig]):
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
             name=SchemaExternalDataSourceType.CHARGEBEE,
-            docsUrl="https://posthog.com/docs/cdp/sources/chargebee",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/chargebee",
             iconPath="/static/services/chargebee.png",
             fields=cast(
                 list[FieldType],

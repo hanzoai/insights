@@ -11,11 +11,11 @@ import { Underline } from '@tiptap/extension-underline'
 import { Editor, EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconCode, IconImage, IconList, IconVideoCamera } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonInput, LemonMenu, LemonModal } from '@posthog/lemon-ui'
+import { IconCode, IconImage, IconList, IconVideoCamera } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonInput, LemonMenu, LemonModal } from '@hanzo/lemon-ui'
 
 import { ResizableElement } from 'lib/components/ResizeElement/ResizeElement'
 import { useUploadFiles } from 'lib/hooks/useUploadFiles'
@@ -159,7 +159,7 @@ export function StepContentEditor({
             if (editor) {
                 editor.chain().focus().setImage({ src: url, alt: fileName }).run()
             }
-            posthog.capture('product tour image uploaded', { name: fileName })
+            insights.capture('product tour image uploaded', { name: fileName })
         },
         onError: (detail) => {
             lemonToast.error(`Error uploading image: ${detail}`)
@@ -180,7 +180,7 @@ export function StepContentEditor({
                     if (editor) {
                         editor.chain().focus().setImage({ src: url, alt: fileName }).run()
                     }
-                    posthog.capture('product tour image uploaded', { name: fileName })
+                    insights.capture('product tour image uploaded', { name: fileName })
                 } catch (error) {
                     const detail = (error as Error).message || 'Upload failed'
                     lemonToast.error(`Error uploading image: ${detail}`)

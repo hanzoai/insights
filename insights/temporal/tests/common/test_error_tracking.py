@@ -14,7 +14,7 @@ from temporalio.common import RetryPolicy
 from temporalio.exceptions import ApplicationError
 from temporalio.worker import UnsandboxedWorkflowRunner, Worker
 
-from insights.temporal.common.posthog_client import InsightsClientInterceptor
+from insights.temporal.common.analytics_client import InsightsClientInterceptor
 
 
 @dataclass
@@ -105,7 +105,7 @@ async def test_exception_capture(fail: bool, capture_additional_properties: bool
         workflow_inputs = OptionallyFailingInputs(fail=fail)
 
     with (
-        patch("insights.temporal.common.posthog_client.capture_exception") as mock_ph_capture,
+        patch("insights.temporal.common.analytics_client.capture_exception") as mock_ph_capture,
     ):
         async with Worker(
             temporal_client,
@@ -147,7 +147,7 @@ async def test_exception_capture(fail: bool, capture_additional_properties: bool
             else:
                 assert "fail" not in activity_call[1]["properties"]
 
-            from posthoganalytics.exception_utils import exceptions_from_error_tuple
+            from hanzoanalytics.exception_utils import exceptions_from_error_tuple
 
             exc_info = (type(captured_exc), captured_exc, captured_exc.__traceback__)
             formatted = exceptions_from_error_tuple(exc_info)
@@ -163,7 +163,7 @@ async def test_workflow_only_error_is_captured(temporal_client: Client):
     task_queue = "TEST-TASK-QUEUE"
     workflow_id = str(uuid.uuid4())
 
-    with patch("insights.temporal.common.posthog_client.capture_exception") as mock_ph_capture:
+    with patch("insights.temporal.common.analytics_client.capture_exception") as mock_ph_capture:
         async with Worker(
             temporal_client,
             task_queue=task_queue,

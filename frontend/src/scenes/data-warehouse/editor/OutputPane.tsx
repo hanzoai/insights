@@ -18,8 +18,8 @@ import {
     IconMinus,
     IconPlus,
     IconShare,
-} from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonMenu, LemonModal, LemonTable, Tooltip } from '@posthog/lemon-ui'
+} from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonMenu, LemonModal, LemonTable, Tooltip } from '@hanzo/lemon-ui'
 
 import { ExportButton } from 'lib/components/ExportButton/ExportButton'
 import { JSONViewer } from 'lib/components/JSONViewer'

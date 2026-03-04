@@ -1,10 +1,10 @@
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { getNextSurveyStep } from 'posthog-js/dist/surveys-preview'
+import { getNextSurveyStep } from '@hanzo/insights/dist/surveys-preview'
 import { useState } from 'react'
 
-import { IconGear } from '@posthog/icons'
-import { LemonButton, LemonDivider, LemonModal, LemonSelect, LemonSwitch, LemonTabs } from '@posthog/lemon-ui'
+import { IconGear } from '@hanzo/icons'
+import { LemonButton, LemonDivider, LemonModal, LemonSelect, LemonSwitch, LemonTabs } from '@hanzo/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 import { LemonField } from 'lib/lemon-ui/LemonField'

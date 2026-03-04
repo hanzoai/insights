@@ -23,7 +23,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                         {dedent`
                             Experiments run on top of our feature flags. You can define which version of your code runs based on the return value of the feature flag:
 
-                            **Note:** Server-side experiment metrics require you to manually send the feature flag information. See [this tutorial](https://posthog.com/docs/experiments/adding-experiment-code) for more information.
+                            **Note:** Server-side experiment metrics require you to manually send the feature flag information. See [this tutorial](https://hanzo.ai/docs/experiments/adding-experiment-code) for more information.
                         `}
                     </Markdown>
                     {ExperimentImplementation && <ExperimentImplementation language="ruby" />}

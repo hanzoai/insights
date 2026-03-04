@@ -3,7 +3,7 @@ import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 import { subscriptions } from 'kea-subscriptions'
 import isEqual from 'lodash.isequal'
-import { findElement } from 'posthog-js/dist/element-inference'
+import { findElement } from '@hanzo/insights/dist/element-inference'
 
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { uuid } from 'lib/utils'
@@ -21,7 +21,7 @@ import { urls } from 'scenes/urls'
 
 import { toolbarLogic } from '~/toolbar/bar/toolbarLogic'
 import { toolbarConfigLogic, toolbarFetch } from '~/toolbar/toolbarConfigLogic'
-import { toolbarPosthogJS } from '~/toolbar/toolbarPosthogJS'
+import { toolbarInsightsJS } from '~/toolbar/toolbarInsightsJS'
 import { ElementRect } from '~/toolbar/types'
 import { TOOLBAR_ID, elementToActionStep, getRectForElement, joinWithUiHost } from '~/toolbar/utils'
 import { captureAndUploadElementScreenshot } from '~/toolbar/utils/screenshot'
@@ -53,8 +53,8 @@ export interface TourForm {
 export const PRODUCT_TOURS_MIN_JS_VERSION = '1.324.0'
 
 const startRecording = (): void => {
-    toolbarPosthogJS.startSessionRecording(true)
-    toolbarPosthogJS.capture(ProductTourEvent.RECORDING_STARTED)
+    toolbarInsightsJS.startSessionRecording(true)
+    toolbarInsightsJS.capture(ProductTourEvent.RECORDING_STARTED)
 }
 
 export function hasMinProductToursVersion(version: string): boolean {
@@ -347,7 +347,7 @@ export const productToursLogic = kea<productToursLogicType>([
     })),
 
     connect(() => ({
-        values: [toolbarConfigLogic, ['dataAttributes', 'uiHost', 'userIntent', 'productTourId', 'posthog']],
+        values: [toolbarConfigLogic, ['dataAttributes', 'uiHost', 'userIntent', 'productTourId', 'insights']],
     })),
 
     selectors({
@@ -439,7 +439,7 @@ export const productToursLogic = kea<productToursLogicType>([
     listeners(({ actions, values, cache }) => ({
         addStep: ({ stepType }) => {
             const nextIndex = values.tourForm?.steps?.length ?? 0
-            toolbarPosthogJS.capture(ProductTourEvent.STEP_ADDED, {
+            toolbarInsightsJS.capture(ProductTourEvent.STEP_ADDED, {
                 step_type: stepType,
                 step_index: nextIndex,
                 tour_id: values.tourForm?.id ?? null,
@@ -493,7 +493,7 @@ export const productToursLogic = kea<productToursLogicType>([
         removeStep: ({ index }) => {
             if (values.tourForm) {
                 const removedStep = values.tourForm.steps?.[index]
-                toolbarPosthogJS.capture(ProductTourEvent.STEP_REMOVED, {
+                toolbarInsightsJS.capture(ProductTourEvent.STEP_REMOVED, {
                     step_type: removedStep?.type ?? null,
                     step_index: index,
                     tour_id: values.tourForm.id ?? null,
@@ -545,11 +545,11 @@ export const productToursLogic = kea<productToursLogicType>([
             }
         },
         setSessionRecordingConsent: ({ consent }) => {
-            toolbarPosthogJS.capture(ProductTourEvent.CONSENT_SELECTED, { consent })
+            toolbarInsightsJS.capture(ProductTourEvent.CONSENT_SELECTED, { consent })
             if (consent && values.selectedTourId !== null) {
                 startRecording()
             } else if (!consent) {
-                toolbarPosthogJS.stopSessionRecording()
+                toolbarInsightsJS.stopSessionRecording()
             }
         },
         selectTour: ({ id }) => {
@@ -587,7 +587,7 @@ export const productToursLogic = kea<productToursLogicType>([
             }
 
             if (!values.isPreviewing && values.sessionRecordingConsent) {
-                toolbarPosthogJS.stopSessionRecording()
+                toolbarInsightsJS.stopSessionRecording()
             }
         },
         saveTour: async () => {
@@ -635,22 +635,22 @@ export const productToursLogic = kea<productToursLogicType>([
             actions.submitTourForm()
         },
         previewTour: () => {
-            const { tourForm, posthog, selectedTourId, tours } = values
-            if (posthog?.version && !hasMinProductToursVersion(posthog.version)) {
-                lemonToast.error(`Requires posthog-js ${PRODUCT_TOURS_MIN_JS_VERSION}+`)
+            const { tourForm, insights, selectedTourId, tours } = values
+            if (insights?.version && !hasMinProductToursVersion(insights.version)) {
+                lemonToast.error(`Requires insights-js ${PRODUCT_TOURS_MIN_JS_VERSION}+`)
                 return
             }
 
-            if (!tourForm || !posthog?.productTours) {
+            if (!tourForm || !insights?.productTours) {
                 lemonToast.error('Unable to preview tour')
                 return
             }
 
-            // we can clean this up when posthog-js is updated in the main repo...
+            // we can clean this up when insights-js is updated in the main repo...
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const productTours = posthog.productTours as any
+            const productTours = insights.productTours as any
             if (typeof productTours.previewTour !== 'function') {
-                lemonToast.error('Preview requires an updated version of posthog-js')
+                lemonToast.error('Preview requires an updated version of insights-js')
                 return
             }
 
@@ -665,7 +665,7 @@ export const productToursLogic = kea<productToursLogicType>([
             }
 
             // Validation passed - now enter preview mode
-            toolbarPosthogJS.capture(ProductTourEvent.PREVIEW_STARTED, {
+            toolbarInsightsJS.capture(ProductTourEvent.PREVIEW_STARTED, {
                 tour_id: tourForm.id ?? null,
                 step_count: tourForm.steps.length,
             })
@@ -700,7 +700,7 @@ export const productToursLogic = kea<productToursLogicType>([
 
             if (isAnnouncement) {
                 if (launchedFromMainApp) {
-                    window.close() // go back to posthog app
+                    window.close() // go back to insights app
                     return
                 }
                 actions.selectTour(null)
@@ -739,11 +739,11 @@ export const productToursLogic = kea<productToursLogicType>([
             }
         },
         showButtonProductTours: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'product-tours', enabled: true })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'product-tours', enabled: true })
             actions.loadTours()
         },
         hideButtonProductTours: () => {
-            toolbarPosthogJS.capture('toolbar mode triggered', { mode: 'product-tours', enabled: false })
+            toolbarInsightsJS.capture('toolbar mode triggered', { mode: 'product-tours', enabled: false })
         },
         loadToursSuccess: () => {
             const { userIntent, productTourId } = values
@@ -878,7 +878,7 @@ export const productToursLogic = kea<productToursLogicType>([
                 window.removeEventListener('PHProductTourCompleted', cache.onTourEnded)
                 window.removeEventListener('PHProductTourDismissed', cache.onTourEnded)
             }
-            toolbarPosthogJS.stopSessionRecording()
+            toolbarInsightsJS.stopSessionRecording()
         },
     })),
 ])

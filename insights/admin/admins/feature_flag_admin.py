@@ -24,6 +24,6 @@ class FeatureFlagAdmin(admin.ModelAdmin):
     def team_link(self, flag: FeatureFlag):
         return format_html(
             '<a href="{}">{}</a>',
-            reverse("admin:posthog_team_change", args=[flag.team.pk]),
+            reverse("admin:insights_team_change", args=[flag.team.pk]),
             flag.team.name,
         )

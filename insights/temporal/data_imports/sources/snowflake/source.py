@@ -46,7 +46,7 @@ class SnowflakeSource(SimpleSource[SnowflakeSourceConfig]):
             name=SchemaExternalDataSourceType.SNOWFLAKE,
             caption="Enter your Snowflake credentials to automatically pull your Snowflake data into the Insights Data warehouse.",
             iconPath="/static/services/snowflake.png",
-            docsUrl="https://posthog.com/docs/cdp/sources/snowflake",
+            docsUrl="https://hanzo.ai/docs/cdp/sources/snowflake",
             fields=cast(
                 list[FieldType],
                 [

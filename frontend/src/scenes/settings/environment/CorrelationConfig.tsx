@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlus } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconPlus } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import { EventSelect } from 'lib/components/EventSelect/EventSelect'
 import { PropertySelect } from 'lib/components/PropertySelect/PropertySelect'

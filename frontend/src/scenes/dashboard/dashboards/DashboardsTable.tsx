@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconChevronDown, IconHome, IconLock, IconPin, IconPinFilled, IconShare } from '@posthog/icons'
-import { LemonInput, Popover } from '@posthog/lemon-ui'
+import { IconChevronDown, IconHome, IconLock, IconPin, IconPinFilled, IconShare } from '@hanzo/icons'
+import { LemonInput, Popover } from '@hanzo/lemon-ui'
 
 import { AccessControlAction } from 'lib/components/AccessControlAction'
 import { MemberSelect } from 'lib/components/MemberSelect'

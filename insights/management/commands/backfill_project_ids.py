@@ -5,7 +5,7 @@ from django.db import connection
 
 
 class Command(BaseCommand):
-    help = "Backfill project_id in action tables from posthog_team.project_id in batches"
+    help = "Backfill project_id in action tables from insights_team.project_id in batches"
 
     def add_arguments(self, parser):
         parser.add_argument("--table-name", type=str, required=True, help="Name of the table to update (required)")
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.table_name = options["table_name"]
-        self.team_table = "posthog_team"  # Fixed to posthog_team
+        self.team_table = "insights_team"  # Fixed to insights_team
 
         try:
             self.stdout.write(self.style.SUCCESS("Starting project_id update process"))
@@ -45,7 +45,7 @@ class Command(BaseCommand):
 
     def update_with_sql(self, options):
         """
-        Update project_id from posthog_team.project_id in batches using PostgreSQL-optimized SQL.
+        Update project_id from insights_team.project_id in batches using PostgreSQL-optimized SQL.
         """
         total_updated = 0
         batch_count = 0

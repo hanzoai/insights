@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSkeleton } from '@posthog/lemon-ui'
+import { LemonSkeleton } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SetupTaskId } from 'lib/components/ProductSetup'
@@ -50,7 +50,7 @@ export function MessageChannels(): JSX.Element {
                         productName="Workflows channel"
                         thingName="channel integration"
                         description="Set up messaging channels to automatically send emails, SMS, or Slack notifications triggered by user actions and events."
-                        docsURL="https://posthog.com/docs/workflows/configure-channels"
+                        docsURL="https://hanzo.ai/docs/workflows/configure-channels"
                         action={() => openSetupModal(undefined, 'email')}
                         customHog={MicrophoneHog}
                         isEmpty

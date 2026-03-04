@@ -20,21 +20,21 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'bash',
                                 file: 'npm',
                                 code: dedent`
-                                    npm install posthog-js
+                                    npm install insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'yarn',
                                 code: dedent`
-                                    yarn add posthog-js
+                                    yarn add insights-js
                                 `,
                             },
                             {
                                 language: 'bash',
                                 file: 'pnpm',
                                 code: dedent`
-                                    pnpm add posthog-js
+                                    pnpm add insights-js
                                 `,
                             },
                         ]}
@@ -42,7 +42,7 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                     <CalloutBox type="fyi" title="Vue version">
                         <Markdown>
                             This guide is for Vue 3 and above. For Vue 2.x, see our [Vue
-                            docs](https://posthog.com/docs/libraries/vue-js).
+                            docs](https://hanzo.ai/docs/libraries/vue-js).
                         </Markdown>
                     </CalloutBox>
                 </>
@@ -60,15 +60,15 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'javascript',
                                 file: 'src/composables/useInsights.js',
                                 code: dedent`
-                                    import posthog from 'posthog-js'
+                                    import insights from '@hanzo/insights'
 
                                     export function useInsights() {
-                                      posthog.init('<ph_project_api_key>', {
+                                      insights.init('<ph_project_api_key>', {
                                         api_host: '<ph_client_api_host>',
                                         defaults: '2026-01-30'
                                       })
 
-                                      return { posthog }
+                                      return { insights }
                                     }
                                 `,
                             },
@@ -109,7 +109,7 @@ export const getVueSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                       ],
                                     })
 
-                                    const { posthog } = useInsights()
+                                    const { insights } = useInsights()
 
                                     export default router
                                 `,

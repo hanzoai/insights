@@ -112,7 +112,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         constraints = [
             models.UniqueConstraint(
                 fields=["team", "name"],
-                name="posthog_datawarehouse_saved_query_unique_name",
+                name="insights_datawarehouse_saved_query_unique_name",
             )
         ]
         db_table = "insights_datawarehousesavedquery"
@@ -190,7 +190,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         self.deleted = True
         self.deleted_at = datetime.now()
         self.deleted_name = self.name
-        self.name = f"POSTHOG_DELETED_{uuid.uuid4()}"
+        self.name = f"INSIGHTS_DELETED_{uuid.uuid4()}"
 
         self.save()
 

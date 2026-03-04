@@ -1,7 +1,7 @@
 import { useActions } from 'kea'
 import React from 'react'
 
-import { IconCode, IconFlask, IconPeople, IconSparkles, IconTestTube, IconToggle, IconWrench } from '@posthog/icons'
+import { IconCode, IconFlask, IconPeople, IconSparkles, IconTestTube, IconToggle, IconWrench } from '@hanzo/icons'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'

@@ -52,7 +52,7 @@ class TestGetTeamIdsForDpft:
         # Verify query was executed
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
         assert any("SELECT DISTINCT pdl.team_id" in call for call in execute_calls)
-        assert any("FROM posthog_person_deletes_log" in call for call in execute_calls)
+        assert any("FROM insights_person_deletes_log" in call for call in execute_calls)
         assert any("EXISTS" in call for call in execute_calls)
 
     def test_get_team_ids_returns_empty_list_when_no_teams(self):
@@ -189,7 +189,7 @@ class TestScanDeleteChunkForDpft:
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
 
         # Verify SELECT scan query format (keyset pagination, no OFFSET)
-        scan_calls = [call for call in execute_calls if "FROM posthog_person_deletes_log" in call]
+        scan_calls = [call for call in execute_calls if "FROM insights_person_deletes_log" in call]
         assert len(scan_calls) >= 1
         scan_query = scan_calls[0]
         assert "WHERE pdl.team_id = %s" in scan_query
@@ -199,7 +199,7 @@ class TestScanDeleteChunkForDpft:
         assert "EXISTS" in scan_query
 
         # Verify DELETE queries were called (one per person)
-        delete_calls = [call for call in execute_calls if "DELETE FROM posthog_person_new" in call]
+        delete_calls = [call for call in execute_calls if "DELETE FROM insights_person_new" in call]
         assert len(delete_calls) == 50
 
     def test_scan_delete_chunk_multiple_batches_with_keyset_pagination(self):
@@ -236,7 +236,7 @@ class TestScanDeleteChunkForDpft:
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
 
         # Verify SELECT scan called multiple times (keyset pagination)
-        scan_calls = [call for call in execute_calls if "FROM posthog_person_deletes_log" in call]
+        scan_calls = [call for call in execute_calls if "FROM insights_person_deletes_log" in call]
         assert len(scan_calls) >= 2
 
         # Second scan should include "WHERE pdl.id > %s" for keyset pagination
@@ -246,7 +246,7 @@ class TestScanDeleteChunkForDpft:
             assert "AND pdl.id > %s" in second_scan
 
         # Verify DELETE called 100 times
-        delete_calls = [call for call in execute_calls if "DELETE FROM posthog_person_new" in call]
+        delete_calls = [call for call in execute_calls if "DELETE FROM insights_person_new" in call]
         assert len(delete_calls) == 100
 
     def test_scan_delete_chunk_serialization_failure_retry(self):
@@ -263,12 +263,12 @@ class TestScanDeleteChunkForDpft:
         scan_attempts = [0]
 
         def execute_side_effect(query, *args):
-            if "FROM posthog_person_deletes_log" in query:
+            if "FROM insights_person_deletes_log" in query:
                 scan_attempts[0] += 1
                 if scan_attempts[0] == 1:
                     error = create_mock_psycopg2_error("could not serialize access", "40001")
                     raise error
-            elif "DELETE FROM posthog_person_new" in query:
+            elif "DELETE FROM insights_person_new" in query:
                 cursor.rowcount = 1
 
         cursor.execute.side_effect = execute_side_effect
@@ -288,7 +288,7 @@ class TestScanDeleteChunkForDpft:
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
         assert "ROLLBACK" in execute_calls
 
-        scan_calls = [call for call in execute_calls if "FROM posthog_person_deletes_log" in call]
+        scan_calls = [call for call in execute_calls if "FROM insights_person_deletes_log" in call]
         assert len(scan_calls) >= 2
 
     def test_scan_delete_chunk_deadlock_retry(self):
@@ -305,12 +305,12 @@ class TestScanDeleteChunkForDpft:
         scan_attempts = [0]
 
         def execute_side_effect(query, *args):
-            if "FROM posthog_person_deletes_log" in query:
+            if "FROM insights_person_deletes_log" in query:
                 scan_attempts[0] += 1
                 if scan_attempts[0] == 1:
                     error = create_mock_psycopg2_error("deadlock detected", "40P01")
                     raise error
-            elif "DELETE FROM posthog_person_new" in query:
+            elif "DELETE FROM insights_person_new" in query:
                 cursor.rowcount = 1
 
         cursor.execute.side_effect = execute_side_effect
@@ -330,7 +330,7 @@ class TestScanDeleteChunkForDpft:
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
         assert "ROLLBACK" in execute_calls
 
-        scan_calls = [call for call in execute_calls if "FROM posthog_person_deletes_log" in call]
+        scan_calls = [call for call in execute_calls if "FROM insights_person_deletes_log" in call]
         assert len(scan_calls) >= 2
 
     def test_scan_delete_chunk_error_handling(self):
@@ -345,7 +345,7 @@ class TestScanDeleteChunkForDpft:
         cursor = mock_db.cursor.return_value.__enter__.return_value
 
         def execute_side_effect(query, *args):
-            if "FROM posthog_person_deletes_log" in query:
+            if "FROM insights_person_deletes_log" in query:
                 raise Exception("Connection lost")
 
         cursor.execute.side_effect = execute_side_effect
@@ -393,18 +393,18 @@ class TestScanDeleteChunkForDpft:
         execute_calls = [call[0][0] for call in cursor.execute.call_args_list]
 
         # Verify DELETE queries
-        delete_queries = [call for call in execute_calls if "DELETE FROM posthog_person_new" in call]
+        delete_queries = [call for call in execute_calls if "DELETE FROM insights_person_new" in call]
         assert len(delete_queries) == 10
 
         delete_query = delete_queries[0]
-        assert "DELETE FROM posthog_person_new" in delete_query
+        assert "DELETE FROM insights_person_new" in delete_query
         assert "WHERE team_id = %s AND id = %s" in delete_query
 
         # Verify SELECT query for team-based filtering
-        scan_query = next((call for call in execute_calls if "FROM posthog_person_deletes_log" in call), None)
+        scan_query = next((call for call in execute_calls if "FROM insights_person_deletes_log" in call), None)
         assert scan_query is not None
         assert "WHERE pdl.team_id = %s" in scan_query
-        assert "FROM posthog_person_deletes_log" in scan_query
+        assert "FROM insights_person_deletes_log" in scan_query
         assert "ORDER BY pdl.id" in scan_query
         assert "LIMIT" in scan_query
         assert "EXISTS" in scan_query

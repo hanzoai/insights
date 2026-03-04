@@ -93,7 +93,7 @@ describe('RetentionService', () => {
             expect(retentionPeriod).toEqual('30d')
 
             expect(mockRedisClient.get).toHaveBeenCalledTimes(1)
-            expect(mockRedisClient.get).toHaveBeenCalledWith('@posthog/replay/session-retention-123')
+            expect(mockRedisClient.get).toHaveBeenCalledWith('@hanzo/replay/session-retention-123')
         })
 
         it('should store retention in Redis if key does not exist', async () => {
@@ -104,7 +104,7 @@ describe('RetentionService', () => {
 
             expect(mockRedisClient.set).toHaveBeenCalledTimes(1)
             expect(mockRedisClient.set).toHaveBeenCalledWith(
-                '@posthog/replay/session-retention-123',
+                '@hanzo/replay/session-retention-123',
                 '30d',
                 'EX',
                 24 * 60 * 60

@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconPauseFilled, IconPlayFilled, IconRefresh, IconTerminal } from '@posthog/icons'
-import { LemonButton, Link, Spinner, Tooltip } from '@posthog/lemon-ui'
+import { IconPauseFilled, IconPlayFilled, IconRefresh, IconTerminal } from '@hanzo/icons'
+import { LemonButton, Link, Spinner, Tooltip } from '@hanzo/lemon-ui'
 
 import { LiveRecordingsCount, LiveUserCount } from 'lib/components/LiveUserCount'
 import { PropertyKeyInfo } from 'lib/components/PropertyKeyInfo'
@@ -109,8 +109,8 @@ export function LiveEventsTable(): JSX.Element {
             <ActivitySceneTabs activeKey={ActivityTab.LiveEvents} />
             {featureFlags[FEATURE_FLAGS.LIVESTREAM_TUI] && (
                 <LemonBanner type="info" className="mb-4" icon={<IconTerminal />} dismissKey="livestream-tui-banner">
-                    Stream live events directly in your terminal with <code>posthog-live</code>.{' '}
-                    <Link to="https://posthog.com/docs/live-events/cli" target="_blank">
+                    Stream live events directly in your terminal with <code>insights-live</code>.{' '}
+                    <Link to="https://hanzo.ai/docs/live-events/cli" target="_blank">
                         Learn more
                     </Link>
                 </LemonBanner>

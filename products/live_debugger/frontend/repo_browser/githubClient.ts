@@ -1,6 +1,6 @@
 // Default repository configuration
 export const DEFAULT_OWNER = 'Insights'
-export const DEFAULT_REPO = 'posthog'
+export const DEFAULT_REPO = 'insights'
 export const DEFAULT_BRANCH = 'master'
 
 export interface RepositoryConfig {

@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useValues } from 'kea'
 import { router } from 'kea-router'
 
-import { IconClock } from '@posthog/icons'
-import { SpinnerOverlay } from '@posthog/lemon-ui'
+import { IconClock } from '@hanzo/icons'
+import { SpinnerOverlay } from '@hanzo/lemon-ui'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { NotFound } from 'lib/components/NotFound'

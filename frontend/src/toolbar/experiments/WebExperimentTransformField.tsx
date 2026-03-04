@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconCursorClick } from '@posthog/icons'
-import { LemonLabel, LemonSelect } from '@posthog/lemon-ui'
+import { IconCursorClick } from '@hanzo/icons'
+import { LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
 
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonTextArea } from 'lib/lemon-ui/LemonTextArea/LemonTextArea'

@@ -1,6 +1,6 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
-import { getPostHogClient } from '@/lib/analytics'
+import { getInsightsClient } from '@/lib/analytics'
 
 export enum ErrorCode {
     INVALID_API_KEY = 'INVALID_API_KEY',
@@ -52,7 +52,7 @@ export function handleToolError(error: any, tool?: string, distinctId?: string, 
         properties.$session_id = sessionUuid
     }
 
-    getPostHogClient().captureException(mcpError, distinctId, properties)
+    getInsightsClient().captureException(mcpError, distinctId, properties)
 
     return {
         content: [

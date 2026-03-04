@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { Spinner } from '@posthog/lemon-ui'
+import { Spinner } from '@hanzo/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 
@@ -42,7 +42,7 @@ function IngestionStatusCheck({ className, thing }: { className?: string; thing:
             isEmpty={true}
             productKey={ProductKey.LLM_ANALYTICS}
             className={className}
-            docsURL="https://posthog.com/docs/llm-analytics/installation"
+            docsURL="https://hanzo.ai/docs/llm-analytics/installation"
         />
     )
 }

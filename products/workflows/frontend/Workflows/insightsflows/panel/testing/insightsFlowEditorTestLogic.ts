@@ -3,7 +3,7 @@ import { actions, afterMount, connect, kea, key, listeners, path, props, reducer
 import { forms } from 'kea-forms'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -41,7 +41,7 @@ export const createExampleEvent = (
     teamId?: number,
     workflowName?: string | null,
     eventName: string = '$pageview',
-    email: string = 'example@posthog.com'
+    email: string = 'example@hanzo.ai'
 ): CyclotronJobInvocationGlobals => ({
     event: {
         uuid: uuid(),

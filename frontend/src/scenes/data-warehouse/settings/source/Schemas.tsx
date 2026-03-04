@@ -2,7 +2,7 @@ import { BindLogic, useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { IconInfo } from '@posthog/icons'
+import { IconInfo } from '@hanzo/icons'
 import {
     LemonButton,
     LemonInput,
@@ -16,7 +16,7 @@ import {
     Link,
     Spinner,
     Tooltip,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { AccessControlAction, AccessControlActionChildrenProps } from 'lib/components/AccessControlAction'
 import { TZLabel } from 'lib/components/TZLabel'

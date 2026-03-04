@@ -10,7 +10,7 @@ class TestTemplateMicrosoftTeams(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "webhookUrl": "https://prod-180.westus.logic.azure.com:443/workflows/abc/triggers/manual/paths/invoke?api-version=2016-06-01",
-            "text": "**max@posthog.com** triggered event: '$pageview'",
+            "text": "**max@hanzo.ai** triggered event: '$pageview'",
         }
         inputs.update(kwargs)
         return inputs
@@ -38,7 +38,7 @@ class TestTemplateMicrosoftTeams(BaseInsightsFunctionTemplateTest):
                                 "body": [
                                     {
                                         "type": "TextBlock",
-                                        "text": "**max@posthog.com** triggered event: '$pageview'",
+                                        "text": "**max@hanzo.ai** triggered event: '$pageview'",
                                         "wrap": True,
                                     }
                                 ],

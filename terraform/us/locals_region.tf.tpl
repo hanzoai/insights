@@ -1,3 +1,3 @@
 locals {
-  posthog_host = "https://us.posthog.com"
+  insights_host = "https://us.insights.com"
 }

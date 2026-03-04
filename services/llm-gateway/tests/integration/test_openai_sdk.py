@@ -18,7 +18,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 skip_without_openai_key = pytest.mark.skipif(not OPENAI_API_KEY, reason="OPENAI_API_KEY not set")
 
-TEST_IMAGE_URL = "https://posthog.com/brand/posthog-logo.png"
+TEST_IMAGE_URL = "https://hanzo.ai/brand/insights-logo.png"
 
 
 class TestOpenAIModelsEndpoint:

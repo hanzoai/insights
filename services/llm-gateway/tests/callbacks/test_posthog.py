@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from llm_gateway.auth.models import AuthenticatedUser
-from llm_gateway.callbacks.posthog import InsightsCallback, _replace_binary_content, _truncate_for_capture
+from llm_gateway.callbacks.insights import InsightsCallback, _replace_binary_content, _truncate_for_capture
 
 
 class TestInsightsCallback:
     @pytest.fixture
     def callback(self):
-        return InsightsCallback(api_key="test-key", host="https://test.posthog.com")
+        return InsightsCallback(api_key="test-key", host="https://test.hanzo.ai")
 
     @pytest.fixture
     def auth_user(self):
@@ -44,14 +44,14 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="wizard"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="wizard"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            mock_posthog.capture.assert_called_once()
-            call_kwargs = mock_posthog.capture.call_args.kwargs
+            mock_analytics.capture.assert_called_once()
+            call_kwargs = mock_analytics.capture.call_args.kwargs
 
             assert call_kwargs["distinct_id"] == "user-distinct-id-123"
             assert call_kwargs["event"] == "$ai_generation"
@@ -66,7 +66,7 @@ class TestInsightsCallback:
             assert props["$ai_total_cost_usd"] == 0.05
             assert props["team_id"] == 456
             assert props["ai_product"] == "wizard"
-            mock_posthog.flush.assert_not_called()
+            mock_analytics.flush.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_on_success_uses_uuid_when_no_auth_user(
@@ -75,14 +75,14 @@ class TestInsightsCallback:
         kwargs = {"standard_logging_object": standard_logging_object, "llm_params": {}}
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=None),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="llm_gateway"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
-            patch("llm_gateway.callbacks.posthog.uuid4", return_value=MagicMock(hex="test-uuid")),
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=None),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="llm_gateway"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
+            patch("llm_gateway.callbacks.insights.uuid4", return_value=MagicMock(hex="test-uuid")),
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            call_kwargs = mock_posthog.capture.call_args.kwargs
+            call_kwargs = mock_analytics.capture.call_args.kwargs
             # distinct_id should be a UUID string since no auth user
             assert "groups" not in call_kwargs  # No team_id means no groups
 
@@ -96,13 +96,13 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="llm_gateway"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="llm_gateway"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id="end-user-123")
 
-            call_kwargs = mock_posthog.capture.call_args.kwargs
+            call_kwargs = mock_analytics.capture.call_args.kwargs
             assert call_kwargs["distinct_id"] == "end-user-123"
 
             props = call_kwargs["properties"]
@@ -117,7 +117,7 @@ class TestInsightsCallback:
             user_id=123,
             team_id=456,
             auth_method="oauth_access_token",
-            distinct_id="real-posthog-distinct-id",
+            distinct_id="real-insights-distinct-id",
         )
         kwargs = {
             "standard_logging_object": {
@@ -134,15 +134,15 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=oauth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="wizard"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=oauth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="wizard"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             method = getattr(callback, method_name)
             await method(kwargs, None, 0.0, 1.0, end_user_id="123")
 
-            call_kwargs = mock_posthog.capture.call_args.kwargs
-            assert call_kwargs["distinct_id"] == "real-posthog-distinct-id"
+            call_kwargs = mock_analytics.capture.call_args.kwargs
+            assert call_kwargs["distinct_id"] == "real-insights-distinct-id"
 
     @pytest.mark.asyncio
     async def test_on_failure_captures_error_event(
@@ -158,14 +158,14 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="twig"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="twig"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_failure(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            mock_posthog.capture.assert_called_once()
-            call_kwargs = mock_posthog.capture.call_args.kwargs
+            mock_analytics.capture.assert_called_once()
+            call_kwargs = mock_analytics.capture.call_args.kwargs
 
             assert call_kwargs["distinct_id"] == "user-distinct-id-123"
             assert call_kwargs["event"] == "$ai_generation"
@@ -175,7 +175,7 @@ class TestInsightsCallback:
             assert props["$ai_is_error"] is True
             assert props["$ai_error"] == "Rate limit exceeded"
             assert props["ai_product"] == "twig"
-            mock_posthog.flush.assert_not_called()
+            mock_analytics.flush.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_on_success_without_optional_fields(
@@ -190,20 +190,20 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="llm_gateway"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="llm_gateway"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            props = mock_posthog.capture.call_args.kwargs["properties"]
+            props = mock_analytics.capture.call_args.kwargs["properties"]
             assert props["$ai_input_tokens"] == 0
             assert props["$ai_output_tokens"] == 0
             assert "$ai_total_cost_usd" not in props
             assert "$ai_output_choices" not in props
 
-    def test_callback_name_is_posthog(self, callback: InsightsCallback) -> None:
-        assert callback.callback_name == "posthog"
+    def test_callback_name_is_insights(self, callback: InsightsCallback) -> None:
+        assert callback.callback_name == "insights"
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("product", ["wizard", "twig", "llm_gateway"])
@@ -216,13 +216,13 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value=product),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value=product),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            props = mock_posthog.capture.call_args.kwargs["properties"]
+            props = mock_analytics.capture.call_args.kwargs["properties"]
             assert props["ai_product"] == product
 
     @pytest.mark.asyncio
@@ -240,13 +240,13 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value=product),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value=product),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_failure(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            props = mock_posthog.capture.call_args.kwargs["properties"]
+            props = mock_analytics.capture.call_args.kwargs["properties"]
             assert props["ai_product"] == product
 
     @pytest.mark.asyncio
@@ -259,13 +259,13 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="growth"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="growth"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id="openai-end-user-456")
 
-            call_kwargs = mock_posthog.capture.call_args.kwargs
+            call_kwargs = mock_analytics.capture.call_args.kwargs
             assert call_kwargs["distinct_id"] == "openai-end-user-456"
             assert call_kwargs["groups"] == {"project": 456}
 
@@ -286,13 +286,13 @@ class TestInsightsCallback:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="growth"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="growth"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_failure(kwargs, None, 0.0, 1.0, end_user_id="openai-end-user-789")
 
-            call_kwargs = mock_posthog.capture.call_args.kwargs
+            call_kwargs = mock_analytics.capture.call_args.kwargs
             assert call_kwargs["distinct_id"] == "openai-end-user-789"
             assert call_kwargs["properties"]["$ai_trace_id"] == "trace-id-from-metadata"
 
@@ -442,7 +442,7 @@ class TestTruncateForCapture:
 
     @pytest.mark.asyncio
     async def test_on_success_truncates_oversized_content(self) -> None:
-        callback = InsightsCallback(api_key="test-key", host="https://test.posthog.com")
+        callback = InsightsCallback(api_key="test-key", host="https://test.hanzo.ai")
         auth_user = AuthenticatedUser(user_id=123, team_id=456, auth_method="personal_api_key", distinct_id="user-123")
         large_response = "R" * (900 * 1024)
         kwargs = {
@@ -460,13 +460,13 @@ class TestTruncateForCapture:
         }
 
         with (
-            patch("llm_gateway.callbacks.posthog.get_auth_user", return_value=auth_user),
-            patch("llm_gateway.callbacks.posthog.get_product", return_value="wizard"),
-            patch("llm_gateway.callbacks.posthog.posthoganalytics") as mock_posthog,
+            patch("llm_gateway.callbacks.insights.get_auth_user", return_value=auth_user),
+            patch("llm_gateway.callbacks.insights.get_product", return_value="wizard"),
+            patch("llm_gateway.callbacks.insights.hanzoanalytics") as mock_analytics,
         ):
             await callback._on_success(kwargs, None, 0.0, 1.0, end_user_id=None)
 
-            props = mock_posthog.capture.call_args.kwargs["properties"]
+            props = mock_analytics.capture.call_args.kwargs["properties"]
             assert props["$ai_output_choices"] == _TRUNCATION_MARKER
             assert props["$ai_model"] == "claude-3-opus"
             assert props["$ai_input_tokens"] == 10

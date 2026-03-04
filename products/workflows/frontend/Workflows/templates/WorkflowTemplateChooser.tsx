@@ -5,8 +5,8 @@ import { useActions, useValues } from 'kea'
 import { router } from 'kea-router'
 import { useState } from 'react'
 
-import { IconPencil, IconTrash } from '@posthog/icons'
-import { LemonButton, LemonDialog, LemonTag } from '@posthog/lemon-ui'
+import { IconPencil, IconTrash } from '@hanzo/icons'
+import { LemonButton, LemonDialog, LemonTag } from '@hanzo/lemon-ui'
 
 import { FallbackCoverImage } from 'lib/components/FallbackCoverImage/FallbackCoverImage'
 import { More } from 'lib/lemon-ui/LemonButton/More'

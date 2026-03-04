@@ -40,8 +40,8 @@ import {
     WebflowInstallation,
     WordpressInstallation,
     ZapierInstallation,
-} from '@posthog/shared-onboarding/product-analytics'
-import { StepDefinition } from '@posthog/shared-onboarding/steps'
+} from '@hanzo/shared-onboarding/product-analytics'
+import { StepDefinition } from '@hanzo/shared-onboarding/steps'
 
 import { useMDXComponents } from 'scenes/onboarding/OnboardingDocsContentWrapper'
 
@@ -56,7 +56,7 @@ const WorkflowsFinalStepContent = (): JSX.Element => {
     return (
         <Markdown>
             {dedent`
-                Now that Insights is installed, any captured or custom event can be used as a [workflow trigger](https://posthog.com/docs/workflows/workflow-builder#triggers) to send **emails**, **Slack messages**, **SMS via Twilio**, or call **webhooks**.
+                Now that Insights is installed, any captured or custom event can be used as a [workflow trigger](https://hanzo.ai/docs/workflows/workflow-builder#triggers) to send **emails**, **Slack messages**, **SMS via Twilio**, or call **webhooks**.
 
                 To get started, [configure a channel](/workflows/channels) then head to the [workflow builder](/workflows) to create your first automation.
             `}

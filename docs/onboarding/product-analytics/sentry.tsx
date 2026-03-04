@@ -21,7 +21,7 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'bash',
                                 file: 'Terminal',
                                 code: dedent`
-                                npm install --save posthog-js @sentry/browser
+                                npm install --save insights-js @sentry/browser
                             `,
                             },
                         ]}
@@ -41,7 +41,7 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 language: 'javascript',
                                 file: 'JavaScript',
                                 code: dedent`
-                                import posthog from 'posthog-js'
+                                import insights from '@hanzo/insights'
                                 import * as Sentry from '@sentry/browser'
 
                                 // Initialize Sentry first
@@ -50,13 +50,13 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 })
 
                                 // Initialize Insights with Sentry integration
-                                posthog.init('<ph_project_api_key>', {
+                                insights.init('<ph_project_api_key>', {
                                   api_host: '<ph_client_api_host>',
                                   defaults: '2026-01-30'
                                 })
 
                                 // Set Insights session ID on Sentry scope
-                                Sentry.getCurrentScope().setTag('posthog_session_id', posthog.get_session_id())
+                                Sentry.getCurrentScope().setTag('insights_session_id', insights.get_session_id())
                             `,
                             },
                         ]}
@@ -64,7 +64,7 @@ export const getSentrySteps = (ctx: OnboardingComponentsContext): StepDefinition
                     <CalloutBox type="fyi" title="Full setup guide">
                         <Markdown>
                             This allows you to link Sentry errors to Insights sessions. See the [Sentry integration
-                            docs](https://posthog.com/docs/libraries/sentry) for the full setup guide.
+                            docs](https://hanzo.ai/docs/libraries/sentry) for the full setup guide.
                         </Markdown>
                     </CalloutBox>
                 </>

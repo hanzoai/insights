@@ -56,11 +56,11 @@ class BaseUserAccessControlTest(BaseTest):
         RoleMembership.objects.create(user=self.user, role=self.role_a)
         self.user_access_control = UserAccessControl(self.user, self.team)
 
-        self.other_user = User.objects.create_and_join(self.organization, "other@posthog.com", "testtest")
+        self.other_user = User.objects.create_and_join(self.organization, "other@hanzo.ai", "testtest")
         RoleMembership.objects.create(user=self.other_user, role=self.role_b)
         self.other_user_access_control = UserAccessControl(self.other_user, self.team)
 
-        self.user_with_no_role = User.objects.create_and_join(self.organization, "norole@posthog.com", "testtest")
+        self.user_with_no_role = User.objects.create_and_join(self.organization, "norole@hanzo.ai", "testtest")
         self.user_with_no_role_access_control = UserAccessControl(self.user_with_no_role, self.team)
 
     def _clear_uac_caches(self):
@@ -73,7 +73,7 @@ class BaseUserAccessControlTest(BaseTest):
 class TestUserAccessControl(BaseUserAccessControlTest):
     def test_no_organization_id_passed(self):
         # Create a user without an organization
-        user_without_org = User.objects.create(email="no-org@posthog.com", password="testtest")
+        user_without_org = User.objects.create(email="no-org@hanzo.ai", password="testtest")
         user_access_control = UserAccessControl(user_without_org)
 
         assert user_access_control._organization_membership is None
@@ -82,7 +82,7 @@ class TestUserAccessControl(BaseUserAccessControlTest):
 
     def test_organization_with_no_project_or_team(self):
         organization = Organization.objects.create(name="No project or team")
-        user = User.objects.create_and_join(organization, "no-project-or-team@posthog.com", "testtest")
+        user = User.objects.create_and_join(organization, "no-project-or-team@hanzo.ai", "testtest")
         user_access_control = UserAccessControl(user, organization_id=organization.id)
 
         assert user_access_control._organization_membership is not None
@@ -90,7 +90,7 @@ class TestUserAccessControl(BaseUserAccessControlTest):
 
     def test_organization_with_no_project_or_team_and_no_organization_id(self):
         organization = Organization.objects.create(name="No project or team")
-        user = User.objects.create_and_join(organization, "no-project-or-team@posthog.com", "testtest")
+        user = User.objects.create_and_join(organization, "no-project-or-team@hanzo.ai", "testtest")
         user_access_control = UserAccessControl(user)
 
         assert user_access_control._organization_membership is None

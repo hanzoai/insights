@@ -6,7 +6,7 @@ import { retryWithBackoff } from 'lib/utils'
 
 import type { logsIngestionLogicType } from './logsIngestionLogicType'
 
-const teamId = window.POSTHOG_APP_CONTEXT?.current_team?.id
+const teamId = window.INSIGHTS_APP_CONTEXT?.current_team?.id
 
 export const logsIngestionLogic = kea<logsIngestionLogicType>([
     path(['products', 'logs', 'components', 'SetupPrompt', 'logsIngestionLogic']),

@@ -1,11 +1,11 @@
 {
     "name": "Filter Out Plugin",
-    "url": "https://github.com/PostHog/posthog-filter-out-plugin",
+    "url": "https://github.com/hanzoai/insights-filter-out-plugin",
     "description": "Filter out events where property values satisfy the given condition",
     "main": "src/main.ts",
     "config": [
         {
-            "markdown": "All filters must adhere to the JSON schema specified in the project's [README](https://github.com/plibither8/posthog-filter-out-plugin)."
+            "markdown": "All filters must adhere to the JSON schema specified in the project's [README](https://github.com/plibither8/insights-filter-out-plugin)."
         },
         {
             "key": "filters",

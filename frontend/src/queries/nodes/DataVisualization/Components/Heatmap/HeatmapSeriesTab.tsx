@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { IconPlusSmall, IconTrash } from '@posthog/icons'
+import { IconPlusSmall, IconTrash } from '@hanzo/icons'
 import {
     LemonButton,
     LemonCheckbox,
@@ -9,7 +9,7 @@ import {
     LemonLabel,
     LemonSelect,
     LemonTag,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { getSeriesColorPalette } from 'lib/colors'
 

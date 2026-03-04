@@ -5,7 +5,7 @@ import { mathjax } from 'mathjax-full/js/mathjax.js'
 import { SVG } from 'mathjax-full/js/output/svg.js'
 import { useEffect, useRef, useState } from 'react'
 
-import { LemonTextArea } from '@posthog/lemon-ui'
+import { LemonTextArea } from '@hanzo/lemon-ui'
 
 import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 

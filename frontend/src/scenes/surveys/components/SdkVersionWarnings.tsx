@@ -1,6 +1,6 @@
 import { useValues } from 'kea'
 
-import { LemonBanner, Link } from '@posthog/lemon-ui'
+import { LemonBanner, Link } from '@hanzo/lemon-ui'
 
 import { SurveyFeatureWarning } from 'scenes/surveys/surveyVersionRequirements'
 import { surveysSdkLogic } from 'scenes/surveys/surveysSdkLogic'
@@ -64,7 +64,7 @@ export function SdkVersionWarnings({ warnings }: { warnings: SurveyFeatureWarnin
                     </ul>
                     {hasVersionIssues && (
                         <p className="text-sm text-secondary">
-                            <Link to="https://posthog.com/docs/libraries" target="_blank">
+                            <Link to="https://hanzo.ai/docs/libraries" target="_blank">
                                 Update your SDK
                             </Link>{' '}
                             to ensure these features work correctly.

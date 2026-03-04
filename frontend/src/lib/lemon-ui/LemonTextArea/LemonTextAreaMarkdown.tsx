@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React, { useCallback, useRef, useState } from 'react'
 
-import { IconImage, IconMarkdownFilled } from '@posthog/icons'
+import { IconImage, IconMarkdownFilled } from '@hanzo/icons'
 
 import { TextContent } from 'lib/components/Cards/TextCard/TextCard'
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
@@ -44,10 +44,10 @@ export const LemonTextAreaMarkdown = React.forwardRef<HTMLTextAreaElement, Lemon
         const { setFilesToUpload, filesToUpload, uploading } = useUploadFiles({
             onUpload: (url, fileName) => {
                 onChange?.(value + `\n\n![${fileName}](${url})`)
-                posthog.capture('markdown image uploaded', { name: fileName })
+                insights.capture('markdown image uploaded', { name: fileName })
             },
             onError: (detail) => {
-                posthog.capture('markdown image upload failed', { error: detail })
+                insights.capture('markdown image upload failed', { error: detail })
                 lemonToast.error(`Error uploading image: ${detail}`)
             },
         })

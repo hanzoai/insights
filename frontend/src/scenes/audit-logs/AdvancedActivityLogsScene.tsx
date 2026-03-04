@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconInfo, IconNotification } from '@posthog/icons'
-import { LemonTabs, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconInfo, IconNotification } from '@hanzo/icons'
+import { LemonTabs, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { AccessDenied } from 'lib/components/AccessDenied'
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'

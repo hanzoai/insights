@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from insights.templatetags.posthog_filters import compact_number, percentage
+from insights.templatetags.insights_filters import compact_number, percentage
 
 
 class TestTemplateTags(TestCase):

@@ -1,4 +1,4 @@
-{% extends "email/base.html" %} {% load posthog_assets %} {% block section %}
+{% extends "email/base.html" %} {% load insights_assets %} {% block section %}
 
 {% if inviter %}
 <h1 class="invite-header">
@@ -8,7 +8,7 @@
         <strong>{{ inviter.first_name }}</strong> has subscribed you 
     {% endif %}
 
-    to the {{ resource_noun }} <strong>{{ resource_name }}</strong> on PostHog.
+    to the {{ resource_noun }} <strong>{{ resource_name }}</strong> on Hanzo Insights.
 </h1>
 
 <p>
@@ -55,14 +55,14 @@
 {% endfor %}
 
 <div class="mb mt text-center">
-    <a class="button primary" href="{{ resource_url }}">View in PostHog</a>
+    <a class="button primary" href="{{ resource_url }}">View in Hanzo Insights</a>
 </div>
 
 <div class="divider"></div>
 
 <p class="text-center">
-    <a target="_blank" href="{{ subscription_url }}"><b>Manage this subscription in PostHog</b></a>
+    <a target="_blank" href="{{ subscription_url }}"><b>Manage this subscription in Hanzo Insights</b></a>
     or
     <a target="_blank" href="{{ unsubscribe_url }}"><b>unsubscribe now.</b></a>
 </p>
-{% endblock %}{% load posthog_filters %}
+{% endblock %}{% load insights_filters %}

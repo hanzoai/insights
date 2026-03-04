@@ -28,7 +28,7 @@ expected_autocapture_data_response_results: list[dict] = [
                 "text": "event 1",
                 "tag_name": "a",
                 "attr_class": None,
-                "href": "https://posthog.com/event-1",
+                "href": "https://hanzo.ai/event-1",
                 "attr_id": None,
                 "nth_child": 0,
                 "nth_of_type": 0,
@@ -39,7 +39,7 @@ expected_autocapture_data_response_results: list[dict] = [
                 "text": "event 1",
                 "tag_name": "div",
                 "attr_class": None,
-                "href": "https://posthog.com/event-1",
+                "href": "https://hanzo.ai/event-1",
                 "attr_id": None,
                 "nth_child": 0,
                 "nth_of_type": 0,
@@ -57,7 +57,7 @@ expected_autocapture_data_response_results: list[dict] = [
                 "text": "event 2",
                 "tag_name": "a",
                 "attr_class": None,
-                "href": "https://posthog.com/event-2",
+                "href": "https://hanzo.ai/event-2",
                 "attr_id": None,
                 "nth_child": 0,
                 "nth_of_type": 0,
@@ -68,7 +68,7 @@ expected_autocapture_data_response_results: list[dict] = [
                 "text": "event 2",
                 "tag_name": "div",
                 "attr_class": None,
-                "href": "https://posthog.com/event-2",
+                "href": "https://hanzo.ai/event-2",
                 "attr_id": None,
                 "nth_child": 0,
                 "nth_of_type": 0,
@@ -89,7 +89,7 @@ expected_rage_click_data_response_results: list[dict] = [
                 "text": "event 1",
                 "tag_name": "a",
                 "attr_class": None,
-                "href": "https://posthog.com/event-1",
+                "href": "https://hanzo.ai/event-1",
                 "attr_id": None,
                 "nth_child": 0,
                 "nth_of_type": 0,
@@ -100,7 +100,7 @@ expected_rage_click_data_response_results: list[dict] = [
                 "text": "event 1",
                 "tag_name": "div",
                 "attr_class": None,
-                "href": "https://posthog.com/event-1",
+                "href": "https://hanzo.ai/event-1",
                 "attr_id": None,
                 "nth_child": 0,
                 "nth_of_type": 0,
@@ -115,7 +115,7 @@ expected_rage_click_data_response_results: list[dict] = [
 class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
     def test_element_automatic_order(self) -> None:
         elements = [
-            Element(tag_name="a", href="https://posthog.com/about", text="click here"),
+            Element(tag_name="a", href="https://hanzo.ai/about", text="click here"),
             Element(tag_name="span"),
             Element(tag_name="div"),
         ]
@@ -130,7 +130,7 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             team=self.team,
             distinct_id="test",
             event="$autocapture",
-            elements=[Element(tag_name="a", href="https://posthog.com/about", text="click here")],
+            elements=[Element(tag_name="a", href="https://hanzo.ai/about", text="click here")],
         )
         team2 = Organization.objects.bootstrap(None)[2]
         _create_event(
@@ -187,13 +187,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements = [
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/about",
+                    href="https://hanzo.ai/about",
                     text="click here",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/about",
+                    href="https://hanzo.ai/about",
                     text="click here",
                     order=1,
                 ),
@@ -324,13 +324,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=1,
                 ),
@@ -344,13 +344,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=1,
                 ),
@@ -364,13 +364,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=1,
                 ),
@@ -384,13 +384,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/event-2",
+                    href="https://hanzo.ai/event-2",
                     text="event 2",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/event-2",
+                    href="https://hanzo.ai/event-2",
                     text="event 2",
                     order=1,
                 ),
@@ -404,13 +404,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/event-2",
+                    href="https://hanzo.ai/event-2",
                     text="event 2",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/event-2",
+                    href="https://hanzo.ai/event-2",
                     text="event 2",
                     order=1,
                 ),
@@ -424,13 +424,13 @@ class TestElement(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
             elements=[
                 Element(
                     tag_name="a",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=0,
                 ),
                 Element(
                     tag_name="div",
-                    href="https://posthog.com/event-1",
+                    href="https://hanzo.ai/event-1",
                     text="event 1",
                     order=1,
                 ),

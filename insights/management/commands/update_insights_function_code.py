@@ -65,12 +65,12 @@ class Command(BaseCommand):
             )
 
             for destination in page.object_list:
-                if destination.hog and replaceOption["from_string"] in destination.hog:
-                    destination.hog = destination.hog.replace(replaceOption["from_string"], replaceOption["to_string"])
+                if destination.iql and replaceOption["from_string"] in destination.hog:
+                    destination.iql = destination.hog.replace(replaceOption["from_string"], replaceOption["to_string"])
                     destination.bytecode = compile_script(destination.hog, destination.type)
                     updated_count += 1
                     if not dry_run:
-                        destination.save(update_fields=["hog", "bytecode"])
+                        destination.save(update_fields=["iql", "bytecode"])
 
         # Output summary
         duration = time.time() - start_time

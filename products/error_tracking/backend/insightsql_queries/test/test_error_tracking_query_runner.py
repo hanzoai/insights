@@ -120,7 +120,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
             _create_person(
                 team=self.team,
                 properties={
-                    "email": "email@posthog.com",
+                    "email": "email@hanzo.ai",
                     "name": "Test User",
                 },
                 distinct_ids=[self.distinct_id_two],
@@ -333,7 +333,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
             additional_properties={
                 "$exception_types": "['DatabaseNotFoundX']",
                 "$exception_values": "['this is the same error message']",
-                "$exception_sources": "['posthog/clickhouse/client/execute.py']",
+                "$exception_sources": "['insights/clickhouse/client/execute.py']",
             },
         )
 
@@ -344,7 +344,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
             additional_properties={
                 "$exception_types": "['DatabaseNotFoundY']",
                 "$exception_values": "['this is the same error message']",
-                "$exception_sources": "['posthog/clickhouse/client/execute.py']",
+                "$exception_sources": "['insights/clickhouse/client/execute.py']",
             },
         )
         flush_persons_and_events()
@@ -362,7 +362,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
     @freeze_time("2022-01-10 12:11:00")
     @snapshot_clickhouse_queries
     def test_search_person_properties(self):
-        distinct_id = "david@posthog.com"
+        distinct_id = "david@hanzo.ai"
 
         _create_person(
             team=self.team,
@@ -377,7 +377,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
             distinct_ids=[distinct_id],
         )
 
-        results = self._calculate(searchQuery="david@posthog.com")["results"]
+        results = self._calculate(searchQuery="david@hanzo.ai")["results"]
 
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]["id"], "684bd8ae-498f-4548-bc05-e621b5b5b9aa")
@@ -443,7 +443,7 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
                         type=FilterLogicalOperator.OR_,
                         values=[
                             PersonPropertyFilter(
-                                key="email", value="email@posthog.com", operator=PropertyOperator.EXACT
+                                key="email", value="email@hanzo.ai", operator=PropertyOperator.EXACT
                             ),
                         ],
                     )
@@ -551,14 +551,14 @@ class TestErrorTrackingQueryRunner(ClickhouseTestMixin, APIBaseTest):
     def test_person_id_filter(self):
         person = _create_person(
             team=self.team,
-            properties={"email": "arthur@posthog.com"},
+            properties={"email": "arthur@hanzo.ai"},
             is_identified=True,
         )
         issue_id = "684bd8ae-498f-4548-bc05-e621b5b5b9ab"
         self.create_events_and_issue(
             issue_id=issue_id,
             fingerprint="fingerprint_DatabaseNotFound1",
-            distinct_ids=["arthur@posthog.com"],
+            distinct_ids=["arthur@hanzo.ai"],
             person_id=str(person.uuid),
         )
         self.create_events_and_issue(

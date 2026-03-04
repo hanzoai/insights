@@ -93,11 +93,11 @@ jobs:
 
             - name: Install package.json dependencies with pnpm
               run: |
-                  pnpm --filter=@posthog/playwright... install --frozen-lockfile
-                  bin/turbo --filter=@posthog/frontend prepare
+                  pnpm --filter=@hanzo/playwright... install --frozen-lockfile
+                  bin/turbo --filter=@hanzo/frontend prepare
 
             - name: Check formatting with prettier
-              run: pnpm --filter=@posthog/frontend prettier:check
+              run: pnpm --filter=@hanzo/frontend prettier:check
 
             - name: Lint with Stylelint
               run: pnpm run lint:css
@@ -141,17 +141,17 @@ jobs:
 
             - name: Install package.json dependencies with pnpm
               run: |
-                  pnpm --filter=@posthog/playwright... install --frozen-lockfile
-                  bin/turbo --filter=@posthog/frontend prepare
+                  pnpm --filter=@hanzo/playwright... install --frozen-lockfile
+                  bin/turbo --filter=@hanzo/frontend prepare
 
             - name: Build products
-              run: pnpm --filter=@posthog/frontend build:products
+              run: pnpm --filter=@hanzo/frontend build:products
 
             - name: Check frontend bundle size
               uses: preactjs/compressed-size-action@946a292cd35bd1088e0d7eb92b69d1a8d5b5d76a # v2
               with:
-                  build-script: '--filter=@posthog/frontend build'
-                  install-script: 'pnpm --filter=@posthog/frontend... install'
+                  build-script: '--filter=@hanzo/frontend build'
+                  install-script: 'pnpm --filter=@hanzo/frontend... install'
                   compression: 'none'
                   # Check all JS bundles in the dist folder
                   pattern: 'frontend/dist/**/*.js'
@@ -163,7 +163,7 @@ jobs:
                   strip-hash: "-[A-Za-z0-9]{8}\\.js$"
 
             - name: Check toolbar for CSP eval violations
-              run: pnpm --filter=@posthog/frontend check-toolbar-csp-eval
+              run: pnpm --filter=@hanzo/frontend check-toolbar-csp-eval
 
             - name: Calculate dist folder size
               id: dist-size
@@ -206,8 +206,8 @@ jobs:
 
             - name: Install package.json dependencies with pnpm
               run: |
-                  pnpm --filter=@posthog/playwright... install --no-frozen-lockfile
-                  bin/turbo --filter=@posthog/frontend prepare
+                  pnpm --filter=@hanzo/playwright... install --no-frozen-lockfile
+                  bin/turbo --filter=@hanzo/frontend prepare
 
             - name: Restore .typegen cache
               uses: actions/cache/restore@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.1
@@ -217,13 +217,13 @@ jobs:
                   restore-keys: ${{ runner.os }}-typegen-
 
             - name: Build products
-              run: pnpm --filter=@posthog/frontend build:products
+              run: pnpm --filter=@hanzo/frontend build:products
 
             - name: Check if products.tsx and products.json are up to date
-              run: pnpm --filter=@posthog/frontend build:products && git diff --exit-code
+              run: pnpm --filter=@hanzo/frontend build:products && git diff --exit-code
 
             - name: Kea typegen
-              run: pnpm --filter=@posthog/frontend typegen:write
+              run: pnpm --filter=@hanzo/frontend typegen:write
 
             - name: Save .typegen cache
               if: github.ref == 'refs/heads/master'
@@ -233,15 +233,15 @@ jobs:
                   key: ${{ runner.os }}-typegen-${{ hashFiles('pnpm-lock.yaml') }}
 
             - name: Run typescript with strict
-              run: pnpm --filter=@posthog/frontend typescript:check
+              run: pnpm --filter=@hanzo/frontend typescript:check
               env:
                   NODE_OPTIONS: --max-old-space-size=16384
 
             - name: Check if schema.json and validators.js are up to date
-              run: pnpm --filter=@posthog/frontend schema:build:json && git diff --exit-code
+              run: pnpm --filter=@hanzo/frontend schema:build:json && git diff --exit-code
 
             - name: Check if mobile replay "schema.json" is up to date
-              run: pnpm --filter=@posthog/frontend mobile-replay:schema:build:json && git diff --exit-code
+              run: pnpm --filter=@hanzo/frontend mobile-replay:schema:build:json && git diff --exit-code
 
             - name: Validate SetupTaskId completions
               run: node bin/validate-setup-tasks.mjs
@@ -285,10 +285,10 @@ jobs:
               run: sudo apt-get install -y ninja-build
 
             - name: Install package.json dependencies with pnpm
-              run: pnpm --filter=@posthog/frontend... install --frozen-lockfile
+              run: pnpm --filter=@hanzo/frontend... install --frozen-lockfile
 
             - name: Test with Jest
-              run: bin/turbo run test --filter=@posthog/frontend -- --runInBand
+              run: bin/turbo run test --filter=@hanzo/frontend -- --runInBand
               env:
                   NODE_OPTIONS: --max-old-space-size=16384
                   SHARD_INDEX: ${{ matrix.chunk }}

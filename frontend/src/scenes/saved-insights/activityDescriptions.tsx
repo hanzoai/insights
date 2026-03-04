@@ -1,6 +1,6 @@
 import '../../lib/components/Cards/InsightCard/InsightCard.scss'
 
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { Fragment } from 'react'
 
 import { SentenceList } from 'lib/components/ActivityLog/SentenceList'
@@ -353,7 +353,7 @@ export function insightActivityDescriber(logItem: ActivityLogItem, asNotificatio
             }
         } catch (e) {
             console.error('Error while summarizing insight update', e)
-            posthog.captureException(e)
+            insights.captureException(e)
         }
 
         if (changes.length) {

@@ -44,17 +44,17 @@ async fn test_hypercache_config_generation() {
 
     let team_key = KeyType::team(test_team.clone());
 
-    // Test Redis cache key generation (includes posthog:1: prefix)
+    // Test Redis cache key generation (includes insights:1: prefix)
     let redis_key_with_cohorts = config_with_cohorts.get_redis_cache_key(&team_key);
     assert_eq!(
         redis_key_with_cohorts,
-        "posthog:1:cache/teams/123/feature_flags/flags_with_cohorts.json"
+        "insights:1:cache/teams/123/feature_flags/flags_with_cohorts.json"
     );
 
     let redis_key_without_cohorts = config_without_cohorts.get_redis_cache_key(&team_key);
     assert_eq!(
         redis_key_without_cohorts,
-        "posthog:1:cache/teams/123/feature_flags/flags_without_cohorts.json"
+        "insights:1:cache/teams/123/feature_flags/flags_without_cohorts.json"
     );
 
     // Test S3 cache key generation (no prefix, matches Django object_storage)
@@ -290,7 +290,7 @@ async fn test_personal_api_key_authentication_inactive_user() {
 
     // Create INACTIVE user using helper (is_active = false)
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_inactive_{test_uuid}@posthog.com");
+    let user_email = format!("test_inactive_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user_with_options(&user_email, &org_id, Some(team.id), false)
         .await
@@ -473,7 +473,7 @@ async fn test_personal_api_key_with_scoped_teams_allowed() {
     let org_id = context.get_organization_id_for_team(&team).await.unwrap();
 
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_scoped_teams_{test_uuid}@posthog.com");
+    let user_email = format!("test_scoped_teams_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id, team.id)
         .await
@@ -537,7 +537,7 @@ async fn test_personal_api_key_with_scoped_teams_denied() {
     let org_id = context.get_organization_id_for_team(&team).await.unwrap();
 
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_denied_{test_uuid}@posthog.com");
+    let user_email = format!("test_denied_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id, team.id)
         .await
@@ -588,7 +588,7 @@ async fn test_personal_api_key_with_scoped_organizations_allowed() {
     let org_id = context.get_organization_id_for_team(&team).await.unwrap();
 
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_org_allowed_{test_uuid}@posthog.com");
+    let user_email = format!("test_org_allowed_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id, team.id)
         .await
@@ -650,7 +650,7 @@ async fn test_personal_api_key_with_scoped_organizations_denied() {
     let org_id = context.get_organization_id_for_team(&team).await.unwrap();
 
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_org_denied_{test_uuid}@posthog.com");
+    let user_email = format!("test_org_denied_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id, team.id)
         .await
@@ -762,7 +762,7 @@ async fn test_personal_api_key_with_all_access_scopes() {
     let org_id = context.get_organization_id_for_team(&team).await.unwrap();
 
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_all_access_{test_uuid}@posthog.com");
+    let user_email = format!("test_all_access_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id, team.id)
         .await
@@ -821,7 +821,7 @@ async fn test_personal_api_key_with_feature_flag_write_scope() {
     let org_id = context.get_organization_id_for_team(&team).await.unwrap();
 
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_write_scope_{test_uuid}@posthog.com");
+    let user_email = format!("test_write_scope_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id, team.id)
         .await
@@ -981,7 +981,7 @@ async fn test_secret_token_takes_priority_over_personal_api_key() {
 
     // Create PAK for team2
     let test_uuid = uuid::Uuid::new_v4().to_string()[..8].to_string();
-    let user_email = format!("test_priority_{test_uuid}@posthog.com");
+    let user_email = format!("test_priority_{test_uuid}@hanzo.ai");
     let user_id = context
         .create_user(&user_email, &org_id2, team2.id)
         .await

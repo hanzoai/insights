@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonTabs, LemonTag } from '@posthog/lemon-ui'
+import { LemonTabs, LemonTag } from '@hanzo/lemon-ui'
 
 import { ActivityLog } from 'lib/components/ActivityLog/ActivityLog'
 import { WebExperimentImplementationDetails } from 'scenes/experiments/WebExperimentImplementationDetails'

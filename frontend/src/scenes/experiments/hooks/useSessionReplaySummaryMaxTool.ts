@@ -1,5 +1,5 @@
 import { useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useMemo } from 'react'
 
 import { useMaxTool } from 'scenes/max/useMaxTool'
@@ -46,7 +46,7 @@ export const useSessionReplaySummaryMaxTool = (): ReturnType<typeof useMaxTool> 
         initialMaxPrompt: `!Summarize session replays for experiment "${maxToolContext.experiment_name}"`,
         callback(toolOutput) {
             if (toolOutput?.error) {
-                posthog.captureException(
+                insights.captureException(
                     toolOutput?.error || 'Undefined error when summarizing session replays with Max',
                     {
                         action: 'max-ai-session-replay-summary-failed',
@@ -55,7 +55,7 @@ export const useSessionReplaySummaryMaxTool = (): ReturnType<typeof useMaxTool> 
                     }
                 )
             } else {
-                posthog.capture('experiment session replays analyzed', {
+                insights.capture('experiment session replays analyzed', {
                     experiment_id: experiment.id,
                     has_recordings: (toolOutput?.total_recordings ?? 0) > 0,
                 })

@@ -8,7 +8,7 @@ from insights.models.user import User
 class TestLinkModel(BaseTest):
     def setUp(self):
         super().setUp()
-        org, team, user = User.objects.bootstrap("Test org", "test@posthog.com", None)
+        org, team, user = User.objects.bootstrap("Test org", "test@hanzo.ai", None)
         self.team = team
         self.user = user
         self.org = org

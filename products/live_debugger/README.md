@@ -4,10 +4,10 @@ Live Debugger provides runtime inspection capabilities for Insights users by ena
 
 ## Related Projects
 
-- [https://github.com/PostHog/hogtrace](hogtrace), a DTrace-inspired language for defining
+- [https://github.com/Hanzo Insights/hogtrace](hogtrace), a DTrace-inspired language for defining
   instrumentation scripts. It includes a Rust-based VM that can evaluate expressions within
   the context of the client application safely.
-- [https://github.com/PostHog/libdebugger](libdebugger), a library for runtime instrumentation
+- [https://github.com/Hanzo Insights/libdebugger](libdebugger), a library for runtime instrumentation
   of Python code.
 
 ## Flow
@@ -34,7 +34,7 @@ Live Debugger provides runtime inspection capabilities for Insights users by ena
     │ ClickHouse│ ◄─────────────────────────────────────────┘
     └───────────┘
          │
-         │ (5) Query hits (HogQL)
+         │ (5) Query hits (InsightsQL)
          ▼
     Insights UI
 ```

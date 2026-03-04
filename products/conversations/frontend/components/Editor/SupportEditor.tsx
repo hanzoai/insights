@@ -9,10 +9,10 @@ import { Placeholder } from '@tiptap/extensions'
 import { EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useEffect, useRef, useState } from 'react'
 
-import { IconCode, IconImage } from '@posthog/icons'
+import { IconCode, IconImage } from '@hanzo/icons'
 
 import { EmojiPickerPopover } from 'lib/components/EmojiPicker/EmojiPickerPopover'
 import { useRichContentEditor } from 'lib/components/RichContentEditor'
@@ -33,7 +33,7 @@ import { IconBold, IconItalic, IconLink } from 'lib/lemon-ui/icons'
 import { cn } from 'lib/utils/css-classes'
 import { preflightLogic } from 'scenes/PreflightCheck/preflightLogic'
 
-// Underline icon (not in @posthog/icons)
+// Underline icon (not in @hanzo/icons)
 function IconUnderline(): JSX.Element {
     return (
         <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -288,10 +288,10 @@ export function SupportEditor({
             if (ttEditor) {
                 ttEditor.chain().focus().setImage({ src: url, alt: fileName }).run()
             }
-            posthog.capture('rich text image uploaded', { name: fileName })
+            insights.capture('rich text image uploaded', { name: fileName })
         },
         onError: (detail) => {
-            posthog.capture('rich text image upload failed', { error: detail })
+            insights.capture('rich text image upload failed', { error: detail })
             lemonToast.error(`Error uploading image: ${detail}`)
         },
     })

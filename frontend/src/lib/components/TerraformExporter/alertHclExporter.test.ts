@@ -24,7 +24,7 @@ describe('alertHclExporter test', () => {
 
             const hcl = generateAlertHCL(alert).hcl
 
-            expect(hcl).toContain(`resource "posthog_alert" "${expected}"`)
+            expect(hcl).toContain(`resource "insights_alert" "${expected}"`)
         })
     })
 
@@ -45,7 +45,7 @@ describe('alertHclExporter test', () => {
             const result = generateAlertHCL(alert)
             const hcl = result.hcl
 
-            expect(hcl).toContain('resource "posthog_alert" "my_test_alert"')
+            expect(hcl).toContain('resource "insights_alert" "my_test_alert"')
             expect(hcl).toContain('name = "My Test Alert"')
             expect(hcl).toContain('enabled = true')
             expect(hcl).toContain('calculation_interval = "daily"')
@@ -60,7 +60,7 @@ describe('alertHclExporter test', () => {
 
             // Should warn about hardcoded insight id
             expect(result.warnings).toContain(
-                '`insight id` is hardcoded. Consider referencing the Terraform resource instead (e.g., `posthog_insight.my_insight.id`).'
+                '`insight id` is hardcoded. Consider referencing the Terraform resource instead (e.g., `insights_insight.my_insight.id`).'
             )
         })
 
@@ -76,7 +76,7 @@ describe('alertHclExporter test', () => {
             const hcl = result.hcl
 
             expect(hcl).toContain('import {')
-            expect(hcl).toContain('to = posthog_alert.saved_alert')
+            expect(hcl).toContain('to = insights_alert.saved_alert')
             expect(hcl).toContain('id = "1/alert-456"')
         })
 
@@ -102,15 +102,15 @@ describe('alertHclExporter test', () => {
                 insight: { id: 456 },
             })
 
-            const result = generateAlertHCL(alert, { insightTfReference: 'posthog_insight.my_insight.id' })
+            const result = generateAlertHCL(alert, { insightTfReference: 'insights_insight.my_insight.id' })
             const hcl = result.hcl
 
-            expect(hcl).toContain('insight = posthog_insight.my_insight.id')
+            expect(hcl).toContain('insight = insights_insight.my_insight.id')
             expect(hcl).not.toContain('insight = 456')
 
             // Should not warn about hardcoded insight id when using TF reference
             expect(result.warnings).not.toContain(
-                '`insight id` is hardcoded. Consider referencing the Terraform resource instead (e.g., `posthog_insight.my_insight.id`).'
+                '`insight id` is hardcoded. Consider referencing the Terraform resource instead (e.g., `insights_insight.my_insight.id`).'
             )
         })
 
@@ -123,7 +123,7 @@ describe('alertHclExporter test', () => {
 
             const hcl = generateAlertHCL(alert).hcl
 
-            expect(hcl).toMatch(/# Compatible with posthog provider v\d+\.\d+/)
+            expect(hcl).toMatch(/# Compatible with insights provider v\d+\.\d+/)
         })
     })
 

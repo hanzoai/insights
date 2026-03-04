@@ -9,7 +9,7 @@ import { AppContext, TeamType } from '~/types'
 
 import { escapeInsightsQLString, insightsql } from './utils'
 
-window.POSTHOG_APP_CONTEXT = { current_team: { id: MOCK_TEAM_ID } } as unknown as AppContext
+window.INSIGHTS_APP_CONTEXT = { current_team: { id: MOCK_TEAM_ID } } as unknown as AppContext
 
 describe('insightsql tag', () => {
     initKeaTests()

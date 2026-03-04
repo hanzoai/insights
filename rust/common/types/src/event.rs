@@ -64,7 +64,7 @@ pub struct RawEvent {
     )]
     pub token: Option<String>,
     #[serde(alias = "$distinct_id", skip_serializing_if = "Option::is_none")]
-    pub distinct_id: Option<Value>, // posthog-js accepts arbitrary values as distinct_id
+    pub distinct_id: Option<Value>, // insights-js accepts arbitrary values as distinct_id
     #[serde(default, deserialize_with = "empty_string_uuid_is_none")]
     pub uuid: Option<Uuid>,
     pub event: String,
@@ -89,12 +89,12 @@ pub struct RawEngageEvent {
     )]
     pub token: Option<String>,
     #[serde(alias = "$distinct_id", skip_serializing_if = "Option::is_none")]
-    pub distinct_id: Option<Value>, // posthog-js accepts arbitrary values as distinct_id
+    pub distinct_id: Option<Value>, // insights-js accepts arbitrary values as distinct_id
     #[serde(default, deserialize_with = "empty_string_uuid_is_none")]
     pub uuid: Option<Uuid>,
     // NOTE: missing event name is the only difference between RawEvent and RawEngageEvent
     // when the event name is missing, we need fill in $identify as capture.py does:
-    // https://github.com/PostHog/posthog/blob/70ce86a73f6c3d3ee6f44e1ac0acd695e2f78682/posthog/api/capture.py#L501-L502
+    // https://github.com/hanzoai/insights/blob/70ce86a73f6c3d3ee6f44e1ac0acd695e2f78682/insights/api/capture.py#L501-L502
     #[serde(default)]
     pub properties: HashMap<String, Value>,
     #[serde(skip_serializing_if = "Option::is_none")]

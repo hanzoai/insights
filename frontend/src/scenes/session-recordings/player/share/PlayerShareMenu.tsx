@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconExternal, IconGlobe, IconShare, IconShield } from '@posthog/icons'
-import { LemonButton, LemonMenu } from '@posthog/lemon-ui'
+import { IconExternal, IconGlobe, IconShare, IconShield } from '@hanzo/icons'
+import { LemonButton, LemonMenu } from '@hanzo/lemon-ui'
 
 import { newInternalTab } from 'lib/utils/newInternalTab'
 import { sessionPlayerModalLogic } from 'scenes/session-recordings/player/modal/sessionPlayerModalLogic'

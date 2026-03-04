@@ -103,7 +103,7 @@ class TestCreateTaskTool(BaseTaskToolTest):
         tool = self._create_tool(CreateTaskTool)
 
         content, artifact = await tool._arun_impl(
-            title="New Task", description="Task description", repository="posthog/posthog-js"
+            title="New Task", description="Task description", repository="hanzoai/insights-js"
         )
 
         assert "Created and started task" in content
@@ -116,7 +116,7 @@ class TestCreateTaskTool(BaseTaskToolTest):
         task = await sync_to_async(Task.objects.get)(id=artifact["task_id"])
         assert task.title == "New Task"
         assert task.description == "Task description"
-        assert task.repository == "posthog/posthog-js"
+        assert task.repository == "hanzoai/insights-js"
         mock_execute_workflow.assert_called_once()
 
     @pytest.mark.django_db
@@ -514,15 +514,15 @@ class TestListTasksTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_tasks_filter_by_repository(self):
-        await self._create_task("Task 1", repository="posthog/posthog-js")
-        await self._create_task("Task 2", repository="posthog/posthog")
+        await self._create_task("Task 1", repository="hanzoai/insights-js")
+        await self._create_task("Task 2", repository="hanzoai/insights")
 
         tool = self._create_tool(ListTasksTool)
 
-        content, artifact = await tool._arun_impl(repository="posthog/posthog-js")
+        content, artifact = await tool._arun_impl(repository="hanzoai/insights-js")
 
         assert len(artifact["tasks"]) == 1
-        assert artifact["tasks"][0]["repository"] == "posthog/posthog-js"
+        assert artifact["tasks"][0]["repository"] == "hanzoai/insights-js"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -565,15 +565,15 @@ class TestListTasksTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_tasks_repo_partial_match(self):
-        await self._create_task("JS Task", repository="posthog/posthog-js")
-        await self._create_task("Main Task", repository="posthog/posthog")
+        await self._create_task("JS Task", repository="hanzoai/insights-js")
+        await self._create_task("Main Task", repository="hanzoai/insights")
 
         tool = self._create_tool(ListTasksTool)
 
-        content, artifact = await tool._arun_impl(repository="posthog-js")
+        content, artifact = await tool._arun_impl(repository="insights-js")
 
         assert len(artifact["tasks"]) == 1
-        assert artifact["tasks"][0]["repository"] == "posthog/posthog-js"
+        assert artifact["tasks"][0]["repository"] == "hanzoai/insights-js"
 
     @pytest.mark.django_db
     @pytest.mark.asyncio
@@ -582,7 +582,7 @@ class TestListTasksTool(BaseTaskToolTest):
 
         tool = self._create_tool(ListTasksTool)
 
-        content, artifact = await tool._arun_impl(repository="posthog/posthog-js")
+        content, artifact = await tool._arun_impl(repository="hanzoai/insights-js")
 
         assert len(artifact["tasks"]) == 1
 
@@ -655,10 +655,10 @@ class TestListTasksTool(BaseTaskToolTest):
 @parameterized_class(
     ("filter_value", "should_match"),
     [
-        ("posthog/posthog-js", True),
+        ("hanzoai/insights-js", True),
         ("Insights/Insights-JS", True),
-        ("posthog-js", True),
-        ("posthog/posthog", False),
+        ("insights-js", True),
+        ("insights/insights", False),
     ],
 )
 class TestListTasksToolRepositoryFiltering(BaseTaskToolTest):
@@ -668,7 +668,7 @@ class TestListTasksToolRepositoryFiltering(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_repository_filtering(self):
-        await self._create_task("Target Task", repository="posthog/posthog-js")
+        await self._create_task("Target Task", repository="hanzoai/insights-js")
 
         tool = self._create_tool(ListTasksTool)
         content, artifact = await tool._arun_impl(repository=self.filter_value)
@@ -823,14 +823,14 @@ class TestListRepositoriesTool(BaseTaskToolTest):
                 team=self.team,
                 kind="github",
                 integration_id="12345",
-                config={"account": {"name": "posthog"}},
+                config={"account": {"name": "insights"}},
             )
 
         await create_integration()
 
         mock_github_instance = mock_github_class.return_value
-        mock_github_instance.organization.return_value = "posthog"
-        mock_github_instance.list_repositories.return_value = ["posthog-js", "posthog-python", "posthog"]
+        mock_github_instance.organization.return_value = "insights"
+        mock_github_instance.list_repositories.return_value = ["insights-js", "hanzo-insights", "insights"]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -838,9 +838,9 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         assert "3 repository(ies)" in content
         assert len(artifact["repositories"]) == 3
-        assert artifact["repositories"][0]["repository"] == "posthog/posthog-js"
-        assert artifact["repositories"][0]["organization"] == "posthog"
-        assert artifact["repositories"][0]["name"] == "posthog-js"
+        assert artifact["repositories"][0]["repository"] == "hanzoai/insights-js"
+        assert artifact["repositories"][0]["organization"] == "insights"
+        assert artifact["repositories"][0]["name"] == "insights-js"
 
     @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
@@ -854,14 +854,14 @@ class TestListRepositoriesTool(BaseTaskToolTest):
                 team=self.team,
                 kind="github",
                 integration_id="12345",
-                config={"account": {"name": "posthog"}},
+                config={"account": {"name": "insights"}},
             )
 
         await create_integration()
 
         mock_github_instance = mock_github_class.return_value
-        mock_github_instance.organization.return_value = "posthog"
-        mock_github_instance.list_repositories.return_value = ["posthog-js", "posthog-python", "posthog"]
+        mock_github_instance.organization.return_value = "insights"
+        mock_github_instance.list_repositories.return_value = ["insights-js", "hanzo-insights", "insights"]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -869,7 +869,7 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         assert "1 repository(ies)" in content
         assert len(artifact["repositories"]) == 1
-        assert artifact["repositories"][0]["repository"] == "posthog/posthog-python"
+        assert artifact["repositories"][0]["repository"] == "insights/hanzo-insights"
 
     @patch("insights.models.integration.GitHubIntegration")
     @pytest.mark.django_db
@@ -894,7 +894,7 @@ class TestListRepositoriesTool(BaseTaskToolTest):
 
         tool = self._create_tool(ListRepositoriesTool)
 
-        content, artifact = await tool._arun_impl(search="posthog-js")
+        content, artifact = await tool._arun_impl(search="insights-js")
 
         assert len(artifact["repositories"]) == 1
 
@@ -910,14 +910,14 @@ class TestListRepositoriesTool(BaseTaskToolTest):
                 team=self.team,
                 kind="github",
                 integration_id="12345",
-                config={"account": {"name": "posthog"}},
+                config={"account": {"name": "insights"}},
             )
 
         await create_integration()
 
         mock_github_instance = mock_github_class.return_value
-        mock_github_instance.organization.return_value = "posthog"
-        mock_github_instance.list_repositories.return_value = ["posthog-js", "posthog-python"]
+        mock_github_instance.organization.return_value = "insights"
+        mock_github_instance.list_repositories.return_value = ["insights-js", "hanzo-insights"]
 
         tool = self._create_tool(ListRepositoriesTool)
 
@@ -938,7 +938,7 @@ class TestListRepositoriesTool(BaseTaskToolTest):
                 team=self.team,
                 kind="github",
                 integration_id="12345",
-                config={"account": {"name": "posthog"}},
+                config={"account": {"name": "insights"}},
             )
 
         await create_integration()

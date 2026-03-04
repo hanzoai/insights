@@ -23,7 +23,7 @@ Product tours allow Insights users to implement automated onboarding and product
                                                          │
                                                          ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        posthog-js SDK (Display)                              │
+│                        insights-js SDK (Display)                              │
 │              packages/browser/src/extensions/product-tours/                  │
 │                                                                              │
 │  - Fetches active tours from /api/product_tours                             │
@@ -162,7 +162,7 @@ Uses `elementToActionStep()` from toolbar utils to generate CSS selectors from c
 
 ## Layer 3: SDK (Display Runtime)
 
-**Location (external repo):** `posthog-js/packages/browser/src/extensions/product-tours/`
+**Location (external repo):** `insights-js/packages/browser/src/extensions/product-tours/`
 
 The SDK fetches and displays tours to end-users on the customer's website.
 
@@ -233,32 +233,32 @@ start() → setInterval(1s) → evaluateAndDisplayTours()
 On tour completion:
 
 ```javascript
-posthog.capture('$set', {
+insights.capture('$set', {
   $set: { [`$product_tour_completed/${tour_id}`]: true },
 })
 ```
 
 ### Public SDK API
 
-Exposed via `posthog.productTours`:
+Exposed via `insights.productTours`:
 
 ```javascript
 // Manually show a tour (bypasses eligibility checks, clears localStorage state)
-posthog.productTours.showProductTour('tour-uuid')
+insights.productTours.showProductTour('tour-uuid')
 
 // Control active tour
-posthog.productTours.dismissProductTour()
-posthog.productTours.nextStep()
-posthog.productTours.previousStep()
+insights.productTours.dismissProductTour()
+insights.productTours.nextStep()
+insights.productTours.previousStep()
 
 // Fetch tours
-posthog.productTours.getProductTours((tours) => console.log(tours))
-posthog.productTours.getActiveProductTours((tours) => console.log(tours))
+insights.productTours.getProductTours((tours) => console.log(tours))
+insights.productTours.getActiveProductTours((tours) => console.log(tours))
 
 // Reset state (useful for testing)
-posthog.productTours.resetTour('tour-uuid') // Clear completed/dismissed for one tour
-posthog.productTours.resetAllTours() // Clear all completed/dismissed state
-posthog.productTours.clearCache() // Clear cached tour data
+insights.productTours.resetTour('tour-uuid') // Clear completed/dismissed for one tour
+insights.productTours.resetAllTours() // Clear all completed/dismissed state
+insights.productTours.clearCache() // Clear cached tour data
 ```
 
 ---
@@ -329,14 +329,14 @@ Will provide a dedicated UI for viewing, managing, and analyzing product tours w
 2. Create migration: `python manage.py makemigrations product_tours`
 3. Add to serializers in `api/product_tour.py`
 4. Update toolbar form in `productToursLogic.ts`
-5. Update SDK types in `posthog-product-tours-types.ts`
+5. Update SDK types in `insights-product-tours-types.ts`
 6. Handle field in SDK display logic
 
 ### Testing the toolbar locally
 
 The toolbar requires a specific setup because it runs inside an iframe on the customer's site:
 
-1. **Start Insights:** `hogli start`
+1. **Start Insights:** `insightscli start`
 2. **Build frontend:** `cd frontend && pnpm build` (repeat after every change)
 3. **Enable feature flag:** Add your local account email to the `product-tours` feature flag
    - ⚠️ The toolbar fetches feature flags from **prod**, not local - your email must be in the prod flag
@@ -363,8 +363,8 @@ If you change `remote_config.py` and don't see updates at `/array/{token}/config
 
 ```python
 # In Django shell
-from posthog.models.remote_config import RemoteConfig
-from posthog.models.team import Team
+from insights.models.remote_config import RemoteConfig
+from insights.models.team import Team
 
 token = 'your-token-here'
 team = Team.objects.get(api_token=token)

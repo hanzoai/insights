@@ -19,7 +19,7 @@ logger = structlog.get_logger(__name__)
 
 def batch_insert_personless_distinct_ids(data, batch_size=1000):
     query = """
-    INSERT INTO posthog_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
+    INSERT INTO insights_personlessdistinctid (team_id, distinct_id, is_merged, created_at)
     VALUES %s
     ON CONFLICT (team_id, distinct_id) DO NOTHING
     """
@@ -122,7 +122,7 @@ class BackfillShard:
 
 
 class Command(BaseCommand):
-    help = "Backfill posthog_personlessdistinctid records."
+    help = "Backfill insights_personlessdistinctid records."
 
     def add_arguments(self, parser):
         parser.add_argument(

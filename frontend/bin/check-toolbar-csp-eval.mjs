@@ -21,7 +21,7 @@ const FUNCTION_CTORS = new Set(['Function', 'AsyncFunction', 'GeneratorFunction'
 const ALLOWED_VIOLATIONS = {
     'new Function()': {
         count: 5,
-        source: 'pixi.js via @posthog/hedgehog-mode (4) + toolbarLogic CSP probe (1)',
+        source: 'pixi.js via @hanzo/mascot-mode (4) + toolbarLogic CSP probe (1)',
     },
 }
 

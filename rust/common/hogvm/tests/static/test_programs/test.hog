@@ -1,4 +1,4 @@
-// TODO - taken from https://github.com/PostHog/posthog/pull/31293, update STL to support
+// TODO - taken from https://github.com/Insights/insights/pull/31293, update STL to support
 return true
 
 let propertiesToHash := []

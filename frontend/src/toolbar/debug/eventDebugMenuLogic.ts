@@ -3,7 +3,7 @@ import { actions, afterMount, connect, kea, path, reducers, selectors } from 'ke
 import { uuid } from 'lib/utils'
 import { permanentlyMount } from 'lib/utils/kea-logic-builders'
 
-import { CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS } from '~/taxonomy/taxonomy'
+import { CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS } from '~/taxonomy/taxonomy'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP, PROPERTY_KEYS } from '~/taxonomy/taxonomy'
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
 import { EventType } from '~/types'
@@ -13,13 +13,13 @@ import type { eventDebugMenuLogicType } from './eventDebugMenuLogicType'
 export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
     path(['toolbar', 'debug', 'eventDebugMenuLogic']),
     connect(() => ({
-        values: [toolbarConfigLogic, ['posthog']],
+        values: [toolbarConfigLogic, ['insights']],
     })),
     actions({
         addEvent: (event: EventType) => ({ event }),
         markExpanded: (id: string | null | undefined) => ({ id }),
         setSearchText: (searchText: string) => ({ searchText }),
-        setSelectedEventType: (eventType: 'posthog' | 'custom' | 'snapshot', enabled: boolean) => ({
+        setSelectedEventType: (eventType: 'insights' | 'custom' | 'snapshot', enabled: boolean) => ({
             eventType,
             enabled,
         }),
@@ -48,7 +48,7 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
             },
         ],
         selectedEventTypes: [
-            ['posthog', 'custom'] as ('posthog' | 'custom' | 'snapshot')[],
+            ['insights', 'custom'] as ('insights' | 'custom' | 'snapshot')[],
             {
                 setSelectedEventType: (state, { eventType, enabled }) => {
                     const newTypes = [...state]
@@ -94,8 +94,8 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
         ],
         searchFilteredEventsCount: [
             (s) => [s.searchFilteredEvents],
-            (searchFilteredEvents): { posthog: number; custom: number; snapshot: number } => {
-                const counts = { posthog: 0, custom: 0, snapshot: 0 }
+            (searchFilteredEvents): { insights: number; custom: number; snapshot: number } => {
+                const counts = { insights: 0, custom: 0, snapshot: 0 }
 
                 searchFilteredEvents.forEach((e) => {
                     if (e.event === '$snapshot') {
@@ -104,7 +104,7 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
                         e.event.startsWith('$') ||
                         Object.keys(CORE_FILTER_DEFINITIONS_BY_GROUP.events).includes(e.event)
                     ) {
-                        counts.posthog += 1
+                        counts.insights += 1
                     } else {
                         counts.custom += 1
                     }
@@ -125,7 +125,7 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
                         e.event.startsWith('$') ||
                         Object.keys(CORE_FILTER_DEFINITIONS_BY_GROUP.events).includes(e.event)
                     ) {
-                        return selectedEventTypes.includes('posthog')
+                        return selectedEventTypes.includes('insights')
                     }
 
                     return !!selectedEventTypes.includes('custom')
@@ -144,19 +144,19 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
                     return []
                 }
 
-                const posthogPropertiesFiltered = hideInsightsProperties
+                const insightsPropertiesFiltered = hideInsightsProperties
                     ? Object.fromEntries(
                           Object.entries(allProperties).filter(([key]) => {
                               const isInsightsProperty = key.startsWith('$') && PROPERTY_KEYS.includes(key)
-                              const isNonDollarInsightsProperty = CLOUD_INTERNAL_POSTHOG_PROPERTY_KEYS.includes(key)
+                              const isNonDollarInsightsProperty = CLOUD_INTERNAL_INSIGHTS_PROPERTY_KEYS.includes(key)
                               return !isInsightsProperty && !isNonDollarInsightsProperty
                           })
                       )
                     : allProperties
 
-                const posthogFlagsFiltered = hideInsightsFlags
+                const insightsFlagsFiltered = hideInsightsFlags
                     ? Object.fromEntries(
-                          Object.entries(posthogPropertiesFiltered).filter(([key]) => {
+                          Object.entries(insightsPropertiesFiltered).filter(([key]) => {
                               if (key === '$active_feature_flags') {
                                   return false
                               } else if (key.startsWith('$feature/')) {
@@ -166,18 +166,18 @@ export const eventDebugMenuLogic = kea<eventDebugMenuLogicType>([
                               return true
                           })
                       )
-                    : posthogPropertiesFiltered
+                    : insightsPropertiesFiltered
 
-                return posthogFlagsFiltered
+                return insightsFlagsFiltered
             },
         ],
     }),
     afterMount(({ values, actions, cache }) => {
         cache.disposables.add(() => {
-            return values.posthog?.on('eventCaptured', (e) => {
+            return values.insights?.on('eventCaptured', (e) => {
                 actions.addEvent(e)
             })
-        }, 'posthogEventListener')
+        }, 'insightsEventListener')
     }),
     permanentlyMount(),
 ])

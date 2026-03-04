@@ -8,10 +8,10 @@ This is intended to be used for our most important queries by our biggest custom
 
 There are two ways that this can work:
 
-- Automatically transforming HogQL queries
+- Automatically transforming InsightsQL queries
 - Manual API for query runners to consume
 
-### Automatic HogQL transformation
+### Automatic InsightsQL transformation
 
 1. **Pattern detection**: Traverse the AST, check if any SELECT clause matches a supported pattern (e.g., daily unique persons for pageviews)
 2. **Hash the query**: Compute a stable hash from the query structure, timezone, and other settings (excluding the time range for the query)
@@ -53,7 +53,7 @@ from products.analytics_platform.backend.lazy_computation.lazy_computation_execu
     ensure_precomputed,
     LazyComputationTable,
 )
-from posthog.hogql import ast
+from insights.insightsql import ast
 
 # Ensure that the given query is lazy-computed with variable TTLs
 result = ensure_precomputed(
@@ -112,7 +112,7 @@ query = parse_select(
         "time_end": ast.Constant(value=datetime(2025, 12, 25)),
     },
 )
-# note that this is using HogQL, which automatically adds a team_id condition
+# note that this is using InsightsQL, which automatically adds a team_id condition
 ```
 
 ### Variable TTL
@@ -179,4 +179,4 @@ Stale jobs are marked FAILED and the normal replacement flow kicks in. This mean
 
 - While we are waiting, we block an entire django thread despite not doing any useful work. We should make it easier for people to use e.g. celery with this, this would involve using async queries though.
 - The stale enum value isn't used for anything, we just mark stale jobs as errored
-- Add posthog logging for state transitions
+- Add insights logging for state transitions

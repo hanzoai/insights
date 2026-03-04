@@ -4,7 +4,7 @@ from typing import Optional, cast
 from django.db.models import QuerySet
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from django_filters import BaseInFilter, CharFilter, FilterSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, serializers, viewsets
@@ -350,7 +350,7 @@ class InsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetricsMixin
             edges_count = len(serializer.instance.edges) if serializer.instance.edges else 0
             actions_count = len(serializer.instance.actions) if serializer.instance.actions else 0
 
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=str(serializer.context["request"].user.distinct_id),
                 event="insights_flow_created",
                 properties={
@@ -391,7 +391,7 @@ class InsightsFlowViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, AppMetricsMixin
                 edges_count = len(serializer.instance.edges) if serializer.instance.edges else 0
                 actions_count = len(serializer.instance.actions) if serializer.instance.actions else 0
 
-                posthoganalytics.capture(
+                hanzoanalytics.capture(
                     distinct_id=str(serializer.context["request"].user.distinct_id),
                     event="insights_flow_activated",
                     properties={

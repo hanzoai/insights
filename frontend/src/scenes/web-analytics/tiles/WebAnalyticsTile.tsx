@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { BuiltLogic, LogicWrapper, useActions, useValues } from 'kea'
 import { useCallback, useMemo } from 'react'
 
-import { IconChevronDown, IconExternal, IconTrending, IconWarning } from '@posthog/icons'
-import { LemonSegmentedButton, LemonSelect, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconChevronDown, IconExternal, IconTrending, IconWarning } from '@hanzo/icons'
+import { LemonSegmentedButton, LemonSelect, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { getColorVar } from 'lib/colors'
 import { IntervalFilterStandalone } from 'lib/components/IntervalFilter'
@@ -918,7 +918,7 @@ export const WebGoalsTile = ({
                 thingName="action"
                 isEmpty={true}
                 description="Use actions to combine events that you want to have tracked together or to make detailed Autocapture events easier to reuse."
-                docsURL="https://posthog.com/docs/data/actions"
+                docsURL="https://hanzo.ai/docs/data/actions"
                 actionElementOverride={
                     <NewActionButton onSelectOption={() => updateHasSeenProductIntroFor(ProductKey.ACTIONS)} />
                 }

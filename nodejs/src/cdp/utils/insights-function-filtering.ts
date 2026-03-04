@@ -2,7 +2,7 @@
 import { DateTime } from 'luxon'
 import { Counter, Histogram } from 'prom-client'
 
-import { ExecResult } from '@insights/scriptvm'
+import { ExecResult } from '@hanzo/scriptvm'
 
 import { InsightsFlow } from '../../schema/insightsflow'
 import { RawDatastoreEvent } from '../../types'

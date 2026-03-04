@@ -1,4 +1,4 @@
-import { PostHog } from 'posthog-js'
+import { Insights } from '~/lib/insights-browser'
 import { useEffect, useRef } from 'react'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
@@ -16,9 +16,9 @@ export function useScrollSync(enabled: boolean = true): {
             return
         }
 
-        let posthogInstance: PostHog | null = null
+        let insightsInstance: Insights | null = null
         try {
-            posthogInstance = toolbarConfigLogic.values.posthog
+            insightsInstance = toolbarConfigLogic.values.insights
         } catch {
             // toolbarConfigLogic not mounted — fall back to window.scrollY
         }
@@ -27,7 +27,7 @@ export function useScrollSync(enabled: boolean = true): {
         let lastScrollY = -1
 
         const onFrame = (): void => {
-            const scrollY = posthogInstance?.scrollManager?.scrollY() ?? window.scrollY
+            const scrollY = insightsInstance?.scrollManager?.scrollY() ?? window.scrollY
             if (scrollY !== lastScrollY) {
                 lastScrollY = scrollY
                 scrollYRef.current = scrollY

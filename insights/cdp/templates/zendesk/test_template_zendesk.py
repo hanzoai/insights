@@ -7,7 +7,7 @@ def create_inputs(**kwargs):
         "subdomain": "zendeskhelp",
         "admin_email": "admin@zendesk.com",
         "token": "Q0UlvCexisMu6Je5MHG72ev16Tz68Tw8PRRpb5SX",
-        "email": "max@posthog.com",
+        "email": "max@hanzo.ai",
         "name": "Max",
         "attributes": {"phone": "0123456789", "plan": "starship-enterprise"},
     }
@@ -37,7 +37,7 @@ class TestTemplateZendesk(BaseInsightsFunctionTemplateTest):
                 },
                 "body": {
                     "user": {
-                        "email": "max@posthog.com",
+                        "email": "max@hanzo.ai",
                         "name": "Max",
                         "user_fields": {"phone": "0123456789", "plan": "starship-enterprise"},
                         "skip_verify_email": True,

@@ -22,10 +22,10 @@ SQLCOMMENTER_WITH_FRAMEWORK: bool = False
 
 # Person table configuration
 # Controls which PostgreSQL table the Person model uses.
-# Default: "posthog_person" (legacy non-partitioned table)
-# For partitioned table: set PERSON_TABLE_NAME=posthog_person_new
-# Note: posthog_person_new must exist (created by Rust sqlx migrations)
-PERSON_TABLE_NAME: str = os.getenv("PERSON_TABLE_NAME", "posthog_person")
+# Default: "insights_person" (legacy non-partitioned table)
+# For partitioned table: set PERSON_TABLE_NAME=insights_person_new
+# Note: insights_person_new must exist (created by Rust sqlx migrations)
+PERSON_TABLE_NAME: str = os.getenv("PERSON_TABLE_NAME", "insights_person")
 
 
 # Database
@@ -46,18 +46,18 @@ def postgres_config(host: str) -> dict:
 
     return {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_from_env("POSTHOG_DB_NAME"),
-        "USER": os.getenv("POSTHOG_DB_USER", "postgres"),
-        "PASSWORD": os.getenv("POSTHOG_DB_PASSWORD", ""),
+        "NAME": get_from_env("INSIGHTS_DB_NAME"),
+        "USER": os.getenv("INSIGHTS_DB_USER", "postgres"),
+        "PASSWORD": os.getenv("INSIGHTS_DB_PASSWORD", ""),
         "HOST": host,
-        "PORT": os.getenv("POSTHOG_POSTGRES_PORT", "5432"),
+        "PORT": os.getenv("INSIGHTS_POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": 0,
         "DISABLE_SERVER_SIDE_CURSORS": DISABLE_SERVER_SIDE_CURSORS,
         "SSL_OPTIONS": {
-            "sslmode": os.getenv("POSTHOG_POSTGRES_SSL_MODE", None),
-            "sslrootcert": os.getenv("POSTHOG_POSTGRES_CLI_SSL_CA", None),
-            "sslcert": os.getenv("POSTHOG_POSTGRES_CLI_SSL_CRT", None),
-            "sslkey": os.getenv("POSTHOG_POSTGRES_CLI_SSL_KEY", None),
+            "sslmode": os.getenv("INSIGHTS_POSTGRES_SSL_MODE", None),
+            "sslrootcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CA", None),
+            "sslcert": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_CRT", None),
+            "sslkey": os.getenv("INSIGHTS_POSTGRES_CLI_SSL_KEY", None),
         },
         "TEST": {
             "MIRROR": "default",
@@ -88,8 +88,8 @@ if DATABASE_URL:
     if DISABLE_SERVER_SIDE_CURSORS:
         DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
 
-elif os.getenv("POSTHOG_DB_NAME"):
-    DATABASES = {"default": postgres_config(os.getenv("POSTHOG_POSTGRES_HOST", "localhost"))}
+elif os.getenv("INSIGHTS_DB_NAME"):
+    DATABASES = {"default": postgres_config(os.getenv("INSIGHTS_POSTGRES_HOST", "localhost"))}
 
     ssl_configurations = []
     for ssl_option, value in DATABASES["default"]["SSL_OPTIONS"].items():
@@ -112,7 +112,7 @@ elif os.getenv("POSTHOG_DB_NAME"):
     )
 else:
     raise ImproperlyConfigured(
-        f'The environment vars "DATABASE_URL" or "POSTHOG_DB_NAME" are absolutely required to run this software'
+        f'The environment vars "DATABASE_URL" or "INSIGHTS_DB_NAME" are absolutely required to run this software'
     )
 
 DATABASE_ROUTERS: list[str] = []
@@ -120,7 +120,7 @@ DATABASE_ROUTERS: list[str] = []
 # Configure the database which will be used as a read replica.
 # This should have all the same config as our main writer DB, just use a different host.
 # Our database router will point here.
-read_host = os.getenv("POSTHOG_POSTGRES_READ_HOST")
+read_host = os.getenv("INSIGHTS_POSTGRES_READ_HOST")
 if read_host:
     DATABASES["replica"] = postgres_config(read_host)
     DATABASE_ROUTERS.append("insights.dbrouter.ReplicaRouter")
@@ -128,13 +128,13 @@ if read_host:
 # Configure a direct database connection bypassing PgBouncer.
 # This allows using PGOPTIONS like lock_timeout which PgBouncer doesn't support.
 # Used for migrations: python manage.py migrate --database=default_direct
-direct_host = os.getenv("POSTHOG_POSTGRES_DIRECT_HOST")
+direct_host = os.getenv("INSIGHTS_POSTGRES_DIRECT_HOST")
 if direct_host:
-    # Copy from default database config (works with both DATABASE_URL and POSTHOG_DB_NAME setups)
+    # Copy from default database config (works with both DATABASE_URL and INSIGHTS_DB_NAME setups)
     DATABASES["default_direct"] = DATABASES["default"].copy()
     # Override host and port for direct connection (bypassing PgBouncer)
     DATABASES["default_direct"]["HOST"] = direct_host
-    DATABASES["default_direct"]["PORT"] = os.getenv("POSTHOG_POSTGRES_DIRECT_PORT", "5432")
+    DATABASES["default_direct"]["PORT"] = os.getenv("INSIGHTS_POSTGRES_DIRECT_PORT", "5432")
     # Disable server-side cursors is not needed for direct connection
     DATABASES["default_direct"]["DISABLE_SERVER_SIDE_CURSORS"] = False
     # Set lock_timeout for migrations to fail fast on lock contention
@@ -149,7 +149,7 @@ if not persons_db_writer_url and DEBUG and not TEST:
     # This matches the docker-compose.dev.yml configuration
     # A default is needed for generate_demo_data to properly populate the correct databases
     # with the demo data
-    persons_db_writer_url = f"postgres://{PG_USER}:{PG_PASSWORD}@localhost:5432/posthog_persons"
+    persons_db_writer_url = f"postgres://{PG_USER}:{PG_PASSWORD}@localhost:5432/insights_persons"
 elif not persons_db_writer_url and TEST:
     # In test mode, use a placeholder database name that will be updated by conftest
     # pytest-django adds test_ prefix which isn't known at settings import time
@@ -215,14 +215,14 @@ CLICKHOUSE_USER: str = os.getenv("DATASTORE_USER", os.getenv("CLICKHOUSE_USER", 
 CLICKHOUSE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", os.getenv("CLICKHOUSE_PASSWORD", ""))
 CLICKHOUSE_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", os.getenv("CLICKHOUSE_DATABASE", "default"))
 CLICKHOUSE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", os.getenv("CLICKHOUSE_CLUSTER", "insights"))
-CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", os.getenv("CLICKHOUSE_MIGRATIONS_CLUSTER", "posthog_migrations"))
+CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", os.getenv("CLICKHOUSE_MIGRATIONS_CLUSTER", "insights_migrations"))
 CLICKHOUSE_CA: str | None = os.getenv("DATASTORE_CA", os.getenv("CLICKHOUSE_CA", None))
 CLICKHOUSE_SECURE: bool = get_from_env("DATASTORE_SECURE", get_from_env("CLICKHOUSE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool), type_cast=str_to_bool)
 CLICKHOUSE_VERIFY: bool = get_from_env("DATASTORE_VERIFY", get_from_env("CLICKHOUSE_VERIFY", True, type_cast=str_to_bool), type_cast=str_to_bool)
 CLICKHOUSE_ENABLE_STORAGE_POLICY: bool = get_from_env("DATASTORE_ENABLE_STORAGE_POLICY", get_from_env("CLICKHOUSE_ENABLE_STORAGE_POLICY", False, type_cast=str_to_bool), type_cast=str_to_bool)
-CLICKHOUSE_SINGLE_SHARD_CLUSTER: str = os.getenv("DATASTORE_SINGLE_SHARD_CLUSTER", os.getenv("CLICKHOUSE_SINGLE_SHARD_CLUSTER", "posthog_single_shard"))
-CLICKHOUSE_WRITABLE_CLUSTER: str = os.getenv("DATASTORE_WRITABLE_CLUSTER", os.getenv("CLICKHOUSE_WRITABLE_CLUSTER", "posthog_writable"))
-CLICKHOUSE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("DATASTORE_PRIMARY_REPLICA_CLUSTER", os.getenv("CLICKHOUSE_PRIMARY_REPLICA_CLUSTER", "posthog_primary_replica"))
+CLICKHOUSE_SINGLE_SHARD_CLUSTER: str = os.getenv("DATASTORE_SINGLE_SHARD_CLUSTER", os.getenv("CLICKHOUSE_SINGLE_SHARD_CLUSTER", "insights_single_shard"))
+CLICKHOUSE_WRITABLE_CLUSTER: str = os.getenv("DATASTORE_WRITABLE_CLUSTER", os.getenv("CLICKHOUSE_WRITABLE_CLUSTER", "insights_writable"))
+CLICKHOUSE_PRIMARY_REPLICA_CLUSTER: str = os.getenv("DATASTORE_PRIMARY_REPLICA_CLUSTER", os.getenv("CLICKHOUSE_PRIMARY_REPLICA_CLUSTER", "insights_primary_replica"))
 CLICKHOUSE_FALLBACK_CANCEL_QUERY_ON_CLUSTER = get_from_env(
     "DATASTORE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=get_from_env("CLICKHOUSE_FALLBACK_CANCEL_QUERY_ON_CLUSTER", default=False, type_cast=str_to_bool), type_cast=str_to_bool
 )
@@ -246,7 +246,7 @@ CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION: bool = get_from_env(
     "DATASTORE_ALLOW_PER_SHARD_EXECUTION", get_from_env("CLICKHOUSE_ALLOW_PER_SHARD_EXECUTION", False, type_cast=str_to_bool), type_cast=str_to_bool
 )
 
-CLICKHOUSE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", os.getenv("CLICKHOUSE_LOGS_CLUSTER", "posthog_single_shard"))
+CLICKHOUSE_LOGS_CLUSTER: str = os.getenv("DATASTORE_LOGS_CLUSTER", os.getenv("CLICKHOUSE_LOGS_CLUSTER", "insights_single_shard"))
 CLICKHOUSE_LOGS_CLUSTER_HOST: str = os.getenv("DATASTORE_LOGS_CLUSTER_HOST", os.getenv("CLICKHOUSE_LOGS_CLUSTER_HOST", "localhost"))
 CLICKHOUSE_LOGS_CLUSTER_PORT: str = os.getenv("DATASTORE_LOGS_CLUSTER_PORT", os.getenv("CLICKHOUSE_LOGS_CLUSTER_PORT", "9000"))
 CLICKHOUSE_LOGS_CLUSTER_USER: str = os.getenv("DATASTORE_LOGS_CLUSTER_USER", os.getenv("CLICKHOUSE_LOGS_CLUSTER_USER", "default"))
@@ -386,26 +386,26 @@ if TEST or DEBUG or IS_COLLECT_STATIC:
 else:
     REDIS_URL = os.getenv("REDIS_URL", "")
 
-if not REDIS_URL and get_from_env("POSTHOG_REDIS_HOST", ""):
+if not REDIS_URL and get_from_env("INSIGHTS_REDIS_HOST", ""):
     REDIS_URL = "redis://:{}@{}:{}/".format(
-        os.getenv("POSTHOG_REDIS_PASSWORD", ""),
-        os.getenv("POSTHOG_REDIS_HOST", ""),
-        os.getenv("POSTHOG_REDIS_PORT", "6379"),
+        os.getenv("INSIGHTS_REDIS_PASSWORD", ""),
+        os.getenv("INSIGHTS_REDIS_HOST", ""),
+        os.getenv("INSIGHTS_REDIS_PORT", "6379"),
     )
 
 SESSION_RECORDING_REDIS_URL = REDIS_URL
 
-if get_from_env("POSTHOG_SESSION_RECORDING_REDIS_HOST", ""):
+if get_from_env("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""):
     SESSION_RECORDING_REDIS_URL = "redis://{}:{}/".format(
-        os.getenv("POSTHOG_SESSION_RECORDING_REDIS_HOST", ""),
-        os.getenv("POSTHOG_SESSION_RECORDING_REDIS_PORT", "6379"),
+        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_HOST", ""),
+        os.getenv("INSIGHTS_SESSION_RECORDING_REDIS_PORT", "6379"),
     )
 
 if not REDIS_URL:
     raise ImproperlyConfigured(
-        "Env var REDIS_URL or POSTHOG_REDIS_HOST is absolutely required to run this software.\n"
+        "Env var REDIS_URL or INSIGHTS_REDIS_HOST is absolutely required to run this software.\n"
         "If upgrading from Insights 1.0.10 or earlier, see here: "
-        "https://posthog.com/docs/deployment/upgrading-posthog#upgrading-from-before-1011"
+        "https://hanzo.ai/docs/deployment/upgrading-insights#upgrading-from-before-1011"
     )
 
 # Controls whether the ZstdCompressor is used for Redis compression when writing to Redis.
@@ -429,7 +429,7 @@ PLUGINS_RELOAD_REDIS_URL = os.getenv("PLUGINS_RELOAD_REDIS_URL", REDIS_URL)
 CDP_API_URL = get_from_env("CDP_API_URL", "")
 
 if not CDP_API_URL:
-    CDP_API_URL = "http://localhost:6738" if DEBUG else "http://ingestion-cdp-api.posthog.svc.cluster.local"
+    CDP_API_URL = "http://localhost:6738" if DEBUG else "http://ingestion-cdp-api.insights.svc.cluster.local"
 
 # Shared secret for internal API authentication between Django and Node.js services
 INTERNAL_API_SECRET = get_from_env("INTERNAL_API_SECRET", "")
@@ -438,7 +438,7 @@ EMBEDDING_API_URL = get_from_env("EMBEDDING_API_URL", "")
 
 # Used to generate embeddings on the fly, for use with the document embeddings table
 if not EMBEDDING_API_URL:
-    EMBEDDING_API_URL = "http://localhost:3305" if DEBUG else "http://embedding-api.posthog.svc.cluster.local"
+    EMBEDDING_API_URL = "http://localhost:3305" if DEBUG else "http://embedding-api.insights.svc.cluster.local"
 
 # Dedicated Redis for feature flags
 # This allows feature-flags service to have dedicated Redis for better resource isolation

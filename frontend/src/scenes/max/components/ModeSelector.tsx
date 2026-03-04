@@ -1,9 +1,9 @@
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { useCallback, useMemo } from 'react'
 
-import { IconArrowRight, IconWrench } from '@posthog/icons'
-import { LemonSelect, LemonSelectSection, LemonTag } from '@posthog/lemon-ui'
+import { IconArrowRight, IconWrench } from '@hanzo/icons'
+import { LemonSelect, LemonSelectSection, LemonTag } from '@hanzo/lemon-ui'
 
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
 import { identifierToHuman } from 'lib/utils'
@@ -274,7 +274,7 @@ export function ModeSelector(): JSX.Element | null {
 
     const handleChange = useCallback(
         (value: ModeValue): void => {
-            posthog.capture('phai mode switched', {
+            insights.capture('phai mode switched', {
                 previous_mode: agentMode,
                 new_mode: value,
             })

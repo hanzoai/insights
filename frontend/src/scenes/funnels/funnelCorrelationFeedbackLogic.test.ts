@@ -1,5 +1,5 @@
 import { expectLogic } from 'kea-test-utils'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -78,7 +78,7 @@ describe('funnelCorrelationFeedbackLogic', () => {
     })
 
     it('captures emoji feedback properly', async () => {
-        jest.spyOn(posthog, 'capture')
+        jest.spyOn(insights, 'capture')
         await expectLogic(logic, () => {
             logic.actions.setCorrelationFeedbackRating(1)
         })
@@ -88,11 +88,11 @@ describe('funnelCorrelationFeedbackLogic', () => {
             })
             .toDispatchActions(eventUsageLogic, ['reportCorrelationAnalysisFeedback'])
 
-        expect(posthog.capture).toHaveBeenCalledWith('correlation analysis feedback', { rating: 1 })
+        expect(insights.capture).toHaveBeenCalledWith('correlation analysis feedback', { rating: 1 })
     })
 
     it('goes away on sending feedback, capturing it properly', async () => {
-        jest.spyOn(posthog, 'capture')
+        jest.spyOn(insights, 'capture')
         await expectLogic(logic, () => {
             logic.actions.setCorrelationFeedbackRating(2)
             logic.actions.setCorrelationDetailedFeedback('tests')
@@ -109,8 +109,8 @@ describe('funnelCorrelationFeedbackLogic', () => {
 
         await expectLogic(eventUsageLogic).toFinishListeners()
 
-        expect(posthog.capture).toHaveBeenCalledWith('correlation analysis feedback', { rating: 2 })
-        expect(posthog.capture).toHaveBeenCalledWith('correlation analysis detailed feedback', {
+        expect(insights.capture).toHaveBeenCalledWith('correlation analysis feedback', { rating: 2 })
+        expect(insights.capture).toHaveBeenCalledWith('correlation analysis detailed feedback', {
             rating: 2,
             comments: 'tests',
         })

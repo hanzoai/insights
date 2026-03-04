@@ -11,7 +11,7 @@ class TestTemplateLoops(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "apiKey": "1cac089e00a708680bdb1ed9f082d5bf",
-            "email": "max@posthog.com",
+            "email": "max@hanzo.ai",
             "include_all_properties": False,
             "properties": {"firstName": "Max", "lastName": "AI"},
         }
@@ -38,7 +38,7 @@ class TestTemplateLoops(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer 1cac089e00a708680bdb1ed9f082d5bf",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
                     "firstName": "Max",
                     "lastName": "AI",
@@ -66,7 +66,7 @@ class TestTemplateLoops(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer 1cac089e00a708680bdb1ed9f082d5bf",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
                     "company": "Insights",
                     "firstName": "Max",
@@ -90,7 +90,7 @@ class TestTemplateLoopsEvent(BaseInsightsFunctionTemplateTest):
     def _inputs(self, **kwargs):
         inputs = {
             "apiKey": "1cac089e00a708680bdb1ed9f082d5bf",
-            "email": "max@posthog.com",
+            "email": "max@hanzo.ai",
             "include_all_properties": False,
             "properties": {"product": "Insights"},
         }
@@ -121,7 +121,7 @@ class TestTemplateLoopsEvent(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer 1cac089e00a708680bdb1ed9f082d5bf",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
                     "eventName": "pageview",
                     "eventProperties": {
@@ -155,7 +155,7 @@ class TestTemplateLoopsEvent(BaseInsightsFunctionTemplateTest):
                     "Authorization": "Bearer 1cac089e00a708680bdb1ed9f082d5bf",
                 },
                 "body": {
-                    "email": "max@posthog.com",
+                    "email": "max@hanzo.ai",
                     "userId": "c44562aa-c649-426a-a9d4-093fef0c2a4a",
                     "eventName": "pageview",
                     "eventProperties": {

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonSwitch } from '@posthog/lemon-ui'
+import { LemonSwitch } from '@hanzo/lemon-ui'
 
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 import { teamLogic } from 'scenes/teamLogic'
@@ -23,7 +23,7 @@ export function ExceptionAutocaptureToggle(): JSX.Element {
     return (
         <>
             <LemonSwitch
-                id="posthog-autocapture-exceptions-switch"
+                id="insights-autocapture-exceptions-switch"
                 onChange={(checked) => {
                     if (checked) {
                         addProductIntent({

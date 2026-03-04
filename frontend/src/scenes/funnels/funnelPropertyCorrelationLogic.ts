@@ -1,7 +1,7 @@
 import { actions, connect, defaults, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { keyForInsightLogicProps } from 'scenes/insights/sharedUtils'
@@ -17,7 +17,7 @@ import { appendToCorrelationConfig } from './funnelUtils'
 
 // List of events that should be excluded, if we don't have an explicit list of
 // excluded properties. Copied from
-// https://github.com/PostHog/posthog/issues/6474#issuecomment-952044722
+// https://github.com/hanzoai/insights/issues/6474#issuecomment-952044722
 export const DEFAULT_EXCLUDED_PERSON_PROPERTIES = [
     '$initial_geoip_postal_code',
     '$initial_geoip_latitude',

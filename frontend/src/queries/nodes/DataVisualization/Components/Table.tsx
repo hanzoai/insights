@@ -1,11 +1,11 @@
 import '../../DataTable/DataTable.scss'
 
 import { useActions, useValues } from 'kea'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import React from 'react'
 
-import { IconPin, IconPinFilled } from '@posthog/icons'
-import { LemonTable, LemonTableColumn, Tooltip } from '@posthog/lemon-ui'
+import { IconPin, IconPinFilled } from '@hanzo/icons'
+import { LemonTable, LemonTableColumn, Tooltip } from '@hanzo/lemon-ui'
 
 import { execFn } from 'lib/script'
 import { lightenDarkenColor } from 'lib/utils'
@@ -114,7 +114,7 @@ export const Table = (props: TableProps): JSX.Element => {
                         .filter((n) => {
                             const isValidBytecode = !!n.bytecode && n.bytecode.length > 0 && n.bytecode[0] === '_H'
                             if (!isValidBytecode) {
-                                posthog.captureException(new Error('Invalid bytecode for conditional formatting'), {
+                                insights.captureException(new Error('Invalid bytecode for conditional formatting'), {
                                     formatRule: n,
                                 })
                             }

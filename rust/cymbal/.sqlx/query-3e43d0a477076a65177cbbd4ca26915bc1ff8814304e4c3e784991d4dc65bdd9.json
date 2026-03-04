@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT id, team_id, status, name, description, created_at FROM posthog_errortrackingissue\n            WHERE team_id = $1 AND id = $2\n            ",
+  "query": "\n            SELECT id, team_id, status, name, description, created_at FROM insights_errortrackingissue\n            WHERE team_id = $1 AND id = $2\n            ",
   "describe": {
     "columns": [
       {

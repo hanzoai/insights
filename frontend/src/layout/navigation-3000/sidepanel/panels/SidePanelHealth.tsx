@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { IconDatabase, IconPlug, IconRefresh, IconRevert, IconServer, IconX } from '@posthog/icons'
-import { LemonBanner, LemonButton, LemonSkeleton, LemonTag, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconDatabase, IconPlug, IconRefresh, IconRevert, IconServer, IconX } from '@hanzo/icons'
+import { LemonBanner, LemonButton, LemonSkeleton, LemonTag, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { IconWithBadge } from 'lib/lemon-ui/icons'
 import { humanFriendlyDetailedTime } from 'lib/utils'
@@ -163,7 +163,7 @@ function getErrorLabelForMaterializedView(error: string | null): JSX.Element | n
     return (
         <span>
             Please{' '}
-            <Link to="https://posthog.com/support" target="_blank">
+            <Link to="https://hanzo.ai/support" target="_blank">
                 contact support
             </Link>{' '}
             for help resolving this issue.

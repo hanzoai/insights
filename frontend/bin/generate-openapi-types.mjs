@@ -55,13 +55,13 @@ function discoverProductFolders() {
 }
 
 /**
- * Scan posthog/api/ and ee/ for ViewSets that use @validated_request decorator.
+ * Scan insights/api/ and ee/ for ViewSets that use @validated_request decorator.
  * These endpoints should be included in core even without explicit tags.
  * Returns: Set of ViewSet snake_case names
  */
 function buildValidatedRequestViewSets() {
     const viewSets = new Set()
-    const dirsToScan = [path.join(repoRoot, 'posthog', 'api'), path.join(repoRoot, 'ee')]
+    const dirsToScan = [path.join(repoRoot, 'insights', 'api'), path.join(repoRoot, 'ee')]
 
     for (const dir of dirsToScan) {
         if (!fs.existsSync(dir)) {
@@ -217,7 +217,7 @@ function resolveNestedRefs(schemas, refs) {
  * Routing priority:
  * 1. Tag matches product folder (includes auto-tags from backend) -> product
  * 2. URL path contains product folder name (fallback) -> product
- * 3. @validated_request decorator in posthog/api/ or ee/ -> core
+ * 3. @validated_request decorator in insights/api/ or ee/ -> core
  * 4. Explicit "core" tag -> core
  * 5. Otherwise -> skipped
  */

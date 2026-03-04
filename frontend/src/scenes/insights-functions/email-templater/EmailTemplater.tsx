@@ -6,8 +6,8 @@ import { ChildFunctionProps, Form } from 'kea-forms'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import EmailEditor, { EditorRef } from 'react-email-editor'
 
-import { IconChevronDown, IconChevronLeft, IconChevronRight, IconExternal } from '@posthog/icons'
-import { LemonButton, LemonLabel, LemonModal, LemonSelect, LemonTabs } from '@posthog/lemon-ui'
+import { IconChevronDown, IconChevronLeft, IconChevronRight, IconExternal } from '@hanzo/icons'
+import { LemonButton, LemonLabel, LemonModal, LemonSelect, LemonTabs } from '@hanzo/lemon-ui'
 
 import { CyclotronJobTemplateSuggestionsButton } from 'lib/components/CyclotronJob/CyclotronJobTemplateSuggestions'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

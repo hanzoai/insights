@@ -1,17 +1,12 @@
 #
 # This Dockerfile is used for self-hosted production builds.
 #
-# PostHog has sunset support for self-hosted K8s deployments.
-# See: https://posthog.com/blog/sunsetting-helm-support-posthog
-#
-# Note: for PostHog Cloud remember to update ‘Dockerfile.cloud’ as appropriate.
-#
 # The stages are used to:
 #
 # - frontend-build: build the frontend (static assets)
-# - sourcemap-upload: upload sourcemaps to PostHog (isolated, no artifacts)
+# - sourcemap-upload: upload sourcemaps (isolated, no artifacts)
 # - node-scripts-build: build standalone Node.js scripts and their dependencies
-# - insights-build: fetch PostHog (Django app) dependencies & build Django collectstatic
+# - insights-build: fetch Insights (Django app) dependencies & build Django collectstatic
 # - fetch-geoip-db: fetch the GeoIP database
 #
 # Node.js services are built separately using Dockerfile.node.
@@ -40,10 +35,10 @@ COPY products/ products/
 COPY docs/onboarding/ docs/onboarding/
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && pnpm --version && \
-    CI=1 pnpm --filter=@posthog/frontend... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24
+    CI=1 pnpm --filter=@hanzo/frontend... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24
 
 COPY frontend/ frontend/
-RUN bin/turbo --filter=@posthog/frontend build
+RUN bin/turbo --filter=@hanzo/frontend build
 
 
 #
@@ -60,19 +55,19 @@ ARG COMMIT_HASH
 
 COPY --from=frontend-build /code/frontend/dist /code/frontend/dist
 
-RUN --mount=type=secret,id=posthog_upload_sourcemaps_cli_api_key \
+RUN --mount=type=secret,id=insights_upload_sourcemaps_cli_api_key \
     ( \
-        if [ -f /run/secrets/posthog_upload_sourcemaps_cli_api_key ]; then \
+        if [ -f /run/secrets/insights_upload_sourcemaps_cli_api_key ]; then \
             apt-get update && \
             apt-get install -y --no-install-recommends ca-certificates curl && \
-            curl --proto '=https' --tlsv1.2 -LsSf https://download.posthog.com/cli | sh && \
-            export PATH="/root/.posthog:$PATH" && \
-            export POSTHOG_CLI_TOKEN="$(cat /run/secrets/posthog_upload_sourcemaps_cli_api_key)" && \
-            export POSTHOG_CLI_ENV_ID=2 && \
-            posthog-cli --no-fail sourcemap process \
+            curl --proto '=https' --tlsv1.2 -LsSf https://download.insights.hanzo.ai/cli | sh && \
+            export PATH="/root/.insights:$PATH" && \
+            export INSIGHTS_CLI_TOKEN="$(cat /run/secrets/insights_upload_sourcemaps_cli_api_key)" && \
+            export INSIGHTS_CLI_ENV_ID=2 && \
+            insights-cli --no-fail sourcemap process \
                 --directory /code/frontend/dist \
                 --public-path-prefix /static \
-                --project posthog \
+                --project insights \
                 --version "${COMMIT_HASH:-unknown}"; \
         fi \
     ) || true && \
@@ -102,8 +97,8 @@ COPY common/esbuilder/ common/esbuilder/
 COPY common/plugin_transpiler/ common/plugin_transpiler/
 RUN --mount=type=cache,id=pnpm,target=/tmp/pnpm-store-v24 \
     corepack enable && \
-    NODE_OPTIONS="--max-old-space-size=4096" CI=1 pnpm --filter=@posthog/plugin-transpiler... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
-    NODE_OPTIONS="--max-old-space-size=4096" bin/turbo --filter=@posthog/plugin-transpiler build
+    NODE_OPTIONS="--max-old-space-size=4096" CI=1 pnpm --filter=@hanzo/plugin-transpiler... install --frozen-lockfile --store-dir /tmp/pnpm-store-v24 && \
+    NODE_OPTIONS="--max-old-space-size=4096" bin/turbo --filter=@hanzo/plugin-transpiler build
 
 
 #
@@ -190,7 +185,7 @@ RUN apt-get update && \
     && \
     rm -rf /var/lib/apt/lists/* && \
     mkdir share && \
-    ( curl -s -L "https://mmdbcdn.posthog.net/" --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb ) && \
+    ( curl -s -L "https://mmdbcdn.insights.hanzo.ai/" --http1.1 | brotli --decompress --output=./share/GeoLite2-City.mmdb ) && \
     chmod -R 755 ./share/GeoLite2-City.mmdb
 
 
@@ -276,18 +271,18 @@ COPY --from=insights-build /usr/lib/x86_64-linux-gnu/libantlr4-runtime.so* /usr/
 RUN ldconfig
 
 # Install and use a non-root user.
-RUN groupadd -g 1000 posthog && \
-    useradd -r -g posthog posthog && \
-    chown posthog:posthog /code
-USER posthog
+RUN groupadd -g 1000 insights && \
+    useradd -r -g insights insights && \
+    chown insights:insights /code
+USER insights
 
 # Add the commit hash
 ARG COMMIT_HASH
 RUN echo $COMMIT_HASH > /code/commit.txt
 
 # Copy the Python dependencies and Django staticfiles from the insights-build stage.
-COPY --from=insights-build --chown=posthog:posthog /code/staticfiles /code/staticfiles
-COPY --from=insights-build --chown=posthog:posthog /python-runtime /python-runtime
+COPY --from=insights-build --chown=insights:insights /code/staticfiles /code/staticfiles
+COPY --from=insights-build --chown=insights:insights /python-runtime /python-runtime
 ENV PATH=/python-runtime/bin:$PATH \
     PYTHONPATH=/python-runtime
 
@@ -300,41 +295,41 @@ RUN --mount=type=cache,id=playwright-browsers,target=/tmp/playwright-cache \
     /python-runtime/bin/python -m playwright install --with-deps chromium && \
     mkdir -p /ms-playwright && \
     cp -r /tmp/playwright-cache/* /ms-playwright/ && \
-    chown -R posthog:posthog /ms-playwright
-USER posthog
+    chown -R insights:insights /ms-playwright
+USER insights
 
 # Copy the frontend assets from the frontend-build stage.
 # TODO: this copy should not be necessary, we should remove it once we verify everything still works.
-COPY --from=frontend-build --chown=posthog:posthog /code/frontend/dist /code/frontend/dist
+COPY --from=frontend-build --chown=insights:insights /code/frontend/dist /code/frontend/dist
 
 # Ensure sourcemap-upload stage runs (the file itself is not needed in the final image).
 COPY --from=sourcemap-upload /tmp/.sourcemaps-processed /tmp/.sourcemaps-processed
 
 # Copy products.json from the frontend-build stage
-COPY --from=frontend-build --chown=posthog:posthog /code/frontend/src/products.json /code/frontend/src/products.json
+COPY --from=frontend-build --chown=insights:insights /code/frontend/src/products.json /code/frontend/src/products.json
 
 # Copy the GeoLite2-City database from the fetch-geoip-db stage.
-COPY --from=fetch-geoip-db --chown=posthog:posthog /code/share/GeoLite2-City.mmdb /code/share/GeoLite2-City.mmdb
+COPY --from=fetch-geoip-db --chown=insights:insights /code/share/GeoLite2-City.mmdb /code/share/GeoLite2-City.mmdb
 
 # Copy standalone Node.js scripts and their dependencies.
-COPY --from=node-scripts-build --chown=posthog:posthog /code/nodejs/src/scripts /code/nodejs/src/scripts
+COPY --from=node-scripts-build --chown=insights:insights /code/nodejs/src/scripts /code/nodejs/src/scripts
 
 # Copy plugin transpiler (used by Django for site destinations/apps).
 # pnpm stores packages in node_modules/.pnpm/, workspace node_modules contain symlinks there.
-COPY --from=node-scripts-build --chown=posthog:posthog /code/node_modules /code/node_modules
-COPY --from=node-scripts-build --chown=posthog:posthog /code/common/plugin_transpiler/dist /code/common/plugin_transpiler/dist
-COPY --from=node-scripts-build --chown=posthog:posthog /code/common/plugin_transpiler/node_modules /code/common/plugin_transpiler/node_modules
-COPY --from=node-scripts-build --chown=posthog:posthog /code/common/plugin_transpiler/package.json /code/common/plugin_transpiler/package.json
+COPY --from=node-scripts-build --chown=insights:insights /code/node_modules /code/node_modules
+COPY --from=node-scripts-build --chown=insights:insights /code/common/plugin_transpiler/dist /code/common/plugin_transpiler/dist
+COPY --from=node-scripts-build --chown=insights:insights /code/common/plugin_transpiler/node_modules /code/common/plugin_transpiler/node_modules
+COPY --from=node-scripts-build --chown=insights:insights /code/common/plugin_transpiler/package.json /code/common/plugin_transpiler/package.json
 
 # Add in custom bin files and Django deps.
-COPY --chown=posthog:posthog ./bin ./bin/
+COPY --chown=insights:insights ./bin ./bin/
 # Persons SQL migration files (read by apply_persons_migrations management command for hobby deploys)
-COPY --chown=posthog:posthog ./rust/persons_migrations ./rust/persons_migrations/
-COPY --chown=posthog:posthog manage.py manage.py
-COPY --chown=posthog:posthog insights insights/
-COPY --chown=posthog:posthog common/hogvm common/hogvm/
-COPY --chown=posthog:posthog common/migration_utils common/migration_utils/
-COPY --chown=posthog:posthog products products/
+COPY --chown=insights:insights ./rust/persons_migrations ./rust/persons_migrations/
+COPY --chown=insights:insights manage.py manage.py
+COPY --chown=insights:insights insights insights/
+COPY --chown=insights:insights common/hogvm common/hogvm/
+COPY --chown=insights:insights common/migration_utils common/migration_utils/
+COPY --chown=insights:insights products products/
 
 # Validate video export dependencies
 RUN ffmpeg -version

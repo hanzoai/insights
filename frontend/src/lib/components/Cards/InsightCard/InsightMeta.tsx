@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
 import React from 'react'
 
-import { IconThumbsDown, IconThumbsUp } from '@posthog/icons'
-import { lemonToast } from '@posthog/lemon-ui'
+import { IconThumbsDown, IconThumbsUp } from '@hanzo/icons'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import { CardMeta } from 'lib/components/Cards/CardMeta'
 import { TopHeading } from 'lib/components/Cards/InsightCard/TopHeading'

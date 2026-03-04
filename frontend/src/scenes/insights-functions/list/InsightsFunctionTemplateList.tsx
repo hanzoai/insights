@@ -1,8 +1,8 @@
 import { useActions, useValues } from 'kea'
 import { useEffect } from 'react'
 
-import { IconMegaphone, IconPlusSmall } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonTable, Link } from '@posthog/lemon-ui'
+import { IconMegaphone, IconPlusSmall } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonTable, Link } from '@hanzo/lemon-ui'
 
 import { LemonTableLink } from 'lib/lemon-ui/LemonTable/LemonTableLink'
 import { getAccessControlDisabledReason } from 'lib/utils/accessControlUtils'

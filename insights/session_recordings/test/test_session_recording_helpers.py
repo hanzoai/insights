@@ -232,7 +232,7 @@ def test_received_snapshot_source_is_respected_for_first_event(raw_snapshot_even
                 "$snapshot_data": {"type": 3, "timestamp": MILLISECOND_TIMESTAMP},
                 "distinct_id": "abc123",
                 "$snapshot_source": "mobile",
-                "$lib": "posthog-ios",
+                "$lib": "insights-ios",
             },
         },
         {
@@ -259,7 +259,7 @@ def test_received_snapshot_source_is_respected_for_first_event(raw_snapshot_even
                     {"type": 3, "timestamp": 1546300800000},
                 ],
                 "$snapshot_source": "mobile",
-                "$lib": "posthog-ios",
+                "$lib": "insights-ios",
             },
         }
     ]
@@ -609,7 +609,7 @@ def test_snapshot_library(raw_snapshot_events, mocker: MockerFixture):
                 "$snapshot_data": [small_event, small_event],
                 "distinct_id": "abc123",
                 "$snapshot_source": "mobile",
-                "$lib": "posthog-android" + "a" * 1000,
+                "$lib": "insights-android" + "a" * 1000,
             },
         }
     ]
@@ -627,7 +627,7 @@ def test_snapshot_library(raw_snapshot_events, mocker: MockerFixture):
                     small_event,
                 ],
                 "$snapshot_source": "mobile",
-                "$lib": "posthog-android" + "a" * (1000 - len("posthog-android") - 3) + "...",
+                "$lib": "insights-android" + "a" * (1000 - len("insights-android") - 3) + "...",
             },
         },
     ]
@@ -710,7 +710,7 @@ def test_snapshot_library_from_user_agent_splits_version_from_value(raw_snapshot
 
     space_with_headroom = math.ceil((106 + 1072 + 50) * 1.10)
     assert list(
-        mock_capture_flow(events, max_size_bytes=space_with_headroom, user_agent="posthog-react-native/2.2.1")[1]
+        mock_capture_flow(events, max_size_bytes=space_with_headroom, user_agent="insights-react-native/2.2.1")[1]
     ) == [
         {
             "event": "$snapshot_items",
@@ -723,7 +723,7 @@ def test_snapshot_library_from_user_agent_splits_version_from_value(raw_snapshot
                     small_event,
                 ],
                 "$snapshot_source": "web",
-                "$lib": "posthog-react-native",
+                "$lib": "insights-react-native",
             },
         },
     ]

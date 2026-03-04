@@ -24,7 +24,7 @@ on:
     workflow_dispatch:
 
 jobs:
-    posthog_llm_analytics_build:
+    insights_llm_analytics_build:
         name: Build and push container image
         if: |
             github.repository == 'hanzoai/insights' && (
@@ -70,7 +70,7 @@ jobs:
                   file: ./Dockerfile.llm-analytics
                   buildx-fallback: false
                   push: true
-                  tags: ${{ github.ref == 'refs/heads/master' && format('{0}/posthog-llm-analytics:master,{0}/posthog-llm-analytics:{1}', steps.aws-ecr.outputs.registry, github.sha) || format('{0}/posthog-llm-analytics:{1}', steps.aws-ecr.outputs.registry, github.sha) }}
+                  tags: ${{ github.ref == 'refs/heads/master' && format('{0}/insights-llm-analytics:master,{0}/insights-llm-analytics:{1}', steps.aws-ecr.outputs.registry, github.sha) || format('{0}/insights-llm-analytics:{1}', steps.aws-ecr.outputs.registry, github.sha) }}
                   platforms: linux/arm64,linux/amd64
                   build-args: COMMIT_HASH=${{ github.sha }}
 

@@ -1,6 +1,6 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonInput } from '@posthog/lemon-ui'
+import { LemonInput } from '@hanzo/lemon-ui'
 
 import { LemonModal } from 'lib/lemon-ui/LemonModal'
 

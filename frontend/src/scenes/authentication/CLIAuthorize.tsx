@@ -2,9 +2,9 @@ import { useActions, useValues } from 'kea'
 import { Form } from 'kea-forms'
 import { Fragment, useState } from 'react'
 
-import { IconCode, IconGear, IconWarning } from '@posthog/icons'
-import { IconInfo } from '@posthog/icons'
-import { LemonButton, LemonInput, LemonSegmentedButton, LemonSelect, Link, Tooltip } from '@posthog/lemon-ui'
+import { IconCode, IconGear, IconWarning } from '@hanzo/icons'
+import { IconInfo } from '@hanzo/icons'
+import { LemonButton, LemonInput, LemonSegmentedButton, LemonSelect, Link, Tooltip } from '@hanzo/lemon-ui'
 
 import { BridgePage } from 'lib/components/BridgePage/BridgePage'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'

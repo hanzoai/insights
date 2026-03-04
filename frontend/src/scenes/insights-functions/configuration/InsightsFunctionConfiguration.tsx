@@ -10,7 +10,7 @@ import {
     LemonSwitch,
     LemonTag,
     SpinnerOverlay,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { NotFound } from 'lib/components/NotFound'
 import { LemonField } from 'lib/lemon-ui/LemonField'
@@ -127,7 +127,7 @@ export function InsightsFunctionConfiguration({
                             ) : null}
                             {['site_destination'].includes(template?.type ?? insightsFunction?.template?.type ?? '') ? (
                                 <span className="mt-2">
-                                    Make sure to enable the `opt_in_site_apps` flag in your `posthog.init` config.
+                                    Make sure to enable the `opt_in_site_apps` flag in your `insights.init` config.
                                 </span>
                             ) : null}
                         </LemonBanner>

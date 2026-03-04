@@ -116,7 +116,7 @@ fn upload_inner(input_sets: &[SymbolSetUpload], batch_size: usize) -> Result<(),
             .map(|(chunk_id, data)| {
                 debug!("uploading chunk {}", chunk_id);
                 let upload = id_map.get(chunk_id.as_str()).ok_or(anyhow!(
-                    "Got a chunk ID back from posthog that we didn't expect!"
+                    "Got a chunk ID back from insights that we didn't expect!"
                 ))?;
 
                 let content_hash = content_hash([&upload.data]);

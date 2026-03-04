@@ -58,7 +58,7 @@ function initSnippet() {
     'https://sc-static.net/scevent.min.js');
 }
 
-export function onLoad({ inputs, posthog }) {
+export function onLoad({ inputs, insights }) {
     initSnippet();
     let userProperties = {};
     for (const [key, value] of Object.entries(inputs.userProperties)) {
@@ -66,19 +66,19 @@ export function onLoad({ inputs, posthog }) {
             userProperties[key] = value;
         }
     };
-    if (posthog.config.debug) {
+    if (insights.config.debug) {
         console.log('[Insights] snaptr init', inputs.pixelId, userProperties);
     }
     snaptr('init', inputs.pixelId, userProperties);
 }
-export function onEvent({ inputs, posthog }) {
+export function onEvent({ inputs, insights }) {
     let eventProperties = {};
     for (const [key, value] of Object.entries(inputs.eventProperties)) {
         if (value) {
             eventProperties[key] = value;
         }
     };
-    if (posthog.config.debug) {
+    if (insights.config.debug) {
         console.log('[Insights] snaptr track', inputs.eventType, eventProperties);
     }
     snaptr('track', inputs.eventType, eventProperties);

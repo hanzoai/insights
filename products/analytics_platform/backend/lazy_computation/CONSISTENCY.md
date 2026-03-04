@@ -8,7 +8,7 @@ The lazy computation system INSERTs data into ClickHouse and immediately SELECTs
 
 2. **Replication layer**: Even after data reaches the target shard, only 1 replica acknowledges the write by default. A SELECT hitting another replica gets stale/empty results.
 
-Table definitions: [`posthog/clickhouse/preaggregation/sql.py`](../../../../posthog/clickhouse/preaggregation/sql.py)
+Table definitions: [`insights/clickhouse/preaggregation/sql.py`](../../../../insights/clickhouse/preaggregation/sql.py)
 
 ## ClickHouse settings investigated
 
@@ -27,7 +27,7 @@ Controls whether INSERTs into a Distributed table are synchronous or asynchronou
 
 Previously named `insert_distributed_sync`.
 
-**Already enabled globally**: Insights's ClickHouse config sets `insert_distributed_sync=1` in `docker/clickhouse/users.xml`. This means layer 1 (distributed table routing) is already solved for all queries. The `posthog/dags/sessions.py` DAG explicitly overrides this to `0` for large INSERTs to avoid OOM, confirming the global default is `1`.
+**Already enabled globally**: Insights's ClickHouse config sets `insert_distributed_sync=1` in `docker/clickhouse/users.xml`. This means layer 1 (distributed table routing) is already solved for all queries. The `insights/dags/sessions.py` DAG explicitly overrides this to `0` for large INSERTs to avoid OOM, confirming the global default is `1`.
 
 Sources:
 
@@ -162,10 +162,10 @@ An alternative to `select_sequential_consistency`. Waits for the local replica t
 
 - Only syncs the **local replica** on the node where the command runs. The caller's SELECT may go through a different node via the Distributed table, hitting an unsynced replica.
 - `ON CLUSTER` variant syncs all nodes but adds latency proportional to cluster size.
-- Blocked by `readonly=2` (Insights's HogQL default). Requires `SYSTEM SYNC REPLICA` privilege. Would need a separate `sync_execute` call with `readonly=False`.
+- Blocked by `readonly=2` (Insights's InsightsQL default). Requires `SYSTEM SYNC REPLICA` privilege. Would need a separate `sync_execute` call with `readonly=False`.
 - `select_sequential_consistency` is simpler — 1 ZK read, works as a per-query `SETTINGS` clause, compatible with `readonly=2`.
 
-Insights already uses `SYSTEM SYNC REPLICA STRICT` in `posthog/dags/common/overrides_manager.py` and `posthog/dags/deletes.py` for cases where consistency matters, but those use direct `Client` connections rather than the `sync_execute` path.
+Insights already uses `SYSTEM SYNC REPLICA STRICT` in `insights/dags/common/overrides_manager.py` and `insights/dags/deletes.py` for cases where consistency matters, but those use direct `Client` connections rather than the `sync_execute` path.
 
 Sources:
 

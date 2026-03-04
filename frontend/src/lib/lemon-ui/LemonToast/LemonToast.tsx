@@ -1,7 +1,7 @@
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 import { ToastOptions, ToastContentProps as ToastifyRenderProps, toast } from 'react-toastify'
 
-import { IconCheckCircle, IconInfo, IconWarning, IconX } from '@posthog/icons'
+import { IconCheckCircle, IconInfo, IconWarning, IconX } from '@hanzo/icons'
 
 import { isChristmas } from 'lib/holidays'
 import { hashCodeForString } from 'lib/utils'
@@ -37,7 +37,7 @@ interface ToastOptionsWithButton extends ToastOptions {
 export const GET_HELP_BUTTON: ToastButton = {
     label: 'Get help',
     action: () => {
-        window.open('https://posthog.com/support?utm_medium=in-product&utm_campaign=error-toast', '_blank')
+        window.open('https://hanzo.ai/support?utm_medium=in-product&utm_campaign=error-toast', '_blank')
     },
 }
 
@@ -99,7 +99,7 @@ export const lemonToast = {
         })
     },
     warning(message: string | JSX.Element, { button, ...toastOptions }: ToastOptionsWithButton = {}): void {
-        posthog.capture('toast warning', {
+        insights.capture('toast warning', {
             message: String(message),
             button: button?.label,
             toastId: toastOptions.toastId,
@@ -111,10 +111,10 @@ export const lemonToast = {
         })
     },
     error(message: string | JSX.Element, { button, hideButton, ...toastOptions }: ToastOptionsWithButton = {}): void {
-        // when used inside the posthog toolbar, `posthog.capture` isn't loaded
+        // when used inside the insights toolbar, `insights.capture` isn't loaded
         // check if the function is available before calling it.
-        if (posthog.capture) {
-            posthog.capture('toast error', {
+        if (insights.capture) {
+            insights.capture('toast error', {
                 message: String(message),
                 button: button?.label,
                 toastId: toastOptions.toastId,

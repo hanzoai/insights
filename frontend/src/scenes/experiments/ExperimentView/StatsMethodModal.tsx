@@ -1,7 +1,7 @@
 import { useActions, useValues } from 'kea'
 
-import { LemonButton, LemonLabel, LemonSelect } from '@posthog/lemon-ui'
-import { LemonModal } from '@posthog/lemon-ui'
+import { LemonButton, LemonLabel, LemonSelect } from '@hanzo/lemon-ui'
+import { LemonModal } from '@hanzo/lemon-ui'
 
 import { ExperimentStatsMethod } from '~/types'
 

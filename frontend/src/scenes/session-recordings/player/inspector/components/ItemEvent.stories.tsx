@@ -194,30 +194,30 @@ GroupIdentifyEvent.args = {
             $os_version: '10.15.7',
             $browser: 'Chrome',
             $device_type: 'Desktop',
-            $current_url: 'https://us.posthog.com/project/2/insights/new',
-            $host: 'us.posthog.com',
+            $current_url: 'https://insights.hanzo.ai/project/2/insights/new',
+            $host: 'insights.hanzo.ai',
             $pathname: '/project/2/insights/new',
             $initial_person_info: {
                 r: '$direct',
-                u: 'https://us.posthog.com/project/2',
+                u: 'https://insights.hanzo.ai/project/2',
             },
             $groups: {
                 project: '00000000-0000-0000-0000-proj00000001',
                 organization: '00000000-0000-0000-0000-org000000001',
                 customer: 'cus_ExampleCustomer123',
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
             },
             $group_type: 'instance',
-            $group_key: 'https://us.posthog.com',
+            $group_key: 'https://insights.hanzo.ai',
             $group_set: {
-                site_url: 'https://us.posthog.com',
+                site_url: 'https://insights.hanzo.ai',
             },
             $session_id: '01900000-0000-0000-0000-000000000003',
             $window_id: '01900000-0000-0000-0000-000000000004',
             $group_2: '00000000-0000-0000-0000-proj00000001',
             $group_0: '00000000-0000-0000-0000-org000000001',
             $group_3: 'cus_ExampleCustomer123',
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
         }
     ),
 }
@@ -233,7 +233,7 @@ AISpanEvent.args = {
             conversation_id: '00000000-0000-0000-0000-000000000005',
             $session_id: '01900000-0000-0000-0000-000000000006',
             $groups: {
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
                 organization: '00000000-0000-0000-0000-org000000002',
                 project: '00000000-0000-0000-0000-proj00000002',
             },
@@ -308,7 +308,7 @@ AISpanEvent.args = {
                 start_id: '37130538-7a64-452c-b742-0febacea07e2',
                 summary_title: null,
             },
-            $lib: 'posthog-python',
+            $lib: 'insights-python',
             $ai_output_state: {
                 dashboard_name: null,
                 graph_status: null,
@@ -352,7 +352,7 @@ AISpanEvent.args = {
             $lib_version__minor: 7,
             $lib_version__patch: 4,
             num_keys_in_properties: 469,
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
             $group_0: '00000000-0000-0000-0000-org000000002',
             $group_2: '00000000-0000-0000-0000-proj00000002',
         }
@@ -387,7 +387,7 @@ AIGenerationEvent.args = {
                 },
                 {
                     content:
-                        'You are currently in project Example Project, which is part of the Example Organization.\nThe user\'s name appears to be Jane Doe (jane@example.com). Feel free to use their first name when greeting. DO NOT use this name if it appears possibly fake.\nThe user is accessing the Insights App from the "us" region, therefore all Insights App URLs should be prefixed with the region, e.g. https://us.posthog.com\nCurrent time in the project\'s timezone, UTC: 2025-09-21 14:02:43.',
+                        'You are currently in project Example Project, which is part of the Example Organization.\nThe user\'s name appears to be Jane Doe (jane@example.com). Feel free to use their first name when greeting. DO NOT use this name if it appears possibly fake.\nThe user is accessing the Insights App from the "us" region, therefore all Insights App URLs should be prefixed with the region, e.g. https://insights.hanzo.ai\nCurrent time in the project\'s timezone, UTC: 2025-09-21 14:02:43.',
                     role: 'system',
                 },
                 {
@@ -417,7 +417,7 @@ AIGenerationEvent.args = {
             ],
             $ai_span_id: 'span-0002-0002-0002-000000000002',
             $groups: {
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
                 organization: '00000000-0000-0000-0000-org000000003',
                 project: '00000000-0000-0000-0000-proj00000003',
             },
@@ -447,7 +447,7 @@ AIGenerationEvent.args = {
             $ai_cache_creation_input_tokens: 0,
             $ai_cache_read_input_tokens: 3200,
             $ai_model: 'gpt-4.1',
-            $lib: 'posthog-python',
+            $lib: 'insights-python',
             is_first_conversation: true,
             $ai_base_url: null,
             region: 'US',
@@ -467,7 +467,7 @@ AIGenerationEvent.args = {
             $ai_total_cost_usd: 0.003548,
             $ai_temperature: 0.3,
             $ai_stream: true,
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
             $group_0: '00000000-0000-0000-0000-org000000003',
             $group_2: '00000000-0000-0000-0000-proj00000003',
         }
@@ -546,7 +546,7 @@ AITraceEvent.args = {
             },
             $lib_version: '6.7.4',
             $groups: {
-                instance: 'https://us.posthog.com',
+                instance: 'https://insights.hanzo.ai',
                 organization: '00000000-0000-0000-0000-org000000004',
                 project: '00000000-0000-0000-0000-proj00000004',
             },
@@ -554,7 +554,7 @@ AITraceEvent.args = {
             $python_runtime: 'CPython',
             is_first_conversation: true,
             $geoip_disable: true,
-            $lib: 'posthog-python',
+            $lib: 'insights-python',
             $ai_span_id: 'span-0003-0003-0003-000000000003',
             $ai_input_state: {
                 dashboard_name: null,
@@ -596,7 +596,7 @@ AITraceEvent.args = {
             $lib_version__minor: 7,
             $lib_version__patch: 4,
             num_keys_in_properties: 468,
-            $group_1: 'https://us.posthog.com',
+            $group_1: 'https://insights.hanzo.ai',
             $group_0: '00000000-0000-0000-0000-org000000004',
             $group_2: '00000000-0000-0000-0000-proj00000004',
         }

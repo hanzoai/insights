@@ -3,7 +3,7 @@ from typing import Optional, cast
 from django.db.models import Q
 
 import structlog
-import posthoganalytics
+import hanzoanalytics
 from loginas.utils import is_impersonated_session
 from rest_framework import mixins, permissions, serializers, status, viewsets
 from rest_framework.permissions import SAFE_METHODS, BasePermission
@@ -24,7 +24,7 @@ from products.workflows.backend.templates import get_global_template_by_id, load
 logger = structlog.get_logger(__name__)
 
 
-# NOTE: We allow unauthenticated access to global hog flow templates, never put anything secret in them
+# NOTE: We allow unauthenticated access to global iql flow templates, never put anything secret in them
 class PreventGlobalTemplateDatabaseOperations(BasePermission):
     message = "Global workflow templates are stored in code and cannot be modified via the database."
 
@@ -120,7 +120,7 @@ class InsightsFlowTemplateActionSerializer(serializers.Serializer):
 
 class InsightsFlowTemplateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating hog flow templates.
+    Serializer for creating iql flow templates.
     Validates and sanitizes the workflow before creating it as a template.
     """
 
@@ -293,7 +293,7 @@ class InsightsFlowTemplateViewSet(TeamAndOrgViewSetMixin, LogEntryMixin, viewset
             edges_count = len(serializer.instance.edges) if serializer.instance.edges else 0
             actions_count = len(serializer.instance.actions) if serializer.instance.actions else 0
 
-            posthoganalytics.capture(
+            hanzoanalytics.capture(
                 distinct_id=str(serializer.context["request"].user.distinct_id),
                 event="insights_flow_template_created",
                 properties={

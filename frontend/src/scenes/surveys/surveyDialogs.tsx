@@ -1,4 +1,4 @@
-import { LemonDialog } from '@posthog/lemon-ui'
+import { LemonDialog } from '@hanzo/lemon-ui'
 
 import { Survey } from '~/types'
 

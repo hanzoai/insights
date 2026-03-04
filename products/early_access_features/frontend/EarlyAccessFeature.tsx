@@ -3,7 +3,7 @@ import { Form } from 'kea-forms'
 import { router } from 'kea-router'
 import { useMemo, useState } from 'react'
 
-import { IconFlag, IconQuestion, IconTrash, IconX } from '@posthog/icons'
+import { IconFlag, IconQuestion, IconTrash, IconX } from '@hanzo/icons'
 import {
     LemonBanner,
     LemonButton,
@@ -13,7 +13,7 @@ import {
     LemonSkeleton,
     LemonTag,
     Link,
-} from '@posthog/lemon-ui'
+} from '@hanzo/lemon-ui'
 
 import { CopyToClipboardInline } from 'lib/components/CopyToClipboard'
 import { FlagSelector } from 'lib/components/FlagSelector'
@@ -480,7 +480,7 @@ export function EarlyAccessFeature({ id }: EarlyAccessFeatureLogicProps): JSX.El
                             help={
                                 <>
                                     Specify a valid JSON payload as a dictionary. This will be exposed by{' '}
-                                    <code>posthog-js</code> and can be used to customize your UI or behavior after the
+                                    <code>insights-js</code> and can be used to customize your UI or behavior after the
                                     user opts in to the feature.
                                 </>
                             }

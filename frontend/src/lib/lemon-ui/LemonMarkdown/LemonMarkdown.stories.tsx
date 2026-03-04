@@ -56,9 +56,9 @@ Here's a breakdown of our top traffic sources:
 |--------|-------------|------------|
 | Direct | 362,389 | 45.2% |
 | Google | 122,910 | 15.3% |
-| posthog.com | 23,067 | 2.9% |
-| us.posthog.com | 21,593 | 2.7% |
-| eu.posthog.com | 10,723 | 1.3% |
+| hanzo.ai | 23,067 | 2.9% |
+| insights.hanzo.ai | 21,593 | 2.7% |
+| insights.hanzo.ai | 10,723 | 1.3% |
 | LinkedIn | 5,255 | 0.7% |
 | GitHub | 4,019 | 0.5% |
 | Bing | 2,950 | 0.4% |
@@ -97,11 +97,11 @@ Here's our development progress:
 - [ ] Mobile responsiveness testing
 
 ## Autolink literals
-Visit https://posthog.com for more information about our product.
+Visit https://hanzo.ai for more information about our product.
 
-You can also check out our GitHub repository at https://github.com/PostHog/posthog
+You can also check out our GitHub repository at https://github.com/hanzoai/insights
 
-Email us at hello@posthog.com for support.`,
+Email us at hello@hanzo.ai for support.`,
 }
 
 export const Strikethrough: Story = Template.bind({})
@@ -143,17 +143,17 @@ AutolinkLiterals.args = {
     children: `# Automatic Links
 
 ## Websites
-Visit https://posthog.com to learn more about our platform.
+Visit https://hanzo.ai to learn more about our platform.
 
-Check out our documentation at https://posthog.com/docs
+Check out our documentation at https://hanzo.ai/docs
 
 ## Email Addresses  
-Contact us at hello@posthog.com for general inquiries.
+Contact us at hello@hanzo.ai for general inquiries.
 
-For technical support: support@posthog.com
+For technical support: support@hanzo.ai
 
 ## Mixed Content
-Our GitHub repository (https://github.com/PostHog/posthog) contains the full source code.
+Our GitHub repository (https://github.com/hanzoai/insights) contains the full source code.
 
-For questions, email team@posthog.com or visit https://posthog.com/questions`,
+For questions, email team@hanzo.ai or visit https://hanzo.ai/questions`,
 }

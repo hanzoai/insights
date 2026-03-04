@@ -4,17 +4,17 @@
     "description": "WebAssembly InsightsQL Parser - Parse InsightsQL queries in JavaScript/TypeScript",
     "type": "module",
     "main": "dist/index.cjs",
-    "module": "dist/hogql_parser_wasm.js",
+    "module": "dist/insightsql_parser_wasm.js",
     "types": "dist/index.d.ts",
     "exports": {
         ".": {
             "types": "./dist/index.d.ts",
-            "import": "./dist/hogql_parser_wasm.js",
+            "import": "./dist/insightsql_parser_wasm.js",
             "require": "./dist/index.cjs"
         }
     },
     "files": [
-        "dist/hogql_parser_wasm.js",
+        "dist/insightsql_parser_wasm.js",
         "dist/index.cjs",
         "dist/index.d.ts"
     ],

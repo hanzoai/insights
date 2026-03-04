@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, key, listeners, path, props, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 import { combineUrl, router } from 'kea-router'
-import posthog from 'posthog-js'
+import insights from '@hanzo/insights'
 
 import api from 'lib/api'
 import { tabAwareUrlToAction } from 'lib/logic/scenes/tabAwareUrlToAction'
@@ -28,7 +28,7 @@ import {
 
 export interface AvailableModel {
     id: string
-    posthog_available: boolean
+    insights_available: boolean
 }
 
 export interface LLMEvaluationLogicProps {
@@ -363,7 +363,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
         },
 
         regenerateEvaluationSummary: () => {
-            posthog.capture('llma evaluation regenerate clicked', {
+            insights.capture('llma evaluation regenerate clicked', {
                 filter: values.evaluationSummaryFilter,
                 runs_to_summarize: values.runsToSummarizeCount,
             })
@@ -371,21 +371,21 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
         },
 
         trackSummarizeClicked: () => {
-            posthog.capture('llma evaluation summarize clicked', {
+            insights.capture('llma evaluation summarize clicked', {
                 filter: values.evaluationSummaryFilter,
                 runs_to_summarize: values.runsToSummarizeCount,
             })
         },
 
         setEvaluationSummaryFilter: ({ filter, previousFilter }) => {
-            posthog.capture('llma evaluation summary filter changed', {
+            insights.capture('llma evaluation summary filter changed', {
                 filter,
                 previous_filter: previousFilter,
             })
         },
 
         toggleSummaryExpanded: () => {
-            posthog.capture('llma evaluation summary toggled', {
+            insights.capture('llma evaluation summary toggled', {
                 expanded: values.summaryExpanded,
                 filter: values.evaluationSummaryFilter,
             })
@@ -485,7 +485,7 @@ export const llmEvaluationLogic = kea<llmEvaluationLogicType>([
             if (!values.selectedModel && availableModels.length > 0) {
                 // When using Insights key (no selectedKeyId), pick first Insights-available model
                 if (!values.selectedKeyId) {
-                    const firstInsightsModel = availableModels.find((m: AvailableModel) => m.posthog_available)
+                    const firstInsightsModel = availableModels.find((m: AvailableModel) => m.insights_available)
                     if (firstInsightsModel) {
                         actions.setSelectedModel(firstInsightsModel.id)
                     }

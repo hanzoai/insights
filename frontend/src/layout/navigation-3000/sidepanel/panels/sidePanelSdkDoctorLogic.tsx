@@ -1,7 +1,7 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { loaders } from 'kea-loaders'
 
-import { lemonToast } from '@posthog/lemon-ui'
+import { lemonToast } from '@hanzo/lemon-ui'
 
 import api from 'lib/api'
 import { dayjs } from 'lib/dayjs'
@@ -13,17 +13,17 @@ import type { sidePanelSdkDoctorLogicType } from './sidePanelSdkDoctorLogicType'
 // Supported SDK types for version detection and health monitoring
 export type SdkType =
     | 'web'
-    | 'posthog-ios'
-    | 'posthog-android'
-    | 'posthog-node'
-    | 'posthog-python'
-    | 'posthog-php'
-    | 'posthog-ruby'
-    | 'posthog-go'
-    | 'posthog-flutter'
-    | 'posthog-react-native'
-    | 'posthog-dotnet'
-    | 'posthog-elixir'
+    | 'insights-ios'
+    | 'insights-android'
+    | 'insights-node'
+    | 'insights-python'
+    | 'insights-php'
+    | 'insights-ruby'
+    | 'insights-go'
+    | 'insights-flutter'
+    | 'insights-react-native'
+    | 'insights-dotnet'
+    | 'insights-elixir'
 
 // Small helper to define what our versions look like
 export type SdkVersion = `${string}.${string}.${string}`
@@ -90,16 +90,16 @@ export type SdkHealthStatus = 'danger' | 'warning' | 'success'
  */
 
 const DEVICE_CONTEXT_CONFIG = {
-    mobileSDKs: ['posthog-ios', 'posthog-android', 'posthog-flutter', 'posthog-react-native'] as SdkType[],
+    mobileSDKs: ['insights-ios', 'insights-android', 'insights-flutter', 'insights-react-native'] as SdkType[],
     desktopSDKs: [
         'web',
-        'posthog-node',
-        'posthog-python',
-        'posthog-php',
-        'posthog-ruby',
-        'posthog-go',
-        'posthog-dotnet',
-        'posthog-elixir',
+        'insights-node',
+        'insights-python',
+        'insights-php',
+        'insights-ruby',
+        'insights-go',
+        'insights-dotnet',
+        'insights-elixir',
     ] as SdkType[],
     // Age-based outdated detection depends on mobile/desktop
     // We're more lenient with mobile versions because it's harder to keep them up to date

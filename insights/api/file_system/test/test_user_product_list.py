@@ -80,7 +80,7 @@ class TestUserProductListAPI(APIBaseTest):
         )
 
         colleague = User.objects.create_user(
-            email="colleague@posthog.com", password="password", first_name="Colleague", allow_sidebar_suggestions=True
+            email="colleague@hanzo.ai", password="password", first_name="Colleague", allow_sidebar_suggestions=True
         )
         colleague.join(organization=self.organization)
 

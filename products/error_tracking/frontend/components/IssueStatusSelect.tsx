@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import { IconChevronDown } from '@posthog/icons'
-import { LemonButton } from '@posthog/lemon-ui'
+import { IconChevronDown } from '@hanzo/icons'
+import { LemonButton } from '@hanzo/lemon-ui'
 
 import {
     DropdownMenu,
