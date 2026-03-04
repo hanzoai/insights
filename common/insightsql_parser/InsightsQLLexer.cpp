@@ -4,10 +4,10 @@
 
 
 
-// Generated from HogQLLexer.g4 by ANTLR 4.13.2
+// Generated from InsightsQLLexer.g4 by ANTLR 4.13.2
 
 
-#include "HogQLLexer.h"
+#include "InsightsQLLexer.h"
 
 
 using namespace antlr4;
@@ -18,8 +18,8 @@ using namespace antlr4;
 
 namespace {
 
-struct HogQLLexerStaticData final {
-  HogQLLexerStaticData(std::vector<std::string> ruleNames,
+struct InsightsQLLexerStaticData final {
+  InsightsQLLexerStaticData(std::vector<std::string> ruleNames,
                           std::vector<std::string> channelNames,
                           std::vector<std::string> modeNames,
                           std::vector<std::string> literalNames,
@@ -29,10 +29,10 @@ struct HogQLLexerStaticData final {
         symbolicNames(std::move(symbolicNames)),
         vocabulary(this->literalNames, this->symbolicNames) {}
 
-  HogQLLexerStaticData(const HogQLLexerStaticData&) = delete;
-  HogQLLexerStaticData(HogQLLexerStaticData&&) = delete;
-  HogQLLexerStaticData& operator=(const HogQLLexerStaticData&) = delete;
-  HogQLLexerStaticData& operator=(HogQLLexerStaticData&&) = delete;
+  InsightsQLLexerStaticData(const InsightsQLLexerStaticData&) = delete;
+  InsightsQLLexerStaticData(InsightsQLLexerStaticData&&) = delete;
+  InsightsQLLexerStaticData& operator=(const InsightsQLLexerStaticData&) = delete;
+  InsightsQLLexerStaticData& operator=(InsightsQLLexerStaticData&&) = delete;
 
   std::vector<antlr4::dfa::DFA> decisionToDFA;
   antlr4::atn::PredictionContextCache sharedContextCache;
@@ -46,21 +46,21 @@ struct HogQLLexerStaticData final {
   std::unique_ptr<antlr4::atn::ATN> atn;
 };
 
-::antlr4::internal::OnceFlag hogqllexerLexerOnceFlag;
+::antlr4::internal::OnceFlag insightsqllexerLexerOnceFlag;
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
 static thread_local
 #endif
-std::unique_ptr<HogQLLexerStaticData> hogqllexerLexerStaticData = nullptr;
+std::unique_ptr<InsightsQLLexerStaticData> insightsqllexerLexerStaticData = nullptr;
 
-void hogqllexerLexerInitialize() {
+void insightsqllexerLexerInitialize() {
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
-  if (hogqllexerLexerStaticData != nullptr) {
+  if (insightsqllexerLexerStaticData != nullptr) {
     return;
   }
 #else
-  assert(hogqllexerLexerStaticData == nullptr);
+  assert(insightsqllexerLexerStaticData == nullptr);
 #endif
-  auto staticData = std::make_unique<HogQLLexerStaticData>(
+  auto staticData = std::make_unique<InsightsQLLexerStaticData>(
     std::vector<std::string>{
       "ALL", "AND", "ANTI", "ANY", "ARRAY", "AS", "ASCENDING", "ASOF", "BETWEEN", 
       "BOTH", "BY", "CASE", "CAST", "CATCH", "COHORT", "COLLATE", "CROSS", 
@@ -92,15 +92,15 @@ void hogqllexerLexerInitialize() {
       "STRING_TEXT", "STRING_ESCAPE_TRIGGER", "STRING_QUOTE_SINGLE", "FULL_STRING_TEXT", 
       "FULL_STRING_ESCAPE_TRIGGER", "TAG_SELF_CLOSE_GT", "TAG_OPEN_GT", 
       "TAG_IDENT", "TAG_EQ", "TAG_STRING", "TAG_WS", "TAG_LBRACE", "TAGC_GT", 
-      "TAGC_IDENT", "TAGC_WS", "HOGQLX_TEXT_TEXT", "HOGQLX_TEXT_LBRACE", 
-      "HOGQLX_TEXT_LT_SLASH", "HOGQLX_TEXT_LT", "HOGQLX_TEXT_WS"
+      "TAGC_IDENT", "TAGC_WS", "INSIGHTSQLX_TEXT_TEXT", "INSIGHTSQLX_TEXT_LBRACE", 
+      "INSIGHTSQLX_TEXT_LT_SLASH", "INSIGHTSQLX_TEXT_LT", "INSIGHTSQLX_TEXT_WS"
     },
     std::vector<std::string>{
       "DEFAULT_TOKEN_CHANNEL", "HIDDEN"
     },
     std::vector<std::string>{
-      "DEFAULT_MODE", "IN_TEMPLATE_STRING", "IN_FULL_TEMPLATE_STRING", "HOGQLX_TAG_OPEN", 
-      "HOGQLX_TAG_CLOSE", "HOGQLX_TEXT"
+      "DEFAULT_MODE", "IN_TEMPLATE_STRING", "IN_FULL_TEMPLATE_STRING", "INSIGHTSQLX_TAG_OPEN", 
+      "INSIGHTSQLX_TAG_CLOSE", "INSIGHTSQLX_TEXT"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
@@ -142,7 +142,7 @@ void hogqllexerLexerInitialize() {
       "RPAREN", "SEMICOLON", "SLASH", "SLASH_GT", "UNDERSCORE", "MULTI_LINE_COMMENT", 
       "SINGLE_LINE_COMMENT", "WHITESPACE", "STRING_TEXT", "STRING_ESCAPE_TRIGGER", 
       "FULL_STRING_TEXT", "FULL_STRING_ESCAPE_TRIGGER", "TAG_WS", "TAGC_WS", 
-      "HOGQLX_TEXT_TEXT", "HOGQLX_TEXT_WS"
+      "INSIGHTSQLX_TEXT_TEXT", "INSIGHTSQLX_TEXT_WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
@@ -761,50 +761,50 @@ void hogqllexerLexerInitialize() {
   for (size_t i = 0; i < count; i++) { 
     staticData->decisionToDFA.emplace_back(staticData->atn->getDecisionState(i), i);
   }
-  hogqllexerLexerStaticData = std::move(staticData);
+  insightsqllexerLexerStaticData = std::move(staticData);
 }
 
 }
 
-HogQLLexer::HogQLLexer(CharStream *input) : Lexer(input) {
-  HogQLLexer::initialize();
-  _interpreter = new atn::LexerATNSimulator(this, *hogqllexerLexerStaticData->atn, hogqllexerLexerStaticData->decisionToDFA, hogqllexerLexerStaticData->sharedContextCache);
+InsightsQLLexer::InsightsQLLexer(CharStream *input) : Lexer(input) {
+  InsightsQLLexer::initialize();
+  _interpreter = new atn::LexerATNSimulator(this, *insightsqllexerLexerStaticData->atn, insightsqllexerLexerStaticData->decisionToDFA, insightsqllexerLexerStaticData->sharedContextCache);
 }
 
-HogQLLexer::~HogQLLexer() {
+InsightsQLLexer::~InsightsQLLexer() {
   delete _interpreter;
 }
 
-std::string HogQLLexer::getGrammarFileName() const {
-  return "HogQLLexer.g4";
+std::string InsightsQLLexer::getGrammarFileName() const {
+  return "InsightsQLLexer.g4";
 }
 
-const std::vector<std::string>& HogQLLexer::getRuleNames() const {
-  return hogqllexerLexerStaticData->ruleNames;
+const std::vector<std::string>& InsightsQLLexer::getRuleNames() const {
+  return insightsqllexerLexerStaticData->ruleNames;
 }
 
-const std::vector<std::string>& HogQLLexer::getChannelNames() const {
-  return hogqllexerLexerStaticData->channelNames;
+const std::vector<std::string>& InsightsQLLexer::getChannelNames() const {
+  return insightsqllexerLexerStaticData->channelNames;
 }
 
-const std::vector<std::string>& HogQLLexer::getModeNames() const {
-  return hogqllexerLexerStaticData->modeNames;
+const std::vector<std::string>& InsightsQLLexer::getModeNames() const {
+  return insightsqllexerLexerStaticData->modeNames;
 }
 
-const dfa::Vocabulary& HogQLLexer::getVocabulary() const {
-  return hogqllexerLexerStaticData->vocabulary;
+const dfa::Vocabulary& InsightsQLLexer::getVocabulary() const {
+  return insightsqllexerLexerStaticData->vocabulary;
 }
 
-antlr4::atn::SerializedATNView HogQLLexer::getSerializedATN() const {
-  return hogqllexerLexerStaticData->serializedATN;
+antlr4::atn::SerializedATNView InsightsQLLexer::getSerializedATN() const {
+  return insightsqllexerLexerStaticData->serializedATN;
 }
 
-const atn::ATN& HogQLLexer::getATN() const {
-  return *hogqllexerLexerStaticData->atn;
+const atn::ATN& InsightsQLLexer::getATN() const {
+  return *insightsqllexerLexerStaticData->atn;
 }
 
 
-bool HogQLLexer::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
+bool InsightsQLLexer::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
     case 167: return TAG_LT_OPENSempred(antlrcpp::downCast<antlr4::RuleContext *>(context), predicateIndex);
 
@@ -815,7 +815,7 @@ bool HogQLLexer::sempred(RuleContext *context, size_t ruleIndex, size_t predicat
 }
 
 
-bool HogQLLexer::TAG_LT_OPENSempred(antlr4::RuleContext *_localctx, size_t predicateIndex) {
+bool InsightsQLLexer::TAG_LT_OPENSempred(antlr4::RuleContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
     case 0: return isOpeningTag();
 
@@ -826,10 +826,10 @@ bool HogQLLexer::TAG_LT_OPENSempred(antlr4::RuleContext *_localctx, size_t predi
 }
 
 
-void HogQLLexer::initialize() {
+void InsightsQLLexer::initialize() {
 #if ANTLR4_USE_THREAD_LOCAL_CACHE
-  hogqllexerLexerInitialize();
+  insightsqllexerLexerInitialize();
 #else
-  ::antlr4::internal::call_once(hogqllexerLexerOnceFlag, hogqllexerLexerInitialize);
+  ::antlr4::internal::call_once(insightsqllexerLexerOnceFlag, insightsqllexerLexerInitialize);
 #endif
 }
