@@ -212,8 +212,8 @@ class UsageReportCounters:
     elixir_events_count_in_period: int
     unity_events_count_in_period: int
     rust_events_count_in_period: int
-    active_hog_destinations_in_period: int
-    active_hog_transformations_in_period: int
+    active_iql_destinations_in_period: int
+    active_iql_transformations_in_period: int
 
     # Workflow metrics
     workflow_emails_sent_in_period: int
@@ -1486,7 +1486,7 @@ def get_teams_with_recording_bytes_in_period(
 
 @timed_log()
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
-def get_teams_with_active_hog_destinations_in_period() -> list:
+def get_teams_with_active_iql_destinations_in_period() -> list:
     return list(
         InsightsFunction.objects.filter(
             type=InsightsFunctionType.DESTINATION,
@@ -1500,7 +1500,7 @@ def get_teams_with_active_hog_destinations_in_period() -> list:
 
 @timed_log()
 @retry(tries=QUERY_RETRIES, delay=QUERY_RETRY_DELAY, backoff=QUERY_RETRY_BACKOFF)
-def get_teams_with_active_hog_transformations_in_period() -> list:
+def get_teams_with_active_iql_transformations_in_period() -> list:
     return list(
         InsightsFunction.objects.filter(
             type=InsightsFunctionType.TRANSFORMATION,
@@ -1962,8 +1962,8 @@ def _get_all_usage_data(period_start: datetime, period_end: datetime) -> dict[st
         ),
         "teams_with_ai_event_count_in_period": get_teams_with_ai_event_count_in_period(period_start, period_end),
         "teams_with_ai_credits_used_in_period": get_teams_with_ai_credits_used_in_period(period_start, period_end),
-        "teams_with_active_hog_destinations_in_period": get_teams_with_active_hog_destinations_in_period(),
-        "teams_with_active_hog_transformations_in_period": get_teams_with_active_hog_transformations_in_period(),
+        "teams_with_active_iql_destinations_in_period": get_teams_with_active_iql_destinations_in_period(),
+        "teams_with_active_iql_transformations_in_period": get_teams_with_active_iql_transformations_in_period(),
         "teams_with_workflow_emails_sent_in_period": get_teams_with_workflow_emails_sent_in_period(
             period_start, period_end
         ),
@@ -2121,8 +2121,8 @@ def _get_team_report(all_data: dict[str, Any], team: Team) -> UsageReportCounter
         rust_events_count_in_period=all_data["teams_with_rust_events_count_in_period"].get(team.id, 0),
         ai_event_count_in_period=all_data["teams_with_ai_event_count_in_period"].get(team.id, 0),
         ai_credits_used_in_period=all_data["teams_with_ai_credits_used_in_period"].get(team.id, 0),
-        active_hog_destinations_in_period=all_data["teams_with_active_hog_destinations_in_period"].get(team.id, 0),
-        active_hog_transformations_in_period=all_data["teams_with_active_hog_transformations_in_period"].get(
+        active_iql_destinations_in_period=all_data["teams_with_active_iql_destinations_in_period"].get(team.id, 0),
+        active_iql_transformations_in_period=all_data["teams_with_active_iql_transformations_in_period"].get(
             team.id, 0
         ),
         workflow_emails_sent_in_period=all_data["teams_with_workflow_emails_sent_in_period"].get(team.id, 0),

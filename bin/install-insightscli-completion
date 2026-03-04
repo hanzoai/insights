@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install hogli shell completions
+# Install insightscli shell completions
 
 set -e
 
@@ -18,10 +18,10 @@ case "$SHELL_NAME" in
       mkdir -p "$COMPLETION_DIR"
     fi
 
-    echo "Installing bash completion to $COMPLETION_DIR/hogli..."
-    python -m hogli.completion --shell bash > "$COMPLETION_DIR/hogli"
-    chmod 644 "$COMPLETION_DIR/hogli"
-    echo "✅ Bash completion installed. Restart your shell or run: source $COMPLETION_DIR/hogli"
+    echo "Installing bash completion to $COMPLETION_DIR/insightscli..."
+    python -m insightscli.completion --shell bash > "$COMPLETION_DIR/insightscli"
+    chmod 644 "$COMPLETION_DIR/insightscli"
+    echo "✅ Bash completion installed. Restart your shell or run: source $COMPLETION_DIR/insightscli"
     ;;
   zsh)
     # Try common zsh completion directories
@@ -34,9 +34,9 @@ case "$SHELL_NAME" in
       mkdir -p "$COMPLETION_DIR"
     fi
 
-    echo "Installing zsh completion to $COMPLETION_DIR/_hogli..."
-    python -m hogli.completion --shell zsh > "$COMPLETION_DIR/_hogli"
-    chmod 644 "$COMPLETION_DIR/_hogli"
+    echo "Installing zsh completion to $COMPLETION_DIR/_insightscli..."
+    python -m insightscli.completion --shell zsh > "$COMPLETION_DIR/_insightscli"
+    chmod 644 "$COMPLETION_DIR/_insightscli"
     echo "✅ Zsh completion installed. Restart your shell or run: rehash"
     ;;
   *)

@@ -187,7 +187,7 @@
         "$exception_capture_enabled_server_side": false,
         "$feature/recordings-ai-regex": true,
         "$feature/experiment-stats-v2": true,
-        "$feature/mascot-skin-spiderhog": true,
+        "$feature/mascot-skin-spidermascot": true,
         "$active_feature_flags": [
             "onboarding-v2-demo",
             "query_running_time",
@@ -225,7 +225,7 @@
             "settings-session-table-version",
             "insights-http-batch-exports",
             "data-modeling",
-            "mascot-skin-spiderhog",
+            "mascot-skin-spidermascot",
             "insight_variables",
             "web-experiments",
             "bigquery-dwh",

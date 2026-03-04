@@ -43,10 +43,10 @@ class Migration(migrations.Migration):
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["template_id", "sha"], name="insights_hog_templat_55950b_idx"),
-                    models.Index(fields=["type", "status"], name="insights_hog_type_8cac9a_idx"),
-                    models.Index(fields=["created_at"], name="insights_hog_created_6a9df3_idx"),
-                    models.Index(fields=["template_id", "created_at"], name="insights_hog_templat_d1778e_idx"),
+                    models.Index(fields=["template_id", "sha"], name="insights_iql_templat_55950b_idx"),
+                    models.Index(fields=["type", "status"], name="insights_iql_type_8cac9a_idx"),
+                    models.Index(fields=["created_at"], name="insights_iql_created_6a9df3_idx"),
+                    models.Index(fields=["template_id", "created_at"], name="insights_iql_templat_d1778e_idx"),
                 ],
                 "unique_together": {("template_id", "sha")},
             },

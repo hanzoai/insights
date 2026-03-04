@@ -634,14 +634,14 @@ class DataWarehouseViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
                     logger.warning(f"Error processing transformation {transformation.id}", exc_info=e)
 
             # Get destinations with issues
-            hog_destinations = InsightsFunction.objects.filter(
+            iql_destinations = InsightsFunction.objects.filter(
                 team_id=self.team_id,
                 deleted=False,
                 type__in=[InsightsFunctionType.DESTINATION, InsightsFunctionType.SITE_DESTINATION],
                 enabled=True,
             )
 
-            for destination in hog_destinations:
+            for destination in iql_destinations:
                 try:
                     status_data = destination.status
                     state = status_data.get("state", 0)

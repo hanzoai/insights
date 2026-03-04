@@ -197,7 +197,7 @@ package-lock.json @hanzoai/team-devex
 .prettierrc @hanzoai/team-devex
 mypy.ini @hanzoai/team-devex
 insights/management/migration_analysis/ @hanzoai/team-devex
-common/hogli/ @hanzoai/team-devex
+common/insightscli/ @hanzoai/team-devex
 bin/ @hanzoai/team-devex
 CODEOWNERS-soft @hanzoai/team-devex
 CODEOWNERS @hanzoai/team-devex

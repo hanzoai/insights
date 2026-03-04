@@ -9,7 +9,7 @@ use crate::{
     memory::VmHeap,
     program::Module,
     util::{get_json_nested, regex_match},
-    values::{HogLiteral, HogValue, Num},
+    values::{IQLLiteral, IQLValue, Num},
     vm::ScriptVM,
     ExportedFunction,
 };
@@ -18,7 +18,7 @@ pub const TO_STRING_RECURSION_LIMIT: usize = 32;
 
 // A "native function" is a function that can be called from within the VM. It takes a list
 // of arguments, and returns either a value, or null. It's pure (cannot modify the VM state).
-pub type NativeFunction = Box<dyn Fn(&ScriptVM, Vec<HogValue>) -> Result<HogValue, VmError>>;
+pub type NativeFunction = Box<dyn Fn(&ScriptVM, Vec<IQLValue>) -> Result<IQLValue, VmError>>;
 
 pub fn stl_map() -> HashMap<String, NativeFunction> {
     stl().into_iter().collect()
@@ -39,7 +39,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 // Can't just use a ToString trait implementation, because ToString requires heap access to chase
                 // references in arrays and dicts
                 assert_argc(&args, 1, "toString")?;
-                to_string(&vm.heap, &args[0], 0).map(|s| HogLiteral::String(s).into())
+                to_string(&vm.heap, &args[0], 0).map(|s| IQLLiteral::String(s).into())
             }),
         ),
         (
@@ -50,16 +50,16 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 // TODO - tuples, dates, datetimes, errors are all just duck-typed "objects" or "arrays", but we should
                 // still support them I guess
                 match arg {
-                    HogLiteral::Number(_) => Ok(HogLiteral::String("number".to_string()).into()),
-                    HogLiteral::Boolean(_) => Ok(HogLiteral::String("boolean".to_string()).into()),
-                    HogLiteral::String(_) => Ok(HogLiteral::String("string".to_string()).into()),
-                    HogLiteral::Array(_) => Ok(HogLiteral::String("array".to_string()).into()),
-                    HogLiteral::Object(_) => Ok(HogLiteral::String("object".to_string()).into()),
-                    HogLiteral::Callable(_) => {
-                        Ok(HogLiteral::String("function".to_string()).into())
+                    IQLLiteral::Number(_) => Ok(IQLLiteral::String("number".to_string()).into()),
+                    IQLLiteral::Boolean(_) => Ok(IQLLiteral::String("boolean".to_string()).into()),
+                    IQLLiteral::String(_) => Ok(IQLLiteral::String("string".to_string()).into()),
+                    IQLLiteral::Array(_) => Ok(IQLLiteral::String("array".to_string()).into()),
+                    IQLLiteral::Object(_) => Ok(IQLLiteral::String("object".to_string()).into()),
+                    IQLLiteral::Callable(_) => {
+                        Ok(IQLLiteral::String("function".to_string()).into())
                     }
-                    HogLiteral::Closure(_) => Ok(HogLiteral::String("function".to_string()).into()),
-                    HogLiteral::Null => Ok(HogLiteral::String("null".to_string()).into()),
+                    IQLLiteral::Closure(_) => Ok(IQLLiteral::String("function".to_string()).into()),
+                    IQLLiteral::Null => Ok(IQLLiteral::String("null".to_string()).into()),
                 }
             }),
         ),
@@ -69,9 +69,9 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "values")?;
                 let arg = args[0].deref(&vm.heap)?;
                 match arg {
-                    HogLiteral::Array(_) => Ok(arg.clone().into()),
-                    HogLiteral::Object(obj) => {
-                        Ok(HogLiteral::Array(obj.values().cloned().collect()).into())
+                    IQLLiteral::Array(_) => Ok(arg.clone().into()),
+                    IQLLiteral::Object(obj) => {
+                        Ok(IQLLiteral::Array(obj.values().cloned().collect()).into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "values() only supports arrays and objects".to_string(),
@@ -85,9 +85,9 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "length")?;
                 let arg = args[0].deref(&vm.heap)?;
                 match arg {
-                    HogLiteral::Array(arr) => Ok(HogLiteral::Number(arr.len().into()).into()),
-                    HogLiteral::Object(obj) => Ok(HogLiteral::Number(obj.len().into()).into()),
-                    HogLiteral::String(str) => Ok(HogLiteral::Number(str.len().into()).into()),
+                    IQLLiteral::Array(arr) => Ok(IQLLiteral::Number(arr.len().into()).into()),
+                    IQLLiteral::Object(obj) => Ok(IQLLiteral::Number(obj.len().into()).into()),
+                    IQLLiteral::String(str) => Ok(IQLLiteral::Number(str.len().into()).into()),
                     _ => Err(VmError::NativeCallFailed(
                         "length() only supports arrays, objects and strings".to_string(),
                     )),
@@ -102,10 +102,10 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 let array = args[0].deref(&vm.heap)?;
                 let value = args[1].clone();
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let mut arr = arr.clone();
                         arr.push(value);
-                        Ok(HogLiteral::Array(arr).into())
+                        Ok(IQLLiteral::Array(arr).into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "arrayPushBack() only supports arrays".to_string(),
@@ -120,10 +120,10 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 let array = args[0].deref(&vm.heap)?;
                 let value = args[1].clone();
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let mut arr = arr.clone();
                         arr.insert(0, value);
-                        Ok(HogLiteral::Array(arr).into())
+                        Ok(IQLLiteral::Array(arr).into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "arrayPushFront() only supports arrays".to_string(),
@@ -137,10 +137,10 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "arrayPopBack")?;
                 let array = args[0].deref(&vm.heap)?;
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let mut arr = arr.clone();
                         arr.pop();
-                        Ok(HogLiteral::Array(arr).into())
+                        Ok(IQLLiteral::Array(arr).into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "arrayPopBack() only supports arrays".to_string(),
@@ -154,12 +154,12 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "arrayPopFront")?;
                 let array = args[0].deref(&vm.heap)?;
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let mut arr = arr.clone();
                         if !arr.is_empty() {
                             arr.remove(0);
                         }
-                        Ok(HogLiteral::Array(arr).into())
+                        Ok(IQLLiteral::Array(arr).into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "arrayPopFront() only supports arrays".to_string(),
@@ -173,7 +173,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "arraySort")?;
                 let array = args[0].deref(&vm.heap)?;
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let (vals, errs): (Vec<_>, Vec<_>) = arr
                             .iter()
                             .map(|v| v.deref(&vm.heap).and_then(|v| v.try_as::<Num>()).cloned())
@@ -182,7 +182,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                             let mut vals = vals.into_iter().map(|v| v.unwrap()).collect::<Vec<_>>();
                             vals.sort_unstable_by(|a, b| a.compare(b));
                             Ok(
-                                HogLiteral::Array(vals.into_iter().map(|v| v.into()).collect())
+                                IQLLiteral::Array(vals.into_iter().map(|v| v.into()).collect())
                                     .into(),
                             )
                         } else {
@@ -203,10 +203,10 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "arrayReverse")?;
                 let array = args[0].deref(&vm.heap)?;
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let mut arr = arr.clone();
                         arr.reverse();
-                        Ok(HogLiteral::Array(arr).into())
+                        Ok(IQLLiteral::Array(arr).into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "arrayReverse() only supports arrays".to_string(),
@@ -220,7 +220,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "arrayReverseSort")?;
                 let array = args[0].deref(&vm.heap)?;
                 match array {
-                    HogLiteral::Array(arr) => {
+                    IQLLiteral::Array(arr) => {
                         let (vals, errs): (Vec<_>, Vec<_>) = arr
                             .iter()
                             .map(|v| v.deref(&vm.heap).and_then(|v| v.try_as::<Num>()).cloned())
@@ -230,7 +230,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                             vals.sort_unstable_by(|a, b| a.compare(b));
                             vals.reverse();
                             Ok(
-                                HogLiteral::Array(vals.into_iter().map(|v| v.into()).collect())
+                                IQLLiteral::Array(vals.into_iter().map(|v| v.into()).collect())
                                     .into(),
                             )
                         } else {
@@ -251,7 +251,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 2, "arrayStringConcat")?;
                 let vals = args[0].deref(&vm.heap)?;
                 let sep = args[1].deref(&vm.heap)?.try_as::<str>()?;
-                let HogLiteral::Array(vals) = vals else {
+                let IQLLiteral::Array(vals) = vals else {
                     return Err(VmError::NativeCallFailed(
                         "arrayStringConcat() only supports arrays".to_string(),
                     ));
@@ -260,7 +260,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 for val in vals.iter() {
                     parts.push(to_string(&vm.heap, val, 0)?);
                 }
-                Ok(HogLiteral::String(parts.join(sep)).into())
+                Ok(IQLLiteral::String(parts.join(sep)).into())
             }),
         ),
         (
@@ -279,13 +279,13 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 let haystack = &args[0].deref(&vm.heap)?;
                 let needle = &args[1];
                 match haystack {
-                    HogLiteral::Array(vals) => {
+                    IQLLiteral::Array(vals) => {
                         for (i, val) in vals.iter().enumerate() {
                             if *needle.equals(val, &vm.heap)?.try_as()? {
                                 return Ok((i as i64).saturating_add(1).into());
                             }
                         }
-                        Ok(HogLiteral::Null.into())
+                        Ok(IQLLiteral::Null.into())
                     }
                     _ => Err(VmError::NativeCallFailed(
                         "indexOf() only supports arrays".to_string(),
@@ -299,9 +299,9 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 1, "notEmpty")?;
                 let val = &args[0];
                 match val.deref(&vm.heap)? {
-                    HogLiteral::Array(a) => Ok(HogLiteral::Boolean(!a.is_empty()).into()),
-                    HogLiteral::String(s) => Ok(HogLiteral::Boolean(!s.is_empty()).into()),
-                    HogLiteral::Object(o) => Ok(HogLiteral::Boolean(!o.is_empty()).into()),
+                    IQLLiteral::Array(a) => Ok(IQLLiteral::Boolean(!a.is_empty()).into()),
+                    IQLLiteral::String(s) => Ok(IQLLiteral::Boolean(!s.is_empty()).into()),
+                    IQLLiteral::Object(o) => Ok(IQLLiteral::Boolean(!o.is_empty()).into()),
                     _ => Err(VmError::NativeCallFailed(format!(
                         "{} not supported by notEmpty",
                         val.type_name()
@@ -315,7 +315,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 assert_argc(&args, 2, "match")?;
                 let value = args[0].deref(&vm.heap)?.try_as::<str>()?;
                 let regex = args[1].deref(&vm.heap)?.try_as::<str>()?;
-                Ok(HogLiteral::Boolean(regex_match(value, regex, true)?).into())
+                Ok(IQLLiteral::Boolean(regex_match(value, regex, true)?).into())
             }),
         ),
         (
@@ -328,10 +328,10 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 let val = args[0].deref(&vm.heap)?;
                 let json = match val {
                     // Parse strings as json, if a string was passed
-                    HogLiteral::String(s) => serde_json::from_str(s)
+                    IQLLiteral::String(s) => serde_json::from_str(s)
                         .map_err(|e| VmError::NativeCallFailed(e.to_string()))?,
                     // Otherwise just convert the iql to a json object
-                    _ => vm.hog_to_json(&args[0])?,
+                    _ => vm.iql_to_json(&args[0])?,
                 };
                 // JSONExtract must be provided a return type as the final argument (as per the clickhouse implementation). We
                 // ignore this return type, and treat any arguments between the first and last as path components
@@ -342,7 +342,7 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 };
                 let res = get_json_nested(&json, path, vm)?;
                 let Some(res) = res else {
-                    return Ok(HogLiteral::Null.into());
+                    return Ok(IQLLiteral::Null.into());
                 };
                 construct_free_standing(res, 0)
             })),
@@ -362,8 +362,8 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                 // The second argument must be an array of needles; otherwise, treat as no match (0)
                 let needles = args[1].deref(&vm.heap)?;
                 let needles_array = match needles {
-                    HogLiteral::Array(arr) => arr,
-                    _ => return Ok(HogLiteral::Number(0i64.into()).into()),
+                    IQLLiteral::Array(arr) => arr,
+                    _ => return Ok(IQLLiteral::Number(0i64.into()).into()),
                 };
 
                 for needle_value in needles_array {
@@ -371,11 +371,11 @@ pub fn stl() -> Vec<(String, NativeFunction)> {
                     let needle_str = to_string(&vm.heap, needle_value, 0)?.to_lowercase();
                     if haystack_str.contains(&needle_str) {
                         // Return 1 (numeric) to match ClickHouse-style predicate semantics
-                        return Ok(HogLiteral::Number(1i64.into()).into());
+                        return Ok(IQLLiteral::Number(1i64.into()).into());
                     }
                 }
                 // No needles matched: return 0 (numeric)
-                Ok(HogLiteral::Number(0i64.into()).into())
+                Ok(IQLLiteral::Number(0i64.into()).into())
             }),
         ),
     ]
@@ -405,7 +405,7 @@ pub fn iql_stl() -> Module {
 
 // TODO - this is slow, because rather than using a string buffer, we're allocating a new string each time
 // we recurse
-fn to_string(heap: &VmHeap, val: &HogValue, depth: usize) -> Result<String, VmError> {
+fn to_string(heap: &VmHeap, val: &IQLValue, depth: usize) -> Result<String, VmError> {
     if depth > TO_STRING_RECURSION_LIMIT {
         return Err(VmError::NativeCallFailed(
             "Maximum toString recursion depth exceeded".to_string(),
@@ -414,7 +414,7 @@ fn to_string(heap: &VmHeap, val: &HogValue, depth: usize) -> Result<String, VmEr
 
     let val = val.deref(heap)?;
     match val {
-        HogLiteral::Number(num) => {
+        IQLLiteral::Number(num) => {
             let val = if num.is_float() {
                 num.to_float().to_string()
             } else {
@@ -422,26 +422,26 @@ fn to_string(heap: &VmHeap, val: &HogValue, depth: usize) -> Result<String, VmEr
             };
             Ok(val)
         }
-        HogLiteral::Boolean(bool) => Ok(bool.to_string()),
-        HogLiteral::String(string) => Ok(string.clone()),
-        HogLiteral::Array(hog_values) => Ok(format!(
+        IQLLiteral::Boolean(bool) => Ok(bool.to_string()),
+        IQLLiteral::String(string) => Ok(string.clone()),
+        IQLLiteral::Array(iql_values) => Ok(format!(
             "[{}]",
-            hog_values
+            iql_values
                 .iter()
                 .map(|v| to_string(heap, v, depth + 1))
                 .collect::<Result<Vec<String>, VmError>>()?
                 .join(", ")
         )),
-        HogLiteral::Object(hash_map) => {
+        IQLLiteral::Object(hash_map) => {
             let mut entries = Vec::new();
             for (key, value) in hash_map {
                 entries.push(format!("{}: {}", key, to_string(heap, value, depth + 1)?));
             }
             Ok(format!("{{{}}}", entries.join(", ")))
         }
-        HogLiteral::Callable(callable) => Ok(callable.to_string()),
-        HogLiteral::Closure(closure) => Ok(closure.to_string()),
-        HogLiteral::Null => Ok("null".to_string()),
+        IQLLiteral::Callable(callable) => Ok(callable.to_string()),
+        IQLLiteral::Closure(closure) => Ok(closure.to_string()),
+        IQLLiteral::Null => Ok("null".to_string()),
     }
 }
 
@@ -456,7 +456,7 @@ fn assert(test: bool, msg: impl AsRef<str>) -> Result<(), VmError> {
     }
 }
 
-fn assert_argc(args: &[HogValue], count: usize, name: impl AsRef<str>) -> Result<(), VmError> {
+fn assert_argc(args: &[IQLValue], count: usize, name: impl AsRef<str>) -> Result<(), VmError> {
     assert(
         args.len() == count,
         format!("{} takes exactly {} arguments", name.as_ref(), count),
@@ -464,15 +464,15 @@ fn assert_argc(args: &[HogValue], count: usize, name: impl AsRef<str>) -> Result
 }
 
 fn err_to_null(
-    func: impl Fn(&ScriptVM, Vec<HogValue>) -> Result<HogValue, VmError>,
-) -> impl Fn(&ScriptVM, Vec<HogValue>) -> Result<HogValue, VmError> {
-    move |vm, args| func(vm, args).or(Ok(HogLiteral::Null.into()))
+    func: impl Fn(&ScriptVM, Vec<IQLValue>) -> Result<IQLValue, VmError>,
+) -> impl Fn(&ScriptVM, Vec<IQLValue>) -> Result<IQLValue, VmError> {
+    move |vm, args| func(vm, args).or(Ok(IQLLiteral::Null.into()))
 }
 
 /// Helper to construct a ScriptVM native function from a closure.
 pub fn native_func<F>(func: F) -> NativeFunction
 where
-    F: Fn(&ScriptVM, Vec<HogValue>) -> Result<HogValue, VmError> + 'static,
+    F: Fn(&ScriptVM, Vec<IQLValue>) -> Result<IQLValue, VmError> + 'static,
 {
     Box::new(func)
 }

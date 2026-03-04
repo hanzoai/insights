@@ -62,8 +62,8 @@ class Migration(migrations.Migration):
             ],
             options={
                 "indexes": [
-                    models.Index(fields=["status", "team"], name="insights_hog_status_53a054_idx"),
-                    models.Index(fields=["version", "team"], name="insights_hog_version_c1677f_idx"),
+                    models.Index(fields=["status", "team"], name="insights_iql_status_53a054_idx"),
+                    models.Index(fields=["version", "team"], name="insights_iql_version_c1677f_idx"),
                 ],
             },
         ),

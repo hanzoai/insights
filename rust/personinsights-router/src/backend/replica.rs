@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use personinsights_proto::personinsights::replica::v1::person_hog_replica_client::PersonInsightsReplicaClient;
+use personinsights_proto::personinsights::replica::v1::person_insights_replica_client::PersonInsightsReplicaClient;
 use personinsights_proto::personinsights::types::v1::{
     CheckCohortMembershipRequest, CohortMembershipResponse, DeleteHashKeyOverridesByTeamsRequest,
     DeleteHashKeyOverridesByTeamsResponse, GetDistinctIdsForPersonRequest,

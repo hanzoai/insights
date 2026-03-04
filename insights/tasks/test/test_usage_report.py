@@ -1367,7 +1367,7 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
 
     @patch("insights.tasks.usage_report.get_ph_client")
     @patch("insights.tasks.usage_report.send_report_to_billing_service")
-    def test_active_hog_destinations_and_transformations_per_team(
+    def test_active_iql_destinations_and_transformations_per_team(
         self, billing_task_mock: MagicMock, insights_capture_mock: MagicMock
     ) -> None:
         from insights.models.insights_functions.insights_function import InsightsFunction, InsightsFunctionType
@@ -1441,10 +1441,10 @@ class TestFeatureFlagsUsageReport(ClickhouseDestroyTablesMixin, TestCase, Clickh
             _get_full_org_usage_report(all_reports[str(self.org_1.id)], get_instance_metadata(period))
         )
 
-        assert org_1_report["teams"][str(self.org_1_team_1.id)]["active_hog_destinations_in_period"] == 2
-        assert org_1_report["teams"][str(self.org_1_team_1.id)]["active_hog_transformations_in_period"] == 1
-        assert org_1_report["teams"][str(self.org_1_team_2.id)]["active_hog_destinations_in_period"] == 1
-        assert org_1_report["teams"][str(self.org_1_team_2.id)]["active_hog_transformations_in_period"] == 2
+        assert org_1_report["teams"][str(self.org_1_team_1.id)]["active_iql_destinations_in_period"] == 2
+        assert org_1_report["teams"][str(self.org_1_team_1.id)]["active_iql_transformations_in_period"] == 1
+        assert org_1_report["teams"][str(self.org_1_team_2.id)]["active_iql_destinations_in_period"] == 1
+        assert org_1_report["teams"][str(self.org_1_team_2.id)]["active_iql_transformations_in_period"] == 2
 
 
 @freeze_time("2022-01-10T00:01:00Z")

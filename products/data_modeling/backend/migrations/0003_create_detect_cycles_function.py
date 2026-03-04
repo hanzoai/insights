@@ -51,7 +51,7 @@ $$ LANGUAGE plpgsql;
 """
 
 DROP_DETECT_CYCLES = """\
-DROP FUNCTION IF EXISTS prosthog_datamodelingedge_detect_cycles();
+DROP FUNCTION IF EXISTS insights_datamodelingedge_detect_cycles();
 """
 
 

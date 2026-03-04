@@ -3,7 +3,7 @@ mod tests;
 
 use std::sync::Arc;
 
-use personinsights_proto::personinsights::service::v1::person_hog_service_server::PersonInsightsService;
+use personinsights_proto::personinsights::service::v1::person_insights_service_server::PersonInsightsService;
 use personinsights_proto::personinsights::types::v1::{
     CheckCohortMembershipRequest, CohortMembershipResponse, DeleteHashKeyOverridesByTeamsRequest,
     DeleteHashKeyOverridesByTeamsResponse, GetDistinctIdsForPersonRequest,

@@ -297,7 +297,7 @@ await Insights().screen(
     screenName: 'Dashboard',
     properties: {
       'background': 'blue',
-      'hero': 'superhog'
+      'hero': 'supermascot'
     });
 `}</CodeSnippet>
         </>

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`InsightsFlowManager returns the hog flow 1`] = `
+exports[`InsightsFlowManager returns the insights flow 1`] = `
 [
   {
     "abort_action": null,

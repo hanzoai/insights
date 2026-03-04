@@ -8,7 +8,7 @@ mod tests;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use personinsights_proto::personinsights::replica::v1::person_hog_replica_server::PersonInsightsReplica;
+use personinsights_proto::personinsights::replica::v1::person_insights_replica_server::PersonInsightsReplica;
 use personinsights_proto::personinsights::types::v1::{
     CheckCohortMembershipRequest, CohortMembership, CohortMembershipResponse,
     DeleteHashKeyOverridesByTeamsRequest, DeleteHashKeyOverridesByTeamsResponse,

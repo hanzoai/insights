@@ -28,7 +28,7 @@ pub struct Config {
     pub concurrency_limit: usize,
 
     #[envconfig(default = "false")]
-    pub hog_mode: bool,
+    pub iql_mode: bool,
 }
 
 impl Config {

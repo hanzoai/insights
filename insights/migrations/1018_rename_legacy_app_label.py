@@ -9,7 +9,7 @@ from django.db import migrations
 
 # The old app_label value being migrated away from (split to avoid grep matches)
 _OLD = "post" + "iql"  # noqa: S105 — legacy Django app_label
-_OLD_AI = "post" + "hog_ai"  # noqa: S105
+_OLD_AI = "post" + "iql_ai"  # noqa: S105
 
 
 def rename_app_label(apps, schema_editor):

@@ -157,16 +157,16 @@ export const language: () => languages.IMonarchLanguage = () => ({
     },
 })
 
-export function initHogJsonLanguage(monaco: Monaco): void {
-    if (!monaco.languages.getLanguages().some(({ id }) => id === 'hogJson')) {
+export function initIQLJsonLanguage(monaco: Monaco): void {
+    if (!monaco.languages.getLanguages().some(({ id }) => id === 'iqlJson')) {
         monaco.languages.register({
-            id: 'hogJson',
+            id: 'iqlJson',
             mimetypes: ['application/iql+json'],
         })
-        monaco.languages.setLanguageConfiguration('hogJson', conf())
-        monaco.languages.setMonarchTokensProvider('hogJson', language())
-        monaco.languages.registerCompletionItemProvider('hogJson', insightsQLAutocompleteProvider(InsightsLanguage.insightsJson))
-        monaco.languages.registerCodeActionProvider('hogJson', insightsQLMetadataProvider())
+        monaco.languages.setLanguageConfiguration('iqlJson', conf())
+        monaco.languages.setMonarchTokensProvider('iqlJson', language())
+        monaco.languages.registerCompletionItemProvider('iqlJson', insightsQLAutocompleteProvider(InsightsLanguage.insightsJson))
+        monaco.languages.registerCodeActionProvider('iqlJson', insightsQLMetadataProvider())
     }
 }
 /* oxlint-enable no-useless-escape */

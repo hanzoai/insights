@@ -19,7 +19,7 @@ const schemaPath = process.env.OPENAPI_SCHEMA_PATH
     : defaultSchemaPath
 
 if (!fs.existsSync(schemaPath)) {
-    console.error(`OpenAPI schema not found at ${schemaPath}. Generate it with \`hogli build:openapi-schema\` first.`)
+    console.error(`OpenAPI schema not found at ${schemaPath}. Generate it with \`insightscli build:openapi-schema\` first.`)
     process.exit(1)
 }
 
@@ -523,7 +523,7 @@ export default defineConfig({
         header: (info) => [
           'Auto-generated from the Django backend OpenAPI schema.',
           'To modify these types, update the Django serializers or views, then run:',
-          '  hogli build:openapi',
+          '  insightscli build:openapi',
           'Questions or issues? #team-devex on Slack',
           '',
           ...(info?.title ? [info.title] : []),

@@ -2,11 +2,11 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 
-use personinsights_proto::personinsights::replica::v1::person_hog_replica_server::{
+use personinsights_proto::personinsights::replica::v1::person_insights_replica_server::{
     PersonInsightsReplica, PersonInsightsReplicaServer,
 };
-use personinsights_proto::personinsights::service::v1::person_hog_service_client::PersonInsightsServiceClient;
-use personinsights_proto::personinsights::service::v1::person_hog_service_server::PersonInsightsServiceServer;
+use personinsights_proto::personinsights::service::v1::person_insights_service_client::PersonInsightsServiceClient;
+use personinsights_proto::personinsights::service::v1::person_insights_service_server::PersonInsightsServiceServer;
 use personinsights_proto::personinsights::types::v1::{
     CheckCohortMembershipRequest, CohortMembershipResponse, DeleteHashKeyOverridesByTeamsRequest,
     DeleteHashKeyOverridesByTeamsResponse, GetDistinctIdsForPersonRequest,

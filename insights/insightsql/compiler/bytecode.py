@@ -183,7 +183,7 @@ class BytecodeCompiler(Visitor):
         # You may enter "ast" mode with `sql()` or `(select ...)`
         if self.mode == "iql" or isinstance(node, ast.Placeholder):
             return super().visit(node)
-        return self._visit_hog_ast(node)
+        return self._visit_iql_ast(node)
 
     def visit_and(self, node: ast.And):
         response = []
@@ -1004,7 +1004,7 @@ class BytecodeCompiler(Visitor):
             response.append(len(node.attributes) + 1)
         return response
 
-    def _visit_hog_ast(self, node: ast.AST | None):
+    def _visit_iql_ast(self, node: ast.AST | None):
         if node is None:
             return [Operation.NULL]
         if isinstance(node, ast.InsightsQLXTag):
@@ -1057,7 +1057,7 @@ class BytecodeCompiler(Visitor):
                 finally:
                     self.mode = prev_mode
                 return response
-            return self._visit_hog_ast(value)
+            return self._visit_iql_ast(value)
         if isinstance(value, StrEnum):
             return [Operation.STRING, value.value]
         if isinstance(value, int):
@@ -1087,7 +1087,7 @@ class BytecodeCompiler(Visitor):
         prev_mode = self.mode
         self.mode = "ast"
         try:
-            response = self._visit_hog_ast(node)
+            response = self._visit_iql_ast(node)
         finally:
             self.mode = prev_mode
         return response
@@ -1097,13 +1097,13 @@ class BytecodeCompiler(Visitor):
         prev_mode = self.mode
         self.mode = "ast"
         try:
-            response = self._visit_hog_ast(node)
+            response = self._visit_iql_ast(node)
         finally:
             self.mode = prev_mode
         return response
 
 
-def execute_hog(
+def execute_iql(
     source_code: str,
     team: Optional["Team"] = None,
     globals: Optional[dict[str, Any]] = None,
