@@ -442,7 +442,7 @@ Output: {output_data}"""
 
     # Record metrics
     if temporalio.activity.in_activity():
-        increment_key_type("byok" if is_byok else "posthog")
+        increment_key_type("byok" if is_byok else "insights")
         increment_provider_model(provider, model)
         if usage:
             increment_tokens("input", usage.input_tokens)
@@ -508,7 +508,7 @@ async def emit_evaluation_event_activity(
                 if isinstance(event_data["properties"], str)
                 else event_data["properties"]
             ).get("$ai_trace_id"),
-            "$ai_evaluation_key_type": "byok" if result.get("is_byok") else "posthog",
+            "$ai_evaluation_key_type": "byok" if result.get("is_byok") else "insights",
             "$ai_evaluation_key_id": result.get("key_id"),
         }
 
