@@ -205,7 +205,7 @@ elif TEST:
 # Hanzo Datastore (ClickHouse) — read DATASTORE_* with CLICKHOUSE_* fallback
 # Internal Python variable names remain CLICKHOUSE_* for upstream compatibility.
 # All env vars prefer DATASTORE_* but fall back to CLICKHOUSE_* for backward compat.
-CLICKHOUSE_TEST_DB: str = "posthog" + SUFFIX
+CLICKHOUSE_TEST_DB: str = "insights" + SUFFIX
 
 CLICKHOUSE_HOST: str = os.getenv("DATASTORE_HOST", os.getenv("CLICKHOUSE_HOST", "localhost"))
 CLICKHOUSE_OFFLINE_CLUSTER_HOST: str | None = os.getenv("DATASTORE_OFFLINE_CLUSTER_HOST", os.getenv("CLICKHOUSE_OFFLINE_CLUSTER_HOST", None))
@@ -214,7 +214,7 @@ CLICKHOUSE_ENDPOINTS_HOST: str = os.getenv("DATASTORE_ENDPOINTS_HOST", os.getenv
 CLICKHOUSE_USER: str = os.getenv("DATASTORE_USER", os.getenv("CLICKHOUSE_USER", "default"))
 CLICKHOUSE_PASSWORD: str = os.getenv("DATASTORE_PASSWORD", os.getenv("CLICKHOUSE_PASSWORD", ""))
 CLICKHOUSE_DATABASE: str = CLICKHOUSE_TEST_DB if TEST else os.getenv("DATASTORE_DATABASE", os.getenv("CLICKHOUSE_DATABASE", "default"))
-CLICKHOUSE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", os.getenv("CLICKHOUSE_CLUSTER", "posthog"))
+CLICKHOUSE_CLUSTER: str = os.getenv("DATASTORE_CLUSTER", os.getenv("CLICKHOUSE_CLUSTER", "insights"))
 CLICKHOUSE_MIGRATIONS_CLUSTER: str = os.getenv("DATASTORE_MIGRATIONS_CLUSTER", os.getenv("CLICKHOUSE_MIGRATIONS_CLUSTER", "posthog_migrations"))
 CLICKHOUSE_CA: str | None = os.getenv("DATASTORE_CA", os.getenv("CLICKHOUSE_CA", None))
 CLICKHOUSE_SECURE: bool = get_from_env("DATASTORE_SECURE", get_from_env("CLICKHOUSE_SECURE", not TEST and not DEBUG, type_cast=str_to_bool), type_cast=str_to_bool)
@@ -464,7 +464,7 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "COMPRESSOR": "insights.caching.zstd_compressor.ZstdCompressor",
         },
-        "KEY_PREFIX": "posthog",
+        "KEY_PREFIX": "insights",
     }
 }
 
@@ -480,7 +480,7 @@ if FLAGS_REDIS_URL:
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "COMPRESSOR": "insights.caching.zstd_compressor.ZstdCompressor",
         },
-        "KEY_PREFIX": "posthog",
+        "KEY_PREFIX": "insights",
     }
 
 QUERY_CACHE_REDIS_CLUSTER_URL: str | None = os.getenv("QUERY_CACHE_REDIS_CLUSTER_URL", None)
@@ -494,7 +494,7 @@ if QUERY_CACHE_REDIS_CLUSTER_URL:
             "CONNECTION_FACTORY": "insights.caching.redis_cluster_connection_factory.RedisClusterConnectionFactory",
             "COMPRESSOR": "insights.caching.zstd_compressor.ZstdCompressor",
         },
-        "KEY_PREFIX": "posthog",
+        "KEY_PREFIX": "insights",
     }
 
 if TEST:

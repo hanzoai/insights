@@ -7,17 +7,17 @@ Policies enforce architectural decisions and coding standards.
 from abc import ABC, abstractmethod
 
 # Apps owned by Insights where policies are enforced
-POSTHOG_OWNED_APPS = ["posthog"]
+INSIGHTS_OWNED_APPS = ["insights"]
 
 
-def is_posthog_app(app_label: str, migration=None) -> bool:
+def is_insights_app(app_label: str, migration=None) -> bool:
     """Check if app is owned by Insights (vs third-party dependency).
 
     Args:
         app_label: The Django app label (e.g., 'insights', 'endpoints')
         migration: Optional migration class to check module path for product apps
     """
-    if app_label in POSTHOG_OWNED_APPS:
+    if app_label in INSIGHTS_OWNED_APPS:
         return True
 
     # Product apps have short labels like 'endpoints' but modules under 'products.*'
@@ -85,7 +85,7 @@ class UUIDPrimaryKeyPolicy(MigrationPolicy):
 
     def check_migration(self, migration) -> list[str]:
         """Only enforce on Insights-owned apps."""
-        if not is_posthog_app(migration.app_label, migration):
+        if not is_insights_app(migration.app_label, migration):
             return []
 
         violations = []
@@ -115,7 +115,7 @@ class AtomicFalsePolicy(MigrationPolicy):
         return []  # Checked at migration level
 
     def check_migration(self, migration) -> list[str]:
-        if not is_posthog_app(migration.app_label, migration):
+        if not is_insights_app(migration.app_label, migration):
             return []
 
         is_atomic = getattr(migration, "atomic", True)
