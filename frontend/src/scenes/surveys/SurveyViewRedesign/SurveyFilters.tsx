@@ -143,7 +143,7 @@ export function SurveyResultsFiltersBar(): JSX.Element {
                             TaxonomicFilterGroupType.PersonProperties,
                             TaxonomicFilterGroupType.EventFeatureFlags,
                             TaxonomicFilterGroupType.Cohorts,
-                            TaxonomicFilterGroupType.HogQLExpression,
+                            TaxonomicFilterGroupType.InsightsQLExpression,
                             ...groupsTaxonomicTypes,
                         ]}
                     />

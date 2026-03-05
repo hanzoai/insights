@@ -1,11 +1,11 @@
 import dataclasses
 from copy import deepcopy
 
-from posthog.hogql.escape_sql import escape_hogql_string
+from posthog.insightsql.escape_sql import escape_insightsql_string
 
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, HogFunctionTemplateMigrator
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, CustomFunctionTemplateMigrator
 
-template: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="beta",
     free=False,
     type="destination",
@@ -14,7 +14,7 @@ template: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Avo",
     icon_url="/static/services/avo.png",
     category=["Analytics"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.apiKey) or empty(inputs.environment)) {
     print('API Key and environment has to be set. Skipping...')
@@ -134,7 +134,7 @@ fetch('https://api.avo.app/inspector/posthog/v1/track', {
 )
 
 
-class TemplateAvoMigrator(HogFunctionTemplateMigrator):
+class TemplateAvoMigrator(CustomFunctionTemplateMigrator):
     plugin_url = "https://github.com/PostHog/posthog-avo-plugin"
 
     @classmethod
@@ -162,14 +162,14 @@ class TemplateAvoMigrator(HogFunctionTemplateMigrator):
                 {"id": event, "name": event, "type": "events", "order": 0} for event in events_to_include
             ]
         elif events_to_exclude:
-            event_string = ", ".join(escape_hogql_string(event) for event in events_to_exclude)
+            event_string = ", ".join(escape_insightsql_string(event) for event in events_to_exclude)
             hf["filters"]["events"] = [
                 {
                     "id": None,
                     "name": "All events",
                     "type": "events",
                     "order": 0,
-                    "properties": [{"key": f"event not in ({event_string})", "type": "hogql"}],
+                    "properties": [{"key": f"event not in ({event_string})", "type": "insightsql"}],
                 }
             ]
 

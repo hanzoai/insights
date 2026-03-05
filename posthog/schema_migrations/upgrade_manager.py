@@ -2,7 +2,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING
 
-from posthog.hogql_queries.legacy_compatibility.flagged_conversion_manager import conversion_to_query_based
+from posthog.insightsql_queries.legacy_compatibility.flagged_conversion_manager import conversion_to_query_based
 from posthog.schema_migrations.upgrade import upgrade
 
 if TYPE_CHECKING:

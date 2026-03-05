@@ -3,7 +3,7 @@ import { subscriptions } from 'kea-subscriptions'
 
 import { getVariablesFromQuery, haveVariablesOrFiltersChanged } from 'scenes/insights/utils/queryUtils'
 
-import { DataVisualizationNode, HogQLVariable } from '~/queries/schema/schema-general'
+import { DataVisualizationNode, InsightsQLVariable } from '~/queries/schema/schema-general'
 import { DashboardType } from '~/types'
 
 import { dataVisualizationLogic } from '../../dataVisualizationLogic'
@@ -44,9 +44,9 @@ export const variablesLogic = kea<variablesLogicType>([
         values: [dataVisualizationLogic, ['query'], variableDataLogic, ['variables', 'variablesLoading']],
     })),
     actions(({ values }) => ({
-        addVariable: (variable: HogQLVariable) => ({ variable }),
-        _addVariable: (variable: HogQLVariable) => ({ variable }),
-        addVariables: (variables: HogQLVariable[]) => ({ variables }),
+        addVariable: (variable: InsightsQLVariable) => ({ variable }),
+        _addVariable: (variable: InsightsQLVariable) => ({ variable }),
+        addVariables: (variables: InsightsQLVariable[]) => ({ variables }),
         removeVariable: (variableId: string) => ({ variableId }),
         _removeVariable: (variableId: string) => ({ variableId }),
         updateVariableValue: (variableId: string, value: any, isNull: boolean) => ({
@@ -58,7 +58,7 @@ export const variablesLogic = kea<variablesLogicType>([
         setEditorQuery: (query: string) => ({ query }),
         updateSourceQuery: true,
         resetVariables: true,
-        updateInternalSelectedVariable: (variable: HogQLVariable) => ({ variable }),
+        updateInternalSelectedVariable: (variable: InsightsQLVariable) => ({ variable }),
         setSearchTerm: (search: string) => ({ search }),
         clickVariable: (variable: Variable & { selected: boolean }) => ({ variable }),
     })),
@@ -81,7 +81,7 @@ export const variablesLogic = kea<variablesLogicType>([
     }),
     reducers({
         internalSelectedVariables: [
-            [] as HogQLVariable[],
+            [] as InsightsQLVariable[],
             {
                 addVariable: (state, { variable }) => {
                     if (state.find((n) => variable.variableId === n.variableId)) {
@@ -331,7 +331,7 @@ export const variablesLogic = kea<variablesLogicType>([
 
                             return acc
                         },
-                        {} as Record<string, HogQLVariable>
+                        {} as Record<string, InsightsQLVariable>
                     ),
                 },
             }

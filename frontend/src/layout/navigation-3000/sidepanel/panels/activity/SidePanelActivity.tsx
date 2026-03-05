@@ -16,7 +16,7 @@ import { LemonMenuItems } from 'lib/lemon-ui/LemonMenu/LemonMenu'
 import { IconWithCount } from 'lib/lemon-ui/icons'
 import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { userHasAccess } from 'lib/utils/accessControlUtils'
-import { HOG_FUNCTION_SUB_TEMPLATES } from 'scenes/hog-functions/sub-templates/sub-templates'
+import { CUSTOM_FUNCTION_SUB_TEMPLATES } from 'scenes/custom-functions/sub-templates/sub-templates'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
@@ -173,7 +173,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                         items={
                                             [
                                                 {
-                                                    items: HOG_FUNCTION_SUB_TEMPLATES['activity-log'].map(
+                                                    items: CUSTOM_FUNCTION_SUB_TEMPLATES['activity-log'].map(
                                                         (subTemplate) => {
                                                             // Build property filters based on context
                                                             const properties: CyclotronJobFilterPropertyFilter[] = [
@@ -196,7 +196,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                                             }
 
                                                             // Create filters with properties at the top level
-                                                            // HogFunctionFiltersInternal expects filters.properties, not filters.events[0].properties
+                                                            // CustomFunctionFiltersInternal expects filters.properties, not filters.events[0].properties
                                                             const filters = {
                                                                 events: subTemplate.filters?.events || [],
                                                                 properties,
@@ -210,7 +210,7 @@ export const SidePanelActivity = (): JSX.Element => {
                                                             }
 
                                                             const url = combineUrl(
-                                                                urls.hogFunctionNew(subTemplate.template_id),
+                                                                urls.customFunctionNew(subTemplate.template_id),
                                                                 {},
                                                                 { configuration }
                                                             ).url

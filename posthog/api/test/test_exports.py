@@ -22,7 +22,7 @@ from parameterized import parameterized
 from prometheus_client import CollectorRegistry, Counter
 from rest_framework import status
 
-from posthog.hogql.errors import QueryError
+from posthog.insightsql.errors import QueryError
 
 from posthog.api.insight import InsightSerializer
 from posthog.errors import CHQueryErrorTooManySimultaneousQueries
@@ -35,7 +35,7 @@ from posthog.models.organization import Organization
 from posthog.models.subscription import Subscription
 from posthog.models.team import Team
 from posthog.settings import (
-    HOGQL_INCREASED_MAX_EXECUTION_TIME,
+    INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME,
     OBJECT_STORAGE_ACCESS_KEY_ID,
     OBJECT_STORAGE_BUCKET,
     OBJECT_STORAGE_ENDPOINT,
@@ -537,8 +537,8 @@ class TestExports(APIBaseTest):
         self.assertEqual(len(response.json()["results"]), 2)
 
     def test_list_shows_stuck_exports_as_failed_in_response(self) -> None:
-        with freeze_time(now() - timedelta(seconds=2 * HOGQL_INCREASED_MAX_EXECUTION_TIME)):
-            # Create an export that's older than HOGQL_INCREASED_MAX_EXECUTION_TIME
+        with freeze_time(now() - timedelta(seconds=2 * INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME)):
+            # Create an export that's older than INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
             stuck_export = ExportedAsset.objects.create(
                 team=self.team,
                 dashboard_id=self.dashboard.id,
@@ -555,7 +555,7 @@ class TestExports(APIBaseTest):
                 dashboard_id=self.dashboard.id,
                 export_format="image/png",
                 created_by=self.user,
-                created_at=now() - timedelta(seconds=HOGQL_INCREASED_MAX_EXECUTION_TIME + 100),
+                created_at=now() - timedelta(seconds=INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME + 100),
                 content=b"some content",
                 exception=None,
             )
@@ -566,7 +566,7 @@ class TestExports(APIBaseTest):
                 dashboard_id=self.dashboard.id,
                 export_format="image/png",
                 created_by=self.user,
-                created_at=now() - timedelta(seconds=HOGQL_INCREASED_MAX_EXECUTION_TIME + 100),
+                created_at=now() - timedelta(seconds=INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME + 100),
                 content=None,
                 exception="exception",
             )
@@ -610,14 +610,14 @@ class TestExports(APIBaseTest):
         self.assertIsNone(completed_export.exception)
 
     def test_retrieve_shows_stuck_export_as_failed_in_response(self) -> None:
-        with freeze_time(now() - timedelta(seconds=2 * HOGQL_INCREASED_MAX_EXECUTION_TIME)):
-            # Create an export that's older than HOGQL_INCREASED_MAX_EXECUTION_TIME
+        with freeze_time(now() - timedelta(seconds=2 * INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME)):
+            # Create an export that's older than INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME
             stuck_export = ExportedAsset.objects.create(
                 team=self.team,
                 dashboard_id=self.dashboard.id,
                 export_format="image/png",
                 created_by=self.user,
-                created_at=now() - timedelta(seconds=HOGQL_INCREASED_MAX_EXECUTION_TIME + 100),
+                created_at=now() - timedelta(seconds=INSIGHTSQL_INCREASED_MAX_EXECUTION_TIME + 100),
                 content=None,
                 content_location=None,
                 exception=None,
@@ -917,7 +917,7 @@ class TestExports(APIBaseTest):
     @patch("posthog.tasks.exports.image_exporter.export_image")
     def test_synchronous_export_records_failure_on_query_error(self, mock_export_direct) -> None:
         """Test that synchronous exports record failure info when a QueryError occurs."""
-        from posthog.hogql.errors import QueryError
+        from posthog.insightsql.errors import QueryError
 
         mock_export_direct.side_effect = QueryError("Unknown table 'nonexistent_table'")
 

@@ -147,7 +147,7 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
     def test_sharing_access_token_cannot_override_variables(self):
         """
         Test that variables_override parameter is ignored when using sharing access tokens.
-        Variables only work in HogQL queries, not TrendsQuery.
+        Variables only work in InsightsQL queries, not TrendsQuery.
         """
         from posthog.models.insight_variable import InsightVariable
 
@@ -156,15 +156,15 @@ class SharingAccessTokenSecurityTest(APIBaseTest):
             team=self.team, name="Test Event Variable", code_name="test_event", type="String", default_value="pageview"
         )
 
-        # Create an insight that uses HogQL with a variable
+        # Create an insight that uses InsightsQL with a variable
         insight = Insight.objects.create(
-            name="Test HogQL Insight with Variable",
+            name="Test InsightsQL Insight with Variable",
             team=self.team,
             created_by=self.user,
             query={
                 "kind": "DataVisualizationNode",
                 "source": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT event, count() FROM events WHERE event = {variables.test_event} GROUP BY event",
                     "variables": {
                         str(variable.id): {

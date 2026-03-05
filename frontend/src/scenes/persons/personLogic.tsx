@@ -6,14 +6,14 @@ import api from 'lib/api'
 import { Scene } from 'scenes/sceneTypes'
 import { sceneConfigurations } from 'scenes/scenes'
 
-import { HogQLQuery, NodeKind } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
+import { insightsql } from '~/queries/utils'
 import { Breadcrumb, PersonType } from '~/types'
 
 import { CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS } from 'products/customer_analytics/frontend/constants'
 import { revenueAnalyticsLogic } from 'products/revenue_analytics/frontend/revenueAnalyticsLogic'
 
-import { getHogqlQueryStringForPersonId } from './person-utils'
+import { getInsightsqlQueryStringForPersonId } from './person-utils'
 import type { personLogicType } from './personLogicType'
 
 export interface PersonLogicProps {
@@ -69,10 +69,10 @@ export const personLogic = kea<personLogicType>([
                     if (props.id == null) {
                         return null
                     }
-                    const queryResponse = await api.query<HogQLQuery>(
+                    const queryResponse = await api.query<InsightsQLQuery>(
                         {
-                            kind: NodeKind.HogQLQuery,
-                            query: getHogqlQueryStringForPersonId(),
+                            kind: NodeKind.InsightsQLQuery,
+                            query: getInsightsqlQueryStringForPersonId(),
                             values: { id: props.id },
                             tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
                         },
@@ -102,7 +102,7 @@ export const personLogic = kea<personLogicType>([
                         return null
                     }
 
-                    const infoQuery = hogql`
+                    const infoQuery = insightsql`
                     SELECT
                         count(DISTINCT $session_id) as session_count,
                         count(*) as event_count,
@@ -112,7 +112,7 @@ export const personLogic = kea<personLogicType>([
                     AND timestamp >= now() - interval 30 day
                     `
                     try {
-                        const response = await api.queryHogQL(infoQuery, CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS)
+                        const response = await api.queryInsightsQL(infoQuery, CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS)
                         const row = response.results?.[0]
                         if (!row) {
                             return {
@@ -145,7 +145,7 @@ export const personLogic = kea<personLogicType>([
 
                     try {
                         const result = await api.query({
-                            kind: NodeKind.HogQLQuery,
+                            kind: NodeKind.InsightsQLQuery,
                             tags: CUSTOMER_ANALYTICS_DEFAULT_QUERY_TAGS,
                             query: `
                     SELECT mrr, revenue

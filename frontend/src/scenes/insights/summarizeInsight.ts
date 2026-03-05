@@ -28,7 +28,7 @@ import {
     isDataTableNode,
     isEventsQuery,
     isFunnelsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isInsightVizNode,
     isLifecycleQuery,
     isPathsQuery,
@@ -238,12 +238,12 @@ export function summarizeInsightQuery(query: InsightQueryNode, context: SummaryC
 }
 
 function summarizeQuery(query: Node): string {
-    if (isHogQLQuery(query)) {
+    if (isInsightsQLQuery(query)) {
         return 'SQL query'
     }
 
     if (isDataTableNode(query)) {
-        if (isHogQLQuery(query.source)) {
+        if (isInsightsQLQuery(query.source)) {
             return summarizeQuery(query.source)
         }
 

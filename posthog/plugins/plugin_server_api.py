@@ -37,14 +37,14 @@ def drop_action_on_workers(team_id: int, action_id: int):
     publish_message("drop-action", {"teamId": team_id, "actionId": action_id})
 
 
-def reload_hog_functions_on_workers(team_id: int, hog_function_ids: list[str]):
-    logger.info(f"Reloading hog functions {hog_function_ids} on workers")
-    publish_message("reload-hog-functions", {"teamId": team_id, "hogFunctionIds": hog_function_ids})
+def reload_custom_functions_on_workers(team_id: int, custom_function_ids: list[str]):
+    logger.info(f"Reloading custom functions {custom_function_ids} on workers")
+    publish_message("reload-hog-functions", {"teamId": team_id, "customFunctionIds": custom_function_ids})
 
 
-def reload_hog_flows_on_workers(team_id: int, hog_flow_ids: list[str]):
-    logger.info(f"Reloading hog flows {hog_flow_ids} on workers")
-    publish_message("reload-hog-flows", {"teamId": team_id, "hogFlowIds": hog_flow_ids})
+def reload_custom_flows_on_workers(team_id: int, custom_flow_ids: list[str]):
+    logger.info(f"Reloading hog flows {custom_flow_ids} on workers")
+    publish_message("reload-hog-flows", {"teamId": team_id, "hogFlowIds": custom_flow_ids})
 
 
 def reload_evaluations_on_workers(team_id: int, evaluation_ids: list[str]):
@@ -52,8 +52,8 @@ def reload_evaluations_on_workers(team_id: int, evaluation_ids: list[str]):
     publish_message("reload-evaluations", {"teamId": team_id, "evaluationIds": evaluation_ids})
 
 
-def reload_all_hog_functions_on_workers():
-    logger.info(f"Reloading all hog functions on workers")
+def reload_all_custom_functions_on_workers():
+    logger.info(f"Reloading all custom functions on workers")
     publish_message("reload-all-hog-functions", {})
 
 
@@ -67,34 +67,34 @@ def populate_plugin_capabilities_on_workers(plugin_id: str):
     publish_message("populate-plugin-capabilities", {"pluginId": plugin_id})
 
 
-def create_hog_invocation_test(team_id: int, hog_function_id: str, payload: dict) -> requests.Response:
-    logger.info(f"Creating hog invocation test for hog function {hog_function_id} on workers")
+def create_hog_invocation_test(team_id: int, custom_function_id: str, payload: dict) -> requests.Response:
+    logger.info(f"Creating hog invocation test for custom function {custom_function_id} on workers")
     return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/hog_functions/{hog_function_id}/invocations",
+        CDP_API_URL + f"/api/projects/{team_id}/custom_functions/{custom_function_id}/invocations",
         json=payload,
         headers=get_internal_api_headers(),
     )
 
 
-def create_hog_flow_invocation_test(team_id: int, hog_flow_id: str, payload: dict) -> requests.Response:
-    logger.info(f"Creating hog flow invocation test for hog flow {hog_flow_id} on workers")
+def create_custom_flow_invocation_test(team_id: int, custom_flow_id: str, payload: dict) -> requests.Response:
+    logger.info(f"Creating hog flow invocation test for hog flow {custom_flow_id} on workers")
     return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/invocations",
+        CDP_API_URL + f"/api/projects/{team_id}/custom_flows/{custom_flow_id}/invocations",
         json=payload,
         headers=get_internal_api_headers(),
     )
 
 
-def get_hog_function_status(team_id: int, hog_function_id: UUIDT) -> requests.Response:
+def get_custom_function_status(team_id: int, custom_function_id: UUIDT) -> requests.Response:
     return requests.get(
-        CDP_API_URL + f"/api/projects/{team_id}/hog_functions/{hog_function_id}/status",
+        CDP_API_URL + f"/api/projects/{team_id}/custom_functions/{custom_function_id}/status",
         headers=get_internal_api_headers(),
     )
 
 
-def patch_hog_function_status(team_id: int, hog_function_id: UUIDT, state: int) -> requests.Response:
+def patch_custom_function_status(team_id: int, custom_function_id: UUIDT, state: int) -> requests.Response:
     return requests.patch(
-        CDP_API_URL + f"/api/projects/{team_id}/hog_functions/{hog_function_id}/status",
+        CDP_API_URL + f"/api/projects/{team_id}/custom_functions/{custom_function_id}/status",
         json={"state": state},
         headers=get_internal_api_headers(),
     )
@@ -119,16 +119,16 @@ def validate_messaging_preferences_token(token: str) -> requests.Response:
     )
 
 
-def get_hog_function_templates() -> requests.Response:
+def get_custom_function_templates() -> requests.Response:
     return requests.get(
-        CDP_API_URL + "/api/hog_function_templates",
+        CDP_API_URL + "/api/custom_function_templates",
         headers=get_internal_api_headers(),
     )
 
 
-def create_batch_hog_flow_job_invocation(team_id: int, hog_flow_id: UUIDT, batch_job_id: UUIDT) -> requests.Response:
+def create_batch_custom_flow_job_invocation(team_id: int, custom_flow_id: UUIDT, batch_job_id: UUIDT) -> requests.Response:
     return requests.post(
-        CDP_API_URL + f"/api/projects/{team_id}/hog_flows/{hog_flow_id}/batch_invocations/{batch_job_id}",
+        CDP_API_URL + f"/api/projects/{team_id}/custom_flows/{custom_flow_id}/batch_invocations/{batch_job_id}",
         headers=get_internal_api_headers(),
     )
 

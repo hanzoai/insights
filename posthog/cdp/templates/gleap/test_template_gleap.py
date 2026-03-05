@@ -1,5 +1,5 @@
 from posthog.cdp.templates.gleap.template_gleap import template as template_gleap
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 
 
 def create_inputs(**kwargs):
@@ -14,7 +14,7 @@ def create_inputs(**kwargs):
     return inputs
 
 
-class TestTemplateGleap(BaseHogFunctionTemplateTest):
+class TestTemplateGleap(BaseCustomFunctionTemplateTest):
     template = template_gleap
 
     def test_function_works(self):

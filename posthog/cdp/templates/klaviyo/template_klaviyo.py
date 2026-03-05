@@ -1,6 +1,6 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC
 
-template_user: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_user: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -9,7 +9,7 @@ template_user: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Updates a contact in Klaviyo",
     icon_url="/static/services/klaviyo.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.externalId) and empty(inputs.email)) {
     print('Email or External ID has to be set. Skipping...')
@@ -135,7 +135,7 @@ print(f'{action} profile successfully: id={profileId}')
     },
 )
 
-template_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_event: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     status="stable",
     free=False,
     type="destination",
@@ -144,7 +144,7 @@ template_event: HogFunctionTemplateDC = HogFunctionTemplateDC(
     description="Send events to Klaviyo",
     icon_url="/static/services/klaviyo.png",
     category=["Email Marketing"],
-    code_language="hog",
+    code_language="custom_script",
     code="""
 if (empty(inputs.externalId) and empty(inputs.email)) {
     print('Email or External ID has to be set. Skipping...')

@@ -5,7 +5,7 @@ import { Dayjs, dayjs } from 'lib/dayjs'
 import { TimeTree } from 'lib/utils/time-tree'
 
 import { EventsQuery, NodeKind } from '~/queries/schema/schema-general'
-import { HogQLQueryString, hogql } from '~/queries/utils'
+import { InsightsQLQueryString, insightsql } from '~/queries/utils'
 
 export function BasePreview({
     name,
@@ -149,7 +149,7 @@ export abstract class EventLoader<T extends TimelineItem> extends QueryLoader<T>
 export abstract class LogEntryLoader<T extends TimelineItem> extends QueryLoader<T> implements ItemLoader<T> {
     async queryFrom(from: Dayjs, limit: number): Promise<T[]> {
         const query = this.buildQueryFrom(from, limit)
-        const response = await api.queryHogQL(query, { scene: 'ReplaySingle', productKey: 'session_replay' })
+        const response = await api.queryInsightsQL(query, { scene: 'ReplaySingle', productKey: 'session_replay' })
         return response.results.map((row) =>
             this.buildItem({
                 timestamp: dayjs.utc(row[0]),
@@ -161,7 +161,7 @@ export abstract class LogEntryLoader<T extends TimelineItem> extends QueryLoader
 
     async queryTo(to: Dayjs, limit: number): Promise<T[]> {
         const query = this.buildQueryTo(to, limit)
-        const response = await api.queryHogQL(query, { scene: 'ReplaySingle', productKey: 'session_replay' })
+        const response = await api.queryInsightsQL(query, { scene: 'ReplaySingle', productKey: 'session_replay' })
         return response.results.map((row) =>
             this.buildItem({
                 timestamp: dayjs.utc(row[0]),
@@ -171,12 +171,12 @@ export abstract class LogEntryLoader<T extends TimelineItem> extends QueryLoader
         )
     }
 
-    buildQueryFrom(from: Dayjs, limit: number): HogQLQueryString {
-        return hogql`SELECT timestamp, level, message FROM log_entries WHERE log_source = ${this.logSource()} AND log_source_id = ${this.logSourceId()} AND timestamp >= ${from} and timestamp <= ${from.add(6, 'hours')} ORDER BY timestamp ASC LIMIT ${limit}`
+    buildQueryFrom(from: Dayjs, limit: number): InsightsQLQueryString {
+        return insightsql`SELECT timestamp, level, message FROM log_entries WHERE log_source = ${this.logSource()} AND log_source_id = ${this.logSourceId()} AND timestamp >= ${from} and timestamp <= ${from.add(6, 'hours')} ORDER BY timestamp ASC LIMIT ${limit}`
     }
 
-    buildQueryTo(to: Dayjs, limit: number): HogQLQueryString {
-        return hogql`SELECT timestamp, level, message FROM log_entries WHERE log_source = ${this.logSource()} AND log_source_id = ${this.logSourceId()} AND timestamp <= ${to} and timestamp >= ${to.subtract(6, 'hours')} ORDER BY timestamp DESC LIMIT ${limit}`
+    buildQueryTo(to: Dayjs, limit: number): InsightsQLQueryString {
+        return insightsql`SELECT timestamp, level, message FROM log_entries WHERE log_source = ${this.logSource()} AND log_source_id = ${this.logSourceId()} AND timestamp <= ${to} and timestamp >= ${to.subtract(6, 'hours')} ORDER BY timestamp DESC LIMIT ${limit}`
     }
 
     abstract logSource(): string

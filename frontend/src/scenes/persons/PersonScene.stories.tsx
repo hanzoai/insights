@@ -94,7 +94,7 @@ const meta: Meta = {
                     // Check if it's a DataTableNode query, which is used for Events/Exceptions tabs
                     if (
                         query &&
-                        query.kind === 'HogQLQuery' &&
+                        query.kind === 'InsightsQLQuery' &&
                         query.values.id === '741cc6c0-7c48-55f2-9b58-1b648a381c9e'
                     ) {
                         return [

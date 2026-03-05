@@ -11,7 +11,7 @@ from prometheus_client import Counter
 
 from posthog.caching.calculate_results import calculate_cache_key
 from posthog.caching.utils import active_teams
-from posthog.hogql_queries.query_runner import get_query_runner_or_none
+from posthog.insightsql_queries.query_runner import get_query_runner_or_none
 from posthog.models.dashboard_tile import DashboardTile
 from posthog.models.insight import Insight, InsightViewed
 from posthog.models.insight_caching_state import InsightCachingState

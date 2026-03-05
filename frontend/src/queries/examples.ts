@@ -9,7 +9,7 @@ import {
     EventsNode,
     EventsQuery,
     FunnelsQuery,
-    HogQLQuery,
+    InsightsQLQuery,
     HogQuery,
     InsightVizNode,
     LifecycleQuery,
@@ -278,8 +278,8 @@ const InsightLifecycleQuery: LifecycleQuery = {
     series, // TODO: Visualization only supports one event or action
 }
 
-const HogQLRaw: HogQLQuery = {
-    kind: NodeKind.HogQLQuery,
+const InsightsQLRaw: InsightsQLQuery = {
+    kind: NodeKind.InsightsQLQuery,
     query: `   select event,
           person.properties.email,
           properties.$browser,
@@ -299,8 +299,8 @@ const HogQLRaw: HogQLQuery = {
     },
 }
 
-const HogQLForDataVisualization: HogQLQuery = {
-    kind: NodeKind.HogQLQuery,
+const InsightsQLForDataVisualization: InsightsQLQuery = {
+    kind: NodeKind.InsightsQLQuery,
     query: `select toDate(timestamp) as timestamp, count()
 from events
 where timestamp >= now() - interval '7 days'
@@ -309,8 +309,8 @@ order by timestamp asc
 limit 100`,
 }
 
-const HogQLForDataWarehouse: HogQLQuery = {
-    kind: NodeKind.HogQLQuery,
+const InsightsQLForDataWarehouse: InsightsQLQuery = {
+    kind: NodeKind.InsightsQLQuery,
     query: `select toDate(timestamp) as timestamp, count()
 from events
 group by timestamp
@@ -320,18 +320,18 @@ limit 100`,
 
 const DataWarehouse: DataVisualizationNode = {
     kind: NodeKind.DataVisualizationNode,
-    source: HogQLForDataWarehouse,
+    source: InsightsQLForDataWarehouse,
 }
 
-const HogQLTable: DataTableNode = {
+const InsightsQLTable: DataTableNode = {
     kind: NodeKind.DataTableNode,
     full: true,
-    source: HogQLRaw,
+    source: InsightsQLRaw,
 }
 
 const DataVisualization: DataVisualizationNode = {
     kind: NodeKind.DataVisualizationNode,
-    source: HogQLForDataVisualization,
+    source: InsightsQLForDataVisualization,
     tableSettings: {
         columns: [
             {
@@ -517,7 +517,7 @@ const WebAnalyticsRetention: InsightVizNode<RetentionQuery> = {
     },
 }
 
-/* a subset of examples including only those we can show all users and that don't use HogQL */
+/* a subset of examples including only those we can show all users and that don't use InsightsQL */
 export const queryExamples: Record<string, Node> = {
     Events,
     EventsTable,
@@ -569,10 +569,10 @@ export const stringifiedQueryExamples: Record<string, string> = Object.fromEntri
 
 export const examples: Record<string, Node> = setLatestVersionsOnQuery({
     ...queryExamples,
-    HogQLRaw,
-    HogQLTable,
+    InsightsQLRaw,
+    InsightsQLTable,
     DataVisualization,
-    HogQLForDataVisualization,
+    InsightsQLForDataVisualization,
     Hog,
     Hoggonacci,
     DataWarehouse,

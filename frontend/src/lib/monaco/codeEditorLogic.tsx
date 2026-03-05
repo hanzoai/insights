@@ -17,20 +17,20 @@ import { performQuery } from '~/queries/query'
 import {
     AnyDataNode,
     HogLanguage,
-    HogQLFilters,
-    HogQLMetadata,
-    HogQLMetadataResponse,
-    HogQLNotice,
+    InsightsQLFilters,
+    InsightsQLMetadata,
+    InsightsQLMetadataResponse,
+    InsightsQLNotice,
     NodeKind,
 } from '~/queries/schema/schema-general'
 import { setLatestVersionsOnQuery } from '~/queries/utils'
 
 import type { codeEditorLogicType } from './codeEditorLogicType'
 
-const METADATA_LANGUAGES = [HogLanguage.hog, HogLanguage.hogQL, HogLanguage.hogQLExpr, HogLanguage.hogTemplate]
+const METADATA_LANGUAGES = [HogLanguage.hog, HogLanguage.insightsQL, HogLanguage.insightsQLExpr, HogLanguage.hogTemplate]
 
 export interface ModelMarker extends editor.IMarkerData {
-    hogQLFix?: string
+    insightsQLFix?: string
     start: number
     end: number
 }
@@ -40,17 +40,17 @@ export interface CodeEditorLogicProps {
     query: string
     language: string
     sourceQuery?: AnyDataNode
-    metadataFilters?: HogQLFilters
+    metadataFilters?: InsightsQLFilters
     monaco?: Monaco | null
     editor?: editor.IStandaloneCodeEditor | null
     globals?: Record<string, any>
     onError?: (error: string | null) => void
-    onMetadata?: (metadata: HogQLMetadataResponse | null) => void
+    onMetadata?: (metadata: InsightsQLMetadataResponse | null) => void
     onMetadataLoading?: (loading: boolean) => void
 }
 
 export const codeEditorLogic = kea<codeEditorLogicType>([
-    path(['lib', 'monaco', 'hogQLMetadataProvider']),
+    path(['lib', 'monaco', 'insightsQLMetadataProvider']),
     props({} as CodeEditorLogicProps),
     key((props) => props.key),
     actions({
@@ -61,7 +61,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
     })),
     loaders(({ props }) => ({
         metadata: [
-            null as null | [string, HogQLMetadataResponse],
+            null as null | [string, InsightsQLMetadataResponse],
             {
                 reloadMetadata: async (_, breakpoint) => {
                     const model = props.editor?.getModel()
@@ -77,14 +77,14 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                     }
 
                     const variables =
-                        props.sourceQuery?.kind === NodeKind.HogQLQuery
+                        props.sourceQuery?.kind === NodeKind.InsightsQLQuery
                             ? (props.sourceQuery.variables ?? undefined)
                             : undefined
 
-                    const response = await performQuery<HogQLMetadata>(
+                    const response = await performQuery<InsightsQLMetadata>(
                         setLatestVersionsOnQuery(
                             {
-                                kind: NodeKind.HogQLMetadata,
+                                kind: NodeKind.InsightsQLMetadata,
                                 language: props.language as HogLanguage,
                                 query: query,
                                 filters: props.metadataFilters,
@@ -112,7 +112,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                     const markers: ModelMarker[] = []
                     const [query, metadataResponse] = metadata
 
-                    function noticeToMarker(error: HogQLNotice, severity: MarkerSeverity): ModelMarker {
+                    function noticeToMarker(error: InsightsQLNotice, severity: MarkerSeverity): ModelMarker {
                         const start = model!.getPositionAt(error.start ?? 0)
                         const end = model!.getPositionAt(error.end ?? query.length)
                         return {
@@ -124,7 +124,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                             endColumn: end.column,
                             message: error.message ?? 'Unknown error',
                             severity: severity,
-                            hogQLFix: error.fix,
+                            insightsQLFix: error.fix,
                         }
                     }
 
@@ -138,7 +138,7 @@ export const codeEditorLogic = kea<codeEditorLogicType>([
                         markers.push(noticeToMarker(notice, 1 /* MarkerSeverity.Hint */))
                     }
 
-                    props.monaco?.editor.setModelMarkers(model, 'hogql', markers)
+                    props.monaco?.editor.setModelMarkers(model, 'insightsql', markers)
                     return markers
                 },
             },

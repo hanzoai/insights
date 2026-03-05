@@ -2,16 +2,16 @@ import json
 
 from posthog.test.base import APIBaseTest, ClickhouseTestMixin, QueryMatchingTest
 
-from posthog.hogql.compiler.bytecode import create_bytecode
+from posthog.insightsql.compiler.bytecode import create_bytecode
 
-from posthog.cdp.filters import compile_filters_bytecode, hog_function_filters_to_expr
+from posthog.cdp.filters import compile_filters_bytecode, custom_function_filters_to_expr
 from posthog.models.action.action import Action
 
 from common.hogvm.python.execute import execute_bytecode
-from common.hogvm.python.operation import HOGQL_BYTECODE_VERSION
+from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
-class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
+class TestCustomFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest):
     action: Action
     filters: dict
 
@@ -62,13 +62,13 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
         }
 
     def filters_to_bytecode(self, filters: dict):
-        res = hog_function_filters_to_expr(filters=filters, team=self.team, actions={self.action.id: self.action})
+        res = custom_function_filters_to_expr(filters=filters, team=self.team, actions={self.action.id: self.action})
 
         return json.loads(json.dumps(create_bytecode(res).bytecode))
 
     def test_filters_empty(self):
         bytecode = self.filters_to_bytecode(filters={})
-        assert bytecode == ["_H", HOGQL_BYTECODE_VERSION, 29]
+        assert bytecode == ["_H", INSIGHTSQL_BYTECODE_VERSION, 29]
         assert execute_bytecode(bytecode, {}).result is True
 
     def test_filters_all_events(self):
@@ -84,7 +84,7 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
                 ]
             }
         )
-        assert bytecode == ["_H", HOGQL_BYTECODE_VERSION, 29]
+        assert bytecode == ["_H", INSIGHTSQL_BYTECODE_VERSION, 29]
 
         assert execute_bytecode(bytecode, {}).result is True
 
@@ -93,7 +93,7 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
             filters={
                 "properties": [
                     {
-                        "type": "hogql",
+                        "type": "insightsql",
                         "key": "(select 1)",
                     }
                 ]
@@ -106,7 +106,7 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
         bytecode = self.filters_to_bytecode(filters={"events": self.filters["events"]})
         assert bytecode == [
             "_H",
-            HOGQL_BYTECODE_VERSION,
+            INSIGHTSQL_BYTECODE_VERSION,
             32,
             "$pageview",
             32,
@@ -134,7 +134,7 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
         bytecode = self.filters_to_bytecode(filters={"actions": self.filters["actions"]})
         assert bytecode == [
             "_H",
-            HOGQL_BYTECODE_VERSION,
+            INSIGHTSQL_BYTECODE_VERSION,
             32,
             "$pageview",
             32,
@@ -156,14 +156,14 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
         ]
 
         # Also works if we don't pass the actions dict
-        expr = hog_function_filters_to_expr(filters={"actions": self.filters["actions"]}, team=self.team, actions={})
+        expr = custom_function_filters_to_expr(filters={"actions": self.filters["actions"]}, team=self.team, actions={})
         bytecode_2 = create_bytecode(expr).bytecode
         assert bytecode == bytecode_2
 
     def test_filters_properties(self):
         assert self.filters_to_bytecode(filters={"properties": self.filters["properties"]}) == [
             "_H",
-            HOGQL_BYTECODE_VERSION,
+            INSIGHTSQL_BYTECODE_VERSION,
             32,
             "%@posthog.com%",
             32,
@@ -197,7 +197,7 @@ class TestHogFunctionFilters(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest
         bytecode = self.filters_to_bytecode(filters=self.filters)
         assert bytecode == [
             "_H",
-            HOGQL_BYTECODE_VERSION,
+            INSIGHTSQL_BYTECODE_VERSION,
             32,
             "%@posthog.com%",
             32,
@@ -299,7 +299,7 @@ class TestCohortExprHelpers(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest)
         bytecode = create_bytecode(expr).bytecode
         assert bytecode == [
             "_H",
-            HOGQL_BYTECODE_VERSION,
+            INSIGHTSQL_BYTECODE_VERSION,
             32,
             "$pageview",
             32,
@@ -356,7 +356,7 @@ class TestCohortExprHelpers(ClickhouseTestMixin, APIBaseTest, QueryMatchingTest)
         bytecode = create_bytecode(expr).bytecode
         assert bytecode == [
             "_H",
-            HOGQL_BYTECODE_VERSION,
+            INSIGHTSQL_BYTECODE_VERSION,
             32,
             "$pageview",
             32,

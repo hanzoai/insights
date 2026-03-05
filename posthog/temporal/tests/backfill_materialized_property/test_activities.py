@@ -25,7 +25,7 @@ class TestPropertyExtractionSQL:
     @pytest.mark.parametrize(
         "property_type,expected_fragments",
         [
-            # String type uses base extraction with nullIf handling (HogQL pattern)
+            # String type uses base extraction with nullIf handling (InsightsQL pattern)
             ("String", ["replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(properties, %(property_name)s)", "'null')"]),
             ("Numeric", ["toFloat64OrNull("]),
             ("Boolean", ["transform(toString(", "['true', 'false'], [1, 0], NULL)"]),

@@ -35,13 +35,13 @@ export const THINKING_MESSAGES = [
     'Hunting', // focused seeking
     'Swizzling', // techy weirdness
     'Grokking', // deep understanding
-    'Hedging', // hedgehog pun
+    'Hedging', // considering alternatives
     'Scheming', // clever planning
     'Unfurling', // opening up ideas
     'Puzzling', // solving something tricky
     'Dissecting', // breaking it apart
     'Stacking', // building layers
-    'Snuffling', // hedgehog behavior
+    'Snuffling', // searching around
     'Hashing', // working something out
     'Clustering', // grouping related things
     'Teasing', // nudging out meaning

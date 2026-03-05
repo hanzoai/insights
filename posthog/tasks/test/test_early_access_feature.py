@@ -1,7 +1,7 @@
 from posthog.test.base import APIBaseTest
 from unittest.mock import MagicMock, patch
 
-from posthog.hogql.constants import DEFAULT_RETURNED_ROWS
+from posthog.insightsql.constants import DEFAULT_RETURNED_ROWS
 
 from posthog.models.feature_flag.feature_flag import FeatureFlag
 from posthog.models.person.person import Person
@@ -70,7 +70,7 @@ class TestSendEventsForEarlyAccessFeatureStageChange(APIBaseTest):
         mock_capture.assert_not_called()
 
     @patch("posthog.tasks.early_access_feature.capture_event")
-    def test_sends_events_for_all_enrolled_users_over_default_hogql_limit(self, mock_capture: MagicMock) -> None:
+    def test_sends_events_for_all_enrolled_users_over_default_insightsql_limit(self, mock_capture: MagicMock) -> None:
         team = Team.objects.create(organization=self.organization)
         feature_flag = FeatureFlag.objects.create(team=team, key="test-limit-flag", filters={})
         feature = EarlyAccessFeature.objects.create(

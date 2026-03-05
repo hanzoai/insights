@@ -9,7 +9,7 @@ from botocore.client import Config
 
 from posthog.api.insight_variable import map_stale_to_latest
 from posthog.caching.fetch_from_cache import InsightResult
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.models import Dashboard, ExportedAsset, Insight, InsightVariable
 from posthog.models.dashboard_tile import DashboardTile
 from posthog.settings import (
@@ -120,7 +120,7 @@ class TestImageExporter(APIBaseTest):
                 name=f"SQL Insight {i}",
                 query={
                     "kind": "DataVisualizationNode",
-                    "source": {"kind": "HogQLQuery", "query": f"SELECT {i} as value"},
+                    "source": {"kind": "InsightsQLQuery", "query": f"SELECT {i} as value"},
                 },
             )
             insights.append(insight)
@@ -167,7 +167,7 @@ class TestImageExporter(APIBaseTest):
         insight = Insight.objects.create(
             team=self.team,
             name="Test Insight",
-            query={"kind": "DataVisualizationNode", "source": {"kind": "HogQLQuery", "query": "SELECT 1 as value"}},
+            query={"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 1 as value"}},
         )
         exported_asset = ExportedAsset.objects.create(
             team=self.team,
@@ -204,7 +204,7 @@ class TestImageExporter(APIBaseTest):
             insight = Insight.objects.create(
                 team=self.team,
                 name=f"Insight {i}",
-                query={"kind": "DataVisualizationNode", "source": {"kind": "HogQLQuery", "query": f"SELECT {i}"}},
+                query={"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": f"SELECT {i}"}},
             )
             insights.append(insight)
             DashboardTile.objects.create(dashboard=dashboard, insight=insight)
@@ -248,7 +248,7 @@ class TestImageExporter(APIBaseTest):
         insight = Insight.objects.create(
             team=self.team,
             name="Test Insight",
-            query={"kind": "DataVisualizationNode", "source": {"kind": "HogQLQuery", "query": "SELECT 1 as value"}},
+            query={"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 1 as value"}},
         )
         DashboardTile.objects.create(dashboard=dashboard, insight=insight)
 
@@ -287,7 +287,7 @@ class TestImageExporter(APIBaseTest):
         insight = Insight.objects.create(
             team=self.team,
             name="Test Insight",
-            query={"kind": "DataVisualizationNode", "source": {"kind": "HogQLQuery", "query": "SELECT 1"}},
+            query={"kind": "DataVisualizationNode", "source": {"kind": "InsightsQLQuery", "query": "SELECT 1"}},
         )
         tile_filters = {"date_from": "-7d", "properties": [{"key": "$browser", "value": "Chrome"}]}
         DashboardTile.objects.create(dashboard=dashboard, insight=insight, filters_overrides=tile_filters)

@@ -5,7 +5,7 @@ import { InsightTypeMetadata, QUERY_TYPES_METADATA } from 'scenes/saved-insights
 
 import { Node, NodeKind, ResolvedDateRangeResponse } from '~/queries/schema/schema-general'
 import {
-    containsHogQLQuery,
+    containsInsightsQLQuery,
     dateRangeFor,
     isDataTableNode,
     isInsightQueryNode,
@@ -29,7 +29,7 @@ export function TopHeading({
     let insightType: InsightTypeMetadata
 
     if (query?.kind) {
-        if ((isDataTableNode(query) && containsHogQLQuery(query)) || isInsightVizNode(query)) {
+        if ((isDataTableNode(query) && containsInsightsQLQuery(query)) || isInsightVizNode(query)) {
             insightType = QUERY_TYPES_METADATA[query.source.kind]
         } else {
             insightType = QUERY_TYPES_METADATA[query.kind]

@@ -33,7 +33,7 @@ export function GlobalAndOrFilters({ insightProps }: EditorFilterProps): JSX.Ele
         TaxonomicFilterGroupType.Cohorts,
         TaxonomicFilterGroupType.Elements,
         TaxonomicFilterGroupType.SessionProperties,
-        TaxonomicFilterGroupType.HogQLExpression,
+        TaxonomicFilterGroupType.InsightsQLExpression,
         TaxonomicFilterGroupType.DataWarehousePersonProperties,
     ]
 

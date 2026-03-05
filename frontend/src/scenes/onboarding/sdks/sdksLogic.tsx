@@ -10,7 +10,7 @@ import { liveEventsLogic } from 'scenes/activity/live/liveEventsLogic'
 import { userLogic } from 'scenes/userLogic'
 
 import { ProductKey } from '~/queries/schema/schema-general'
-import { hogql } from '~/queries/utils'
+import { insightsql } from '~/queries/utils'
 import { SDK, SDKInstructionsMap, SDKTag, SDKTagOverrides } from '~/types'
 
 import { onboardingLogic } from '../onboardingLogic'
@@ -182,7 +182,7 @@ export const sdksLogic = kea<sdksLogicType>([
             null as boolean | null,
             {
                 loadSnippetEvents: async () => {
-                    const query = hogql`
+                    const query = insightsql`
                         SELECT
                             max(timestamp) AS latest_timestamp,
                             concat(
@@ -199,7 +199,7 @@ export const sdksLogic = kea<sdksLogicType>([
                         ORDER BY latest_timestamp DESC
                         LIMIT 7`
 
-                    const res = await api.queryHogQL(
+                    const res = await api.queryInsightsQL(
                         query,
                         { scene: 'Onboarding', productKey: 'platform_and_support' },
                         {

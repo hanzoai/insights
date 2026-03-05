@@ -4,13 +4,13 @@ from typing import Any
 import pytest
 from posthog.test.base import ClickhouseTestMixin
 
-from posthog.cdp.templates.hog_function_template import sync_template_to_db
+from posthog.cdp.templates.custom_function_template import sync_template_to_db
 from posthog.cdp.templates.zapier.template_zapier import template as template_zapier
 from posthog.models.action.action import Action
-from posthog.models.hog_functions.hog_function import HogFunction
+from posthog.models.custom_functions.custom_function import CustomFunction
 
-from common.hogvm.python.operation import HOGQL_BYTECODE_VERSION
-from ee.api.hooks import create_zapier_hog_function, valid_domain
+from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
+from ee.api.hooks import create_zapier_custom_function, valid_domain
 from ee.api.test.base import APILicensedTest
 from ee.models.hook import Hook
 
@@ -48,7 +48,7 @@ class TestHooksAPI(ClickhouseTestMixin, APILicensedTest):
         response = self.client.post(f"/api/projects/{self.team.id}/hooks/", data)
         self.assertEqual(response.status_code, 400)
 
-    def test_create_hog_function_via_hook(self):
+    def test_create_custom_function_via_hook(self):
         data = {
             "target": "https://hooks.zapier.com/hooks/standard/1234/abcd",
             "event": "action_performed",
@@ -61,27 +61,27 @@ class TestHooksAPI(ClickhouseTestMixin, APILicensedTest):
         json = res.json()
 
         assert not Hook.objects.exists()
-        assert HogFunction.objects.count() == 1
-        hog_function = HogFunction.objects.first()
-        assert hog_function
+        assert CustomFunction.objects.count() == 1
+        custom_function = CustomFunction.objects.first()
+        assert custom_function
         assert json == {
-            "id": str(hog_function.id),
+            "id": str(custom_function.id),
             "event": "action_performed",
             "target": "https://hooks.zapier.com/hooks/standard/1234/abcd",
             "resource_id": self.action.id,
         }
 
-        assert hog_function.description == template_zapier.description
+        assert custom_function.description == template_zapier.description
 
-        assert hog_function.filters == {
+        assert custom_function.filters == {
             "source": "events",
             "actions": [{"id": str(self.action.id), "name": "", "type": "actions", "order": 0}],
-            "bytecode": ["_H", HOGQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11],
+            "bytecode": ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "$pageview", 32, "event", 1, 1, 11],
         }
 
-        assert (hog_function.hog, hog_function.inputs) == self.snapshot
+        assert (custom_function.hog, custom_function.inputs) == self.snapshot
 
-    def test_delete_hog_function_via_hook(self):
+    def test_delete_custom_function_via_hook(self):
         data = {
             "target": "https://hooks.zapier.com/hooks/standard/1234/abcd",
             "event": "action_performed",
@@ -92,16 +92,16 @@ class TestHooksAPI(ClickhouseTestMixin, APILicensedTest):
 
         hook_id = res.json()["id"]
 
-        assert HogFunction.objects.filter(enabled=True, deleted=False).count() == 1
+        assert CustomFunction.objects.filter(enabled=True, deleted=False).count() == 1
 
         res = self.client.delete(f"/api/projects/{self.team.id}/hooks/{hook_id}")
         assert res.status_code == 204
 
-        assert HogFunction.objects.filter(enabled=True, deleted=False).count() == 0
+        assert CustomFunction.objects.filter(enabled=True, deleted=False).count() == 0
 
-    def test_delete_migrated_hog_function_via_hook(self):
+    def test_delete_migrated_custom_function_via_hook(self):
         hooks = []
-        hog_functions = []
+        custom_functions = []
         for hook_id in [uuid.uuid4(), uuid.uuid4()]:
             hook = Hook.objects.create(
                 id=hook_id,
@@ -111,23 +111,23 @@ class TestHooksAPI(ClickhouseTestMixin, APILicensedTest):
                 target=f"https://hooks.zapier.com/hooks/standard/{hook_id}",
             )
 
-            hog_function = create_zapier_hog_function(
+            custom_function = create_zapier_custom_function(
                 hook, {"user": hook.user, "get_team": lambda hook=hook: hook.team}, from_migration=True
             )
-            hog_function.save()
+            custom_function.save()
             hooks.append(hook)
-            hog_functions.append(hog_function)
+            custom_functions.append(custom_function)
 
         res = self.client.delete(f"/api/projects/{self.team.id}/hooks/{hooks[0].id}")
         assert res.status_code == 204
 
-        # Ensure the right hook and hog function were deleted
+        # Ensure the right hook and custom function were deleted
         loaded_hooks = Hook.objects.all()
         assert len(loaded_hooks) == 1
         assert str(loaded_hooks[0].id) == str(hooks[1].id)
-        loaded_hog_functions = HogFunction.objects.filter(enabled=True, deleted=False)
-        assert len(loaded_hog_functions) == 1
-        assert str(loaded_hog_functions[0].id) == str(hog_functions[1].id)
+        loaded_custom_functions = CustomFunction.objects.filter(enabled=True, deleted=False)
+        assert len(loaded_custom_functions) == 1
+        assert str(loaded_custom_functions[0].id) == str(custom_functions[1].id)
 
 
 def test_valid_domain() -> None:

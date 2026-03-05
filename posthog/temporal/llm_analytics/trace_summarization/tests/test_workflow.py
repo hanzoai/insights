@@ -46,7 +46,7 @@ class TestSampleItemsInWindowActivity:
 
         mock_results = [[f"trace_{i}", f"2025-01-15T11:{i:02d}:00+00:00"] for i in range(50)]
 
-        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_hogql_query") as mock_execute:
+        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_insightsql_query") as mock_execute:
             mock_execute.return_value.results = mock_results
 
             result = await sample_items_in_window_activity(inputs)
@@ -73,7 +73,7 @@ class TestSampleItemsInWindowActivity:
             window_end="2025-01-15T12:00:00",
         )
 
-        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_hogql_query") as mock_execute:
+        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_insightsql_query") as mock_execute:
             mock_execute.return_value.results = []
 
             await sample_items_in_window_activity(inputs)
@@ -96,7 +96,7 @@ class TestSampleItemsInWindowActivity:
 
         mock_results = [[f"trace_{i}", f"gen-uuid-{i}", f"2025-01-15T11:{i:02d}:00+00:00"] for i in range(10)]
 
-        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_hogql_query") as mock_execute:
+        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_insightsql_query") as mock_execute:
             mock_execute.return_value.results = mock_results
 
             result = await sample_items_in_window_activity(inputs)
@@ -123,7 +123,7 @@ class TestSampleItemsInWindowActivity:
             window_end="2025-01-15T12:00:00",
         )
 
-        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_hogql_query") as mock_execute:
+        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_insightsql_query") as mock_execute:
             mock_execute.return_value.results = []
 
             await sample_items_in_window_activity(inputs)
@@ -143,7 +143,7 @@ class TestSampleItemsInWindowActivity:
             window_end="2025-01-15T12:00:00",
         )
 
-        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_hogql_query") as mock_execute:
+        with patch("posthog.temporal.llm_analytics.trace_summarization.sampling.execute_insightsql_query") as mock_execute:
             mock_execute.return_value.results = []
 
             result = await sample_items_in_window_activity(inputs)

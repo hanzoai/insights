@@ -93,8 +93,8 @@ describe('propertyFilterTypeToTaxonomicFilterType()', () => {
                 type: PropertyFilterType.Session,
             } as SessionPropertyFilter)
         ).toEqual(TaxonomicFilterGroupType.SessionProperties)
-        expect(propertyFilterTypeToTaxonomicFilterType({ ...baseFilter, type: PropertyFilterType.HogQL })).toEqual(
-            TaxonomicFilterGroupType.HogQLExpression
+        expect(propertyFilterTypeToTaxonomicFilterType({ ...baseFilter, type: PropertyFilterType.InsightsQL })).toEqual(
+            TaxonomicFilterGroupType.InsightsQLExpression
         )
     })
 })
@@ -133,8 +133,8 @@ describe('breakdownFilterToTaxonomicFilterType()', () => {
         expect(breakdownFilterToTaxonomicFilterType({ ...baseFilter, breakdown_type: 'session' })).toEqual(
             TaxonomicFilterGroupType.SessionProperties
         )
-        expect(breakdownFilterToTaxonomicFilterType({ ...baseFilter, breakdown_type: 'hogql' })).toEqual(
-            TaxonomicFilterGroupType.HogQLExpression
+        expect(breakdownFilterToTaxonomicFilterType({ ...baseFilter, breakdown_type: 'insightsql' })).toEqual(
+            TaxonomicFilterGroupType.InsightsQLExpression
         )
     })
 })
@@ -249,7 +249,7 @@ describe('type mapping round-trip', () => {
         [PropertyFilterType.Cohort, TaxonomicFilterGroupType.Cohorts],
         [PropertyFilterType.Element, TaxonomicFilterGroupType.Elements],
         [PropertyFilterType.Session, TaxonomicFilterGroupType.SessionProperties],
-        [PropertyFilterType.HogQL, TaxonomicFilterGroupType.HogQLExpression],
+        [PropertyFilterType.InsightsQL, TaxonomicFilterGroupType.InsightsQLExpression],
     ])('PropertyFilterType.%s round-trips through both mapping functions', (propertyType, expectedTaxonomicType) => {
         const filter = {
             type: propertyType,
@@ -304,16 +304,16 @@ describe('createDefaultPropertyFilter()', () => {
         })
     })
 
-    it('creates a HogQL filter with null value', () => {
+    it('creates a InsightsQL filter with null value', () => {
         const result = createDefaultPropertyFilter(
             null,
             "event = 'click'",
-            PropertyFilterType.HogQL,
-            makeGroup(TaxonomicFilterGroupType.HogQLExpression),
+            PropertyFilterType.InsightsQL,
+            makeGroup(TaxonomicFilterGroupType.InsightsQLExpression),
             noopDescribeProperty
         )
         expect(result).toEqual({
-            type: PropertyFilterType.HogQL,
+            type: PropertyFilterType.InsightsQL,
             key: "event = 'click'",
             value: null,
         })

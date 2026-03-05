@@ -32,7 +32,7 @@ import { dashboardsModel } from '~/models/dashboardsModel'
 import { groupsModel } from '~/models/groupsModel'
 import { insightsModel } from '~/models/insightsModel'
 import { tagsModel } from '~/models/tagsModel'
-import { DashboardFilter, HogQLVariable, Node, TileFilters } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable, Node, TileFilters } from '~/queries/schema/schema-general'
 import {
     isFunnelsQuery,
     isLifecycleQuery,
@@ -122,7 +122,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
         loadInsight: (
             shortId: InsightShortId,
             filtersOverride?: DashboardFilter | null,
-            variablesOverride?: Record<string, HogQLVariable> | null,
+            variablesOverride?: Record<string, InsightsQLVariable> | null,
             tileFiltersOverride?: DashboardFilter | null
         ) => ({
             shortId,
@@ -480,7 +480,7 @@ export const insightLogic: LogicWrapper<insightLogicType> = kea<insightLogicType
             ],
             (
                 filtersOverride: DashboardFilter | null,
-                variablesOverride: Record<string, HogQLVariable> | null,
+                variablesOverride: Record<string, InsightsQLVariable> | null,
                 tileFiltersOverride: TileFilters | null
             ) => {
                 return (

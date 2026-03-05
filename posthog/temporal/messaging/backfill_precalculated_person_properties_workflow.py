@@ -128,7 +128,7 @@ class PersonPropertyFilter:
     """Person property filter to evaluate."""
 
     condition_hash: str
-    bytecode: list[Any]  # HogQL bytecode
+    bytecode: list[Any]  # InsightsQL bytecode
 
 
 @dataclasses.dataclass
@@ -255,7 +255,7 @@ async def backfill_precalculated_person_properties_activity(
                         distinct_ids = row["distinct_ids"]
 
                         for filter_info in inputs.filters:
-                            # Evaluate person against filter using HogQL bytecode
+                            # Evaluate person against filter using InsightsQL bytecode
                             globals_dict = {
                                 "person": {
                                     "id": person_id,

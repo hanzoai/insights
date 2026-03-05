@@ -26,35 +26,35 @@ def fatal_plugin_error(
 
 # Called from plugin-server/../hog-watcher.service.ts
 @shared_task(ignore_result=True, queue=queue)
-def hog_function_state_transition(hog_function_id: str, state: int) -> None:
-    logger.info("hog_function_state_transition (disabled)", hog_function_id=hog_function_id, state=state)
+def custom_function_state_transition(custom_function_id: str, state: int) -> None:
+    logger.info("custom_function_state_transition (disabled)", custom_function_id=custom_function_id, state=state)
     return
-    # from posthog.models.hog_functions.hog_function import HogFunction
+    # from posthog.models.custom_functions.custom_function import CustomFunction
 
-    # logger.info("hog_function_state_transition", hog_function_id=hog_function_id, state=state)
+    # logger.info("custom_function_state_transition", custom_function_id=custom_function_id, state=state)
 
-    # hog_function = HogFunction.objects.get(id=hog_function_id)
+    # custom_function = CustomFunction.objects.get(id=custom_function_id)
 
-    # if not hog_function:
-    #     logger.warning("hog_function_state_transition: hog_function not found", hog_function_id=hog_function_id)
+    # if not custom_function:
+    #     logger.warning("custom_function_state_transition: custom_function not found", custom_function_id=custom_function_id)
     #     return
 
     # report_team_action(
-    #     hog_function.team,
-    #     "hog function state changed",
+    #     custom_function.team,
+    #     "custom function state changed",
     #     {
-    #         "hog_function_id": hog_function_id,
-    #         "hog_function_url": f"{settings.SITE_URL}/project/{hog_function.team.id}/pipeline/destinations/hog-{hog_function_id}",
+    #         "custom_function_id": custom_function_id,
+    #         "custom_function_url": f"{settings.SITE_URL}/project/{custom_function.team.id}/pipeline/destinations/hog-{custom_function_id}",
     #         "state": state,
     #     },
     # )
 
     # # TRICKY: It seems like without this call the events don't get flushed, possibly due to celery worker threads exiting...
-    # logger.info("hog_function_state_transition: Flushing posthoganalytics")
+    # logger.info("custom_function_state_transition: Flushing posthoganalytics")
     # posthoganalytics.flush()
 
     # if state >= 2:  # 2 and 3 are disabled
-    #     logger.info("hog_function_state_transition: sending hog_function_disabled email")
-    #     send_hog_function_disabled.delay(hog_function_id)
+    #     logger.info("custom_function_state_transition: sending custom_function_disabled email")
+    #     send_custom_function_disabled.delay(custom_function_id)
 
-    # logger.info("hog_function_state_transition: done")
+    # logger.info("custom_function_state_transition: done")

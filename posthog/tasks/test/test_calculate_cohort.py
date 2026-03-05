@@ -868,7 +868,7 @@ def calculate_cohort_test_factory(event_factory: Callable, person_factory: Calla
                 name="test_query_cohort",
                 is_static=True,
                 count=0,
-                query={"kind": "HogQLQuery", "query": "SELECT person_id FROM persons LIMIT 10"},
+                query={"kind": "InsightsQLQuery", "query": "SELECT person_id FROM persons LIMIT 10"},
             )
 
             # Mock the query processing to fail

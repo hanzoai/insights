@@ -105,8 +105,8 @@ export const dataWarehouseTableLogic = kea<dataWarehouseTableLogicType>([
         table: {
             defaults: { ...NEW_WAREHOUSE_TABLE } as DataWarehouseTable,
             errors: ({ name, url_pattern, credential, format }) => {
-                const HOGQL_TABLE_NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*$/
-                if (!HOGQL_TABLE_NAME_REGEX.test(name)) {
+                const INSIGHTSQL_TABLE_NAME_REGEX = /^[a-zA-Z_][a-zA-Z0-9_]*$/
+                if (!INSIGHTSQL_TABLE_NAME_REGEX.test(name)) {
                     return {
                         name: 'Invalid table name. Table names must start with a letter or underscore and contain only alphanumeric characters or underscores.',
                     }

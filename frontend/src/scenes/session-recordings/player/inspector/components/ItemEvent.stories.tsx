@@ -261,7 +261,7 @@ AISpanEvent.args = {
                                         'Modify the query to return results for both cohort 1001 and cohort 1002. Group by cohort, as well as day, and show the cohort ID in the results. All other logic should remain the same.',
                                 },
                                 id: 'call_a8sMElJzxA53Acb9AguyjOg1',
-                                name: 'generate_hogql_query',
+                                name: 'generate_insightsql_query',
                                 type: 'tool_call',
                             },
                         ],
@@ -274,7 +274,7 @@ AISpanEvent.args = {
                         tool_call_id: 'call_a8sMElJzxA53Acb9AguyjOg1',
                         type: 'tool',
                         ui_payload: {
-                            generate_hogql_query:
+                            generate_insightsql_query:
                                 "SELECT\n    cohort_id,\n    day,\n    sum(session_duration) AS total_session_time_seconds,\n    count() AS total_sessions,\n    count(distinct person_id) AS total_unique_users\nFROM (\n    SELECT\n        toDate(timestamp) AS day,\n        $session_id,\n        person_id,\n        multiIf(person_id IN COHORT 1001, 1001, person_id IN COHORT 1002, 1002, NULL) AS cohort_id,\n        dateDiff('second', min(timestamp), max(timestamp)) AS session_duration\n    FROM events\n    WHERE event = 'page_viewed'\n        AND timestamp >= now() - interval 3 day\n        AND (person_id IN COHORT 1001 OR person_id IN COHORT 1002)\n    GROUP BY day, $session_id, person_id, cohort_id\n)\nGROUP BY cohort_id, day\nORDER BY cohort_id, day DESC",
                         },
                         visible: false,
@@ -378,7 +378,7 @@ AIGenerationEvent.args = {
                     role: 'system',
                 },
                 {
-                    content: 'User is editing SQL. Use generate_hogql_query tool for SQL queries.',
+                    content: 'User is editing SQL. Use generate_insightsql_query tool for SQL queries.',
                     role: 'system',
                 },
                 {
@@ -402,7 +402,7 @@ AIGenerationEvent.args = {
                             function: {
                                 arguments:
                                     '{"instructions": "Count the number of distinct users (person_id) who triggered an autocapture event where element_text contains \'submit\' and $current_url contains \'/upload\' (case-insensitive)."}',
-                                name: 'generate_hogql_query',
+                                name: 'generate_insightsql_query',
                             },
                             id: 'call_kS45Oc4e5FV19MjLy61Y2xyC',
                             type: 'function',
@@ -511,7 +511,7 @@ AITraceEvent.args = {
                                         "Count the number of distinct users (person_id) who triggered an autocapture event where element_text contains 'submit' and $current_url contains '/upload' (case-insensitive).",
                                 },
                                 id: 'call_ExampleCallId001',
-                                name: 'generate_hogql_query',
+                                name: 'generate_insightsql_query',
                                 type: 'tool_call',
                             },
                         ],
@@ -524,7 +524,7 @@ AITraceEvent.args = {
                         tool_call_id: 'call_ExampleCallId001',
                         type: 'tool',
                         ui_payload: {
-                            generate_hogql_query:
+                            generate_insightsql_query:
                                 "SELECT count(DISTINCT person_id)\nFROM events\nWHERE event = '$autocapture'\n  AND lower(properties.element_text) LIKE '%submit%'\n  AND lower(properties.$current_url) LIKE '%/upload%'\n  AND timestamp >= now() - INTERVAL 30 DAY",
                         },
                         visible: false,

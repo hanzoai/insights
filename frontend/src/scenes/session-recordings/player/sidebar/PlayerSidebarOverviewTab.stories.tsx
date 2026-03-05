@@ -129,7 +129,7 @@ const meta: Meta = {
                 '/api/environments/:team_id/query': (req, res, ctx) => {
                     const body = req.body as Record<string, any>
                     if (
-                        body.query.kind === 'HogQLQuery' &&
+                        body.query.kind === 'InsightsQLQuery' &&
                         // very lazy match
                         body.query.query.includes('any(properties.$geoip_country_code) as $geoip_country_code')
                     ) {

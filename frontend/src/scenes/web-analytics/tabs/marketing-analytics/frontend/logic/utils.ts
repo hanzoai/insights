@@ -14,7 +14,7 @@ import {
     NodeKind,
     VALID_NATIVE_MARKETING_SOURCES,
 } from '~/queries/schema/schema-general'
-import { HogQLMathType, ManualLinkSourceType } from '~/types'
+import { InsightsQLMathType, ManualLinkSourceType } from '~/types'
 
 import { NativeSource } from './marketingAnalyticsLogic'
 
@@ -246,12 +246,12 @@ function buildConversionExpr(
     const fieldList = typeof fields === 'string' ? [fields] : [...fields]
     const availableFields = fieldList.filter((field) => table.fields && field in table.fields)
     if (availableFields.length === 0) {
-        return { math: HogQLMathType.HogQL, math_hogql: '0' }
+        return { math: InsightsQLMathType.InsightsQL, math_insightsql: '0' }
     }
-    const mathHogql = buildExpr
+    const mathInsightsql = buildExpr
         ? buildExpr(availableFields)
         : `SUM(${availableFields.map((field) => safeFloat(field)).join(' + ')})`
-    return { math: HogQLMathType.HogQL, math_hogql: mathHogql }
+    return { math: InsightsQLMathType.InsightsQL, math_insightsql: mathInsightsql }
 }
 
 const sourceTileConfigs: Record<NativeMarketingSource, SourceTileConfig> = {
@@ -493,8 +493,8 @@ export function createMarketingTile(
             table,
             MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue
         )
-        if (specialResult?.math_hogql) {
-            conversionValueExpr = specialResult.math_hogql
+        if (specialResult?.math_insightsql) {
+            conversionValueExpr = specialResult.math_insightsql
         } else {
             const conversionValueColumn = mappings.reportedConversionValue
             const hasConversionValueColumn = table.fields && conversionValueColumn in table.fields
@@ -505,7 +505,7 @@ export function createMarketingTile(
             }
         }
 
-        const mathHogql = conversionValueExpr === '0' ? '0' : `${conversionValueExpr} / nullIf(SUM(${costExpr}), 0)`
+        const mathInsightsql = conversionValueExpr === '0' ? '0' : `${conversionValueExpr} / nullIf(SUM(${costExpr}), 0)`
 
         return {
             kind: NodeKind.DataWarehouseNode,
@@ -516,8 +516,8 @@ export function createMarketingTile(
             distinct_id_field: tileConfig.idField,
             timestamp_field: tileConfig.timestampField,
             table_name: table.name,
-            math: HogQLMathType.HogQL,
-            math_hogql: mathHogql,
+            math: InsightsQLMathType.InsightsQL,
+            math_insightsql: mathInsightsql,
         }
     }
 
@@ -532,13 +532,13 @@ export function createMarketingTile(
     if (tileConfig.specialConversionLogic) {
         const specialLogic = tileConfig.specialConversionLogic(table, tileColumnSelection)
         if (specialLogic) {
-            let finalMathHogql = specialLogic.math_hogql
+            let finalMathInsightsql = specialLogic.math_insightsql
 
             // Apply currency conversion for monetary conversion values
             if (
                 tileColumnSelection === MarketingAnalyticsColumnsSchemaNames.ReportedConversionValue &&
-                finalMathHogql &&
-                finalMathHogql !== '0'
+                finalMathInsightsql &&
+                finalMathInsightsql !== '0'
             ) {
                 const mappings = tileConfig.columnMappings
                 const currencyColumn = mappings.currencyColumn
@@ -546,9 +546,9 @@ export function createMarketingTile(
                 const hasCurrencyColumn = currencyColumn && table.fields && currencyColumn in table.fields
 
                 if (hasCurrencyColumn) {
-                    finalMathHogql = `toFloat(convertCurrency(any(coalesce(${currencyColumn}, '${baseCurrency}')), '${baseCurrency}', ${finalMathHogql}))`
+                    finalMathInsightsql = `toFloat(convertCurrency(any(coalesce(${currencyColumn}, '${baseCurrency}')), '${baseCurrency}', ${finalMathInsightsql}))`
                 } else if (fallbackCurrency) {
-                    finalMathHogql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', ${finalMathHogql}))`
+                    finalMathInsightsql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', ${finalMathInsightsql}))`
                 }
             }
 
@@ -562,7 +562,7 @@ export function createMarketingTile(
                 timestamp_field: tileConfig.timestampField,
                 table_name: table.name,
                 ...specialLogic,
-                math_hogql: finalMathHogql,
+                math_insightsql: finalMathInsightsql,
             }
         }
     }
@@ -576,16 +576,16 @@ export function createMarketingTile(
 
         let costExpr = needsDivision ? `toFloat(${costColumn} / 1000000)` : `toFloat(${costColumn})`
 
-        let mathHogql: string
+        let mathInsightsql: string
 
         const hasCurrencyColumn = currencyColumn && table.fields && currencyColumn in table.fields
 
         if (hasCurrencyColumn) {
-            mathHogql = `SUM(toFloat(convertCurrency(coalesce(${currencyColumn}, '${baseCurrency}'), '${baseCurrency}', ${costExpr})))`
+            mathInsightsql = `SUM(toFloat(convertCurrency(coalesce(${currencyColumn}, '${baseCurrency}'), '${baseCurrency}', ${costExpr})))`
         } else if (fallbackCurrency) {
-            mathHogql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', SUM(${costExpr})))`
+            mathInsightsql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', SUM(${costExpr})))`
         } else {
-            mathHogql = `SUM(${costExpr})`
+            mathInsightsql = `SUM(${costExpr})`
         }
 
         return {
@@ -597,8 +597,8 @@ export function createMarketingTile(
             distinct_id_field: tileConfig.idField,
             timestamp_field: tileConfig.timestampField,
             table_name: table.name,
-            math: HogQLMathType.HogQL,
-            math_hogql: mathHogql,
+            math: InsightsQLMathType.InsightsQL,
+            math_insightsql: mathInsightsql,
         }
     }
 
@@ -610,14 +610,14 @@ export function createMarketingTile(
         const hasCurrencyColumn = currencyColumn && table.fields && currencyColumn in table.fields
 
         const valueExpr = safeFloat(column.name)
-        let mathHogql: string
+        let mathInsightsql: string
 
         if (hasCurrencyColumn) {
-            mathHogql = `SUM(toFloat(convertCurrency(coalesce(${currencyColumn}, '${baseCurrency}'), '${baseCurrency}', ${valueExpr})))`
+            mathInsightsql = `SUM(toFloat(convertCurrency(coalesce(${currencyColumn}, '${baseCurrency}'), '${baseCurrency}', ${valueExpr})))`
         } else if (fallbackCurrency) {
-            mathHogql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', SUM(${valueExpr})))`
+            mathInsightsql = `toFloat(convertCurrency('${fallbackCurrency}', '${baseCurrency}', SUM(${valueExpr})))`
         } else {
-            mathHogql = `SUM(${valueExpr})`
+            mathInsightsql = `SUM(${valueExpr})`
         }
 
         return {
@@ -629,8 +629,8 @@ export function createMarketingTile(
             distinct_id_field: tileConfig.idField,
             timestamp_field: tileConfig.timestampField,
             table_name: table.name,
-            math: HogQLMathType.HogQL,
-            math_hogql: mathHogql,
+            math: InsightsQLMathType.InsightsQL,
+            math_insightsql: mathInsightsql,
         }
     }
 
@@ -644,8 +644,8 @@ export function createMarketingTile(
         distinct_id_field: tileConfig.idField,
         timestamp_field: tileConfig.timestampField,
         table_name: table.name,
-        math: HogQLMathType.HogQL,
-        math_hogql: sumSafeFloat(column.name),
+        math: InsightsQLMathType.InsightsQL,
+        math_insightsql: sumSafeFloat(column.name),
     }
 }
 

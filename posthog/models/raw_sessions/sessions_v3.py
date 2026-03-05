@@ -12,7 +12,7 @@ All events with the same session ID will be aggregated into approximately one ro
 reduce the amount of data that needs to be read from disk for session-based queries.
 
 It's not guaranteed that clickhouse will merge all events for a session into a single row, so any queries against this
-table should always aggregate again on session_id (the HogQL session table will do this automatically, so HogQL users
+table should always aggregate again on session_id (the InsightsQL session table will do this automatically, so InsightsQL users
 don't need to consider this).
 
 Upgrades over v2:

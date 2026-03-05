@@ -1,6 +1,6 @@
 from posthog.test.base import BaseTest
 
-from posthog.cdp.templates.helpers import BaseHogFunctionTemplateTest
+from posthog.cdp.templates.helpers import BaseCustomFunctionTemplateTest
 from posthog.cdp.templates.salesforce.template_salesforce import (
     TemplatSalesforceMigrator,
     template_create as template_salesforce_create,
@@ -9,7 +9,7 @@ from posthog.cdp.templates.salesforce.template_salesforce import (
 from posthog.models import PluginConfig
 
 
-class TestTemplateSalesforceCreate(BaseHogFunctionTemplateTest):
+class TestTemplateSalesforceCreate(BaseCustomFunctionTemplateTest):
     template = template_salesforce_create
 
     def _inputs(self, **kwargs):
@@ -63,7 +63,7 @@ class TestTemplateSalesforceCreate(BaseHogFunctionTemplateTest):
         )
 
 
-class TestTemplateSalesforceUpdate(BaseHogFunctionTemplateTest):
+class TestTemplateSalesforceUpdate(BaseCustomFunctionTemplateTest):
     template = template_salesforce_update
 
     def _inputs(self, **kwargs):

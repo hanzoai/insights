@@ -45,7 +45,7 @@ class Stickiness:
             query,
             {
                 **event_params,
-                **filter.hogql_context.values,
+                **filter.insightsql_context.values,
                 "num_intervals": filter.total_intervals,
             },
             query_type="stickiness",

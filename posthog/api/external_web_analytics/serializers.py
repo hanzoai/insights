@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from posthog.hogql_queries.web_analytics.stats_table_pre_aggregated import (
+from posthog.insightsql_queries.web_analytics.stats_table_pre_aggregated import (
     WEB_ANALYTICS_STATS_TABLE_PRE_AGGREGATED_SUPPORTED_BREAKDOWNS,
 )
 

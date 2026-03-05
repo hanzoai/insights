@@ -272,7 +272,7 @@ export function GroupDashboardCard(): JSX.Element {
                                             type: 'AND',
                                             values: [
                                                 {
-                                                    type: 'hogql',
+                                                    type: 'insightsql',
                                                     key: `$group_${groupData.group_type_index}='${groupData.group_key}'`,
                                                     value: null,
                                                 },

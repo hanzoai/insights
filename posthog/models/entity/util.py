@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Any
 
-from posthog.hogql.hogql import HogQLContext
+from posthog.insightsql.insightsql import InsightsQLContext
 
 from posthog.constants import TREND_FILTER_TYPE_ACTIONS
 from posthog.models.action.util import format_action_filter, format_action_filter_event_only
@@ -12,7 +12,7 @@ from posthog.queries.util import PersonPropertiesMode
 def get_entity_filtering_params(
     allowed_entities: Sequence[Entity],
     team_id: int,
-    hogql_context: HogQLContext,
+    insightsql_context: InsightsQLContext,
     table_name: str = "",
     *,
     person_properties_mode: PersonPropertiesMode = PersonPropertiesMode.USING_PERSON_PROPERTIES_COLUMN,
@@ -42,7 +42,7 @@ def get_entity_filtering_params(
                     table_name=table_name,
                     person_properties_mode=person_properties_mode,
                     person_id_joined_alias=person_id_joined_alias,
-                    hogql_context=hogql_context,
+                    insightsql_context=insightsql_context,
                 )
                 if not deep_filtering
                 else format_action_filter_event_only(action)

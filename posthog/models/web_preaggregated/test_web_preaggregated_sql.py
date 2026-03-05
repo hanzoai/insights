@@ -3,7 +3,7 @@ from freezegun import freeze_time
 from posthog.test.base import _create_event, _create_person
 
 from posthog.clickhouse.client.execute import sync_execute
-from posthog.hogql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
+from posthog.insightsql_queries.web_analytics.test.web_preaggregated_test_base import WebAnalyticsPreAggregatedTestBase
 from posthog.models.utils import uuid7
 from posthog.models.web_preaggregated.sql import (
     DROP_PARTITION_SQL,

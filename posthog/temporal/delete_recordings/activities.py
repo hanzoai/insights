@@ -399,7 +399,7 @@ async def load_recordings_with_query(input: RecordingsWithQueryInput) -> list[st
         query_instance = SessionRecordingListFromQuery(
             query=query,
             team=team,
-            hogql_query_modifiers=None,
+            insightsql_query_modifiers=None,
         )
         query_results = await database_sync_to_async(query_instance.run)()
         new_sessions = [session["session_id"] for session in query_results.results]

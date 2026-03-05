@@ -27,7 +27,7 @@ import { urls } from 'scenes/urls'
 import { refreshTreeItem } from '~/layout/panel-layout/ProjectTree/projectTreeLogic'
 import { cohortsModel, processCohort } from '~/models/cohortsModel'
 import { dataNodeLogic } from '~/queries/nodes/DataNode/dataNodeLogic'
-import { ActorsQuery, DataTableNode, HogQLQuery, Node, NodeKind } from '~/queries/schema/schema-general'
+import { ActorsQuery, DataTableNode, InsightsQLQuery, Node, NodeKind } from '~/queries/schema/schema-general'
 import { isDataTableNode } from '~/queries/utils'
 import {
     AnyCohortCriteriaType,
@@ -459,8 +459,8 @@ export const cohortEditLogic = kea<cohortEditLogicType>([
                         await breakpoint(200)
                         if (asStatic) {
                             const sourceTable = values.cohort.is_static ? 'static_cohort_people' : 'cohort_people'
-                            const query: HogQLQuery = {
-                                kind: NodeKind.HogQLQuery,
+                            const query: InsightsQLQuery = {
+                                kind: NodeKind.InsightsQLQuery,
                                 query: `SELECT person_id FROM ${sourceTable} WHERE cohort_id = ${values.cohort.id}`,
                             }
                             cohort = await api.create('api/cohort', {

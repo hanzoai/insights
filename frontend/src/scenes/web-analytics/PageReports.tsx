@@ -13,7 +13,7 @@ function NoUrlSelectedMessage(): JSX.Element {
     return (
         <div className="border-2 border-dashed border-primary w-full p-8 rounded flex items-center justify-center gap-8">
             <div className="flex-shrink-0">
-                <XRayHog2 alt="X-ray hedgehog" className="w-60" />
+                <XRayHog2 alt="Illustration" className="w-60" />
             </div>
             <div className="flex-1 max-w-140">
                 <h2>Select a page to analyze</h2>

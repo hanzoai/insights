@@ -5,7 +5,7 @@ import {
 } from 'lib/components/TerraformExporter/hclExporterFormattingUtils'
 
 import { AlertType } from '~/lib/components/Alerts/types'
-import { DashboardBasicType, HogFunctionType, InsightModel } from '~/types'
+import { DashboardBasicType, CustomFunctionType, InsightModel } from '~/types'
 
 import { FieldMapping, HclExportOptions, HclExportResult, ResourceExporter, generateHCL } from './hclExporter'
 import { generateInsightHCL } from './insightHclExporter'
@@ -15,8 +15,8 @@ export interface DashboardHclExportOptions extends HclExportOptions {
     insights?: InsightModel[]
     /** Alerts grouped by insight ID */
     alertsByInsightId?: Map<number, AlertType[]>
-    /** Hog functions grouped by alert ID */
-    hogFunctionsByAlertId?: Map<string, HogFunctionType[]>
+    /** Custom functions grouped by alert ID */
+    customFunctionsByAlertId?: Map<string, CustomFunctionType[]>
 }
 
 export interface DashboardExportResult extends HclExportResult {
@@ -24,7 +24,7 @@ export interface DashboardExportResult extends HclExportResult {
         dashboards: number
         insights: number
         alerts: number
-        hogFunctions: number
+        customFunctions: number
     }
 }
 
@@ -87,8 +87,8 @@ export function generateDashboardHCL(
 
     const insightCount = options.insights?.length || 0
     const alertCount = options.alertsByInsightId ? Array.from(options.alertsByInsightId.values()).flat().length : 0
-    const hogFunctionCount = options.hogFunctionsByAlertId
-        ? Array.from(options.hogFunctionsByAlertId.values()).flat().length
+    const customFunctionCount = options.customFunctionsByAlertId
+        ? Array.from(options.customFunctionsByAlertId.values()).flat().length
         : 0
 
     const result = generateHCL(dashboard, DASHBOARD_EXPORTER, options)
@@ -113,7 +113,7 @@ export function generateDashboardHCL(
             const insightResult = generateInsightHCL(insight, {
                 dashboardIdReplacements,
                 alerts,
-                hogFunctionsByAlertId: options.hogFunctionsByAlertId,
+                customFunctionsByAlertId: options.customFunctionsByAlertId,
             })
             hclSections.push('')
             hclSections.push(insightResult.hcl)
@@ -128,7 +128,7 @@ export function generateDashboardHCL(
             dashboards: 1,
             insights: insightCount,
             alerts: alertCount,
-            hogFunctions: hogFunctionCount,
+            customFunctions: customFunctionCount,
         },
     }
 }

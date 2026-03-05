@@ -1,6 +1,6 @@
 # These tables are used to save and re-use intermediate results from queries
 
-# They are hidden behind a flag that is only visible behind a HogQLQueryModifier that is only settable in the query debugger
+# They are hidden behind a flag that is only visible behind a InsightsQLQueryModifier that is only settable in the query debugger
 
 # One unsolved problem so far is ensuring that we can read our own writes, as often we write to this table immediately before we want to re-read the results.
 # Some ideas for how to solve this in a future version:

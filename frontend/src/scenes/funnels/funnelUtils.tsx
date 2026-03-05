@@ -592,11 +592,11 @@ export const appendToCorrelationConfig = (
     })
 }
 
-export function aggregationLabelForHogQL(funnelAggregateByHogQL: string): Noun {
-    if (funnelAggregateByHogQL === 'person_id') {
+export function aggregationLabelForInsightsQL(funnelAggregateByInsightsQL: string): Noun {
+    if (funnelAggregateByInsightsQL === 'person_id') {
         return { singular: 'person', plural: 'persons' }
     }
-    if (funnelAggregateByHogQL === 'properties.$session_id') {
+    if (funnelAggregateByInsightsQL === 'properties.$session_id') {
         return { singular: 'session', plural: 'sessions' }
     }
     return { singular: 'result', plural: 'results' }

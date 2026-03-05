@@ -22,7 +22,7 @@ import { urls } from 'scenes/urls'
 
 import { SIDE_PANEL_CONTEXT_KEY, SidePanelSceneContext } from '~/layout/navigation-3000/sidepanel/types'
 import { getDefaultQuery } from '~/queries/nodes/InsightViz/utils'
-import { DashboardFilter, FileSystemIconType, HogQLVariable, Node, TileFilters } from '~/queries/schema/schema-general'
+import { DashboardFilter, FileSystemIconType, InsightsQLVariable, Node, TileFilters } from '~/queries/schema/schema-general'
 import { checkLatestVersionsOnQuery } from '~/queries/utils'
 import {
     ActivityScope,
@@ -86,7 +86,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             itemId: string | undefined,
             alertId: AlertType['id'] | undefined,
             filtersOverride: DashboardFilter | undefined,
-            variablesOverride: Record<string, HogQLVariable> | undefined,
+            variablesOverride: Record<string, InsightsQLVariable> | undefined,
             tileFiltersOverride: TileFilters | undefined,
             dashboardId: DashboardType['id'] | undefined,
             dashboardName: DashboardType['name'] | undefined,
@@ -171,7 +171,7 @@ export const insightSceneLogic = kea<insightSceneLogicType>([
             },
         ],
         variablesOverride: [
-            null as null | Record<string, HogQLVariable>,
+            null as null | Record<string, InsightsQLVariable>,
             {
                 setSceneState: (_, { variablesOverride }) =>
                     variablesOverride !== undefined ? variablesOverride : null,

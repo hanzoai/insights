@@ -4,16 +4,16 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from posthog.models import User
-from posthog.models.hog_flow import HogFlow
+from posthog.models.custom_flow import CustomFlow
 
 
-class BackfillHogFlowBillableActionTypesTest(TestCase):
+class BackfillCustomFlowBillableActionTypesTest(TestCase):
     def setUp(self):
         self.organization, self.team, self.user = User.objects.bootstrap("Test Organization", "test@example.com", None)
 
     def test_backfill_with_various_billable_action_types(self):
         """Test that the command correctly backfills various billable action configurations"""
-        flow1 = HogFlow.objects.create(
+        flow1 = CustomFlow.objects.create(
             team=self.team,
             created_by=self.user,
             name="Email and Destination Flow",
@@ -26,7 +26,7 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
             trigger={"type": "event"},
         )
 
-        flow2 = HogFlow.objects.create(
+        flow2 = CustomFlow.objects.create(
             team=self.team,
             created_by=self.user,
             name="Complex Flow with SMS and Push",
@@ -43,7 +43,7 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
             trigger={"type": "event"},
         )
 
-        flow3 = HogFlow.objects.create(
+        flow3 = CustomFlow.objects.create(
             team=self.team,
             created_by=self.user,
             name="Only Non-Billable Actions Flow",
@@ -79,7 +79,7 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
 
     def test_dry_run_mode(self):
         """Test that dry-run mode doesn't make changes"""
-        flow = HogFlow.objects.create(
+        flow = CustomFlow.objects.create(
             team=self.team,
             created_by=self.user,
             name="Test Flow",
@@ -100,7 +100,7 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
 
     def test_recomputation_of_wrong_values(self):
         """Test that the command fixes incorrect billable_action_types values"""
-        flow = HogFlow.objects.create(
+        flow = CustomFlow.objects.create(
             team=self.team,
             created_by=self.user,
             name="Test Flow",
@@ -116,7 +116,7 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
 
     def test_handles_duplicates(self):
         """Test that duplicate action types are deduplicated"""
-        flow = HogFlow.objects.create(
+        flow = CustomFlow.objects.create(
             team=self.team,
             created_by=self.user,
             name="Duplicate Actions Flow",
@@ -138,12 +138,12 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
     def test_batch_processing(self):
         """Test that batch processing works correctly"""
         # Clean up any leftover flows from previous runs
-        HogFlow.objects.filter(name__startswith="Batch Flow Test").delete()
+        CustomFlow.objects.filter(name__startswith="Batch Flow Test").delete()
 
         # Create 25 flows to test batching
         created_ids = []
         for i in range(25):
-            flow = HogFlow.objects.create(
+            flow = CustomFlow.objects.create(
                 team=self.team,
                 created_by=self.user,
                 name=f"Batch Flow Test {i}",
@@ -160,7 +160,7 @@ class BackfillHogFlowBillableActionTypesTest(TestCase):
         output = out.getvalue()
 
         # Check all were processed
-        flows = HogFlow.objects.filter(id__in=created_ids)
+        flows = CustomFlow.objects.filter(id__in=created_ids)
         self.assertEqual(flows.count(), 25)
 
         for flow in flows:

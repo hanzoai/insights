@@ -9,9 +9,9 @@ from unittest.mock import MagicMock, patch
 import STPyV8
 
 from posthog.cdp.site_functions import get_transpiled_function
-from posthog.cdp.templates.hog_function_template import HogFunctionTemplateDC, sync_template_to_db
+from posthog.cdp.templates.custom_function_template import CustomFunctionTemplateDC, sync_template_to_db
 from posthog.cdp.validation import compile_hog
-from posthog.models import HogFunction
+from posthog.models import CustomFunction
 from posthog.models.utils import uuid7
 
 from common.hogvm.python.execute import execute_bytecode
@@ -57,9 +57,9 @@ def mock_transpile(code: str, type: str = "site") -> str:
     return code
 
 
-# TODO this test class only tests part of the template. The hog code is tested, the default mappings are not
-class BaseHogFunctionTemplateTest(BaseTest):
-    template: HogFunctionTemplateDC
+# TODO this test class only tests part of the template. The custom code is tested, the default mappings are not
+class BaseCustomFunctionTemplateTest(BaseTest):
+    template: CustomFunctionTemplateDC
     compiled_hog: Any
     mock_fetch = MagicMock()
     mock_print = MagicMock()
@@ -70,13 +70,13 @@ class BaseHogFunctionTemplateTest(BaseTest):
         super().setUp()
         self.compiled_hog = compile_hog(self.template.code, self.template.type)
 
-        self.mock_print = MagicMock(side_effect=lambda *args: print("[DEBUG HogFunctionPrint]", *args))  # noqa: T201
+        self.mock_print = MagicMock(side_effect=lambda *args: print("[DEBUG CustomFunctionPrint]", *args))  # noqa: T201
         # Side effect - log the fetch call and return  with sensible output
         self.mock_fetch = MagicMock(
-            side_effect=lambda *args: print("[DEBUG HogFunctionFetch]", *args) or self.mock_fetch_response(*args)  # noqa: T201
+            side_effect=lambda *args: print("[DEBUG CustomFunctionFetch]", *args) or self.mock_fetch_response(*args)  # noqa: T201
         )
         self.mock_posthog_capture = MagicMock(
-            side_effect=lambda *args: print("[DEBUG HogFunctionPostHogCapture]", *args)  # noqa: T201
+            side_effect=lambda *args: print("[DEBUG CustomFunctionPostHogCapture]", *args)  # noqa: T201
         )
 
     def mock_fetch_response(self, url, *args):
@@ -107,7 +107,7 @@ class BaseHogFunctionTemplateTest(BaseTest):
                 "elements_chain": "",
             },
             "person": {"id": "person-id", "properties": {"email": "example@posthog.com"}},
-            "source": {"url": "https://us.posthog.com/hog_functions/1234"},
+            "source": {"url": "https://us.posthog.com/custom_functions/1234"},
         }
 
         if globals:
@@ -144,7 +144,7 @@ class BaseHogFunctionTemplateTest(BaseTest):
 
 
 class BaseSiteDestinationFunctionTest(APIBaseTest):
-    template: HogFunctionTemplateDC
+    template: CustomFunctionTemplateDC
     track_fn: str
     inputs: dict
 
@@ -156,8 +156,8 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
         self.organization.save()
 
         # Mock the plugin server status endpoint to avoid connection errors
-        # Patch where it's used (in hog_function.py) not where it's defined
-        self.mock_get_status = patch("posthog.models.hog_functions.hog_function.get_hog_function_status").start()
+        # Patch where it's used (in custom_function.py) not where it's defined
+        self.mock_get_status = patch("posthog.models.custom_functions.custom_function.get_custom_function_status").start()
         self.mock_get_status.return_value = MagicMock(status_code=200, json=lambda: {"state": "idle", "tokens": 0})
         self.addCleanup(self.mock_get_status.stop)
 
@@ -190,7 +190,7 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
         # Mock the transpile function to avoid Node.js/pnpm dependency
         with patch("posthog.cdp.site_functions.transpile", side_effect=mock_transpile):
             response = self.client.post(
-                f"/api/projects/{self.team.id}/hog_functions/",
+                f"/api/projects/{self.team.id}/custom_functions/",
                 data=payload,
             )
             assert response.status_code in (200, 201)
@@ -198,9 +198,9 @@ class BaseSiteDestinationFunctionTest(APIBaseTest):
 
             # load from the DB based on the created ID
             # nosemgrep: idor-lookup-without-team (test helper only)
-            hog_function = HogFunction.objects.get(id=function_id)
+            custom_function = CustomFunction.objects.get(id=function_id)
 
-            return get_transpiled_function(hog_function)
+            return get_transpiled_function(custom_function)
 
     def _process_event(
         self,

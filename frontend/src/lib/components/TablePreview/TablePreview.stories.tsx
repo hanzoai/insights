@@ -16,25 +16,25 @@ const mockTable: DatabaseSchemaTable = {
     fields: {
         event: {
             name: 'event',
-            hogql_value: 'event',
+            insightsql_value: 'event',
             type: 'string',
             schema_valid: true,
         },
         timestamp: {
             name: 'timestamp',
-            hogql_value: 'timestamp',
+            insightsql_value: 'timestamp',
             type: 'datetime',
             schema_valid: true,
         },
         distinct_id: {
             name: 'distinct_id',
-            hogql_value: 'distinct_id',
+            insightsql_value: 'distinct_id',
             type: 'string',
             schema_valid: true,
         },
         ignored_view: {
             name: 'ignored_view',
-            hogql_value: 'ignored_view',
+            insightsql_value: 'ignored_view',
             type: 'view',
             schema_valid: true,
         },

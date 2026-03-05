@@ -547,7 +547,7 @@ export const experimentLogic = kea<experimentLogicType>([
             funnelWindowInterval,
             funnelWindowIntervalUnit,
             aggregation_group_type_index,
-            funnelAggregateByHogQL,
+            funnelAggregateByInsightsQL,
             isSecondary,
         }: {
             uuid: string
@@ -559,7 +559,7 @@ export const experimentLogic = kea<experimentLogicType>([
             funnelWindowInterval?: number
             funnelWindowIntervalUnit?: string
             aggregation_group_type_index?: number
-            funnelAggregateByHogQL?: string
+            funnelAggregateByInsightsQL?: string
             isSecondary?: boolean
         }) => ({
             uuid,
@@ -571,7 +571,7 @@ export const experimentLogic = kea<experimentLogicType>([
             funnelWindowInterval,
             funnelWindowIntervalUnit,
             aggregation_group_type_index,
-            funnelAggregateByHogQL,
+            funnelAggregateByInsightsQL,
             isSecondary,
         }),
         addSharedMetricsToExperiment: (
@@ -765,7 +765,7 @@ export const experimentLogic = kea<experimentLogicType>([
                         funnelWindowInterval,
                         funnelWindowIntervalUnit,
                         aggregation_group_type_index,
-                        funnelAggregateByHogQL,
+                        funnelAggregateByInsightsQL,
                         isSecondary,
                     }
                 ) => {
@@ -793,7 +793,7 @@ export const experimentLogic = kea<experimentLogicType>([
                                 ...(breakdownAttributionValue !== undefined && { breakdownAttributionValue }),
                                 ...(funnelWindowInterval !== undefined && { funnelWindowInterval }),
                                 ...(funnelWindowIntervalUnit && { funnelWindowIntervalUnit }),
-                                ...(funnelAggregateByHogQL !== undefined && { funnelAggregateByHogQL }),
+                                ...(funnelAggregateByInsightsQL !== undefined && { funnelAggregateByInsightsQL }),
                             },
                         },
                     } as ExperimentFunnelsQuery

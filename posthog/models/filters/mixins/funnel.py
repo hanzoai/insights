@@ -14,7 +14,7 @@ from posthog.constants import (
     DISPLAY,
     DROP_OFF,
     ENTRANCE_PERIOD_START,
-    FUNNEL_AGGREAGTE_BY_HOGQL,
+    FUNNEL_AGGREAGTE_BY_INSIGHTSQL,
     FUNNEL_CORRELATION_EVENT_EXCLUDE_PROPERTY_NAMES,
     FUNNEL_CORRELATION_EVENT_NAMES,
     FUNNEL_CORRELATION_EXCLUDE_EVENT_NAMES,
@@ -211,14 +211,14 @@ class FunnelLayoutMixin(BaseParamMixin):
         return {FUNNEL_LAYOUT: self.layout} if self.layout else {}
 
 
-class FunnelHogQLAggregationMixin(BaseParamMixin):
+class FunnelInsightsQLAggregationMixin(BaseParamMixin):
     @cached_property
-    def funnel_aggregate_by_hogql(self) -> Optional[str]:
-        return self._data.get(FUNNEL_AGGREAGTE_BY_HOGQL)
+    def funnel_aggregate_by_insightsql(self) -> Optional[str]:
+        return self._data.get(FUNNEL_AGGREAGTE_BY_INSIGHTSQL)
 
     @include_dict
-    def funnel_aggregate_by_hogql_to_dict(self):
-        return {FUNNEL_AGGREAGTE_BY_HOGQL: self.funnel_aggregate_by_hogql} if self.funnel_aggregate_by_hogql else {}
+    def funnel_aggregate_by_insightsql_to_dict(self):
+        return {FUNNEL_AGGREAGTE_BY_INSIGHTSQL: self.funnel_aggregate_by_insightsql} if self.funnel_aggregate_by_insightsql else {}
 
 
 class FunnelTypeMixin(BaseParamMixin):

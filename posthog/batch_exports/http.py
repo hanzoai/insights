@@ -16,14 +16,14 @@ from rest_framework import filters, mixins, request, response, serializers, stat
 from rest_framework.exceptions import NotAuthenticated, NotFound, PermissionDenied, ValidationError
 from rest_framework.pagination import CursorPagination
 
-from posthog.schema import HogQLQueryModifiers, PersonsOnEventsMode
+from posthog.schema import InsightsQLQueryModifiers, PersonsOnEventsMode
 
-from posthog.hogql import ast, errors
-from posthog.hogql.escape_sql import escape_clickhouse_identifier
-from posthog.hogql.hogql import HogQLContext
-from posthog.hogql.parser import parse_select
-from posthog.hogql.printer import prepare_ast_for_printing, print_prepared_ast
-from posthog.hogql.visitor import TraversingVisitor
+from posthog.insightsql import ast, errors
+from posthog.insightsql.escape_sql import escape_clickhouse_identifier
+from posthog.insightsql.insightsql import InsightsQLContext
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from posthog.insightsql.visitor import TraversingVisitor
 
 from posthog.api.log_entries import LogEntryMixin
 from posthog.api.routing import TeamAndOrgViewSetMixin
@@ -360,9 +360,9 @@ def try_convert_to_type(value: typing.Any, target_type: type) -> tuple[typing.An
     return (new_value, True)
 
 
-class HogQLSelectQueryField(serializers.Field):
+class InsightsQLSelectQueryField(serializers.Field):
     def to_internal_value(self, data: str) -> ast.SelectQuery | ast.SelectSetQuery:
-        """Parse a HogQL SelectQuery from a string query."""
+        """Parse a InsightsQL SelectQuery from a string query."""
         try:
             parsed_query = parse_select(data)
         except Exception:
@@ -373,18 +373,18 @@ class HogQLSelectQueryField(serializers.Field):
                 ast.SelectQuery,
                 prepare_ast_for_printing(
                     parsed_query,
-                    context=HogQLContext(
+                    context=InsightsQLContext(
                         team_id=self.context["team_id"],
                         enable_select_queries=True,
-                        modifiers=HogQLQueryModifiers(
+                        modifiers=InsightsQLQueryModifiers(
                             personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_NO_OVERRIDE_PROPERTIES_ON_EVENTS
                         ),
                     ),
                     dialect="clickhouse",
                 ),
             )
-        except errors.ExposedHogQLError as e:
-            raise serializers.ValidationError(f"Invalid HogQL query: {e}")
+        except errors.ExposedInsightsQLError as e:
+            raise serializers.ValidationError(f"Invalid InsightsQL query: {e}")
 
         return prepared_select_query
 
@@ -397,7 +397,7 @@ class BatchExportsField(TypedDict):
 class BatchExportsSchema(TypedDict):
     fields: list[BatchExportsField]
     values: dict[str, str]
-    hogql_query: str
+    insightsql_query: str
 
 
 class _SubqueryFinder(TraversingVisitor):
@@ -420,7 +420,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
     destination = BatchExportDestinationSerializer()
     latest_runs = BatchExportRunSerializer(many=True, read_only=True)
     interval = serializers.ChoiceField(choices=BATCH_EXPORT_INTERVALS)
-    hogql_query = HogQLSelectQueryField(required=False)
+    insightsql_query = InsightsQLSelectQueryField(required=False)
     timezone = serializers.ChoiceField(choices=TIMEZONES, required=False, allow_null=True)
     offset_day = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=6)
     offset_hour = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=23)
@@ -441,7 +441,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
             "start_at",
             "end_at",
             "latest_runs",
-            "hogql_query",
+            "insightsql_query",
             "schema",
             "filters",
             "timezone",
@@ -776,9 +776,9 @@ class BatchExportSerializer(serializers.ModelSerializer):
             ):
                 raise PermissionDenied("Higher frequency batch exports are not enabled for this team.")
 
-        hogql_query = None
-        if hogql_query := validated_data.pop("hogql_query", None):
-            batch_export_schema = self.serialize_hogql_query_to_batch_export_schema(hogql_query)
+        insightsql_query = None
+        if insightsql_query := validated_data.pop("insightsql_query", None):
+            batch_export_schema = self.serialize_insightsql_query_to_batch_export_schema(insightsql_query)
             validated_data["schema"] = batch_export_schema
 
         destination = BatchExportDestination(**destination_data)
@@ -791,22 +791,22 @@ class BatchExportSerializer(serializers.ModelSerializer):
 
         return batch_export
 
-    def serialize_hogql_query_to_batch_export_schema(self, hogql_query: ast.SelectQuery) -> BatchExportSchema:
-        """Return a batch export schema from a HogQL query ast."""
+    def serialize_insightsql_query_to_batch_export_schema(self, insightsql_query: ast.SelectQuery) -> BatchExportSchema:
+        """Return a batch export schema from a InsightsQL query ast."""
         try:
             # Print the query in ClickHouse dialect to catch unresolved field errors, and discard the result
-            context = HogQLContext(
+            context = InsightsQLContext(
                 team_id=self.context["team_id"],
                 enable_select_queries=True,
                 limit_top_select=False,
-                modifiers=HogQLQueryModifiers(
+                modifiers=InsightsQLQueryModifiers(
                     personsOnEventsMode=PersonsOnEventsMode.PERSON_ID_NO_OVERRIDE_PROPERTIES_ON_EVENTS
                 ),
             )
-            print_prepared_ast(hogql_query, context=context, dialect="clickhouse")
+            print_prepared_ast(insightsql_query, context=context, dialect="clickhouse")
 
             # Recreate the context
-            context = HogQLContext(
+            context = InsightsQLContext(
                 team_id=self.context["team_id"],
                 enable_select_queries=True,
                 limit_top_select=False,
@@ -814,12 +814,12 @@ class BatchExportSerializer(serializers.ModelSerializer):
             batch_export_schema: BatchExportsSchema = {
                 "fields": [],
                 "values": {},
-                "hogql_query": print_prepared_ast(hogql_query, context=context, dialect="hogql"),
+                "insightsql_query": print_prepared_ast(insightsql_query, context=context, dialect="insightsql"),
             }
-        except errors.ExposedHogQLError:
-            raise serializers.ValidationError("Unsupported HogQL query")
+        except errors.ExposedInsightsQLError:
+            raise serializers.ValidationError("Unsupported InsightsQL query")
 
-        for field in hogql_query.select:
+        for field in insightsql_query.select:
             if isinstance(field, ast.Alias):
                 expression = print_prepared_ast(
                     field.expr,
@@ -834,7 +834,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
                     dialect="clickhouse",
                 )
                 # String constants get parameterized by the ClickHouse printer (e.g., 'hello' becomes
-                # %(hogql_val_0)s), which escape_clickhouse_identifier rejects. Use the raw value instead.
+                # %(insightsql_val_0)s), which escape_clickhouse_identifier rejects. Use the raw value instead.
                 if isinstance(field, ast.Constant) and isinstance(field.value, str):
                     alias = escape_clickhouse_identifier(field.value)
                 else:
@@ -850,8 +850,8 @@ class BatchExportSerializer(serializers.ModelSerializer):
 
         return batch_export_schema
 
-    def validate_hogql_query(self, hogql_query: ast.SelectQuery | ast.SelectSetQuery) -> ast.SelectQuery:
-        """Validate a HogQLQuery being used for batch exports.
+    def validate_insightsql_query(self, insightsql_query: ast.SelectQuery | ast.SelectSetQuery) -> ast.SelectQuery:
+        """Validate a InsightsQLQuery being used for batch exports.
 
         This method essentially checks that a query is supported by batch exports:
         1. UNION ALL is not supported.
@@ -860,10 +860,10 @@ class BatchExportSerializer(serializers.ModelSerializer):
         4. Subqueries in SELECT expressions are not supported.
         """
 
-        if isinstance(hogql_query, ast.SelectSetQuery):
+        if isinstance(insightsql_query, ast.SelectSetQuery):
             raise serializers.ValidationError("UNIONs are not supported")
 
-        parsed = cast(ast.SelectQuery, hogql_query)
+        parsed = cast(ast.SelectQuery, insightsql_query)
 
         if parsed.select_from is None:
             raise serializers.ValidationError("Query must SELECT FROM events")
@@ -889,7 +889,7 @@ class BatchExportSerializer(serializers.ModelSerializer):
             if subquery_finder.found:
                 raise serializers.ValidationError("Subqueries in SELECT expressions are not supported")
 
-        return hogql_query
+        return insightsql_query
 
     def update(self, batch_export: BatchExport, validated_data: dict) -> BatchExport:
         """Update a BatchExport."""
@@ -905,8 +905,8 @@ class BatchExportSerializer(serializers.ModelSerializer):
                 integration = destination_data.get("integration", batch_export.destination.integration)
                 batch_export.destination.integration = integration
 
-            if hogql_query := validated_data.pop("hogql_query", None):
-                batch_export_schema = self.serialize_hogql_query_to_batch_export_schema(hogql_query)
+            if insightsql_query := validated_data.pop("insightsql_query", None):
+                batch_export_schema = self.serialize_insightsql_query_to_batch_export_schema(insightsql_query)
                 validated_data["schema"] = batch_export_schema
 
             batch_export.destination.save()

@@ -3,7 +3,7 @@ import { useValues } from 'kea'
 import { IconInfo } from '@posthog/icons'
 import { LemonInput, LemonSelect, LemonSelectOption, LemonSelectSection, Link } from '@posthog/lemon-ui'
 
-import { HogQLEditor } from 'lib/components/HogQLEditor/HogQLEditor'
+import { InsightsQLEditor } from 'lib/components/InsightsQLEditor/InsightsQLEditor'
 import { TaxonomicFilterGroupType } from 'lib/components/TaxonomicFilter/types'
 import { groupsAccessLogic } from 'lib/introductions/groupsAccessLogic'
 import { Tooltip } from 'lib/lemon-ui/Tooltip'
@@ -28,7 +28,7 @@ export const commonActionFilterProps = {
         TaxonomicFilterGroupType.Cohorts,
         TaxonomicFilterGroupType.Elements,
         TaxonomicFilterGroupType.SessionProperties,
-        TaxonomicFilterGroupType.HogQLExpression,
+        TaxonomicFilterGroupType.InsightsQLExpression,
         TaxonomicFilterGroupType.DataWarehouseProperties,
         TaxonomicFilterGroupType.DataWarehousePersonProperties,
     ],
@@ -80,15 +80,15 @@ export function FunnelAggregationSelect({
         label: 'Custom SQL expression',
         options: [
             {
-                // This is a bit of a hack so that the HogQL option is only highlighted as active when the user has
-                // set a custom value (because actually _all_ the options are HogQL)
+                // This is a bit of a hack so that the InsightsQL option is only highlighted as active when the user has
+                // set a custom value (because actually _all_ the options are InsightsQL)
                 value: !value || baseValues.includes(value) ? '' : value,
                 label: <span className="font-mono">{value}</span>,
-                labelInMenu: function CustomHogQLOptionWrapped({ onSelect }) {
+                labelInMenu: function CustomInsightsQLOptionWrapped({ onSelect }) {
                     return (
                         // eslint-disable-next-line react/forbid-dom-props
                         <div className="w-120" style={{ maxWidth: 'max(60vw, 20rem)' }}>
-                            <HogQLEditor
+                            <InsightsQLEditor
                                 onChange={onSelect}
                                 value={value}
                                 placeholder={

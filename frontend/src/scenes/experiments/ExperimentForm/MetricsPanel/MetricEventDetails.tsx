@@ -38,7 +38,7 @@ const getMathLabel = (math: string | undefined): string => {
         .with('max', () => 'Maximum')
         .with('unique_session', () => 'Unique sessions')
         .with('unique_group', () => 'Unique groups')
-        .with('hogql', () => 'HogQL')
+        .with('insightsql', () => 'InsightsQL')
         .otherwise(() => math)
 }
 

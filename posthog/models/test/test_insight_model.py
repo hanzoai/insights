@@ -213,7 +213,7 @@ class TestInsightModel(BaseTest):
                     "kind": "DataTableNode",
                     "source": {
                         "filters": query_filters,
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "modifiers": None,
                         "query": "select * from events where {filters}",
                         "response": None,

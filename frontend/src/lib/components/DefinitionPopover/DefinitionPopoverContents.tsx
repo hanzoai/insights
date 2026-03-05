@@ -35,7 +35,7 @@ import {
     PropertyDefinitionVerificationStatus,
 } from '~/types'
 
-import { HogQLDropdown } from '../HogQLDropdown/HogQLDropdown'
+import { InsightsQLDropdown } from '../InsightsQLDropdown/InsightsQLDropdown'
 import { TZLabel } from '../TZLabel'
 import { taxonomicFilterLogic } from '../TaxonomicFilter/taxonomicFilterLogic'
 
@@ -470,10 +470,10 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
             value: column.name,
             type: column.type,
         }))
-        const hogqlOption = { label: 'SQL Expression', value: '' }
+        const insightsqlOption = { label: 'SQL Expression', value: '' }
         const itemValue = localDefinition ? group?.getValue?.(localDefinition) : null
 
-        const isUsingHogQLExpression = (value: string | undefined): boolean => {
+        const isUsingInsightsQLExpression = (value: string | undefined): boolean => {
             if (value === undefined) {
                 return false
             }
@@ -490,14 +490,14 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                 key,
                                 label,
                                 description,
-                                allowHogQL,
-                                hogQLOnly,
+                                allowInsightsQL,
+                                insightsQLOnly,
                                 tableName,
                                 optional,
                                 type,
                             }: DataWarehousePopoverField) => {
                                 const fieldValue = key in localDefinition ? localDefinition[key] : undefined
-                                const isHogQL = isUsingHogQLExpression(fieldValue)
+                                const isInsightsQL = isUsingInsightsQLExpression(fieldValue)
 
                                 return (
                                     <Fragment key={key}>
@@ -517,25 +517,25 @@ function DefinitionView({ group }: { group: TaxonomicFilterGroup }): JSX.Element
                                                 </Tooltip>
                                             )}
                                         </label>
-                                        {!hogQLOnly && (
+                                        {!insightsQLOnly && (
                                             <LemonSelect
                                                 fullWidth
                                                 allowClear={!!optional}
-                                                value={isHogQL ? '' : fieldValue}
+                                                value={isInsightsQL ? '' : fieldValue}
                                                 options={[
                                                     ...columnOptions.filter((col) => !type || col.type === type),
-                                                    ...(allowHogQL ? [hogqlOption] : []),
+                                                    ...(allowInsightsQL ? [insightsqlOption] : []),
                                                 ]}
                                                 onChange={(value: string | null) =>
                                                     setLocalDefinition({ [key]: value })
                                                 }
                                             />
                                         )}
-                                        {((allowHogQL && isHogQL) || hogQLOnly) && (
-                                            <HogQLDropdown
-                                                hogQLValue={fieldValue || ''}
+                                        {((allowInsightsQL && isInsightsQL) || insightsQLOnly) && (
+                                            <InsightsQLDropdown
+                                                insightsQLValue={fieldValue || ''}
                                                 tableName={tableName || _definition.name}
-                                                onHogQLValueChange={(value) => setLocalDefinition({ [key]: value })}
+                                                onInsightsQLValueChange={(value) => setLocalDefinition({ [key]: value })}
                                             />
                                         )}
                                     </Fragment>

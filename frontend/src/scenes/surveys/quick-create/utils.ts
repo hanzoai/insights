@@ -80,8 +80,8 @@ export const buildLogicProps = (context: QuickSurveyContext): Omit<QuickSurveyFo
                 defaults: {
                     questionType: SurveyQuestionType.Link,
                     name: `Announcement (${randomId})`,
-                    question: 'Hog mode is now available!',
-                    description: 'You can never have too many hedgehogs.',
+                    question: 'Custom mode is now available!',
+                    description: 'Try out the latest features.',
                     buttonText: 'Check it out 👉',
                 },
             }

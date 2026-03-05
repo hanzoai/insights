@@ -1793,12 +1793,12 @@
     }
 
     /* stylelint-disable-next-line order/order */
-    .hogqlx-blink {
-        animation: hogqlx-blink 1s steps(1, end) infinite;
+    .insightsqlx-blink {
+        animation: insightsqlx-blink 1s steps(1, end) infinite;
     }
 
     /* stylelint-disable-next-line keyframes-name-pattern */
-    @keyframes hogqlx-blink {
+    @keyframes insightsqlx-blink {
         0% {
             opacity: 1;
         }
@@ -1813,7 +1813,7 @@
     }
 
     /* stylelint-disable-next-line keyframes-name-pattern */
-    @keyframes hogqlx-marquee {
+    @keyframes insightsqlx-marquee {
         0% {
             transform: translateX(0);
         }
@@ -1824,19 +1824,19 @@
     }
 
     /* stylelint-disable-next-line order/order */
-    .hogqlx-marquee {
+    .insightsqlx-marquee {
         position: relative;
         overflow: hidden;
         white-space: nowrap;
     }
 
-    .hogqlx-marquee span {
+    .insightsqlx-marquee span {
         display: inline-block;
         padding-left: 100%;
-        animation: hogqlx-marquee 10s linear infinite;
+        animation: insightsqlx-marquee 10s linear infinite;
     }
 
-    .hogqlx-redacted {
+    .insightsqlx-redacted {
         /* themeable variables */
         position: relative;
         display: inline-block;
@@ -1850,8 +1850,8 @@
         border-radius: var(--radius);
     }
 
-    .hogqlx-redacted:hover,
-    .hogqlx-redacted:focus-visible {
+    .insightsqlx-redacted:hover,
+    .insightsqlx-redacted:focus-visible {
         color: inherit;
 
         /* show the text */
@@ -1860,7 +1860,7 @@
         /* remove the bar */
     }
 
-    .hogqlx-redacted:focus-visible {
+    .insightsqlx-redacted:focus-visible {
         outline: 2px dashed currentColor;
         outline-offset: 2px;
     }

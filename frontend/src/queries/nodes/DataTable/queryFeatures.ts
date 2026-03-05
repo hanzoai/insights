@@ -4,7 +4,7 @@ import {
     isEndpointsUsageTableQuery,
     isEventsQuery,
     isGroupsQuery,
-    isHogQLQuery,
+    isInsightsQLQuery,
     isMarketingAnalyticsTableQuery,
     isNonIntegratedConversionsTableQuery,
     isPersonsNode,
@@ -50,7 +50,7 @@ export function getQueryFeatures(query: Node): Set<QueryFeature> {
     const features = new Set<QueryFeature>()
 
     if (
-        isHogQLQuery(query) ||
+        isInsightsQLQuery(query) ||
         isEventsQuery(query) ||
         isSessionAttributionExplorerQuery(query) ||
         isRevenueExampleEventsQuery(query)

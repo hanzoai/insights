@@ -9,7 +9,7 @@ from django.core.management import call_command
 from posthog.models.cohort.cohort import Cohort
 from posthog.models.team.team import Team
 
-from common.hogvm.python.operation import HOGQL_BYTECODE_VERSION
+from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_VERSION
 
 
 def _has_condition_hash(obj: Any) -> bool:
@@ -124,7 +124,7 @@ class TestResaveCohortsCommandSingleTeam(BaseTest):
         assert isinstance(filters_0, dict)
         behavioral_filter_0 = filters_0["properties"]["values"][1]
         assert behavioral_filter_0["type"] == "behavioral"
-        assert behavioral_filter_0["bytecode"] == ["_H", HOGQL_BYTECODE_VERSION, 32, "purchase", 32, "event", 1, 1, 11]
+        assert behavioral_filter_0["bytecode"] == ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "purchase", 32, "event", 1, 1, 11]
         assert behavioral_filter_0["conditionHash"] is not None
 
         # unsupported stays None (but supported sub-filters may still emit inline bytecode)
@@ -167,7 +167,7 @@ class TestResaveCohortsCommandSingleTeam(BaseTest):
         assert isinstance(filters_4, dict)
         behavioral_filter_4 = filters_4["properties"]["values"][0]
         assert behavioral_filter_4["type"] == "behavioral"
-        assert behavioral_filter_4["bytecode"] == ["_H", HOGQL_BYTECODE_VERSION, 32, "page_view", 32, "event", 1, 1, 11]
+        assert behavioral_filter_4["bytecode"] == ["_H", INSIGHTSQL_BYTECODE_VERSION, 32, "page_view", 32, "event", 1, 1, 11]
         assert behavioral_filter_4["conditionHash"] is not None
 
 

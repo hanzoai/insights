@@ -3,11 +3,11 @@ import { useActions } from 'kea'
 import { LemonRadioOption } from 'lib/lemon-ui/LemonRadio'
 import { eventUsageLogic } from 'lib/utils/eventUsageLogic'
 
-import { HogQLQueryModifiers } from '~/queries/schema/schema-general'
+import { InsightsQLQueryModifiers } from '~/queries/schema/schema-general'
 
 import { TeamSettingRadio } from '../components/TeamSettingRadio'
 
-type SessionTableVersionType = NonNullable<HogQLQueryModifiers['sessionTableVersion']>
+type SessionTableVersionType = NonNullable<InsightsQLQueryModifiers['sessionTableVersion']>
 
 const sessionTableVersionOptions: LemonRadioOption<SessionTableVersionType>[] = [
     { value: 'auto', label: 'Auto' },

@@ -4,7 +4,7 @@ import api, { ApiError } from 'lib/api'
 
 import { useMocks } from '~/mocks/jest'
 import { performQuery, pollForResults, queryExportContext, waitForPageVisible } from '~/queries/query'
-import { EventsQuery, HogQLQuery, NodeKind } from '~/queries/schema/schema-general'
+import { EventsQuery, InsightsQLQuery, NodeKind } from '~/queries/schema/schema-general'
 import { initKeaTests } from '~/test/init'
 import { PropertyFilterType, PropertyOperator } from '~/types'
 
@@ -16,10 +16,10 @@ describe('query', () => {
             post: {
                 '/api/environments/:team_id/query': (req) => {
                     const data = req.body as any
-                    if (data.query?.kind === 'HogQLQuery') {
+                    if (data.query?.kind === 'InsightsQLQuery') {
                         return [
                             200,
-                            { results: [], clickhouse: 'clickhouse string', hogql: 'hogql string', is_cached: false },
+                            { results: [], clickhouse: 'clickhouse string', insightsql: 'insightsql string', is_cached: false },
                         ]
                     }
                     if (data.query?.kind === 'EventsQuery' && data.query.select[0] === 'error') {
@@ -92,10 +92,10 @@ describe('query', () => {
         expect(queryCompletedCalls[0][1]).toMatchObject({ query: q, duration: expect.any(Number) })
     })
 
-    it('emits a specific event on a HogQLQuery', async () => {
+    it('emits a specific event on a InsightsQLQuery', async () => {
         const captureSpy = jest.spyOn(posthog, 'capture')
-        const q: HogQLQuery = setLatestVersionsOnQuery({
-            kind: NodeKind.HogQLQuery,
+        const q: InsightsQLQuery = setLatestVersionsOnQuery({
+            kind: NodeKind.InsightsQLQuery,
             query: 'select * from events',
         })
         captureSpy.mockClear()

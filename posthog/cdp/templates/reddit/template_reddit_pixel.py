@@ -1,4 +1,4 @@
-from posthog.cdp.templates.hog_function_template import HogFunctionMappingTemplate, HogFunctionTemplateDC
+from posthog.cdp.templates.custom_function_template import CustomFunctionMappingTemplate, CustomFunctionTemplateDC
 
 common_inputs = [
     {
@@ -17,7 +17,7 @@ common_inputs = [
     },
 ]
 
-template_reddit_pixel: HogFunctionTemplateDC = HogFunctionTemplateDC(
+template_reddit_pixel: CustomFunctionTemplateDC = CustomFunctionTemplateDC(
     free=False,
     status="alpha",
     type="site_destination",
@@ -108,7 +108,7 @@ export function onEvent({ inputs, posthog }) {
     # And reddit's here:
     # https://business.reddithelp.com/s/article/manual-conversion-events-with-the-reddit-pixel
     mapping_templates=[
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Page Visit",
             include_by_default=True,
             filters={"events": [{"id": "$pageview", "name": "Pageview", "type": "events"}]},
@@ -124,7 +124,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Search",
             include_by_default=True,
             filters={"events": [{"id": "Products Searched", "name": "Products Searched", "type": "events"}]},
@@ -140,7 +140,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Product Added",
             include_by_default=True,
             filters={"events": [{"id": "Product Added", "name": "Product Added", "type": "events"}]},
@@ -156,7 +156,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Product Added to Wishlist",
             include_by_default=True,
             filters={
@@ -174,7 +174,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Order Completed",
             include_by_default=True,
             filters={"events": [{"id": "Order Completed", "name": "Order Completed", "type": "events"}]},
@@ -190,7 +190,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Product Viewed",
             include_by_default=True,
             filters={"events": [{"id": "Product Viewed", "name": "Product Viewed", "type": "events"}]},
@@ -206,7 +206,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Lead Generated",
             include_by_default=True,
             filters={"events": [{"id": "Lead Generated", "name": "Lead Generated", "type": "events"}]},
@@ -222,7 +222,7 @@ export function onEvent({ inputs, posthog }) {
                 *common_inputs,
             ],
         ),
-        HogFunctionMappingTemplate(
+        CustomFunctionMappingTemplate(
             name="Signed Up",
             include_by_default=True,
             filters={"events": [{"id": "Signed Up", "name": "Signed Up", "type": "events"}]},

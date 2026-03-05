@@ -30,7 +30,7 @@ export function PersonPropertyFilters({ query, setQuery }: PersonPropertyFilters
                     ? [
                           TaxonomicFilterGroupType.PersonProperties,
                           TaxonomicFilterGroupType.Cohorts,
-                          TaxonomicFilterGroupType.HogQLExpression,
+                          TaxonomicFilterGroupType.InsightsQLExpression,
                       ]
                     : [TaxonomicFilterGroupType.PersonProperties]
             }

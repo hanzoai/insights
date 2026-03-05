@@ -13,9 +13,9 @@ from posthoganalytics.ai.gemini import AsyncClient, genai
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models import Team
 from posthog.sync import database_sync_to_async
@@ -182,7 +182,7 @@ def _query_new_records(
     """
     parsed = parse_select(query, placeholders=placeholders) if placeholders else parse_select(query)
     try:
-        result = execute_hogql_query(query=parsed, team=team, query_type="EmitSignalsNewRecords")
+        result = execute_insightsql_query(query=parsed, team=team, query_type="EmitSignalsNewRecords")
     except Exception as e:
         activity.logger.exception(f"Error querying new records: {e}", extra=extra)
         return []

@@ -15,7 +15,7 @@ from posthog.models import Dashboard, Experiment, FeatureFlag, Insight, Project,
 from posthog.models.activity_logging.activity_log import ActivityLog
 from posthog.models.cohort import Cohort
 from posthog.models.file_system.file_system import FileSystem
-from posthog.models.hog_functions.hog_function import HogFunction, HogFunctionType
+from posthog.models.custom_functions.custom_function import CustomFunction, CustomFunctionType
 from posthog.models.link import Link
 from posthog.models.surveys.survey import Survey
 from posthog.session_recordings.models.session_recording_playlist import SessionRecordingPlaylist
@@ -303,15 +303,15 @@ class TestFileSystemAPI(APIBaseTest):
         self.assertEqual(data["results"][0]["path"], "unfiled/scene-tabs")
         self.assertEqual(data["results"][0]["type"], "feature_flag")
 
-    def test_search_hog_function_types(self):
+    def test_search_custom_function_types(self):
         """
         Ensure the search functionality is working on the 'path' field.
         """
         FileSystem.objects.create(
-            team=self.team, path="Analytics/Report 1", type="hog_function/source", created_by=self.user
+            team=self.team, path="Analytics/Report 1", type="custom_function/source", created_by=self.user
         )
         FileSystem.objects.create(
-            team=self.team, path="Analytics/Report 2", type="hog_function/destination", created_by=self.user
+            team=self.team, path="Analytics/Report 2", type="custom_function/destination", created_by=self.user
         )
         FileSystem.objects.create(team=self.team, path="Random/Other File", type="misc", created_by=self.user)
 
@@ -336,7 +336,7 @@ class TestFileSystemAPI(APIBaseTest):
         paths = {item["path"] for item in data["results"]}
         self.assertSetEqual(paths, {"Random/Other File"})
 
-        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=type:hog_function/")
+        response = self.client.get(f"/api/projects/{self.team.id}/file_system/?search=type:custom_function/")
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
         data = response.json()
         self.assertEqual(data["count"], 2)
@@ -1351,9 +1351,9 @@ class TestFileSystemAPIAdvancedPermissions(APIBaseTest):
 @pytest.mark.django_db
 class TestFileSystemProjectScoping(APIBaseTest):
     """
-    - Any *non-hog_function* item belonging to **any team in the same project**
+    - Any *non-custom_function* item belonging to **any team in the same project**
       must be visible & editable.
-    - Items whose type starts with "hog_function/" are **team-scoped** and
+    - Items whose type starts with "custom_function/" are **team-scoped** and
       must be hidden from sibling teams.
     """
 
@@ -1393,15 +1393,15 @@ class TestFileSystemProjectScoping(APIBaseTest):
             team=self.team3, path="Shared/Doc-T3", type="feature_flag", created_by=self.user
         )
 
-        # hog_function – team-scoped
+        # custom_function – team-scoped
         self.hog_t1 = FileSystem.objects.create(
-            team=self.team, path="Functions/Hog-T1", type="hog_function/source", created_by=self.user
+            team=self.team, path="Functions/Hog-T1", type="custom_function/source", created_by=self.user
         )
         self.hog_t2 = FileSystem.objects.create(
-            team=self.team2, path="Functions/Hog-T2", type="hog_function/source", created_by=self.user
+            team=self.team2, path="Functions/Hog-T2", type="custom_function/source", created_by=self.user
         )
         self.hog_t3 = FileSystem.objects.create(
-            team=self.team3, path="Functions/Hog-T3", type="hog_function/source", created_by=self.user
+            team=self.team3, path="Functions/Hog-T3", type="custom_function/source", created_by=self.user
         )
 
     # LIST
@@ -1410,31 +1410,31 @@ class TestFileSystemProjectScoping(APIBaseTest):
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         paths = {item["path"] for item in resp.json()["results"]}
 
-        # Non-hog_function items from *both* teams in the project
+        # Non-custom_function items from *both* teams in the project
         self.assertIn("Shared/Doc-T1", paths)
         self.assertIn("Shared/Doc-T2", paths)
         # But not from a different project
         self.assertNotIn("Shared/Doc-T3", paths)
 
-        # hog_function only from the *current* team
+        # custom_function only from the *current* team
         self.assertIn("Functions/Hog-T1", paths)
         self.assertNotIn("Functions/Hog-T2", paths)
         self.assertNotIn("Functions/Hog-T3", paths)
 
     # RETRIEVE
-    def test_retrieve_non_hog_function_from_other_team_is_allowed(self):
+    def test_retrieve_non_custom_function_from_other_team_is_allowed(self):
         url = f"/api/projects/{self.team.id}/file_system/{self.doc_t2.id}/"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
         self.assertEqual(resp.json()["path"], "Shared/Doc-T2")
 
-    def test_retrieve_hog_function_from_other_team_is_forbidden(self):
+    def test_retrieve_custom_function_from_other_team_is_forbidden(self):
         url = f"/api/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     # UPDATE (PATCH)
-    def test_update_non_hog_function_from_other_team_is_allowed(self):
+    def test_update_non_custom_function_from_other_team_is_allowed(self):
         url = f"/api/projects/{self.team.id}/file_system/{self.doc_t2.id}/"
         resp = self.client.patch(url, {"path": "Shared/Doc-T2-Renamed"})
         self.assertEqual(resp.status_code, status.HTTP_200_OK, resp.json())
@@ -1442,17 +1442,17 @@ class TestFileSystemProjectScoping(APIBaseTest):
         self.doc_t2.refresh_from_db()
         self.assertEqual(self.doc_t2.path, "Shared/Doc-T2-Renamed")
 
-    def test_update_hog_function_from_other_team_is_forbidden(self):
+    def test_update_custom_function_from_other_team_is_forbidden(self):
         url = f"/api/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
         resp = self.client.patch(url, {"path": "Functions/Hog-T2-Renamed"})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
 @pytest.mark.django_db
-class TestMoveRepairsLeftoverHogFunctions(APIBaseTest):
+class TestMoveRepairsLeftoverCustomFunctions(APIBaseTest):
     """
     When a folder is moved we copy / delete only the rows that belong to the
-    *current* team. `hog_function/*` rows owned by *other* teams stay where they
+    *current* team. `custom_function/*` rows owned by *other* teams stay where they
     are – so the code must recreate the folder hierarchy they still depend on.
     """
 
@@ -1494,7 +1494,7 @@ class TestMoveRepairsLeftoverHogFunctions(APIBaseTest):
             team=self.team2,
             path="Shared/Hog-func.js",
             depth=2,
-            type="hog_function/source",
+            type="custom_function/source",
             created_by=self.other_user,
         )
 
@@ -1510,7 +1510,7 @@ class TestMoveRepairsLeftoverHogFunctions(APIBaseTest):
         self.doc_t1.refresh_from_db()
         self.assertEqual(self.doc_t1.path, "SharedRenamed/Doc-1.txt")
 
-        # ─── Team-2 hog_function stayed in place ------------------------------
+        # ─── Team-2 custom_function stayed in place ------------------------------
         self.hog_t2.refresh_from_db()
         self.assertEqual(self.hog_t2.path, "Shared/Hog-func.js")
 
@@ -1522,7 +1522,7 @@ class TestMoveRepairsLeftoverHogFunctions(APIBaseTest):
         )
         #  • Team-2 still has “Shared” (re-created by the repair step)
         folder_t2_qs = FileSystem.objects.filter(team=self.team2, path="Shared", type="folder")
-        self.assertTrue(folder_t2_qs.exists(), "Left-behind hog_function lost its parent folder")
+        self.assertTrue(folder_t2_qs.exists(), "Left-behind custom_function lost its parent folder")
         folder = folder_t2_qs.first()
         assert folder is not None
         self.assertEqual(folder.depth, 1)
@@ -1535,7 +1535,7 @@ class TestMoveRepairsLeftoverHogFunctions(APIBaseTest):
 
 
 @pytest.mark.django_db
-class TestDestroyRepairsLeftoverHogFunctions(APIBaseTest):
+class TestDestroyRepairsLeftoverCustomFunctions(APIBaseTest):
     def setUp(self):
         super().setUp()
 
@@ -1576,7 +1576,7 @@ class TestDestroyRepairsLeftoverHogFunctions(APIBaseTest):
             team=self.team2,
             path="Shared/Hog-func.js",
             depth=2,
-            type="hog_function/source",
+            type="custom_function/source",
             created_by=self.other_user,
         )
 
@@ -1592,7 +1592,7 @@ class TestDestroyRepairsLeftoverHogFunctions(APIBaseTest):
 
         self.assertTrue(
             FileSystem.objects.filter(id=self.hog_t2.id).exists(),
-            "Leftover hog_function row was deleted erroneously",
+            "Leftover custom_function row was deleted erroneously",
         )
 
         folder_t2_qs = FileSystem.objects.filter(team=self.team2, path="Shared", type="folder")
@@ -1649,9 +1649,9 @@ class TestDestroyRepairsLeftoverHogFunctions(APIBaseTest):
                 "supports_restore": True,
             },
             {
-                "file_type": f"hog_function/{HogFunctionType.DESTINATION}",
-                "scope": "HogFunction",
-                "factory": self._prepare_hog_function_case,
+                "file_type": f"custom_function/{CustomFunctionType.DESTINATION}",
+                "scope": "CustomFunction",
+                "factory": self._prepare_custom_function_case,
                 "supports_restore": True,
                 "extra_restore_fields": ["enabled"],
             },
@@ -1858,23 +1858,23 @@ class TestDestroyRepairsLeftoverHogFunctions(APIBaseTest):
             "path": fs_entry.path,
         }
 
-    def _prepare_hog_function_case(self):
-        hog_function = HogFunction.objects.create(
+    def _prepare_custom_function_case(self):
+        custom_function = CustomFunction.objects.create(
             team=self.team,
             name="Destination",
             created_by=self.user,
-            type=HogFunctionType.DESTINATION,
+            type=CustomFunctionType.DESTINATION,
             enabled=True,
             hog="return 1",
         )
-        file_type = f"hog_function/{hog_function.type}"
+        file_type = f"custom_function/{custom_function.type}"
         fs_entry = self._ensure_file_system_entry(
-            file_type=file_type, ref=str(hog_function.id), fallback_name=str(hog_function.id)
+            file_type=file_type, ref=str(custom_function.id), fallback_name=str(custom_function.id)
         )
         return {
             "fs_entry": fs_entry,
-            "item_id": str(hog_function.id),
-            "ref": str(hog_function.id),
+            "item_id": str(custom_function.id),
+            "ref": str(custom_function.id),
             "path": fs_entry.path,
         }
 

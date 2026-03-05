@@ -23,8 +23,8 @@ from temporalio import (
 )
 from temporalio.testing import WorkflowEnvironment
 
-from posthog.hogql.database.database import Database
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models import Team
 from posthog.models.event.util import bulk_create_events
@@ -44,7 +44,7 @@ from posthog.temporal.data_modeling.run_workflow import (
     create_job_model_activity,
     fail_jobs_activity,
     finish_run_activity,
-    hogql_table,
+    insightsql_table,
     materialize_model,
     run_dag_activity,
     start_run_activity,
@@ -65,8 +65,8 @@ TEST_TIME = dt.datetime.now(dt.UTC)
 @pytest_asyncio.fixture
 async def posthog_table_names(ateam):
     team = await database_sync_to_async(Team.objects.get)(id=ateam.pk)
-    hogql_db = await database_sync_to_async(Database.create_for)(team=team)
-    posthog_table_names = hogql_db.get_posthog_table_names()
+    insightsql_db = await database_sync_to_async(Database.create_for)(team=team)
+    posthog_table_names = insightsql_db.get_posthog_table_names()
 
     return posthog_table_names
 
@@ -96,7 +96,7 @@ async def test_run_dag_activity_activity_materialize_mocked(activity_environment
             await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
                 team=ateam,
                 name=model_label,
-                query={"query": f"SELECT * FROM events LIMIT 10", "kind": "HogQLQuery"},
+                query={"query": f"SELECT * FROM events LIMIT 10", "kind": "InsightsQLQuery"},
             )
 
     job = await database_sync_to_async(DataModelingJob.objects.create)(
@@ -167,7 +167,7 @@ async def test_run_dag_activity_activity_skips_if_ancestor_failed_mocked(
             await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
                 team=ateam,
                 name=model_label,
-                query={"query": f"SELECT * FROM events LIMIT 10", "kind": "HogQLQuery"},
+                query={"query": f"SELECT * FROM events LIMIT 10", "kind": "InsightsQLQuery"},
             )
 
     job = await database_sync_to_async(DataModelingJob.objects.create)(
@@ -278,7 +278,7 @@ async def test_materialize_model(ateam, bucket_name, minio_client, pageview_even
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="my_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     with override_settings(
@@ -331,7 +331,7 @@ async def test_materialize_model(ateam, bucket_name, minio_client, pageview_even
     assert sorted(table.to_pylist(), key=lambda d: (d["distinct_id"], d["timestamp"])) == expected_events
 
     # Ensure we can query the table
-    await sync_to_async(execute_hogql_query)(f"SELECT * FROM {saved_query.name}", ateam)
+    await sync_to_async(execute_insightsql_query)(f"SELECT * FROM {saved_query.name}", ateam)
 
 
 async def test_materialize_model_timestamps(ateam, bucket_name, minio_client, pageview_events):
@@ -341,7 +341,7 @@ async def test_materialize_model_timestamps(ateam, bucket_name, minio_client, pa
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="my_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
     with override_settings(
         BUCKET_URL=f"s3://{bucket_name}",
@@ -385,7 +385,7 @@ async def test_materialize_model_nullable_nothing_column(ateam, bucket_name, min
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="my_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
     with override_settings(
         BUCKET_URL=f"s3://{bucket_name}",
@@ -427,7 +427,7 @@ async def test_materialize_model_with_pascal_cased_name(ateam, bucket_name, mini
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="PascalCasedView",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     with override_settings(
@@ -480,7 +480,7 @@ async def test_materialize_model_with_pascal_cased_name(ateam, bucket_name, mini
     assert sorted(table.to_pylist(), key=lambda d: (d["distinct_id"], d["timestamp"])) == expected_events
 
     # Ensure we can query the table
-    await sync_to_async(execute_hogql_query)(f"SELECT * FROM {saved_query.name}", ateam)
+    await sync_to_async(execute_insightsql_query)(f"SELECT * FROM {saved_query.name}", ateam)
 
 
 @pytest_asyncio.fixture
@@ -496,7 +496,7 @@ async def saved_queries(ateam):
     parent_saved_query = DataWarehouseSavedQuery(
         team=ateam,
         name="my_model",
-        query={"query": parent_query, "kind": "HogQLQuery"},
+        query={"query": parent_query, "kind": "InsightsQLQuery"},
     )
     parent_saved_query.columns = await sync_to_async(parent_saved_query.get_columns)()
     await parent_saved_query.asave()
@@ -504,7 +504,7 @@ async def saved_queries(ateam):
     child_saved_query = DataWarehouseSavedQuery(
         team=ateam,
         name="my_model_child",
-        query={"query": "select * from my_model where distinct_id = 'b'", "kind": "HogQLQuery"},
+        query={"query": "select * from my_model where distinct_id = 'b'", "kind": "InsightsQLQuery"},
     )
     child_saved_query.columns = await sync_to_async(child_saved_query.get_columns)()
     await child_saved_query.asave()
@@ -512,7 +512,7 @@ async def saved_queries(ateam):
     child_2_saved_query = DataWarehouseSavedQuery(
         team=ateam,
         name="my_model_child_2",
-        query={"query": "select * from my_model where distinct_id = 'a'", "kind": "HogQLQuery"},
+        query={"query": "select * from my_model where distinct_id = 'a'", "kind": "InsightsQLQuery"},
     )
     child_2_saved_query.columns = await sync_to_async(child_2_saved_query.get_columns)()
     await child_2_saved_query.asave()
@@ -520,7 +520,7 @@ async def saved_queries(ateam):
     grand_child_saved_query = DataWarehouseSavedQuery(
         team=ateam,
         name="my_model_grand_child",
-        query={"query": "select * from my_model_child union all select * from my_model_child_2", "kind": "HogQLQuery"},
+        query={"query": "select * from my_model_child union all select * from my_model_child_2", "kind": "InsightsQLQuery"},
     )
     grand_child_saved_query.columns = await sync_to_async(grand_child_saved_query.get_columns)()
     await grand_child_saved_query.asave()
@@ -930,7 +930,7 @@ async def test_run_workflow_revert_materialization(
     workflow_id = str(uuid.uuid4())
     inputs = RunWorkflowInputs(team_id=ateam.pk)
 
-    def mock_hogql_table(_query, _team, _logger):
+    def mock_insightsql_table(_query, _team, _logger):
         raise Exception("Unknown table")
 
     with (
@@ -942,7 +942,7 @@ async def test_run_workflow_revert_materialization(
             DATAWAREHOUSE_BUCKET_DOMAIN="objectstorage:19000",
         ),
         freeze_time(TEST_TIME),
-        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.hogql_table", mock_hogql_table),
+        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.insightsql_table", mock_insightsql_table),
     ):
         async with temporalio.worker.Worker(
             temporal_client,
@@ -999,12 +999,12 @@ async def test_run_workflow_timeout_exceeded(
             DATAWAREHOUSE_BUCKET_DOMAIN="objectstorage:19000",
         ),
         freeze_time(TEST_TIME),
-        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.hogql_table") as mock_hogql_table,
+        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.insightsql_table") as mock_insightsql_table,
         unittest.mock.patch(
             "posthog.temporal.data_modeling.run_workflow.a_pause_saved_query_schedule"
         ) as mock_pause_saved_query_schedule,
     ):
-        mock_hogql_table.side_effect = Exception(
+        mock_insightsql_table.side_effect = Exception(
             "Code: 159. DB::Exception: Timeout exceeded: elapsed 600585.167566 ms, maximum: 600000 ms. (TIMEOUT_EXCEEDED) (version 25.8.12.129 (official build))"
         )
 
@@ -1035,7 +1035,7 @@ async def test_run_workflow_timeout_exceeded(
             )
 
     # Temporal shouldn't reattempt the activity
-    assert mock_hogql_table.call_count == 1
+    assert mock_insightsql_table.call_count == 1
     mock_pause_saved_query_schedule.assert_called()
 
     job = await DataModelingJob.objects.aget(workflow_id=workflow_id)
@@ -1143,7 +1143,7 @@ async def test_dlt_direct_naming(ateam, bucket_name, minio_client, pageview_even
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="camel_case_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     # Make sure we have pageview events for the query to work with
@@ -1194,10 +1194,10 @@ async def test_materialize_model_with_decimal256_fix(ateam, bucket_name, minio_c
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="decimal_fix_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
-    def mock_hogql_table(*args, **kwargs):
+    def mock_insightsql_table(*args, **kwargs):
         from decimal import Decimal
 
         high_precision_decimal_type = pa.decimal256(76, 32)
@@ -1223,7 +1223,7 @@ async def test_materialize_model_with_decimal256_fix(ateam, bucket_name, minio_c
             DATAWAREHOUSE_LOCAL_BUCKET_REGION="us-east-1",
             DATAWAREHOUSE_BUCKET_DOMAIN="objectstorage:19000",
         ),
-        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.hogql_table", mock_hogql_table),
+        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.insightsql_table", mock_insightsql_table),
     ):
         job = await database_sync_to_async(DataModelingJob.objects.create)(
             team=ateam,
@@ -1266,10 +1266,10 @@ async def test_materialize_model_with_decimal256_downscale_to_decimal128(ateam, 
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="decimal_downscale_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
-    def mock_hogql_table(*args, **kwargs):
+    def mock_insightsql_table(*args, **kwargs):
         from decimal import Decimal
 
         high_precision_decimal_type = pa.decimal256(50, 10)
@@ -1295,7 +1295,7 @@ async def test_materialize_model_with_decimal256_downscale_to_decimal128(ateam, 
             DATAWAREHOUSE_LOCAL_BUCKET_REGION="us-east-1",
             DATAWAREHOUSE_BUCKET_DOMAIN="objectstorage:19000",
         ),
-        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.hogql_table", mock_hogql_table),
+        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.insightsql_table", mock_insightsql_table),
     ):
         job = await database_sync_to_async(DataModelingJob.objects.create)(
             team=ateam,
@@ -1370,7 +1370,7 @@ async def test_create_job_model_activity_cleans_up_running_jobs(activity_environ
     )
 
     saved_query = await database_sync_to_async(DataWarehouseSavedQuery.objects.create)(
-        team=ateam, name="test_query", query={"query": "SELECT * FROM events LIMIT 10", "kind": "HogQLQuery"}
+        team=ateam, name="test_query", query={"query": "SELECT * FROM events LIMIT 10", "kind": "InsightsQLQuery"}
     )
 
     await activity_environment.run(cleanup_running_jobs_activity, CleanupRunningJobsActivityInputs(team_id=ateam.pk))
@@ -1403,10 +1403,10 @@ async def test_materialize_model_progress_tracking(ateam, bucket_name, minio_cli
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="progress_tracking_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
-    def mock_hogql_table(*args, **kwargs):
+    def mock_insightsql_table(*args, **kwargs):
         # Create multiple batches to test progress tracking
         batch1 = pa.RecordBatch.from_arrays([pa.array([1, 2, 3], type=pa.int64())], names=["test_column"])
         batch2 = pa.RecordBatch.from_arrays([pa.array([4, 5], type=pa.int64())], names=["test_column"])
@@ -1427,7 +1427,7 @@ async def test_materialize_model_progress_tracking(ateam, bucket_name, minio_cli
             DATAWAREHOUSE_LOCAL_BUCKET_REGION="us-east-1",
             DATAWAREHOUSE_BUCKET_DOMAIN="objectstorage:19000",
         ),
-        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.hogql_table", mock_hogql_table),
+        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.insightsql_table", mock_insightsql_table),
         unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.get_query_row_count", return_value=6),
     ):
         job = await database_sync_to_async(DataModelingJob.objects.create)(
@@ -1463,7 +1463,7 @@ async def test_materialize_model_with_non_utc_timestamp(ateam, bucket_name, mini
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="timezone_fix_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     with override_settings(
@@ -1511,7 +1511,7 @@ async def test_materialize_model_with_utc_timestamp(ateam, bucket_name, minio_cl
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="timezone_fix_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     with override_settings(
@@ -1559,7 +1559,7 @@ async def test_materialize_model_with_date(ateam, bucket_name, minio_client, tru
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="timezone_fix_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     with override_settings(
@@ -1607,7 +1607,7 @@ async def test_materialize_model_with_plain_datetime(ateam, bucket_name, minio_c
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="timezone_fix_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
     with override_settings(
@@ -1653,10 +1653,10 @@ async def test_materialize_model_empty_results(ateam, bucket_name, minio_client)
     saved_query = await DataWarehouseSavedQuery.objects.acreate(
         team=ateam,
         name="empty_results_test_model",
-        query={"query": query, "kind": "HogQLQuery"},
+        query={"query": query, "kind": "InsightsQLQuery"},
     )
 
-    async def mock_hogql_table(*args, **kwargs):
+    async def mock_insightsql_table(*args, **kwargs):
         return
         yield  # makes this a generator but nothing is ever yielded because of the return
 
@@ -1668,7 +1668,7 @@ async def test_materialize_model_empty_results(ateam, bucket_name, minio_client)
             DATAWAREHOUSE_LOCAL_BUCKET_REGION="us-east-1",
             DATAWAREHOUSE_BUCKET_DOMAIN="objectstorage:19000",
         ),
-        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.hogql_table", mock_hogql_table),
+        unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.insightsql_table", mock_insightsql_table),
         unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.get_query_row_count", return_value=0),
         unittest.mock.patch("posthog.temporal.data_modeling.run_workflow.a_pause_saved_query_schedule"),
     ):
@@ -1702,11 +1702,11 @@ class DummyDuckLakeCopyDataModelingWorkflow:
         child_ducklake_workflow_runs.append(inputs)
 
 
-async def test_hogql_table_applies_custom_modifier_to_sessions_query(ateam):
+async def test_insightsql_table_applies_custom_modifier_to_sessions_query(ateam):
     """Test that team-level bounceRateDurationSeconds is applied to sessions queries.
 
     The $is_bounce calculation uses bounceRateDurationSeconds. Without the fix to pass
-    modifiers to HogQLContext, the default value (10) would be used instead of the
+    modifiers to InsightsQLContext, the default value (10) would be used instead of the
     team's custom value.
     """
     # Set custom bounce rate duration (default is 10)
@@ -1730,7 +1730,7 @@ async def test_hogql_table_applies_custom_modifier_to_sessions_query(ateam):
         mock_astream_query,
     ):
         try:
-            async for _ in hogql_table(query, ateam, logger):
+            async for _ in insightsql_table(query, ateam, logger):
                 break
         except (StopAsyncIteration, StopIteration):
             pass
@@ -1748,11 +1748,11 @@ async def test_create_default_modifiers_for_team_in_async_context(ateam):
     which triggers a lazy load of the organization foreign key. Without database_sync_to_async,
     this raises SynchronousOnlyOperation in an async context.
 
-    This is a regression test for the fix that wrapped the call in hogql_table and get_query_row_count.
+    This is a regression test for the fix that wrapped the call in insightsql_table and get_query_row_count.
     """
     from django.core.exceptions import SynchronousOnlyOperation
 
-    from posthog.hogql.modifiers import create_default_modifiers_for_team
+    from posthog.insightsql.modifiers import create_default_modifiers_for_team
 
     # fetch team without select_related to ensure organization needs lazy loading
     team = await database_sync_to_async(Team.objects.get)(id=ateam.pk)

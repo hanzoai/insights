@@ -28,7 +28,7 @@ import { ErrorBoundary } from '~/layout/ErrorBoundary'
 import { themeLogic } from '~/layout/navigation-3000/themeLogic'
 import { Query } from '~/queries/Query/Query'
 import { extractValidationError } from '~/queries/nodes/InsightViz/utils'
-import { DashboardFilter, HogQLVariable } from '~/queries/schema/schema-general'
+import { DashboardFilter, InsightsQLVariable } from '~/queries/schema/schema-general'
 import {
     AccessControlLevel,
     AccessControlResourceType,
@@ -86,7 +86,7 @@ export interface InsightCardProps extends Resizeable {
     /** Dashboard filters to override the ones in the insight */
     filtersOverride?: DashboardFilter
     /** Dashboard variables to override the ones in the insight */
-    variablesOverride?: Record<string, HogQLVariable>
+    variablesOverride?: Record<string, InsightsQLVariable>
     /** Dashboard breakdown colors to override the ones in the insight */
     breakdownColorOverride?: BreakdownColorConfig[]
     /** Dashboard color theme to override the ones in the insight */

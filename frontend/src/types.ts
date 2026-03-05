@@ -56,9 +56,9 @@ import type {
     ExternalDataSourceType,
     FileSystemIconType,
     FileSystemImport,
-    HogQLQuery,
-    HogQLQueryModifiers,
-    HogQLVariable,
+    InsightsQLQuery,
+    InsightsQLQueryModifiers,
+    InsightsQLVariable,
     InsightQueryNode,
     InsightVizNode,
     MarketingAnalyticsConfig,
@@ -691,8 +691,8 @@ export interface TeamType extends TeamBasicType {
     correlation_config: CorrelationConfigType | null
     person_on_events_querying_enabled: boolean
     extra_settings?: Record<string, string | number | boolean | undefined>
-    modifiers?: HogQLQueryModifiers
-    default_modifiers?: HogQLQueryModifiers
+    modifiers?: InsightsQLQueryModifiers
+    default_modifiers?: InsightsQLQueryModifiers
     product_intents?: ProductIntentType[]
     default_data_theme?: number
     flags_persistence_default: boolean
@@ -925,7 +925,7 @@ export enum PropertyFilterType {
     Recording = 'recording',
     LogEntry = 'log_entry',
     Group = 'group',
-    HogQL = 'hogql',
+    InsightsQL = 'insightsql',
     DataWarehouse = 'data_warehouse',
     DataWarehousePersonProperty = 'data_warehouse_person_property',
     ErrorTrackingIssue = 'error_tracking_issue',
@@ -1039,8 +1039,8 @@ export interface FlagPropertyFilter extends BasePropertyFilter {
     value: boolean | string
 }
 
-export interface HogQLPropertyFilter extends BasePropertyFilter {
-    type: PropertyFilterType.HogQL
+export interface InsightsQLPropertyFilter extends BasePropertyFilter {
+    type: PropertyFilterType.InsightsQL
     key: string
 }
 
@@ -1063,7 +1063,7 @@ export type AnyPropertyFilter =
     | GroupPropertyFilter
     | FeaturePropertyFilter
     | FlagPropertyFilter
-    | HogQLPropertyFilter
+    | InsightsQLPropertyFilter
     | EmptyPropertyFilter
     | DataWarehousePropertyFilter
     | DataWarehousePersonPropertyFilter
@@ -1075,10 +1075,10 @@ export type AnyPropertyFilter =
 export type AnyPersonScopeFilter =
     | PersonPropertyFilter
     | CohortPropertyFilter
-    | HogQLPropertyFilter
+    | InsightsQLPropertyFilter
     | EmptyPropertyFilter
 
-export type AnyGroupScopeFilter = GroupPropertyFilter | HogQLPropertyFilter
+export type AnyGroupScopeFilter = GroupPropertyFilter | InsightsQLPropertyFilter
 
 export type AnyFilterLike = AnyPropertyFilter | PropertyGroupFilter | PropertyGroupFilterValue
 
@@ -1360,7 +1360,7 @@ export interface ActionFilter extends EntityFilter {
     math_property?: string | null
     math_property_type?: TaxonomicFilterGroupType | null
     math_group_type_index?: integer | null
-    math_hogql?: string | null
+    math_insightsql?: string | null
     properties?: AnyPropertyFilter[]
     type: EntityType
     days?: string[] // TODO: why was this added here?
@@ -2247,7 +2247,7 @@ export interface EndpointType extends WithAccessControl {
     name: string
     description: string
     derived_from_insight?: string | null
-    query: HogQLQuery | InsightQueryNode
+    query: InsightsQLQuery | InsightQueryNode
     is_active: boolean
     endpoint_path: string
     created_at: string
@@ -2316,9 +2316,9 @@ export type DashboardTemplateScope = 'team' | 'global' | 'feature_flag'
 export interface DashboardType<T = InsightModel> extends DashboardBasicType {
     tiles: DashboardTile<T>[]
     filters: DashboardFilter
-    variables?: Record<string, HogQLVariable>
+    variables?: Record<string, InsightsQLVariable>
     persisted_filters?: DashboardFilter | null
-    persisted_variables?: Record<string, HogQLVariable> | null
+    persisted_variables?: Record<string, InsightsQLVariable> | null
     breakdown_colors?: BreakdownColorConfig[]
     data_color_theme_id?: number | null
 }
@@ -2407,7 +2407,7 @@ export interface PluginType {
     metrics?: Record<string, StoredMetricMathOperations>
     capabilities?: Record<'jobs' | 'methods' | 'scheduled_tasks', string[] | undefined>
     public_jobs?: Record<string, JobSpec>
-    hog_function_migration_available?: boolean
+    custom_function_migration_available?: boolean
 }
 
 export type AppType = PluginType
@@ -2591,7 +2591,7 @@ export type BreakdownType =
     | 'event_metadata'
     | 'group'
     | 'session'
-    | 'hogql'
+    | 'insightsql'
     | 'data_warehouse'
     | 'data_warehouse_person_property'
     | 'revenue_analytics'
@@ -2617,7 +2617,7 @@ export enum PathType {
     PageView = '$pageview',
     Screen = '$screen',
     CustomEvent = 'custom_event',
-    HogQL = 'hogql',
+    InsightsQL = 'insightsql',
 }
 
 export enum FunnelPathType {
@@ -2784,7 +2784,7 @@ export interface FunnelsFilterType extends FilterType {
     funnel_window_interval?: number | undefined // length of conversion window
     funnel_order_type?: StepOrderValue
     exclusions?: FunnelExclusionLegacy[] // used in funnel exclusion filters
-    funnel_aggregate_by_hogql?: string | null
+    funnel_aggregate_by_insightsql?: string | null
 
     // frontend only
     layout?: FunnelLayout // used only for funnels
@@ -2802,7 +2802,7 @@ export interface FunnelsFilterType extends FilterType {
 }
 export interface PathsFilterType extends FilterType {
     path_type?: PathType
-    paths_hogql_expression?: string
+    paths_insightsql_expression?: string
     include_event_types?: PathType[]
     start_point?: string
     end_point?: string
@@ -3178,7 +3178,7 @@ export interface InsightLogicProps<Q extends QuerySchema = QuerySchema> {
     /** Dashboard filters to override the ones in the query */
     filtersOverride?: DashboardFilter | null
     /** Dashboard variables to override the ones in the query */
-    variablesOverride?: Record<string, HogQLVariable> | null
+    variablesOverride?: Record<string, InsightsQLVariable> | null
     /** Tile filters to override the ones in the query */
     tileFiltersOverride?: TileFilters | null
     /** The tab of the scene if the insight is a full scene insight */
@@ -4658,8 +4658,8 @@ export enum CountPerActorMathType {
     P99 = 'p99_count_per_actor',
 }
 
-export enum HogQLMathType {
-    HogQL = 'hogql',
+export enum InsightsQLMathType {
+    InsightsQL = 'insightsql',
 }
 export enum GroupMathType {
     UniqueGroup = 'unique_group',
@@ -4674,7 +4674,7 @@ export enum ExperimentMetricMathType {
     Avg = 'avg',
     UniqueUsers = 'dau',
     UniqueGroup = 'unique_group',
-    HogQL = 'hogql',
+    InsightsQL = 'insightsql',
 }
 
 export enum ExperimentMetricGoal {
@@ -4997,7 +4997,7 @@ export type APIScopeObject =
     | 'feature_flag'
     | 'group'
     | 'health_issue'
-    | 'hog_function'
+    | 'custom_function'
     | 'insight'
     | 'insight_variable'
     | 'integration'
@@ -5132,7 +5132,7 @@ export enum ActivityScope {
     INSIGHT = 'Insight',
     PLUGIN = 'Plugin',
     PLUGIN_CONFIG = 'PluginConfig',
-    HOG_FUNCTION = 'HogFunction',
+    CUSTOM_FUNCTION = 'CustomFunction',
     HOG_FLOW = 'HogFlow',
     DATA_MANAGEMENT = 'DataManagement',
     EVENT_DEFINITION = 'EventDefinition',
@@ -5248,7 +5248,7 @@ export interface DataWarehouseSavedQuery {
     id: string
     name: string
     /** Only included when fetching a single saved query, not in list responses */
-    query?: HogQLQuery
+    query?: InsightsQLQuery
     columns: DatabaseSchemaField[]
     last_run_at?: string
     sync_frequency?: string
@@ -5266,7 +5266,7 @@ export interface DataWarehouseSavedQuery {
 
 export interface DataWarehouseSavedQueryDraft {
     id: string
-    query: HogQLQuery
+    query: InsightsQLQuery
     saved_query_id?: string
     created_at: string
     updated_at: string
@@ -5294,7 +5294,7 @@ export interface DataWarehouseViewLink {
 export interface DataWarehouseViewLinkValidation {
     is_valid: boolean
     msg: string | null
-    hogql: string | null
+    insightsql: string | null
     results: any[]
 }
 
@@ -6016,7 +6016,7 @@ export type CyclotronJobFilterPropertyFilter =
     | ElementPropertyFilter
     | GroupPropertyFilter
     | FeaturePropertyFilter
-    | HogQLPropertyFilter
+    | InsightsQLPropertyFilter
     | FlagPropertyFilter
 
 export interface CyclotronJobFiltersType {
@@ -6032,19 +6032,19 @@ export interface CyclotronJobFiltersType {
 
 export type CyclotronJobInputType = CyclotronInputType
 
-export interface HogFunctionMappingType {
+export interface CustomFunctionMappingType {
     name: string
     disabled?: boolean
     inputs_schema?: CyclotronJobInputSchemaType[]
     inputs?: Record<string, CyclotronInputType> | null
     filters?: CyclotronJobFiltersType | null
 }
-export interface HogFunctionMappingTemplateType extends HogFunctionMappingType {
+export interface CustomFunctionMappingTemplateType extends CustomFunctionMappingType {
     name: string
     include_by_default?: boolean
 }
 
-export type HogFunctionTypeType =
+export type CustomFunctionTypeType =
     | 'destination'
     | 'internal_destination'
     | 'source'
@@ -6053,9 +6053,9 @@ export type HogFunctionTypeType =
     | 'site_app'
     | 'transformation'
 
-export type HogFunctionType = {
+export type CustomFunctionType = {
     id: string
-    type: HogFunctionTypeType
+    type: CustomFunctionTypeType
     icon_url?: string
     icon_class_name?: string // allow for overriding css styling on the icon case by case
     name: string
@@ -6068,27 +6068,27 @@ export type HogFunctionType = {
     execution_order?: number
     inputs_schema?: CyclotronJobInputSchemaType[]
     inputs?: Record<string, CyclotronInputType> | null
-    mappings?: HogFunctionMappingType[] | null
+    mappings?: CustomFunctionMappingType[] | null
     masking?: CyclotronJobMasking | null
     filters?: CyclotronJobFiltersType | null
-    template?: HogFunctionTemplateType
-    status?: HogFunctionStatus
+    template?: CustomFunctionTemplateType
+    status?: CustomFunctionStatus
     batch_export_id?: string | null
     template_id?: string
     deleted?: boolean
 }
 
-export type HogFunctionTemplateStatus = 'stable' | 'alpha' | 'beta' | 'deprecated' | 'coming_soon' | 'hidden'
+export type CustomFunctionTemplateStatus = 'stable' | 'alpha' | 'beta' | 'deprecated' | 'coming_soon' | 'hidden'
 
 // Contexts change the way the UI is rendered allowing different teams to customize the UI for their use case
-export type HogFunctionConfigurationContextId =
+export type CustomFunctionConfigurationContextId =
     | 'standard'
     | 'error-tracking'
     | 'activity-log'
     | 'discussion-mention'
     | 'insight-alerts'
 
-export type HogFunctionSubTemplateIdType =
+export type CustomFunctionSubTemplateIdType =
     | 'early-access-feature-enrollment'
     | 'survey-response'
     | 'activity-log'
@@ -6098,35 +6098,35 @@ export type HogFunctionSubTemplateIdType =
     | 'discussion-mention'
     | 'insight-alert-firing'
 
-export type HogFunctionConfigurationType = Omit<
-    HogFunctionType,
+export type CustomFunctionConfigurationType = Omit<
+    CustomFunctionType,
     'id' | 'created_at' | 'created_by' | 'updated_at' | 'status' | 'hog'
 > & {
-    hog?: HogFunctionType['hog'] // In the config it can be empty if using a template
+    hog?: CustomFunctionType['hog'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
 export type HogFlowConfigurationType = Omit<HogFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
-export type CyclotronJobConfigurationType = HogFunctionConfigurationType | HogFlowConfigurationType
+export type CyclotronJobConfigurationType = CustomFunctionConfigurationType | HogFlowConfigurationType
 
-export type HogFunctionSubTemplateType = Pick<
-    HogFunctionType,
+export type CustomFunctionSubTemplateType = Pick<
+    CustomFunctionType,
     'filters' | 'inputs' | 'masking' | 'mappings' | 'type'
 > & {
-    template_id: HogFunctionTemplateType['id']
-    context_id: HogFunctionConfigurationContextId
-    sub_template_id: HogFunctionSubTemplateIdType
+    template_id: CustomFunctionTemplateType['id']
+    context_id: CustomFunctionConfigurationContextId
+    sub_template_id: CustomFunctionSubTemplateIdType
     name?: string
     description?: string
     flag?: string
 }
 
-export type HogFunctionTemplateType = Pick<
-    HogFunctionType,
+export type CustomFunctionTemplateType = Pick<
+    CustomFunctionType,
     'id' | 'type' | 'name' | 'inputs_schema' | 'filters' | 'icon_url' | 'icon_class_name' | 'masking' | 'mappings'
 > & {
-    status: HogFunctionTemplateStatus
+    status: CustomFunctionTemplateStatus
     free: boolean
-    mapping_templates?: HogFunctionMappingTemplateType[]
+    mapping_templates?: CustomFunctionMappingTemplateType[]
     description?: string | JSX.Element
     code: string
     code_language: 'javascript' | 'hog'
@@ -6136,11 +6136,11 @@ export type HogFunctionTemplateType = Pick<
     featured?: boolean
 }
 
-export type HogFunctionTemplateWithSubTemplateType = HogFunctionTemplateType & {
-    sub_template_id?: HogFunctionSubTemplateIdType
+export type CustomFunctionTemplateWithSubTemplateType = CustomFunctionTemplateType & {
+    sub_template_id?: CustomFunctionSubTemplateIdType
 }
 
-export type HogFunctionIconResponse = {
+export type CustomFunctionIconResponse = {
     id: string
     name: string
     url: string
@@ -6154,7 +6154,7 @@ export enum HogWatcherState {
     forcefully_disabled = 12,
 }
 
-export type HogFunctionStatus = {
+export type CustomFunctionStatus = {
     state: HogWatcherState
     tokens: number
 }

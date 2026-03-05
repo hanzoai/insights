@@ -90,7 +90,7 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                                 <LemonInput
                                     value={surveyForm.question}
                                     onChange={(value) => setSurveyFormValue('question', value)}
-                                    placeholder="Hog mode is now available!"
+                                    placeholder="Custom mode is now available!"
                                     data-attr="quick-survey-question-input"
                                     onFocus={(e) => e.currentTarget.select()}
                                 />
@@ -101,7 +101,7 @@ export function QuickSurveyForm({ context, info, onCancel, showFollowupToggle }:
                                 <LemonTextArea
                                     value={surveyForm.description}
                                     onChange={(value) => setSurveyFormValue('description', value)}
-                                    placeholder="You can never have too many hedgehogs."
+                                    placeholder="Add a description for your survey."
                                     minRows={2}
                                     data-attr="quick-survey-question-input"
                                     onFocus={(e) => e.currentTarget.select()}

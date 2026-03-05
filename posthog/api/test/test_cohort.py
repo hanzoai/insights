@@ -2389,7 +2389,7 @@ email@example.org,
                     "name": "cohort A",
                     "is_static": True,
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": query,
                     },
                 },
@@ -2429,7 +2429,7 @@ email@example.org,
                 "name": "cohort A",
                 "is_static": True,
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "select 1 from groups",
                 },
             },
@@ -2751,7 +2751,7 @@ email@example.org,
                 "is_static": True,
                 "name": "cohort A (static copy)",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"SELECT person_id FROM cohort_people WHERE cohort_id = {cohort_id}",
                 },
             },
@@ -2797,7 +2797,7 @@ email@example.org,
                 "is_static": True,
                 "name": f"{cohort.name} (static copy)",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"SELECT person_id FROM static_cohort_people WHERE cohort_id = {cohort.id}",
                 },
             },
@@ -3428,9 +3428,9 @@ email@example.org,
         assert fs_entry.path.startswith(f"{restore_folder}/"), fs_entry.path
 
     @patch("posthog.api.cohort.report_user_action")
-    def test_behavioral_filter_with_hogql_event_filter_and_null_value(self, patch_capture):
+    def test_behavioral_filter_with_insightsql_event_filter_and_null_value(self, patch_capture):
         payload = {
-            "name": "Cohort with HogQL Event Filter and Null Value",
+            "name": "Cohort with InsightsQL Event Filter and Null Value",
             "filters": {
                 "properties": {  # CohortFilters.properties -> Group
                     "type": "OR",
@@ -3447,7 +3447,7 @@ email@example.org,
                                     "event_filters": [  # BehavioralFilter.event_filters
                                         {
                                             "key": "to_date(timestamp) = current_date() - INTERVAL '3 days'",
-                                            "type": "hogql",  # HogQLFilter
+                                            "type": "insightsql",  # InsightsQLFilter
                                             "value": None,  # Testing this null value
                                         },
                                         {

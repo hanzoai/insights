@@ -28,7 +28,7 @@ import {
     FilterLogicalOperator,
     FlagPropertyFilter,
     GroupPropertyFilter,
-    HogQLPropertyFilter,
+    InsightsQLPropertyFilter,
     LogEntryPropertyFilter,
     LogPropertyFilter,
     PersonPropertyFilter,
@@ -112,7 +112,7 @@ export const PROPERTY_FILTER_TYPE_TO_TAXONOMIC_FILTER_GROUP_TYPE: Record<Propert
         [PropertyFilterType.Cohort]: TaxonomicFilterGroupType.Cohorts,
         [PropertyFilterType.Element]: TaxonomicFilterGroupType.Elements,
         [PropertyFilterType.Session]: TaxonomicFilterGroupType.SessionProperties,
-        [PropertyFilterType.HogQL]: TaxonomicFilterGroupType.HogQLExpression,
+        [PropertyFilterType.InsightsQL]: TaxonomicFilterGroupType.InsightsQLExpression,
         [PropertyFilterType.Group]: TaxonomicFilterGroupType.GroupsPrefix,
         [PropertyFilterType.DataWarehouse]: TaxonomicFilterGroupType.DataWarehouse,
         [PropertyFilterType.DataWarehousePersonProperty]: TaxonomicFilterGroupType.DataWarehousePersonProperties,
@@ -133,7 +133,7 @@ export function formatPropertyLabel(
     cohortsById: Partial<Record<CohortType['id'], CohortType>>,
     valueFormatter: (value: PropertyFilterValue | undefined) => string | string[] | null = (s) => [String(s)]
 ): string {
-    if (isHogQLPropertyFilter(item as AnyFilterLike)) {
+    if (isInsightsQLPropertyFilter(item as AnyFilterLike)) {
         return extractExpressionComment(item.key)
     }
     const { value, key, operator, type, cohort_name, label } = item
@@ -190,7 +190,7 @@ export function isValidPropertyFilter(
     return (
         !!filter && // is not falsy
         'key' in filter && // has a "key" property
-        ((filter.type === 'hogql' && !!filter.key) || Object.values(filter).some((v) => !!v)) // contains some properties with values
+        ((filter.type === 'insightsql' && !!filter.key) || Object.values(filter).some((v) => !!v)) // contains some properties with values
     )
 }
 
@@ -269,8 +269,8 @@ export function isFeaturePropertyFilter(filter?: AnyFilterLike | null): filter i
 export function isFlagPropertyFilter(filter?: AnyFilterLike | null): filter is FlagPropertyFilter {
     return filter?.type === PropertyFilterType.Flag
 }
-export function isHogQLPropertyFilter(filter?: AnyFilterLike | null): filter is HogQLPropertyFilter {
-    return filter?.type === PropertyFilterType.HogQL
+export function isInsightsQLPropertyFilter(filter?: AnyFilterLike | null): filter is InsightsQLPropertyFilter {
+    return filter?.type === PropertyFilterType.InsightsQL
 }
 
 export function isAnyPropertyfilter(filter?: AnyFilterLike | null): filter is AnyPropertyFilter {
@@ -349,7 +349,7 @@ const propertyFilterMapping: Partial<Record<PropertyFilterType, TaxonomicFilterG
     [PropertyFilterType.Cohort]: TaxonomicFilterGroupType.Cohorts,
     [PropertyFilterType.Element]: TaxonomicFilterGroupType.Elements,
     [PropertyFilterType.Session]: TaxonomicFilterGroupType.SessionProperties,
-    [PropertyFilterType.HogQL]: TaxonomicFilterGroupType.HogQLExpression,
+    [PropertyFilterType.InsightsQL]: TaxonomicFilterGroupType.InsightsQLExpression,
     [PropertyFilterType.Recording]: TaxonomicFilterGroupType.Replay,
     [PropertyFilterType.ErrorTrackingIssue]: TaxonomicFilterGroupType.ErrorTrackingIssues,
     [PropertyFilterType.Log]: TaxonomicFilterGroupType.Logs,
@@ -506,13 +506,13 @@ export function createDefaultPropertyFilter(
         return cohortProperty
     }
 
-    if (propertyType === PropertyFilterType.HogQL) {
-        const hogQLProperty: HogQLPropertyFilter = {
+    if (propertyType === PropertyFilterType.InsightsQL) {
+        const insightsQLProperty: InsightsQLPropertyFilter = {
             type: propertyType,
             key: String(propertyKey),
             value: null, // must specify something to be compatible with existing types
         }
-        return hogQLProperty
+        return insightsQLProperty
     }
 
     if (propertyType === PropertyFilterType.Flag) {

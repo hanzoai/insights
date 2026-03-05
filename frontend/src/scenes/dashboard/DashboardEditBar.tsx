@@ -137,7 +137,7 @@ export function DashboardEditBar(): JSX.Element {
                             TaxonomicFilterGroupType.Cohorts,
                             TaxonomicFilterGroupType.Elements,
                             TaxonomicFilterGroupType.SessionProperties,
-                            TaxonomicFilterGroupType.HogQLExpression,
+                            TaxonomicFilterGroupType.InsightsQLExpression,
                             TaxonomicFilterGroupType.DataWarehousePersonProperties,
                         ]}
                     />

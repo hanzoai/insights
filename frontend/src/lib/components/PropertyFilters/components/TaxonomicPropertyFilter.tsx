@@ -48,7 +48,7 @@ export const DEFAULT_TAXONOMIC_GROUP_TYPES = [
     TaxonomicFilterGroupType.EventFeatureFlags,
     TaxonomicFilterGroupType.Cohorts,
     TaxonomicFilterGroupType.Elements,
-    TaxonomicFilterGroupType.HogQLExpression,
+    TaxonomicFilterGroupType.InsightsQLExpression,
 ]
 
 export function TaxonomicPropertyFilter({
@@ -78,7 +78,7 @@ export function TaxonomicPropertyFilter({
     editable = true,
     operatorAllowlist,
     endpointFilters,
-    hogQLGlobals,
+    insightsQLGlobals,
 }: PropertyFilterInternalProps): JSX.Element {
     const pageKey = useMemo(() => pageKeyInput || `filter-${uniqueMemoizedIndex++}`, [pageKeyInput])
     const showQuickFilters = useFeatureFlag('TAXONOMIC_QUICK_FILTERS', 'test')
@@ -94,7 +94,7 @@ export function TaxonomicPropertyFilter({
     ) => void = (taxonomicGroup, value, item, originalQuery) => {
         selectItem(taxonomicGroup, value, item?.propertyFilterType, item, originalQuery)
         if (
-            taxonomicGroup.type === TaxonomicFilterGroupType.HogQLExpression ||
+            taxonomicGroup.type === TaxonomicFilterGroupType.InsightsQLExpression ||
             taxonomicGroup.type === TaxonomicFilterGroupType.SuggestedFilters
         ) {
             onComplete?.()
@@ -119,11 +119,11 @@ export function TaxonomicPropertyFilter({
     const valuePresent = filter?.type === 'cohort' || !!filter?.key
     const showInitialSearchInline =
         !disablePopover &&
-        ((!filter?.type && (!filter || !(filter as any)?.key)) || filter?.type === PropertyFilterType.HogQL)
+        ((!filter?.type && (!filter || !(filter as any)?.key)) || filter?.type === PropertyFilterType.InsightsQL)
     const showOperatorValueSelect =
         filter?.type &&
         filter?.key &&
-        !(filter?.type === PropertyFilterType.HogQL) &&
+        !(filter?.type === PropertyFilterType.InsightsQL) &&
         // If we're in a feature flag, we don't want to show operators for cohorts because
         // we don't support any cohort matching operators other than "in"
         // See https://github.com/PostHog/posthog/pull/25149/
@@ -178,7 +178,7 @@ export function TaxonomicPropertyFilter({
             hideBehavioralCohorts={hideBehavioralCohorts}
             selectFirstItem={!cohortOrOtherValue}
             endpointFilters={endpointFilters}
-            hogQLGlobals={hogQLGlobals}
+            insightsQLGlobals={insightsQLGlobals}
         />
     )
 

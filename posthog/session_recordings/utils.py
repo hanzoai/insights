@@ -44,8 +44,8 @@ def filter_from_params_to_query(params: dict) -> RecordingsQuery:
     data_dict = query_as_params_to_dict(params)
     # we used to send `version` and it's not part of query, so we pop to make sure
     data_dict.pop("version", None)
-    # we used to send `hogql_filtering` and it's not part of query, so we pop to make sure
-    data_dict.pop("hogql_filtering", None)
+    # we used to send `insightsql_filtering` and it's not part of query, so we pop to make sure
+    data_dict.pop("insightsql_filtering", None)
 
     try:
         return RecordingsQuery.model_validate(data_dict)
