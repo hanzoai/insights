@@ -1394,13 +1394,13 @@ class TestFileSystemProjectScoping(APIBaseTest):
 
         # insights_function – team-scoped
         self.hog_t1 = FileSystem.objects.create(
-            team=self.team, path="Functions/Hog-T1", type="insights_function/source", created_by=self.user
+            team=self.team, path="Functions/Script-T1", type="insights_function/source", created_by=self.user
         )
         self.hog_t2 = FileSystem.objects.create(
-            team=self.team2, path="Functions/Hog-T2", type="insights_function/source", created_by=self.user
+            team=self.team2, path="Functions/Script-T2", type="insights_function/source", created_by=self.user
         )
         self.hog_t3 = FileSystem.objects.create(
-            team=self.team3, path="Functions/Hog-T3", type="insights_function/source", created_by=self.user
+            team=self.team3, path="Functions/Script-T3", type="insights_function/source", created_by=self.user
         )
 
     # LIST
@@ -1416,9 +1416,9 @@ class TestFileSystemProjectScoping(APIBaseTest):
         self.assertNotIn("Shared/Doc-T3", paths)
 
         # insights_function only from the *current* team
-        self.assertIn("Functions/Hog-T1", paths)
-        self.assertNotIn("Functions/Hog-T2", paths)
-        self.assertNotIn("Functions/Hog-T3", paths)
+        self.assertIn("Functions/Script-T1", paths)
+        self.assertNotIn("Functions/Script-T2", paths)
+        self.assertNotIn("Functions/Script-T3", paths)
 
     # RETRIEVE
     def test_retrieve_non_insights_function_from_other_team_is_allowed(self):
@@ -1443,7 +1443,7 @@ class TestFileSystemProjectScoping(APIBaseTest):
 
     def test_update_insights_function_from_other_team_is_forbidden(self):
         url = f"/api/projects/{self.team.id}/file_system/{self.hog_t2.id}/"
-        resp = self.client.patch(url, {"path": "Functions/Hog-T2-Renamed"})
+        resp = self.client.patch(url, {"path": "Functions/Script-T2-Renamed"})
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -1488,10 +1488,10 @@ class TestMoveRepairsLeftoverInsightsFunctions(APIBaseTest):
             created_by=self.user,
         )
 
-        # Team-2 HOG function (stays behind)
+        # Team-2 script function (stays behind)
         self.hog_t2 = FileSystem.objects.create(
             team=self.team2,
-            path="Shared/Hog-func.js",
+            path="Shared/Script-func.js",
             depth=2,
             type="insights_function/source",
             created_by=self.other_user,
@@ -1511,7 +1511,7 @@ class TestMoveRepairsLeftoverInsightsFunctions(APIBaseTest):
 
         # ─── Team-2 insights_function stayed in place ------------------------------
         self.hog_t2.refresh_from_db()
-        self.assertEqual(self.hog_t2.path, "Shared/Hog-func.js")
+        self.assertEqual(self.hog_t2.path, "Shared/Script-func.js")
 
         # ─── Parent folders exist for both teams ------------------------------
         #  • Team-1 now has “SharedRenamed”
@@ -1573,7 +1573,7 @@ class TestDestroyRepairsLeftoverInsightsFunctions(APIBaseTest):
         # Custom function file for *team 2*  (stays behind; no parent folder yet)
         self.hog_t2 = FileSystem.objects.create(
             team=self.team2,
-            path="Shared/Hog-func.js",
+            path="Shared/Script-func.js",
             depth=2,
             type="insights_function/source",
             created_by=self.other_user,

@@ -1845,7 +1845,7 @@ class FileSystemIconType(StrEnum):
     INSIGHT_PATHS = "insight/paths"
     INSIGHT_LIFECYCLE = "insight/lifecycle"
     INSIGHT_STICKINESS = "insight/stickiness"
-    INSIGHT_HOG = "insight/hog"
+    INSIGHT_SCRIPT = "insight/script"
     TEAM_ACTIVITY = "team_activity"
     HOME = "home"
     APPS = "apps"
@@ -2039,7 +2039,7 @@ class HeatmapSettings(BaseModel):
     yAxisLabel: str | None = None
 
 
-class HogCompileResponse(BaseModel):
+class InsightsQLCompileResponse(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -2047,12 +2047,12 @@ class HogCompileResponse(BaseModel):
     locals: list
 
 
-class HogLanguage(StrEnum):
-    HOG = "hog"
-    HOG_JSON = "hogJson"
-    HOG_QL = "insightsQL"
-    HOG_QL_EXPR = "insightsQLExpr"
-    HOG_TEMPLATE = "hogTemplate"
+class InsightsLanguage(StrEnum):
+    INSIGHTS_SCRIPT = "insightsScript"
+    INSIGHTS_JSON = "insightsJson"
+    INSIGHTS_QL = "insightsQL"
+    INSIGHTS_QL_EXPR = "insightsQLExpr"
+    INSIGHTS_TEMPLATE = "insightsTemplate"
     LIQUID = "liquid"
 
 
@@ -18709,7 +18709,7 @@ class InsightsQLAutocomplete(BaseModel):
     filters: InsightsQLFilters | None = Field(default=None, description="Table to validate the expression against")
     globals: dict[str, Any] | None = Field(default=None, description="Global values in scope")
     kind: Literal["InsightsQLAutocomplete"] = "InsightsQLAutocomplete"
-    language: HogLanguage = Field(..., description="Language to validate")
+    language: InsightsLanguage = Field(..., description="Language to validate")
     modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query: str = Field(..., description="Query to validate")
     response: InsightsQLAutocompleteResponse | None = None
@@ -18785,7 +18785,7 @@ class InsightsQLMetadata(BaseModel):
     filters: InsightsQLFilters | None = Field(default=None, description="Extra filters applied to query via {filters}")
     globals: dict[str, Any] | None = Field(default=None, description="Extra globals for the query")
     kind: Literal["InsightsQLMetadata"] = "InsightsQLMetadata"
-    language: HogLanguage = Field(..., description="Language to validate")
+    language: InsightsLanguage = Field(..., description="Language to validate")
     modifiers: InsightsQLQueryModifiers | None = Field(default=None, description="Modifiers used when performing the query")
     query: str = Field(..., description="Query to validate")
     response: InsightsQLMetadataResponse | None = None

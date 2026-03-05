@@ -2,7 +2,7 @@ import './Toolbar.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { Insights } from 'posthog-js'
+import { PostHog } from 'posthog-js'
 import { useEffect, useRef, useState } from 'react'
 
 import {
@@ -31,7 +31,7 @@ import { AnimatedLogomark } from 'lib/brand/Logomark'
 import { useKeyboardHotkeys } from 'lib/hooks/useKeyboardHotkeys'
 import { LemonMenu, LemonMenuItem, LemonMenuItems } from 'lib/lemon-ui/LemonMenu'
 import { Link } from 'lib/lemon-ui/Link'
-import { IconFlare, IconMenu } from 'lib/lemon-ui/icons'
+import { IconMenu } from 'lib/lemon-ui/icons'
 import { inStorybook, inStorybookTestRunner } from 'lib/utils'
 
 import { ActionsToolbarMenu } from '~/toolbar/actions/ActionsToolbarMenu'
@@ -64,7 +64,7 @@ function EnabledStatusItem({ label, value }: { label: string; value: boolean }):
 }
 
 function postHogDebugInfoMenuItem(
-    posthog: Insights | null,
+    posthog: PostHog | null,
     loadingSurveys: boolean,
     surveysCount: number
 ): LemonMenuItem {

@@ -60,7 +60,7 @@ class TestInsightsFlowTemplateAPI(APIBaseTest):
         )
 
     def _create_insights_flow_data(self, include_metadata=False, custom_inputs=None):
-        """Helper to create hog flow data for template creation"""
+        """Helper to create insights flow data for template creation"""
         trigger_action = {
             "id": "trigger_node",
             "name": "trigger_1",

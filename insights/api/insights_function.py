@@ -45,10 +45,10 @@ from insights.models.insights_functions.insights_function import (
 )
 from insights.models.insights_functions.utils import humanize_insights_function_type
 from insights.models.plugin import TranspilerError
-from insights.plugins.plugin_server_api import create_hog_invocation_test
+from insights.plugins.plugin_server_api import create_script_invocation_test
 
-# Maximum size of HOG code as a string in bytes (100KB)
-MAX_HOG_CODE_SIZE_BYTES = 100 * 1024
+# Maximum size of script code as a string in bytes (100KB)
+MAX_SCRIPT_CODE_SIZE_BYTES = 100 * 1024
 # Maximum number of transformation functions per team
 MAX_TRANSFORMATIONS_PER_TEAM = 20
 
@@ -260,10 +260,10 @@ class InsightsFunctionSerializer(InsightsFunctionMinimalSerializer):
         if "hog" in attrs:
             # First check the raw code size before trying to compile/transpile it
             hog_code_size = len(attrs["fn"].encode("utf-8"))
-            if hog_code_size > MAX_HOG_CODE_SIZE_BYTES:
+            if hog_code_size > MAX_SCRIPT_CODE_SIZE_BYTES:
                 raise serializers.ValidationError(
                     {
-                        "fn": f"HOG code exceeds maximum size of {MAX_HOG_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
+                        "fn": f"Script code exceeds maximum size of {MAX_SCRIPT_CODE_SIZE_BYTES // 1024}KB. Please simplify your code or contact support if you need this limit increased."
                     }
                 )
 
@@ -494,7 +494,7 @@ class InsightsFunctionViewSet(
         # Remove the team from the config
         configuration.pop("team")
 
-        res = create_hog_invocation_test(
+        res = create_script_invocation_test(
             team_id=self.team_id,
             insights_function_id=str(insights_function.id) if insights_function else "new",
             payload=serializer.validated_data,

@@ -73,7 +73,7 @@ export interface InsightsFunctionConfigurationLogicProps {
 
 export const EVENT_VOLUME_DAILY_WARNING_THRESHOLD = 1000
 const UNSAVED_CONFIGURATION_TTL = 1000 * 60 * 5
-export const HOG_CODE_SIZE_LIMIT = 100 * 1024 // 100KB to match backend limit
+export const SCRIPT_CODE_SIZE_LIMIT = 100 * 1024 // 100KB to match backend limit
 
 const VALIDATION_RULES = {
     SITE_DESTINATION_REQUIRES_MAPPINGS: (data: InsightsFunctionConfigurationType) =>
@@ -694,13 +694,13 @@ export const insightsFunctionConfigurationLogic = kea<insightsFunctionConfigurat
                 }
             },
             submit: async (data) => {
-                // Check HOG code size immediately before submission
+                // Check script code size immediately before submission
                 if (data.fn) {
                     const fnSize = new Blob([data.fn]).size
-                    if (fnSize > HOG_CODE_SIZE_LIMIT) {
+                    if (fnSize > SCRIPT_CODE_SIZE_LIMIT) {
                         lemonToast.error(
                             `Custom code exceeds maximum size of ${
-                                HOG_CODE_SIZE_LIMIT / 1024
+                                SCRIPT_CODE_SIZE_LIMIT / 1024
                             }KB. Please simplify your code or contact support to increase the limit.`
                         )
                         return

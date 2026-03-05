@@ -37,7 +37,7 @@ import {
     FileSystemViewLogEntry,
     GroupsQuery,
     GroupsQueryResponse,
-    HogCompileResponse,
+    InsightsQLCompileResponse,
     InsightsQLQuery,
     InsightsQLQueryResponse,
     InsightsQLVariable,
@@ -3331,7 +3331,7 @@ const api = {
         },
     },
     fn: {
-        async create(code: string, locals?: any[], inRepl?: boolean): Promise<HogCompileResponse> {
+        async create(code: string, locals?: any[], inRepl?: boolean): Promise<InsightsQLCompileResponse> {
             return await new ApiRequest().fn().create({ data: { code, locals, in_repl: inRepl || false } })
         },
     },

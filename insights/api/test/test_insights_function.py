@@ -9,7 +9,7 @@ from django.db import connection
 
 from rest_framework import status
 
-from insights.api.insights_function import MAX_HOG_CODE_SIZE_BYTES, MAX_TRANSFORMATIONS_PER_TEAM
+from insights.api.insights_function import MAX_SCRIPT_CODE_SIZE_BYTES, MAX_TRANSFORMATIONS_PER_TEAM
 from insights.api.test.test_insights_function_templates import MOCK_NODE_TEMPLATES
 from insights.cdp.templates.helpers import mock_transpile
 from insights.cdp.templates.insights_function_template import sync_template_to_db
@@ -1598,9 +1598,9 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         ]
 
     def test_can_call_a_test_invocation(self):
-        with patch("insights.api.insights_function.create_hog_invocation_test") as mock_create_hog_invocation_test:
+        with patch("insights.api.insights_function.create_script_invocation_test") as mock_create_script_invocation_test:
             res = MagicMock(status_code=200, json=lambda: {"status": "success"})
-            mock_create_hog_invocation_test.return_value = res
+            mock_create_script_invocation_test.return_value = res
 
             response = self.client.post(
                 f"/api/projects/{self.team.id}/insights_functions/new/invocations/",
@@ -1614,14 +1614,14 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
             assert response.status_code == status.HTTP_200_OK, response.json()
             assert response.json() == {"status": "success"}
 
-            assert mock_create_hog_invocation_test.call_count == 1
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["team_id"] == self.team.id
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["insights_function_id"] == "new"
+            assert mock_create_script_invocation_test.call_count == 1
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["team_id"] == self.team.id
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["insights_function_id"] == "new"
             assert (
-                mock_create_hog_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["type"]
+                mock_create_script_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["type"]
                 == "destination"
             )
-            assert mock_create_hog_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["inputs"][
+            assert mock_create_script_invocation_test.call_args_list[0].kwargs["payload"]["configuration"]["inputs"][
                 "url"
             ] == {
                 "bytecode": [
@@ -1760,34 +1760,34 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         )
         assert response.status_code == status.HTTP_200_OK
 
-    def test_validates_raw_hog_code_size(self):
-        """Test that we validate the raw HOG code size before compiling it."""
-        # Generate a large HOG code string that exceeds the maximum allowed size
-        large_hog_code = "return " + "x" * (MAX_HOG_CODE_SIZE_BYTES + 1000)
+    def test_validates_raw_script_code_size(self):
+        """Test that we validate the raw script code size before compiling it."""
+        # Generate a large script code string that exceeds the maximum allowed size
+        large_script_code = "return " + "x" * (MAX_SCRIPT_CODE_SIZE_BYTES + 1000)
 
-        # Try to create a function with HOG code exceeding the size limit
+        # Try to create a function with script code exceeding the size limit
         # No need to mock compile_script as we're checking the string size directly
         response = self.client.post(
             f"/api/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "Large HOG Code Function",
+                "name": "Large Script Code Function",
                 "type": "transformation",
-                "fn": large_hog_code,
+                "fn": large_script_code,
             },
         )
 
         # Verify the creation was rejected with the correct error
         assert response.status_code == status.HTTP_400_BAD_REQUEST, response.json()
-        assert "HOG code exceeds maximum size" in response.json()["detail"]
-        assert f"{MAX_HOG_CODE_SIZE_BYTES // 1024}KB" in response.json()["detail"]
+        assert "Script code exceeds maximum size" in response.json()["detail"]
+        assert f"{MAX_SCRIPT_CODE_SIZE_BYTES // 1024}KB" in response.json()["detail"]
 
-    def test_validates_raw_hog_code_size_during_update(self):
-        """Test that we validate the raw HOG code size when updating an existing function."""
+    def test_validates_raw_script_code_size_during_update(self):
+        """Test that we validate the raw script code size when updating an existing function."""
         # First create a custom function with small, valid code
         response = self.client.post(
             f"/api/projects/{self.team.id}/insights_functions/",
             data={
-                "name": "Valid HOG Code Function",
+                "name": "Valid Script Code Function",
                 "type": "transformation",
                 "fn": "return event",
             },
@@ -1796,21 +1796,21 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
         assert response.status_code == status.HTTP_201_CREATED, response.json()
         function_id = response.json()["id"]
 
-        # Generate a large HOG code string for the update that exceeds the limit
-        large_hog_code = "return " + "x" * (MAX_HOG_CODE_SIZE_BYTES + 1000)
+        # Generate a large script code string for the update that exceeds the limit
+        large_script_code = "return " + "x" * (MAX_SCRIPT_CODE_SIZE_BYTES + 1000)
 
-        # Update the function with large HOG code
+        # Update the function with large script code
         update_response = self.client.patch(
             f"/api/projects/{self.team.id}/insights_functions/{function_id}/",
             data={
-                "fn": large_hog_code,
+                "fn": large_script_code,
             },
         )
 
         # Verify the update was rejected with the correct error
         assert update_response.status_code == status.HTTP_400_BAD_REQUEST, update_response.json()
-        assert "HOG code exceeds maximum size" in update_response.json()["detail"]
-        assert f"{MAX_HOG_CODE_SIZE_BYTES // 1024}KB" in update_response.json()["detail"]
+        assert "Script code exceeds maximum size" in update_response.json()["detail"]
+        assert f"{MAX_SCRIPT_CODE_SIZE_BYTES // 1024}KB" in update_response.json()["detail"]
 
     def test_transformation_undeletion_puts_at_end(self, *args):
         """Test that undeleted transformation functions are placed at the end of the execution order sequence."""
@@ -2077,7 +2077,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
                 "inputs": {
                     "url": {"value": "https://example.com"},
                 },
-                "_create_in_folder": "Special/Hog Destinations",
+                "_create_in_folder": "Special/Script Destinations",
             },
         )
 
@@ -2092,7 +2092,7 @@ class TestInsightsFunctionAPI(ClickhouseTestMixin, APIBaseTest, QueryMatchingTes
             ref=str(insights_function_id),
         ).first()
         assert fs_entry is not None, "No FileSystem entry was created for this InsightsFunction."
-        assert "Special/Hog Destinations" in fs_entry.path
+        assert "Special/Script Destinations" in fs_entry.path
 
     def test_insights_function_template_fk_set_on_create(self):
         """

@@ -136,7 +136,7 @@ export function InsightOptions(): JSX.Element {
             metadata.inMenu &&
             insightType !== InsightType.JSON &&
             insightType !== InsightType.WEB_ANALYTICS &&
-            insightType !== InsightType.HOG
+            insightType !== InsightType.SCRIPT
     )
 
     return (
