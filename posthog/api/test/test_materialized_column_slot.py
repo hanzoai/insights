@@ -383,7 +383,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         assert "cannot be materialized" in response.json()["error"]
 
     def test_assign_slot_system_property(self):
-        """Test error when trying to materialize PostHog system property."""
+        """Test error when trying to materialize Insights system property."""
         prop_def = PropertyDefinition.objects.create(
             team=self.team,
             name="$current_url",
@@ -397,7 +397,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "PostHog system properties cannot be materialized" in response.json()["error"]
+        assert "Insights system properties cannot be materialized" in response.json()["error"]
 
     @patch("posthog.api.materialized_column_slot.async_to_sync")
     def test_assign_slot_allows_feature_flags(self, mock_async_to_sync):
@@ -436,7 +436,7 @@ class TestMaterializedColumnSlotAPI(APIBaseTest):
         )
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert "already auto-materialized by PostHog" in response.json()["error"]
+        assert "already auto-materialized by Insights" in response.json()["error"]
 
     @patch("posthog.api.materialized_column_slot.async_to_sync")
     def test_assign_slot_already_materialized(self, mock_async_to_sync):

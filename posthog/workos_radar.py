@@ -5,7 +5,7 @@ This module provides a client for the WorkOS Radar Attempts API to evaluate
 signup and signin attempts for potential fraud or bot activity.
 
 The integration operates in LOG-ONLY mode - it records the Radar decision as
-a PostHog event but does not actually block or challenge users based on the verdict.
+a Insights event but does not actually block or challenge users based on the verdict.
 This allows evaluation of the potential impact before enabling enforcement.
 """
 
@@ -68,7 +68,7 @@ def evaluate_auth_attempt(
     Evaluate an authentication attempt using the WorkOS Radar Attempts API.
 
     This function operates in LOG-ONLY mode - it logs the Radar decision as a
-    PostHog event but always returns the verdict without blocking.
+    Insights event but always returns the verdict without blocking.
 
     Args:
         request: The Django/DRF request object
@@ -190,7 +190,7 @@ def _log_radar_event(
     duration_ms: float,
 ) -> None:
     """
-    Log the Radar decision as a PostHog event for analysis.
+    Log the Radar decision as a Insights event for analysis.
     """
     distinct_id = user_id or f"pre_signup_{_hash_email(email)}"
 

@@ -411,7 +411,7 @@ def _get_database_url() -> str:
     if url := os.environ.get("DATABASE_URL"):
         return url
 
-    # Build from individual components (PostHog's typical setup)
+    # Build from individual components (Insights's typical setup)
     host = os.environ.get("PGHOST", "localhost")
     port = os.environ.get("PGPORT", "5432")
     user = os.environ.get("PGUSER", "posthog")

@@ -23,10 +23,10 @@ describe('vercel log drain template', () => {
 
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].event).toEqual('$http_log')
-        expect(response.capturedPostHogEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
-        expect(response.capturedPostHogEvents[0].properties).toMatchObject({
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].event).toEqual('$http_log')
+        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
+        expect(response.capturedInsightsEvents[0].properties).toMatchObject({
             source: 'lambda',
             level: 'info',
             project_id: 'gdufoJxB6b9b1fEqr1jUtFkyavUU',
@@ -49,10 +49,10 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
         // Only first log is captured
-        expect(response.capturedPostHogEvents[0].properties.vercel_log_id).toBe('log1')
-        expect(response.capturedPostHogEvents[0].properties.source).toBe('lambda')
+        expect(response.capturedInsightsEvents[0].properties.vercel_log_id).toBe('log1')
+        expect(response.capturedInsightsEvents[0].properties.source).toBe('lambda')
         // Warning should be logged about dropped logs
         expect(response.logs.map((l) => l.message)).toContainEqual(
             expect.stringContaining('Dropped 2 additional log(s)')
@@ -78,8 +78,8 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].properties.vercel_log_id).toBe('ndjson1')
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].properties.vercel_log_id).toBe('ndjson1')
     })
 
     it('should return 405 for non-POST methods', async () => {
@@ -143,7 +143,7 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
     })
 
     it('should return 400 for empty body', async () => {
@@ -202,8 +202,8 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents[0].properties.message).toHaveLength(100)
-        expect(response.capturedPostHogEvents[0].properties.message_truncated).toBe(true)
+        expect(response.capturedInsightsEvents[0].properties.message).toHaveLength(100)
+        expect(response.capturedInsightsEvents[0].properties.message_truncated).toBe(true)
     })
 
     it('should use consistent distinct_id when requestId is missing', async () => {
@@ -218,7 +218,7 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
+        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
     })
 
     it('should capture all Vercel log properties with snake_case naming', async () => {
@@ -229,7 +229,7 @@ describe('vercel log drain template', () => {
             }
         )
 
-        expect(response.capturedPostHogEvents).toMatchSnapshot()
+        expect(response.capturedInsightsEvents).toMatchSnapshot()
     })
 
     it('should flatten proxy properties', async () => {
@@ -241,7 +241,7 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        const props = response.capturedPostHogEvents[0].properties
+        const props = response.capturedInsightsEvents[0].properties
         expect(props.proxy_method).toBe('GET')
         expect(props.proxy_host).toBe('my-app.vercel.app')
         expect(props.proxy_path).toBe('/api/users?page=1')
@@ -249,7 +249,7 @@ describe('vercel log drain template', () => {
         expect(props.proxy_vercel_cache).toBe('MISS')
     })
 
-    it('should set PostHog standard properties from proxy data', async () => {
+    it('should set Insights standard properties from proxy data', async () => {
         const response = await tester.invoke(
             {},
             {
@@ -258,7 +258,7 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        const props = response.capturedPostHogEvents[0].properties
+        const props = response.capturedInsightsEvents[0].properties
         expect(props.$ip).toBe('120.75.16.101')
         expect(props.$raw_user_agent).toBe('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
         expect(props.$current_url).toBe('https://my-app.vercel.app/api/users?page=1')
@@ -276,9 +276,9 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].properties.message).toBeNull()
-        expect(response.capturedPostHogEvents[0].properties.message_truncated).toBe(false)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].properties.message).toBeNull()
+        expect(response.capturedInsightsEvents[0].properties.message_truncated).toBe(false)
     })
 
     it('should handle logs without proxy field', async () => {
@@ -293,10 +293,10 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].distinct_id).toMatch(/^vercel_[a-f0-9]{64}$/)
         // Proxy fields should be null when proxy is missing
-        expect(response.capturedPostHogEvents[0].properties.proxy_method).toBeNull()
+        expect(response.capturedInsightsEvents[0].properties.proxy_method).toBeNull()
     })
 
     it('should fall back to request.body when stringBody is empty', async () => {
@@ -314,8 +314,8 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].properties).toMatchObject({
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].properties).toMatchObject({
             source: 'lambda',
             level: 'info',
             project_id: 'gdufoJxB6b9b1fEqr1jUtFkyavUU',
@@ -342,8 +342,8 @@ describe('vercel log drain template', () => {
         )
 
         expect(response.error).toBeUndefined()
-        expect(response.capturedPostHogEvents).toHaveLength(1)
-        expect(response.capturedPostHogEvents[0].properties.vercel_log_id).toBe('body1')
+        expect(response.capturedInsightsEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents[0].properties.vercel_log_id).toBe('body1')
     })
 })
 

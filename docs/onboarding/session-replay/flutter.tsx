@@ -12,7 +12,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add the PostHog Flutter SDK to your `pubspec.yaml`:</Markdown>
+                    <Markdown>Add the Insights Flutter SDK to your `pubspec.yaml`:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -26,7 +26,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     />
                     <CalloutBox type="fyi" title="SDK version">
                         <Markdown>
-                            Session replay requires PostHog Flutter SDK version 4.7.0 or higher. We recommend always
+                            Session replay requires Insights Flutter SDK version 4.7.0 or higher. We recommend always
                             using the latest version.
                         </Markdown>
                     </CalloutBox>
@@ -120,7 +120,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Go to your PostHog [Project Settings](https://us.posthog.com/settings/project-replay) and enable
+                        Go to your Insights [Project Settings](https://us.posthog.com/settings/project-replay) and enable
                         **Record user sessions**. Session recordings will not work without this setting enabled.
                     </Markdown>
                     <Markdown>
@@ -131,12 +131,12 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Initialize PostHog with session replay',
+            title: 'Initialize Insights with session replay',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog in your `main.dart` with session replay enabled. Here are all the available
+                        Initialize Insights in your `main.dart` with session replay enabled. Here are all the available
                         options:
                     </Markdown>
                     <CodeBlock
@@ -151,7 +151,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     Future<void> main() async {
                                       WidgetsFlutterBinding.ensureInitialized();
 
-                                      final config = PostHogConfig('<ph_project_api_key>');
+                                      final config = InsightsConfig('<ph_project_api_key>');
                                       config.host = '<ph_client_api_host>';
                                       config.debug = true;
                                       config.captureApplicationLifecycleEvents = true;
@@ -184,12 +184,12 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Wrap your app with PostHogWidget',
+            title: 'Wrap your app with InsightsWidget',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        For Session Replay to work, wrap your app with `PostHogWidget` and add the `PosthogObserver`:
+                        For Session Replay to work, wrap your app with `InsightsWidget` and add the `PosthogObserver`:
                     </Markdown>
                     <Tab.Group tabs={['MaterialApp', 'go_router']}>
                         <Tab.List>
@@ -210,7 +210,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                                 class MyApp extends StatelessWidget {
                                                   @override
                                                   Widget build(BuildContext context) {
-                                                    return PostHogWidget(
+                                                    return InsightsWidget(
                                                       child: MaterialApp(
                                                         navigatorObservers: [PosthogObserver()],
                                                         title: 'My App',
@@ -249,7 +249,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                                 class MyApp extends StatelessWidget {
                                                   @override
                                                   Widget build(BuildContext context) {
-                                                    return PostHogWidget(
+                                                    return InsightsWidget(
                                                       child: MaterialApp.router(
                                                         routerConfig: _router,
                                                         title: 'My App',

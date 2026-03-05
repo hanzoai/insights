@@ -89,7 +89,7 @@ This document outlines the implementation steps for the LLM Analytics capture pi
 #### 5.1 Request Signature Verification
 
 - [x] Implement basic API key validation (Bearer token authentication)
-- [ ] Implement PostHog API key authentication
+- [ ] Implement Insights API key authentication
 - [ ] Add request signature verification
 - [ ] Validate API key before processing multipart data
 - [ ] Add proper error responses for authentication failures

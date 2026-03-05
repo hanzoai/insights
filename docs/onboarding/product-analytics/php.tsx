@@ -11,7 +11,7 @@ export const getPHPSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog PHP library using Composer:</Markdown>
+                    <Markdown>Install the Insights PHP library using Composer:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -27,18 +27,18 @@ export const getPHPSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Initialize the PostHog client with your API key and host:</Markdown>
+                    <Markdown>Initialize the Insights client with your API key and host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
                                 language: 'php',
                                 file: 'PHP',
                                 code: dedent`
-                                PostHog\\PostHog::init(
+                                Insights\\Insights::init(
                                     '<ph_project_api_key>',
                                     ['host' => '<ph_client_api_host>']
                                 );
@@ -61,7 +61,7 @@ export const getPHPSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'php',
                                 file: 'PHP',
                                 code: dedent`
-                                PostHog::capture([
+                                Insights::capture([
                                     'distinctId' => 'test-user',
                                     'event' => 'test-event',
                                 ]);

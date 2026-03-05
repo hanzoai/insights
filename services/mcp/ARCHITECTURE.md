@@ -1,6 +1,6 @@
 # MCP Integration Architecture
 
-This directory contains the Cloudflare Workers implementation of PostHog's MCP (Model Context Protocol) server.
+This directory contains the Cloudflare Workers implementation of Insights's MCP (Model Context Protocol) server.
 
 ## Overview
 
@@ -22,7 +22,7 @@ flowchart TB
         D1["Stateful - one instance per user (keyed by token hash)"]
         D2["SQLite storage for persistence (region, distinctId)"]
         D3["Handles MCP protocol (tools, prompts, resources)"]
-        D4["Tracks analytics events to PostHog"]
+        D4["Tracks analytics events to Insights"]
     end
 
     Worker -->|"MCP.serve() / MCP.serveSSE()<br/>passes ctx.props with token, userHash, etc."| DO
@@ -36,7 +36,7 @@ src/integrations/mcp/
 ├── mcp.ts            # Durable Object class (MCP protocol handler)
 ├── README.md         # This file
 └── utils/
-    ├── client.ts     # PostHog analytics client
+    ├── client.ts     # Insights analytics client
     ├── formatResponse.ts
     ├── handleToolError.ts
     └── logging.ts    # Wide logging middleware
@@ -133,14 +133,14 @@ The server implements RFC 9728 (OAuth Protected Resource Metadata) and RFC 8414 
 sequenceDiagram
     participant Client
     participant MCP as MCP Server
-    participant PostHog as PostHog OAuth
+    participant Insights as Insights OAuth
 
     Client->>MCP: Connect without token
     MCP-->>Client: 401 + WWW-Authenticate header
     Client->>MCP: GET /.well-known/oauth-protected-resource/{path}
     MCP-->>Client: Authorization server URL (US or EU)
-    Client->>PostHog: OAuth flow
-    PostHog-->>Client: Access token
+    Client->>Insights: OAuth flow
+    Insights-->>Client: Access token
     Client->>MCP: Reconnect with token
     MCP-->>Client: MCP protocol ready
 ```

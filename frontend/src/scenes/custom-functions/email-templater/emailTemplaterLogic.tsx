@@ -39,8 +39,8 @@ export interface EmailTemplaterLogicProps {
     variables?: Record<string, any>
     type: EmailTemplaterType
     defaultValue?: EmailTemplate | null
-    templating?: boolean | 'hog' | 'liquid'
-    onChangeTemplating?: (templating: 'hog' | 'liquid') => void
+    templating?: boolean | 'custom_script' | 'liquid'
+    onChangeTemplating?: (templating: 'custom_script' | 'liquid') => void
 }
 
 export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
@@ -56,7 +56,7 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
         setIsSaveTemplateModalOpen: (isOpen: boolean) => ({ isOpen }),
         applyTemplate: (template: MessageTemplate) => ({ template }),
         closeWithConfirmation: true,
-        setTemplatingEngine: (templating: 'hog' | 'liquid') => ({ templating }),
+        setTemplatingEngine: (templating: 'custom_script' | 'liquid') => ({ templating }),
         saveAsTemplate: (name: string, description: string) => ({ name, description }),
         setActiveContentTab: (tab: 'visual' | 'plaintext') => ({ tab }),
     }),
@@ -93,7 +93,7 @@ export const emailTemplaterLogic = kea<emailTemplaterLogicType>([
             },
         ],
         templatingEngine: [
-            'liquid' as 'hog' | 'liquid',
+            'liquid' as 'custom_script' | 'liquid',
             {
                 setTemplatingEngine: (_, { templating }) => {
                     return templating

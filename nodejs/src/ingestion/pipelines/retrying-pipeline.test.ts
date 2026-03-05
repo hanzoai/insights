@@ -1,6 +1,6 @@
 import { Message } from 'node-rdkafka'
 
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { createContext, createNewPipeline } from './helpers'
 import { PipelineResultWithContext } from './pipeline.interface'
 import { PipelineResultType, dlq, ok } from './results'
@@ -8,7 +8,7 @@ import { RetryingPipeline, RetryingPipelineOptions } from './retrying-pipeline'
 
 jest.setTimeout(1000)
 
-jest.mock('../../utils/posthog', () => ({
+jest.mock('../../utils/insights', () => ({
     captureException: jest.fn(),
 }))
 

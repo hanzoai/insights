@@ -1,6 +1,6 @@
 # Domain Connect
 
-Automates DNS configuration for PostHog features that require users to add DNS records
+Automates DNS configuration for Insights features that require users to add DNS records
 (email sending, managed reverse proxy). Instead of manually copy-pasting records at their
 DNS provider, users click a button and get redirected to approve pre-filled records.
 
@@ -24,7 +24,7 @@ Backend builds signed apply URL → returns to frontend
 Frontend opens URL in new tab → DNS provider shows pre-filled records
         │
         ▼
-User approves → provider redirects back to PostHog with ?domain_connect=<context>
+User approves → provider redirects back to Insights with ?domain_connect=<context>
         │
         ▼
 Frontend detects redirect param, cleans URL, parent component re-verifies
@@ -47,7 +47,7 @@ Single module with all Domain Connect logic:
 - **URL building**: `build_sync_apply_url()` — constructs the redirect URL
 - **Signing**: `sign_query_string()` — RSA-SHA256 signs the query string (required by Cloudflare)
 - **Domain parsing**: `extract_root_domain_and_host()` — splits FQDNs handling multi-part TLDs
-- **Context resolvers**: `resolve_email_context()` / `resolve_proxy_context()` — extracts template variables from the relevant PostHog resource
+- **Context resolvers**: `resolve_email_context()` / `resolve_proxy_context()` — extracts template variables from the relevant Insights resource
 - **Provider allowlist**: `DOMAIN_CONNECT_PROVIDERS` dict — empty until providers accept our templates
 
 ### API endpoints (`posthog/api/integration.py`)

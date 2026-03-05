@@ -15,10 +15,10 @@ import {
     LegacyTransformationPlugin,
     LegacyTransformationPluginMeta,
 } from '../legacy-plugins/types'
-import { CyclotronJobInvocationHogFunction, CyclotronJobInvocationResult } from '../types'
-import { CDP_TEST_ID, createAddLogFunction, destinationE2eLagMsSummary, isLegacyPluginHogFunction } from '../utils'
+import { CyclotronJobInvocationCustomFunction, CyclotronJobInvocationResult } from '../types'
+import { CDP_TEST_ID, createAddLogFunction, destinationE2eLagMsSummary, isLegacyPluginCustomFunction } from '../utils'
 import { createInvocationResult } from '../utils/invocation-utils'
-import { cdpTrackedFetch } from './hog-executor.service'
+import { cdpTrackedFetch } from './script-executor.service'
 
 const pluginExecutionDuration = new Histogram({
     name: 'cdp_plugin_execution_duration_ms',
@@ -65,8 +65,8 @@ export class LegacyPluginExecutorService {
         const get = async (key: string, defaultValue: unknown): Promise<unknown> => {
             const result = await this.postgres.query(
                 PostgresUse.PLUGIN_STORAGE_RW,
-                `SELECT * FROM posthog_pluginstorage as ps 
-                   JOIN posthog_pluginconfig as pc ON ps."plugin_config_id" = pc."id" 
+                `SELECT * FROM insights_pluginstorage as ps 
+                   JOIN insights_pluginconfig as pc ON ps."plugin_config_id" = pc."id" 
                    WHERE pc."team_id" = $1 AND pc."id" = $2 AND ps."key" = $3
                    LIMIT 1`,
                 [teamId, pluginConfigId, key],
@@ -82,7 +82,7 @@ export class LegacyPluginExecutorService {
                 // Check if the plugin config for that team exists
                 const result = await this.postgres.query(
                     PostgresUse.COMMON_READ,
-                    `SELECT * FROM posthog_pluginconfig as pc 
+                    `SELECT * FROM insights_pluginconfig as pc 
                    WHERE pc."team_id" = $1 AND pc."id" = $2
                    LIMIT 1`,
                     [teamId, pluginConfigId],
@@ -99,7 +99,7 @@ export class LegacyPluginExecutorService {
             await this.postgres.query(
                 PostgresUse.PLUGIN_STORAGE_RW,
                 `
-                    INSERT INTO posthog_pluginstorage ("plugin_config_id", "key", "value")
+                    INSERT INTO insights_pluginstorage ("plugin_config_id", "key", "value")
                     VALUES ($1, $2, $3)
                     ON CONFLICT ("plugin_config_id", "key")
                     DO UPDATE SET value = $3
@@ -116,10 +116,10 @@ export class LegacyPluginExecutorService {
     }
 
     public async execute(
-        invocation: CyclotronJobInvocationHogFunction,
+        invocation: CyclotronJobInvocationCustomFunction,
         shouldMockFetch = false
-    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationHogFunction>> {
-        const result = createInvocationResult<CyclotronJobInvocationHogFunction>(invocation)
+    ): Promise<CyclotronJobInvocationResult<CyclotronJobInvocationCustomFunction>> {
+        const result = createInvocationResult<CyclotronJobInvocationCustomFunction>(invocation)
         const addLog = createAddLogFunction(result.logs)
 
         const pluginLogger: LegacyPluginLogger = {
@@ -129,13 +129,13 @@ export class LegacyPluginExecutorService {
             error: (...args: any[]) => addLog('error', ...args),
         }
 
-        const pluginId = isLegacyPluginHogFunction(invocation.hogFunction) ? invocation.hogFunction.template_id : null
+        const pluginId = isLegacyPluginCustomFunction(invocation.customFunction) ? invocation.customFunction.template_id : null
 
         const fetch = async (url: string, fetchParams: FetchOptions): Promise<FetchResponse> => {
             const { fetchError, fetchResponse } = await cdpTrackedFetch({
                 url,
                 fetchParams,
-                templateId: invocation.hogFunction.template_id ?? '',
+                templateId: invocation.customFunction.template_id ?? '',
             })
 
             if (fetchError || !fetchResponse) {
@@ -156,13 +156,13 @@ export class LegacyPluginExecutorService {
                 throw new Error(`Plugin ${pluginId} not found`)
             }
 
-            if (invocation.hogFunction.type === 'destination' && 'processEvent' in plugin) {
+            if (invocation.customFunction.type === 'destination' && 'processEvent' in plugin) {
                 throw new Error(`Plugin ${pluginId} is not a destination`)
-            } else if (invocation.hogFunction.type === 'transformation' && 'onEvent' in plugin) {
+            } else if (invocation.customFunction.type === 'transformation' && 'onEvent' in plugin) {
                 throw new Error(`Plugin ${pluginId} is not a transformation`)
             }
 
-            let state = this.pluginState[invocation.hogFunction.id]
+            let state = this.pluginState[invocation.customFunction.id]
 
             // NOTE: If this is set then we can add in the legacy storage
             const legacyPluginConfigId = invocation.state.globals.inputs?.legacy_plugin_config_id
@@ -202,12 +202,12 @@ export class LegacyPluginExecutorService {
                             ...meta,
                             // Setup receives the real fetch always
                             fetch,
-                            storage: this.legacyStorage(invocation.hogFunction.team_id, legacyPluginConfigId),
+                            storage: this.legacyStorage(invocation.customFunction.team_id, legacyPluginConfigId),
                         })
                     }
                 }
 
-                state = this.pluginState[invocation.hogFunction.id] = {
+                state = this.pluginState[invocation.customFunction.id] = {
                     setupPromise,
                     meta,
                     errored: false,
@@ -220,7 +220,7 @@ export class LegacyPluginExecutorService {
                 throw new Error(`Plugin ${pluginId} setup failed: ${e.message}`)
             }
 
-            const isTestFunction = invocation.hogFunction.name.includes(CDP_TEST_ID)
+            const isTestFunction = invocation.customFunction.name.includes(CDP_TEST_ID)
 
             const request = async (...args: Parameters<typeof fetch>) => {
                 // TRICKY: We use the overridden fetch here if given as it is used by the comparer service
@@ -235,8 +235,8 @@ export class LegacyPluginExecutorService {
                     })
 
                     result.metrics!.push({
-                        team_id: invocation.hogFunction.team_id,
-                        app_source_id: invocation.hogFunction.id,
+                        team_id: invocation.customFunction.team_id,
+                        app_source_id: invocation.customFunction.id,
                         metric_kind: 'other',
                         metric_name: 'fetch',
                         count: 1,
@@ -270,7 +270,7 @@ export class LegacyPluginExecutorService {
             const event = {
                 distinct_id: globals.event.distinct_id,
                 ip: globals.event.properties.$ip,
-                team_id: invocation.hogFunction.team_id,
+                team_id: invocation.customFunction.team_id,
                 event: globals.event.event,
                 properties: globals.event.properties,
                 timestamp: globals.event.timestamp,
@@ -297,7 +297,7 @@ export class LegacyPluginExecutorService {
                     // NOTE: We override logger and fetch here so we can track the calls
                     logger: pluginLogger,
                     fetch: request,
-                    storage: this.legacyStorage(invocation.hogFunction.team_id, legacyPluginConfigId),
+                    storage: this.legacyStorage(invocation.customFunction.team_id, legacyPluginConfigId),
                 })
 
                 addLog('info', `Function completed in ${performance.now() - start}ms.`)
@@ -310,7 +310,7 @@ export class LegacyPluginExecutorService {
                             ...state.meta,
                             logger: pluginLogger,
                         },
-                        this.legacyStorage(invocation.hogFunction.team_id, legacyPluginConfigId)
+                        this.legacyStorage(invocation.customFunction.team_id, legacyPluginConfigId)
                     )
                     result.execResult = transformedEvent
                 } else {

@@ -94,9 +94,9 @@ export const toolbarConfigLogic = kea<toolbarConfigLogicType>([
         },
         tokenExpired: () => {
             toolbarPosthogJS.capture('toolbar token expired')
-            console.warn('PostHog Toolbar API token expired. Clearing session.')
+            console.warn('Insights Toolbar API token expired. Clearing session.')
             if (values.props.source !== 'localstorage') {
-                lemonToast.error('PostHog Toolbar API token expired.')
+                lemonToast.error('Insights Toolbar API token expired.')
             }
             actions.persistConfig()
         },
@@ -145,7 +145,7 @@ export async function toolbarFetch(
     urlConstruction: 'full' | 'use-as-provided' = 'full'
 ): Promise<Response> {
     const temporaryToken = toolbarConfigLogic.findMounted()?.values.temporaryToken
-    const host = toolbarConfigLogic.findMounted()?.values.uiHost // Use UI host for API requests since it's pointing to PostHog's UI
+    const host = toolbarConfigLogic.findMounted()?.values.uiHost // Use UI host for API requests since it's pointing to Insights's UI
 
     let fullUrl: string
     if (urlConstruction === 'use-as-provided') {

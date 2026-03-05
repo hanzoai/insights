@@ -1,6 +1,6 @@
 # Temporal
 
-PostHog uses Temporal to power multiple products and features like:
+Insights uses Temporal to power multiple products and features like:
 
 - All of Batch exports,
 - Syncs for data warehouse,
@@ -77,7 +77,7 @@ If an activity is prone to experience temporary disruptions, it can be configure
 
 The Temporal service acts as the orchestrator of all workflows and activities. This service ensures workflows are durable such that they persist even if workers crash. The service achieves this by keeping track of the execution progress of a workflow, which also enables automated retrying when any activities fail. Developers can inspect this history if required to debug their workflows.
 
-At PostHog, we rely on [Temporal Cloud](https://cloud.temporal.io) to host the Temporal service. If you require access to Temporal Cloud, you can request it via the usual help channels.
+At Insights, we rely on [Temporal Cloud](https://cloud.temporal.io) to host the Temporal service. If you require access to Temporal Cloud, you can request it via the usual help channels.
 
 ### Worker
 
@@ -86,7 +86,7 @@ Workflows and activities run in Temporal workers. The Temporal service assigns w
 > [!NOTE]
 > A worker can only listen to a single queue.
 
-At PostHog, most of the configuration currently happens in this package, particularly in the `worker.py` module.
+At Insights, most of the configuration currently happens in this package, particularly in the `worker.py` module.
 
 ### Schedule
 
@@ -173,7 +173,7 @@ Temporal workers run multiple workflows and activities simultaneously. In order 
 
 The most important rule when writing asyncio code is: **DO NOT BLOCK** the event loop. Asyncio is the optimal choice for code that is bound by I/O operations, like network or database requests. However, it is of utmost importance that those requests are done using non-blocking primitives. Otherwise, no tasks will be executing concurrently in the worker, and any performance benefit of using asyncio is lost. Moreover, the same event loop is also used to run other activities in the worker which can also be blocked and eventually timed-out.
 
-Asyncio is not new in Python (originally introduced in 3.4, and the new keywords in 3.5), but it has not been widely adopted in PostHog (yet!). This means that there isn't much code we can re-use from the PostHog monolith within Temporal activities. In particular, Django models will issue blocking requests when using the same method calls used anywhere else in PostHog. For this reason, more often than not, some amount of work is required to bring code from other parts of PostHog into activities:
+Asyncio is not new in Python (originally introduced in 3.4, and the new keywords in 3.5), but it has not been widely adopted in Insights (yet!). This means that there isn't much code we can re-use from the Insights monolith within Temporal activities. In particular, Django models will issue blocking requests when using the same method calls used anywhere else in Insights. For this reason, more often than not, some amount of work is required to bring code from other parts of Insights into activities:
 
 - Sometimes, the library you need to use has adopted asyncio and offers methods that can be a drop-in replacement.
   - For example: Django models have async methods that just append `a` to the front: `MyModel.objects.get(...)` becomes `await MyModel.objects.aget(...)`. But not all the Django model API has support for asyncio, so check the documentation for our current version of Django.
@@ -302,10 +302,10 @@ class HelloWorldWorkflow:
 
 ### Logging
 
-Like the rest of PostHog, logging in Temporal is configured to use [structlog](https://www.structlog.org/en/stable/). In contrast to the rest of PostHog, the structlog configuration defined in `posthog/temporal/common/logger.py` is more complex as it supports two logging modes:
+Like the rest of Insights, logging in Temporal is configured to use [structlog](https://www.structlog.org/en/stable/). In contrast to the rest of Insights, the structlog configuration defined in `posthog/temporal/common/logger.py` is more complex as it supports two logging modes:
 
 - Write: Logs are written to stdout. These are logs meant to be ingested by internal logging parsers and monitoring systems.
-- Produce: Logs are produced to Kafka and later consumed by ClickHouse in the `log_entries` table. This enables querying of logs in PostHog to, for example, communicate to users directly from a Temporal activity or workflow. As an example of this, check how the batch exports logs tab is used to offer debug information to users to allow them to fix configuration errors.
+- Produce: Logs are produced to Kafka and later consumed by ClickHouse in the `log_entries` table. This enables querying of logs in Insights to, for example, communicate to users directly from a Temporal activity or workflow. As an example of this, check how the batch exports logs tab is used to offer debug information to users to allow them to fix configuration errors.
 
 By default, the logger you get from `structlog.get_logger` is configured to do both writing and producing.
 
@@ -347,7 +347,7 @@ async def my_activity_with_lots_of_logging(inputs: MyActivityInputs):
     try:
         ...
     except:
-        # Help your fellow PostHog engineers figure out what happened!
+        # Help your fellow Insights engineers figure out what happened!
         logger.exception("Activity failed", reason="wow much technical")
 
 
@@ -398,9 +398,9 @@ Once workflows and activities are finished, there are a few more steps required 
 
 ### Assign workflows and activities to workers
 
-Once your workflow and activities have been written, it's time to decide which workers will run them. At PostHog, we have multiple sets of Temporal workers running. Each set of workers listens to a particular task queue, which is how we coordinate which workflows and activities will each worker run: By executing your workflows and activities in a certain task queue, only workers from the set of workers configured to poll that task queue will pick up the work.
+Once your workflow and activities have been written, it's time to decide which workers will run them. At Insights, we have multiple sets of Temporal workers running. Each set of workers listens to a particular task queue, which is how we coordinate which workflows and activities will each worker run: By executing your workflows and activities in a certain task queue, only workers from the set of workers configured to poll that task queue will pick up the work.
 
-Since each product has its own requirements when it comes to worker resources and behavior, each product has its own set of workers, and the product team manages the deployment of said workers. For in-development workflows and activities, there exists a set of workers listening on a shared task queue (called `general-purpose-task-queue`). Anybody may use this general task queue, so you can assign your workflows to it while they are still in development. Once your workflows have moved past the prototyping stage, I recommend looking in the [charts](https://github.com/PostHog/charts) repository for the `temporal-worker` package you can use to create your own deployment. With your own set of workers, you can define resource limits of your own, and avoid conflicts with other workflows running in the shared task queue.
+Since each product has its own requirements when it comes to worker resources and behavior, each product has its own set of workers, and the product team manages the deployment of said workers. For in-development workflows and activities, there exists a set of workers listening on a shared task queue (called `general-purpose-task-queue`). Anybody may use this general task queue, so you can assign your workflows to it while they are still in development. Once your workflows have moved past the prototyping stage, I recommend looking in the [charts](https://github.com/Insights/charts) repository for the `temporal-worker` package you can use to create your own deployment. With your own set of workers, you can define resource limits of your own, and avoid conflicts with other workflows running in the shared task queue.
 
 Regardless of which task queue and workers are chosen to run your workflows, all workers are configured right here in the code. So, you need to get your workflow classes and your activity functions in the worker configuration based on the task queue you have chosen. This is done by adding your workflows and activities to mappings in the `posthog/management/command/start_temporal_worker.py` script. I recommend that you group all your workflows and activities in a single collection at the top level `__init__.py` of your product package, so that then they can be imported in `start_temporal_worker.py` and added to the mappings.
 
@@ -489,8 +489,8 @@ As you run workflows, you will be able to see the logs in the worker's logs, and
 - [Temporal Python SDK repository](https://github.com/temporalio/sdk-python).
 - [Temporal Python SDK code samples](https://github.com/temporalio/samples-python).
 
-## Examples in PostHog
+## Examples in Insights
 
-- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/PostHog/posthog/tree/master/products/batch_exports/backend/temporal/destinations).
-- [Examples on unit testing Temporal workflows](https://github.com/PostHog/posthog/tree/master/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
+- All of batch exports is built in Temporal, see [example workflows in batch exports](https://github.com/Insights/posthog/tree/master/products/batch_exports/backend/temporal/destinations).
+- [Examples on unit testing Temporal workflows](https://github.com/Insights/posthog/tree/master/products/batch_exports/backend/tests/temporal) are available in the batch exports tests.
 - DuckLake data modeling writes leverage Temporal too; follow the [DuckLake copy workflow configuration guide](../ducklake/README.md) to see how we configure environment variables, bucket layouts, and IAM perms for the copy workflow.

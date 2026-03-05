@@ -11,7 +11,7 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog React Native library and its dependencies:</Markdown>
+                    <Markdown>Install the Insights React Native library and its dependencies:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -47,12 +47,12 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        PostHog is most easily used via the `PostHogProvider` component. Wrap your app with the
+                        Insights is most easily used via the `InsightsProvider` component. Wrap your app with the
                         provider:
                     </Markdown>
                     <CodeBlock
@@ -61,18 +61,18 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'App.tsx',
                                 code: dedent`
-                                    import { PostHogProvider } from 'posthog-react-native'
+                                    import { InsightsProvider } from 'posthog-react-native'
 
                                     export function MyApp() {
                                         return (
-                                            <PostHogProvider
+                                            <InsightsProvider
                                                 apiKey="<ph_project_api_key>"
                                                 options={{
                                                     host: "<ph_client_api_host>",
                                                 }}
                                             >
                                                 <RestOfApp />
-                                            </PostHogProvider>
+                                            </InsightsProvider>
                                         )
                                     }
                                 `,
@@ -88,8 +88,8 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
             content: (
                 <>
                     <Markdown>
-                        Once installed, PostHog will automatically start capturing events. You can also manually send
-                        events using the `usePostHog` hook:
+                        Once installed, Insights will automatically start capturing events. You can also manually send
+                        events using the `useInsights` hook:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -97,10 +97,10 @@ export const getReactNativeSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'tsx',
                                 file: 'Component.tsx',
                                 code: dedent`
-                                    import { usePostHog } from 'posthog-react-native'
+                                    import { useInsights } from 'posthog-react-native'
 
                                     function MyComponent() {
-                                        const posthog = usePostHog()
+                                        const posthog = useInsights()
 
                                         const handlePress = () => {
                                             posthog.capture('button_pressed', {

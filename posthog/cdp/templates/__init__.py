@@ -65,7 +65,7 @@ from .meta_ads.template_meta_ads import template as meta_ads
 from .microsoft_teams.template_microsoft_teams import template as microsoft_teams
 from .onesignal.template_onesignal import template as onesignal
 from .posthog.template_posthog import (
-    TemplatePostHogMigrator,
+    TemplateInsightsMigrator,
     template as posthog,
 )
 from .reddit.template_reddit_pixel import template_reddit_pixel as reddit_pixel
@@ -150,7 +150,7 @@ CUSTOM_FUNCTION_MIGRATORS = {
     TemplateGooglePubSubMigrator.plugin_url: TemplateGooglePubSubMigrator,
     TemplateGoogleCloudStorageMigrator.plugin_url: TemplateGoogleCloudStorageMigrator,
     TemplateEngageMigrator.plugin_url: TemplateEngageMigrator,
-    TemplatePostHogMigrator.plugin_url: TemplatePostHogMigrator,
+    TemplateInsightsMigrator.plugin_url: TemplateInsightsMigrator,
     TemplateHubspotMigrator.plugin_url: TemplateHubspotMigrator,
     TemplateRudderstackMigrator.plugin_url: TemplateRudderstackMigrator,
     TemplateLoopsMigrator.plugin_url: TemplateLoopsMigrator,

@@ -15,11 +15,11 @@ import { LegacyWebhookService } from '../legacy-webhooks/legacy-webhook-service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import {
     CyclotronJobInvocation,
-    CyclotronJobInvocationHogFunction,
-    HogFunctionInvocationGlobals,
-    HogFunctionType,
+    CyclotronJobInvocationCustomFunction,
+    CustomFunctionInvocationGlobals,
+    CustomFunctionType,
 } from '../types'
-import { convertToHogFunctionInvocationGlobals } from '../utils'
+import { convertToCustomFunctionInvocationGlobals } from '../utils'
 import { createInvocation } from '../utils/invocation-utils'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
 import { counterParseError } from './metrics'
@@ -38,9 +38,9 @@ export type LightweightPluginConfig = {
     }
 }
 
-type PluginConfigHogFunction = {
+type PluginConfigCustomFunction = {
     pluginConfigId: number
-    hogFunction: HogFunctionType
+    customFunction: CustomFunctionType
 }
 
 const legacyPluginExecutionResultCounter = new Counter({
@@ -71,14 +71,14 @@ export type CdpLegacyEventsConsumerHub = CdpConsumerBaseHub &
 /**
  * This is a temporary consumer that hooks into the existing onevent consumer group
  * It currently just runs the same logic as the old one but with noderdkafka as the consumer tech which should improve things
- * We can then use this to gradually move over to the new hog functions
+ * We can then use this to gradually move over to the new custom functions
  */
 export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsConsumerHub> {
     protected name = 'CdpLegacyEventsConsumer'
     protected promiseScheduler = new PromiseScheduler()
     protected kafkaConsumer: KafkaConsumer
 
-    private pluginConfigsLoader: LazyLoader<PluginConfigHogFunction[]>
+    private pluginConfigsLoader: LazyLoader<PluginConfigCustomFunction[]>
     private legacyPluginExecutor: LegacyPluginExecutorService
     private legacyWebhookService: LegacyWebhookService
 
@@ -96,8 +96,8 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         this.legacyWebhookService = new LegacyWebhookService(hub)
 
         this.pluginConfigsLoader = new LazyLoader({
-            name: 'plugin_config_hog_functions',
-            loader: async (teamIds: string[]) => this.loadAndBuildHogFunctions(teamIds),
+            name: 'plugin_config_custom_functions',
+            loader: async (teamIds: string[]) => this.loadAndBuildCustomFunctions(teamIds),
             refreshAgeMs: 600000, // 10 minutes
             refreshBackgroundAgeMs: 300000, // 5 minutes
             bufferMs: 10, // 10ms buffer for batching
@@ -110,27 +110,27 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         )
     }
 
-    private async loadAndBuildHogFunctions(teamIds: string[]): Promise<Record<string, PluginConfigHogFunction[]>> {
+    private async loadAndBuildCustomFunctions(teamIds: string[]): Promise<Record<string, PluginConfigCustomFunction[]>> {
         const { rows } = await this.hub.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
-                posthog_pluginconfig.id,
-                posthog_pluginconfig.team_id,
-                posthog_pluginconfig.plugin_id,
-                posthog_pluginconfig.enabled,
-                posthog_pluginconfig.config,
-                posthog_pluginconfig.created_at,
-                posthog_pluginconfig.updated_at,
-                posthog_plugin.id as plugin__id,
-                posthog_plugin.url as plugin__url
-            FROM posthog_pluginconfig
-            LEFT JOIN posthog_plugin ON posthog_plugin.id = posthog_pluginconfig.plugin_id
-            WHERE posthog_pluginconfig.team_id = ANY($1)
-                AND posthog_pluginconfig.enabled = 't'
-                AND (posthog_pluginconfig.deleted IS NULL OR posthog_pluginconfig.deleted != 't')
-                AND posthog_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
+                insights_pluginconfig.id,
+                insights_pluginconfig.team_id,
+                insights_pluginconfig.plugin_id,
+                insights_pluginconfig.enabled,
+                insights_pluginconfig.config,
+                insights_pluginconfig.created_at,
+                insights_pluginconfig.updated_at,
+                insights_plugin.id as plugin__id,
+                insights_plugin.url as plugin__url
+            FROM insights_pluginconfig
+            LEFT JOIN insights_plugin ON insights_plugin.id = insights_pluginconfig.plugin_id
+            WHERE insights_pluginconfig.team_id = ANY($1)
+                AND insights_pluginconfig.enabled = 't'
+                AND (insights_pluginconfig.deleted IS NULL OR insights_pluginconfig.deleted != 't')
+                AND insights_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
             [teamIds.map((id) => parseInt(id))],
-            'loadPluginConfigHogFunctions'
+            'loadPluginConfigCustomFunctions'
         )
 
         // Load attachments for all plugin configs with non-empty config
@@ -141,7 +141,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             const { rows: attachmentRows } = await this.hub.postgres.query(
                 PostgresUse.COMMON_READ,
                 `SELECT plugin_config_id, key, contents
-                FROM posthog_pluginattachment
+                FROM insights_pluginattachment
                 WHERE plugin_config_id = ANY($1)`,
                 [pluginConfigIds],
                 'loadPluginConfigAttachments'
@@ -177,8 +177,8 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             }
         }
 
-        // Group by team_id and build hog functions directly
-        const results: Record<string, PluginConfigHogFunction[]> = {}
+        // Group by team_id and build custom functions directly
+        const results: Record<string, PluginConfigCustomFunction[]> = {}
 
         for (const row of rows) {
             const teamId = row.team_id.toString()
@@ -187,7 +187,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             }
 
             try {
-                const hogFunction = this.convertPluginConfigToHogFunction(
+                const customFunction = this.convertPluginConfigToCustomFunction(
                     {
                         id: row.id,
                         team_id: row.team_id,
@@ -206,14 +206,14 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                     attachmentsMap[row.id]
                 )
 
-                if (hogFunction) {
+                if (customFunction) {
                     results[teamId].push({
                         pluginConfigId: row.id,
-                        hogFunction,
+                        customFunction,
                     })
                 }
             } catch (error: any) {
-                logger.warn('Failed to convert plugin config to hog function', {
+                logger.warn('Failed to convert plugin config to custom function', {
                     pluginConfigId: row.id,
                     error: error?.message,
                 })
@@ -230,21 +230,21 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         return results
     }
 
-    private convertPluginConfigToHogFunction(
+    private convertPluginConfigToCustomFunction(
         pluginConfig: LightweightPluginConfig,
         attachments?: Record<string, any>
-    ): HogFunctionType | null {
+    ): CustomFunctionType | null {
         if (!pluginConfig.plugin?.url) {
             return null
         }
 
         // Extract plugin ID from URL (following the migration.py pattern)
-        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/PostHog/', '')
+        const pluginId = pluginConfig.plugin.url.replace('inline://', '').replace('https://github.com/Insights/', '')
 
         const templateId = `plugin-${pluginId}`
 
         // Build inputs from plugin config
-        const inputs: HogFunctionType['inputs'] = {}
+        const inputs: CustomFunctionType['inputs'] = {}
 
         for (const [key, value] of Object.entries(pluginConfig.config)) {
             inputs[key] = { value: value?.toString() ?? '' }
@@ -264,7 +264,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             inputs.legacy_plugin_config_id = { value: pluginConfig.id }
         }
 
-        // Create a HogFunctionType
+        // Create a CustomFunctionType
         return {
             id: `legacy-${pluginConfig.id}`,
             type: 'destination' as const,
@@ -272,7 +272,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             name: `Legacy Plugin ${pluginConfig.id}`,
             enabled: pluginConfig.enabled,
             deleted: false,
-            hog: '',
+            script: '',
             bytecode: [],
             template_id: templateId,
             inputs,
@@ -283,7 +283,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
     }
 
     @instrumented('cdpLegacyEventsConsumer.processEvent')
-    public async processEvent(invocation: HogFunctionInvocationGlobals) {
+    public async processEvent(invocation: CustomFunctionInvocationGlobals) {
         const event: PostIngestionEvent = {
             eventUuid: invocation.event.uuid,
             event: invocation.event.event,
@@ -298,20 +298,20 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
             person_id: undefined,
         }
 
-        const invocations = await this.getLegacyPluginHogFunctionInvocations(invocation)
+        const invocations = await this.getLegacyPluginCustomFunctionInvocations(invocation)
 
         const results = await Promise.all(
             invocations.map(async (invocation) => this.legacyPluginExecutor.execute(invocation))
         )
 
         for (const result of results) {
-            const pluginConfigId = parseInt(result.invocation.hogFunction.id.replace('legacy-', ''))
+            const pluginConfigId = parseInt(result.invocation.customFunction.id.replace('legacy-', ''))
             const error = result.error
 
             legacyPluginExecutionResultCounter
                 .labels({
                     result: error ? 'error' : 'success',
-                    template_id: result.invocation.hogFunction.template_id,
+                    template_id: result.invocation.customFunction.template_id,
                 })
                 .inc()
 
@@ -329,7 +329,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
 
     @instrumented('cdpLegacyEventsConsumer.processBatch')
     public async processBatch(
-        invocationGlobals: HogFunctionInvocationGlobals[]
+        invocationGlobals: CustomFunctionInvocationGlobals[]
     ): Promise<{ backgroundTask: Promise<any>; invocations: CyclotronJobInvocation[] }> {
         if (invocationGlobals.length) {
             await Promise.all(invocationGlobals.map((x) => this.processEvent(x)))
@@ -344,8 +344,8 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
 
     // This consumer always parses from kafka
     @instrumented('cdpConsumer.handleEachBatch.parseKafkaMessages')
-    public async _parseKafkaBatch(messages: Message[]): Promise<HogFunctionInvocationGlobals[]> {
-        const events: HogFunctionInvocationGlobals[] = []
+    public async _parseKafkaBatch(messages: Message[]): Promise<CustomFunctionInvocationGlobals[]> {
+        const events: CustomFunctionInvocationGlobals[] = []
 
         await Promise.all(
             messages.map(async (message) => {
@@ -358,13 +358,13 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                         return
                     }
 
-                    const pluginConfigHogFunctions = await this.pluginConfigsLoader.get(team.id.toString())
+                    const pluginConfigCustomFunctions = await this.pluginConfigsLoader.get(team.id.toString())
 
-                    if (!pluginConfigHogFunctions?.length) {
+                    if (!pluginConfigCustomFunctions?.length) {
                         return
                     }
 
-                    events.push(convertToHogFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
+                    events.push(convertToCustomFunctionInvocationGlobals(clickHouseEvent, team, this.hub.SITE_URL))
                 } catch (e) {
                     logger.error('Error parsing message', e)
                     counterParseError.labels({ error: e.message }).inc()
@@ -375,18 +375,18 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
         return events
     }
 
-    private async getLegacyPluginHogFunctionInvocations(
-        invocation: HogFunctionInvocationGlobals
-    ): Promise<CyclotronJobInvocationHogFunction[]> {
-        const pluginConfigHogFunctions = await this.pluginConfigsLoader.get(invocation.project.id.toString())
+    private async getLegacyPluginCustomFunctionInvocations(
+        invocation: CustomFunctionInvocationGlobals
+    ): Promise<CyclotronJobInvocationCustomFunction[]> {
+        const pluginConfigCustomFunctions = await this.pluginConfigsLoader.get(invocation.project.id.toString())
 
-        if (!pluginConfigHogFunctions) {
+        if (!pluginConfigCustomFunctions) {
             return []
         }
 
-        return pluginConfigHogFunctions.map(({ hogFunction }) => {
+        return pluginConfigCustomFunctions.map(({ customFunction }) => {
             // Plugin configs are always static { value: any } so we can just convert to a record of strings
-            const inputs = Object.entries(hogFunction.inputs || {}).reduce(
+            const inputs = Object.entries(customFunction.inputs || {}).reduce(
                 (acc, [key, value]) => {
                     acc[key] = value?.value
                     return acc
@@ -399,7 +399,7 @@ export class CdpLegacyEventsConsumer extends CdpConsumerBase<CdpLegacyEventsCons
                     ...invocation,
                     inputs,
                 },
-                hogFunction
+                customFunction
             )
         })
     }

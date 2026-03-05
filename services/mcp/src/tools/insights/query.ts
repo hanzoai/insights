@@ -47,7 +47,7 @@ export const queryHandler: ToolBase<typeof schema>['handler'] = async (context: 
         }
     }
 
-    // HogQL/table results have columns and results arrays
+    // InsightsQL/table results have columns and results arrays
     return {
         query: insightResult.data.query,
         insight: {

@@ -1,14 +1,14 @@
 import { UUIDT } from '~/utils/utils'
 
-import { CyclotronJobInvocationHogFunction, HogFunctionType } from '../types'
-import { createHogFunction } from './fixtures'
+import { CyclotronJobInvocationCustomFunction, CustomFunctionType } from '../types'
+import { createCustomFunction } from './fixtures'
 import { SAMPLE_GLOBALS } from './fixtures'
 
 export const createExampleNativeInvocation = (
-    hogFunctionOverrides: Partial<HogFunctionType> = {},
+    customFunctionOverrides: Partial<CustomFunctionType> = {},
     inputs: Record<string, any> = {}
-): CyclotronJobInvocationHogFunction => {
-    const hogFunction = createHogFunction(hogFunctionOverrides)
+): CyclotronJobInvocationCustomFunction => {
+    const customFunction = createCustomFunction(customFunctionOverrides)
 
     return {
         id: new UUIDT().toString(),
@@ -20,10 +20,10 @@ export const createExampleNativeInvocation = (
             timings: [],
             attempts: 0,
         },
-        teamId: hogFunction.team_id,
-        functionId: hogFunction.id,
-        hogFunction,
-        queue: 'hog',
+        teamId: customFunction.team_id,
+        functionId: customFunction.id,
+        customFunction,
+        queue: 'custom_script',
         queuePriority: 0,
     }
 }

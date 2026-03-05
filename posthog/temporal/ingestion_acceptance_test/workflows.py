@@ -5,7 +5,7 @@ from datetime import timedelta
 import temporalio.workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 with temporalio.workflow.unsafe.imports_passed_through():
     from posthog.temporal.ingestion_acceptance_test.activities import run_ingestion_acceptance_tests
@@ -13,7 +13,7 @@ with temporalio.workflow.unsafe.imports_passed_through():
 
 
 @temporalio.workflow.defn(name="ingestion-acceptance-test")
-class IngestionAcceptanceTestWorkflow(PostHogWorkflow):
+class IngestionAcceptanceTestWorkflow(InsightsWorkflow):
     """Workflow that runs ingestion acceptance tests.
 
     Verifies that the ingestion pipeline is functioning correctly by

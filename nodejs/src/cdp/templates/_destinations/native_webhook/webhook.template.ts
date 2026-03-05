@@ -7,7 +7,7 @@ export const template: NativeTemplate = {
     id: 'native-webhook',
     name: 'Native HTTP Webhook',
     description: 'Sends a native webhook templated by the incoming event data',
-    icon_url: '/static/posthog-icon.svg',
+    icon_url: '/static/insights-icon.svg',
     category: ['Custom'],
     perform: (request, { payload }) => {
         try {

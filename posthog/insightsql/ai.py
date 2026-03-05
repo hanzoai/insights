@@ -27,7 +27,7 @@ openai_client = (
 
 UNCLEAR_PREFIX = "UNCLEAR:"
 
-IDENTITY_MESSAGE = """You are an expert in writing InsightsQL. InsightsQL is PostHog's variant of SQL. It supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
+IDENTITY_MESSAGE = """You are an expert in writing InsightsQL. InsightsQL is Insights's variant of SQL. It supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
 
 Important InsightsQL differences versus other SQL dialects:
 - JSON properties are accessed using `properties.foo.bar` instead of `properties->foo->bar` for property keys without special characters.
@@ -249,7 +249,7 @@ def hit_openai(messages, user, posthog_properties=None) -> tuple[str, int, int]:
     return content, prompt_tokens, completion_tokens
 
 
-IDENTITY_MESSAGE_HOG = """Hog is PostHog's own programming language. You write Custom code based on a prompt. You don't help with other knowledge.
+IDENTITY_MESSAGE_HOG = """Hog is Insights's own programming language. You write Custom code based on a prompt. You don't help with other knowledge.
 
 Here is the Hog standard library. Dont use any other functions since they are not supported in Hog:
 
@@ -749,8 +749,8 @@ while (i <= length(propertiesToFilter)) {
 return returnEvent"""
 
 
-TRANSFORMATION_LIMITATIONS_MESSAGE = """PostHog Transformations can only modify individual incoming events. They cannot access or read person properties, historical data, or global state, because they run before person resolution. Their only purpose is to transform the structure of a single event (e.g., add properties, rename fields, enrich data) before ingestion. This means they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
-DESTINATION_LIMITATIONS_MESSAGE = """PostHog Destinations have access to the event properties, including person properties and group properties. Just like Transformations they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
+TRANSFORMATION_LIMITATIONS_MESSAGE = """Insights Transformations can only modify individual incoming events. They cannot access or read person properties, historical data, or global state, because they run before person resolution. Their only purpose is to transform the structure of a single event (e.g., add properties, rename fields, enrich data) before ingestion. This means they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
+DESTINATION_LIMITATIONS_MESSAGE = """Insights Destinations have access to the event properties, including person properties and group properties. Just like Transformations they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
 
 HOG_GRAMMAR_MESSAGE = """
 Here is the grammar for Hog:
@@ -1111,7 +1111,7 @@ Here is the taxonomy for events:
         "$feature_enrollment_update": {
             "label": "Feature enrollment",
             "description": "When a user enrolls with a feature.",
-            "description_llm": "When a user opts in or out of a beta feature. This event is specific to the PostHog Early Access Features product, and is only relevant if the project is using this product.",
+            "description_llm": "When a user opts in or out of a beta feature. This event is specific to the Insights Early Access Features product, and is only relevant if the project is using this product.",
         },
         "$capture_metrics": {
             "label": "Capture metrics",
@@ -1240,7 +1240,7 @@ Here is the taxonomy for event properties:
 "event_properties": {
         "$config_defaults": {
             "label": "Config defaults",
-            "description": "The version of the PostHog config defaults that were used when capturing the event.",
+            "description": "The version of the Insights config defaults that were used when capturing the event.",
             "type": "String",
         },
         "$python_runtime": {
@@ -1297,7 +1297,7 @@ Here is the taxonomy for event properties:
         },
         "$pageview_id": {
             "label": "Pageview ID",
-            "description": "PostHog's internal ID for matching events to a pageview.",
+            "description": "Insights's internal ID for matching events to a pageview.",
         },
         "$autocapture_disabled_server_side": {
             "label": "Autocapture disabled server-side",
@@ -1544,7 +1544,7 @@ Here is the taxonomy for event properties:
         },
         "$exception_personURL": {
             "label": "Exception person URL",
-            "description": "The PostHog person that experienced the exception.",
+            "description": "The Insights person that experienced the exception.",
         },
         "$cymbal_errors": {
             "label": "Exception processing errors",
@@ -1951,7 +1951,7 @@ Here is the taxonomy for event properties:
         },
         "$sent_at": {
             "label": "Sent at",
-            "description": "Time the event was sent to PostHog. Used for correcting the event timestamp when the device clock is off.",
+            "description": "Time the event was sent to Insights. Used for correcting the event timestamp when the device clock is off.",
             "examples": ["2023-05-20T15:31:00Z"],
         },
         "$browser": {
@@ -1989,7 +1989,7 @@ Here is the taxonomy for event properties:
         },
         "$raw_user_agent": {
             "label": "Raw user agent",
-            "description": "PostHog process information like browser, OS, and device type from the user agent string. This is the raw user agent string.",
+            "description": "Insights process information like browser, OS, and device type from the user agent string. This is the raw user agent string.",
             "examples": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"],
         },
         "$user_agent": {
@@ -2117,7 +2117,7 @@ Here is the taxonomy for event properties:
         },
         "$feature_flag_request_id": {
             "label": "Feature flag request ID",
-            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by PostHog support for debugging issues with feature flags.",
+            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by Insights support for debugging issues with feature flags.",
             "examples": ["01234567-89ab-cdef-0123-456789abcdef"],
         },
         "$feature_flag_evaluated_at": {
@@ -2813,7 +2813,7 @@ PROPERTY_FILTER_VERBOSE_NAME: dict[PropertyOperator, str] = {
 }
 """
 
-CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT = """You are an expert at creating filters for PostHog custom functions.
+CUSTOM_FUNCTION_FILTERS_SYSTEM_PROMPT = """You are an expert at creating filters for Insights custom functions.
 
 Create filters based on the user's instructions. Return the filters as a JSON object with the following structure:
 {
@@ -2851,7 +2851,7 @@ Common operators:
 
 Return ONLY the JSON object inside <filters> tags. Do not add any other text or explanation."""
 
-CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for PostHog custom functions.
+CUSTOM_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for Insights custom functions.
 
 Your task is to analyze the hog code and create appropriate input variable schemas based on the instructions.
 CRITICAL: You must extract the EXACT variable names used in the hog code. Look for patterns like:

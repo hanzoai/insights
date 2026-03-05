@@ -14,8 +14,8 @@ from temporalio.common import RetryPolicy
 
 from posthog.schema import EmbeddingModelName
 
-from posthog.hogql import ast
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models import Team
 from posthog.sync import database_sync_to_async
@@ -235,7 +235,7 @@ async def fetch_signals_for_report_activity(input: FetchSignalsForReportInput) -
             ORDER BY timestamp ASC
         """
 
-        result = await sync_to_async(execute_hogql_query, thread_sensitive=False)(
+        result = await sync_to_async(execute_insightsql_query, thread_sensitive=False)(
             query_type="SignalsFetchForReport",
             query=query,
             team=team,

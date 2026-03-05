@@ -39,7 +39,7 @@ class MySQLSource(SimpleSource[MySQLSourceConfig], SSHTunnelMixin, ValidateDatab
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
             name=SchemaExternalDataSourceType.MY_SQL,
-            caption="Enter your MySQL/MariaDB credentials to automatically pull your MySQL data into the PostHog Data warehouse.",
+            caption="Enter your MySQL/MariaDB credentials to automatically pull your MySQL data into the Insights Data warehouse.",
             iconPath="/static/services/mysql.png",
             docsUrl="https://posthog.com/docs/cdp/sources/mysql",
             fields=cast(

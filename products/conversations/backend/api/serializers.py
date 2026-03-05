@@ -30,10 +30,10 @@ class WidgetMessageSerializer(serializers.Serializer):
     """Serializer for incoming widget messages."""
 
     widget_session_id = serializers.UUIDField(required=True, help_text="Random UUID for access control")
-    distinct_id = serializers.CharField(required=True, max_length=400, help_text="PostHog distinct_id")
+    distinct_id = serializers.CharField(required=True, max_length=400, help_text="Insights distinct_id")
     message = serializers.CharField(required=True, max_length=5000, help_text="Message content")
     traits = serializers.DictField(required=False, default=dict, help_text="Customer traits")
-    session_id = serializers.CharField(required=False, max_length=64, allow_null=True, help_text="PostHog session ID")
+    session_id = serializers.CharField(required=False, max_length=64, allow_null=True, help_text="Insights session ID")
     session_context = serializers.DictField(
         required=False, default=dict, help_text="Session context (replay URL, current URL, etc.)"
     )

@@ -28,7 +28,7 @@ class TestFindPythonDependencies(unittest.TestCase):
         [
             ("simple_module", "posthog.utils", "posthog/utils.py"),
             ("package_module", "posthog.temporal.subscriptions", "posthog/temporal/subscriptions/__init__.py"),
-            ("nested_module", "posthog.hogql_queries.query_runner", "posthog/hogql_queries/query_runner.py"),
+            ("nested_module", "posthog.insightsql_queries.query_runner", "posthog/insightsql_queries/query_runner.py"),
             ("nonexistent_module", "posthog.nonexistent.module", None),
             ("ee_module", "ee.tasks.subscriptions.subscription_utils", "ee/tasks/subscriptions/subscription_utils.py"),
         ]
@@ -46,7 +46,7 @@ class TestFindPythonDependencies(unittest.TestCase):
         [
             # Dependencies - should be included
             ("The utils file (e.g. caching key)", "posthog/utils.py", True),
-            ("The underlying query runner", "posthog/hogql_queries/query_runner.py", True),
+            ("The underlying query runner", "posthog/insightsql_queries/query_runner.py", True),
             # Non-dependencies - should NOT be included
             ("API endpoint that calls the worker", "ee/api/subscription.py", False),
             ("Schedule config that starts workflows", "posthog/temporal/schedule.py", False),
@@ -65,9 +65,9 @@ class TestFindPythonDependencies(unittest.TestCase):
             # Direct dependencies - should trigger rebuild
             ("entrypoint_init", "posthog/temporal/subscriptions/__init__.py", True),
             ("entrypoint_workflow", "posthog/temporal/subscriptions/subscription_scheduling_workflow.py", True),
-            # Transitive dependencies (the bug that caused issue https://github.com/PostHog/posthog/pull/42307) - should trigger rebuild
+            # Transitive dependencies (the bug that caused issue https://github.com/Insights/posthog/pull/42307) - should trigger rebuild
             ("transitive_utils", "posthog/utils.py", True),
-            ("transitive_query_runner", "posthog/hogql_queries/query_runner.py", True),
+            ("transitive_query_runner", "posthog/insightsql_queries/query_runner.py", True),
             # Export-related files - should trigger rebuild
             ("exporter", "posthog/tasks/exporter.py", True),
             ("image_exporter", "posthog/tasks/exports/image_exporter.py", True),
@@ -115,7 +115,7 @@ class TestFindPythonDependencies(unittest.TestCase):
         _affected, matching = check_if_changes_affect_entrypoint(
             self.graph,
             "posthog.temporal.subscriptions",
-            ["posthog/utils.py", "posthog/hogql_queries/query_runner.py", "ee/models/license.py"],
+            ["posthog/utils.py", "posthog/insightsql_queries/query_runner.py", "ee/models/license.py"],
         )
         self.assertGreater(len(matching), 1, "Need multiple matches to verify sorting")
         self.assertEqual(matching, sorted(matching))
@@ -138,7 +138,7 @@ class TestFindPythonDependencies(unittest.TestCase):
             ("email_subscriptions", "ee/tasks/subscriptions/email_subscriptions.py", True),
             # Transitive dependencies - should trigger rebuild
             ("utils", "posthog/utils.py", True),
-            ("query_runner", "posthog/hogql_queries/query_runner.py", True),
+            ("query_runner", "posthog/insightsql_queries/query_runner.py", True),
             # Non-dependencies - should NOT trigger rebuild
             ("api_endpoint", "ee/api/subscription.py", False),
             ("schedule_config", "posthog/temporal/schedule.py", False),

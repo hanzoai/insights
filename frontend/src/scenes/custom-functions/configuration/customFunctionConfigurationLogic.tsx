@@ -93,7 +93,7 @@ const NEW_FUNCTION_TEMPLATE: CustomFunctionTemplateType = {
     name: '',
     description: '',
     inputs_schema: [],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: "print('Hello, world!');",
     status: 'stable',
 }
@@ -138,7 +138,7 @@ export function sanitizeInputs(
 
         sanitizedInputs[inputSchema.key] = {
             value: value,
-            templating: templatingEnabled ? (input?.templating ?? 'hog') : undefined,
+            templating: templatingEnabled ? (input?.templating ?? 'custom_script') : undefined,
         }
     })
 
@@ -205,7 +205,7 @@ export const templateToConfiguration = (template: CustomFunctionTemplateType): C
         inputs_schema: template.inputs_schema,
         filters: template.filters,
         mappings: mappings,
-        hog: template.code,
+        custom_script: template.code,
         icon_url: template.icon_url,
         inputs: getInputs(template.inputs_schema),
         enabled: true,
@@ -336,7 +336,7 @@ export const customFunctionConfigurationLogic = kea<customFunctionConfigurationL
         setSampleGlobals: (sampleGlobals: CyclotronJobInvocationGlobals | null) => ({ sampleGlobals }),
         setShowEventsList: (showEventsList: boolean) => ({ showEventsList }),
         setOldHogCode: (oldHogCode: string) => ({ oldHogCode }),
-        setNewHogCode: (newHogCode: string) => ({ newHogCode }),
+        setNewHogCode: (newScriptCode: string) => ({ newScriptCode }),
         clearHogCodeDiff: true,
         reportAICustomFunctionPrompted: true,
         reportAICustomFunctionAccepted: true,
@@ -408,10 +408,10 @@ export const customFunctionConfigurationLogic = kea<customFunctionConfigurationL
                 clearHogCodeDiff: () => null,
             },
         ],
-        newHogCode: [
+        newScriptCode: [
             null as string | null,
             {
-                setNewHogCode: (_, { newHogCode }) => newHogCode,
+                setNewHogCode: (_, { newScriptCode }) => newScriptCode,
                 clearHogCodeDiff: () => null,
             },
         ],
@@ -695,9 +695,9 @@ export const customFunctionConfigurationLogic = kea<customFunctionConfigurationL
             },
             submit: async (data) => {
                 // Check HOG code size immediately before submission
-                if (data.hog) {
-                    const hogSize = new Blob([data.hog]).size
-                    if (hogSize > HOG_CODE_SIZE_LIMIT) {
+                if (data.custom_script) {
+                    const scriptSize = new Blob([data.custom_script]).size
+                    if (scriptSize > HOG_CODE_SIZE_LIMIT) {
                         lemonToast.error(
                             `Custom code exceeds maximum size of ${
                                 HOG_CODE_SIZE_LIMIT / 1024
@@ -1130,7 +1130,7 @@ export const customFunctionConfigurationLogic = kea<customFunctionConfigurationL
         templateHasChanged: [
             (s) => [s.customFunction, s.configuration],
             (customFunction, configuration) => {
-                return customFunction?.template?.code && customFunction.template.code !== configuration.hog
+                return customFunction?.template?.code && customFunction.template.code !== configuration.custom_script
             },
         ],
         mappingTemplates: [
@@ -1152,16 +1152,16 @@ export const customFunctionConfigurationLogic = kea<customFunctionConfigurationL
                 if (type !== 'transformation') {
                     return false
                 }
-                const hogCode = configuration.hog || ''
+                const scriptCode = configuration.custom_script || ''
 
-                return mightDropEvents(hogCode)
+                return mightDropEvents(scriptCode)
             },
         ],
 
-        currentHogCode: [
-            (s) => [s.newHogCode, s.configuration],
-            (newHogCode: string | null, configuration: CustomFunctionConfigurationType) => {
-                return newHogCode ?? configuration.hog ?? ''
+        currentScriptCode: [
+            (s) => [s.newScriptCode, s.configuration],
+            (newScriptCode: string | null, configuration: CustomFunctionConfigurationType) => {
+                return newScriptCode ?? configuration.custom_script ?? ''
             },
         ],
 
@@ -1212,8 +1212,8 @@ export const customFunctionConfigurationLogic = kea<customFunctionConfigurationL
                     return true
                 }
 
-                // Only allow editing if code language is 'hog'
-                if (codeLanguage && codeLanguage !== 'hog') {
+                // Only allow editing if code language is 'custom_script'
+                if (codeLanguage && codeLanguage !== 'custom_script') {
                     return false
                 }
 

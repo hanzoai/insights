@@ -38,14 +38,14 @@ describe('hubspot template', () => {
         expect(response.finished).toEqual(false)
         expect(response.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"properties":{"posthog_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
+              "body": "{"properties":{"insights_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
               },
               "method": "PATCH",
               "type": "fetch",
-              "url": "https://api.hubapi.com/crm/v3/objects/companies/company-123?idProperty=posthog_group_id",
+              "url": "https://api.hubapi.com/crm/v3/objects/companies/company-123?idProperty=insights_group_id",
             }
         `)
 
@@ -77,14 +77,14 @@ describe('hubspot template', () => {
 
         expect(response.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"properties":{"posthog_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
+              "body": "{"properties":{"insights_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
               },
               "method": "PATCH",
               "type": "fetch",
-              "url": "https://api.hubapi.com/crm/v3/objects/companies/company-123?idProperty=posthog_group_id",
+              "url": "https://api.hubapi.com/crm/v3/objects/companies/company-123?idProperty=insights_group_id",
             }
         `)
 
@@ -96,7 +96,7 @@ describe('hubspot template', () => {
         expect(patchResponse.finished).toEqual(false)
         expect(patchResponse.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"name":"posthog_group_id","label":"PostHog Group ID","description":"Unique Property to map PostHog Group ID with a HubSpot Company Object","groupName":"companyinformation","type":"string","fieldType":"text","hidden":true,"displayOrder":-1,"hasUniqueValue":true,"formField":false}",
+              "body": "{"name":"insights_group_id","label":"Insights Group ID","description":"Unique Property to map Insights Group ID with a HubSpot Company Object","groupName":"companyinformation","type":"string","fieldType":"text","hidden":true,"displayOrder":-1,"hasUniqueValue":true,"formField":false}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
@@ -115,7 +115,7 @@ describe('hubspot template', () => {
         expect(propertyResponse.finished).toEqual(false)
         expect(propertyResponse.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"properties":{"posthog_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
+              "body": "{"properties":{"insights_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
@@ -160,7 +160,7 @@ describe('hubspot template', () => {
         expect(patchResponse.finished).toEqual(false)
         expect(patchResponse.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"name":"posthog_group_id","label":"PostHog Group ID","description":"Unique Property to map PostHog Group ID with a HubSpot Company Object","groupName":"companyinformation","type":"string","fieldType":"text","hidden":true,"displayOrder":-1,"hasUniqueValue":true,"formField":false}",
+              "body": "{"name":"insights_group_id","label":"Insights Group ID","description":"Unique Property to map Insights Group ID with a HubSpot Company Object","groupName":"companyinformation","type":"string","fieldType":"text","hidden":true,"displayOrder":-1,"hasUniqueValue":true,"formField":false}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
@@ -173,13 +173,13 @@ describe('hubspot template', () => {
 
         const propertyResponse = await tester.invokeFetchResponse(patchResponse.invocation, {
             status: 201,
-            body: { name: 'posthog_group_id' },
+            body: { name: 'insights_group_id' },
         })
 
         expect(propertyResponse.finished).toEqual(false)
         expect(propertyResponse.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"properties":{"posthog_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
+              "body": "{"properties":{"insights_group_id":"company-123","name":"Test Company","domain":"test.com","description":"A test company"}}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",

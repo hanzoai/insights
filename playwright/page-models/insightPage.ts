@@ -345,7 +345,7 @@ class SqlInsight {
     }
 
     async writeQuery(query: string): Promise<void> {
-        const editorArea = this.page.getByTestId('hogql-query-editor')
+        const editorArea = this.page.getByTestId('insightsql-query-editor')
         await editorArea.waitFor({ state: 'visible' })
         await editorArea.click()
         await this.page.keyboard.press('Meta+A')

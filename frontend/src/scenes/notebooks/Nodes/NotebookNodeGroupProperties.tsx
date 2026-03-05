@@ -5,7 +5,7 @@ import { LemonSkeleton } from '@posthog/lemon-ui'
 import { NotFound } from 'lib/components/NotFound'
 import { userPreferencesLogic } from 'lib/logic/userPreferencesLogic'
 import { groupLogic } from 'scenes/groups/groupLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { PropertyDefinitionType } from '~/types'
 
@@ -41,7 +41,7 @@ const Component = (): JSX.Element | null => {
     )
 }
 
-export const NotebookNodeGroupProperties = createPostHogWidgetNode({
+export const NotebookNodeGroupProperties = createInsightsWidgetNode({
     nodeType: NotebookNodeType.GroupProperties,
     titlePlaceholder: 'Properties',
     Component,

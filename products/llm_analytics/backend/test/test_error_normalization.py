@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 
 from posthog.test.base import APIBaseTest, ClickhouseTestMixin, _create_event, flush_persons_and_events
 
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.query import execute_insightsql_query
 
 from products.llm_analytics.backend.queries import get_errors_query
 
@@ -65,7 +65,7 @@ class TestErrorsQuery(ClickhouseTestMixin, APIBaseTest):
 
         query = query.replace("{filters}", f"team_id = {self.team.pk}")
 
-        result = execute_hogql_query(
+        result = execute_insightsql_query(
             query=query,
             team=self.team,
         )

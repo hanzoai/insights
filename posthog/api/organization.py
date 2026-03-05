@@ -44,7 +44,7 @@ from posthog.user_permissions import UserPermissions, UserPermissionsSerializerM
 class PremiumMultiorganizationPermission(permissions.BasePermission):
     """Require user to have all necessary premium features on their plan for create access to the endpoint."""
 
-    message = "You must upgrade your PostHog plan to be able to create and manage multiple organizations."
+    message = "You must upgrade your Insights plan to be able to create and manage multiple organizations."
 
     def has_permission(self, request: Request, view) -> bool:
         user = cast(User, request.user)

@@ -6,14 +6,14 @@ from django.contrib.postgres import indexes as pg_indexes
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection, models, transaction
 
-from posthog.hogql import ast
-from posthog.hogql.database.database import Database
-from posthog.hogql.database.models import SavedQuery
-from posthog.hogql.database.s3_table import DataWarehouseTable as HogQLDataWarehouseTable
-from posthog.hogql.errors import QueryError
-from posthog.hogql.parser import parse_select
-from posthog.hogql.resolver import Resolver
-from posthog.hogql.resolver_utils import extract_select_queries
+from posthog.insightsql import ast
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.database.models import SavedQuery
+from posthog.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
+from posthog.insightsql.errors import QueryError
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.resolver import Resolver
+from posthog.insightsql.resolver_utils import extract_select_queries
 
 from posthog.models.team import Team
 from posthog.models.user import User
@@ -133,15 +133,15 @@ def get_parents_from_model_query(team: Team, model_name: str, model_query: str) 
     Uses CycleDetectingResolver to detect circular dependencies in view references.
 
     Args:
-        model_query: The HogQL query string to parse
+        model_query: The InsightsQL query string to parse
         team: The team context for database resolution
         view_name: Optional name of the view being parsed. If provided, cycles back to
                    this view through other views will be detected.
     """
-    from posthog.hogql.context import HogQLContext
+    from posthog.insightsql.context import InsightsQLContext
 
-    hogql_query = parse_select(model_query)
-    context = HogQLContext(
+    insightsql_query = parse_select(model_query)
+    context = InsightsQLContext(
         team_id=team.pk,
         team=team,
         enable_select_queries=True,
@@ -154,8 +154,8 @@ def get_parents_from_model_query(team: Team, model_name: str, model_query: str) 
         )
 
     # use cycledetectingresolver to resolve types and detect circular view dependencies
-    resolver = CycleDetectingResolver(context=context, dialect="hogql", initial_view_name=model_name)
-    prepared_ast = resolver.visit(hogql_query)
+    resolver = CycleDetectingResolver(context=context, dialect="insightsql", initial_view_name=model_name)
+    prepared_ast = resolver.visit(insightsql_query)
 
     if prepared_ast is None:
         return set()
@@ -217,7 +217,7 @@ def get_parents_from_model_query(team: Team, model_name: str, model_query: str) 
 
 class NodeType(enum.Enum):
     SAVED_QUERY = "SavedQuery"
-    POSTHOG = "PostHog"
+    POSTHOG = "Insights"
     TABLE = "Table"
 
 
@@ -312,7 +312,7 @@ class UnknownParentError(Exception):
 
     def __init__(self, parent: str, query: str):
         super().__init__(
-            f"The parent name {parent} does not correspond to an existing PostHog table, Data Warehouse Table, or Data Warehouse Saved Query."
+            f"The parent name {parent} does not correspond to an existing Insights table, Data Warehouse Table, or Data Warehouse Saved Query."
         )
         self.query = query
 
@@ -396,26 +396,26 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
     def get_or_create_root_path_for_posthog_source(
         self, posthog_source_name: str, team: Team
     ) -> tuple["DataWarehouseModelPath", bool]:
-        """Get a root path for a PostHog source, creating it if it doesn't exist.
+        """Get a root path for a Insights source, creating it if it doesn't exist.
 
-        PostHog sources are well-known PostHog tables. We check against the team's HogQL database
+        Insights sources are well-known Insights tables. We check against the team's InsightsQL database
         to ensure that the source exists before creating the path.
 
         Raises:
-            ValueError: If the provided `posthog_source_name` is not a PostHog table.
+            ValueError: If the provided `posthog_source_name` is not a Insights table.
 
         Returns:
             A tuple with the model path and a `bool` indicating whether it was created or not.
         """
         try:
-            self.get_hogql_database(team).get_table(posthog_source_name)
+            self.get_insightsql_database(team).get_table(posthog_source_name)
         except QueryError:
-            raise ValueError(f"Provided source {posthog_source_name} is not a PostHog table")
+            raise ValueError(f"Provided source {posthog_source_name} is not a Insights table")
 
         return self.get_or_create(path=[posthog_source_name], team=team, defaults={"saved_query": None})
 
-    def get_hogql_database(self, team: Team) -> Database:
-        """Get the HogQL database for given team."""
+    def get_insightsql_database(self, team: Team) -> Database:
+        """Get the InsightsQL database for given team."""
         return Database.create_for(team=team)
 
     def get_or_create_root_path_for_data_warehouse_table(
@@ -463,8 +463,8 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
                 continue
 
             try:
-                table = self.get_hogql_database(team).get_table(parent)
-                if not isinstance(table, HogQLDataWarehouseTable):
+                table = self.get_insightsql_database(team).get_table(parent)
+                if not isinstance(table, InsightsQLDataWarehouseTable):
                     raise ObjectDoesNotExist()
 
                 if table.table_id:
@@ -527,7 +527,7 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
         the transaction and clean them up.
         """
         parents = get_parents_from_model_query(team, model_name, model_query)
-        posthog_table_names = self.get_hogql_database(team).get_posthog_table_names()
+        posthog_table_names = self.get_insightsql_database(team).get_posthog_table_names()
 
         base_params = {
             "team_id": team.pk,
@@ -551,8 +551,8 @@ class DataWarehouseModelPathManager(models.Manager["DataWarehouseModelPath"]):
                             )
                         except ObjectDoesNotExist:
                             try:
-                                table = self.get_hogql_database(team).get_table(parent)
-                                if not isinstance(table, HogQLDataWarehouseTable):
+                                table = self.get_insightsql_database(team).get_table(parent)
+                                if not isinstance(table, InsightsQLDataWarehouseTable):
                                     raise ObjectDoesNotExist()
 
                                 if table.table_id:
@@ -625,7 +625,7 @@ class DataWarehouseModelPath(CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
 
     A data warehouse model is represented by a saved query, and the path to it contains all
     tables and views that said query is selecting from, recursively all the way to root
-    PostHog tables and external data source tables.
+    Insights tables and external data source tables.
     """
 
     class Meta:

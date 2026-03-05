@@ -34,7 +34,7 @@ class TestParseOutput:
         tool = CreateHogTransformationFunctionTool.__new__(CreateHogTransformationFunctionTool)
         with pytest.raises(PydanticOutputParserException) as exc_info:
             tool._parse_output(f"<hog_code>{hog_code}</hog_code>")
-        assert "The Hog code failed to compile" in str(exc_info.value)
+        assert "The Script code failed to compile" in str(exc_info.value)
         # Should NOT contain a specific parse error since it's not a syntax error
         assert "no viable alternative" not in str(exc_info.value)
 

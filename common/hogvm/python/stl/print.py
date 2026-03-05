@@ -25,9 +25,9 @@ def escape_string(value: str) -> str:
 
 # Copied from clickhouse_driver.util.escape, adapted from single quotes to backquotes. Added a $.
 def escape_identifier(identifier: str | int) -> str:
-    if isinstance(identifier, int):  # In HogQL we allow integers as identifiers to access array elements
+    if isinstance(identifier, int):  # In InsightsQL we allow integers as identifiers to access array elements
         return str(identifier)
-    # HogQL allows dollars in the identifier.
+    # InsightsQL allows dollars in the identifier.
     if re.match(r"^[A-Za-z_$][A-Za-z0-9_$]*$", identifier):
         return identifier
     return "`{}`".format("".join(backquote_escape_chars_map.get(c, c) for c in identifier))

@@ -29,7 +29,7 @@ export interface DashboardExportResult extends HclExportResult {
 }
 
 /**
- * @see https://registry.terraform.io/providers/PostHog/posthog/latest/docs/resources/dashboard
+ * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/dashboard
  */
 const DASHBOARD_FIELD_MAPPINGS: FieldMapping<Partial<DashboardBasicType>>[] = [
     {

@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'hidden',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Send push notifications to mobile devices via Firebase Cloud Messaging (FCM)',
     icon_url: '/static/services/firebase.png',
     category: ['Communication'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 let fcmToken := inputs.fcm_token
 let title := inputs.title

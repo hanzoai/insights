@@ -318,9 +318,9 @@ class GeminiVideoUnderstandingProvider:
 
     def __init__(self, model_id: str):
         self.model_id = model_id
-        # Using PostHog Gemini provider to avoid logic duplication
+        # Using Insights Gemini provider to avoid logic duplication
         self._base_provider = GeminiProvider(model_id=model_id)
-        # Using default Gemini client as workaround, as PostHog wrapper doesn't support async yet
+        # Using default Gemini client as workaround, as Insights wrapper doesn't support async yet
         self.client = Client(api_key=self._base_provider.get_api_key())
 
     async def understand_video(
@@ -365,7 +365,7 @@ class GeminiVideoUnderstandingProvider:
             response = await self.client.aio.models.generate_content(
                 model=self.model_id,
                 contents=contents,
-                # Add trace ID, when PostHog wrapper supports async
+                # Add trace ID, when Insights wrapper supports async
             )
             return response.text
         except APIError as e:

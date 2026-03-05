@@ -33,7 +33,7 @@ The app slug is the URL-friendly name in your GitHub App URL (e.g., `github.com/
 
 ## 2. Array OAuth app setup
 
-Cloud runs create scoped OAuth tokens to give the agent access to the PostHog API. This requires an `OAuthApplication` record in the database.
+Cloud runs create scoped OAuth tokens to give the agent access to the Insights API. This requires an `OAuthApplication` record in the database.
 
 For **local development**, this is created automatically when you run `generate_demo_data`.
 
@@ -64,7 +64,7 @@ GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVA
 
 Create a `tasks` feature flag at 100% rollout:
 
-1. Navigate to Feature flags in PostHog
+1. Navigate to Feature flags in Insights
 2. Create a new flag with key `tasks`
 3. Set rollout to 100%
 4. Save
@@ -87,7 +87,7 @@ The activities live in `products/tasks/backend/temporal/process_task/activities/
 
 This is very minimal at the moment, but the tasks page can be used to see what is happening with a background cloud run.
 
-1. Navigate to Tasks in PostHog (requires the `tasks` feature flag)
+1. Navigate to Tasks in Insights (requires the `tasks` feature flag)
 2. Create a task with a title, description, and repository (format: `owner/repo`)
 3. Click "Run task"
 4. Watch logs stream in the session view

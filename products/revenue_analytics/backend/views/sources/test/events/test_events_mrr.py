@@ -21,7 +21,7 @@ class TestMRREventsBuilder(EventsSourceBaseTest):
             query = build(handle)
 
             self.assertBuiltQueryStructure(query, self.PURCHASE_EVENT_NAME, "revenue_analytics.events.purchase")
-            query_sql = query.query.to_hogql()
+            query_sql = query.query.to_insightsql()
             self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_query_structure_contains_required_fields(self):
@@ -36,7 +36,7 @@ class TestMRREventsBuilder(EventsSourceBaseTest):
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
 
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should use argMax to get the latest amount by timestamp
         self.assertIn("argMax(amount, timestamp)", query_sql)
@@ -46,7 +46,7 @@ class TestMRREventsBuilder(EventsSourceBaseTest):
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
 
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should filter for is_recurring
         self.assertIn("and(is_recurring,", query_sql)
@@ -56,7 +56,7 @@ class TestMRREventsBuilder(EventsSourceBaseTest):
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
 
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should group by source_label, customer_id, subscription_id
         self.assertIn("GROUP BY source_label, customer_id, subscription_id", query_sql)
@@ -66,7 +66,7 @@ class TestMRREventsBuilder(EventsSourceBaseTest):
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
 
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Should use UNION ALL to combine revenue items and subscription end events
         self.assertIn("UNION ALL", query_sql)
@@ -76,7 +76,7 @@ class TestMRREventsBuilder(EventsSourceBaseTest):
         handle = SourceHandle(type="events", team=self.team, event=self.events[0])
 
         query = build(handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         # Subscription end events should have toDecimal(0, ...) as amount
         self.assertIn("toDecimal(0,", query_sql)

@@ -252,7 +252,7 @@ const iconTypes: Record<FileSystemIconType, { icon: JSX.Element; iconColor?: Fil
         icon: <IconStickiness />,
         iconColor: ['var(--color-insight-stickiness-light)'],
     },
-    'insight/hog': {
+    'insight/sql': {
         icon: <IconInsightsQL />,
         iconColor: ['var(--color-insight-sql-light)'],
     },

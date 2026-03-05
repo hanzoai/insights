@@ -6,7 +6,7 @@ This document describes the Rust integration test suite for the LLM Analytics ca
 
 **Implementation Requirement**: Each phase in the implementation plan must pass its corresponding integration tests before proceeding to the next phase. This ensures incremental validation and prevents regression as new features are added.
 
-**See Also**: `llma-acceptance-test-suite.md` for end-to-end tests that require full PostHog infrastructure.
+**See Also**: `llma-acceptance-test-suite.md` for end-to-end tests that require full Insights infrastructure.
 
 ## Test Architecture
 

@@ -2390,7 +2390,7 @@
                     "label": "Emoji icon",
                     "hidden": false,
                     "secret": false,
-                    "default": ":hedgehog:",
+                    "default": ":mascot:",
                     "required": false
                 },
                 {
@@ -24942,7 +24942,7 @@
             "description": "New destination with complex event mapping. Works only with posthog-js when opt_in_site_apps is set to true.",
             "filters": null,
             "masking": null,
-            "icon_url": "/static/hedgehog/builder-hog-01.png"
+            "icon_url": "/static/mascot/builder-hog-01.png"
         },
         {
             "mapping_templates": null,

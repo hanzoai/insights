@@ -2,13 +2,13 @@ import json
 from collections.abc import Callable
 from typing import Any, Optional
 
-from posthog.hogql.compiler.bytecode import create_bytecode
-from posthog.hogql.parser import parse_expr, parse_program
+from posthog.insightsql.compiler.bytecode import create_bytecode
+from posthog.insightsql.parser import parse_expr, parse_program
 
 from common.hogvm.python.execute import execute_bytecode, get_nested_value
 from common.hogvm.python.operation import (
-    HOGQL_BYTECODE_IDENTIFIER as _H,
-    HOGQL_BYTECODE_VERSION as VERSION,
+    INSIGHTSQL_BYTECODE_IDENTIFIER as _H,
+    INSIGHTSQL_BYTECODE_VERSION as VERSION,
     Operation as op,
 )
 from common.hogvm.python.utils import UncaughtHogVMException
@@ -301,7 +301,7 @@ class TestBytecodeExecute:
         )
 
     def test_version_0_and_1(self):
-        # version 0 of HogQL bytecode had arguments in a different order
+        # version 0 of InsightsQL bytecode had arguments in a different order
         assert (
             execute_bytecode(["_h", op.STRING, "1", op.STRING, "2", op.CALL_GLOBAL, "concat", 2, op.RETURN]).result
             == "21"

@@ -4,7 +4,7 @@ import { HedgeboxAccount, HedgeboxFile, HedgeboxUser } from '@/types'
 export const sampleUsers: HedgeboxUser[] = [
     {
         id: 'user1',
-        name: 'Sonic Hedgehog',
+        name: 'Sonic Mascot',
         email: 'sonic@hedgebox.net',
         plan: 'personal/pro',
     },

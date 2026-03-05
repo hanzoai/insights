@@ -1,15 +1,15 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'source_webhook',
     id: 'template-source-vercel-log-drain',
     name: 'Vercel logs',
-    description: 'Capture Vercel deployment logs as PostHog events',
+    description: 'Capture Vercel deployment logs as Insights events',
     icon_url: '/static/services/webhook.svg',
     category: ['Infrastructure', 'Monitoring'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 if (inputs.debug) {
     print('Incoming headers:', request.headers)
@@ -94,12 +94,12 @@ if (empty(logs)) {
     }
 }
 
-// Technical limitation: Hog functions can only call postHogCapture once per invocation.
+// Technical limitation: Custom functions can only call insightsCapture once per invocation.
 // If Vercel batches multiple logs in one request, we capture only the first one.
 // Configure Vercel to send logs individually for complete coverage.
 let droppedCount := length(logs) - 1
 if (droppedCount > 0) {
-    print(f'Warning: Dropped {droppedCount} additional log(s). Hog functions can only emit one event per invocation.')
+    print(f'Warning: Dropped {droppedCount} additional log(s). Custom functions can only emit one event per invocation.')
 }
 
 let log := logs[1]
@@ -126,7 +126,7 @@ let path := proxy.path ?? log.path ?? ''
 let distinctId := f'vercel_{sha256Hex(f'{log.projectId}:{host}:{clientIp}:{userAgent}')}'
 
 let props := {
-    // PostHog standard properties
+    // Insights standard properties
     '$ip': clientIp,
     '$raw_user_agent': userAgent,
     '$current_url': f'{scheme}://{host}{path}',
@@ -190,7 +190,7 @@ let props := {
     'proxy_waf_rule_id': proxy.wafRuleId
 }
 
-postHogCapture({
+insightsCapture({
     'event': '$http_log',
     'distinct_id': distinctId,
     'properties': props

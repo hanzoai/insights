@@ -12,16 +12,16 @@ import { SetupTaskId, globalSetupLogic } from 'lib/components/ProductSetup'
 import { lemonToast } from 'lib/lemon-ui/LemonToast'
 import { publicWebhooksHostOrigin } from 'lib/utils/apiHost'
 import { LiquidRenderer } from 'lib/utils/liquid'
-import { sanitizeInputs } from 'scenes/hog-functions/configuration/hogFunctionConfigurationLogic'
-import { EmailTemplate } from 'scenes/hog-functions/email-templater/emailTemplaterLogic'
+import { sanitizeInputs } from 'scenes/custom-functions/configuration/customFunctionConfigurationLogic'
+import { EmailTemplate } from 'scenes/custom-functions/email-templater/emailTemplaterLogic'
 import { projectLogic } from 'scenes/projectLogic'
 import { urls } from 'scenes/urls'
 import { userLogic } from 'scenes/userLogic'
 
-import { HogFunctionTemplateType } from '~/types'
+import { CustomFunctionTemplateType } from '~/types'
 
-import { HogFlowActionSchema, isFunctionAction, isTriggerFunction } from './hogflows/steps/types'
-import { type HogFlow, type HogFlowAction, HogFlowActionValidationResult, type HogFlowEdge } from './hogflows/types'
+import { CustomFlowActionSchema, isFunctionAction, isTriggerFunction } from './customflows/steps/types'
+import { type CustomFlow, type CustomFlowAction, CustomFlowActionValidationResult, type CustomFlowEdge } from './customflows/types'
 import type { workflowLogicType } from './workflowLogicType'
 import { workflowSceneLogic } from './workflowSceneLogic'
 import { workflowsLogic } from './workflowsLogic'
@@ -36,9 +36,9 @@ export interface WorkflowLogicProps {
 export const TRIGGER_NODE_ID = 'trigger_node'
 export const EXIT_NODE_ID = 'exit_node'
 
-export type TriggerAction = Extract<HogFlowAction, { type: 'trigger' }>
+export type TriggerAction = Extract<CustomFlowAction, { type: 'trigger' }>
 
-export const NEW_WORKFLOW: HogFlow = {
+export const NEW_WORKFLOW: CustomFlow = {
     id: 'new',
     name: 'New workflow',
     actions: [
@@ -82,7 +82,7 @@ export const NEW_WORKFLOW: HogFlow = {
     updated_at: '',
 }
 
-function getTemplatingError(value: string, templating?: 'liquid' | 'hog'): string | undefined {
+function getTemplatingError(value: string, templating?: 'liquid' | 'custom_script'): string | undefined {
     if (templating === 'liquid' && typeof value === 'string') {
         try {
             LiquidRenderer.parse(value)
@@ -93,14 +93,14 @@ function getTemplatingError(value: string, templating?: 'liquid' | 'hog'): strin
 }
 
 export function sanitizeWorkflow(
-    workflow: HogFlow,
-    hogFunctionTemplatesById: Record<string, HogFunctionTemplateType>
-): HogFlow {
-    // Sanitize all function-like actions the same as we would a hog function
+    workflow: CustomFlow,
+    customFunctionTemplatesById: Record<string, CustomFunctionTemplateType>
+): CustomFlow {
+    // Sanitize all function-like actions the same as we would a script function
     workflow.actions.forEach((action) => {
         if (isFunctionAction(action) || isTriggerFunction(action)) {
             const inputs = action.config.inputs
-            const template = hogFunctionTemplatesById[action.config.template_id]
+            const template = customFunctionTemplatesById[action.config.template_id]
             if (template) {
                 action.config.inputs = sanitizeInputs({
                     inputs_schema: template.inputs_schema,
@@ -121,23 +121,23 @@ export const workflowLogic = kea<workflowLogicType>([
         actions: [workflowsLogic, ['archiveWorkflow']],
     })),
     actions({
-        partialSetWorkflowActionConfig: (actionId: string, config: Partial<HogFlowAction['config']>) => ({
+        partialSetWorkflowActionConfig: (actionId: string, config: Partial<CustomFlowAction['config']>) => ({
             actionId,
             config,
         }),
-        setWorkflowActionConfig: (actionId: string, config: HogFlowAction['config']) => ({ actionId, config }),
-        setWorkflowAction: (actionId: string, action: HogFlowAction) => ({ actionId, action }),
-        setWorkflowActionEdges: (actionId: string, edges: HogFlow['edges']) => ({ actionId, edges }),
+        setWorkflowActionConfig: (actionId: string, config: CustomFlowAction['config']) => ({ actionId, config }),
+        setWorkflowAction: (actionId: string, action: CustomFlowAction) => ({ actionId, action }),
+        setWorkflowActionEdges: (actionId: string, edges: CustomFlow['edges']) => ({ actionId, edges }),
         // NOTE: This is a wrapper for setWorkflowValues, to get around some weird typegen issues
-        setWorkflowInfo: (workflow: Partial<HogFlow>) => ({ workflow }),
-        saveWorkflowPartial: (workflow: Partial<HogFlow>) => ({ workflow }),
+        setWorkflowInfo: (workflow: Partial<CustomFlow>) => ({ workflow }),
+        saveWorkflowPartial: (workflow: Partial<CustomFlow>) => ({ workflow }),
         triggerManualWorkflow: (variables: Record<string, any>, scheduledAt?: string | null) => ({
             variables,
             scheduledAt,
         }),
         triggerBatchWorkflow: (
             variables: Record<string, any>,
-            filters: Extract<HogFlowAction['config'], { type: 'batch' }>['filters'],
+            filters: Extract<CustomFlowAction['config'], { type: 'batch' }>['filters'],
             scheduledAt?: string | null
         ) => ({
             variables,
@@ -149,20 +149,20 @@ export const workflowLogic = kea<workflowLogicType>([
     }),
     loaders(({ props, values }) => ({
         originalWorkflow: [
-            null as HogFlow | null,
+            null as CustomFlow | null,
             {
                 loadWorkflow: async () => {
                     if (!props.id || props.id === 'new') {
                         if (props.editTemplateId) {
                             // Editing a template - load it and add a temporary status field for the editor
-                            const templateWorkflow = await api.hogFlowTemplates.getHogFlowTemplate(props.editTemplateId)
+                            const templateWorkflow = await api.customFlowTemplates.getCustomFlowTemplate(props.editTemplateId)
                             return {
                                 ...templateWorkflow,
                                 status: 'draft' as const, // Temporary status for editor compatibility, won't be saved
-                            } as HogFlow
+                            } as CustomFlow
                         }
                         if (props.templateId) {
-                            const templateWorkflow = await api.hogFlowTemplates.getHogFlowTemplate(props.templateId)
+                            const templateWorkflow = await api.customFlowTemplates.getCustomFlowTemplate(props.templateId)
 
                             const newWorkflow = {
                                 ...templateWorkflow,
@@ -181,16 +181,16 @@ export const workflowLogic = kea<workflowLogicType>([
                         return { ...NEW_WORKFLOW }
                     }
 
-                    return api.hogFlows.getHogFlow(props.id)
+                    return api.customFlows.getCustomFlow(props.id)
                 },
-                saveWorkflow: async (updates: HogFlow) => {
-                    updates = sanitizeWorkflow(updates, values.hogFunctionTemplatesById)
+                saveWorkflow: async (updates: CustomFlow) => {
+                    updates = sanitizeWorkflow(updates, values.customFunctionTemplatesById)
 
                     if (!props.id || props.id === 'new') {
-                        const result = await api.hogFlows.createHogFlow(updates)
+                        const result = await api.customFlows.createCustomFlow(updates)
 
                         if (props.templateId) {
-                            posthog.capture('hog_flow_created_from_template', {
+                            posthog.capture('custom_flow_created_from_template', {
                                 workflow_id: result.id,
                                 template_id: props.templateId,
                             })
@@ -198,17 +198,17 @@ export const workflowLogic = kea<workflowLogicType>([
                         return result
                     }
 
-                    return api.hogFlows.updateHogFlow(props.id, updates)
+                    return api.customFlows.updateCustomFlow(props.id, updates)
                 },
             },
         ],
     })),
     lazyLoaders(() => ({
-        hogFunctionTemplatesById: [
-            {} as Record<string, HogFunctionTemplateType>,
+        customFunctionTemplatesById: [
+            {} as Record<string, CustomFunctionTemplateType>,
             {
-                loadHogFunctionTemplatesById: async () => {
-                    const allTemplates = await api.hogFunctions.listTemplates({
+                loadCustomFunctionTemplatesById: async () => {
+                    const allTemplates = await api.customFunctions.listTemplates({
                         types: ['destination', 'source_webhook'],
                     })
 
@@ -217,7 +217,7 @@ export const workflowLogic = kea<workflowLogicType>([
                             acc[template.id] = template
                             return acc
                         },
-                        {} as Record<string, HogFunctionTemplateType>
+                        {} as Record<string, CustomFunctionTemplateType>
                     )
 
                     return allTemplatesById
@@ -236,7 +236,7 @@ export const workflowLogic = kea<workflowLogicType>([
                         actions.some((action) => !(values.actionValidationErrorsById[action.id]?.valid ?? true))
                             ? 'Some fields need work'
                             : undefined,
-                } as DeepPartialMap<HogFlow, ValidationErrorType>
+                } as DeepPartialMap<CustomFlow, ValidationErrorType>
 
                 return errors
             },
@@ -254,7 +254,7 @@ export const workflowLogic = kea<workflowLogicType>([
         workflowLoading: [(s) => [s.originalWorkflowLoading], (originalWorkflowLoading) => originalWorkflowLoading],
         edgesByActionId: [
             (s) => [s.workflow],
-            (workflow): Record<string, HogFlowEdge[]> => {
+            (workflow): Record<string, CustomFlowEdge[]> => {
                 return workflow.edges.reduce(
                     (acc, edge) => {
                         if (!acc[edge.from]) {
@@ -269,32 +269,32 @@ export const workflowLogic = kea<workflowLogicType>([
 
                         return acc
                     },
-                    {} as Record<string, HogFlowEdge[]>
+                    {} as Record<string, CustomFlowEdge[]>
                 )
             },
         ],
 
         actionValidationErrorsById: [
-            (s) => [s.workflow, s.hogFunctionTemplatesById, s.hogFunctionTemplatesByIdLoading],
+            (s) => [s.workflow, s.customFunctionTemplatesById, s.customFunctionTemplatesByIdLoading],
             (
                 workflow,
-                hogFunctionTemplatesById,
-                hogFunctionTemplatesByIdLoading
-            ): Record<string, HogFlowActionValidationResult | null> => {
+                customFunctionTemplatesById,
+                customFunctionTemplatesByIdLoading
+            ): Record<string, CustomFlowActionValidationResult | null> => {
                 return workflow.actions.reduce(
                     (acc, action) => {
-                        const result: HogFlowActionValidationResult = {
+                        const result: CustomFlowActionValidationResult = {
                             valid: true,
                             schema: null,
                             errors: {},
                         }
-                        const schemaValidation = HogFlowActionSchema.safeParse(action)
+                        const schemaValidation = CustomFlowActionSchema.safeParse(action)
 
                         if (!schemaValidation.success) {
                             result.valid = false
                             result.schema = schemaValidation.error
                         } else if (action.type === 'function_email') {
-                            // special case for function_email which has nested email inputs, so basic hog input validation is not enough
+                            // special case for function_email which has nested email inputs, so basic script input validation is not enough
                             // TODO: modify email/native_email input type to flatten email inputs so we don't need this special case
                             const emailValue = action.config.inputs?.email?.value as any | undefined
                             const emailTemplating = action.config.inputs?.email?.templating
@@ -334,9 +334,9 @@ export const workflowLogic = kea<workflowLogicType>([
 
                         if (
                             (isFunctionAction(action) || isTriggerFunction(action)) &&
-                            !hogFunctionTemplatesByIdLoading
+                            !customFunctionTemplatesByIdLoading
                         ) {
-                            const template = hogFunctionTemplatesById[action.config.template_id]
+                            const template = customFunctionTemplatesById[action.config.template_id]
                             if (!template) {
                                 result.valid = false
                                 result.errors = {
@@ -382,7 +382,7 @@ export const workflowLogic = kea<workflowLogicType>([
                         acc[action.id] = result
                         return acc
                     },
-                    {} as Record<string, HogFlowActionValidationResult>
+                    {} as Record<string, CustomFlowActionValidationResult>
                 )
             },
         ],
@@ -390,8 +390,8 @@ export const workflowLogic = kea<workflowLogicType>([
         workflowHasActionErrors: [
             (s) => [s.workflow, s.actionValidationErrorsById],
             (
-                workflow: HogFlow,
-                actionValidationErrorsById: Record<string, HogFlowActionValidationResult | null>
+                workflow: CustomFlow,
+                actionValidationErrorsById: Record<string, CustomFlowActionValidationResult | null>
             ): boolean => {
                 return workflow.actions.some((action) => !(actionValidationErrorsById[action.id]?.valid ?? true))
             },
@@ -405,9 +405,9 @@ export const workflowLogic = kea<workflowLogicType>([
         ],
 
         workflowSanitized: [
-            (s) => [s.workflow, s.hogFunctionTemplatesById],
-            (workflow, hogFunctionTemplatesById): HogFlow => {
-                return sanitizeWorkflow(workflow, hogFunctionTemplatesById)
+            (s) => [s.workflow, s.customFunctionTemplatesById],
+            (workflow, customFunctionTemplatesById): CustomFlow => {
+                return sanitizeWorkflow(workflow, customFunctionTemplatesById)
             },
         ],
     }),
@@ -496,9 +496,9 @@ export const workflowLogic = kea<workflowLogicType>([
                 return
             }
 
-            action.config = { ...config } as HogFlowAction['config']
+            action.config = { ...config } as CustomFlowAction['config']
 
-            const changes = { actions: [...values.workflow.actions] } as Partial<HogFlow>
+            const changes = { actions: [...values.workflow.actions] } as Partial<CustomFlow>
             if (action.type === 'trigger') {
                 changes.trigger = action.config as TriggerAction['config']
             }
@@ -511,7 +511,7 @@ export const workflowLogic = kea<workflowLogicType>([
                 return
             }
 
-            actions.setWorkflowActionConfig(actionId, { ...action.config, ...config } as HogFlowAction['config'])
+            actions.setWorkflowActionConfig(actionId, { ...action.config, ...config } as CustomFlowAction['config'])
         },
         setWorkflowAction: async ({ actionId, action }) => {
             const newActions = values.workflow.actions.map((a) => (a.id === actionId ? action : a))
@@ -539,7 +539,7 @@ export const workflowLogic = kea<workflowLogicType>([
             delete (newWorkflow as any).created_at
             delete (newWorkflow as any).updated_at
 
-            const createdWorkflow = await api.hogFlows.createHogFlow(newWorkflow)
+            const createdWorkflow = await api.customFlows.createCustomFlow(newWorkflow)
             lemonToast.success('Workflow duplicated')
             router.actions.push(urls.workflow(createdWorkflow.id, 'workflow'))
         },
@@ -588,7 +588,7 @@ export const workflowLogic = kea<workflowLogicType>([
             lemonToast.info(isScheduleTrigger ? 'Scheduling batch workflow...' : 'Triggering batch workflow...')
 
             try {
-                await api.hogFlows.createHogFlowBatchJob(values.workflow.id, {
+                await api.customFlows.createCustomFlowBatchJob(values.workflow.id, {
                     variables,
                     filters,
                     scheduled_at: scheduledAt,
@@ -607,6 +607,6 @@ export const workflowLogic = kea<workflowLogicType>([
     })),
     afterMount(({ actions }) => {
         actions.loadWorkflow()
-        actions.loadHogFunctionTemplatesById()
+        actions.loadCustomFunctionTemplatesById()
     }),
 ])

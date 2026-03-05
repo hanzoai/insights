@@ -31,9 +31,9 @@ MAX_SELECT_HEATMAPS_LIMIT = 1000000  # 1m datapoints
 MAX_SELECT_COHORT_CALCULATION_LIMIT = 1000000000  # 1b persons
 # Max limit for LLM traces
 MAX_SELECT_TRACES_LIMIT_EXPORT = 10000  # 10k traces
-# Max limit for PostHog AI queries
+# Max limit for Insights AI queries
 MAX_SELECT_POSTHOG_AI_LIMIT = 500  # 500 rows
-# Default limit for PostHog AI queries
+# Default limit for Insights AI queries
 DEFAULT_POSTHOG_AI_RETURNED_ROWS = 100
 # Max amount of memory usage when doing group by before swapping to disk. Only used in certain queries
 MAX_BYTES_BEFORE_EXTERNAL_GROUP_BY = 22 * 1024 * 1024 * 1024

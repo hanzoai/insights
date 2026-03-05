@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.SeparateDatabaseAndState(
             state_operations=[
                 migrations.AddField(
-                    model_name="hogfunction",
+                    model_name="customfunction",
                     name="custom_function_template",
                     field=models.ForeignKey(
                         blank=True,
@@ -30,20 +30,20 @@ class Migration(migrations.Migration):
                 # We add -- existing-table-constraint-ignore to ignore the constraint validation in CI.
                 migrations.RunSQL(
                     """
-                    ALTER TABLE "posthog_hogfunction" ADD COLUMN "custom_function_template_id" uuid NULL CONSTRAINT "posthog_hogfunction_custom_function_templat_3dc757e7_fk_posthog_h" REFERENCES "posthog_hogfunctiontemplate"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
-                    SET CONSTRAINTS "posthog_hogfunction_custom_function_templat_3dc757e7_fk_posthog_h" IMMEDIATE; -- existing-table-constraint-ignore
+                    ALTER TABLE "posthog_customfunction" ADD COLUMN "custom_function_template_id" uuid NULL CONSTRAINT "posthog_customfunction_custom_function_templat_3dc757e7_fk_posthog_h" REFERENCES "posthog_customfunctiontemplate"("id") DEFERRABLE INITIALLY DEFERRED; -- existing-table-constraint-ignore
+                    SET CONSTRAINTS "posthog_customfunction_custom_function_templat_3dc757e7_fk_posthog_h" IMMEDIATE; -- existing-table-constraint-ignore
                     """,
                     reverse_sql="""
-                        ALTER TABLE "posthog_hogfunction" DROP COLUMN IF EXISTS "custom_function_template_id";
+                        ALTER TABLE "posthog_customfunction" DROP COLUMN IF EXISTS "custom_function_template_id";
                     """,
                 ),
                 # We add CONCURRENTLY to the create command
                 migrations.RunSQL(
                     """
-                    CREATE INDEX CONCURRENTLY "posthog_hogfunction_custom_function_template_id_3dc757e7" ON "posthog_hogfunction" ("custom_function_template_id");
+                    CREATE INDEX CONCURRENTLY "posthog_customfunction_custom_function_template_id_3dc757e7" ON "posthog_customfunction" ("custom_function_template_id");
                     """,
                     reverse_sql="""
-                        DROP INDEX IF EXISTS "posthog_hogfunction_custom_function_template_id_3dc757e7";
+                        DROP INDEX IF EXISTS "posthog_customfunction_custom_function_template_id_3dc757e7";
                     """,
                 ),
             ],

@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 
 from posthog.schema import (
     CachedLogsQueryResponse,
-    HogQLFilters,
+    InsightsQLFilters,
     IntervalType,
     LogPropertyFilter,
     LogPropertyFilterType,
@@ -16,15 +16,15 @@ from posthog.schema import (
     PropertyOperator,
 )
 
-from posthog.hogql import ast
-from posthog.hogql.constants import HogQLGlobalSettings, LimitContext
-from posthog.hogql.parser import parse_expr, parse_order_expr, parse_select
-from posthog.hogql.property import get_lowercase_index_hint, operator_is_negative, property_to_expr
+from posthog.insightsql import ast
+from posthog.insightsql.constants import InsightsQLGlobalSettings, LimitContext
+from posthog.insightsql.parser import parse_expr, parse_order_expr, parse_select
+from posthog.insightsql.property import get_lowercase_index_hint, operator_is_negative, property_to_expr
 
 from posthog.clickhouse.client.connection import Workload
-from posthog.hogql_queries.insights.paginators import HogQLHasMorePaginator
-from posthog.hogql_queries.query_runner import AnalyticsQueryRunner, QueryRunner
-from posthog.hogql_queries.utils.query_date_range import QueryDateRange
+from posthog.insightsql_queries.insights.paginators import InsightsQLHasMorePaginator
+from posthog.insightsql_queries.query_runner import AnalyticsQueryRunner, QueryRunner
+from posthog.insightsql_queries.utils.query_date_range import QueryDateRange
 from posthog.models.filters.mixins.utils import cached_property
 
 if TYPE_CHECKING:
@@ -125,7 +125,7 @@ def _generate_resource_attribute_filters(
 class LogsQueryRunnerMixin(QueryRunner):
     @cached_property
     def settings(self):
-        return HogQLGlobalSettings(
+        return InsightsQLGlobalSettings(
             max_bytes_to_read=None,
             read_overflow_mode=None,
         )
@@ -133,7 +133,7 @@ class LogsQueryRunnerMixin(QueryRunner):
     def __init__(self, query, *args, **kwargs):
         super().__init__(query, *args, **kwargs)
 
-        self.paginator = HogQLHasMorePaginator.from_limit_context(
+        self.paginator = InsightsQLHasMorePaginator.from_limit_context(
             limit_context=LimitContext.QUERY,
             limit=self.query.limit if self.query.limit else None,
             offset=self.query.offset,
@@ -391,7 +391,7 @@ class LogsQueryRunnerMixin(QueryRunner):
 class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMixin):
     query: LogsQuery
     cached_response: CachedLogsQueryResponse
-    paginator: HogQLHasMorePaginator
+    paginator: InsightsQLHasMorePaginator
 
     def validate_query_runner_access(self, user: "User") -> bool:
         # LogsQuery is registered in get_query_runner solely for server-side CSV export
@@ -403,7 +403,7 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
         raise UserAccessControlError("logs", "viewer")
 
     def _calculate(self) -> LogsQueryResponse:
-        response = self.paginator.execute_hogql_query(
+        response = self.paginator.execute_insightsql_query(
             query_type="LogsQuery",
             query=self.to_query(),
             modifiers=self.modifiers,
@@ -411,7 +411,7 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
             workload=Workload.LOGS,
             timings=self.timings,
             limit_context=self.limit_context,
-            filters=HogQLFilters(dateRange=self.query.dateRange),
+            filters=InsightsQLFilters(dateRange=self.query.dateRange),
             settings=self.settings,
         )
         results = []
@@ -486,7 +486,7 @@ class LogsQueryRunner(AnalyticsQueryRunner[LogsQueryResponse], LogsQueryRunnerMi
 
     @cached_property
     def settings(self):
-        return HogQLGlobalSettings(
+        return InsightsQLGlobalSettings(
             allow_experimental_object_type=False,
             allow_experimental_join_condition=False,
             transform_null_in=False,

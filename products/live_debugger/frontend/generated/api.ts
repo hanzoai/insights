@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
@@ -88,7 +88,7 @@ export const liveDebuggerBreakpointsCreate = async (
 /**
  * External API endpoint for client applications to fetch active breakpoints using Project API key. This endpoint allows external client applications (like Python scripts, Node.js apps, etc.) to fetch the list of active breakpoints so they can instrument their code accordingly. 
 
-Authentication: Requires a Project API Key in the Authorization header: `Authorization: Bearer phs_<your-project-api-key>`. You can find your Project API Key in PostHog at: Settings → Project → Project API Key
+Authentication: Requires a Project API Key in the Authorization header: `Authorization: Bearer phs_<your-project-api-key>`. You can find your Project API Key in Insights at: Settings → Project → Project API Key
  * @summary Get active breakpoints (External API)
  */
 export const getLiveDebuggerBreakpointsActiveRetrieveUrl = (

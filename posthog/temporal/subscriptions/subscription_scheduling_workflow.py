@@ -13,7 +13,7 @@ from structlog import get_logger
 
 from posthog.models.subscription import Subscription
 from posthog.sync import database_sync_to_async
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 
 from ee.tasks.subscriptions import deliver_subscription_report_async
@@ -108,7 +108,7 @@ class ScheduleAllSubscriptionsWorkflowInputs:
 
 
 @temporalio.workflow.defn(name="schedule-all-subscriptions")
-class ScheduleAllSubscriptionsWorkflow(PostHogWorkflow):
+class ScheduleAllSubscriptionsWorkflow(InsightsWorkflow):
     """Workflow to schedule all subscriptions that are due for delivery."""
 
     @staticmethod
@@ -158,7 +158,7 @@ class ScheduleAllSubscriptionsWorkflow(PostHogWorkflow):
 
 
 @temporalio.workflow.defn(name="handle-subscription-value-change")
-class HandleSubscriptionValueChangeWorkflow(PostHogWorkflow):
+class HandleSubscriptionValueChangeWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> DeliverSubscriptionReportActivityInputs:
         loaded = json.loads(inputs[0])

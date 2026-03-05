@@ -33,7 +33,7 @@ import posthog from 'posthog-js'
 import { NotebookNodeContext } from './NotebookNodeContext'
 import { IconCollapse, IconCopy, IconEllipsis, IconExpand, IconPencil, IconPlus, IconX } from '@posthog/icons'
 import {
-    CreatePostHogWidgetNodeOptions,
+    CreateInsightsWidgetNodeOptions,
     CustomNotebookNodeAttributes,
     NodeWrapperProps,
     NotebookNodeProps,
@@ -446,8 +446,8 @@ function NodeWrapper<T extends CustomNotebookNodeAttributes>(props: NodeWrapperP
 
 export const MemoizedNodeWrapper = memo(NodeWrapper) as typeof NodeWrapper
 
-export function createPostHogWidgetNode<T extends CustomNotebookNodeAttributes>(
-    options: CreatePostHogWidgetNodeOptions<T>
+export function createInsightsWidgetNode<T extends CustomNotebookNodeAttributes>(
+    options: CreateInsightsWidgetNodeOptions<T>
 ): Node {
     const { Component, pasteOptions, inputOptions, attributes, serializedText, ...wrapperProps } = options
 

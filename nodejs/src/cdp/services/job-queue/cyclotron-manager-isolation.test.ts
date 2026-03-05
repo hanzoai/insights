@@ -8,8 +8,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { CyclotronManager, CyclotronShadowManager } from '@posthog/cyclotron'
 
-const TEST_CYCLOTRON_URL = 'postgres://posthog:posthog@localhost:5432/test_cyclotron'
-const TEST_CYCLOTRON_SHADOW_URL = 'postgres://posthog:posthog@localhost:5432/test_cyclotron_shadow'
+const TEST_CYCLOTRON_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron'
+const TEST_CYCLOTRON_SHADOW_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron_shadow'
 
 describe('CyclotronManager isolation', () => {
     jest.setTimeout(10000)
@@ -54,7 +54,7 @@ describe('CyclotronManager isolation', () => {
             id: mainJobId,
             teamId: 1,
             functionId: uuidv4(),
-            queueName: 'hog',
+            queueName: 'custom_script',
             priority: 1,
         })
 
@@ -63,7 +63,7 @@ describe('CyclotronManager isolation', () => {
             id: shadowJobId,
             teamId: 1,
             functionId: uuidv4(),
-            queueName: 'hog',
+            queueName: 'custom_script',
             priority: 1,
         })
 
@@ -100,7 +100,7 @@ describe('CyclotronManager isolation', () => {
                 id,
                 teamId: 1,
                 functionId: uuidv4(),
-                queueName: 'hog',
+                queueName: 'custom_script',
                 priority: 1,
             }))
         )
@@ -111,7 +111,7 @@ describe('CyclotronManager isolation', () => {
                 id,
                 teamId: 1,
                 functionId: uuidv4(),
-                queueName: 'hog',
+                queueName: 'custom_script',
                 priority: 1,
             }))
         )

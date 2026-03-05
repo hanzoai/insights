@@ -110,7 +110,7 @@ export const EmbeddingEvent = (): JSX.Element => {
                             <p>
                                 The text to embed
                                 <br />
-                                Example: <code>"Tell me a fun fact about hedgehogs"</code> or array of strings for batch embeddings
+                                Example: <code>"Tell me a fun fact about mascots"</code> or array of strings for batch embeddings
                             </p>
                         </td>
                     </tr>

@@ -50,7 +50,7 @@ export function SceneTitlePanelButton({
     )
 
     if (isRemovingSidePanelFlag) {
-        // Open Info tab if scene has panel content, otherwise default to PostHog AI
+        // Open Info tab if scene has panel content, otherwise default to Insights AI
         const defaultTab = scenePanelIsPresent ? SidePanelTab.Info : SidePanelTab.Max
 
         if (sidePanelOpen) {
@@ -73,7 +73,7 @@ export function SceneTitlePanelButton({
                     tooltip={
                         definition ? (
                             <>
-                                Open PostHog AI
+                                Open Insights AI
                                 <br />
                                 <div className="flex items-center">
                                     {definition.icon || <IconWrench />}
@@ -81,7 +81,7 @@ export function SceneTitlePanelButton({
                                 </div>
                             </>
                         ) : (
-                            'Open PostHog AI'
+                            'Open Insights AI'
                         )
                     }
                     tooltipPlacement="bottom-end"

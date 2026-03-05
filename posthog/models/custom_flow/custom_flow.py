@@ -87,7 +87,7 @@ def custom_flow_saved(sender, instance: CustomFlow, created, **kwargs):
 
 @receiver(post_save, sender=Action)
 def action_saved_for_custom_flows(sender, instance: Action, created, **kwargs):
-    # Whenever an action is saved we want to load all hog flows using it
+    # Whenever an action is saved we want to load all custom flows using it
     # and trigger a refresh
     from posthog.tasks.custom_flows import refresh_affected_custom_flows
 

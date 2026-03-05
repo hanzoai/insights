@@ -200,7 +200,7 @@ class GitProviderFileLinksViewSet(TeamAndOrgViewSetMixin, viewsets.ViewSet):
         if not owner or not repository or not code_sample or not file_name:
             return Response({"found": False, "error": "owner, repository, code_sample, and file_name are required"})
 
-        # Try with PostHog's token first (public repos on gitlab.com)
+        # Try with Insights's token first (public repos on gitlab.com)
         if settings.GITLAB_TOKEN:
             url = get_gitlab_file_url(
                 code_sample=code_sample,

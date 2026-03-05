@@ -236,7 +236,7 @@ class AssistantInsightsQLQuery(BaseModel):
     query: str = Field(
         ...,
         description=(
-            "SQL SELECT statement to execute. Mostly standard ClickHouse SQL with PostHog-specific additions."
+            "SQL SELECT statement to execute. Mostly standard ClickHouse SQL with Insights-specific additions."
         ),
     )
 
@@ -270,7 +270,7 @@ class AssistantNavigateUrl(StrEnum):
     ERROR_TRACKING = "errorTracking"
     EXPERIMENTS = "experiments"
     FEATURE_FLAGS = "featureFlags"
-    GAME368HEDGEHOGS = "game368hedgehogs"
+    GAME368MASCOTS = "game368mascots"
     HEATMAPS = "heatmaps"
     INGESTION_WARNINGS = "ingestionWarnings"
     INSIGHTS = "insights"
@@ -2039,7 +2039,7 @@ class HeatmapSettings(BaseModel):
     yAxisLabel: str | None = None
 
 
-class HedgehogActorAccessoryOption(StrEnum):
+class MascotActorAccessoryOption(StrEnum):
     BERET = "beret"
     CAP = "cap"
     CHEF = "chef"
@@ -2058,7 +2058,7 @@ class HedgehogActorAccessoryOption(StrEnum):
     XMAS_SCARF = "xmas-scarf"
 
 
-class HedgehogActorColorOption(StrEnum):
+class MascotActorColorOption(StrEnum):
     GREEN = "green"
     RED = "red"
     BLUE = "blue"
@@ -2071,7 +2071,7 @@ class HedgehogActorColorOption(StrEnum):
     RAINBOW = "rainbow"
 
 
-class HedgehogActorSkinOption(StrEnum):
+class MascotActorSkinOption(StrEnum):
     DEFAULT = "default"
     SPIDERHOG = "spiderhog"
     ROBOHOG = "robohog"
@@ -2779,13 +2779,13 @@ class MetaAdsTableKeywords(StrEnum):
     CAMPAIGNS = "campaigns"
 
 
-class MinimalHedgehogConfig(BaseModel):
+class MinimalMascotConfig(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
-    accessories: list[HedgehogActorAccessoryOption] | None = None
-    color: HedgehogActorColorOption | None = None
-    skin: HedgehogActorSkinOption | None = None
+    accessories: list[MascotActorAccessoryOption] | None = None
+    color: MascotActorColorOption | None = None
+    skin: MascotActorSkinOption | None = None
     use_as_profile: bool
 
 
@@ -4104,7 +4104,7 @@ class UserBasicType(BaseModel):
     distinct_id: str
     email: str
     first_name: str
-    hedgehog_config: MinimalHedgehogConfig | None = None
+    mascot_config: MinimalMascotConfig | None = None
     id: float
     is_email_verified: Any | None = None
     last_name: str | None = None
@@ -5039,7 +5039,7 @@ class DatabaseSchemaField(BaseModel):
     type: DatabaseSerializedFieldType
 
 
-class DatabaseSchemaPostHogTable(BaseModel):
+class DatabaseSchemaInsightsTable(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -17926,7 +17926,7 @@ class QueryResponseAlternative72(BaseModel):
     joins: list[DataWarehouseViewLink]
     tables: dict[
         str,
-        DatabaseSchemaPostHogTable
+        DatabaseSchemaInsightsTable
         | DatabaseSchemaSystemTable
         | DatabaseSchemaDataWarehouseTable
         | DatabaseSchemaViewTable
@@ -18112,7 +18112,7 @@ class DatabaseSchemaQueryResponse(BaseModel):
     joins: list[DataWarehouseViewLink]
     tables: dict[
         str,
-        DatabaseSchemaPostHogTable
+        DatabaseSchemaInsightsTable
         | DatabaseSchemaSystemTable
         | DatabaseSchemaDataWarehouseTable
         | DatabaseSchemaViewTable
@@ -19122,10 +19122,10 @@ class QueryRequest(BaseModel):
     ) = Field(
         ...,
         description=(
-            "Submit a JSON string representing a query for PostHog data analysis, for"
+            "Submit a JSON string representing a query for Insights data analysis, for"
             ' example a InsightsQL query.\n\nExample payload:\n\n```\n\n{"query": {"kind":'
             ' "InsightsQLQuery", "query": "select * from events limit 100"}}\n\n```\n\nFor'
-            " more details on InsightsQL queries, see the [PostHog InsightsQL"
+            " more details on InsightsQL queries, see the [Insights InsightsQL"
             " documentation](/docs/insightsql#api-access)."
         ),
         discriminator="kind",

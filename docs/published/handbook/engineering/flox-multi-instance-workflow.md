@@ -4,7 +4,7 @@ showTitle: true
 noindex: true
 ---
 
-This guide explains how to create isolated PostHog development environments using Flox and Git worktrees for seamless branch switching.
+This guide explains how to create isolated Insights development environments using Flox and Git worktrees for seamless branch switching.
 
 **Key Benefits:**
 
@@ -14,7 +14,7 @@ This guide explains how to create isolated PostHog development environments usin
 - Standard `bin/start` command works in each worktree
 
 > [!IMPORTANT]
-> **Important:** Only one PostHog instance (`bin/start`) can run at a time since they all use the same ports. The workflow focuses on quickly stopping one instance and starting another.
+> **Important:** Only one Insights instance (`bin/start`) can run at a time since they all use the same ports. The workflow focuses on quickly stopping one instance and starting another.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ export POSTHOG_WORKTREE_BASE="$HOME/code/worktrees"
 
 ### Worktree Location Management
 
-The `phw list` and `phw remove` commands work with **all** your PostHog worktrees, regardless of where they were created. This is helpful if you:
+The `phw list` and `phw remove` commands work with **all** your Insights worktrees, regardless of where they were created. This is helpful if you:
 
 - Changed your `POSTHOG_WORKTREE_BASE` setting after creating some worktrees
 - Have worktrees in multiple locations
@@ -74,7 +74,7 @@ This uses Git's native worktree tracking (`git worktree list`) rather than tryin
 
 ### 1. One-Time Setup
 
-In all these examples, replace `~/dev/posthog/posthog` with your local path to the PostHog repo.
+In all these examples, replace `~/dev/posthog/posthog` with your local path to the Insights repo.
 
 ```bash
 # Install dependencies
@@ -149,7 +149,7 @@ bin/start    # Start development
 # Work on feature at http://localhost:8000
 
 # 10:30 AM - Urgent production bug!
-# Stop current PostHog instance first
+# Stop current Insights instance first
 # Ctrl+C to stop bin/start
 phw checkout master
 # Already in main worktree with Flox activated
@@ -179,7 +179,7 @@ phw remove pr-5678-teammate            # Done with PR review
 
 ### Switching Between Worktrees
 
-Since you can only run one PostHog instance at a time, the workflow focuses on quickly switching between isolated environments:
+Since you can only run one Insights instance at a time, the workflow focuses on quickly switching between isolated environments:
 
 ```bash
 # Create isolated worktrees for different tasks
@@ -209,7 +209,7 @@ bin/start  # Review PR
 phw list
 
 # Output:
-# All PostHog Worktrees:
+# All Insights Worktrees:
 #
 # Branch                        Path                                           Location
 # ------                        ----                                           --------

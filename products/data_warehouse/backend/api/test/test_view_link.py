@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 from rest_framework import status
 
-from posthog.schema import HogQLQueryResponse
+from posthog.schema import InsightsQLQueryResponse
 
-from posthog.hogql.query import HogQLQueryExecutor
+from posthog.insightsql.query import InsightsQLQueryExecutor
 
 from products.data_warehouse.backend.models import DataWarehouseJoin, DataWarehouseTable
 from products.data_warehouse.backend.models.credential import DataWarehouseCredential
@@ -65,7 +65,7 @@ class TestViewLinkQuery(APIBaseTest):
             external_data_source_id=source.id,
             credential=credentials,
             url_pattern="https://bucket.s3/data/*",
-            columns={"id": {"hogql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
+            columns={"id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True}},
         )
         ExternalDataSchema.objects.create(
             team=self.team,
@@ -289,13 +289,13 @@ class TestViewLinkQuery(APIBaseTest):
         self.assertEqual(join_ids, expected_ids)
 
 
-def _mock_execute_hogql_side_effect(*args, **kwargs):
+def _mock_execute_insightsql_side_effect(*args, **kwargs):
     """Helper to minimize side effects of mocking, just avoiding the query execution itself."""
-    executor = HogQLQueryExecutor(*args, **kwargs)
+    executor = InsightsQLQueryExecutor(*args, **kwargs)
     executor.generate_clickhouse_sql()
-    return HogQLQueryResponse(
+    return InsightsQLQueryResponse(
         query=executor.query,
-        hogql=executor.hogql,
+        insightsql=executor.insightsql,
         clickhouse=executor.clickhouse_sql,
         error=executor.error,
         timings=executor.timings.to_list(),
@@ -311,7 +311,7 @@ def _mock_execute_hogql_side_effect(*args, **kwargs):
 class TestViewLinkValidation(APIBaseTest):
     PATH = "products.data_warehouse.backend.api.view_link"
 
-    def assertHogQLEqual(self, result, expected):
+    def assertInsightsQLEqual(self, result, expected):
         formatted_result = dedent(re.sub(r"\s+", " ", result.strip())).strip()
         self.assertEqual(formatted_result, expected)
 
@@ -339,8 +339,8 @@ class TestViewLinkValidation(APIBaseTest):
             credential=credentials,
             url_pattern="s3://bucket/user/*",
             columns={
-                "id": {"hogql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
-                "email": {"hogql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+                "id": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
+                "email": {"insightsql": "StringDatabaseField", "clickhouse": "Nullable(String)", "schema_valid": True},
             },
         )
 
@@ -353,7 +353,7 @@ class TestViewLinkValidation(APIBaseTest):
             last_synced_at="2024-01-01",
         )
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_basic_success(self, _):
         payloads = [
             (
@@ -383,12 +383,12 @@ class TestViewLinkValidation(APIBaseTest):
                 data = response.json()
                 self.assertTrue(data["is_valid"])
                 self.assertIsNone(data["msg"])
-                self.assertHogQLEqual(
-                    data["hogql"],
+                self.assertInsightsQLEqual(
+                    data["insightsql"],
                     f"SELECT validation.{payload['joining_table_key']} FROM {payload['source_table_name']} LIMIT 10",
                 )
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_system_table_success(self, _):
         response = self.client.post(
             f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
@@ -404,12 +404,12 @@ class TestViewLinkValidation(APIBaseTest):
         data = response.json()
         self.assertTrue(data["is_valid"])
         self.assertIsNone(data["msg"])
-        self.assertHogQLEqual(
-            data["hogql"],
+        self.assertInsightsQLEqual(
+            data["insightsql"],
             "SELECT validation.id FROM groups LIMIT 10",
         )
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_dot_notation_table_name(self, _):
         self._create_external_source_table(prefix="foo", table_name="bar")
 
@@ -427,13 +427,13 @@ class TestViewLinkValidation(APIBaseTest):
         data = response.json()
         self.assertTrue(data["is_valid"])
         self.assertIsNone(data["msg"])
-        self.assertHogQLEqual(
-            data["hogql"],
+        self.assertInsightsQLEqual(
+            data["insightsql"],
             "SELECT validation.distinct_id FROM `postgres.foo.bar` AS postgres__foo__bar LIMIT 10",
         )
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
-    def test_hogql_expression_keys(self, _):
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
+    def test_insightsql_expression_keys(self, _):
         response = self.client.post(
             f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
             {
@@ -448,12 +448,12 @@ class TestViewLinkValidation(APIBaseTest):
         data = response.json()
         self.assertTrue(data["is_valid"])
         self.assertIsNone(data["msg"])
-        self.assertHogQLEqual(
-            data["hogql"],
+        self.assertInsightsQLEqual(
+            data["insightsql"],
             "SELECT validation.id FROM events LIMIT 10",
         )
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_complex_expression(self, _):
         response = self.client.post(
             f"/api/environments/{self.team.id}/warehouse_view_links/validate/",
@@ -469,8 +469,8 @@ class TestViewLinkValidation(APIBaseTest):
         data = response.json()
         self.assertTrue(data["is_valid"])
         self.assertIsNone(data["msg"])
-        self.assertHogQLEqual(
-            data["hogql"],
+        self.assertInsightsQLEqual(
+            data["insightsql"],
             "SELECT validation.id FROM events LIMIT 10",
         )
 
@@ -491,7 +491,7 @@ class TestViewLinkValidation(APIBaseTest):
         self.assertEqual(data["code"], "QueryError")
         self.assertEqual(data["detail"], "Field not found: nonexistent_field")
         self.assertEqual(data["type"], "query_error")
-        self.assertEqual(data["hogql"], "SELECT validation.id FROM events LIMIT 10")
+        self.assertEqual(data["insightsql"], "SELECT validation.id FROM events LIMIT 10")
 
     def test_invalid_source_table(self):
         response = self.client.post(
@@ -631,9 +631,9 @@ class TestViewLinkValidation(APIBaseTest):
         self.assertEqual(data["attr"], None)
         self.assertEqual(data["code"], "CHQueryErrorTypeMismatch")
         self.assertEqual(data["type"], "query_error")
-        self.assertEqual(data["hogql"], "SELECT validation.id FROM events LIMIT 10")
+        self.assertEqual(data["insightsql"], "SELECT validation.id FROM events LIMIT 10")
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_ambiguous_keys(self, _):
         self._create_external_source_table(prefix="test", table_name="foo")
         self._create_external_source_table(prefix="test", table_name="bar")
@@ -652,12 +652,12 @@ class TestViewLinkValidation(APIBaseTest):
         data = response.json()
         self.assertTrue(data["is_valid"])
         self.assertIsNone(data["msg"])
-        self.assertHogQLEqual(
-            data["hogql"],
+        self.assertInsightsQLEqual(
+            data["insightsql"],
             "SELECT validation.email FROM `postgres.test.foo` AS postgres__test__foo LIMIT 10",
         )
 
-    @patch(f"{PATH}.execute_hogql_query", side_effect=_mock_execute_hogql_side_effect)
+    @patch(f"{PATH}.execute_insightsql_query", side_effect=_mock_execute_insightsql_side_effect)
     def test_expression_with_dot_notation_table(self, _):
         self._create_external_source_table(prefix="test", table_name="user")
         response = self.client.post(
@@ -674,7 +674,7 @@ class TestViewLinkValidation(APIBaseTest):
         data = response.json()
         self.assertTrue(data["is_valid"])
         self.assertIsNone(data["msg"])
-        self.assertHogQLEqual(
-            data["hogql"],
+        self.assertInsightsQLEqual(
+            data["insightsql"],
             "SELECT validation.distinct_id FROM `postgres.test.user` AS postgres__test__user LIMIT 10",
         )

@@ -11,20 +11,20 @@ from django.db import models, transaction
 import structlog
 from dlt.common.normalizers.naming.snake_case import NamingConvention
 
-from posthog.schema import DataWarehouseSavedQueryOrigin, HogQLQueryModifiers
+from posthog.schema import DataWarehouseSavedQueryOrigin, InsightsQLQueryModifiers
 
-from posthog.hogql import ast
-from posthog.hogql.database.database import Database
-from posthog.hogql.database.models import FieldOrTable, SavedQuery
-from posthog.hogql.database.s3_table import DataWarehouseTable as HogQLDataWarehouseTable
+from posthog.insightsql import ast
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.database.models import FieldOrTable, SavedQuery
+from posthog.insightsql.database.s3_table import DataWarehouseTable as InsightsQLDataWarehouseTable
 
 from posthog.exceptions_capture import capture_exception
 from posthog.models.utils import CreatedMetaFields, DeletedMetaFields, UUIDTModel
 from posthog.sync import database_sync_to_async
 
 from products.data_warehouse.backend.models.util import (
-    CLICKHOUSE_HOGQL_MAPPING,
-    STR_TO_HOGQL_MAPPING,
+    CLICKHOUSE_INSIGHTSQL_MAPPING,
+    STR_TO_INSIGHTSQL_MAPPING,
     clean_type,
     remove_named_tuples,
 )
@@ -46,7 +46,7 @@ def validate_saved_query_name(value):
 
     if value in table_names:
         raise ValidationError(
-            f"{value} is not a valid view name. View names cannot overlap with PostHog table names.",
+            f"{value} is not a valid view name. View names cannot overlap with Insights table names.",
             params={"value": value},
         )
 
@@ -78,7 +78,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
         help_text="Dict of all columns with ClickHouse type (including Nullable())",
     )
     external_tables = models.JSONField(default=list, null=True, blank=True, help_text="List of all external tables")
-    query = models.JSONField(default=dict, null=True, blank=True, help_text="HogQL query")
+    query = models.JSONField(default=dict, null=True, blank=True, help_text="InsightsQL query")
     status = models.CharField(
         null=True, choices=Status.choices, max_length=64, help_text="The status of when this SavedQuery last ran."
     )
@@ -196,7 +196,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
     def get_columns(self) -> dict[str, dict[str, Any]]:
         from posthog.api.services.query import process_query_dict
-        from posthog.hogql_queries.query_runner import ExecutionMode
+        from posthog.insightsql_queries.query_runner import ExecutionMode
 
         response = process_query_dict(self.team, self.query, execution_mode=ExecutionMode.CALCULATE_BLOCKING_ALWAYS)
         result = getattr(response, "types", [])
@@ -206,7 +206,7 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
         columns = {
             str(item[0]): {
-                "hogql": CLICKHOUSE_HOGQL_MAPPING[clean_type(str(item[1]))].__name__,
+                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(item[1]))].__name__,
                 "clickhouse": item[1],
                 "valid": True,
             }
@@ -228,15 +228,15 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
     @property
     def s3_tables(self):
-        from posthog.hogql.context import HogQLContext
-        from posthog.hogql.database.database import Database
-        from posthog.hogql.parser import parse_select
-        from posthog.hogql.query import create_default_modifiers_for_team
-        from posthog.hogql.resolver import resolve_types
+        from posthog.insightsql.context import InsightsQLContext
+        from posthog.insightsql.database.database import Database
+        from posthog.insightsql.parser import parse_select
+        from posthog.insightsql.query import create_default_modifiers_for_team
+        from posthog.insightsql.resolver import resolve_types
 
         from posthog.models.property.util import S3TableVisitor
 
-        context = HogQLContext(
+        context = InsightsQLContext(
             team_id=self.team.pk,
             enable_select_queries=True,
             modifiers=create_default_modifiers_for_team(self.team),
@@ -270,16 +270,16 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
         return f"https://{settings.DATAWAREHOUSE_BUCKET_DOMAIN}/dlt/team_{self.team.pk}_model_{self.id.hex}/modeling/{self.normalized_name}"
 
-    def hogql_definition(
-        self, modifiers: Optional[HogQLQueryModifiers] = None
-    ) -> Union[SavedQuery, HogQLDataWarehouseTable]:
+    def insightsql_definition(
+        self, modifiers: Optional[InsightsQLQueryModifiers] = None
+    ) -> Union[SavedQuery, InsightsQLDataWarehouseTable]:
         if self.table is not None and self.is_materialized and modifiers is not None and modifiers.useMaterializedViews:
-            return self.table.hogql_definition(modifiers)
+            return self.table.insightsql_definition(modifiers)
 
         columns = self.columns or {}
         fields: dict[str, FieldOrTable] = {}
 
-        from products.data_warehouse.backend.models.table import CLICKHOUSE_HOGQL_MAPPING
+        from products.data_warehouse.backend.models.table import CLICKHOUSE_INSIGHTSQL_MAPPING
 
         for column, type in columns.items():
             # Support for 'old' style columns
@@ -299,14 +299,14 @@ class DataWarehouseSavedQuery(CreatedMetaFields, UUIDTModel, DeletedMetaFields):
 
             # Support for 'old' style columns
             if isinstance(type, str):
-                hogql_type_str = clickhouse_type.partition("(")[0]
-                hogql_type = CLICKHOUSE_HOGQL_MAPPING[hogql_type_str]
+                insightsql_type_str = clickhouse_type.partition("(")[0]
+                insightsql_type = CLICKHOUSE_INSIGHTSQL_MAPPING[insightsql_type_str]
             elif isinstance(type, dict):
-                hogql_type = STR_TO_HOGQL_MAPPING[type["hogql"]]
+                insightsql_type = STR_TO_INSIGHTSQL_MAPPING[type["insightsql"]]
             else:
                 raise Exception(f"Unknown column type: {type}")  # Never reached
 
-            fields[column] = hogql_type(name=column)
+            fields[column] = insightsql_type(name=column)
 
         return SavedQuery(
             id=str(self.id),

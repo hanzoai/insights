@@ -1,5 +1,5 @@
 export {
-    initPostHog,
+    initInsights,
     identifyUser,
     capture,
     captureAppConnected,

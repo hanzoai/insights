@@ -5,18 +5,18 @@ import { actionToUrl, router, urlToAction } from 'kea-router'
 
 import api from 'lib/api'
 
-import type { HogFlowTemplate } from '../hogflows/types'
+import type { CustomFlowTemplate } from '../customflows/types'
 import type { workflowTemplatesLogicType } from './workflowTemplatesLogicType'
 
 // Helping kea-typegen navigate the exported default class for Fuse
-export interface Fuse extends FuseClass<HogFlowTemplate> {}
+export interface Fuse extends FuseClass<CustomFlowTemplate> {}
 
 export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
     path(['products', 'workflows', 'frontend', 'Workflows', 'workflowTemplatesLogic']),
     actions({
         setTemplateFilter: (search: string) => ({ search }),
         setTagFilter: (tag: string | null) => ({ tag }),
-        deleteHogflowTemplate: (template: HogFlowTemplate) => ({ template }),
+        deleteCustomFlowTemplate: (template: CustomFlowTemplate) => ({ template }),
     }),
     reducers({
         templateFilter: [
@@ -34,14 +34,14 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
     }),
     loaders(({ values }) => ({
         workflowTemplates: [
-            [] as HogFlowTemplate[],
+            [] as CustomFlowTemplate[],
             {
-                loadWorkflowTemplates: async (): Promise<HogFlowTemplate[]> => {
-                    const response = await api.hogFlowTemplates.getHogFlowTemplates()
-                    return response.results as HogFlowTemplate[]
+                loadWorkflowTemplates: async (): Promise<CustomFlowTemplate[]> => {
+                    const response = await api.customFlowTemplates.getCustomFlowTemplates()
+                    return response.results as CustomFlowTemplate[]
                 },
-                deleteHogflowTemplate: async ({ template }) => {
-                    await api.hogFlowTemplates.deleteHogFlowTemplate(template.id)
+                deleteCustomFlowTemplate: async ({ template }) => {
+                    await api.customFlowTemplates.deleteCustomFlowTemplate(template.id)
                     return values.workflowTemplates.filter((t) => t.id !== template.id)
                 },
             },
@@ -50,7 +50,7 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
     selectors({
         workflowTemplateFuse: [
             (s) => [s.workflowTemplates],
-            (workflowTemplates: HogFlowTemplate[]): Fuse => {
+            (workflowTemplates: CustomFlowTemplate[]): Fuse => {
                 return new FuseClass(workflowTemplates || [], {
                     keys: [{ name: 'name', weight: 2 }, 'description'],
                     threshold: 0.3,
@@ -61,11 +61,11 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
         filteredTemplates: [
             (s) => [s.workflowTemplates, s.templateFilter, s.tagFilter, s.workflowTemplateFuse],
             (
-                workflowTemplates: HogFlowTemplate[],
+                workflowTemplates: CustomFlowTemplate[],
                 templateFilter: string,
                 tagFilter: string | null,
                 workflowTemplateFuse: Fuse
-            ): HogFlowTemplate[] => {
+            ): CustomFlowTemplate[] => {
                 let filtered = workflowTemplates
 
                 // Filter by tag
@@ -76,7 +76,7 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
                 // Filter by search term using Fuse
                 if (templateFilter) {
                     const searchResults = workflowTemplateFuse.search(templateFilter)
-                    filtered = searchResults.map((result: { item: HogFlowTemplate }) => result.item)
+                    filtered = searchResults.map((result: { item: CustomFlowTemplate }) => result.item)
                     // Apply tag filter to search results if active
                     if (tagFilter) {
                         filtered = filtered.filter((template) => template.tags.includes(tagFilter))
@@ -88,7 +88,7 @@ export const workflowTemplatesLogic = kea<workflowTemplatesLogicType>([
         ],
         availableTags: [
             (s) => [s.workflowTemplates],
-            (workflowTemplates: HogFlowTemplate[]): string[] => {
+            (workflowTemplates: CustomFlowTemplate[]): string[] => {
                 const tagSet = new Set<string>()
                 workflowTemplates.forEach((template) => {
                     template.tags.forEach((tag) => tagSet.add(tag))

@@ -40,7 +40,7 @@ describe('customFunctionTemplateListLogic - configuration structure', () => {
             status: 'stable',
             free: true,
             code: 'return event',
-            code_language: 'hog',
+            code_language: 'custom_script',
             sub_template_id: 'insight-alert-firing',
         }
 

@@ -214,7 +214,7 @@ class SetupWizardTests(APIBaseTest):
     @patch("posthog.api.wizard.http.posthoganalytics.default_client", MagicMock())
     @patch("posthog.api.wizard.http.OpenAI")
     def test_query_endpoint_mock_wizard_data_in_debug_with_fixture_header(self, mock_openai):
-        """Test that mock wizard data is used when DEBUG=True and X-PostHog-Wizard-Fixture-Generation header is present"""
+        """Test that mock wizard data is used when DEBUG=True and X-Insights-Wizard-Fixture-Generation header is present"""
         mock_openai_instance = mock_openai.return_value
         mock_openai_instance.chat.completions.create.return_value = MagicMock(
             choices=[MagicMock(message=MagicMock(content=json.dumps({"result": "mocked"})))]

@@ -30,7 +30,7 @@ describe('snapchat template', () => {
                         sku: '43431-18',
                         category: 'merch',
                         name: 'Tactical black t-shirt',
-                        brand: 'PostHog',
+                        brand: 'Insights',
                         variant: 'dark',
                         price: 30,
                         quantity: 1,
@@ -38,10 +38,10 @@ describe('snapchat template', () => {
                         currency: 'usd',
                         position: 3,
                         value: 30,
-                        url: 'https://posthog.com/merch?product=tactical-black-t-shirt',
+                        url: 'https://hanzo.ai/merch?product=tactical-black-t-shirt',
                         image_url:
                             'https://cdn.shopify.com/s/files/1/0452/0935/4401/files/darkmode_tee_5_1000x1000_crop_center.jpg?v=1732211354',
-                        $current_url: 'https://posthog.com/merch?product=tactical-black-t-shirt',
+                        $current_url: 'https://hanzo.ai/merch?product=tactical-black-t-shirt',
                     },
                     event: 'Product Viewed',
                 },
@@ -60,7 +60,7 @@ describe('snapchat template', () => {
         expect(response.finished).toEqual(false)
         expect(response.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"data":[{"event_name":"VIEW_CONTENT","action_source":"WEB","event_time":1735689600,"event_source_url":"https://posthog.com/merch?product=tactical-black-t-shirt","user_data":{"em":"3d4eee8538a4bbbe2ef7912f90ee494c1280f74dd7fd81232e58deb9cb9997e3","ph":"c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646","sc_click_id":"snapchat-id","fn":"9baf3a40312f39849f46dad1040f2f039f1cffa1238c41e9db675315cfad39b6","ln":"32e83e92d45d71f69dcf9d214688f0375542108631b45d344e5df2eb91c11566","external_id":"b5400f5d931b20e0e905cc4a009a428ce3427b3110e3a2a1cfc7e6349beabc10"},"custom_data":{"value":30,"currency":"usd","content_ids":"43431-18","content_category":"merch","contents":[{"item_price":30,"id":"43431-18","quantity":1,"delivery_category":"normal"}],"num_items":1,"event_id":"event-id"}}]}",
+              "body": "{"data":[{"event_name":"VIEW_CONTENT","action_source":"WEB","event_time":1735689600,"event_source_url":"https://hanzo.ai/merch?product=tactical-black-t-shirt","user_data":{"em":"3d4eee8538a4bbbe2ef7912f90ee494c1280f74dd7fd81232e58deb9cb9997e3","ph":"c775e7b757ede630cd0aa1113bd102661ab38829ca52a6422ab782862f268646","sc_click_id":"snapchat-id","fn":"9baf3a40312f39849f46dad1040f2f039f1cffa1238c41e9db675315cfad39b6","ln":"32e83e92d45d71f69dcf9d214688f0375542108631b45d344e5df2eb91c11566","external_id":"b5400f5d931b20e0e905cc4a009a428ce3427b3110e3a2a1cfc7e6349beabc10"},"custom_data":{"value":30,"currency":"usd","content_ids":"43431-18","content_category":"merch","contents":[{"item_price":30,"id":"43431-18","quantity":1,"delivery_category":"normal"}],"num_items":1,"event_id":"event-id"}}]}",
               "headers": {
                 "Content-Type": "application/json",
               },
@@ -108,12 +108,12 @@ describe('snapchat template', () => {
                                 sku: '18499-12',
                                 category: 'merch',
                                 name: 'Data warehouse t-shirt',
-                                brand: 'PostHog',
+                                brand: 'Insights',
                                 variant: 'light',
                                 price: 30,
                                 quantity: 1,
                                 position: 3,
-                                url: 'https://posthog.com/merch?product=data-warehouse-t-shirt',
+                                url: 'https://hanzo.ai/merch?product=data-warehouse-t-shirt',
                                 image_url:
                                     'https://cdn.shopify.com/s/files/1/0452/0935/4401/files/DSC07095_1017x1526_crop_center.jpg?v=1709570895',
                             },
@@ -122,12 +122,12 @@ describe('snapchat template', () => {
                                 sku: '94839-23',
                                 category: 'merch',
                                 name: 'Danger t-shirt',
-                                brand: 'PostHog',
+                                brand: 'Insights',
                                 variant: 'blue',
                                 price: 30,
                                 quantity: 2,
                                 position: 3,
-                                url: 'https://posthog.com/merch?product=danger-t-shirt',
+                                url: 'https://hanzo.ai/merch?product=danger-t-shirt',
                                 image_url:
                                     'https://cdn.shopify.com/s/files/1/0452/0935/4401/files/cautiontee4_1000x1000_crop_center.jpg?v=1732041736',
                             },
@@ -289,7 +289,7 @@ describe('snapchat template', () => {
                 },
                 person: {
                     properties: {
-                        email: 'example@posthog.com',
+                        email: 'example@hanzo.ai',
                         sccid: 'snapchat-id',
                         phone: '+1234567890',
                         first_name: 'Max',

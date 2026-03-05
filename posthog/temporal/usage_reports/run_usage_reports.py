@@ -28,7 +28,7 @@ from posthog.tasks.usage_report import (
     get_ph_client,
     has_non_zero_usage,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.utils import get_instance_region, get_previous_day
 
@@ -164,7 +164,7 @@ async def query_usage_reports(
                     except Exception as err:
                         logger.exception(f"Error capturing report for organization {oid}: {err}")
 
-                # First capture the events to PostHog
+                # First capture the events to Insights
                 if not inputs.skip_capture_event:
                     await async_capture_report(organization_id, full_report_dict, at_date)
 
@@ -207,7 +207,7 @@ async def query_usage_reports(
 
 
 @workflow.defn(name="run-usage-reports")
-class RunUsageReportsWorkflow(PostHogWorkflow):
+class RunUsageReportsWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> RunUsageReportsInputs:
         """Parse inputs from the management command CLI."""

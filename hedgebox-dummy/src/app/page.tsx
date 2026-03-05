@@ -22,7 +22,7 @@ export default function HomePage(): JSX.Element {
                                 <div className="mb-8 flex items-center justify-center gap-2 animate-fade-in-up">
                                     <div className="inline-flex items-center rounded-full bg-base-200/80 px-3 py-1 text-sm font-medium mb-6 shadow-md">
                                         <span className="text-lg mr-2">👋</span>
-                                        Welcome back, hedgehog!
+                                        Welcome back, mascot!
                                     </div>
                                     <div className="avatar mb-6">
                                         <div className="w-8 h-8 rounded-full ring-1 ring-base-300 shadow-md">
@@ -35,7 +35,7 @@ export default function HomePage(): JSX.Element {
                                     <span className="ml-2">🦔</span>
                                 </h1>
                                 <p className="text-xl text-base-content/70 mb-8 max-w-2xl mx-auto leading-relaxed">
-                                    Ready to manage your files with hedgehog-level security and lightning-fast
+                                    Ready to manage your files with mascot-level security and lightning-fast
                                     performance? Your digital spikes are waiting! ⚡
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -64,11 +64,11 @@ export default function HomePage(): JSX.Element {
                                 <h1 className="text-4xl font-bold tracking-tight text-base-content sm:text-6xl lg:text-7xl mb-6">
                                     File storage and sharing
                                     <br />
-                                    <span className="text-primary">for hedgehogs</span>
+                                    <span className="text-primary">for mascots</span>
                                 </h1>
                                 <p className="text-xl text-base-content/70 mb-8 max-w-3xl mx-auto leading-relaxed">
                                     Store, share, and collaborate on files with rock-solid security 🛡️, lightning-fast
-                                    performance ⚡, and an intuitive interface designed for modern hedgehog families.
+                                    performance ⚡, and an intuitive interface designed for modern mascot families.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                                     <Link
@@ -95,10 +95,10 @@ export default function HomePage(): JSX.Element {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold tracking-tight text-base-content sm:text-4xl mb-4">
-                            Why hedgehogs choose Hedgebox
+                            Why mascots choose Hedgebox
                         </h2>
                         <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
-                            Built specifically for the unique needs of hedgehog file management and collaboration.
+                            Built specifically for the unique needs of mascot file management and collaboration.
                         </p>
                     </div>
 
@@ -149,7 +149,7 @@ export default function HomePage(): JSX.Element {
                         Ready to join the revolution?
                     </h2>
                     <p className="text-xl text-base-content/70 mb-8">
-                        Join thousands of hedgehogs already using Hedgebox for their file sharing needs.
+                        Join thousands of mascots already using Hedgebox for their file sharing needs.
                     </p>
                     <Link href="/signup" className="btn btn-primary btn-lg px-8 rounded-xl transition-all">
                         🌟 Start your journey

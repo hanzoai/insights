@@ -39,7 +39,7 @@ export namespace Schemas {
         last_name?: string | undefined
         email: string
         is_email_verified?: (boolean | null) | undefined
-        hedgehog_config: Record<string, unknown> | null
+        mascot_config: Record<string, unknown> | null
         role_at_organization?: ((RoleAtOrganizationEnum | BlankEnum | NullEnum) | null) | undefined
     }
     export type Action = {
@@ -168,7 +168,7 @@ export namespace Schemas {
         type?: string | undefined
         value: boolean | string
     }
-    export type HogQLPropertyFilter = {
+    export type InsightsQLPropertyFilter = {
         key: string
         label?: (string | null) | undefined
         type?: string | undefined
@@ -250,7 +250,7 @@ export namespace Schemas {
         | 'avg'
         | 'dau'
         | 'unique_group'
-        | 'hogql'
+        | 'insightsql'
     export type CalendarHeatmapMathType = 'total' | 'dau'
     export type MathGroupTypeIndex = 0 | 1 | 2 | 3 | 4
     export type CurrencyCode =
@@ -425,7 +425,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -450,7 +450,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -469,7 +469,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -554,7 +554,7 @@ export namespace Schemas {
     export type PropertyGroupsMode = 'enabled' | 'disabled' | 'optimized'
     export type SessionTableVersion = 'auto' | 'v1' | 'v2'
     export type SessionsV2JoinMode = 'string' | 'uuid'
-    export type HogQLQueryModifiers = Partial<{
+    export type InsightsQLQueryModifiers = Partial<{
         bounceRateDurationSeconds: number | null
         bounceRatePageViewMode: BounceRatePageViewMode | null
         convertToProjectTimezone: boolean | null
@@ -611,8 +611,8 @@ export namespace Schemas {
     export type QueryTiming = { k: string; t: number }
     export type ActorsPropertyTaxonomyQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: ActorsPropertyTaxonomyResponse | Array<ActorsPropertyTaxonomyResponse>
@@ -623,7 +623,7 @@ export namespace Schemas {
         groupTypeIndex?: (number | null) | undefined
         kind?: string | undefined
         maxPropertyValues?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties: Array<string>
         response?: (ActorsPropertyTaxonomyQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -644,7 +644,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -657,10 +657,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit: number
         missing_actors_count?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -676,7 +676,7 @@ export namespace Schemas {
         | 'event_metadata'
         | 'group'
         | 'session'
-        | 'hogql'
+        | 'insightsql'
         | 'data_warehouse'
         | 'data_warehouse_person_property'
         | 'revenue_analytics'
@@ -687,7 +687,7 @@ export namespace Schemas {
         | 'event_metadata'
         | 'group'
         | 'session'
-        | 'hogql'
+        | 'insightsql'
         | 'revenue_analytics'
     export type Breakdown = {
         group_type_index?: (number | null) | undefined
@@ -721,8 +721,8 @@ export namespace Schemas {
     export type TrendsQueryResponse = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<Record<string, unknown>>
@@ -743,7 +743,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -764,7 +764,7 @@ export namespace Schemas {
             | string
             | null
         math_group_type_index: MathGroupTypeIndex | null
-        math_hogql: string | null
+        math_insightsql: string | null
         math_multiplier: number | null
         math_property: string | null
         math_property_revenue_currency: RevenueCurrencyPropertyConfig | null
@@ -783,7 +783,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -811,7 +811,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -837,7 +837,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -856,7 +856,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -963,7 +963,7 @@ export namespace Schemas {
         filterTestAccounts?: (boolean | null) | undefined
         interval?: (IntervalType | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties?:
             | (
                   | Array<
@@ -978,7 +978,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -1014,7 +1014,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -1041,7 +1041,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -1061,7 +1061,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -1088,7 +1088,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -1115,7 +1115,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -1134,7 +1134,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -1162,7 +1162,7 @@ export namespace Schemas {
         breakdownAttributionType: BreakdownAttributionType | null
         breakdownAttributionValue: number | null
         exclusions: Array<FunnelExclusionEventsNode | FunnelExclusionActionsNode> | null
-        funnelAggregateByHogQL: string | null
+        funnelAggregateByInsightsQL: string | null
         funnelFromStep: number | null
         funnelOrderType: StepOrderValue | null
         funnelStepReference: FunnelStepReference | null
@@ -1179,9 +1179,9 @@ export namespace Schemas {
     }>
     export type FunnelsQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         isUdf?: (boolean | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -1196,7 +1196,7 @@ export namespace Schemas {
         funnelsFilter?: (FunnelsFilter | null) | undefined
         interval?: (IntervalType | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties?:
             | (
                   | Array<
@@ -1211,7 +1211,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -1238,8 +1238,8 @@ export namespace Schemas {
     }
     export type RetentionQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RetentionResult>
@@ -1273,7 +1273,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -1305,7 +1305,7 @@ export namespace Schemas {
         dateRange?: (DateRange | null) | undefined
         filterTestAccounts?: (boolean | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties?:
             | (
                   | Array<
@@ -1320,7 +1320,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -1347,7 +1347,7 @@ export namespace Schemas {
         funnelSource: FunnelsQuery
         funnelStep?: (number | null) | undefined
     }
-    export type PathType = '$pageview' | '$screen' | 'custom_event' | 'hogql'
+    export type PathType = '$pageview' | '$screen' | 'custom_event' | 'insightsql'
     export type PathCleaningFilter = Partial<{
         alias: string | null
         order: number | null
@@ -1366,7 +1366,7 @@ export namespace Schemas {
         pathGroupings: Array<string> | null
         pathReplacements: boolean | null
         pathStartKey: string | null
-        pathsHogQLExpression: string | null
+        pathsInsightsQLExpression: string | null
         startPoint: string | null
         stepLimit: number | null
     }>
@@ -1378,8 +1378,8 @@ export namespace Schemas {
     }
     export type PathsQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<PathsLink>
@@ -1392,7 +1392,7 @@ export namespace Schemas {
         filterTestAccounts?: (boolean | null) | undefined
         funnelPathsFilter?: (FunnelPathsFilter | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         pathsFilter: PathsFilter
         properties?:
             | (
@@ -1408,7 +1408,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -1427,8 +1427,8 @@ export namespace Schemas {
     }
     export type StickinessQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<Record<string, unknown>>
@@ -1456,7 +1456,7 @@ export namespace Schemas {
         interval?: (IntervalType | null) | undefined
         intervalCount?: (number | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties?:
             | (
                   | Array<
@@ -1471,7 +1471,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -1499,8 +1499,8 @@ export namespace Schemas {
     }>
     export type LifecycleQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<Record<string, unknown>>
@@ -1514,7 +1514,7 @@ export namespace Schemas {
         interval?: (IntervalType | null) | undefined
         kind?: string | undefined
         lifecycleFilter?: (LifecycleFilter | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties?:
             | (
                   | Array<
@@ -1529,7 +1529,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -1554,7 +1554,7 @@ export namespace Schemas {
         includeRecordings?: (boolean | null) | undefined
         interval?: (number | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         response?: (ActorsQueryResponse | null) | undefined
         series?: (number | null) | undefined
         source:
@@ -1578,7 +1578,7 @@ export namespace Schemas {
         funnelTrendsEntrancePeriodStart?: (string | null) | undefined
         includeRecordings?: (boolean | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         response?: (ActorsQueryResponse | null) | undefined
         source: FunnelsQuery
         tags?: (QueryLogTags | null) | undefined
@@ -1606,9 +1606,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -1646,7 +1646,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -1657,7 +1657,7 @@ export namespace Schemas {
             | undefined
         includeRecordings?: (boolean | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         response?: (ActorsQueryResponse | null) | undefined
         source: FunnelCorrelationQuery
         tags?: (QueryLogTags | null) | undefined
@@ -1668,7 +1668,7 @@ export namespace Schemas {
         day?: (string | number | null) | undefined
         includeRecordings?: (boolean | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         operator?: (StickinessOperator | null) | undefined
         response?: (ActorsQueryResponse | null) | undefined
         series?: (number | null) | undefined
@@ -1676,7 +1676,7 @@ export namespace Schemas {
         tags?: (QueryLogTags | null) | undefined
         version?: (number | null) | undefined
     }
-    export type HogQLFilters = Partial<{
+    export type InsightsQLFilters = Partial<{
         dateRange: DateRange | null
         filterTestAccounts: boolean | null
         properties: Array<
@@ -1691,7 +1691,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -1700,32 +1700,32 @@ export namespace Schemas {
             | RevenueAnalyticsPropertyFilter
         > | null
     }>
-    export type HogQLNotice = {
+    export type InsightsQLNotice = {
         end?: (number | null) | undefined
         fix?: (string | null) | undefined
         message: string
         start?: (number | null) | undefined
     }
     export type QueryIndexUsage = 'undecisive' | 'no' | 'partial' | 'yes'
-    export type HogQLMetadataResponse = {
-        errors: Array<HogQLNotice>
+    export type InsightsQLMetadataResponse = {
+        errors: Array<InsightsQLNotice>
         isUsingIndices?: (QueryIndexUsage | null) | undefined
         isValid?: (boolean | null) | undefined
-        notices: Array<HogQLNotice>
+        notices: Array<InsightsQLNotice>
         query?: (string | null) | undefined
         table_names?: (Array<string> | null) | undefined
-        warnings: Array<HogQLNotice>
+        warnings: Array<InsightsQLNotice>
     }
-    export type HogQLQueryResponse = {
+    export type InsightsQLQueryResponse = {
         clickhouse?: (string | null) | undefined
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        metadata?: (HogQLMetadataResponse | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        metadata?: (InsightsQLMetadataResponse | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query?: (string | null) | undefined
         query_status?: (QueryStatus | null) | undefined
@@ -1734,20 +1734,20 @@ export namespace Schemas {
         timings?: (Array<QueryTiming> | null) | undefined
         types?: (Array<unknown> | null) | undefined
     }
-    export type HogQLVariable = {
+    export type InsightsQLVariable = {
         code_name: string
         isNull?: (boolean | null) | undefined
         value?: (unknown | null) | undefined
         variableId: string
     }
-    export type HogQLQuery = {
+    export type InsightsQLQuery = {
         explain?: (boolean | null) | undefined
-        filters?: (HogQLFilters | null) | undefined
+        filters?: (InsightsQLFilters | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         name?: (string | null) | undefined
         query: string
-        response?: (HogQLQueryResponse | null) | undefined
+        response?: (InsightsQLQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
         values?: (Record<string, unknown> | null) | undefined
         variables?: (Record<string, unknown> | null) | undefined
@@ -1755,18 +1755,18 @@ export namespace Schemas {
     }
     export type ActorsQuery = Partial<{
         fixedProperties: Array<
-            PersonPropertyFilter | CohortPropertyFilter | HogQLPropertyFilter | EmptyPropertyFilter
+            PersonPropertyFilter | CohortPropertyFilter | InsightsQLPropertyFilter | EmptyPropertyFilter
         > | null
         kind: string
         limit: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         offset: number | null
         orderBy: Array<string> | null
         properties:
             | Array<
                   | PersonPropertyFilter
                   | CohortPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
               >
             | PropertyGroupFilterValue
@@ -1779,7 +1779,7 @@ export namespace Schemas {
             | FunnelsActorsQuery
             | FunnelCorrelationActorsQuery
             | StickinessActorsQuery
-            | HogQLQuery
+            | InsightsQLQuery
             | null
         tags: QueryLogTags | null
         version: number | null
@@ -2052,7 +2052,7 @@ export namespace Schemas {
         start_at?: (string | null) | undefined
         end_at?: (string | null) | undefined
         latest_runs: Array<BatchExportRun>
-        hogql_query?: string | undefined
+        insightsql_query?: string | undefined
         schema: unknown | null
         filters?: (unknown | null) | undefined
     }
@@ -2100,8 +2100,8 @@ export namespace Schemas {
     export type CalendarHeatmapResponse = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: EventsHeatMapStructuredResult
@@ -2116,7 +2116,7 @@ export namespace Schemas {
         filterTestAccounts?: (boolean | null) | undefined
         interval?: (IntervalType | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties?:
             | (
                   | Array<
@@ -2131,7 +2131,7 @@ export namespace Schemas {
                         | GroupPropertyFilter
                         | FeaturePropertyFilter
                         | FlagPropertyFilter
-                        | HogQLPropertyFilter
+                        | InsightsQLPropertyFilter
                         | EmptyPropertyFilter
                         | DataWarehousePropertyFilter
                         | DataWarehousePersonPropertyFilter
@@ -2252,7 +2252,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -2277,7 +2277,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -2297,7 +2297,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -2327,7 +2327,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -2352,7 +2352,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -2371,7 +2371,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -2403,7 +2403,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -2429,7 +2429,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -2448,7 +2448,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -2561,7 +2561,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -2601,9 +2601,9 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2615,10 +2615,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit: number
         missing_actors_count?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2630,10 +2630,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         kind?: string | undefined
         limit: number
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2647,10 +2647,10 @@ export namespace Schemas {
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        metadata?: (HogQLMetadataResponse | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        metadata?: (InsightsQLMetadataResponse | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query?: (string | null) | undefined
         query_status?: (QueryStatus | null) | undefined
@@ -2674,8 +2674,8 @@ export namespace Schemas {
         dateFrom?: (string | null) | undefined
         dateTo?: (string | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebOverviewItem>
@@ -2687,9 +2687,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2703,9 +2703,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2722,8 +2722,8 @@ export namespace Schemas {
     }
     export type Response8 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebVitalsPathBreakdownResult>
@@ -2733,9 +2733,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2746,8 +2746,8 @@ export namespace Schemas {
     export type Response10 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<unknown>
@@ -2756,8 +2756,8 @@ export namespace Schemas {
     export type Response11 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -2773,8 +2773,8 @@ export namespace Schemas {
     export type Response12 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsMRRQueryResultItem>
@@ -2790,8 +2790,8 @@ export namespace Schemas {
     }
     export type Response13 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsOverviewItem>
@@ -2800,8 +2800,8 @@ export namespace Schemas {
     export type Response14 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -2811,9 +2811,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2834,9 +2834,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2908,9 +2908,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -2941,9 +2941,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3023,9 +3023,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3060,7 +3060,7 @@ export namespace Schemas {
         | 'dashboards'
         | 'name_groups'
         | 'session_properties'
-        | 'hogql_expression'
+        | 'insightsql_expression'
         | 'notebooks'
         | 'log_entries'
         | 'error_tracking_issues'
@@ -3074,9 +3074,9 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3105,7 +3105,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -3116,7 +3116,7 @@ export namespace Schemas {
             | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?: (Array<string> | null) | undefined
         personId?: (string | null) | undefined
@@ -3133,7 +3133,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -3164,7 +3164,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -3174,7 +3174,7 @@ export namespace Schemas {
         > | null
         kind: string
         limit: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         offset: number | null
         properties: Array<
             | EventPropertyFilter
@@ -3188,7 +3188,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -3205,10 +3205,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         kind?: string | undefined
         limit: number
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3220,10 +3220,10 @@ export namespace Schemas {
         group_type_index: number
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?: (Array<string> | null) | undefined
-        properties?: (Array<GroupPropertyFilter | HogQLPropertyFilter> | null) | undefined
+        properties?: (Array<GroupPropertyFilter | InsightsQLPropertyFilter> | null) | undefined
         response?: (GroupsQueryResponse | null) | undefined
         search?: (string | null) | undefined
         select?: (Array<string> | null) | undefined
@@ -3249,8 +3249,8 @@ export namespace Schemas {
         dateFrom?: (string | null) | undefined
         dateTo?: (string | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebOverviewItem>
@@ -3270,7 +3270,7 @@ export namespace Schemas {
         filterTestAccounts?: (boolean | null) | undefined
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
             | undefined
@@ -3310,9 +3310,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3334,7 +3334,7 @@ export namespace Schemas {
         includeScrollDepth?: (boolean | null) | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
@@ -3350,9 +3350,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3370,7 +3370,7 @@ export namespace Schemas {
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
             | undefined
@@ -3386,9 +3386,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3406,7 +3406,7 @@ export namespace Schemas {
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
             | undefined
@@ -3425,7 +3425,7 @@ export namespace Schemas {
         filterTestAccounts?: (boolean | null) | undefined
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
             | undefined
@@ -3447,8 +3447,8 @@ export namespace Schemas {
     export type WebVitalsPercentile = 'p75' | 'p90' | 'p99'
     export type WebVitalsPathBreakdownQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebVitalsPathBreakdownResult>
@@ -3463,7 +3463,7 @@ export namespace Schemas {
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
         metric: WebVitalsMetric
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
             | undefined
@@ -3492,9 +3492,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3507,7 +3507,7 @@ export namespace Schemas {
         groupBy: Array<SessionAttributionGroupBy>
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         response?: (SessionAttributionExplorerQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3518,8 +3518,8 @@ export namespace Schemas {
     export type RevenueAnalyticsGrossRevenueQueryResponse = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<unknown>
@@ -3530,7 +3530,7 @@ export namespace Schemas {
         dateRange?: (DateRange | null) | undefined
         interval: SimpleIntervalType
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties: Array<RevenueAnalyticsPropertyFilter>
         response?: (RevenueAnalyticsGrossRevenueQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3539,8 +3539,8 @@ export namespace Schemas {
     export type RevenueAnalyticsMetricsQueryResponse = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -3551,7 +3551,7 @@ export namespace Schemas {
         dateRange?: (DateRange | null) | undefined
         interval: SimpleIntervalType
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties: Array<RevenueAnalyticsPropertyFilter>
         response?: (RevenueAnalyticsMetricsQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3560,8 +3560,8 @@ export namespace Schemas {
     export type RevenueAnalyticsMRRQueryResponse = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsMRRQueryResultItem>
@@ -3572,7 +3572,7 @@ export namespace Schemas {
         dateRange?: (DateRange | null) | undefined
         interval: SimpleIntervalType
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties: Array<RevenueAnalyticsPropertyFilter>
         response?: (RevenueAnalyticsMRRQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3580,8 +3580,8 @@ export namespace Schemas {
     }
     export type RevenueAnalyticsOverviewQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsOverviewItem>
@@ -3590,7 +3590,7 @@ export namespace Schemas {
     export type RevenueAnalyticsOverviewQuery = {
         dateRange?: (DateRange | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties: Array<RevenueAnalyticsPropertyFilter>
         response?: (RevenueAnalyticsOverviewQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3600,8 +3600,8 @@ export namespace Schemas {
     export type RevenueAnalyticsTopCustomersQueryResponse = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -3611,7 +3611,7 @@ export namespace Schemas {
         dateRange?: (DateRange | null) | undefined
         groupBy: RevenueAnalyticsTopCustomersGroupBy
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         properties: Array<RevenueAnalyticsPropertyFilter>
         response?: (RevenueAnalyticsTopCustomersQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3621,9 +3621,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3634,7 +3634,7 @@ export namespace Schemas {
     export type RevenueExampleEventsQuery = Partial<{
         kind: string
         limit: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         offset: number | null
         response: RevenueExampleEventsQueryResponse | null
         tags: QueryLogTags | null
@@ -3644,9 +3644,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3657,7 +3657,7 @@ export namespace Schemas {
     export type RevenueExampleDataWarehouseTablesQuery = Partial<{
         kind: string
         limit: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         offset: number | null
         response: RevenueExampleDataWarehouseTablesQueryResponse | null
         tags: QueryLogTags | null
@@ -3668,9 +3668,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3691,7 +3691,7 @@ export namespace Schemas {
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?: (Array<Array<string | MarketingAnalyticsOrderByEnum>> | null) | undefined
         properties: Array<EventPropertyFilter | PersonPropertyFilter | SessionPropertyFilter>
@@ -3708,9 +3708,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3732,7 +3732,7 @@ export namespace Schemas {
         issueId?: (string | null) | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?: (OrderBy | null) | undefined
         orderDirection?: (OrderDirection | null) | undefined
@@ -3750,9 +3750,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3762,7 +3762,7 @@ export namespace Schemas {
     export type ErrorTrackingIssueCorrelationQuery = {
         events: Array<string>
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         response?: (ErrorTrackingIssueCorrelationQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
         version?: (number | null) | undefined
@@ -3783,7 +3783,7 @@ export namespace Schemas {
         experiment_id?: (number | null) | undefined
         funnels_query: FunnelsQuery
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         name?: (string | null) | undefined
         response?: (ExperimentFunnelsQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3808,7 +3808,7 @@ export namespace Schemas {
         experiment_id?: (number | null) | undefined
         exposure_query?: (TrendsQuery | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         name?: (string | null) | undefined
         response?: (ExperimentTrendsQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -3819,9 +3819,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -3833,7 +3833,7 @@ export namespace Schemas {
         filterTestAccounts: boolean | null
         kind: string
         limit: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         offset: number | null
         properties: Array<
             | EventPropertyFilter
@@ -3847,7 +3847,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -3905,7 +3905,7 @@ export namespace Schemas {
         showElapsedTime?: (boolean | null) | undefined
         showEventFilter?: (boolean | null) | undefined
         showExport?: (boolean | null) | undefined
-        showHogQLEditor?: (boolean | null) | undefined
+        showInsightsQLEditor?: (boolean | null) | undefined
         showOpenEditorButton?: (boolean | null) | undefined
         showPersistentColumnConfigurator?: (boolean | null) | undefined
         showPropertyFilter?: (boolean | Array<TaxonomicFilterGroupType> | null) | undefined
@@ -3922,7 +3922,7 @@ export namespace Schemas {
             | PersonsNode
             | ActorsQuery
             | GroupsQuery
-            | HogQLQuery
+            | InsightsQLQuery
             | WebOverviewQuery
             | WebStatsTableQuery
             | WebExternalClicksTableQuery
@@ -3953,7 +3953,7 @@ export namespace Schemas {
         chartSettings?: (ChartSettings | null) | undefined
         display?: (ChartDisplayType | null) | undefined
         kind?: string | undefined
-        source: HogQLQuery
+        source: InsightsQLQuery
         tableSettings?: (TableSettings | null) | undefined
         version?: (number | null) | undefined
     }
@@ -3984,7 +3984,7 @@ export namespace Schemas {
         experiments_optimized: boolean | null
         experiments_timestamp_key: string | null
     }>
-    export type HedgehogColorOptions =
+    export type MascotColorOptions =
         | 'green'
         | 'red'
         | 'blue'
@@ -3995,16 +3995,16 @@ export namespace Schemas {
         | 'invert'
         | 'invert-hue'
         | 'greyscale'
-    export type MinimalHedgehogConfig = {
+    export type MinimalMascotConfig = {
         accessories: Array<string>
-        color?: (HedgehogColorOptions | null) | undefined
+        color?: (MascotColorOptions | null) | undefined
         use_as_profile: boolean
     }
     export type UserBasicType = {
         distinct_id: string
         email: string
         first_name: string
-        hedgehog_config?: (MinimalHedgehogConfig | null) | undefined
+        mascot_config?: (MinimalMascotConfig | null) | undefined
         id: number
         is_email_verified?: (unknown | null) | undefined
         last_name?: (string | null) | undefined
@@ -4041,7 +4041,7 @@ export namespace Schemas {
     export type DatabaseSchemaField = {
         chain?: (Array<string | number> | null) | undefined
         fields?: (Array<string> | null) | undefined
-        hogql_value: string
+        insightsql_value: string
         id?: (string | null) | undefined
         name: string
         schema_valid: boolean
@@ -4092,7 +4092,7 @@ export namespace Schemas {
         id: string
         kind: DatabaseSchemaManagedViewTableKind
         name: string
-        query: HogQLQuery
+        query: InsightsQLQuery
         row_count?: (number | null) | undefined
         source_id?: (string | null) | undefined
         type?: string | undefined
@@ -4102,12 +4102,12 @@ export namespace Schemas {
         id: string
         last_run_at?: (string | null) | undefined
         name: string
-        query: HogQLQuery
+        query: InsightsQLQuery
         row_count?: (number | null) | undefined
         status?: (string | null) | undefined
         type?: string | undefined
     }
-    export type DatabaseSchemaPostHogTable = {
+    export type DatabaseSchemaInsightsTable = {
         fields: Record<string, unknown>
         id: string
         name: string
@@ -4118,7 +4118,7 @@ export namespace Schemas {
         fields: Record<string, unknown>
         id: string
         name: string
-        query: HogQLQuery
+        query: InsightsQLQuery
         row_count?: (number | null) | undefined
         type?: string | undefined
     }
@@ -4128,7 +4128,7 @@ export namespace Schemas {
     }
     export type DatabaseSchemaQuery = Partial<{
         kind: string
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         response: DatabaseSchemaQueryResponse | null
         tags: QueryLogTags | null
         version: number | null
@@ -4228,8 +4228,8 @@ export namespace Schemas {
     }
     export type EventTaxonomyQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<EventTaxonomyItem>
@@ -4240,7 +4240,7 @@ export namespace Schemas {
         event: string | null
         kind: string
         maxPropertyValues: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         properties: Array<string> | null
         response: EventTaxonomyQueryResponse | null
         tags: QueryLogTags | null
@@ -4333,7 +4333,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -4357,7 +4357,7 @@ export namespace Schemas {
               )
             | undefined
         math_group_type_index?: (MathGroupTypeIndex | null) | undefined
-        math_hogql?: (string | null) | undefined
+        math_insightsql?: (string | null) | undefined
         math_multiplier?: (number | null) | undefined
         math_property?: (string | null) | undefined
         math_property_revenue_currency?: (RevenueCurrencyPropertyConfig | null) | undefined
@@ -4376,7 +4376,7 @@ export namespace Schemas {
                   | GroupPropertyFilter
                   | FeaturePropertyFilter
                   | FlagPropertyFilter
-                  | HogQLPropertyFilter
+                  | InsightsQLPropertyFilter
                   | EmptyPropertyFilter
                   | DataWarehousePropertyFilter
                   | DataWarehousePersonPropertyFilter
@@ -4405,7 +4405,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -4450,7 +4450,7 @@ export namespace Schemas {
         feature_flag: Record<string, unknown>
         holdout?: (ExperimentHoldoutType | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         response?: (ExperimentExposureQueryResponse | null) | undefined
         start_date?: (string | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -4563,7 +4563,7 @@ export namespace Schemas {
         experiment_id?: (number | null) | undefined
         kind?: string | undefined
         metric: ExperimentMeanMetric | ExperimentFunnelMetric | ExperimentRatioMetric
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         name?: (string | null) | undefined
         response?: (ExperimentQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
@@ -4710,7 +4710,7 @@ export namespace Schemas {
         display?: DisplayEnum | undefined
         filters: unknown
     }
-    export type HogFunctionTypeEnum =
+    export type CustomFunctionTypeEnum =
         | 'destination'
         | 'site_destination'
         | 'internal_destination'
@@ -4728,7 +4728,7 @@ export namespace Schemas {
         | 'integration_field'
         | 'email'
         | 'native_email'
-    export type InputsSchemaItemTemplatingEnum = true | false | 'hog' | 'liquid'
+    export type InputsSchemaItemTemplatingEnum = true | false | 'custom_script' | 'liquid'
     export type InputsSchemaItem = {
         type: InputsSchemaItemTypeEnum
         key: string
@@ -4746,7 +4746,7 @@ export namespace Schemas {
         requiredScopes?: string | undefined
         templating?: InputsSchemaItemTemplatingEnum | undefined
     }
-    export type InputsItemTemplatingEnum = 'hog' | 'liquid'
+    export type InputsItemTemplatingEnum = 'custom_script' | 'liquid'
     export type InputsItem = {
         value?: string | undefined
         templating?: InputsItemTemplatingEnum | undefined
@@ -4754,9 +4754,9 @@ export namespace Schemas {
         order: number
         transpiled: unknown
     }
-    export type HogFunctionFiltersSourceEnum = 'events' | 'person-updates'
-    export type HogFunctionFilters = Partial<{
-        source: HogFunctionFiltersSourceEnum & unknown
+    export type CustomFunctionFiltersSourceEnum = 'events' | 'person-updates'
+    export type CustomFunctionFilters = Partial<{
+        source: CustomFunctionFiltersSourceEnum & unknown
         actions: Array<Record<string, unknown>>
         events: Array<Record<string, unknown>>
         properties: Array<Record<string, unknown>>
@@ -4765,7 +4765,7 @@ export namespace Schemas {
         filter_test_accounts: boolean
         bytecode_error: string
     }>
-    export type HogFunctionMasking = {
+    export type CustomFunctionMasking = {
         ttl: number
         threshold?: (number | null) | undefined
         hash: string
@@ -4775,16 +4775,16 @@ export namespace Schemas {
         name: string
         inputs_schema: Array<InputsSchemaItem>
         inputs: Record<string, unknown>
-        filters: HogFunctionFilters
+        filters: CustomFunctionFilters
     }>
-    export type HogFunctionMappingTemplate = {
+    export type CustomFunctionMappingTemplate = {
         name: string
         include_by_default?: (boolean | null) | undefined
         filters?: (unknown | null) | undefined
         inputs?: (unknown | null) | undefined
         inputs_schema?: (unknown | null) | undefined
     }
-    export type HogFunctionTemplate = {
+    export type CustomFunctionTemplate = {
         id: string
         name: string
         description?: (string | null) | undefined
@@ -4798,13 +4798,13 @@ export namespace Schemas {
         icon_url?: (string | null) | undefined
         filters?: (unknown | null) | undefined
         masking?: (unknown | null) | undefined
-        mapping_templates?: (Array<HogFunctionMappingTemplate> | null) | undefined
+        mapping_templates?: (Array<CustomFunctionMappingTemplate> | null) | undefined
     }
     export type StateEnum = 0 | 1 | 2 | 3 | 11 | 12
-    export type HogFunctionStatus = { state: StateEnum; tokens: number }
-    export type HogFunction = {
+    export type CustomFunctionStatus = { state: StateEnum; tokens: number }
+    export type CustomFunction = {
         id: string
-        type?: ((HogFunctionTypeEnum | NullEnum) | null) | undefined
+        type?: ((CustomFunctionTypeEnum | NullEnum) | null) | undefined
         name?: (string | null) | undefined
         description?: string | undefined
         created_at: string
@@ -4812,22 +4812,22 @@ export namespace Schemas {
         updated_at: string
         enabled?: boolean | undefined
         deleted?: boolean | undefined
-        hog?: string | undefined
+        custom_script?: string | undefined
         bytecode: unknown | null
         transpiled: string | null
         inputs_schema?: Array<InputsSchemaItem> | undefined
         inputs?: Record<string, unknown> | undefined
-        filters?: HogFunctionFilters | undefined
-        masking?: ((HogFunctionMasking & (unknown | null)) | null) | undefined
+        filters?: CustomFunctionFilters | undefined
+        masking?: ((CustomFunctionMasking & (unknown | null)) | null) | undefined
         mappings?: (Array<Mappings> | null) | undefined
         icon_url?: (string | null) | undefined
-        template: HogFunctionTemplate & unknown
+        template: CustomFunctionTemplate & unknown
         template_id?: (string | null) | undefined
-        status: (HogFunctionStatus & (unknown | null)) | null
+        status: (CustomFunctionStatus & (unknown | null)) | null
         execution_order?: (number | null) | undefined
         _create_in_folder?: string | undefined
     }
-    export type HogFunctionMinimal = {
+    export type CustomFunctionMinimal = {
         id: string
         type: string | null
         name: string | null
@@ -4836,28 +4836,28 @@ export namespace Schemas {
         created_by: UserBasic & unknown
         updated_at: string
         enabled: boolean
-        hog: string
+        custom_script: string
         filters: unknown | null
         icon_url: string | null
-        template: HogFunctionTemplate & unknown
-        status: (HogFunctionStatus & (unknown | null)) | null
+        template: CustomFunctionTemplate & unknown
+        status: (CustomFunctionStatus & (unknown | null)) | null
         execution_order: number | null
     }
-    export type HogLanguage = 'hog' | 'hogJson' | 'hogQL' | 'hogQLExpr' | 'hogTemplate'
-    export type HogQLASTQuery = {
+    export type HogLanguage = 'hog' | 'hogJson' | 'insightsQL' | 'insightsQLExpr' | 'hogTemplate'
+    export type InsightsQLASTQuery = {
         explain?: (boolean | null) | undefined
-        filters?: (HogQLFilters | null) | undefined
+        filters?: (InsightsQLFilters | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         name?: (string | null) | undefined
         query: Record<string, unknown>
-        response?: (HogQLQueryResponse | null) | undefined
+        response?: (InsightsQLQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
         values?: (Record<string, unknown> | null) | undefined
         variables?: (Record<string, unknown> | null) | undefined
         version?: (number | null) | undefined
     }
-    export type HogQLAutocompleteResponse = {
+    export type InsightsQLAutocompleteResponse = {
         incomplete_list: boolean
         suggestions: Array<AutocompleteCompletionItem>
         timings?: (Array<QueryTiming> | null) | undefined
@@ -4893,8 +4893,8 @@ export namespace Schemas {
     export type SessionsTimelineQueryResponse = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<TimelineEntry>
@@ -4904,7 +4904,7 @@ export namespace Schemas {
         after: string | null
         before: string | null
         kind: string
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         personId: string | null
         response: SessionsTimelineQueryResponse | null
         tags: QueryLogTags | null
@@ -4919,7 +4919,7 @@ export namespace Schemas {
     export type HogQuery = Partial<{
         code: string | null
         kind: string
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         response: HogQueryResponse | null
         tags: QueryLogTags | null
         version: number | null
@@ -4928,9 +4928,9 @@ export namespace Schemas {
     export type WebPageURLSearchQueryResponse = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<PageURL>
@@ -4945,7 +4945,7 @@ export namespace Schemas {
         includeRevenue?: (boolean | null) | undefined
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
             | undefined
@@ -4980,10 +4980,10 @@ export namespace Schemas {
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        metadata?: (HogQLMetadataResponse | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        metadata?: (InsightsQLMetadataResponse | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query?: (string | null) | undefined
         query_status?: (QueryStatus | null) | undefined
@@ -5005,7 +5005,7 @@ export namespace Schemas {
         kind?: string | undefined
         limit?: (number | null) | undefined
         metrics: Array<WebTrendsMetric>
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?:
             | (Array<WebAnalyticsOrderByFields | WebAnalyticsOrderByDirection> | null)
@@ -5034,9 +5034,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -5049,7 +5049,7 @@ export namespace Schemas {
         filterGroup: PropertyGroupFilter
         kind?: string | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         orderBy?: (OrderBy2 | null) | undefined
         response?: (LogsQueryResponse | null) | undefined
@@ -5139,7 +5139,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -5149,7 +5149,7 @@ export namespace Schemas {
         > | null
         kind: string
         limit: number | null
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         offset: number | null
         operand: FilterLogicalOperator | null
         order: RecordingOrder | null
@@ -5167,7 +5167,7 @@ export namespace Schemas {
             | GroupPropertyFilter
             | FeaturePropertyFilter
             | FlagPropertyFilter
-            | HogQLPropertyFilter
+            | InsightsQLPropertyFilter
             | EmptyPropertyFilter
             | DataWarehousePropertyFilter
             | DataWarehousePersonPropertyFilter
@@ -5184,8 +5184,8 @@ export namespace Schemas {
     export type VectorSearchResponseItem = { distance: number; id: string }
     export type VectorSearchQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<VectorSearchResponseItem>
@@ -5195,20 +5195,20 @@ export namespace Schemas {
         embedding: Array<number>
         embeddingVersion?: (number | null) | undefined
         kind?: string | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         response?: (VectorSearchQueryResponse | null) | undefined
         tags?: (QueryLogTags | null) | undefined
         version?: (number | null) | undefined
     }
-    export type HogQLMetadata = {
+    export type InsightsQLMetadata = {
         debug?: (boolean | null) | undefined
-        filters?: (HogQLFilters | null) | undefined
+        filters?: (InsightsQLFilters | null) | undefined
         globals?: (Record<string, unknown> | null) | undefined
         kind?: string | undefined
         language: HogLanguage
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query: string
-        response?: (HogQLMetadataResponse | null) | undefined
+        response?: (InsightsQLMetadataResponse | null) | undefined
         sourceQuery?:
             | (
                   | EventsNode
@@ -5221,9 +5221,9 @@ export namespace Schemas {
                   | InsightActorsQueryOptions
                   | SessionsTimelineQuery
                   | HogQuery
-                  | HogQLQuery
-                  | HogQLMetadata
-                  | HogQLAutocomplete
+                  | InsightsQLQuery
+                  | InsightsQLMetadata
+                  | InsightsQLAutocomplete
                   | RevenueAnalyticsGrossRevenueQuery
                   | RevenueAnalyticsMetricsQuery
                   | RevenueAnalyticsMRRQuery
@@ -5258,15 +5258,15 @@ export namespace Schemas {
         variables?: (Record<string, unknown> | null) | undefined
         version?: (number | null) | undefined
     }
-    export type HogQLAutocomplete = {
+    export type InsightsQLAutocomplete = {
         endPosition: number
-        filters?: (HogQLFilters | null) | undefined
+        filters?: (InsightsQLFilters | null) | undefined
         globals?: (Record<string, unknown> | null) | undefined
         kind?: string | undefined
         language: HogLanguage
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query: string
-        response?: (HogQLAutocompleteResponse | null) | undefined
+        response?: (InsightsQLAutocompleteResponse | null) | undefined
         sourceQuery?:
             | (
                   | EventsNode
@@ -5279,9 +5279,9 @@ export namespace Schemas {
                   | InsightActorsQueryOptions
                   | SessionsTimelineQuery
                   | HogQuery
-                  | HogQLQuery
-                  | HogQLMetadata
-                  | HogQLAutocomplete
+                  | InsightsQLQuery
+                  | InsightsQLMetadata
+                  | InsightsQLAutocomplete
                   | RevenueAnalyticsGrossRevenueQuery
                   | RevenueAnalyticsMetricsQuery
                   | RevenueAnalyticsMRRQuery
@@ -5347,7 +5347,7 @@ export namespace Schemas {
         timezone: string
         is_cached: string
         query_status: string
-        hogql: string
+        insightsql: string
         types: string
         _create_in_folder?: string | undefined
         alerts: string
@@ -5664,11 +5664,11 @@ export namespace Schemas {
         previous?: (string | null) | undefined
         results: Array<GroupUsageMetric>
     }
-    export type PaginatedHogFunctionMinimalList = {
+    export type PaginatedCustomFunctionMinimalList = {
         count: number
         next?: (string | null) | undefined
         previous?: (string | null) | undefined
-        results: Array<HogFunctionMinimal>
+        results: Array<CustomFunctionMinimal>
     }
     export type PaginatedInsightList = {
         count: number
@@ -6679,7 +6679,7 @@ export namespace Schemas {
         has_seen_product_intro_for?: (unknown | null) | undefined
         scene_personalisation: Array<ScenePersonalisationBasic>
         theme_mode?: ((ThemeModeEnum | BlankEnum | NullEnum) | null) | undefined
-        hedgehog_config?: (unknown | null) | undefined
+        mascot_config?: (unknown | null) | undefined
         role_at_organization?: RoleAtOrganizationEnum | undefined
     }
     export type PaginatedUserList = {
@@ -6752,7 +6752,7 @@ export namespace Schemas {
         start_at: string | null
         end_at: string | null
         latest_runs: Array<BatchExportRun>
-        hogql_query: string
+        insightsql_query: string
         schema: unknown | null
         filters: unknown | null
     }>
@@ -7013,9 +7013,9 @@ export namespace Schemas {
         display: DisplayEnum
         filters: unknown
     }>
-    export type PatchedHogFunction = Partial<{
+    export type PatchedCustomFunction = Partial<{
         id: string
-        type: (HogFunctionTypeEnum | NullEnum) | null
+        type: (CustomFunctionTypeEnum | NullEnum) | null
         name: string | null
         description: string
         created_at: string
@@ -7023,18 +7023,18 @@ export namespace Schemas {
         updated_at: string
         enabled: boolean
         deleted: boolean
-        hog: string
+        custom_script: string
         bytecode: unknown | null
         transpiled: string | null
         inputs_schema: Array<InputsSchemaItem>
         inputs: Record<string, unknown>
-        filters: HogFunctionFilters
-        masking: (HogFunctionMasking & (unknown | null)) | null
+        filters: CustomFunctionFilters
+        masking: (CustomFunctionMasking & (unknown | null)) | null
         mappings: Array<Mappings> | null
         icon_url: string | null
-        template: HogFunctionTemplate & unknown
+        template: CustomFunctionTemplate & unknown
         template_id: string | null
-        status: (HogFunctionStatus & (unknown | null)) | null
+        status: (CustomFunctionStatus & (unknown | null)) | null
         execution_order: number | null
         _create_in_folder: string
     }>
@@ -7069,7 +7069,7 @@ export namespace Schemas {
         timezone: string
         is_cached: string
         query_status: string
-        hogql: string
+        insightsql: string
         types: string
         _create_in_folder: string
         alerts: string
@@ -7470,7 +7470,7 @@ export namespace Schemas {
         has_seen_product_intro_for: unknown | null
         scene_personalisation: Array<ScenePersonalisationBasic>
         theme_mode: (ThemeModeEnum | BlankEnum | NullEnum) | null
-        hedgehog_config: unknown | null
+        mascot_config: unknown | null
         role_at_organization: RoleAtOrganizationEnum
     }>
     export type PatchedUserInterview = Partial<{
@@ -7563,7 +7563,7 @@ export namespace Schemas {
         | 'log_entry'
         | 'behavioral'
         | 'session'
-        | 'hogql'
+        | 'insightsql'
         | 'data_warehouse'
         | 'data_warehouse_person_property'
         | 'error_tracking_issue'
@@ -7600,7 +7600,7 @@ export namespace Schemas {
         showExport?: (boolean | null) | undefined
         showFilters?: (boolean | null) | undefined
         showHeader?: (boolean | null) | undefined
-        showHogQLEditor?: (boolean | null) | undefined
+        showInsightsQLEditor?: (boolean | null) | undefined
         showLastComputation?: (boolean | null) | undefined
         showLastComputationRefresh?: (boolean | null) | undefined
         showOpenEditorButton?: (boolean | null) | undefined
@@ -7622,7 +7622,7 @@ export namespace Schemas {
     export type SuggestedQuestionsQueryResponse = { questions: Array<string> }
     export type SuggestedQuestionsQuery = Partial<{
         kind: string
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         response: SuggestedQuestionsQueryResponse | null
         tags: QueryLogTags | null
         version: number | null
@@ -7630,8 +7630,8 @@ export namespace Schemas {
     export type TeamTaxonomyItem = { count: number; event: string }
     export type TeamTaxonomyQueryResponse = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<TeamTaxonomyItem>
@@ -7639,7 +7639,7 @@ export namespace Schemas {
     }
     export type TeamTaxonomyQuery = Partial<{
         kind: string
-        modifiers: HogQLQueryModifiers | null
+        modifiers: InsightsQLQueryModifiers | null
         response: TeamTaxonomyQueryResponse | null
         tags: QueryLogTags | null
         version: number | null
@@ -7669,10 +7669,10 @@ export namespace Schemas {
             | InsightActorsQueryOptions
             | SessionsTimelineQuery
             | HogQuery
-            | HogQLQuery
-            | HogQLMetadata
-            | HogQLAutocomplete
-            | HogQLASTQuery
+            | InsightsQLQuery
+            | InsightsQLMetadata
+            | InsightsQLAutocomplete
+            | InsightsQLASTQuery
             | SessionAttributionExplorerQuery
             | RevenueExampleEventsQuery
             | RevenueExampleDataWarehouseTablesQuery
@@ -7722,9 +7722,9 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7736,10 +7736,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit: number
         missing_actors_count?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7751,10 +7751,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         kind?: string | undefined
         limit: number
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7774,8 +7774,8 @@ export namespace Schemas {
     export type QueryResponseAlternative5 = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<TimelineEntry>
@@ -7793,10 +7793,10 @@ export namespace Schemas {
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        metadata?: (HogQLMetadataResponse | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        metadata?: (InsightsQLMetadataResponse | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query?: (string | null) | undefined
         query_status?: (QueryStatus | null) | undefined
@@ -7806,13 +7806,13 @@ export namespace Schemas {
         types?: (Array<unknown> | null) | undefined
     }
     export type QueryResponseAlternative8 = {
-        errors: Array<HogQLNotice>
+        errors: Array<InsightsQLNotice>
         isUsingIndices?: (QueryIndexUsage | null) | undefined
         isValid?: (boolean | null) | undefined
-        notices: Array<HogQLNotice>
+        notices: Array<InsightsQLNotice>
         query?: (string | null) | undefined
         table_names?: (Array<string> | null) | undefined
-        warnings: Array<HogQLNotice>
+        warnings: Array<InsightsQLNotice>
     }
     export type QueryResponseAlternative9 = {
         incomplete_list: boolean
@@ -7823,9 +7823,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7837,9 +7837,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7850,9 +7850,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7914,8 +7914,8 @@ export namespace Schemas {
         dateFrom?: (string | null) | undefined
         dateTo?: (string | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebOverviewItem>
@@ -7927,9 +7927,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7943,9 +7943,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -7956,8 +7956,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative23 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebVitalsPathBreakdownResult>
@@ -7966,9 +7966,9 @@ export namespace Schemas {
     export type QueryResponseAlternative24 = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<PageURL>
@@ -7982,8 +7982,8 @@ export namespace Schemas {
     export type QueryResponseAlternative26 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<unknown>
@@ -7992,8 +7992,8 @@ export namespace Schemas {
     export type QueryResponseAlternative27 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -8002,8 +8002,8 @@ export namespace Schemas {
     export type QueryResponseAlternative28 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsMRRQueryResultItem>
@@ -8011,8 +8011,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative29 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsOverviewItem>
@@ -8021,8 +8021,8 @@ export namespace Schemas {
     export type QueryResponseAlternative30 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -8032,9 +8032,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8047,9 +8047,9 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8061,10 +8061,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         limit: number
         missing_actors_count?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8076,10 +8076,10 @@ export namespace Schemas {
         columns: Array<unknown>
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql: string
+        insightsql: string
         kind?: string | undefined
         limit: number
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset: number
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8093,10 +8093,10 @@ export namespace Schemas {
         error?: (string | null) | undefined
         explain?: (Array<string> | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        metadata?: (HogQLMetadataResponse | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        metadata?: (InsightsQLMetadataResponse | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query?: (string | null) | undefined
         query_status?: (QueryStatus | null) | undefined
@@ -8109,8 +8109,8 @@ export namespace Schemas {
         dateFrom?: (string | null) | undefined
         dateTo?: (string | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebOverviewItem>
@@ -8122,9 +8122,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8138,9 +8138,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8151,8 +8151,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative40 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<WebVitalsPathBreakdownResult>
@@ -8162,9 +8162,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8175,8 +8175,8 @@ export namespace Schemas {
     export type QueryResponseAlternative42 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<unknown>
@@ -8185,8 +8185,8 @@ export namespace Schemas {
     export type QueryResponseAlternative43 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -8195,8 +8195,8 @@ export namespace Schemas {
     export type QueryResponseAlternative44 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsMRRQueryResultItem>
@@ -8204,8 +8204,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative45 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RevenueAnalyticsOverviewItem>
@@ -8214,8 +8214,8 @@ export namespace Schemas {
     export type QueryResponseAlternative46 = {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -8225,9 +8225,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8239,9 +8239,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8254,9 +8254,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8292,9 +8292,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8304,8 +8304,8 @@ export namespace Schemas {
     export type QueryResponseAlternative55 = {
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<Record<string, unknown>>
@@ -8313,9 +8313,9 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative56 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         isUdf?: (boolean | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: unknown
@@ -8323,8 +8323,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative57 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<RetentionResult>
@@ -8332,8 +8332,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative58 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<PathsLink>
@@ -8341,8 +8341,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative59 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<Record<string, unknown>>
@@ -8352,9 +8352,9 @@ export namespace Schemas {
         columns?: (Array<unknown> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8370,9 +8370,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8382,8 +8382,8 @@ export namespace Schemas {
     export type QueryResponseAlternative64 = { questions: Array<string> }
     export type QueryResponseAlternative65 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<TeamTaxonomyItem>
@@ -8391,8 +8391,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative66 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<EventTaxonomyItem>
@@ -8400,8 +8400,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative67 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: ActorsPropertyTaxonomyResponse | Array<ActorsPropertyTaxonomyResponse>
@@ -8411,9 +8411,9 @@ export namespace Schemas {
         columns?: (Array<string> | null) | undefined
         error?: (string | null) | undefined
         hasMore?: (boolean | null) | undefined
-        hogql?: (string | null) | undefined
+        insightsql?: (string | null) | undefined
         limit?: (number | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         offset?: (number | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
@@ -8422,8 +8422,8 @@ export namespace Schemas {
     }
     export type QueryResponseAlternative69 = {
         error?: (string | null) | undefined
-        hogql?: (string | null) | undefined
-        modifiers?: (HogQLQueryModifiers | null) | undefined
+        insightsql?: (string | null) | undefined
+        modifiers?: (InsightsQLQueryModifiers | null) | undefined
         query_status?: (QueryStatus | null) | undefined
         resolved_date_range?: (ResolvedDateRangeResponse | null) | undefined
         results: Array<VectorSearchResponseItem>
@@ -8508,10 +8508,10 @@ export namespace Schemas {
             | InsightActorsQueryOptions
             | SessionsTimelineQuery
             | HogQuery
-            | HogQLQuery
-            | HogQLMetadata
-            | HogQLAutocomplete
-            | HogQLASTQuery
+            | InsightsQLQuery
+            | InsightsQLMetadata
+            | InsightsQLAutocomplete
+            | InsightsQLASTQuery
             | SessionAttributionExplorerQuery
             | RevenueExampleEventsQuery
             | RevenueExampleDataWarehouseTablesQuery
@@ -8568,10 +8568,10 @@ export namespace Schemas {
             | InsightActorsQueryOptions
             | SessionsTimelineQuery
             | HogQuery
-            | HogQLQuery
-            | HogQLMetadata
-            | HogQLAutocomplete
-            | HogQLASTQuery
+            | InsightsQLQuery
+            | InsightsQLMetadata
+            | InsightsQLAutocomplete
+            | InsightsQLASTQuery
             | SessionAttributionExplorerQuery
             | RevenueExampleEventsQuery
             | RevenueExampleDataWarehouseTablesQuery
@@ -9975,9 +9975,9 @@ export namespace Endpoints {
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_hog_functions_list = {
+    export type get_Environments_custom_functions_list = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/'
+        path: '/api/environments/{project_id}/custom_functions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -9993,134 +9993,134 @@ export namespace Endpoints {
             }>
             path: { project_id: string }
         }
-        responses: { 200: Schemas.PaginatedHogFunctionMinimalList }
+        responses: { 200: Schemas.PaginatedCustomFunctionMinimalList }
     }
-    export type post_Environments_hog_functions_create = {
+    export type post_Environments_custom_functions_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/hog_functions/'
+        path: '/api/environments/{project_id}/custom_functions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
-        responses: { 201: Schemas.HogFunction }
+        responses: { 201: Schemas.CustomFunction }
     }
-    export type get_Environments_hog_functions_retrieve = {
+    export type get_Environments_custom_functions_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/{id}/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
-        responses: { 200: Schemas.HogFunction }
+        responses: { 200: Schemas.CustomFunction }
     }
-    export type put_Environments_hog_functions_update = {
+    export type put_Environments_custom_functions_update = {
         method: 'PUT'
-        path: '/api/environments/{project_id}/hog_functions/{id}/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
-        responses: { 200: Schemas.HogFunction }
+        responses: { 200: Schemas.CustomFunction }
     }
-    export type patch_Environments_hog_functions_partial_update = {
+    export type patch_Environments_custom_functions_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/hog_functions/{id}/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.PatchedHogFunction
+            body: Schemas.PatchedCustomFunction
         }
-        responses: { 200: Schemas.HogFunction }
+        responses: { 200: Schemas.CustomFunction }
     }
-    export type delete_Environments_hog_functions_destroy = {
+    export type delete_Environments_custom_functions_destroy = {
         method: 'DELETE'
-        path: '/api/environments/{project_id}/hog_functions/{id}/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 405: unknown }
     }
-    export type post_Environments_hog_functions_broadcast_create = {
+    export type post_Environments_custom_functions_broadcast_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/hog_functions/{id}/broadcast/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/broadcast/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
         responses: { 200: unknown }
     }
-    export type post_Environments_hog_functions_invocations_create = {
+    export type post_Environments_custom_functions_invocations_create = {
         method: 'POST'
-        path: '/api/environments/{project_id}/hog_functions/{id}/invocations/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/invocations/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_hog_functions_logs_retrieve = {
+    export type get_Environments_custom_functions_logs_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/{id}/logs/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_hog_functions_metrics_retrieve = {
+    export type get_Environments_custom_functions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/{id}/metrics/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_hog_functions_metrics_totals_retrieve = {
+    export type get_Environments_custom_functions_metrics_totals_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/{id}/metrics/totals/'
+        path: '/api/environments/{project_id}/custom_functions/{id}/metrics/totals/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_hog_functions_icon_retrieve = {
+    export type get_Environments_custom_functions_icon_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/icon/'
+        path: '/api/environments/{project_id}/custom_functions/icon/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Environments_hog_functions_icons_retrieve = {
+    export type get_Environments_custom_functions_icons_retrieve = {
         method: 'GET'
-        path: '/api/environments/{project_id}/hog_functions/icons/'
+        path: '/api/environments/{project_id}/custom_functions/icons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type patch_Environments_hog_functions_rearrange_partial_update = {
+    export type patch_Environments_custom_functions_rearrange_partial_update = {
         method: 'PATCH'
-        path: '/api/environments/{project_id}/hog_functions/rearrange/'
+        path: '/api/environments/{project_id}/custom_functions/rearrange/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.PatchedHogFunction
+            body: Schemas.PatchedCustomFunction
         }
         responses: { 200: unknown }
     }
@@ -13933,9 +13933,9 @@ export namespace Endpoints {
         }
         responses: { 200: unknown }
     }
-    export type get_Hog_functions_list = {
+    export type get_Custom_functions_list = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/'
+        path: '/api/projects/{project_id}/custom_functions/'
         requestFormat: 'json'
         parameters: {
             query: Partial<{
@@ -13951,134 +13951,134 @@ export namespace Endpoints {
             }>
             path: { project_id: string }
         }
-        responses: { 200: Schemas.PaginatedHogFunctionMinimalList }
+        responses: { 200: Schemas.PaginatedCustomFunctionMinimalList }
     }
-    export type post_Hog_functions_create = {
+    export type post_Custom_functions_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/hog_functions/'
+        path: '/api/projects/{project_id}/custom_functions/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
-        responses: { 201: Schemas.HogFunction }
+        responses: { 201: Schemas.CustomFunction }
     }
-    export type get_Hog_functions_retrieve = {
+    export type get_Custom_functions_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/{id}/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
-        responses: { 200: Schemas.HogFunction }
+        responses: { 200: Schemas.CustomFunction }
     }
-    export type put_Hog_functions_update = {
+    export type put_Custom_functions_update = {
         method: 'PUT'
-        path: '/api/projects/{project_id}/hog_functions/{id}/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
-        responses: { 200: Schemas.HogFunction }
+        responses: { 200: Schemas.CustomFunction }
     }
-    export type patch_Hog_functions_partial_update = {
+    export type patch_Custom_functions_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/hog_functions/{id}/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.PatchedHogFunction
+            body: Schemas.PatchedCustomFunction
         }
-        responses: { 200: Schemas.HogFunction }
+        responses: { 200: Schemas.CustomFunction }
     }
-    export type delete_Hog_functions_destroy = {
+    export type delete_Custom_functions_destroy = {
         method: 'DELETE'
-        path: '/api/projects/{project_id}/hog_functions/{id}/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 405: unknown }
     }
-    export type post_Hog_functions_broadcast_create = {
+    export type post_Custom_functions_broadcast_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/hog_functions/{id}/broadcast/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/broadcast/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
         responses: { 200: unknown }
     }
-    export type post_Hog_functions_invocations_create = {
+    export type post_Custom_functions_invocations_create = {
         method: 'POST'
-        path: '/api/projects/{project_id}/hog_functions/{id}/invocations/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/invocations/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
 
-            body: Schemas.HogFunction
+            body: Schemas.CustomFunction
         }
         responses: { 200: unknown }
     }
-    export type get_Hog_functions_logs_retrieve = {
+    export type get_Custom_functions_logs_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/{id}/logs/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/logs/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Hog_functions_metrics_retrieve = {
+    export type get_Custom_functions_metrics_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/{id}/metrics/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/metrics/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Hog_functions_metrics_totals_retrieve = {
+    export type get_Custom_functions_metrics_totals_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/{id}/metrics/totals/'
+        path: '/api/projects/{project_id}/custom_functions/{id}/metrics/totals/'
         requestFormat: 'json'
         parameters: {
             path: { id: string; project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Hog_functions_icon_retrieve = {
+    export type get_Custom_functions_icon_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/icon/'
+        path: '/api/projects/{project_id}/custom_functions/icon/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type get_Hog_functions_icons_retrieve = {
+    export type get_Custom_functions_icons_retrieve = {
         method: 'GET'
-        path: '/api/projects/{project_id}/hog_functions/icons/'
+        path: '/api/projects/{project_id}/custom_functions/icons/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
         }
         responses: { 200: unknown }
     }
-    export type patch_Hog_functions_rearrange_partial_update = {
+    export type patch_Custom_functions_rearrange_partial_update = {
         method: 'PATCH'
-        path: '/api/projects/{project_id}/hog_functions/rearrange/'
+        path: '/api/projects/{project_id}/custom_functions/rearrange/'
         requestFormat: 'json'
         parameters: {
             path: { project_id: string }
 
-            body: Schemas.PatchedHogFunction
+            body: Schemas.PatchedCustomFunction
         }
         responses: { 200: unknown }
     }
@@ -15630,18 +15630,18 @@ export namespace Endpoints {
         }
         responses: { 204: unknown }
     }
-    export type get_Users_hedgehog_config_retrieve = {
+    export type get_Users_mascot_config_retrieve = {
         method: 'GET'
-        path: '/api/users/{uuid}/hedgehog_config/'
+        path: '/api/users/{uuid}/mascot_config/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
         }
         responses: { 200: unknown }
     }
-    export type patch_Users_hedgehog_config_partial_update = {
+    export type patch_Users_mascot_config_partial_update = {
         method: 'PATCH'
-        path: '/api/users/{uuid}/hedgehog_config/'
+        path: '/api/users/{uuid}/mascot_config/'
         requestFormat: 'json'
         parameters: {
             path: { uuid: string }
@@ -15813,13 +15813,13 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/groups/property_definitions/': Endpoints.get_Environments_groups_property_definitions_retrieve
         '/api/environments/{project_id}/groups/property_values/': Endpoints.get_Environments_groups_property_values_retrieve
         '/api/environments/{project_id}/groups/related/': Endpoints.get_Environments_groups_related_retrieve
-        '/api/environments/{project_id}/hog_functions/': Endpoints.get_Environments_hog_functions_list
-        '/api/environments/{project_id}/hog_functions/{id}/': Endpoints.get_Environments_hog_functions_retrieve
-        '/api/environments/{project_id}/hog_functions/{id}/logs/': Endpoints.get_Environments_hog_functions_logs_retrieve
-        '/api/environments/{project_id}/hog_functions/{id}/metrics/': Endpoints.get_Environments_hog_functions_metrics_retrieve
-        '/api/environments/{project_id}/hog_functions/{id}/metrics/totals/': Endpoints.get_Environments_hog_functions_metrics_totals_retrieve
-        '/api/environments/{project_id}/hog_functions/icon/': Endpoints.get_Environments_hog_functions_icon_retrieve
-        '/api/environments/{project_id}/hog_functions/icons/': Endpoints.get_Environments_hog_functions_icons_retrieve
+        '/api/environments/{project_id}/custom_functions/': Endpoints.get_Environments_custom_functions_list
+        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.get_Environments_custom_functions_retrieve
+        '/api/environments/{project_id}/custom_functions/{id}/logs/': Endpoints.get_Environments_custom_functions_logs_retrieve
+        '/api/environments/{project_id}/custom_functions/{id}/metrics/': Endpoints.get_Environments_custom_functions_metrics_retrieve
+        '/api/environments/{project_id}/custom_functions/{id}/metrics/totals/': Endpoints.get_Environments_custom_functions_metrics_totals_retrieve
+        '/api/environments/{project_id}/custom_functions/icon/': Endpoints.get_Environments_custom_functions_icon_retrieve
+        '/api/environments/{project_id}/custom_functions/icons/': Endpoints.get_Environments_custom_functions_icons_retrieve
         '/api/environments/{project_id}/insights/': Endpoints.get_Environments_insights_list
         '/api/environments/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Environments_insights_sharing_list
         '/api/environments/{project_id}/insights/{id}/': Endpoints.get_Environments_insights_retrieve
@@ -15966,13 +15966,13 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/groups_types/': Endpoints.get_Groups_types_list
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.get_Groups_types_metrics_list
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.get_Groups_types_metrics_retrieve
-        '/api/projects/{project_id}/hog_functions/': Endpoints.get_Hog_functions_list
-        '/api/projects/{project_id}/hog_functions/{id}/': Endpoints.get_Hog_functions_retrieve
-        '/api/projects/{project_id}/hog_functions/{id}/logs/': Endpoints.get_Hog_functions_logs_retrieve
-        '/api/projects/{project_id}/hog_functions/{id}/metrics/': Endpoints.get_Hog_functions_metrics_retrieve
-        '/api/projects/{project_id}/hog_functions/{id}/metrics/totals/': Endpoints.get_Hog_functions_metrics_totals_retrieve
-        '/api/projects/{project_id}/hog_functions/icon/': Endpoints.get_Hog_functions_icon_retrieve
-        '/api/projects/{project_id}/hog_functions/icons/': Endpoints.get_Hog_functions_icons_retrieve
+        '/api/projects/{project_id}/custom_functions/': Endpoints.get_Custom_functions_list
+        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.get_Custom_functions_retrieve
+        '/api/projects/{project_id}/custom_functions/{id}/logs/': Endpoints.get_Custom_functions_logs_retrieve
+        '/api/projects/{project_id}/custom_functions/{id}/metrics/': Endpoints.get_Custom_functions_metrics_retrieve
+        '/api/projects/{project_id}/custom_functions/{id}/metrics/totals/': Endpoints.get_Custom_functions_metrics_totals_retrieve
+        '/api/projects/{project_id}/custom_functions/icon/': Endpoints.get_Custom_functions_icon_retrieve
+        '/api/projects/{project_id}/custom_functions/icons/': Endpoints.get_Custom_functions_icons_retrieve
         '/api/projects/{project_id}/insights/': Endpoints.get_Insights_list
         '/api/projects/{project_id}/insights/{insight_id}/sharing/': Endpoints.get_Insights_sharing_list
         '/api/projects/{project_id}/insights/{id}/': Endpoints.get_Insights_retrieve
@@ -16035,7 +16035,7 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.get_Web_experiments_retrieve
         '/api/users/': Endpoints.get_Users_list
         '/api/users/{uuid}/': Endpoints.get_Users_retrieve
-        '/api/users/{uuid}/hedgehog_config/': Endpoints.get_Users_hedgehog_config_retrieve
+        '/api/users/{uuid}/mascot_config/': Endpoints.get_Users_mascot_config_retrieve
         '/api/users/{uuid}/start_2fa_setup/': Endpoints.get_Users_start_2fa_setup_retrieve
         '/api/users/{uuid}/two_factor_start_setup/': Endpoints.get_Users_two_factor_start_setup_retrieve
         '/api/users/{uuid}/two_factor_status/': Endpoints.get_Users_two_factor_status_retrieve
@@ -16075,9 +16075,9 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/groups/': Endpoints.post_Environments_groups_create
         '/api/environments/{project_id}/groups/delete_property/': Endpoints.post_Environments_groups_delete_property_create
         '/api/environments/{project_id}/groups/update_property/': Endpoints.post_Environments_groups_update_property_create
-        '/api/environments/{project_id}/hog_functions/': Endpoints.post_Environments_hog_functions_create
-        '/api/environments/{project_id}/hog_functions/{id}/broadcast/': Endpoints.post_Environments_hog_functions_broadcast_create
-        '/api/environments/{project_id}/hog_functions/{id}/invocations/': Endpoints.post_Environments_hog_functions_invocations_create
+        '/api/environments/{project_id}/custom_functions/': Endpoints.post_Environments_custom_functions_create
+        '/api/environments/{project_id}/custom_functions/{id}/broadcast/': Endpoints.post_Environments_custom_functions_broadcast_create
+        '/api/environments/{project_id}/custom_functions/{id}/invocations/': Endpoints.post_Environments_custom_functions_invocations_create
         '/api/environments/{project_id}/insights/': Endpoints.post_Environments_insights_create
         '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Environments_insights_sharing_passwords_create
         '/api/environments/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Environments_insights_sharing_refresh_create
@@ -16176,9 +16176,9 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/groups/delete_property/': Endpoints.post_Groups_delete_property_create
         '/api/projects/{project_id}/groups/update_property/': Endpoints.post_Groups_update_property_create
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/': Endpoints.post_Groups_types_metrics_create
-        '/api/projects/{project_id}/hog_functions/': Endpoints.post_Hog_functions_create
-        '/api/projects/{project_id}/hog_functions/{id}/broadcast/': Endpoints.post_Hog_functions_broadcast_create
-        '/api/projects/{project_id}/hog_functions/{id}/invocations/': Endpoints.post_Hog_functions_invocations_create
+        '/api/projects/{project_id}/custom_functions/': Endpoints.post_Custom_functions_create
+        '/api/projects/{project_id}/custom_functions/{id}/broadcast/': Endpoints.post_Custom_functions_broadcast_create
+        '/api/projects/{project_id}/custom_functions/{id}/invocations/': Endpoints.post_Custom_functions_invocations_create
         '/api/projects/{project_id}/insights/': Endpoints.post_Insights_create
         '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/': Endpoints.post_Insights_sharing_passwords_create
         '/api/projects/{project_id}/insights/{insight_id}/sharing/refresh/': Endpoints.post_Insights_sharing_refresh_create
@@ -16237,7 +16237,7 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.put_Environments_explicit_members_update
         '/api/environments/{project_id}/file_system/{id}/': Endpoints.put_Environments_file_system_update
         '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.put_Environments_file_system_shortcut_update
-        '/api/environments/{project_id}/hog_functions/{id}/': Endpoints.put_Environments_hog_functions_update
+        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.put_Environments_custom_functions_update
         '/api/environments/{project_id}/insights/{id}/': Endpoints.put_Environments_insights_update
         '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.put_Environments_persisted_folder_update
         '/api/environments/{project_id}/persons/{id}/': Endpoints.put_Environments_persons_update
@@ -16273,7 +16273,7 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.put_Groups_types_metrics_update
         '/api/projects/{project_id}/groups_types/create_detail_dashboard/': Endpoints.put_Groups_types_create_detail_dashboard_update
         '/api/projects/{project_id}/groups_types/set_default_columns/': Endpoints.put_Groups_types_set_default_columns_update
-        '/api/projects/{project_id}/hog_functions/{id}/': Endpoints.put_Hog_functions_update
+        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.put_Custom_functions_update
         '/api/projects/{project_id}/insights/{id}/': Endpoints.put_Insights_update
         '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.put_Notebooks_update
         '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.put_Persisted_folder_update
@@ -16303,8 +16303,8 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.patch_Environments_explicit_members_partial_update
         '/api/environments/{project_id}/file_system/{id}/': Endpoints.patch_Environments_file_system_partial_update
         '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_Environments_file_system_shortcut_partial_update
-        '/api/environments/{project_id}/hog_functions/{id}/': Endpoints.patch_Environments_hog_functions_partial_update
-        '/api/environments/{project_id}/hog_functions/rearrange/': Endpoints.patch_Environments_hog_functions_rearrange_partial_update
+        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.patch_Environments_custom_functions_partial_update
+        '/api/environments/{project_id}/custom_functions/rearrange/': Endpoints.patch_Environments_custom_functions_rearrange_partial_update
         '/api/environments/{project_id}/insights/{id}/': Endpoints.patch_Environments_insights_partial_update
         '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.patch_Environments_persisted_folder_partial_update
         '/api/environments/{project_id}/persons/{id}/': Endpoints.patch_Environments_persons_partial_update
@@ -16351,8 +16351,8 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.patch_File_system_shortcut_partial_update
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.patch_Groups_types_metrics_partial_update
         '/api/projects/{project_id}/groups_types/update_metadata/': Endpoints.patch_Groups_types_update_metadata_partial_update
-        '/api/projects/{project_id}/hog_functions/{id}/': Endpoints.patch_Hog_functions_partial_update
-        '/api/projects/{project_id}/hog_functions/rearrange/': Endpoints.patch_Hog_functions_rearrange_partial_update
+        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.patch_Custom_functions_partial_update
+        '/api/projects/{project_id}/custom_functions/rearrange/': Endpoints.patch_Custom_functions_rearrange_partial_update
         '/api/projects/{project_id}/insights/{id}/': Endpoints.patch_Insights_partial_update
         '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.patch_Notebooks_partial_update
         '/api/projects/{project_id}/persisted_folder/{id}/': Endpoints.patch_Persisted_folder_partial_update
@@ -16366,7 +16366,7 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/warehouse_tables/{id}/': Endpoints.patch_Warehouse_tables_partial_update
         '/api/projects/{project_id}/web_experiments/{id}/': Endpoints.patch_Web_experiments_partial_update
         '/api/users/{uuid}/': Endpoints.patch_Users_partial_update
-        '/api/users/{uuid}/hedgehog_config/': Endpoints.patch_Users_hedgehog_config_partial_update
+        '/api/users/{uuid}/mascot_config/': Endpoints.patch_Users_mascot_config_partial_update
         '/api/users/cancel_email_change_request/': Endpoints.patch_Users_cancel_email_change_request_partial_update
     }
     delete: {
@@ -16382,7 +16382,7 @@ export type EndpointByMethod = {
         '/api/environments/{project_id}/explicit_members/{parent_membership__user__uuid}/': Endpoints.delete_Environments_explicit_members_destroy
         '/api/environments/{project_id}/file_system/{id}/': Endpoints.delete_Environments_file_system_destroy
         '/api/environments/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_Environments_file_system_shortcut_destroy
-        '/api/environments/{project_id}/hog_functions/{id}/': Endpoints.delete_Environments_hog_functions_destroy
+        '/api/environments/{project_id}/custom_functions/{id}/': Endpoints.delete_Environments_custom_functions_destroy
         '/api/environments/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Environments_insights_sharing_passwords_destroy
         '/api/environments/{project_id}/insights/{id}/': Endpoints.delete_Environments_insights_destroy
         '/api/environments/{project_id}/persisted_folder/{id}/': Endpoints.delete_Environments_persisted_folder_destroy
@@ -16426,7 +16426,7 @@ export type EndpointByMethod = {
         '/api/projects/{project_id}/file_system_shortcut/{id}/': Endpoints.delete_File_system_shortcut_destroy
         '/api/projects/{project_id}/groups_types/{group_type_index}/': Endpoints.delete_Groups_types_destroy
         '/api/projects/{project_id}/groups_types/{group_type_index}/metrics/{id}/': Endpoints.delete_Groups_types_metrics_destroy
-        '/api/projects/{project_id}/hog_functions/{id}/': Endpoints.delete_Hog_functions_destroy
+        '/api/projects/{project_id}/custom_functions/{id}/': Endpoints.delete_Custom_functions_destroy
         '/api/projects/{project_id}/insights/{insight_id}/sharing/passwords/{password_id}/': Endpoints.delete_Insights_sharing_passwords_destroy
         '/api/projects/{project_id}/insights/{id}/': Endpoints.delete_Insights_destroy
         '/api/projects/{project_id}/notebooks/{short_id}/': Endpoints.delete_Notebooks_destroy

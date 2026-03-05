@@ -6,7 +6,7 @@ from typing import Any
 import temporalio
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.llm_analytics.sentiment.activities import classify_sentiment_activity
 from posthog.temporal.llm_analytics.sentiment.constants import ACTIVITY_TIMEOUT_SECONDS, MAX_RETRY_ATTEMPTS
 from posthog.temporal.llm_analytics.sentiment.schema import ClassifySentimentInput
@@ -14,7 +14,7 @@ from posthog.temporal.llm_analytics.sentiment.schema import ClassifySentimentInp
 
 # Must match constants.WORKFLOW_NAME
 @temporalio.workflow.defn(name="llma-sentiment-classify")
-class ClassifySentimentWorkflow(PostHogWorkflow):
+class ClassifySentimentWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> ClassifySentimentInput:
         return ClassifySentimentInput(

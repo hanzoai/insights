@@ -11,7 +11,7 @@ class TestView(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event as event from events LIMIT 100",
                 },
             },
@@ -40,7 +40,7 @@ class TestView(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event as event from event_view LIMIT 100",
                 },
             },
@@ -53,7 +53,7 @@ class TestView(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select event as event from events LIMIT 100",
                 },
             },
@@ -64,7 +64,7 @@ class TestView(APIBaseTest):
             f"/api/environments/{self.team.id}/warehouse_saved_queries/" + view["id"],
             {
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select distinct_id as distinct_id from events LIMIT 100",
                 },
                 "edited_history_id": view["latest_history_id"],
@@ -92,8 +92,8 @@ class TestView(APIBaseTest):
     @patch(
         "products.data_warehouse.backend.models.table.DataWarehouseTable.get_columns",
         return_value={
-            "id": {"clickhouse": "String", "hogql": "StringDatabaseField", "valid": True},
-            "a_column": {"clickhouse": "String", "hogql": "StringDatabaseField", "valid": True},
+            "id": {"clickhouse": "String", "insightsql": "StringDatabaseField", "valid": True},
+            "a_column": {"clickhouse": "String", "insightsql": "StringDatabaseField", "valid": True},
         },
     )
     @patch(
@@ -122,7 +122,7 @@ class TestView(APIBaseTest):
             {
                 "name": "event_view",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"select id as id, a_column as a_column from whatever LIMIT 100",
                 },
             },

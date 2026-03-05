@@ -23,7 +23,7 @@ export function SlackNotConfiguredBanner(): JSX.Element {
         <LemonBanner type="info">
             <div className="flex justify-between gap-2 items-center">
                 <span>
-                    Slack is not yet configured for this project. Add PostHog to your Slack workspace to continue.
+                    Slack is not yet configured for this project. Add Insights to your Slack workspace to continue.
                 </span>
                 <Link
                     to={api.integrations.authorizeUrl({
@@ -141,7 +141,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                 }}
                 emptyStateComponent={
                     <p className="text-secondary italic p-1">
-                        No channels found. Make sure the PostHog Slack App is installed in the channel.{' '}
+                        No channels found. Make sure the Insights Slack App is installed in the channel.{' '}
                         <Link to="https://posthog.com/docs/cdp/destinations/slack" target="_blank">
                             See the docs for more information.
                         </Link>
@@ -165,7 +165,7 @@ export function SlackChannelPicker({ onChange, value, integration, disabled }: S
                 <LemonBanner type="info">
                     <div className="flex gap-2 items-center">
                         <span>
-                            The PostHog Slack App is not in this channel. Please add it to the channel otherwise
+                            The Insights Slack App is not in this channel. Please add it to the channel otherwise
                             Subscriptions will fail to be delivered.{' '}
                             <Link to="https://posthog.com/docs/webhooks/slack" target="_blank">
                                 See the Docs for more information

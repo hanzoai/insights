@@ -7,7 +7,7 @@ import { Identifier, Navigation } from './navigation'
 export const LOGIN_USERNAME = process.env.LOGIN_USERNAME || 'test@posthog.com'
 export const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD || '12345678'
 
-export type WindowWithPostHog = typeof globalThis & {
+export type WindowWithInsights = typeof globalThis & {
     POSTHOG_APP_CONTEXT: AppContext
 }
 
@@ -28,7 +28,7 @@ export const test = base.extend<{ page: Page }>({
         page.setAppContext = async function <K extends keyof AppContext>(key: K, value: AppContext[K]): Promise<void> {
             await page.evaluate(
                 ([key, value]) => {
-                    const appContext = (window as WindowWithPostHog).POSTHOG_APP_CONTEXT
+                    const appContext = (window as WindowWithInsights).POSTHOG_APP_CONTEXT
                     // @ts-expect-error - Type safety is handled by the generic constraint
                     appContext[key] = value
                 },

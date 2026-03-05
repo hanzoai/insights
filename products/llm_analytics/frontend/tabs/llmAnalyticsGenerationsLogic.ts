@@ -196,7 +196,7 @@ export const llmAnalyticsGenerationsLogic = kea<llmAnalyticsGenerationsLogicType
                     TaxonomicFilterGroupType.PersonProperties,
                     ...groupsTaxonomicTypes,
                     TaxonomicFilterGroupType.Cohorts,
-                    TaxonomicFilterGroupType.HogQLExpression,
+                    TaxonomicFilterGroupType.InsightsQLExpression,
                 ],
                 showExport: true,
                 showActions: false,

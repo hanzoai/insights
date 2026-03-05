@@ -10,7 +10,7 @@ import { BasePerson, ClickHousePerson, InternalPerson, RawPerson, TimestampForma
 import { logger } from '../../utils/logger'
 import { castTimestampOrNow } from '../../utils/utils'
 import { eventToPersonProperties } from '../../worker/ingestion/persons/person-property-utils'
-import { captureException } from '../posthog'
+import { captureException } from '../insights'
 
 export function unparsePersonPartial(person: Partial<InternalPerson>): Partial<RawPerson> {
     return {
@@ -99,7 +99,7 @@ export function personInitialAndUTMProperties(properties: Properties): Propertie
     }
 
     // For the purposes of $initial properties, $os_name is treated as a fallback alias of $os, starting August 2024
-    // It's a special case due to _some_ SDKs using $os_name: https://github.com/PostHog/posthog-js-lite/issues/244
+    // It's a special case due to _some_ SDKs using $os_name: https://github.com/Insights/insights-js-lite/issues/244
     const osName = properties.$os_name
     if (osName !== undefined) {
         if (!('$os' in properties)) {
@@ -135,7 +135,7 @@ export function generateKafkaPersonUpdateMessage(person: InternalPerson, isDelet
                     team_id: person.team_id,
                     is_identified: Number(person.is_identified),
                     is_deleted: Number(isDeleted),
-                    version: person.version + (isDeleted ? 100 : 0), // keep in sync with delete_person in posthog/models/person/util.py
+                    version: person.version + (isDeleted ? 100 : 0), // keep in sync with delete_person in insights/models/person/util.py
                     last_seen_at: person.last_seen_at
                         ? castTimestampOrNow(person.last_seen_at, TimestampFormat.ClickHouseSecondPrecision)
                         : null,
@@ -150,7 +150,7 @@ export function getFinalPostgresQuery(queryString: string, values: any[]): strin
     return queryString.replace(/\$([0-9]+)/g, (m, v) => JSON.stringify(values[parseInt(v) - 1]))
 }
 
-// keep in sync with posthog/posthog/api/utils.py::safe_clickhouse_string
+// keep in sync with insights/insights/api/utils.py::safe_clickhouse_string
 export function safeClickhouseString(str: string): string {
     // character is a surrogate
     return str.replace(/[\ud800-\udfff]/gu, (match) => {

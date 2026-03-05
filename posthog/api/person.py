@@ -332,8 +332,8 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
         _should_paginate = len(actor_ids) >= filter.limit
 
         # If the undocumented include_total param is set to true, we'll return the total count of people
-        # This is extra time and DB load, so we only do this when necessary, which is in PostHog 3000 navigation
-        # TODO: Use a more scalable solution before PostHog 3000 navigation is released, and remove this param
+        # This is extra time and DB load, so we only do this when necessary, which is in Insights 3000 navigation
+        # TODO: Use a more scalable solution before Insights 3000 navigation is released, and remove this param
         total_count: Optional[int] = None
         if "include_total" in request.GET:
             total_query, total_params = person_query.get_query(paginate=False, filter_future_persons=True)
@@ -426,14 +426,14 @@ class PersonViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
             OpenApiParameter(
                 "ids",
                 OpenApiTypes.OBJECT,
-                description="A list of PostHog person IDs, up to 1000 of them. We'll delete all the persons listed.",
+                description="A list of Person IDs, up to 1000 of them. We'll delete all the persons listed.",
             ),
         ],
     )
     @action(methods=["POST"], detail=False, required_scopes=["person:write"])
     def bulk_delete(self, request: request.Request, pk=None, **kwargs):
         """
-        This endpoint allows you to bulk delete persons, either by the PostHog person IDs or by distinct IDs. You can pass in a maximum of 1000 IDs per call. Only events captured before the request will be deleted.
+        This endpoint allows you to bulk delete persons, either by the Person IDs or by distinct IDs. You can pass in a maximum of 1000 IDs per call. Only events captured before the request will be deleted.
         """
 
         delete_events = bool(request.data.get("delete_events"))

@@ -1,10 +1,10 @@
 import '~/tests/helpers/mocks/date.mock'
 import { mockFetch } from '~/tests/helpers/mocks/request.mock'
 
-import { NATIVE_HOG_FUNCTIONS_BY_ID } from '../../index'
+import { NATIVE_CUSTOM_FUNCTIONS_BY_ID } from '../../index'
 import { TemplateTester, generateTestData } from '../../test/test-helpers'
 
-const template = NATIVE_HOG_FUNCTIONS_BY_ID['native-webhook']
+const template = NATIVE_CUSTOM_FUNCTIONS_BY_ID['native-webhook']
 describe(`${template.name} template`, () => {
     const tester = new TemplateTester({ ...template, code: '', code_language: 'javascript' })
     beforeEach(async () => {
@@ -34,7 +34,7 @@ describe(`${template.name} template`, () => {
             [
               {
                 "level": "debug",
-                "message": "config, {"method":"POST","body":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.posthog.com/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@posthog.com"},"url":"https://us.posthog.com/projects/1/persons/1234"}},"headers":{"Content-Type":"application/json"},"debug":false,"debug_mode":true,"url":"https://example.com/webhook"}",
+                "message": "config, {"method":"POST","body":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.hanzo.ai/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@hanzo.ai"},"url":"https://us.hanzo.ai/projects/1/persons/1234"}},"headers":{"Content-Type":"application/json"},"debug":false,"debug_mode":true,"url":"https://example.com/webhook"}",
                 "timestamp": "2025-01-01T00:00:00.000Z",
               },
               {
@@ -44,12 +44,12 @@ describe(`${template.name} template`, () => {
               },
               {
                 "level": "debug",
-                "message": "options, {"method":"POST","headers":{"Content-Type":"application/json"},"json":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.posthog.com/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@posthog.com"},"url":"https://us.posthog.com/projects/1/persons/1234"}}}",
+                "message": "options, {"method":"POST","headers":{"Content-Type":"application/json"},"json":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.hanzo.ai/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@hanzo.ai"},"url":"https://us.hanzo.ai/projects/1/persons/1234"}}}",
                 "timestamp": "2025-01-01T00:00:00.000Z",
               },
               {
                 "level": "debug",
-                "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"PostHog.com/1.0","Content-Type":"application/json"},"body":"{\\"event\\":{\\"uuid\\":\\"event-id\\",\\"event\\":\\"event-name\\",\\"distinct_id\\":\\"distinct-id\\",\\"properties\\":{\\"$current_url\\":\\"https://example.com\\"},\\"timestamp\\":\\"2024-01-01T00:00:00Z\\",\\"elements_chain\\":\\"\\",\\"url\\":\\"https://us.posthog.com/projects/1/events/1234\\"},\\"person\\":{\\"id\\":\\"person-id\\",\\"name\\":\\"person-name\\",\\"properties\\":{\\"email\\":\\"example@posthog.com\\"},\\"url\\":\\"https://us.posthog.com/projects/1/persons/1234\\"}}"}",
+                "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"Insights.com/1.0","Content-Type":"application/json"},"body":"{\\"event\\":{\\"uuid\\":\\"event-id\\",\\"event\\":\\"event-name\\",\\"distinct_id\\":\\"distinct-id\\",\\"properties\\":{\\"$current_url\\":\\"https://example.com\\"},\\"timestamp\\":\\"2024-01-01T00:00:00Z\\",\\"elements_chain\\":\\"\\",\\"url\\":\\"https://us.hanzo.ai/projects/1/events/1234\\"},\\"person\\":{\\"id\\":\\"person-id\\",\\"name\\":\\"person-name\\",\\"properties\\":{\\"email\\":\\"example@hanzo.ai\\"},\\"url\\":\\"https://us.hanzo.ai/projects/1/persons/1234\\"}}"}",
                 "timestamp": "2025-01-01T00:00:00.000Z",
               },
               {
@@ -81,7 +81,7 @@ describe(`${template.name} template`, () => {
             [
               {
                 "level": "debug",
-                "message": "config, {"method":"POST","body":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.posthog.com/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@posthog.com"},"url":"https://us.posthog.com/projects/1/persons/1234"}},"headers":{"Content-Type":"application/json"},"debug":false,"debug_mode":true,"url":"http://jaj.mu/iroti"}",
+                "message": "config, {"method":"POST","body":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.hanzo.ai/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@hanzo.ai"},"url":"https://us.hanzo.ai/projects/1/persons/1234"}},"headers":{"Content-Type":"application/json"},"debug":false,"debug_mode":true,"url":"http://jaj.mu/iroti"}",
                 "timestamp": "2025-01-01T00:00:00.000Z",
               },
               {
@@ -91,12 +91,12 @@ describe(`${template.name} template`, () => {
               },
               {
                 "level": "debug",
-                "message": "options, {"method":"POST","headers":{"Content-Type":"application/json"},"json":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.posthog.com/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@posthog.com"},"url":"https://us.posthog.com/projects/1/persons/1234"}}}",
+                "message": "options, {"method":"POST","headers":{"Content-Type":"application/json"},"json":{"event":{"uuid":"event-id","event":"event-name","distinct_id":"distinct-id","properties":{"$current_url":"https://example.com"},"timestamp":"2024-01-01T00:00:00Z","elements_chain":"","url":"https://us.hanzo.ai/projects/1/events/1234"},"person":{"id":"person-id","name":"person-name","properties":{"email":"example@hanzo.ai"},"url":"https://us.hanzo.ai/projects/1/persons/1234"}}}",
                 "timestamp": "2025-01-01T00:00:00.000Z",
               },
               {
                 "level": "debug",
-                "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"PostHog.com/1.0","Content-Type":"application/json"},"body":"{\\"event\\":{\\"uuid\\":\\"event-id\\",\\"event\\":\\"event-name\\",\\"distinct_id\\":\\"distinct-id\\",\\"properties\\":{\\"$current_url\\":\\"https://example.com\\"},\\"timestamp\\":\\"2024-01-01T00:00:00Z\\",\\"elements_chain\\":\\"\\",\\"url\\":\\"https://us.posthog.com/projects/1/events/1234\\"},\\"person\\":{\\"id\\":\\"person-id\\",\\"name\\":\\"person-name\\",\\"properties\\":{\\"email\\":\\"example@posthog.com\\"},\\"url\\":\\"https://us.posthog.com/projects/1/persons/1234\\"}}"}",
+                "message": "fetchOptions, {"method":"POST","headers":{"User-Agent":"Insights.com/1.0","Content-Type":"application/json"},"body":"{\\"event\\":{\\"uuid\\":\\"event-id\\",\\"event\\":\\"event-name\\",\\"distinct_id\\":\\"distinct-id\\",\\"properties\\":{\\"$current_url\\":\\"https://example.com\\"},\\"timestamp\\":\\"2024-01-01T00:00:00Z\\",\\"elements_chain\\":\\"\\",\\"url\\":\\"https://us.hanzo.ai/projects/1/events/1234\\"},\\"person\\":{\\"id\\":\\"person-id\\",\\"name\\":\\"person-name\\",\\"properties\\":{\\"email\\":\\"example@hanzo.ai\\"},\\"url\\":\\"https://us.hanzo.ai/projects/1/persons/1234\\"}}"}",
                 "timestamp": "2025-01-01T00:00:00.000Z",
               },
               {

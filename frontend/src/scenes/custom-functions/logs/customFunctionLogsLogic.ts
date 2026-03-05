@@ -93,7 +93,7 @@ const loadClickhouseEvents = async (
 }
 
 export const customFunctionLogsLogic = kea<customFunctionLogsLogicType>([
-    path((key) => ['scenes', 'pipeline', 'hogfunctions', 'logs', 'customFunctionLogsLogic', key]),
+    path((key) => ['scenes', 'pipeline', 'customfunctions', 'logs', 'customFunctionLogsLogic', key]),
     props({} as LogsViewerLogicProps), // TODO: Remove `stage` from props, it isn't needed here for anything
     key(({ sourceType, sourceId }) => `${sourceType}:${sourceId}`),
     connect((props: LogsViewerLogicProps) => ({

@@ -1,13 +1,13 @@
 import { PluginEvent } from '@posthog/plugin-scaffold'
 
-import { HogTransformerService, TransformationResult } from '../../../cdp/hog-transformations/hog-transformer.service'
+import { ScriptTransformerService, TransformationResult } from '../../../cdp/script-transformations/script-transformer.service'
 
 export async function transformEventStep(
     event: PluginEvent,
-    hogTransformer: HogTransformerService | null
+    scriptTransformer: ScriptTransformerService | null
 ): Promise<TransformationResult> {
-    if (!hogTransformer) {
+    if (!scriptTransformer) {
         return { event, invocationResults: [] }
     }
-    return await hogTransformer.transformEventAndProduceMessages(event)
+    return await scriptTransformer.transformEventAndProduceMessages(event)
 }

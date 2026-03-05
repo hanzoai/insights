@@ -21,8 +21,8 @@ from posthog.models import User
 from posthog.models.organization_domain import OrganizationDomain
 
 from ee.api.scim.auth import SCIMBearerTokenAuthentication
-from ee.api.scim.group import PostHogSCIMGroup
-from ee.api.scim.user import PostHogSCIMUser, SCIMUserConflict
+from ee.api.scim.group import InsightsSCIMGroup
+from ee.api.scim.user import InsightsSCIMUser, SCIMUserConflict
 from ee.api.scim.utils import detect_identity_provider, mask_scim_filter, mask_scim_payload, normalize_scim_operations
 from ee.models.rbac.role import Role
 from ee.models.scim_provisioned_user import SCIMProvisionedUser
@@ -109,7 +109,7 @@ class SCIMBaseView(APIView):
         return super().handle_exception(exc)
 
 
-class PostHogUserFilterQuery(UserFilterQuery):
+class InsightsUserFilterQuery(UserFilterQuery):
     attr_map = SCIM_USER_ATTR_MAP
 
     @classmethod
@@ -135,7 +135,7 @@ class PostHogUserFilterQuery(UserFilterQuery):
         )
 
 
-class PostHogGroupFilterQuery(GroupFilterQuery):
+class InsightsGroupFilterQuery(GroupFilterQuery):
     attr_map = SCIM_GROUP_ATTR_MAP
 
     @classmethod
@@ -157,8 +157,8 @@ class SCIMUsersView(SCIMBaseView):
 
         if filter_param:
             try:
-                queryset = PostHogUserFilterQuery.search(filter_param, request)
-                users = [PostHogSCIMUser(u, organization_domain) for u in queryset]
+                queryset = InsightsUserFilterQuery.search(filter_param, request)
+                users = [InsightsSCIMUser(u, organization_domain) for u in queryset]
             except Exception as e:
                 capture_exception(
                     e,
@@ -171,7 +171,7 @@ class SCIMUsersView(SCIMBaseView):
                 )
                 users = []
         else:
-            users = PostHogSCIMUser.get_for_organization(organization_domain)
+            users = InsightsSCIMUser.get_for_organization(organization_domain)
 
         return Response(
             {
@@ -188,7 +188,7 @@ class SCIMUsersView(SCIMBaseView):
 
         try:
             identity_provider = detect_identity_provider(request)
-            scim_user = PostHogSCIMUser.from_dict(request.data, organization_domain, identity_provider)
+            scim_user = InsightsSCIMUser.from_dict(request.data, organization_domain, identity_provider)
             return Response(scim_user.to_dict(), status=status.HTTP_201_CREATED)
         except SCIMUserConflict:
             return Response(
@@ -212,7 +212,7 @@ class SCIMUsersView(SCIMBaseView):
 
 
 class SCIMUserDetailView(SCIMBaseView):
-    def get_object(self, user_id: int) -> PostHogSCIMUser:
+    def get_object(self, user_id: int) -> InsightsSCIMUser:
         organization_domain = cast(OrganizationDomain, self.request.auth)
         user = User.objects.filter(
             Q(organization_membership__organization=organization_domain.organization)
@@ -221,7 +221,7 @@ class SCIMUserDetailView(SCIMBaseView):
         ).first()
         if not user:
             raise User.DoesNotExist()
-        return PostHogSCIMUser(user, organization_domain)
+        return InsightsSCIMUser(user, organization_domain)
 
     def handle_exception(self, exc):
         if isinstance(exc, User.DoesNotExist):
@@ -292,8 +292,8 @@ class SCIMGroupsView(SCIMBaseView):
 
         if filter_param:
             try:
-                queryset = PostHogGroupFilterQuery.search(filter_param, request)
-                groups = [PostHogSCIMGroup(role, organization_domain) for role in queryset]
+                queryset = InsightsGroupFilterQuery.search(filter_param, request)
+                groups = [InsightsSCIMGroup(role, organization_domain) for role in queryset]
             except Exception as e:
                 capture_exception(
                     e,
@@ -306,7 +306,7 @@ class SCIMGroupsView(SCIMBaseView):
                 )
                 groups = []
         else:
-            groups = PostHogSCIMGroup.get_for_organization(organization_domain)
+            groups = InsightsSCIMGroup.get_for_organization(organization_domain)
 
         return Response(
             {
@@ -321,7 +321,7 @@ class SCIMGroupsView(SCIMBaseView):
     def post(self, request: Request, domain_id: str) -> Response:
         organization_domain = cast(OrganizationDomain, request.auth)
         try:
-            scim_group = PostHogSCIMGroup.from_dict(request.data, organization_domain)
+            scim_group = InsightsSCIMGroup.from_dict(request.data, organization_domain)
             return Response(scim_group.to_dict(), status=status.HTTP_201_CREATED)
         except ValueError as e:
             capture_exception(
@@ -340,12 +340,12 @@ class SCIMGroupsView(SCIMBaseView):
 
 
 class SCIMGroupDetailView(SCIMBaseView):
-    def get_object(self, group_id: str) -> PostHogSCIMGroup:
+    def get_object(self, group_id: str) -> InsightsSCIMGroup:
         organization_domain = cast(OrganizationDomain, self.request.auth)
         role = Role.objects.filter(id=group_id, organization=organization_domain.organization).first()
         if not role:
             raise Role.DoesNotExist()
-        return PostHogSCIMGroup(role, organization_domain)
+        return InsightsSCIMGroup(role, organization_domain)
 
     def handle_exception(self, exc):
         if isinstance(exc, Role.DoesNotExist):
@@ -440,8 +440,8 @@ class SCIMResourceTypesView(SCIMBaseView):
                 "schemas": [constants.SchemaURI.LIST_RESPONSE],
                 "totalResults": 2,
                 "Resources": [
-                    PostHogSCIMUser.resource_type_dict(request),
-                    PostHogSCIMGroup.resource_type_dict(request),
+                    InsightsSCIMUser.resource_type_dict(request),
+                    InsightsSCIMGroup.resource_type_dict(request),
                 ],
             }
         )

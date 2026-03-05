@@ -91,7 +91,7 @@ export const messageTemplateLogic = kea<messageTemplateLogicType>([
                 if (!props.messageId) {
                     return null
                 }
-                return await api.hogFunctions.get(props.messageId)
+                return await api.customFunctions.get(props.messageId)
             },
         },
     })),

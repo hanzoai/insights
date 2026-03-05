@@ -180,28 +180,28 @@ fun getPropValueTypeDefinition(name, propValue) {
                 'name': name,
                 'label': name,
                 'type': 'datetime',
-                'description': f'{name} - (created by PostHog)'
+                'description': f'{name} - (created by Insights)'
             }
         }
         return {
             'name': name,
             'label': name,
             'type': 'string',
-            'description': f'{name} - (created by PostHog)'
+            'description': f'{name} - (created by Insights)'
         }
     } else if (propType == 'integer' or propType == 'float') {
         return {
             'name': name,
             'label': name,
             'type': 'number',
-            'description': f'{name} - (created by PostHog)'
+            'description': f'{name} - (created by Insights)'
         }
     } else if (propType == 'boolean') {
         return {
             'name': name,
             'label': name,
             'type': 'enumeration',
-            'description': f'{name} - (created by PostHog)',
+            'description': f'{name} - (created by Insights)',
             'options': [
                 {
                     'label': 'true',
@@ -231,7 +231,7 @@ if (eventSchema.status >= 400) {
     let body := {
         'label': eventName,
         'name': eventName,
-        'description': f'{eventName} - (created by PostHog)',
+        'description': f'{eventName} - (created by Insights)',
         'primaryObject': 'CONTACT',
         'propertyDefinitions': []
     }
@@ -365,12 +365,12 @@ if (res.status >= 400) {
 
 
 class TemplateHubspotMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/hubspot-plugin"
+    plugin_url = "https://github.com/Insights/hubspot-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         # Must reauthenticate with HubSpot
@@ -388,7 +388,7 @@ class TemplateHubspotMigrator(CustomFunctionTemplateMigrator):
             "secret": True,
             "required": True,
         }
-        hf["hog"] = hf["hog"].replace("inputs.oauth.access_token", "inputs.access_token")
+        hf["custom_script"] = hf["custom_script"].replace("inputs.oauth.access_token", "inputs.access_token")
 
         hf["inputs"] = {
             "access_token": {"value": hubspotAccessToken},

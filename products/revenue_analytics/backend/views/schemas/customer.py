@@ -1,6 +1,6 @@
 from posthog.schema import DatabaseSchemaManagedViewTableKind
 
-from posthog.hogql.database.models import DateTimeDatabaseField, StringDatabaseField, StringJSONDatabaseField
+from posthog.insightsql.database.models import DateTimeDatabaseField, StringDatabaseField, StringJSONDatabaseField
 
 from ._definitions import FieldsDict, Schema
 

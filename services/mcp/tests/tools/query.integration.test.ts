@@ -8,7 +8,7 @@ import type { Context } from '@/tools/types'
 import {
     type CreatedResources,
     SAMPLE_FUNNEL_QUERIES,
-    SAMPLE_HOGQL_QUERIES,
+    SAMPLE_INSIGHTSQL_QUERIES,
     SAMPLE_TREND_QUERIES,
     TEST_ORG_ID,
     TEST_PROJECT_ID,
@@ -53,9 +53,9 @@ function assertQueryResponse(response: any, expectedQueryKind?: string): { resul
 }
 
 /**
- * Asserts HogQL query response structure (has columns and nested results)
+ * Asserts InsightsQL query response structure (has columns and nested results)
  */
-function assertHogQLResults(results: any): { columns: string[]; rows: any[][] } {
+function assertInsightsQLResults(results: any): { columns: string[]; rows: any[][] } {
     expect(results).toHaveProperty('columns')
     expect(results).toHaveProperty('results')
     expect(Array.isArray(results.columns)).toBe(true)
@@ -103,32 +103,32 @@ describe('Query Integration Tests', () => {
         await cleanupResources(client, testProjectId, createdResources)
     })
 
-    describe('HogQL Query Execution', () => {
-        it('should execute pageviews HogQL query successfully', async () => {
-            const result = await executeQuery(context, SAMPLE_HOGQL_QUERIES.pageviews, 'pageviews HogQL')
+    describe('InsightsQL Query Execution', () => {
+        it('should execute pageviews InsightsQL query successfully', async () => {
+            const result = await executeQuery(context, SAMPLE_INSIGHTSQL_QUERIES.pageviews, 'pageviews InsightsQL')
             const { results } = assertQueryResponse(result)
-            const { columns } = assertHogQLResults(results)
+            const { columns } = assertInsightsQLResults(results)
 
             // Should have event and count columns based on the query
             expect(columns).toContain('event')
             expect(columns).toContain('event_count')
         })
 
-        it('should execute topEvents HogQL query successfully', async () => {
-            const result = await executeQuery(context, SAMPLE_HOGQL_QUERIES.topEvents, 'topEvents HogQL')
+        it('should execute topEvents InsightsQL query successfully', async () => {
+            const result = await executeQuery(context, SAMPLE_INSIGHTSQL_QUERIES.topEvents, 'topEvents InsightsQL')
             const { results } = assertQueryResponse(result)
-            const { columns } = assertHogQLResults(results)
+            const { columns } = assertInsightsQLResults(results)
 
             // Should have event and count columns based on the query
             expect(columns).toContain('event')
             expect(columns).toContain('event_count')
         })
 
-        it('should handle invalid HogQL query with invalid node', async () => {
+        it('should handle invalid InsightsQL query with invalid node', async () => {
             const invalidQuery = {
                 kind: 'DataVisualizationNode' as const,
                 source: {
-                    kind: 'HogQLQuery' as const,
+                    kind: 'InsightsQLQuery' as const,
                     query: "SELECT * FROM invalid_table WHERE invalid_column = 'test'",
                     filters: {
                         dateRange: {

@@ -340,19 +340,19 @@ export function DataTable({
                                         type="tertiary"
                                         fullWidth
                                         onChange={(v, g) => {
-                                            const hogQl = isActorsQuery(query.source)
+                                            const insightsQl = isActorsQuery(query.source)
                                                 ? taxonomicPersonFilterToInsightsQL(g, v)
                                                 : taxonomicEventFilterToInsightsQL(g, v)
                                             if (
                                                 setQuery &&
-                                                hogQl &&
+                                                insightsQl &&
                                                 sourceFeatures.has(QueryFeature.selectAndOrderByColumns)
                                             ) {
                                                 // Typecasting to a query type with select and order_by fields.
                                                 // The actual query may or may not be an events query.
                                                 const source = query.source as EventsQuery
                                                 const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
-                                                const isAggregation = isInsightsQLAggregation(hogQl)
+                                                const isAggregation = isInsightsQLAggregation(insightsQl)
                                                 const isOrderBy = source.orderBy?.[0] === key
                                                 const isDescOrderBy = source.orderBy?.[0] === `${key} DESC`
                                                 setQuery({
@@ -360,7 +360,7 @@ export function DataTable({
                                                     source: {
                                                         ...source,
                                                         select: columns
-                                                            .map((s, i) => (i === index ? hogQl : s))
+                                                            .map((s, i) => (i === index ? insightsQl : s))
                                                             .filter((c) =>
                                                                 isAggregation
                                                                     ? c !== '*' && c !== 'person.$delete'
@@ -368,7 +368,7 @@ export function DataTable({
                                                             ),
                                                         orderBy:
                                                             isOrderBy || isDescOrderBy
-                                                                ? [isDescOrderBy ? `${hogQl} DESC` : hogQl]
+                                                                ? [isDescOrderBy ? `${insightsQl} DESC` : insightsQl]
                                                                 : source.orderBy,
                                                     },
                                                 })
@@ -454,17 +454,17 @@ export function DataTable({
                                         type="tertiary"
                                         fullWidth
                                         onChange={(v, g) => {
-                                            const hogQl = isActorsQuery(query.source)
+                                            const insightsQl = isActorsQuery(query.source)
                                                 ? taxonomicPersonFilterToInsightsQL(g, v)
                                                 : isGroupsQuery(query.source)
                                                   ? taxonomicGroupFilterToInsightsQL(g, v)
                                                   : taxonomicEventFilterToInsightsQL(g, v)
                                             if (
                                                 setQuery &&
-                                                hogQl &&
+                                                insightsQl &&
                                                 sourceFeatures.has(QueryFeature.selectAndOrderByColumns)
                                             ) {
-                                                const isAggregation = isInsightsQLAggregation(hogQl)
+                                                const isAggregation = isInsightsQLAggregation(insightsQl)
                                                 const source = query.source as EventsQuery
                                                 const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
                                                 setQuery({
@@ -473,7 +473,7 @@ export function DataTable({
                                                         ...source,
                                                         select: [
                                                             ...columns.slice(0, index),
-                                                            hogQl,
+                                                            insightsQl,
                                                             ...columns.slice(index),
                                                         ].filter((c) =>
                                                             isAggregation ? c !== '*' && c !== 'person.$delete' : true
@@ -493,17 +493,17 @@ export function DataTable({
                                         type="tertiary"
                                         fullWidth
                                         onChange={(v, g) => {
-                                            const hogQl = isActorsQuery(query.source)
+                                            const insightsQl = isActorsQuery(query.source)
                                                 ? taxonomicPersonFilterToInsightsQL(g, v)
                                                 : isGroupsQuery(query.source)
                                                   ? taxonomicGroupFilterToInsightsQL(g, v)
                                                   : taxonomicEventFilterToInsightsQL(g, v)
                                             if (
                                                 setQuery &&
-                                                hogQl &&
+                                                insightsQl &&
                                                 sourceFeatures.has(QueryFeature.selectAndOrderByColumns)
                                             ) {
-                                                const isAggregation = isInsightsQLAggregation(hogQl)
+                                                const isAggregation = isInsightsQLAggregation(insightsQl)
                                                 const source = query.source as EventsQuery
                                                 const columns = columnsInLemonTable ?? getDataNodeDefaultColumns(source)
                                                 setQuery?.({
@@ -512,7 +512,7 @@ export function DataTable({
                                                         ...source,
                                                         select: [
                                                             ...columns.slice(0, index + 1),
-                                                            hogQl,
+                                                            insightsQl,
                                                             ...columns.slice(index + 1),
                                                         ].filter((c) =>
                                                             isAggregation ? c !== '*' && c !== 'person.$delete' : true

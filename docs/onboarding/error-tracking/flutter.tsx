@@ -22,7 +22,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                 </CalloutBox>
                 <Markdown>
                     {dedent`
-                        You can autocapture exceptions by configuring the \`errorTrackingConfig\` when setting up PostHog:
+                        You can autocapture exceptions by configuring the \`errorTrackingConfig\` when setting up Insights:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -31,7 +31,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             language: 'dart',
                             file: 'Dart',
                             code: dedent`
-                              final config = PostHogConfig('<ph_project_api_key>');
+                              final config = InsightsConfig('<ph_project_api_key>');
                               // Enable exception autocapture
                               config.errorTrackingConfig.captureFlutterErrors = true;
                               config.errorTrackingConfig.capturePlatformDispatcherErrors = true;
@@ -82,7 +82,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 // Your awesome code that may throw
                                 await someRiskyOperation();
                               } catch (exception, stackTrace) {
-                                // Capture the exception with PostHog
+                                // Capture the exception with Insights
                                 await Posthog().captureException(
                                   error: exception,
                                   stackTrace: stackTrace,
@@ -102,7 +102,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
                         ### Error tracking configuration
 
-                        You can configure error tracking behavior when setting up PostHog:
+                        You can configure error tracking behavior when setting up Insights:
                     `}
                 </Markdown>
                 <CalloutBox type="fyi" title="Flutter web apps use minified stack trace frames">
@@ -118,7 +118,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                             language: 'dart',
                             file: 'Dart',
                             code: dedent`
-                              final config = PostHogConfig('<ph_project_api_key>');
+                              final config = InsightsConfig('<ph_project_api_key>');
                               // Configure error tracking
                               config.errorTrackingConfig.inAppIncludes.add('package:your_app');
                               config.errorTrackingConfig.inAppExcludes.add('package:third_party_lib');
@@ -138,7 +138,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                         | \`inAppExcludes\` | List of package names to be excluded from inApp frames |
                         | \`inAppByDefault\` | Whether frames are considered inApp by default when their origin cannot be determined |
 
-                        \`inApp\` frames are stack trace frames that belong to your application code (as opposed to third-party libraries or system code). These are highlighted in the PostHog error tracking interface to help you focus on the relevant parts of the stack trace.
+                        \`inApp\` frames are stack trace frames that belong to your application code (as opposed to third-party libraries or system code). These are highlighted in the Insights error tracking interface to help you focus on the relevant parts of the stack trace.
                     `}
                 </Markdown>
             </>
@@ -152,9 +152,9 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
         content: (
             <Markdown>
                 {dedent`
-                    Before proceeding, let's make sure exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),
@@ -176,7 +176,7 @@ export const getFlutterSteps = (ctx: OnboardingComponentsContext): StepDefinitio
                       - No background isolate error capture
 
                       These features will be added in future releases. We recommend you stay 
-                      up to date with the latest version of the PostHog Flutter SDK.
+                      up to date with the latest version of the Insights Flutter SDK.
                   `}
               </Markdown>
         ),

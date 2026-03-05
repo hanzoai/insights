@@ -4,7 +4,7 @@ import { Histogram, Summary, exponentialBuckets } from 'prom-client'
 import { defaultConfig } from '~/config/config'
 import { timeoutGuard } from '~/utils/db/utils'
 import { logger } from '~/utils/logger'
-import { captureException } from '~/utils/posthog'
+import { captureException } from '~/utils/insights'
 
 const instrumentedFnSummary = new Summary({
     name: 'instrumented_fn_duration_ms',

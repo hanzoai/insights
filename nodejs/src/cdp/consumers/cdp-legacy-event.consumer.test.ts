@@ -8,10 +8,10 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import { PostgresUse } from '../../utils/db/postgres'
-import { createHogExecutionGlobals } from '../_tests/fixtures'
+import { createScriptExecutionGlobals } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
-import { HogFunctionInvocationGlobals } from '../types'
+import { CustomFunctionInvocationGlobals } from '../types'
 import { CdpLegacyEventsConsumer, LightweightPluginConfig } from './cdp-legacy-event.consumer'
 
 jest.setTimeout(5000)
@@ -22,7 +22,7 @@ describe('CdpLegacyEventsConsumer', () => {
     let hub: Hub
     let team: Team
     let pluginConfig: LightweightPluginConfig
-    let invocation: HogFunctionInvocationGlobals
+    let invocation: CustomFunctionInvocationGlobals
     let uniquePluginId: number
 
     const customerIoPlugin = DESTINATION_PLUGINS_BY_ID['plugin-customerio-plugin']
@@ -43,7 +43,7 @@ describe('CdpLegacyEventsConsumer', () => {
         // Create a plugin in the database with onEvent capability
         const { rows: pluginRows } = await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO posthog_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
+            `INSERT INTO insights_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
              VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13::jsonb)
              RETURNING *`,
             [
@@ -52,7 +52,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 'Customer.io',
                 'custom',
                 false,
-                'https://github.com/PostHog/customerio-plugin',
+                'https://github.com/Insights/customerio-plugin',
                 JSON.stringify({}),
                 false,
                 false,
@@ -76,7 +76,7 @@ describe('CdpLegacyEventsConsumer', () => {
             config: {
                 customerioSiteId: '1234567890',
                 customerioToken: 'cio-token',
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
             },
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -84,7 +84,7 @@ describe('CdpLegacyEventsConsumer', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'INSERT INTO posthog_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
+            'INSERT INTO insights_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
             [
                 pluginConfigData.id,
                 pluginConfigData.team_id,
@@ -104,15 +104,15 @@ describe('CdpLegacyEventsConsumer', () => {
         const { rows } = await hub.postgres.query(
             PostgresUse.COMMON_READ,
             `SELECT
-                posthog_pluginconfig.id,
-                posthog_pluginconfig.team_id,
-                posthog_plugin.capabilities
-            FROM posthog_pluginconfig
-            LEFT JOIN posthog_plugin ON posthog_plugin.id = posthog_pluginconfig.plugin_id
-            WHERE posthog_pluginconfig.id = $1
-                AND posthog_pluginconfig.enabled = 't'
-                AND (posthog_pluginconfig.deleted IS NULL OR posthog_pluginconfig.deleted != 't')
-                AND posthog_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
+                insights_pluginconfig.id,
+                insights_pluginconfig.team_id,
+                insights_plugin.capabilities
+            FROM insights_pluginconfig
+            LEFT JOIN insights_plugin ON insights_plugin.id = insights_pluginconfig.plugin_id
+            WHERE insights_pluginconfig.id = $1
+                AND insights_pluginconfig.enabled = 't'
+                AND (insights_pluginconfig.deleted IS NULL OR insights_pluginconfig.deleted != 't')
+                AND insights_plugin.capabilities->'methods' @> '["onEvent"]'::jsonb`,
             [pluginConfigData.id],
             'verifyPluginConfig'
         )
@@ -136,7 +136,7 @@ describe('CdpLegacyEventsConsumer', () => {
             })
         )
 
-        invocation = createHogExecutionGlobals({
+        invocation = createScriptExecutionGlobals({
             project: {
                 id: team.id,
                 name: team.name,
@@ -147,7 +147,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 event: '$pageview',
                 distinct_id: 'distinct_id',
                 properties: {
-                    $current_url: 'https://posthog.com',
+                    $current_url: 'https://hanzo.ai',
                     $lib_version: '1.0.0',
                 },
                 timestamp: fixedTime.toISO(),
@@ -164,8 +164,8 @@ describe('CdpLegacyEventsConsumer', () => {
         jest.useRealTimers()
     })
 
-    describe('convertPluginConfigToHogFunction', () => {
-        it('should convert a lightweight plugin config to a hog function', () => {
+    describe('convertPluginConfigToCustomFunction', () => {
+        it('should convert a lightweight plugin config to a custom function', () => {
             const lightweightConfig = {
                 id: pluginConfig.id,
                 team_id: team.id,
@@ -174,17 +174,17 @@ describe('CdpLegacyEventsConsumer', () => {
                 config: {
                     customerioSiteId: '1234567890',
                     customerioToken: 'cio-token',
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                 },
                 created_at: '2025-01-01T00:00:00.000Z',
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/PostHog/customerio-plugin',
+                    url: 'https://github.com/Insights/customerio-plugin',
                 },
             }
 
-            const result = consumer['convertPluginConfigToHogFunction'](lightweightConfig)
+            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig)
 
             expect(result).toBeTruthy()
             expect(result?.template_id).toBe('plugin-customerio-plugin')
@@ -193,7 +193,7 @@ describe('CdpLegacyEventsConsumer', () => {
             expect(result?.inputs).toMatchObject({
                 customerioSiteId: { value: '1234567890' },
                 customerioToken: { value: 'cio-token' },
-                email: { value: 'test@posthog.com' },
+                email: { value: 'test@hanzo.ai' },
                 legacy_plugin_config_id: { value: pluginConfig.id },
             })
         })
@@ -212,7 +212,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/PostHog/customerio-plugin',
+                    url: 'https://github.com/Insights/customerio-plugin',
                 },
             }
 
@@ -224,7 +224,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 customField: 'value123',
             }
 
-            const result = consumer['convertPluginConfigToHogFunction'](lightweightConfig, attachments)
+            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig, attachments)
 
             expect(result).toBeTruthy()
             expect(result?.inputs).toMatchObject({
@@ -252,7 +252,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 updated_at: '2025-01-01T00:00:00.000Z',
                 plugin: {
                     id: pluginConfig.plugin_id,
-                    url: 'https://github.com/PostHog/customerio-plugin',
+                    url: 'https://github.com/Insights/customerio-plugin',
                 },
             }
 
@@ -262,7 +262,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const result = consumer['convertPluginConfigToHogFunction'](lightweightConfig, attachments)
+            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig, attachments)
 
             expect(result).toBeTruthy()
             expect(result?.inputs).toMatchObject({
@@ -287,7 +287,7 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const result = consumer['convertPluginConfigToHogFunction'](lightweightConfig)
+            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig)
 
             expect(result?.template_id).toBe('plugin-semver-flattener')
         })
@@ -302,20 +302,20 @@ describe('CdpLegacyEventsConsumer', () => {
                 created_at: '2025-01-01T00:00:00.000Z',
             }
 
-            const result = consumer['convertPluginConfigToHogFunction'](lightweightConfig)
+            const result = consumer['convertPluginConfigToCustomFunction'](lightweightConfig)
 
             expect(result).toBeNull()
         })
     })
 
-    describe('getLegacyPluginHogFunctionInvocations', () => {
-        it('should load hog functions and create invocations', async () => {
+    describe('getLegacyPluginCustomFunctionInvocations', () => {
+        it('should load custom functions and create invocations', async () => {
             // This test validates the full flow
-            const invocations = await consumer['getLegacyPluginHogFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
 
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
-            expect(invocations[0].hogFunction.template_id).toBe('plugin-customerio-plugin')
+            expect(invocations[0].customFunction.template_id).toBe('plugin-customerio-plugin')
 
             // Check that the loader was called and cached
             const cachedConfigs = consumer['pluginConfigsLoader'].getCache()[team.id.toString()]
@@ -333,15 +333,15 @@ describe('CdpLegacyEventsConsumer', () => {
                 },
             }
 
-            const invocations = await consumer['getLegacyPluginHogFunctionInvocations'](emptyInvocation)
+            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](emptyInvocation)
             expect(invocations).toEqual([])
         })
 
-        it('should load attachments and include them in hog function inputs', async () => {
+        it('should load attachments and include them in custom function inputs', async () => {
             // Insert an attachment for the plugin config
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `INSERT INTO posthog_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
+                `INSERT INTO insights_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
                  VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     1001,
@@ -359,23 +359,23 @@ describe('CdpLegacyEventsConsumer', () => {
             consumer['pluginConfigsLoader'].clear()
 
             // Get invocations
-            const invocations = await consumer['getLegacyPluginHogFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
 
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
 
             // Check that the attachment was loaded into inputs
-            const hogFunction = invocations[0].hogFunction
-            expect(hogFunction.inputs).toBeTruthy()
-            expect(hogFunction.inputs?.mappings).toBeTruthy()
-            expect(hogFunction.inputs?.mappings?.value).toEqual({
+            const customFunction = invocations[0].customFunction
+            expect(customFunction.inputs).toBeTruthy()
+            expect(customFunction.inputs?.mappings).toBeTruthy()
+            expect(customFunction.inputs?.mappings?.value).toEqual({
                 event1: 'action1',
                 event2: 'action2',
             })
 
             // Verify other inputs are still present
-            expect(hogFunction.inputs?.customerioSiteId?.value).toBe('1234567890')
-            expect(hogFunction.inputs?.customerioToken?.value).toBe('cio-token')
+            expect(customFunction.inputs?.customerioSiteId?.value).toBe('1234567890')
+            expect(customFunction.inputs?.customerioToken?.value).toBe('cio-token')
         })
     })
 
@@ -403,15 +403,15 @@ describe('CdpLegacyEventsConsumer', () => {
             })
 
             // Get invocations from the consumer - these are just logged, not executed
-            const invocations = await consumer['getLegacyPluginHogFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
 
-            const hogFunctionInvocation = invocations[0]
-            expect(hogFunctionInvocation.hogFunction.template_id).toBe('plugin-customerio-plugin')
+            const customFunctionInvocation = invocations[0]
+            expect(customFunctionInvocation.customFunction.template_id).toBe('plugin-customerio-plugin')
 
             // Verify the invocation structure is correct by executing it manually
-            const result = await legacyPluginExecutor.execute(hogFunctionInvocation)
+            const result = await legacyPluginExecutor.execute(customFunctionInvocation)
 
             expect(result.finished).toBe(true)
             expect(result.error).toBeUndefined()
@@ -426,7 +426,7 @@ describe('CdpLegacyEventsConsumer', () => {
                   "event": "$identify",
                   "ip": null,
                   "properties": {
-                    "$current_url": "https://posthog.com",
+                    "$current_url": "https://hanzo.ai",
                     "$lib_version": "1.0.0",
                   },
                   "team_id": 2,
@@ -452,7 +452,7 @@ describe('CdpLegacyEventsConsumer', () => {
 
             await hub.postgres.query(
                 PostgresUse.COMMON_WRITE,
-                `INSERT INTO posthog_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
+                `INSERT INTO insights_pluginattachment (id, plugin_config_id, key, contents, content_type, file_size, file_name)
                  VALUES ($1, $2, $3, $4, $5, $6, $7)`,
                 [
                     2001,
@@ -470,7 +470,7 @@ describe('CdpLegacyEventsConsumer', () => {
             consumer['pluginConfigsLoader'].clear()
 
             // Get invocations
-            const invocations = await consumer['getLegacyPluginHogFunctionInvocations'](invocation)
+            const invocations = await consumer['getLegacyPluginCustomFunctionInvocations'](invocation)
 
             expect(invocations).toBeTruthy()
             expect(invocations.length).toBeGreaterThan(0)
@@ -492,7 +492,7 @@ describe('CdpLegacyEventsConsumer', () => {
     })
 
     describe('LazyLoader caching', () => {
-        it('should cache hog functions and batch requests', async () => {
+        it('should cache custom functions and batch requests', async () => {
             // Clear any existing cache
             consumer['pluginConfigsLoader'].clear()
 
@@ -508,16 +508,16 @@ describe('CdpLegacyEventsConsumer', () => {
             expect(results[1]).toEqual(results[2])
 
             // Check cache is populated
-            const cachedHogFunctions = consumer['pluginConfigsLoader'].getCache()[team.id.toString()]
-            expect(cachedHogFunctions).toBeTruthy()
-            expect(cachedHogFunctions?.length).toBeGreaterThan(0)
-            expect(cachedHogFunctions![0].hogFunction).toBeTruthy()
-            expect(cachedHogFunctions![0].pluginConfigId).toBe(pluginConfig.id)
+            const cachedCustomFunctions = consumer['pluginConfigsLoader'].getCache()[team.id.toString()]
+            expect(cachedCustomFunctions).toBeTruthy()
+            expect(cachedCustomFunctions?.length).toBeGreaterThan(0)
+            expect(cachedCustomFunctions![0].customFunction).toBeTruthy()
+            expect(cachedCustomFunctions![0].pluginConfigId).toBe(pluginConfig.id)
         })
 
         it('should return empty array for teams with no configs', async () => {
-            const hogFunctions = await consumer['pluginConfigsLoader'].get('99999')
-            expect(hogFunctions).toEqual([])
+            const customFunctions = await consumer['pluginConfigsLoader'].get('99999')
+            expect(customFunctions).toEqual([])
         })
     })
 

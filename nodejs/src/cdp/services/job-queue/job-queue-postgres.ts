@@ -20,7 +20,7 @@ import { CyclotronInvocationQueueParametersType } from '~/schema/cyclotron'
 
 import { HealthCheckResult, HealthCheckResultError, HealthCheckResultOk, PluginsServerConfig } from '../../../types'
 import { logger } from '../../../utils/logger'
-import { captureException } from '../../../utils/posthog'
+import { captureException } from '../../../utils/insights'
 import { CyclotronJobInvocation, CyclotronJobInvocationResult, CyclotronJobQueueKind } from '../../types'
 
 export class CyclotronJobQueuePostgres {

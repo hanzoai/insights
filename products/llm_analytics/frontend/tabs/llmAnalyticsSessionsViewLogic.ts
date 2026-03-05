@@ -300,7 +300,7 @@ export const llmAnalyticsSessionsViewLogic = kea<llmAnalyticsSessionsViewLogicTy
             ): DataTableNode => ({
                 kind: NodeKind.DataTableNode,
                 source: {
-                    kind: NodeKind.HogQLQuery,
+                    kind: NodeKind.InsightsQLQuery,
                     query: `
                 SELECT
                     properties.$ai_session_id as session_id,
@@ -351,7 +351,7 @@ export const llmAnalyticsSessionsViewLogic = kea<llmAnalyticsSessionsViewLogicTy
                     TaxonomicFilterGroupType.PersonProperties,
                     ...groupsTaxonomicTypes,
                     TaxonomicFilterGroupType.Cohorts,
-                    TaxonomicFilterGroupType.HogQLExpression,
+                    TaxonomicFilterGroupType.InsightsQLExpression,
                 ],
                 showTestAccountFilters: true,
                 showExport: true,

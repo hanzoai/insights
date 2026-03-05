@@ -13,7 +13,7 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -43,11 +43,11 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Import and initialize the PostHog library with your project API key and host:</Markdown>
+                    <Markdown>Import and initialize the Insights library with your project API key and host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -73,7 +73,7 @@ export const getJSWebSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Once installed, PostHog will automatically start capturing events. You can also manually send
+                        Once installed, Insights will automatically start capturing events. You can also manually send
                         events to test your integration:
                     </Markdown>
                     {JSEventCapture && <JSEventCapture />}

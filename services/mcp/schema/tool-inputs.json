@@ -730,7 +730,7 @@
                             },
                             "event_name": {
                                 "type": "string",
-                                "description": "REQUIRED for metrics to work: PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events."
+                                "description": "REQUIRED for metrics to work: Insights event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events."
                             },
                             "funnel_steps": {
                                 "type": "array",
@@ -814,7 +814,7 @@
                             },
                             "event_name": {
                                 "type": "string",
-                                "description": "REQUIRED: PostHog event name. Use '$pageview' if unsure."
+                                "description": "REQUIRED: Insights event name. Use '$pageview' if unsure."
                             },
                             "funnel_steps": {
                                 "type": "array",
@@ -1019,7 +1019,7 @@
                             },
                             "event_name": {
                                 "type": "string",
-                                "description": "PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')"
+                                "description": "Insights event name (e.g., '$pageview', 'add_to_cart', 'purchase')"
                             },
                             "funnel_steps": {
                                 "type": "array",
@@ -1103,7 +1103,7 @@
                             },
                             "event_name": {
                                 "type": "string",
-                                "description": "PostHog event name"
+                                "description": "Insights event name"
                             },
                             "funnel_steps": {
                                 "type": "array",
@@ -1233,7 +1233,7 @@
                                     },
                                     "event_name": {
                                         "type": "string",
-                                        "description": "PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')"
+                                        "description": "Insights event name (e.g., '$pageview', 'add_to_cart', 'purchase')"
                                     },
                                     "funnel_steps": {
                                         "type": "array",
@@ -1317,7 +1317,7 @@
                                     },
                                     "event_name": {
                                         "type": "string",
-                                        "description": "PostHog event name"
+                                        "description": "Insights event name"
                                     },
                                     "funnel_steps": {
                                         "type": "array",

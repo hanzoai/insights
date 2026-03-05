@@ -9,7 +9,7 @@ import { Tooltip } from '../Tooltip'
 import { ELEMENTS, OBJECTS, TEAMS_AND_COMPANIES, TECHNOLOGY } from './categories'
 
 const meta: Meta = {
-    title: 'PostHog 3000/Icons',
+    title: 'Insights 3000/Icons',
     tags: ['test-skip'],
     parameters: {
         previewTabs: {

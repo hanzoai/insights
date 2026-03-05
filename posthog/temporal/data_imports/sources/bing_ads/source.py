@@ -32,7 +32,7 @@ class BingAdsSource(SimpleSource[BingAdsSourceConfig], OAuthMixin):
         return SourceConfig(
             name=SchemaExternalDataSourceType.BING_ADS,
             label="Bing Ads",
-            caption="Ensure you have granted PostHog access to your Bing Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/bing-ads).",
+            caption="Ensure you have granted Insights access to your Bing Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/bing-ads).",
             betaSource=True,
             featureFlag="bing-ads-source",
             iconPath="/static/services/bing-ads.svg",

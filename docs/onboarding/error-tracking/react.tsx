@@ -31,7 +31,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             <>
                 <Markdown>
                     {dedent`
-                        You can use the \`PostHogErrorBoundary\` component to capture rendering errors thrown by components:
+                        You can use the \`InsightsErrorBoundary\` component to capture rendering errors thrown by components:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -40,16 +40,16 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                             language: 'javascript',
                             file: 'JavaScript',
                             code: dedent`
-                                import { PostHogProvider, PostHogErrorBoundary } from '@posthog/react'
+                                import { InsightsProvider, InsightsErrorBoundary } from '@posthog/react'
                                 const Layout = () => {
                                   return (
-                                    <PostHogProvider apiKey="<ph_project_api_key>">
-                                      <PostHogErrorBoundary
+                                    <InsightsProvider apiKey="<ph_project_api_key>">
+                                      <InsightsErrorBoundary
                                         fallback={<YourFallbackComponent />} // (Optional) Add a fallback component that's shown when an error happens.
                                       >
                                         <YourApp />
-                                      </PostHogErrorBoundary>
-                                    </PostHogProvider>
+                                      </InsightsErrorBoundary>
+                                    </InsightsProvider>
                                   )
                                 }
                                 const YourFallbackComponent = ({ error, componentStack, exceptionEvent }) => {
@@ -95,9 +95,9 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
         content: (
             <Markdown>
                 {dedent`
-                    Confirm exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Confirm exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),

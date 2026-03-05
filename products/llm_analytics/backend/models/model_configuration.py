@@ -5,7 +5,7 @@ from posthog.models.utils import UUIDTModel
 
 from .provider_keys import LLMProvider
 
-# Cost-controlled models for PostHog default keys
+# Cost-controlled models for Insights default keys
 POSTHOG_ALLOWED_MODELS: dict[str, list[str]] = {
     "openai": ["gpt-5-mini"],
     "anthropic": ["claude-haiku-4-5"],
@@ -35,7 +35,7 @@ class LLMModelConfiguration(UUIDTModel):
         ]
 
     def __str__(self) -> str:
-        key_info = f" (key: {self.provider_key.name})" if self.provider_key else " (PostHog default)"
+        key_info = f" (key: {self.provider_key.name})" if self.provider_key else " (Insights default)"
         return f"{self.provider}/{self.model}{key_info}"
 
     def clean(self) -> None:
@@ -51,7 +51,7 @@ class LLMModelConfiguration(UUIDTModel):
             )
 
     def get_available_models(self) -> list[str]:
-        """Get available models - delegates to API if key present, otherwise returns PostHog allowed list."""
+        """Get available models - delegates to API if key present, otherwise returns Insights allowed list."""
         if self.provider_key:
             from products.llm_analytics.backend.llm.client import Client
 

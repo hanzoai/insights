@@ -134,7 +134,7 @@ export function SupportForm(): JSX.Element | null {
             </LemonField>
             {sendSupportRequest.target_area === 'error_tracking' && (
                 <LemonBanner type="warning">
-                    This topic is for our Error Tracking <i>product</i>. If you're reporting an error in PostHog please
+                    This topic is for our Error Tracking <i>product</i>. If you're reporting an error in Insights please
                     choose the relevant topic so your submission is sent to the correct team.
                 </LemonBanner>
             )}

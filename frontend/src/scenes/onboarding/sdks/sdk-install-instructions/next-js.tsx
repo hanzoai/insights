@@ -9,7 +9,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from '~/loadPostHogJS'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
 import SetupWizardBanner from './components/SetupWizardBanner'
 import { JSInstallSnippet } from './js-web'
@@ -36,7 +36,7 @@ function NextPagesRouterPageViewSnippet(): JSX.Element {
 import { useEffect } from 'react'
 import { Router } from 'next/router'
 import posthog from 'posthog-js'
-import { PostHogProvider } from 'posthog-js/react'
+import { InsightsProvider } from 'posthog-js/react'
 import type { AppProps } from 'next/app'
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -58,9 +58,9 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [])
 
   return (
-    <PostHogProvider client={posthog}>
+    <InsightsProvider client={posthog}>
       <Component {...pageProps} />
-    </PostHogProvider>
+    </InsightsProvider>
   )
 }`}
         </CodeSnippet>
@@ -73,15 +73,15 @@ function NextAppRouterLayoutSnippet(): JSX.Element {
             {`// app/layout.tsx
 
 import './globals.css'
-import { PostHogProvider } from './providers'
+import { InsightsProvider } from './providers'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <PostHogProvider>
+        <InsightsProvider>
           {children}
-        </PostHogProvider>
+        </InsightsProvider>
       </body>
     </html>
   )
@@ -100,12 +100,12 @@ function NextAppRouterPageViewProviderSnippet(): JSX.Element {
 
 import { usePathname, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
-import { usePostHog } from 'posthog-js/react'
+import { useInsights } from 'posthog-js/react'
 
 import posthog from 'posthog-js'
-import { PostHogProvider as PHProvider } from 'posthog-js/react'
+import { InsightsProvider as PHProvider } from 'posthog-js/react'
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+export function InsightsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || '${apiHostOrigin()}',
@@ -199,7 +199,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
                         <Link to="https://nextjs.org/docs/app" target="_blank">
                             app router
                         </Link>
-                        , you can integrate PostHog by creating a <code>providers</code> file in your <code>app</code>{' '}
+                        , you can integrate Insights by creating a <code>providers</code> file in your <code>app</code>{' '}
                         folder. This is because the <code>posthog-js</code> library needs to be initialized on the
                         client-side using the Next.js{' '}
                         <Link
@@ -212,7 +212,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
                     </p>
                     <NextAppRouterPageViewProviderSnippet />
                     <p>
-                        Afterwards, import the <code>PostHogProvider</code> component in your{' '}
+                        Afterwards, import the <code>InsightsProvider</code> component in your{' '}
                         <code>app/layout.tsx</code> file and wrap your app with it.
                     </p>
                     <NextAppRouterLayoutSnippet />
@@ -225,7 +225,7 @@ export function SDKInstallNextJSInstructions({ hideWizard }: { hideWizard?: bool
                         <Link to="https://nextjs.org/docs/pages" target="_blank">
                             pages router
                         </Link>
-                        , you can integrate PostHog at the root of your app.
+                        , you can integrate Insights at the root of your app.
                     </p>
                     <NextPagesRouterPageViewSnippet />
                 </>

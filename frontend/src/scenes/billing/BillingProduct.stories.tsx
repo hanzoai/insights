@@ -135,7 +135,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
                         key: 'data_warehouse_joins',
                         name: 'Cross-source joins',
                         description:
-                            'Join data from any source, including your PostHog analytics data, to easily get the answers you need.',
+                            'Join data from any source, including your Insights analytics data, to easily get the answers you need.',
                         unit: null,
                         limit: null,
                         note: null,
@@ -144,7 +144,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
                     {
                         key: 'data_warehouse_unified_querying',
                         name: 'Unified querying',
-                        description: 'Query all your business and product data directly inside PostHog.',
+                        description: 'Query all your business and product data directly inside Insights.',
                         unit: null,
                         limit: null,
                         note: null,
@@ -154,7 +154,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
                         key: 'data_warehouse_insights_visualization',
                         name: 'Data visualization',
                         description:
-                            'Create insights from the data you import and add them to your PostHog dashboards.',
+                            'Create insights from the data you import and add them to your Insights dashboards.',
                         unit: null,
                         limit: null,
                         note: null,
@@ -238,7 +238,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
                 key: 'data_warehouse_joins',
                 name: 'Cross-source joins',
                 description:
-                    'Join data from any source, including your PostHog analytics data, to easily get the answers you need.',
+                    'Join data from any source, including your Insights analytics data, to easily get the answers you need.',
                 images: null,
                 icon_key: null,
                 type: null,
@@ -246,7 +246,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
             {
                 key: 'data_warehouse_unified_querying',
                 name: 'Unified querying',
-                description: 'Query all your business and product data directly inside PostHog.',
+                description: 'Query all your business and product data directly inside Insights.',
                 images: null,
                 icon_key: null,
                 type: null,
@@ -254,7 +254,7 @@ export const BillingProductTemporarilyFree = (): JSX.Element => {
             {
                 key: 'data_warehouse_insights_visualization',
                 name: 'Data visualization',
-                description: 'Create insights from the data you import and add them to your PostHog dashboards.',
+                description: 'Create insights from the data you import and add them to your Insights dashboards.',
                 images: null,
                 icon_key: null,
                 type: null,

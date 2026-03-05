@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
@@ -177,17 +177,17 @@ export const notebooksActivityRetrieve2 = async (
 /**
  * The API for interacting with Notebooks. This feature is in early access and the API can have breaking changes without announcement.
  */
-export const getNotebooksHogqlExecuteCreateUrl = (projectId: string, shortId: string) => {
-    return `/api/projects/${projectId}/notebooks/${shortId}/hogql/execute/`
+export const getNotebooksInsightsQLExecuteCreateUrl = (projectId: string, shortId: string) => {
+    return `/api/projects/${projectId}/notebooks/${shortId}/insightsql/execute/`
 }
 
-export const notebooksHogqlExecuteCreate = async (
+export const notebooksInsightsQLExecuteCreate = async (
     projectId: string,
     shortId: string,
     notebookApi: NonReadonly<NotebookApi>,
     options?: RequestInit
 ): Promise<void> => {
-    return apiMutator<void>(getNotebooksHogqlExecuteCreateUrl(projectId, shortId), {
+    return apiMutator<void>(getNotebooksInsightsQLExecuteCreateUrl(projectId, shortId), {
         ...options,
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...options?.headers },

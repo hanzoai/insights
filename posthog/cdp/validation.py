@@ -174,7 +174,7 @@ class AnyInputField(serializers.Field):
 
 class InputsItemSerializer(serializers.Serializer):
     value = AnyInputField(required=False)
-    templating = serializers.ChoiceField(choices=["hog", "liquid"], required=False)
+    templating = serializers.ChoiceField(choices=["custom_script", "liquid"], required=False)
     bytecode = serializers.ListField(required=False, read_only=True)
     order = serializers.IntegerField(required=False, read_only=True)
     transpiled = serializers.JSONField(required=False, read_only=True)
@@ -228,7 +228,7 @@ class InputsItemSerializer(serializers.Serializer):
                     # and we don't care about it being invalid at this stage.
                     pass
                 else:
-                    # If we have a value and hog templating is enabled, we need to transpile the value
+                    # If we have a value and custom templating is enabled, we need to transpile the value
                     if item_type in ["string", "dictionary", "json", "email", "native_email"]:
                         if item_type in ("email", "native_email") and isinstance(value, dict):
                             # We want to exclude the "design" property
@@ -287,7 +287,7 @@ class InputsSerializer(serializers.DictField):
                 templating_val = schema["templating"]
                 if isinstance(templating_val, bool):
                     if templating_val:
-                        value["templating"] = "hog"
+                        value["templating = "custom_script"
                     # If False, do not set templating field
                 else:
                     value["templating"] = templating_val
@@ -441,10 +441,10 @@ def topological_sort(nodes: list[str], edges: dict[str, list[str]]) -> list[str]
     return sorted_list
 
 
-def compile_hog(hog: str, hog_type: str, in_repl: Optional[bool] = False) -> list[Any]:
+def compile_script(custom_script: str, script_type: str, in_repl: Optional[bool] = False) -> list[Any]:
     # Attempt to compile the hog
     try:
-        program = parse_program(hog)
+        program = parse_program(custom_script)
 
         detector = HyphenatedPropertyDetector()
         detector.visit(program)
@@ -460,5 +460,5 @@ def compile_hog(hog: str, hog_type: str, in_repl: Optional[bool] = False) -> lis
     except serializers.ValidationError:
         raise
     except Exception as e:
-        logger.error(f"Failed to compile hog {e}", exc_info=True)
+        logger.error(f"Failed to compile script {e}", exc_info=True)
         raise serializers.ValidationError({"custom_script": "Custom code has errors."})

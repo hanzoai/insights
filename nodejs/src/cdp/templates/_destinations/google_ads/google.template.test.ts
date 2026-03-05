@@ -33,7 +33,7 @@ describe('google template', () => {
             createAdDestinationPayload({
                 event: {
                     properties: {
-                        $current_url: 'https://posthog.com/merch?product=tactical-black-t-shirt',
+                        $current_url: 'https://hanzo.ai/merch?product=tactical-black-t-shirt',
                         currency: 'USD',
                         value: '100',
                         order_id: '1234567890',

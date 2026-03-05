@@ -162,7 +162,7 @@ def trigger_alert_custom_functions(alert: AlertConfiguration, properties: dict) 
 def send_notifications_for_breaches(alert: AlertConfiguration, breaches: list[str]) -> None:
     email_targets = alert.get_subscribed_users_emails()
     if email_targets:
-        subject = f"PostHog alert {alert.name} is firing"
+        subject = f"Insights alert {alert.name} is firing"
         campaign_key = f"alert-firing-notification-{alert.id}-{timezone.now().timestamp()}"
         insight_url = f"/project/{alert.team.pk}/insights/{alert.insight.short_id}"
         alert_url = f"{insight_url}?alert_id={alert.id}"
@@ -192,7 +192,7 @@ def send_notifications_for_errors(alert: AlertConfiguration, error: dict) -> Non
     logger.info("Sending alert error notifications", alert_id=alert.id, error=error)
 
     # TODO: uncomment this after checking errors sent
-    # subject = f"PostHog alert {alert.name} check failed to evaluate"
+    # subject = f"Insights alert {alert.name} check failed to evaluate"
     # campaign_key = f"alert-firing-notification-{alert.id}-{timezone.now().timestamp()}"
     # insight_url = f"/project/{alert.team.pk}/insights/{alert.insight.short_id}"
     # alert_url = f"{insight_url}?alert_id={alert.id}"

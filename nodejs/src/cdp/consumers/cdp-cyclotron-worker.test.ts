@@ -7,15 +7,15 @@ import { UUIDT } from '~/utils/utils'
 
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
-    createHogExecutionGlobals,
-    createHogFunction,
-    insertHogFunction,
+    createScriptExecutionGlobals,
+    createCustomFunction,
+    insertCustomFunction,
 } from '../_tests/fixtures'
-import { compileHog } from '../templates/compiler'
-import { CyclotronJobInvocationHogFunction, HogFunctionInvocationGlobalsWithInputs, HogFunctionType } from '../types'
+import { compileScript } from '../templates/compiler'
+import { CyclotronJobInvocationCustomFunction, CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
 import { destinationE2eLagMsSummary } from '../utils'
 import { CdpCyclotronWorker } from './cdp-cyclotron-worker.consumer'
 
@@ -28,9 +28,9 @@ describe('CdpCyclotronWorker', () => {
     let processor: CdpCyclotronWorker
     let hub: Hub
     let team: Team
-    let fn: HogFunctionType
-    let globals: HogFunctionInvocationGlobalsWithInputs
-    let invocation: CyclotronJobInvocationHogFunction
+    let fn: CustomFunctionType
+    let globals: CustomFunctionInvocationGlobalsWithInputs
+    let invocation: CyclotronJobInvocationCustomFunction
 
     beforeEach(async () => {
         await resetTestDatabase()
@@ -38,21 +38,21 @@ describe('CdpCyclotronWorker', () => {
         team = await getFirstTeam(hub)
         processor = new CdpCyclotronWorker(hub)
 
-        fn = await insertHogFunction(
+        fn = await insertCustomFunction(
             hub.postgres,
             team.id,
-            createHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+            createCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 template_id: 'template-webhook',
             })
         )
 
         globals = {
-            ...createHogExecutionGlobals({}),
+            ...createScriptExecutionGlobals({}),
             inputs: {
-                url: 'https://posthog.com',
+                url: 'https://hanzo.ai',
             },
         }
 
@@ -99,44 +99,44 @@ describe('CdpCyclotronWorker', () => {
             ])
         })
 
-        it('should route hog functions to correct executor services based on template_id', async () => {
-            const segmentFn = await insertHogFunction(
+        it('should route custom functions to correct executor services based on template_id', async () => {
+            const segmentFn = await insertCustomFunction(
                 hub.postgres,
                 team.id,
-                createHogFunction({
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'segment-actions-amplitude',
                 })
             )
 
-            const nativeFn = await insertHogFunction(
+            const nativeFn = await insertCustomFunction(
                 hub.postgres,
                 team.id,
-                createHogFunction({
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     template_id: 'native-webhook',
                 })
             )
 
-            const pluginFn = await insertHogFunction(
+            const pluginFn = await insertCustomFunction(
                 hub.postgres,
                 team.id,
-                createHogFunction({
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
-                    template_id: 'plugin-posthog-intercom-plugin',
+                createCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    template_id: 'plugin-insights-intercom-plugin',
                 })
             )
 
             const nativeExecutorSpy = jest.spyOn(processor['nativeDestinationExecutorService'], 'execute')
             const pluginExecutorSpy = jest.spyOn(processor['pluginDestinationExecutorService'], 'execute')
             const segmentExecutorSpy = jest.spyOn(processor['segmentDestinationExecutorService'], 'execute')
-            const hogExecutorSpy = jest.spyOn(processor['hogExecutor'], 'executeWithAsyncFunctions')
+            const scriptExecutorSpy = jest.spyOn(processor['scriptExecutor'], 'executeWithAsyncFunctions')
 
             const invocations = [
                 createExampleInvocation(nativeFn, globals),
@@ -150,28 +150,28 @@ describe('CdpCyclotronWorker', () => {
             expect(nativeExecutorSpy).toHaveBeenCalledTimes(1)
             expect(nativeExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    hogFunction: expect.objectContaining({ template_id: 'native-webhook' }),
+                    customFunction: expect.objectContaining({ template_id: 'native-webhook' }),
                 })
             )
 
             expect(pluginExecutorSpy).toHaveBeenCalledTimes(1)
             expect(pluginExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    hogFunction: expect.objectContaining({ template_id: 'plugin-posthog-intercom-plugin' }),
+                    customFunction: expect.objectContaining({ template_id: 'plugin-insights-intercom-plugin' }),
                 })
             )
 
             expect(segmentExecutorSpy).toHaveBeenCalledTimes(1)
             expect(segmentExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    hogFunction: expect.objectContaining({ template_id: 'segment-actions-amplitude' }),
+                    customFunction: expect.objectContaining({ template_id: 'segment-actions-amplitude' }),
                 })
             )
 
-            expect(hogExecutorSpy).toHaveBeenCalledTimes(1)
-            expect(hogExecutorSpy).toHaveBeenCalledWith(
+            expect(scriptExecutorSpy).toHaveBeenCalledTimes(1)
+            expect(scriptExecutorSpy).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    hogFunction: expect.objectContaining({ template_id: 'template-webhook' }),
+                    customFunction: expect.objectContaining({ template_id: 'template-webhook' }),
                 })
             )
         })
@@ -193,7 +193,7 @@ describe('CdpCyclotronWorker', () => {
             expect(result.error).toBe(undefined)
             expect(result.metrics).toEqual([])
             expect(result.invocation.id).toEqual(invocationId)
-            expect(result.invocation.queue).toEqual('hog')
+            expect(result.invocation.queue).toEqual('custom_script')
             // NOTE: Check the queue scheduled at is within the bounds of the backoff
             expect(result.invocation.queueScheduledAt?.toMillis()).toBeGreaterThan(
                 DateTime.now().plus({ milliseconds: hub.CDP_FETCH_BACKOFF_BASE_MS }).toMillis()
@@ -210,7 +210,7 @@ describe('CdpCyclotronWorker', () => {
                   },
                   "method": "POST",
                   "type": "fetch",
-                  "url": "https://posthog.com",
+                  "url": "https://hanzo.ai",
                 }
             `)
             expect(result.invocation.queueMetadata).toBeUndefined()
@@ -242,7 +242,7 @@ describe('CdpCyclotronWorker', () => {
             ])
         })
 
-        it('should dequeue an invocation if the hog function cannot be found', async () => {
+        it('should dequeue an invocation if the custom function cannot be found', async () => {
             const dequeueInvocationsSpy = jest
                 .spyOn(processor['cyclotronJobQueue'], 'dequeueInvocations')
                 .mockResolvedValue(undefined)
@@ -254,18 +254,18 @@ describe('CdpCyclotronWorker', () => {
         })
 
         it('should skip a loaded function if it is disabled', async () => {
-            const fn2 = await insertHogFunction(
+            const fn2 = await insertCustomFunction(
                 hub.postgres,
                 team.id,
-                createHogFunction({
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                createCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     enabled: false,
                 })
             )
 
-            const results = await processor['loadHogFunctions']([createExampleInvocation(fn2, globals)])
+            const results = await processor['loadCustomFunctions']([createExampleInvocation(fn2, globals)])
             expect(results).toEqual([])
         })
 
@@ -285,13 +285,13 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const segmentFn = await insertHogFunction(
+                const segmentFn = await insertCustomFunction(
                     hub.postgres,
                     team.id,
-                    createHogFunction({
-                        ...HOG_EXAMPLES.simple_fetch,
-                        ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                        ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createCustomFunction({
+                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'segment-actions-mixpanel',
                     })
                 )
@@ -320,14 +320,14 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const pluginFn = await insertHogFunction(
+                const pluginFn = await insertCustomFunction(
                     hub.postgres,
                     team.id,
-                    createHogFunction({
-                        ...HOG_EXAMPLES.simple_fetch,
-                        ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                        ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
-                        template_id: 'plugin-posthog-intercom-plugin',
+                    createCustomFunction({
+                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                        template_id: 'plugin-insights-intercom-plugin',
                     })
                 )
 
@@ -349,13 +349,13 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const nativeFn = await insertHogFunction(
+                const nativeFn = await insertCustomFunction(
                     hub.postgres,
                     team.id,
-                    createHogFunction({
-                        ...HOG_EXAMPLES.simple_fetch,
-                        ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                        ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createCustomFunction({
+                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                         template_id: 'native-webhook',
                     })
                 )
@@ -378,17 +378,17 @@ describe('CdpCyclotronWorker', () => {
                 const capturedAt = new Date(fixedTime.toMillis() - 1000).toISOString()
                 const observeSpy = jest.spyOn(destinationE2eLagMsSummary, 'observe')
 
-                const hogFn = await insertHogFunction(
+                const scriptFn = await insertCustomFunction(
                     hub.postgres,
                     team.id,
-                    createHogFunction({
-                        ...HOG_EXAMPLES.simple_fetch,
-                        ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                        ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    createCustomFunction({
+                        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                     })
                 )
 
-                const hogInvocation = createExampleInvocation(hogFn, {
+                const scriptInvocation = createExampleInvocation(scriptFn, {
                     ...globals,
                     event: {
                         ...globals.event,
@@ -396,7 +396,7 @@ describe('CdpCyclotronWorker', () => {
                     },
                 })
 
-                await processor.processInvocations([hogInvocation])
+                await processor.processInvocations([scriptInvocation])
 
                 expect(observeSpy).toHaveBeenCalledTimes(1)
                 expect(observeSpy).toHaveBeenCalledWith(1000)
@@ -437,13 +437,13 @@ describe('CdpCyclotronWorker', () => {
                         }
                         print(f'fib {fibonacci(64)}');`
 
-                const evilFunction = await insertHogFunction(
+                const evilFunction = await insertCustomFunction(
                     hub.postgres,
                     team.id,
-                    createHogFunction({
-                        ...HOG_FILTERS_EXAMPLES.no_filters,
-                        hog: evilFunctionCode,
-                        bytecode: await compileHog(evilFunctionCode),
+                    createCustomFunction({
+                        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
+                        script: evilFunctionCode,
+                        bytecode: await compileScript(evilFunctionCode),
                     })
                 )
 
@@ -457,18 +457,18 @@ describe('CdpCyclotronWorker', () => {
                 const results = await processor.processInvocations(invocations)
 
                 const timings = results.flatMap(
-                    (x) => (x.invocation.state as CyclotronJobInvocationHogFunction['state']).timings
+                    (x) => (x.invocation.state as CyclotronJobInvocationCustomFunction['state']).timings
                 )
 
                 const total = timings.reduce((acc, timing) => acc + timing.duration_ms, 0)
 
                 // Timings is semi random so we can't test for exact values
                 expect(total).toBeGreaterThan(200 * numberToTest)
-                expect(total).toBeLessThan(300 * numberToTest) // the hog exec limiter isn't exact
+                expect(total).toBeLessThan(300 * numberToTest) // the script exec limiter isn't exact
 
                 await new Promise((resolve) => setTimeout(resolve, 1))
 
-                expect(longestDelay).toBeLessThan(300) // Rough upper bound of the hog exec limiter
+                expect(longestDelay).toBeLessThan(300) // Rough upper bound of the script exec limiter
             })
         })
     })

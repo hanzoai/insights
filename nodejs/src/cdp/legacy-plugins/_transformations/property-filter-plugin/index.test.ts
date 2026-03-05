@@ -32,7 +32,7 @@ const meta: LegacyTransformationPluginMeta = {
 
 const properties = {
     properties: {
-        name: 'Mr. Hog',
+        name: 'Mr. Script',
         gender: 'male',
         age: 12,
         $set: {
@@ -63,7 +63,7 @@ test('event properties are filtered', () => {
     expect(event.properties.$set).toHaveProperty('firstName', 'Post')
     expect(event.properties.foo.bar.baz).toHaveProperty('two', 'two')
     expect(event.properties).toEqual({
-        name: 'Mr. Hog',
+        name: 'Mr. Script',
         age: 12,
         $set: {
             pet: 'dog',

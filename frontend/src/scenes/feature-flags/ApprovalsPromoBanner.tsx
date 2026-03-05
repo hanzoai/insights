@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 
 import { LemonBanner } from '@posthog/lemon-ui'
 
-import { JudgeHog } from 'lib/components/hedgehogs'
+import { JudgeHog } from 'lib/components/mascots'
 import { lemonBannerLogic } from 'lib/lemon-ui/LemonBanner/lemonBannerLogic'
 import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { organizationLogic } from 'scenes/organizationLogic'

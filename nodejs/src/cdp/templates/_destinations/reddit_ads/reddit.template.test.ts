@@ -28,7 +28,7 @@ describe('reddit template', () => {
                         sku: '43431-18',
                         category: 'merch',
                         name: 'Tactical black t-shirt',
-                        brand: 'PostHog',
+                        brand: 'Insights',
                         variant: 'dark',
                         price: 30,
                         quantity: 1,
@@ -36,10 +36,10 @@ describe('reddit template', () => {
                         currency: 'usd',
                         position: 3,
                         value: 30,
-                        url: 'https://posthog.com/merch?product=tactical-black-t-shirt',
+                        url: 'https://hanzo.ai/merch?product=tactical-black-t-shirt',
                         image_url:
                             'https://cdn.shopify.com/s/files/1/0452/0935/4401/files/darkmode_tee_5_1000x1000_crop_center.jpg?v=1732211354',
-                        $current_url: 'https://posthog.com/merch?product=tactical-black-t-shirt',
+                        $current_url: 'https://hanzo.ai/merch?product=tactical-black-t-shirt',
                     },
                     event: 'Product Viewed',
                     timestamp: '2025-01-01T00:00:00Z',
@@ -51,11 +51,11 @@ describe('reddit template', () => {
         expect(response.finished).toEqual(false)
         expect(response.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"test_mode":false,"events":[{"event_at":"2025-01-01T00:00:00Z","event_type":{"tracking_type":"ViewContent"},"user":{"email":"example@posthog.com","screen_dimensions":{"width":null,"height":null}},"event_metadata":{"conversion_id":"event-id","products":[{"id":"1bdfef47c9724b58b6831933","category":"merch","name":"Tactical black t-shirt"}],"value":30,"currency":"usd"},"click_id":"reddit-id"}]}",
+              "body": "{"test_mode":false,"events":[{"event_at":"2025-01-01T00:00:00Z","event_type":{"tracking_type":"ViewContent"},"user":{"email":"example@hanzo.ai","screen_dimensions":{"width":null,"height":null}},"event_metadata":{"conversion_id":"event-id","products":[{"id":"1bdfef47c9724b58b6831933","category":"merch","name":"Tactical black t-shirt"}],"value":30,"currency":"usd"},"click_id":"reddit-id"}]}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
-                "User-Agent": "hog:com.posthog.cdp:0.0.1 (by /u/PostHogTeam)",
+                "User-Agent": "hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
               },
               "method": "POST",
               "type": "fetch",
@@ -86,11 +86,11 @@ describe('reddit template', () => {
         expect(response.finished).toEqual(false)
         expect(response.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"test_mode":false,"events":[{"event_at":"2025-01-01T00:00:00Z","event_type":{"tracking_type":"Purchase"},"user":{"email":"example@posthog.com","screen_dimensions":{"width":null,"height":null}},"event_metadata":{"conversion_id":"event-id"},"click_id":"reddit-id"}]}",
+              "body": "{"test_mode":false,"events":[{"event_at":"2025-01-01T00:00:00Z","event_type":{"tracking_type":"Purchase"},"user":{"email":"example@hanzo.ai","screen_dimensions":{"width":null,"height":null}},"event_metadata":{"conversion_id":"event-id"},"click_id":"reddit-id"}]}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
-                "User-Agent": "hog:com.posthog.cdp:0.0.1 (by /u/PostHogTeam)",
+                "User-Agent": "hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
               },
               "method": "POST",
               "type": "fetch",
@@ -121,11 +121,11 @@ describe('reddit template', () => {
         expect(response.finished).toEqual(false)
         expect(response.invocation.queueParameters).toMatchInlineSnapshot(`
             {
-              "body": "{"test_mode":false,"events":[{"event_at":"2025-01-01T00:00:00Z","event_type":{"tracking_type":"Purchase"},"user":{"email":"example@posthog.com","screen_dimensions":{"width":null,"height":null}},"event_metadata":{"conversion_id":"event-id"},"click_id":"reddit-id"}]}",
+              "body": "{"test_mode":false,"events":[{"event_at":"2025-01-01T00:00:00Z","event_type":{"tracking_type":"Purchase"},"user":{"email":"example@hanzo.ai","screen_dimensions":{"width":null,"height":null}},"event_metadata":{"conversion_id":"event-id"},"click_id":"reddit-id"}]}",
               "headers": {
                 "Authorization": "Bearer access-token",
                 "Content-Type": "application/json",
-                "User-Agent": "hog:com.posthog.cdp:0.0.1 (by /u/PostHogTeam)",
+                "User-Agent": "hog:com.insights.cdp:0.0.1 (by /u/InsightsTeam)",
               },
               "method": "POST",
               "type": "fetch",

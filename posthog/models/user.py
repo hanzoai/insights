@@ -203,7 +203,7 @@ class User(AbstractUser, UUIDTClassicModel, ModelActivityMixin):
     anonymize_data = models.BooleanField(default=False, null=True, blank=True)
     allow_impersonation = models.BooleanField(default=True, null=True, blank=True)
     toolbar_mode = models.CharField(max_length=200, null=True, blank=True, choices=TOOLBAR_CHOICES, default=TOOLBAR)
-    hedgehog_config = models.JSONField(null=True, blank=True)
+    mascot_config = models.JSONField(null=True, blank=True)
     allow_sidebar_suggestions = models.BooleanField(default=True, null=True, blank=True)
     shortcut_position = models.CharField(
         max_length=20, null=True, blank=True, choices=ShortcutPosition.choices, default=ShortcutPosition.ABOVE

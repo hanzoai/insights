@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { LemonTextArea } from '@posthog/lemon-ui'
 
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 
 import { CustomNotebookNodeAttributes, NotebookNodeProps, NotebookNodeType } from '../types'
 
@@ -121,7 +121,7 @@ const DEFAULT_ATTRIBUTES_WITH_DEFAULTS = {
     editing: { default: true }, // Start in editing mode when newly inserted
 }
 
-export const NotebookNodeLatex = createPostHogWidgetNode<NotebookNodeLatexAttributes>({
+export const NotebookNodeLatex = createInsightsWidgetNode<NotebookNodeLatexAttributes>({
     nodeType: NotebookNodeType.Latex,
     titlePlaceholder: 'LaTeX',
     Component: LatexComponent,

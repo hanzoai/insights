@@ -37,7 +37,7 @@ async def _add_inputs_to_capture_kwargs(
         capture_exception(e, **capture_kwargs)
 
 
-class _PostHogClientActivityInboundInterceptor(ActivityInboundInterceptor):
+class _InsightsClientActivityInboundInterceptor(ActivityInboundInterceptor):
     async def execute_activity(self, input: ExecuteActivityInput) -> Any:
         try:
             return await super().execute_activity(input)
@@ -66,7 +66,7 @@ class _PostHogClientActivityInboundInterceptor(ActivityInboundInterceptor):
             raise
 
 
-class _PostHogClientWorkflowInterceptor(WorkflowInboundInterceptor):
+class _InsightsClientWorkflowInterceptor(WorkflowInboundInterceptor):
     async def execute_workflow(self, input: ExecuteWorkflowInput) -> Any:
         try:
             return await super().execute_workflow(input)
@@ -95,16 +95,16 @@ class _PostHogClientWorkflowInterceptor(WorkflowInboundInterceptor):
             raise
 
 
-class PostHogClientInterceptor(Interceptor):
-    """PostHog Interceptor class which will report workflow & activity exceptions to PostHog"""
+class InsightsClientInterceptor(Interceptor):
+    """Insights Interceptor class which will report workflow & activity exceptions to Insights"""
 
     def intercept_activity(self, next: ActivityInboundInterceptor) -> ActivityInboundInterceptor:
         """Implementation of
         :py:meth:`temporalio.worker.Interceptor.intercept_activity`.
         """
-        return _PostHogClientActivityInboundInterceptor(super().intercept_activity(next))
+        return _InsightsClientActivityInboundInterceptor(super().intercept_activity(next))
 
     def workflow_interceptor_class(
         self, input: WorkflowInterceptorClassInput
     ) -> Optional[type[WorkflowInboundInterceptor]]:
-        return _PostHogClientWorkflowInterceptor
+        return _InsightsClientWorkflowInterceptor

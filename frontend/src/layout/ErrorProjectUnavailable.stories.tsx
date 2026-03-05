@@ -55,7 +55,7 @@ export const AccessRevoked = (): JSX.Element => {
                 200,
                 {
                     email: 'test@posthog.com',
-                    first_name: 'Test PostHog',
+                    first_name: 'Test Insights',
                     organization: {
                         name: 'Test org',
                         teams: [],
@@ -95,7 +95,7 @@ export const NoSelectableProjects = (): JSX.Element => {
                 200,
                 {
                     email: 'test@posthog.com',
-                    first_name: 'Test PostHog',
+                    first_name: 'Test Insights',
                     organization: {
                         name: 'Test org',
                         teams: [],

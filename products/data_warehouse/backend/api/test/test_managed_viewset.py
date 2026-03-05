@@ -61,7 +61,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="test_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             managed_viewset=managed_viewset,
         )
 
@@ -99,14 +99,14 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
         DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="test_view_1",
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
         DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="test_view_2",
-            query={"kind": "HogQLQuery", "query": "SELECT 2"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 2"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
@@ -174,7 +174,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
         active_view = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="active_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             managed_viewset=managed_viewset,
             created_by=self.user,
         )
@@ -183,7 +183,7 @@ class TestDataWarehouseManagedViewSetAPIBase(APIBaseTest):
         DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="deleted_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 2"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 2"},
             managed_viewset=managed_viewset,
             created_by=self.user,
             deleted=True,

@@ -21,13 +21,13 @@ We currently use [Braintrust](https://braintrust.dev) as our evaluation platform
 
 3. Voila! Max ran, evals executed, and results and traces uploaded to the Braintrust platform + summarized in the terminal.
 
-For historical eval runs, see the [full Experiments list in Braintrust](https://www.braintrust.dev/app/PostHog/p/Max%20AI/experiments).
+For historical eval runs, see the [full Experiments list in Braintrust](https://www.braintrust.dev/app/Insights/p/Max%20AI/experiments).
 
 ## Offline evals
 
 ### Datasets
 
-For offline evaluation, you typically need to collect a dataset first. You can do that in [PostHog LLM Analytics](https://us.posthog.com/llm-analytics/datasets). There are a few requirements for the shape of a dataset item:
+For offline evaluation, you typically need to collect a dataset first. You can do that in [Insights LLM Analytics](https://us.posthog.com/llm-analytics/datasets). There are a few requirements for the shape of a dataset item:
 
 - The `input`, `output`, `metadata` fields must be valid JSON objects.
 - The `metadata` must contain the `team_id` field.

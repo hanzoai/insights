@@ -130,7 +130,7 @@ export function TeamVariables(): JSX.Element {
             maxWidth: 480,
             title: 'Reset project token?',
             description:
-                'This will immediately invalidate your current project token. Any apps, websites, or services using it will stop sending data to PostHog until you update them with the new token. This action cannot be undone.',
+                'This will immediately invalidate your current project token. Any apps, websites, or services using it will stop sending data to Insights until you update them with the new token. This action cannot be undone.',
             initialValues: { confirmation: '' },
             content: (
                 <LemonField name="confirmation">
@@ -185,7 +185,7 @@ export function TeamVariables(): JSX.Element {
                         {String(currentTeam?.id || '')}
                     </CodeSnippet>
                     <p className="text-muted text-xs mb-0">
-                        Use this ID in the <Link to="https://posthog.com/docs/api">PostHog API</Link>.
+                        Use this ID in the <Link to="https://posthog.com/docs/api">Insights API</Link>.
                     </p>
                 </div>
                 {region ? (
@@ -194,7 +194,7 @@ export function TeamVariables(): JSX.Element {
                         <CodeSnippet compact thing="project region">
                             {`${region} Cloud`}
                         </CodeSnippet>
-                        <p className="text-muted text-xs mb-0">Where your PostHog data is hosted.</p>
+                        <p className="text-muted text-xs mb-0">Where your Insights data is hosted.</p>
                     </div>
                 ) : null}
             </div>

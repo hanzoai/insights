@@ -4,13 +4,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from llm_gateway.auth.models import AuthenticatedUser
-from llm_gateway.callbacks.posthog import PostHogCallback, _replace_binary_content, _truncate_for_capture
+from llm_gateway.callbacks.posthog import InsightsCallback, _replace_binary_content, _truncate_for_capture
 
 
-class TestPostHogCallback:
+class TestInsightsCallback:
     @pytest.fixture
     def callback(self):
-        return PostHogCallback(api_key="test-key", host="https://test.posthog.com")
+        return InsightsCallback(api_key="test-key", host="https://test.posthog.com")
 
     @pytest.fixture
     def auth_user(self):
@@ -36,7 +36,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_success_captures_event(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser, standard_logging_object: dict
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser, standard_logging_object: dict
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
@@ -70,7 +70,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_success_uses_uuid_when_no_auth_user(
-        self, callback: PostHogCallback, standard_logging_object: dict
+        self, callback: InsightsCallback, standard_logging_object: dict
     ) -> None:
         kwargs = {"standard_logging_object": standard_logging_object, "llm_params": {}}
 
@@ -88,7 +88,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_success_uses_end_user_id_for_distinct_id(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser, standard_logging_object: dict
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser, standard_logging_object: dict
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
@@ -111,7 +111,7 @@ class TestPostHogCallback:
     @pytest.mark.asyncio
     @pytest.mark.parametrize("method_name", ["_on_success", "_on_failure"])
     async def test_oauth_uses_auth_user_distinct_id_not_end_user_id(
-        self, callback: PostHogCallback, method_name: str
+        self, callback: InsightsCallback, method_name: str
     ) -> None:
         oauth_user = AuthenticatedUser(
             user_id=123,
@@ -146,7 +146,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_failure_captures_error_event(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser
     ) -> None:
         kwargs = {
             "standard_logging_object": {
@@ -179,7 +179,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_success_without_optional_fields(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser
     ) -> None:
         kwargs = {
             "standard_logging_object": {
@@ -202,13 +202,13 @@ class TestPostHogCallback:
             assert "$ai_total_cost_usd" not in props
             assert "$ai_output_choices" not in props
 
-    def test_callback_name_is_posthog(self, callback: PostHogCallback) -> None:
+    def test_callback_name_is_posthog(self, callback: InsightsCallback) -> None:
         assert callback.callback_name == "posthog"
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize("product", ["wizard", "twig", "llm_gateway"])
     async def test_on_success_includes_ai_product(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser, standard_logging_object: dict, product: str
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser, standard_logging_object: dict, product: str
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
@@ -228,7 +228,7 @@ class TestPostHogCallback:
     @pytest.mark.asyncio
     @pytest.mark.parametrize("product", ["wizard", "twig", "llm_gateway"])
     async def test_on_failure_includes_ai_product(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser, product: str
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser, product: str
     ) -> None:
         kwargs = {
             "standard_logging_object": {
@@ -251,7 +251,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_success_uses_passed_end_user_id(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser, standard_logging_object: dict
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser, standard_logging_object: dict
     ) -> None:
         kwargs = {
             "standard_logging_object": standard_logging_object,
@@ -274,7 +274,7 @@ class TestPostHogCallback:
 
     @pytest.mark.asyncio
     async def test_on_failure_uses_passed_end_user_id(
-        self, callback: PostHogCallback, auth_user: AuthenticatedUser
+        self, callback: InsightsCallback, auth_user: AuthenticatedUser
     ) -> None:
         kwargs = {
             "standard_logging_object": {
@@ -442,7 +442,7 @@ class TestTruncateForCapture:
 
     @pytest.mark.asyncio
     async def test_on_success_truncates_oversized_content(self) -> None:
-        callback = PostHogCallback(api_key="test-key", host="https://test.posthog.com")
+        callback = InsightsCallback(api_key="test-key", host="https://test.posthog.com")
         auth_user = AuthenticatedUser(user_id=123, team_id=456, auth_method="personal_api_key", distinct_id="user-123")
         large_response = "R" * (900 * 1024)
         kwargs = {

@@ -135,8 +135,8 @@ export class CyclotronJobQueueKafka {
                 cdpJobSizeKb.observe(value.length / 1024)
 
                 const headers: Record<string, string> = {
-                    // NOTE: Later we should remove hogFunctionId as it is no longer used
-                    hogFunctionId: x.functionId,
+                    // NOTE: Later we should remove customFunctionId as it is no longer used
+                    customFunctionId: x.functionId,
                     functionId: x.functionId,
                     teamId: x.teamId.toString(),
                 }
@@ -282,17 +282,17 @@ export class CyclotronJobQueueKafka {
     }
 }
 
-// NOTE: https://github.com/PostHog/posthog/pull/32588 modified the job format to move more things to the generic "state" value
+// NOTE: https://github.com/Insights/insights/pull/32588 modified the job format to move more things to the generic "state" value
 // This function migrates any legacy jobs to the new format. We can remove this shortly after full release.
 export function migrateKafkaCyclotronInvocation(invocation: CyclotronJobInvocation): CyclotronJobInvocation {
     // Type casting but keeping as a reference
     const unknownInvocation = invocation as Record<string, any>
 
-    if ('hogFunctionId' in unknownInvocation) {
+    if ('customFunctionId' in unknownInvocation) {
         // Must be the old format
-        unknownInvocation.functionId = unknownInvocation.hogFunctionId
+        unknownInvocation.functionId = unknownInvocation.customFunctionId
         unknownInvocation.state = {}
-        delete unknownInvocation.hogFunctionId
+        delete unknownInvocation.customFunctionId
 
         if ('vmState' in unknownInvocation) {
             unknownInvocation.state.vmState = unknownInvocation.vmState

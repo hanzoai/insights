@@ -27,11 +27,11 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'swift',
                                 file: 'Swift',
                                 code: dedent`
-                                    let isMyFlagEnabled = PostHogSDK.shared.isFeatureEnabled("flag-key")
+                                    let isMyFlagEnabled = InsightsSDK.shared.isFeatureEnabled("flag-key")
                                     if isMyFlagEnabled {
                                         // Do something differently for this user
                                         // Optional: fetch the payload
-                                        let matchedFlagPayload = PostHogSDK.shared.getFeatureFlagPayload("flag-key")
+                                        let matchedFlagPayload = InsightsSDK.shared.getFeatureFlagPayload("flag-key")
                                     }
                                 `,
                             },
@@ -56,11 +56,11 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
                                 language: 'swift',
                                 file: 'Swift',
                                 code: dedent`
-                                    let enabledVariant = PostHogSDK.shared.getFeatureFlag("flag-key")
+                                    let enabledVariant = InsightsSDK.shared.getFeatureFlag("flag-key")
                                     if enabledVariant == "variant-key" { // replace 'variant-key' with the key of your variant
                                         // Do something differently for this user
                                         // Optional: fetch the payload
-                                        let matchedFlagPayload = PostHogSDK.shared.getFeatureFlagPayload("flag-key")
+                                        let matchedFlagPayload = InsightsSDK.shared.getFeatureFlagPayload("flag-key")
                                     }
                                 `,
                             },
@@ -75,7 +75,7 @@ export const getIOSSteps = (ctx: OnboardingComponentsContext): StepDefinition[] 
             content: (
                 <Markdown>
                     {dedent`
-                        Experiments run on top of our feature flags. Once you've implemented the flag in your code, you run an experiment by creating a new experiment in the PostHog dashboard.
+                        Experiments run on top of our feature flags. Once you've implemented the flag in your code, you run an experiment by creating a new experiment in the Insights dashboard.
                     `}
                 </Markdown>
             ),

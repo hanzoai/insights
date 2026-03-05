@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddField(
-            model_name="hogfunction",
+            model_name="customfunction",
             name="execution_order",
             field=models.PositiveSmallIntegerField(null=True, blank=True),
         ),

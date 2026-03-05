@@ -220,7 +220,7 @@ class VercelIntegration:
     @staticmethod
     def get_vercel_plans() -> list[dict[str, Any]]:
         # Single usage-based plan matching posthog.com model
-        # Billing is handled through PostHog's billing service, not Vercel
+        # Billing is handled through Insights's billing service, not Vercel
         return [
             {
                 "id": "posthog-usage-based",
@@ -385,7 +385,7 @@ class VercelIntegration:
     def get_installation_billing_plan(installation_id: str) -> dict[str, Any]:
         VercelIntegration._get_installation(installation_id)
 
-        # No billing plans - billing is handled through PostHog's billing service
+        # No billing plans - billing is handled through Insights's billing service
         return {}
 
     @staticmethod

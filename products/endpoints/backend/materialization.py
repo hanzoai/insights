@@ -1,16 +1,16 @@
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from posthog.schema import HogQLQuery, HogQLQueryModifiers
+from posthog.schema import InsightsQLQuery, InsightsQLQueryModifiers
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.printer import to_printed_hogql
-from posthog.hogql.timings import HogQLTimings
-from posthog.hogql.visitor import CloningVisitor, TraversingVisitor
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.printer import to_printed_insightsql
+from posthog.insightsql.timings import InsightsQLTimings
+from posthog.insightsql.visitor import CloningVisitor, TraversingVisitor
 
 from posthog.exceptions_capture import capture_exception
-from posthog.hogql_queries.query_runner import get_query_runner
+from posthog.insightsql_queries.query_runner import get_query_runner
 from posthog.models.team import Team
 
 
@@ -18,24 +18,24 @@ class VariableInHavingClauseError(ValueError):
     """Raised when a variable is used in a HAVING clause, which is not supported for materialization."""
 
 
-def convert_insight_query_to_hogql(query: dict[str, Any], team: Team) -> dict[str, Any]:
+def convert_insight_query_to_insightsql(query: dict[str, Any], team: Team) -> dict[str, Any]:
     query_kind = query.get("kind")
 
-    if query_kind == "HogQLQuery":
+    if query_kind == "InsightsQLQuery":
         return query
 
     query_runner = get_query_runner(
         query=query,
         team=team,
-        timings=HogQLTimings(),
-        modifiers=HogQLQueryModifiers(),
+        timings=InsightsQLTimings(),
+        modifiers=InsightsQLQueryModifiers(),
     )
 
     combined_query_ast = query_runner.to_query()
 
-    hogql_string = to_printed_hogql(combined_query_ast, team=team, modifiers=query_runner.modifiers)
+    insightsql_string = to_printed_insightsql(combined_query_ast, team=team, modifiers=query_runner.modifiers)
 
-    result = HogQLQuery(query=hogql_string, modifiers=query_runner.modifiers).model_dump()
+    result = InsightsQLQuery(query=insightsql_string, modifiers=query_runner.modifiers).model_dump()
     if "variables" in query:
         result["variables"] = query["variables"]
     return result
@@ -81,7 +81,7 @@ SUPPORTED_MATERIALIZATION_OPS = frozenset(
 
 
 def analyze_variables_for_materialization(
-    hogql_query: dict[str, Any],
+    insightsql_query: dict[str, Any],
 ) -> tuple[bool, str, list[MaterializableVariable]]:
     """
     Check if query variables can be materialized.
@@ -92,7 +92,7 @@ def analyze_variables_for_materialization(
     Returns:
         (can_materialize, reason, variable_infos)
     """
-    query_str = hogql_query.get("query")
+    query_str = insightsql_query.get("query")
     if not query_str:
         return False, "No query string found", []
 
@@ -108,7 +108,7 @@ def analyze_variables_for_materialization(
     if not finder.variable_placeholders:
         return False, "No variables found", []
 
-    variables_dict = hogql_query.get("variables", {})
+    variables_dict = insightsql_query.get("variables", {})
     result_vars: list[MaterializableVariable] = []
     seen_code_names: set[str] = set()
 
@@ -291,14 +291,14 @@ def transform_select_for_materialized_table(select_exprs: list[ast.Expr], team: 
         if isinstance(expr, ast.Alias):
             transformed.append(ast.Field(chain=[expr.alias]))
         else:
-            expr_str = expr.to_hogql()
+            expr_str = expr.to_insightsql()
             transformed.append(ast.Field(chain=[expr_str]))
 
     return transformed
 
 
 def transform_query_for_materialization(
-    hogql_query: dict[str, Any],
+    insightsql_query: dict[str, Any],
     variable_infos: MaterializableVariable | list[MaterializableVariable],
     team: Team,
 ) -> dict[str, Any]:
@@ -318,7 +318,7 @@ def transform_query_for_materialization(
     if isinstance(variable_infos, MaterializableVariable):
         variable_infos = [variable_infos]
 
-    query_str = hogql_query.get("query")
+    query_str = insightsql_query.get("query")
     if not query_str:
         raise ValueError("No query string found")
     parsed_ast = parse_select(query_str)
@@ -326,10 +326,10 @@ def transform_query_for_materialization(
     transformer = MaterializationTransformer(variable_infos)
     transformed_ast = transformer.visit(parsed_ast)
 
-    transformed_query_str = to_printed_hogql(transformed_ast, team=team)
+    transformed_query_str = to_printed_insightsql(transformed_ast, team=team)
 
     return {
-        **hogql_query,
+        **insightsql_query,
         "query": transformed_query_str,
         "variables": {},
     }

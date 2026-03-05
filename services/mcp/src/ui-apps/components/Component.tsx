@@ -1,10 +1,10 @@
 import type { CSSProperties, ReactElement } from 'react'
 
 import { FunnelVisualizer } from './FunnelVisualizer'
-import { PostHogLink } from './PostHogLink'
+import { InsightsLink } from './InsightsLink'
 import { TableVisualizer } from './TableVisualizer'
 import { TrendsVisualizer } from './TrendsVisualizer'
-import type { FunnelResult, FunnelsQuery, HogQLResult, TrendsQuery, TrendsResult } from './types'
+import type { FunnelResult, FunnelsQuery, InsightsQLResult, TrendsQuery, TrendsResult } from './types'
 
 type VisualizationType = 'trends' | 'funnel' | 'table'
 
@@ -50,9 +50,9 @@ function isFunnelResult(results: unknown): results is FunnelResult {
 }
 
 /**
- * Check if results look like HogQLResult (object with columns and results arrays).
+ * Check if results look like InsightsQLResult (object with columns and results arrays).
  */
-function isHogQLResult(results: unknown): results is HogQLResult {
+function isInsightsQLResult(results: unknown): results is InsightsQLResult {
     if (typeof results !== 'object' || results === null) {
         return false
     }
@@ -63,7 +63,7 @@ function isHogQLResult(results: unknown): results is HogQLResult {
 
 /**
  * Infer the visualization type from the data structure.
- * This mimics how the main PostHog app determines visualization from query/results.
+ * This mimics how the main Insights app determines visualization from query/results.
  */
 function inferVisualizationType(data: unknown): VisualizationType | null {
     if (typeof data !== 'object' || data === null) {
@@ -74,7 +74,7 @@ function inferVisualizationType(data: unknown): VisualizationType | null {
     const results = d.results
 
     // Infer from results structure first (most reliable)
-    if (isHogQLResult(results)) {
+    if (isInsightsQLResult(results)) {
         return 'table'
     }
     if (isTrendsResult(results)) {
@@ -92,7 +92,7 @@ function inferVisualizationType(data: unknown): VisualizationType | null {
     if (query?.kind === 'FunnelsQuery') {
         return 'funnel'
     }
-    if (query?.kind === 'HogQLQuery') {
+    if (query?.kind === 'InsightsQLQuery') {
         return 'table'
     }
 
@@ -102,7 +102,7 @@ function inferVisualizationType(data: unknown): VisualizationType | null {
 /** Data payload from MCP tools */
 interface DataPayload {
     query?: TrendsQuery | FunnelsQuery | Record<string, unknown>
-    results: TrendsResult | FunnelResult | HogQLResult
+    results: TrendsResult | FunnelResult | InsightsQLResult
     _posthogUrl?: string
 }
 
@@ -148,7 +148,7 @@ export function Component({ data, onOpenLink }: ComponentProps): ReactElement {
                     <div style={{ marginBottom: '0.5rem' }}>
                         This visualization type isn't supported in this view yet.
                     </div>
-                    {payload._posthogUrl && <PostHogLink url={payload._posthogUrl} onOpen={onOpenLink} />}
+                    {payload._posthogUrl && <InsightsLink url={payload._posthogUrl} onOpen={onOpenLink} />}
                 </div>
             </div>
         )
@@ -167,7 +167,7 @@ export function Component({ data, onOpenLink }: ComponentProps): ReactElement {
                 )
 
             case 'table':
-                return <TableVisualizer results={payload.results as HogQLResult} />
+                return <TableVisualizer results={payload.results as InsightsQLResult} />
 
             default:
                 return (
@@ -195,7 +195,7 @@ export function Component({ data, onOpenLink }: ComponentProps): ReactElement {
         <div style={containerStyle}>
             <div style={titleStyle}>{getTitle()}</div>
             {renderVisualization()}
-            {payload._posthogUrl && <PostHogLink url={payload._posthogUrl} onOpen={onOpenLink} />}
+            {payload._posthogUrl && <InsightsLink url={payload._posthogUrl} onOpen={onOpenLink} />}
         </div>
     )
 }

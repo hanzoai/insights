@@ -9,15 +9,15 @@ import { PostgresRouter } from '../../utils/db/postgres'
 import { UUIDT } from '../../utils/utils'
 import { CohortMembershipChange } from '../consumers/cdp-cohort-membership.consumer'
 import { CdpInternalEvent } from '../schema'
-import { compileHog } from '../templates/compiler'
+import { compileScript } from '../templates/compiler'
 import {
-    CyclotronJobInvocationHogFunction,
+    CyclotronJobInvocationCustomFunction,
     CyclotronJobQueueKind,
-    DBHogFunctionTemplate,
-    HogFunctionInvocationGlobals,
-    HogFunctionInvocationGlobalsWithInputs,
-    HogFunctionTemplateCompiled,
-    HogFunctionType,
+    DBCustomFunctionTemplate,
+    CustomFunctionInvocationGlobals,
+    CustomFunctionInvocationGlobalsWithInputs,
+    CustomFunctionTemplateCompiled,
+    CustomFunctionType,
     IntegrationType,
 } from '../types'
 
@@ -27,7 +27,7 @@ export const SAMPLE_GLOBALS = {
         event: 'test',
         distinct_id: 'distinct_id',
         properties: {
-            email: 'test@posthog.com',
+            email: 'test@hanzo.ai',
         },
         elements_chain: '',
         timestamp: '',
@@ -40,17 +40,17 @@ export const SAMPLE_GLOBALS = {
     },
 }
 
-export const createHogFunction = (hogFunction: Partial<HogFunctionType>) => {
-    const item: HogFunctionType = {
+export const createCustomFunction = (customFunction: Partial<CustomFunctionType>) => {
+    const item: CustomFunctionType = {
         id: randomUUID(),
         type: 'destination',
-        name: 'Hog Function',
+        name: 'Custom Function',
         team_id: 1,
         enabled: true,
-        hog: '',
+        script: '',
         bytecode: [],
-        ...hogFunction,
-    } as HogFunctionType
+        ...customFunction,
+    } as CustomFunctionType
 
     return item
 }
@@ -119,7 +119,7 @@ export const createClickhousePerson = (teamId: number, data: Partial<ClickHouseP
         id: randomUUID(),
         created_at: new Date().toISOString(),
         properties: JSON.stringify({
-            email: 'test@posthog.com',
+            email: 'test@hanzo.ai',
         }),
         is_identified: 1,
         is_deleted: 0,
@@ -130,16 +130,16 @@ export const createClickhousePerson = (teamId: number, data: Partial<ClickHouseP
     }
 }
 
-export const insertHogFunction = async (
+export const insertCustomFunction = async (
     postgres: PostgresRouter,
     team_id: Team['id'],
-    hogFunction: Partial<HogFunctionType> = {}
-): Promise<HogFunctionType> => {
+    customFunction: Partial<CustomFunctionType> = {}
+): Promise<CustomFunctionType> => {
     // This is only used for testing so we need to override some values
 
-    const res = await insertRow(postgres, 'posthog_hogfunction', {
-        ...createHogFunction({
-            ...hogFunction,
+    const res = await insertRow(postgres, 'posthog_customfunction', {
+        ...createCustomFunction({
+            ...customFunction,
             team_id: team_id,
         }),
         description: '',
@@ -151,39 +151,39 @@ export const insertHogFunction = async (
     return res
 }
 
-export const createHogFunctionTemplate = (
-    hogFunctionTemplate: Partial<HogFunctionTemplateCompiled>
-): HogFunctionTemplateCompiled => {
+export const createCustomFunctionTemplate = (
+    customFunctionTemplate: Partial<CustomFunctionTemplateCompiled>
+): CustomFunctionTemplateCompiled => {
     return {
         id: randomUUID(),
         status: 'stable',
         free: true,
         type: 'destination',
-        name: 'Hog Function Template',
-        description: 'Hog Function Template',
-        code_language: 'hog',
-        code: 'Hog Function Template',
+        name: 'Custom Function Template',
+        description: 'Custom Function Template',
+        code_language: 'custom_script',
+        code: 'Custom Function Template',
         inputs_schema: [],
         category: [],
         bytecode: [],
-        ...hogFunctionTemplate,
+        ...customFunctionTemplate,
     }
 }
 
-export const insertHogFunctionTemplate = async (
+export const insertCustomFunctionTemplate = async (
     postgres: PostgresRouter,
-    hogFunctionTemplate: Partial<HogFunctionTemplateCompiled> = {}
-): Promise<DBHogFunctionTemplate> => {
+    customFunctionTemplate: Partial<CustomFunctionTemplateCompiled> = {}
+): Promise<DBCustomFunctionTemplate> => {
     // This is only used for testing so we need to override some values
 
-    const template = createHogFunctionTemplate({
-        ...hogFunctionTemplate,
+    const template = createCustomFunctionTemplate({
+        ...customFunctionTemplate,
     })
-    if (template.code_language === 'hog') {
-        template.bytecode = await compileHog(template.code)
+    if (template.code_language === 'custom_script') {
+        template.bytecode = await compileScript(template.code)
     }
 
-    const res = await insertRow(postgres, 'posthog_hogfunctiontemplate', {
+    const res = await insertRow(postgres, 'posthog_customfunctiontemplate', {
         id: randomUUID(),
         template_id: template.id,
         sha: 'sha',
@@ -212,7 +212,7 @@ export const insertIntegration = async (
     team_id: Team['id'],
     integration: Partial<IntegrationType> = {}
 ): Promise<IntegrationType> => {
-    const res = await insertRow(postgres, 'posthog_integration', {
+    const res = await insertRow(postgres, 'insights_integration', {
         ...createIntegration({
             ...integration,
             team_id: team_id,
@@ -224,9 +224,9 @@ export const insertIntegration = async (
     return res
 }
 
-export const createHogExecutionGlobals = (
-    data: Partial<HogFunctionInvocationGlobals> = {}
-): HogFunctionInvocationGlobals => {
+export const createScriptExecutionGlobals = (
+    data: Partial<CustomFunctionInvocationGlobals> = {}
+): CustomFunctionInvocationGlobals => {
     return {
         groups: {},
         ...data,
@@ -235,7 +235,7 @@ export const createHogExecutionGlobals = (
             name: 'test',
             url: 'http://localhost:8000/persons/1',
             properties: {
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
                 first_name: 'Pumpkin',
             },
             ...data.person,
@@ -262,29 +262,29 @@ export const createHogExecutionGlobals = (
 }
 
 export const createExampleInvocation = (
-    _hogFunction: Partial<HogFunctionType> = {},
-    _globals: Partial<HogFunctionInvocationGlobalsWithInputs> = {},
-    queue: CyclotronJobQueueKind = 'hog'
-): CyclotronJobInvocationHogFunction => {
-    const hogFunction = createHogFunction(_hogFunction)
+    _customFunction: Partial<CustomFunctionType> = {},
+    _globals: Partial<CustomFunctionInvocationGlobalsWithInputs> = {},
+    queue: CyclotronJobQueueKind = 'custom_script'
+): CyclotronJobInvocationCustomFunction => {
+    const customFunction = createCustomFunction(_customFunction)
     // Add the source of the trigger to the globals
 
-    const globals = createHogExecutionGlobals(_globals)
+    const globals = createScriptExecutionGlobals(_globals)
     globals.source = {
-        name: hogFunction.name ?? `Hog function: ${hogFunction.id}`,
-        url: `${globals.project.url}/pipeline/destinations/hog-${hogFunction.id}/configuration/`,
+        name: customFunction.name ?? `Custom function: ${customFunction.id}`,
+        url: `${globals.project.url}/pipeline/destinations/custom-function-${customFunction.id}/configuration/`,
     }
 
     return {
         id: new UUIDT().toString(),
         state: {
-            globals: globals as HogFunctionInvocationGlobalsWithInputs,
+            globals: globals as CustomFunctionInvocationGlobalsWithInputs,
             timings: [],
             attempts: 0,
         },
-        teamId: hogFunction.team_id,
-        functionId: hogFunction.id,
-        hogFunction,
+        teamId: customFunction.team_id,
+        functionId: customFunction.id,
+        customFunction,
         queue,
         queuePriority: 0,
     }

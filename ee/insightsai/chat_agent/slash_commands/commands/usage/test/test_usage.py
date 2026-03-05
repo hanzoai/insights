@@ -179,7 +179,7 @@ class TestUsage(BaseTest):
         )
         self.assertIn(f"since {DEFAULT_GA_LAUNCH_DATE.strftime('%Y-%m-%d')}", message)
         self.assertIn(
-            f"from PostHog AI general availability date ({DEFAULT_GA_LAUNCH_DATE.strftime('%b %d, %Y')})", message
+            f"from Insights AI general availability date ({DEFAULT_GA_LAUNCH_DATE.strftime('%b %d, %Y')})", message
         )
 
     def test_format_usage_message_with_conversation_start(self):

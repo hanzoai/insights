@@ -57,7 +57,7 @@ PERMISSIONS = [
     "rak_connected_account_read",
     "rak_payment_method_read",
 ]
-STRIPE_API_KEYS_URL = f"{STRIPE_BASE_URL}/apikeys/create?name=PostHog&{'&'.join([f'permissions[{i}]={permission}' for i, permission in enumerate(PERMISSIONS)])}"
+STRIPE_API_KEYS_URL = f"{STRIPE_BASE_URL}/apikeys/create?name=Insights&{'&'.join([f'permissions[{i}]={permission}' for i, permission in enumerate(PERMISSIONS)])}"
 
 
 @SourceRegistry.register
@@ -76,7 +76,7 @@ class StripeSource(ResumableSource[StripeSourceConfig, StripeResumeConfig], Webh
     def get_source_config(self) -> SourceConfig:
         return SourceConfig(
             name=SchemaExternalDataSourceType.STRIPE,
-            caption=f"""Enter your Stripe credentials to automatically pull your Stripe data into the PostHog Data warehouse. You will need your [Stripe account ID]({STRIPE_ACCOUNT_URL}), and create a [restricted API key]({STRIPE_API_KEYS_URL}).
+            caption=f"""Enter your Stripe credentials to automatically pull your Stripe data into the Insights Data warehouse. You will need your [Stripe account ID]({STRIPE_ACCOUNT_URL}), and create a [restricted API key]({STRIPE_API_KEYS_URL}).
 
 By clicking the link above, you will be taken to a form that pre-fills everything you need to get started to match the required permissions.
 """,

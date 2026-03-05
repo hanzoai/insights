@@ -13,7 +13,7 @@ class TestNodeNameSync(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="original_name",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         node = Node.objects.create(
@@ -30,7 +30,7 @@ class TestNodeNameSync(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="saved_query_name",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         node = Node.objects.create(
@@ -51,7 +51,7 @@ class TestNodeNameSync(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="original_name",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         node = Node.objects.create(
@@ -101,7 +101,7 @@ class TestNodeNameSync(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="shared_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         node1 = Node.objects.create(
@@ -133,7 +133,7 @@ class TestNodeNameSync(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="shared_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         Node.objects.create(
             team=self.team,

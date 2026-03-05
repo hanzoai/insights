@@ -22,9 +22,9 @@ from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.monitoring import monitor
 from posthog.api.routing import TeamAndOrgViewSetMixin
@@ -101,7 +101,7 @@ def _fetch_evaluation_runs(
     limit: int = EVALUATION_SUMMARY_MAX_RUNS,
 ) -> list[dict]:
     """
-    Fetch evaluation runs from ClickHouse using HogQL.
+    Fetch evaluation runs from ClickHouse using InsightsQL.
 
     Args:
         team: Team object to query for
@@ -113,7 +113,7 @@ def _fetch_evaluation_runs(
     Returns:
         List of dicts with: generation_id, result, reasoning
     """
-    # Build WHERE conditions using HogQL AST for safe parameterization
+    # Build WHERE conditions using InsightsQL AST for safe parameterization
     where_conditions: list[ast.Expr] = [
         ast.CompareOperation(
             op=ast.CompareOperationOp.Eq,
@@ -197,7 +197,7 @@ def _fetch_evaluation_runs(
     )
 
     with tags_context(product=Product.LLM_ANALYTICS):
-        query_result = execute_hogql_query(
+        query_result = execute_insightsql_query(
             query_type="EvaluationSummaryFetchRuns",
             query=query,
             placeholders={
@@ -368,7 +368,7 @@ Data is fetched server-side by evaluation ID to ensure data integrity.
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            # Fetch evaluation runs from ClickHouse using HogQL
+            # Fetch evaluation runs from ClickHouse using InsightsQL
             runs = _fetch_evaluation_runs(
                 team=self.team,
                 evaluation_id=evaluation_id,

@@ -512,7 +512,7 @@ class Team(UUIDTClassicModel):
     # Environment-level default InsightsQL query modifiers
     modifiers = models.JSONField(null=True, blank=True)
 
-    # This is meant to be used as a stopgap until https://github.com/PostHog/meta/pull/39 gets implemented
+    # This is meant to be used as a stopgap until https://github.com/Insights/meta/pull/39 gets implemented
     # Switches _most_ queries to using distinct_id as aggregator instead of person_id
     @property
     def aggregate_users_by_distinct_id(self) -> bool:
@@ -670,7 +670,7 @@ class Team(UUIDTClassicModel):
         if settings.PERSON_ON_EVENTS_OVERRIDE is not None:
             return settings.PERSON_ON_EVENTS_OVERRIDE
 
-        # on PostHog Cloud, use the feature flag
+        # on Insights Cloud, use the feature flag
         if is_cloud():
             return posthoganalytics.feature_enabled(
                 "persons-on-events-person-id-no-override-properties-on-events",
@@ -695,7 +695,7 @@ class Team(UUIDTClassicModel):
         if settings.PERSON_ON_EVENTS_V2_OVERRIDE is not None:
             return settings.PERSON_ON_EVENTS_V2_OVERRIDE
 
-        # on PostHog Cloud, use the feature flag
+        # on Insights Cloud, use the feature flag
         if is_cloud():
             return posthoganalytics.feature_enabled(
                 "persons-on-events-v2-reads-enabled",

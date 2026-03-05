@@ -317,7 +317,7 @@ describe('llmEvaluationLogic', () => {
                 })
             })
 
-            it('returns null when evaluation uses the PostHog default key', async () => {
+            it('returns null when evaluation uses the Insights default key', async () => {
                 await expectLogic(logic).toDispatchActions(['loadEvaluationSuccess'])
 
                 logic.actions.loadEvaluationSuccess({

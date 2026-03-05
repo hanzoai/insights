@@ -9,13 +9,13 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. The Pydantic AI integration uses
-                        PostHog's OpenAI wrapper.
+                        Setting up analytics starts with installing the Insights SDK. The Pydantic AI integration uses
+                        Insights's OpenAI wrapper.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Install Pydantic AI with OpenAI support. PostHog instruments your LLM calls by wrapping the
+                        Install Pydantic AI with OpenAI support. Insights instruments your LLM calls by wrapping the
                         OpenAI client that Pydantic AI uses.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
             ),
         },
         {
-            title: 'Initialize PostHog and Pydantic AI',
+            title: 'Initialize Insights and Pydantic AI',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
-                        settings](https://app.posthog.com/settings/project), then create a PostHog `AsyncOpenAI`
+                        Initialize Insights with your project API key and host from [your project
+                        settings](https://app.posthog.com/settings/project), then create a Insights `AsyncOpenAI`
                         wrapper, pass it to an `OpenAIProvider`, and use that with Pydantic AI's `OpenAIChatModel`.
                     </Markdown>
 
@@ -87,8 +87,8 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            PostHog's `AsyncOpenAI` wrapper is a proper subclass of `openai.AsyncOpenAI`, so it works
-                            directly as the client for Pydantic AI's `OpenAIProvider`. PostHog captures
+                            Insights's `AsyncOpenAI` wrapper is a proper subclass of `openai.AsyncOpenAI`, so it works
+                            directly as the client for Pydantic AI's `OpenAIProvider`. Insights captures
                             `$ai_generation` events automatically without proxying your calls.
                         </Markdown>
                     </CalloutBox>
@@ -101,7 +101,7 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
             content: (
                 <>
                     <Markdown>
-                        Create a Pydantic AI agent with the model and run it. PostHog automatically captures an
+                        Create a Pydantic AI agent with the model and run it. Insights automatically captures an
                         `$ai_generation` event for each LLM call.
                     </Markdown>
 
@@ -114,8 +114,8 @@ export const getPydanticAISteps = (ctx: OnboardingComponentsContext): StepDefini
                             )
 
                             result = agent.run_sync(
-                                "Tell me a fun fact about hedgehogs.",
-                                # Pass PostHog metadata via the OpenAI client's extra params
+                                "Tell me a fun fact about mascots.",
+                                # Pass Insights metadata via the OpenAI client's extra params
                             )
 
                             print(result.output)

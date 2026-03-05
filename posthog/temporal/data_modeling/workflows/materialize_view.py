@@ -10,7 +10,7 @@ import temporalio.exceptions
 from temporalio.workflow import ParentClosePolicy
 
 from posthog.exceptions_capture import capture_exception
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.data_modeling.activities import (
     CreateDataModelingJobInputs,
     FailMaterializationInputs,
@@ -76,7 +76,7 @@ class MaterializeViewWorkflowResult:
 
 
 @temporalio.workflow.defn(name="data-modeling-materialize-view")
-class MaterializeViewWorkflow(PostHogWorkflow):
+class MaterializeViewWorkflow(InsightsWorkflow):
     """Temporal workflow to materialize a single view.
 
     This workflow handles the complete materialization of a single view/materialized view:

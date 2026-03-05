@@ -8,13 +8,13 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
 import { PostgresUse } from '../../utils/db/postgres'
-import { createExampleInvocation, createHogExecutionGlobals, createHogFunction } from '../_tests/fixtures'
+import { createExampleInvocation, createScriptExecutionGlobals, createCustomFunction } from '../_tests/fixtures'
 import { DESTINATION_PLUGINS_BY_ID, TRANSFORMATION_PLUGINS_BY_ID } from '../legacy-plugins'
 import { LegacyDestinationPlugin, LegacyTransformationPlugin } from '../legacy-plugins/types'
 import {
-    CyclotronJobInvocationHogFunction,
-    HogFunctionInvocationGlobalsWithInputs,
-    HogFunctionType,
+    CyclotronJobInvocationCustomFunction,
+    CustomFunctionInvocationGlobalsWithInputs,
+    CustomFunctionType,
     MinimalLogEntry,
 } from '../types'
 import { LegacyPluginExecutorService } from './legacy-plugin-executor.service'
@@ -33,8 +33,8 @@ describe('LegacyPluginExecutorService', () => {
     let service: LegacyPluginExecutorService
     let hub: Hub
     let team: Team
-    let globals: HogFunctionInvocationGlobalsWithInputs
-    let fn: HogFunctionType
+    let globals: CustomFunctionInvocationGlobalsWithInputs
+    let fn: CustomFunctionType
     let pluginConfigId: number
     let uniquePluginId: number
 
@@ -46,7 +46,7 @@ describe('LegacyPluginExecutorService', () => {
         service = new LegacyPluginExecutorService(hub.postgres, hub.geoipService)
         team = await getFirstTeam(hub)
 
-        fn = createHogFunction({
+        fn = createCustomFunction({
             name: 'Plugin test',
             template_id: customerIoPlugin.template.id,
             team_id: team.id,
@@ -61,7 +61,7 @@ describe('LegacyPluginExecutorService', () => {
         // Create a plugin in the database
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `INSERT INTO posthog_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
+            `INSERT INTO insights_plugin (id, organization_id, name, plugin_type, is_global, url, config_schema, from_json, from_web, created_at, updated_at, is_preinstalled, capabilities)
              VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11, $12, $13::jsonb)
              RETURNING *`,
             [
@@ -86,7 +86,7 @@ describe('LegacyPluginExecutorService', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            'INSERT INTO posthog_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
+            'INSERT INTO insights_pluginconfig (id, team_id, plugin_id, enabled, "order", config, created_at, updated_at, deleted) VALUES ($1, $2, $3, true, $4, $5::jsonb, $6, $7, false)',
             [
                 pluginConfigId,
                 team.id,
@@ -118,7 +118,7 @@ describe('LegacyPluginExecutorService', () => {
         )
 
         globals = {
-            ...createHogExecutionGlobals({
+            ...createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -126,10 +126,10 @@ describe('LegacyPluginExecutorService', () => {
                     uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                     event: '$pageview',
                     properties: {
-                        $current_url: 'https://posthog.com',
+                        $current_url: 'https://hanzo.ai',
                         $lib_version: '1.0.0',
                         $set: {
-                            email: 'test@posthog.com',
+                            email: 'test@hanzo.ai',
                         },
                     },
                     timestamp: fixedTime.toISO(),
@@ -138,7 +138,7 @@ describe('LegacyPluginExecutorService', () => {
             inputs: {
                 customerioSiteId: '1234567890',
                 customerioToken: 'cio-token',
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
                 legacy_plugin_config_id: pluginConfigId,
             },
         }
@@ -173,7 +173,7 @@ describe('LegacyPluginExecutorService', () => {
                 config: {
                     customerioSiteId: '1234567890',
                     customerioToken: 'cio-token',
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                 },
                 geoip: {
                     locate: expect.any(Function),
@@ -201,7 +201,7 @@ describe('LegacyPluginExecutorService', () => {
             const invocation = createExampleInvocation(fn, globals)
             invocation.state.globals.event.event = 'mycustomevent'
             invocation.state.globals.event.properties = {
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
             }
 
             mockFetch.mockResolvedValue({
@@ -234,7 +234,7 @@ describe('LegacyPluginExecutorService', () => {
                   "event": "mycustomevent",
                   "ip": null,
                   "properties": {
-                    "email": "test@posthog.com",
+                    "email": "test@hanzo.ai",
                   },
                   "team_id": 2,
                   "timestamp": "2025-01-01T00:00:00.000Z",
@@ -252,7 +252,7 @@ describe('LegacyPluginExecutorService', () => {
                       "body": undefined,
                       "headers": {
                         "Authorization": "Basic MTIzNDU2Nzg5MDpjaW8tdG9rZW4=",
-                        "User-Agent": "PostHog Customer.io App",
+                        "User-Agent": "Insights Customer.io App",
                       },
                       "method": "GET",
                     },
@@ -264,7 +264,7 @@ describe('LegacyPluginExecutorService', () => {
                       "headers": {
                         "Authorization": "Basic MTIzNDU2Nzg5MDpjaW8tdG9rZW4=",
                         "Content-Type": "application/json",
-                        "User-Agent": "PostHog Customer.io App",
+                        "User-Agent": "Insights Customer.io App",
                       },
                       "method": "PUT",
                     },
@@ -272,11 +272,11 @@ describe('LegacyPluginExecutorService', () => {
                   [
                     "https://track.customer.io/api/v1/customers/distinct_id/events",
                     {
-                      "body": "{"name":"mycustomevent","type":"event","timestamp":1735689600,"data":{"email":"test@posthog.com"}}",
+                      "body": "{"name":"mycustomevent","type":"event","timestamp":1735689600,"data":{"email":"test@hanzo.ai"}}",
                       "headers": {
                         "Authorization": "Basic MTIzNDU2Nzg5MDpjaW8tdG9rZW4=",
                         "Content-Type": "application/json",
-                        "User-Agent": "PostHog Customer.io App",
+                        "User-Agent": "Insights Customer.io App",
                       },
                       "method": "POST",
                     },
@@ -300,10 +300,10 @@ describe('LegacyPluginExecutorService', () => {
             jest.spyOn(customerIoPlugin, 'onEvent')
 
             const invocation = createExampleInvocation(fn, globals)
-            invocation.hogFunction.name = 'My function [CDP-TEST-HIDDEN]'
+            invocation.customFunction.name = 'My function [CDP-TEST-HIDDEN]'
             invocation.state.globals.event.event = 'mycustomevent'
             invocation.state.globals.event.properties = {
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
             }
 
             const res = await service.execute(invocation)
@@ -332,7 +332,7 @@ describe('LegacyPluginExecutorService', () => {
             const invocation = createExampleInvocation(fn, globals)
             invocation.state.globals.event.event = 'mycustomevent'
             invocation.state.globals.event.properties = {
-                email: 'test@posthog.com',
+                email: 'test@hanzo.ai',
             }
 
             // First fetch is successful (setup)
@@ -383,20 +383,20 @@ describe('LegacyPluginExecutorService', () => {
         describe('mismatched types', () => {
             it('should throw if the plugin is a destination but the function is a transformation', async () => {
                 fn.type = 'destination'
-                fn.template_id = 'plugin-posthog-filter-out-plugin'
+                fn.template_id = 'plugin-insights-filter-out-plugin'
 
                 const invocation = createExampleInvocation(fn, globals)
                 const res = await service.execute(invocation)
 
                 expect(res.error).toMatchInlineSnapshot(
-                    `[Error: Plugin plugin-posthog-filter-out-plugin is not a destination]`
+                    `[Error: Plugin plugin-insights-filter-out-plugin is not a destination]`
                 )
             })
         })
         describe('event dropping', () => {
             beforeEach(() => {
                 fn.type = 'transformation'
-                fn.template_id = 'plugin-posthog-filter-out-plugin'
+                fn.template_id = 'plugin-insights-filter-out-plugin'
 
                 globals.inputs = {
                     eventsToDrop: 'drop-me',
@@ -407,7 +407,7 @@ describe('LegacyPluginExecutorService', () => {
                 const invocation = createExampleInvocation(fn, globals)
                 invocation.state.globals.event.event = 'dont-drop-me'
                 invocation.state.globals.event.properties = {
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                 }
 
                 const res = await service.execute(invocation)
@@ -422,7 +422,7 @@ describe('LegacyPluginExecutorService', () => {
                       "event": "dont-drop-me",
                       "ip": undefined,
                       "properties": {
-                        "email": "test@posthog.com",
+                        "email": "test@hanzo.ai",
                       },
                       "team_id": 2,
                       "timestamp": "2025-01-01T00:00:00.000Z",
@@ -435,7 +435,7 @@ describe('LegacyPluginExecutorService', () => {
                 const invocation = createExampleInvocation(fn, globals)
                 invocation.state.globals.event.event = 'drop-me'
                 invocation.state.globals.event.properties = {
-                    email: 'test@posthog.com',
+                    email: 'test@hanzo.ai',
                 }
 
                 const res = await service.execute(invocation)
@@ -491,10 +491,10 @@ describe('LegacyPluginExecutorService', () => {
     describe('smoke tests', () => {
         const buildInvocation = (
             plugin: LegacyDestinationPlugin | LegacyTransformationPlugin
-        ): CyclotronJobInvocationHogFunction => {
+        ): CyclotronJobInvocationCustomFunction => {
             const invocation = createExampleInvocation(fn, globals)
             invocation.state.globals.inputs = {}
-            invocation.hogFunction.template_id = plugin.template.id
+            invocation.customFunction.template_id = plugin.template.id
 
             const inputs: Record<string, any> = {}
 
@@ -524,7 +524,7 @@ describe('LegacyPluginExecutorService', () => {
         }))
         it.each(testCasesDestination)('should run the destination plugin: %s', async ({ name, plugin }) => {
             const invocation = buildInvocation(plugin)
-            invocation.hogFunction.name = name
+            invocation.customFunction.name = name
             invocation.state.globals.event.event = '$identify' // Many plugins filter for this
 
             if (plugin.template.id === 'plugin-customerio-plugin') {
@@ -541,8 +541,8 @@ describe('LegacyPluginExecutorService', () => {
 
         it.each(testCasesTransformation)('should run the transformation plugin: %s', async ({ name, plugin }) => {
             const invocation = buildInvocation(plugin)
-            invocation.hogFunction.name = name
-            invocation.hogFunction.type = 'transformation'
+            invocation.customFunction.name = name
+            invocation.customFunction.type = 'transformation'
             invocation.state.globals.event.event = '$pageview'
             const res = await service.execute(invocation)
             expect(getLogMessages(res.logs)).toMatchSnapshot()
@@ -550,9 +550,9 @@ describe('LegacyPluginExecutorService', () => {
     })
 
     describe('first-time-event-tracker', () => {
-        let invocation: CyclotronJobInvocationHogFunction
+        let invocation: CyclotronJobInvocationCustomFunction
         beforeEach(() => {
-            fn = createHogFunction({
+            fn = createCustomFunction({
                 team_id: team.id,
                 name: 'First time event tracker',
                 template_id: 'plugin-first-time-event-tracker',

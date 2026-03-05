@@ -10,7 +10,7 @@ import { copyToClipboard } from 'lib/utils/copyToClipboard'
 import { urls } from 'scenes/urls'
 
 import { DataTable } from '~/queries/nodes/DataTable/DataTable'
-import { isHogQLQuery } from '~/queries/utils'
+import { isInsightsQLQuery } from '~/queries/utils'
 import { PropertyFilterType, PropertyOperator } from '~/types'
 
 import { useSortableColumns } from './hooks/useSortableColumns'
@@ -34,8 +34,8 @@ export function LLMAnalyticsErrors(): JSX.Element {
                 showSavedFilters: true,
             }}
             setQuery={(query) => {
-                if (!isHogQLQuery(query.source)) {
-                    console.warn('LLMAnalyticsErrors received a non-HogQL query:', query.source)
+                if (!isInsightsQLQuery(query.source)) {
+                    console.warn('LLMAnalyticsErrors received a non-InsightsQL query:', query.source)
                     return
                 }
                 const { filters = {} } = query.source
@@ -80,7 +80,7 @@ export function LLMAnalyticsErrors(): JSX.Element {
                                                             type: PropertyFilterType.Event,
                                                             key: '$ai_error_normalized',
                                                             operator: PropertyOperator.Exact,
-                                                            // Escape backslashes and quotes to match HogQL's JSONExtractRaw extraction
+                                                            // Escape backslashes and quotes to match InsightsQL's JSONExtractRaw extraction
                                                             value: errorString
                                                                 .replace(/\\/g, '\\\\')
                                                                 .replace(/"/g, '\\"'),

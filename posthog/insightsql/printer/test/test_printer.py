@@ -1795,7 +1795,7 @@ class TestPrinter(BaseTest):
         )
 
     def test_print_timezone_gibberish(self):
-        self.team.timezone = "Europe/PostHogLandia"
+        self.team.timezone = "Europe/InsightsLandia"
         self.team.save()
 
         context = InsightsQLContext(team_id=self.team.pk, enable_select_queries=True)
@@ -1804,7 +1804,7 @@ class TestPrinter(BaseTest):
                 "SELECT now(), toDateTime(timestamp), toDateTime('2020-02-02') FROM events",
                 context,
             )
-        self.assertEqual(str(error_context.exception), "Unknown timezone: 'Europe/PostHogLandia'")
+        self.assertEqual(str(error_context.exception), "Unknown timezone: 'Europe/InsightsLandia'")
 
     def test_window_functions(self):
         self.assertEqual(
@@ -3702,7 +3702,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                             ),
                         ]
                     ),
-                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/PostHog/posthog/pull/44346 but test for equivalence here
+                ),  # this is the historical behaviour for is_not_set, was removed in https://github.com/Insights/posthog/pull/44346 but test for equivalence here
             ],
             select_from=ast.JoinExpr(table=ast.Field(chain=["events"])),
             where=ast.CompareOperation(
@@ -3966,7 +3966,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # do multiple test cases per test run, as setup and teardown are a bit slow
         cases: set[str] = {
             "hello@posthog.com",
-            "Hello@PostHog.com",
+            "Hello@Insights.com",
             "other_value",
             "null",
             "NULL",
@@ -3982,8 +3982,8 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
         # In this case we bail out of our optimization and fall back to default NULL handling/wrapping.
         # It'd be a good thing to fix this! And remove these special-cases from the tests! but my top priority was making sure that I didn't change any behavior.
         patterns_and_expected = {
-            "%@posthog.com": ({"hello@posthog.com", "Hello@PostHog.com", "null@posthog.com"}, None),
-            "hello@posthog.com": ({"hello@posthog.com", "Hello@PostHog.com"}, None),
+            "%@posthog.com": ({"hello@posthog.com", "Hello@Insights.com", "null@posthog.com"}, None),
+            "hello@posthog.com": ({"hello@posthog.com", "Hello@Insights.com"}, None),
             "%null%": (
                 {"null", "NULL", "'null'", "null@posthog.com", "contains null in the middle"},
                 {"NULL", "'null'", "null@posthog.com", "contains null in the middle"},
@@ -3992,7 +3992,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                 {
                     "",
                     "hello@posthog.com",
-                    "Hello@PostHog.com",
+                    "Hello@Insights.com",
                     "other_value",
                     "null",
                     "NULL",
@@ -4002,7 +4002,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
                 },
                 {
                     "hello@posthog.com",
-                    "Hello@PostHog.com",
+                    "Hello@Insights.com",
                     "other_value",
                     "NULL",
                     "'null'",
@@ -4076,7 +4076,7 @@ class TestMaterializedColumnOptimization(ClickhouseTestMixin, APIBaseTest):
 
         cases: set[str] = {
             "hello@posthog.com",
-            "Hello@PostHog.com",
+            "Hello@Insights.com",
             "other_value",
             "null",
             "NULL",

@@ -44,7 +44,7 @@ The final output should be:
 - A walkthrough of the relevant code paths
 - A detailed summary of exactly how the issue occurs
 
-PostHog issue: ${issueUrl}
+Insights issue: ${issueUrl}
 `
         }
         return `Please help me fix the root cause of this error. Here's the stack trace:
@@ -66,7 +66,7 @@ The final output of your efforts should be:
 - An implemented fix for the issue applied directly to the code
 - A brief explanation of what was changed and why
 
-PostHog issue: ${issueUrl}
+Insights issue: ${issueUrl}
 `
     }
 

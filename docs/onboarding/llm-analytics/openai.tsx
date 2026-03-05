@@ -8,12 +8,12 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics works
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics works
                         best with our Python and Node SDKs.
                     </Markdown>
 
@@ -44,8 +44,8 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Install the OpenAI SDK. The PostHog SDK instruments your LLM calls by wrapping the OpenAI client. The
-                        PostHog SDK **does not** proxy your calls.
+                        Install the OpenAI SDK. The Insights SDK instruments your LLM calls by wrapping the OpenAI client. The
+                        Insights SDK **does not** proxy your calls.
                     </Markdown>
 
                     <CodeBlock
@@ -70,12 +70,12 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Initialize PostHog and OpenAI client',
+            title: 'Initialize Insights and OpenAI client',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
+                        Initialize Insights with your project API key and host from [your project
                         settings](https://app.posthog.com/settings/project), then pass it to our OpenAI wrapper.
                     </Markdown>
 
@@ -104,9 +104,9 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 file: 'Node',
                                 code: dedent`
                                     import { OpenAI } from '@posthog/ai'
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -131,7 +131,7 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but you
                             will need to capture the data in the right format. See the schema in the [manual capture
                             section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
@@ -146,7 +146,7 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Now, when you use the OpenAI SDK to call LLMs, PostHog automatically captures an `$ai_generation`
+                        Now, when you use the OpenAI SDK to call LLMs, Insights automatically captures an `$ai_generation`
                         event. You can enrich the event with additional data such as the trace ID, distinct ID, custom
                         properties, groups, and privacy mode options.
                     </Markdown>
@@ -160,7 +160,7 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                                     response = client.responses.create(
                                         model="gpt-4o-mini",
                                         input=[
-                                            {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
+                                            {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
                                         posthog_distinct_id="user_123", # optional
                                         posthog_trace_id="trace_123", # optional
@@ -178,7 +178,7 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                                 code: dedent`
                                     const completion = await openai.responses.create({
                                         model: "gpt-4o-mini",
-                                        input: [{ role: "user", content: "Tell me a fun fact about hedgehogs" }],
+                                        input: [{ role: "user", content: "Tell me a fun fact about mascots" }],
                                         posthogDistinctId: "user_123", // optional
                                         posthogTraceId: "trace_123", // optional
                                         posthogProperties: { conversation_id: "abc123", paid: true }, // optional
@@ -221,7 +221,7 @@ export const getOpenAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        PostHog can also capture embedding generations as `$ai_embedding` events. Just make sure to use the
+                        Insights can also capture embedding generations as `$ai_embedding` events. Just make sure to use the
                         same `posthog.ai.openai` client to do so:
                     </Markdown>
 

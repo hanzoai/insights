@@ -88,15 +88,15 @@ async function createHubspotContact(
 
     if (additionalPropertyMappings) {
         for (const mapping of additionalPropertyMappings.split(',')) {
-            const [postHogProperty, hubSpotProperty] = mapping.split(':')
-            if (postHogProperty && hubSpotProperty) {
+            const [insightsProperty, hubSpotProperty] = mapping.split(':')
+            if (insightsProperty && hubSpotProperty) {
                 // special case to convert an event's timestamp to the format Hubspot uses them
-                if (postHogProperty === 'sent_at' || postHogProperty === 'created_at') {
+                if (insightsProperty === 'sent_at' || insightsProperty === 'created_at') {
                     const d = new Date(eventSendTime)
                     d.setUTCHours(0, 0, 0, 0)
                     hubspotFilteredProps[hubSpotProperty] = d.getTime()
-                } else if (postHogProperty in properties) {
-                    hubspotFilteredProps[hubSpotProperty] = properties[postHogProperty]
+                } else if (insightsProperty in properties) {
+                    hubspotFilteredProps[hubSpotProperty] = properties[insightsProperty]
                 }
             }
         }

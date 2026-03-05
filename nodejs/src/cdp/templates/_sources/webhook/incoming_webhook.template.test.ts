@@ -44,13 +44,13 @@ describe('incoming webhook template', () => {
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
 
-        expect(response.capturedPostHogEvents).toMatchInlineSnapshot(`
+        expect(response.capturedInsightsEvents).toMatchInlineSnapshot(`
             [
               {
                 "distinct_id": "hardcoded",
                 "event": "the event",
                 "properties": {
-                  "$hog_function_execution_count": 1,
+                  "$custom_function_execution_count": 1,
                   "missing": null,
                   "nested_level": "nestedLevelValue",
                   "root_level": "rootLevelValue",
@@ -119,7 +119,7 @@ describe('incoming webhook template', () => {
             }
         )
 
-        expect(response.capturedPostHogEvents).toHaveLength(1)
+        expect(response.capturedInsightsEvents).toHaveLength(1)
 
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)

@@ -6,7 +6,7 @@
  * - Receive tool result notifications
  * - Apply host styling
  * - Handle errors and loading states
- * - Track analytics events via PostHog
+ * - Track analytics events via Insights
  *
  * Usage:
  * ```tsx
@@ -50,7 +50,7 @@ import {
     captureToolInput,
     captureToolResult,
     identifyUser,
-    initPostHog,
+    initInsights,
 } from '../analytics/posthog'
 import { extractAnalytics } from '../types'
 
@@ -89,7 +89,7 @@ function parseToolResultContent<T>(structuredContent: unknown): T | null {
 }
 
 function log(...args: any[]): void {
-    console.debug('[PostHog MCP App]', ...args)
+    console.debug('[Insights MCP App]', ...args)
 }
 
 /**
@@ -106,10 +106,10 @@ export function useToolResult<T = unknown>({
     const [parseError, setParseError] = useState<Error | null>(null)
     const hasLoggedConnection = useRef(false)
 
-    // Initialize PostHog on first render
+    // Initialize Insights on first render
     useEffect(() => {
-        log('Initializing PostHog', { appName, appVersion })
-        initPostHog(appName, appVersion)
+        log('Initializing Insights', { appName, appVersion })
+        initInsights(appName, appVersion)
     }, [appName, appVersion])
 
     const {
@@ -177,12 +177,12 @@ export function useToolResult<T = unknown>({
                         setParseError(null)
                     } else {
                         const err = new Error('Unable to parse tool result')
-                        console.error('[PostHog MCP App UI] Parse error:', err)
+                        console.error('[Insights MCP App UI] Parse error:', err)
                         setParseError(err)
                     }
                 } catch (e) {
                     const err = e instanceof Error ? e : new Error(String(e))
-                    console.error('[PostHog MCP App UI] Exception:', err)
+                    console.error('[Insights MCP App UI] Exception:', err)
                     setParseError(err)
                 }
             })
@@ -195,7 +195,7 @@ export function useToolResult<T = unknown>({
     // Track connection state and errors
     useEffect(() => {
         if (connectionError && !hasLoggedConnection.current) {
-            console.error('[PostHog MCP App UI] Connection error:', connectionError)
+            console.error('[Insights MCP App UI] Connection error:', connectionError)
             captureAppConnectionError(connectionError)
             hasLoggedConnection.current = true
         }

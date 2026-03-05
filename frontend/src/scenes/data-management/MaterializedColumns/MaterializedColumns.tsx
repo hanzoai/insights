@@ -246,7 +246,7 @@ export function MaterializedColumns(): JSX.Element {
                         <div>
                             <h3 className="text-lg font-semibold mb-2">Auto-Materialized Properties</h3>
                             <p className="text-sm text-muted mb-4">
-                                These properties are already automatically materialized by PostHog. You're already
+                                These properties are already automatically materialized by Insights. You're already
                                 getting all the performance gains we can provide!
                             </p>
                             {autoMaterializedColumnsLoading ? (

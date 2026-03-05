@@ -29,7 +29,7 @@ class ThreadedWorker(Worker):
     def run_in_thread(self):
         """Run a Temporal Worker in a thread.
 
-        Don't use this outside of tests. Once PostHog is fully async we can get rid of this.
+        Don't use this outside of tests. Once Insights is fully async we can get rid of this.
         """
         loop = asyncio.new_event_loop()
         t = threading.Thread(target=self.run_using_loop, daemon=True, args=(loop,))

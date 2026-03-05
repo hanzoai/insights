@@ -325,7 +325,7 @@ class SurveySerializerCreateUpdateOnly(serializers.ModelSerializer):
         )
 
         if survey_white_label and not use_survey_white_labelling:
-            raise serializers.ValidationError("You need to upgrade to PostHog Enterprise to use white labelling")
+            raise serializers.ValidationError("You need to upgrade to Insights Enterprise to use white labelling")
 
         return value
 
@@ -1575,7 +1575,7 @@ class SurveyViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, viewsets.
         environment_is_allowed = settings.DEBUG or is_cloud()
         has_gemini_api_key = bool(settings.GEMINI_API_KEY)
         if not environment_is_allowed or not has_gemini_api_key:
-            raise exceptions.ValidationError("survey summary is only supported in PostHog Cloud")
+            raise exceptions.ValidationError("survey summary is only supported in Insights Cloud")
 
         end_date: datetime = (survey.end_date or datetime.now()).replace(
             hour=0, minute=0, second=0, microsecond=0
@@ -2026,7 +2026,7 @@ def surveys(request: Request):
             request,
             generate_exception_response(
                 "surveys",
-                "API key not provided. You can find your project API key in your PostHog project settings.",
+                "API key not provided. You can find your project API key in your Insights project settings.",
                 type="authentication_error",
                 code="missing_api_key",
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -2063,7 +2063,7 @@ def surveys(request: Request):
                 request,
                 generate_exception_response(
                     "surveys",
-                    "Project API key invalid. You can find your project API key in your PostHog project settings.",
+                    "Project API key invalid. You can find your project API key in your Insights project settings.",
                     type="authentication_error",
                     code="invalid_api_key",
                     status_code=status.HTTP_401_UNAUTHORIZED,

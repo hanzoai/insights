@@ -7,8 +7,8 @@ import { sidePanelStatusIncidentIoLogic } from '~/layout/navigation-3000/sidepan
 
 import type { healthMenuLogicType } from './healthMenuLogicType'
 
-export type PostHogStatusType = 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage'
-export type PostHogStatusBadgeStatus = 'success' | 'warning' | 'danger'
+export type InsightsStatusType = 'operational' | 'degraded_performance' | 'partial_outage' | 'major_outage'
+export type InsightsStatusBadgeStatus = 'success' | 'warning' | 'danger'
 
 export const healthMenuLogic = kea<healthMenuLogicType>([
     path(['lib', 'components', 'HealthMenu', 'healthMenuLogic']),
@@ -34,7 +34,7 @@ export const healthMenuLogic = kea<healthMenuLogicType>([
         ],
     }),
     selectors({
-        postHogStatus: [(s) => [s.status], (status): PostHogStatusType => status],
+        postHogStatus: [(s) => [s.status], (status): InsightsStatusType => status],
         isFakeStatus: [
             (s) => [s.superpowersEnabled, s.fakeStatusOverride],
             (superpowersEnabled, fakeStatusOverride): boolean => !!superpowersEnabled && fakeStatusOverride !== 'none',
@@ -54,7 +54,7 @@ export const healthMenuLogic = kea<healthMenuLogicType>([
         ],
         postHogStatusBadgeStatus: [
             (s) => [s.postHogStatus],
-            (postHogStatus): PostHogStatusBadgeStatus => {
+            (postHogStatus): InsightsStatusBadgeStatus => {
                 if (postHogStatus.includes('outage')) {
                     return 'danger'
                 }

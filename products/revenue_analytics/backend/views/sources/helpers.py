@@ -4,8 +4,8 @@ from django.conf import settings
 
 from posthog.schema import CurrencyCode
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_expr
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_expr
 
 from posthog.models.exchange_rate.sql import EXCHANGE_RATE_DECIMAL_PRECISION
 from posthog.models.team.team import Team
@@ -75,7 +75,7 @@ def currency_aware_amount() -> ast.Alias:
 
 
 def events_expr_for_team(team: Team) -> ast.Expr:
-    from posthog.hogql.property import property_to_expr
+    from posthog.insightsql.property import property_to_expr
 
     exprs = []
     if (

@@ -326,7 +326,7 @@ Return ONLY the JSON object, no other text or markdown formatting."""
         return self.get_api_key()
 
     def _build_analytics_kwargs(self, analytics: AnalyticsContext, client) -> dict:
-        """Build PostHog analytics kwargs if using instrumented client."""
+        """Build Insights analytics kwargs if using instrumented client."""
         if analytics.capture and isinstance(client, Anthropic):
             return {
                 "posthog_distinct_id": analytics.distinct_id,

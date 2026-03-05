@@ -7,7 +7,7 @@ import { useToolResult } from '../../hooks/useToolResult'
 
 function QueryResultsApp(): JSX.Element {
     const { data, isConnected, error, openLink } = useToolResult({
-        appName: 'PostHog Query Results',
+        appName: 'Insights Query Results',
     })
 
     if (error) {

@@ -18,7 +18,7 @@ import {
 } from 'products/customer_analytics/frontend/queries/ZendeskTicketsQuery'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
-import { createPostHogWidgetNode } from './NodeWrapper'
+import { createInsightsWidgetNode } from './NodeWrapper'
 import { notebookNodeLogic } from './notebookNodeLogic'
 
 const Component = ({ attributes }: NotebookNodeProps<NotebookNodeZendeskTicketsAttributes>): JSX.Element | null => {
@@ -87,7 +87,7 @@ type NotebookNodeZendeskTicketsAttributes = {
     groupKey?: string
 }
 
-export const NotebookNodeZendeskTickets = createPostHogWidgetNode<NotebookNodeZendeskTicketsAttributes>({
+export const NotebookNodeZendeskTickets = createInsightsWidgetNode<NotebookNodeZendeskTicketsAttributes>({
     nodeType: NotebookNodeType.ZendeskTickets,
     titlePlaceholder: 'Zendesk tickets',
     Component,

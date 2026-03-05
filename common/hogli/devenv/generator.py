@@ -186,7 +186,7 @@ class MprocsGenerator(ConfigGenerator):
         process_count = len(resolved.units)
         products = sorted(resolved.intents) if resolved.intents else ["(none)"]
 
-        # ANSI color codes matching PostHog brand
+        # ANSI color codes matching Insights brand
         orange = r"\033[38;2;245;78;0m"  # #F54E00
         blue = r"\033[38;2;29;74;255m"  # #1D4AFF
         gray = r"\033[38;5;245m"
@@ -199,7 +199,7 @@ class MprocsGenerator(ConfigGenerator):
 
         shell = f"""\
 echo ''
-printf '{orange}{bold}  PostHog Dev Environment{reset}\\n'
+printf '{orange}{bold}  Insights Dev Environment{reset}\\n'
 printf '{gray}  ─────────────────────────────────────{reset}\\n'
 echo ''
 if [ -f {news_path} ]; then

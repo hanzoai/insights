@@ -55,7 +55,7 @@ export class ActionManagerCDP {
                 steps_json,
                 created_at,
                 updated_at
-            FROM posthog_action
+            FROM insights_action
             WHERE team_id = ANY($1) AND deleted = FALSE
             AND bytecode IS NOT NULL
             ORDER BY team_id, updated_at DESC

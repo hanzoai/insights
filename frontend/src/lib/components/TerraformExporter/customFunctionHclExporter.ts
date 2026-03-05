@@ -13,7 +13,7 @@ export interface CustomFunctionHclExportOptions extends HclExportOptions {
 }
 
 /**
- * @see https://registry.terraform.io/providers/PostHog/posthog/latest/docs/resources/custom_function
+ * @see https://registry.terraform.io/providers/Insights/posthog/latest/docs/resources/custom_function
  */
 const CUSTOM_FUNCTION_FIELD_MAPPINGS: FieldMapping<Partial<CustomFunctionType>, CustomFunctionHclExportOptions>[] = [
     {

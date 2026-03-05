@@ -18,7 +18,7 @@ class CoreFilterDefinition(TypedDict):
 
 
 """
-Same as https://github.com/PostHog/posthog-js/blob/master/src/utils/event-utils.ts
+Same as https://github.com/Insights/posthog-js/blob/master/src/utils/event-utils.ts
 Ideally this would be imported from one place.
 """
 CAMPAIGN_PROPERTIES: list[str] = [
@@ -174,7 +174,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         "$feature_enrollment_update": {
             "label": "Feature enrollment",
             "description": "When a user enrolls with a feature.",
-            "description_llm": "When a user opts in or out of a beta feature. This event is specific to the PostHog Early Access Features product, and is only relevant if the project is using this product.",
+            "description_llm": "When a user opts in or out of a beta feature. This event is specific to the Insights Early Access Features product, and is only relevant if the project is using this product.",
         },
         "$capture_metrics": {
             "label": "Capture metrics",
@@ -428,7 +428,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$config_defaults": {
             "label": "Config defaults",
-            "description": "The version of the PostHog config defaults that were used when capturing the event.",
+            "description": "The version of the Insights config defaults that were used when capturing the event.",
             "type": "String",
             "used_for_debug": True,
         },
@@ -463,15 +463,15 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
             "used_for_debug": True,
         },
         "$sdk_debug_extensions_init_method": {
-            "label": "PostHog.js extensions init method",
-            "description": "The method used to initialize PostHog.js extensions.",
+            "label": "Insights.js extensions init method",
+            "description": "The method used to initialize Insights.js extensions.",
             "examples": ["deferred", "synchronous"],
             "type": "String",
             "used_for_debug": True,
         },
         "$sdk_debug_extensions_init_time_ms": {
-            "label": "PostHog.js extensions init time (ms)",
-            "description": "The time taken to initialize PostHog.js extensions in milliseconds.",
+            "label": "Insights.js extensions init time (ms)",
+            "description": "The time taken to initialize Insights.js extensions in milliseconds.",
             "examples": ["150"],
             "type": "Numeric",
             "used_for_debug": True,
@@ -515,7 +515,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$pageview_id": {
             "label": "Pageview ID",
-            "description": "PostHog's internal ID for matching events to a pageview.",
+            "description": "Insights's internal ID for matching events to a pageview.",
             "system": True,
             "ignored_in_assistant": True,
         },
@@ -794,7 +794,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$exception_personURL": {
             "label": "Exception person URL",
-            "description": "The PostHog person that experienced the exception.",
+            "description": "The Insights person that experienced the exception.",
         },
         "$cymbal_errors": {
             "label": "Exception processing errors",
@@ -1244,7 +1244,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$sent_at": {
             "label": "Sent at",
-            "description": "Time the event was sent to PostHog. Used for correcting the event timestamp when the device clock is off.",
+            "description": "Time the event was sent to Insights. Used for correcting the event timestamp when the device clock is off.",
             "examples": ["2023-05-20T15:31:00Z"],
         },
         "$browser": {
@@ -1282,7 +1282,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$raw_user_agent": {
             "label": "Raw user agent",
-            "description": "PostHog process information like browser, OS, and device type from the user agent string. This is the raw user agent string.",
+            "description": "Insights process information like browser, OS, and device type from the user agent string. This is the raw user agent string.",
             "examples": ["Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)"],
         },
         "$user_agent": {
@@ -1410,7 +1410,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$feature_flag_request_id": {
             "label": "Feature flag request ID",
-            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by PostHog support for debugging issues with feature flags.",
+            "description": "The unique identifier for the request that retrieved this feature flag result.\n\nNote: Primarily used by Insights support for debugging issues with feature flags.",
             "examples": ["01234567-89ab-cdef-0123-456789abcdef"],
         },
         "$feature_flag_evaluated_at": {
@@ -1994,7 +1994,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
         },
         "$ai_evaluation_key_type": {
             "label": "AI Evaluation Key Type (LLM)",
-            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = PostHog default).",
+            "description": "The type of API key used for the evaluation (byok = user's own key, posthog = Insights default).",
             "examples": ["byok", "posthog"],
         },
         "$ai_evaluation_key_id": {
@@ -2159,7 +2159,7 @@ CORE_FILTER_DEFINITIONS_BY_GROUP: dict[str, dict[str, CoreFilterDefinition]] = {
     "session_properties": {
         "$session_duration": {
             "label": "Session duration",
-            "description": "The duration of the session being tracked. Learn more about how PostHog tracks sessions in [our documentation](https://posthog.com/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
+            "description": "The duration of the session being tracked. Learn more about how Insights tracks sessions in [our documentation](https://posthog.com/docs/user-guides/sessions).\n\nNote: If the duration is formatted as a single number (not `HH:MM:SS`), it's in seconds.",
             "examples": ["30", "146", "2"],
             "type": "Numeric",
         },

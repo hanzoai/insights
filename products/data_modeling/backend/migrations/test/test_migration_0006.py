@@ -32,14 +32,14 @@ class BackfillNodesEdgesMigrationTest(NonAtomicTestMigrations):
         self.new_saved_query = DataWarehouseSavedQuery.objects.create(
             team=team,
             name="new_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             deleted=False,
         )
         # case 2: saved query with existing node → should NOT be backfilled (already handled)
         self.existing_saved_query = DataWarehouseSavedQuery.objects.create(
             team=team,
             name="existing_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 2"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 2"},
             deleted=False,
         )
         Node.objects.create(
@@ -54,14 +54,14 @@ class BackfillNodesEdgesMigrationTest(NonAtomicTestMigrations):
         self.deleted_saved_query = DataWarehouseSavedQuery.objects.create(
             team=team,
             name="deleted_view",
-            query={"kind": "HogQLQuery", "query": "SELECT 3"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 3"},
             deleted=True,
         )
         # case 4: saved query with dependency → should create node with edge
         self.dependent_saved_query = DataWarehouseSavedQuery.objects.create(
             team=team,
             name="dependent_view",
-            query={"kind": "HogQLQuery", "query": "SELECT * FROM new_view"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT * FROM new_view"},
             deleted=False,
         )
 

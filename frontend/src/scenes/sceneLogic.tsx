@@ -271,7 +271,7 @@ const pathPrefixesOnboardingNotRequiredFor = [
     urls.billingAuthorizationStatus(),
     urls.wizard(),
     '/instance',
-    urls.moveToPostHogCloud(),
+    urls.moveToInsightsCloud(),
     urls.unsubscribe(),
     urls.debugHog(),
     urls.debugQuery(),
@@ -1125,7 +1125,7 @@ export const sceneLogic = kea<sceneLogicType>([
                 router.actions.replace(urls.signup())
                 return
             }
-            if (sceneId === Scene.MoveToPostHogCloud && preflight?.cloud) {
+            if (sceneId === Scene.MoveToInsightsCloud && preflight?.cloud) {
                 router.actions.replace(urls.projectRoot())
                 return
             }

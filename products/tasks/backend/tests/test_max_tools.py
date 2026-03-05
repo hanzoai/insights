@@ -578,7 +578,7 @@ class TestListTasksTool(BaseTaskToolTest):
     @pytest.mark.django_db
     @pytest.mark.asyncio
     async def test_list_tasks_repo_case_insensitive(self):
-        await self._create_task("Task", repository="PostHog/PostHog-JS")
+        await self._create_task("Task", repository="Insights/Insights-JS")
 
         tool = self._create_tool(ListTasksTool)
 
@@ -656,7 +656,7 @@ class TestListTasksTool(BaseTaskToolTest):
     ("filter_value", "should_match"),
     [
         ("posthog/posthog-js", True),
-        ("PostHog/PostHog-JS", True),
+        ("Insights/Insights-JS", True),
         ("posthog-js", True),
         ("posthog/posthog", False),
     ],
@@ -883,14 +883,14 @@ class TestListRepositoriesTool(BaseTaskToolTest):
                 team=self.team,
                 kind="github",
                 integration_id="12345",
-                config={"account": {"name": "PostHog"}},
+                config={"account": {"name": "Insights"}},
             )
 
         await create_integration()
 
         mock_github_instance = mock_github_class.return_value
-        mock_github_instance.organization.return_value = "PostHog"
-        mock_github_instance.list_repositories.return_value = ["PostHog-JS"]
+        mock_github_instance.organization.return_value = "Insights"
+        mock_github_instance.list_repositories.return_value = ["Insights-JS"]
 
         tool = self._create_tool(ListRepositoriesTool)
 

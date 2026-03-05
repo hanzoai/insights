@@ -17,7 +17,7 @@ export const getShopifySteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Add the PostHog snippet',
+            title: 'Add the Insights snippet',
             badge: 'required',
             content: (
                 <>
@@ -50,7 +50,7 @@ export const getShopifySteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'recommended',
             content: (
                 <Markdown>
-                    PostHog will now capture pageviews, clicks, and other events on your Shopify store. See the [Shopify
+                    Insights will now capture pageviews, clicks, and other events on your Shopify store. See the [Shopify
                     integration docs](https://posthog.com/docs/libraries/shopify) for tracking checkout events and
                     revenue.
                 </Markdown>

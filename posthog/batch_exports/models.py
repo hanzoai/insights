@@ -44,7 +44,7 @@ class DayOfWeek(IntEnum):
 
 
 class BatchExportDestination(UUIDTModel):
-    """A model for the destination that a PostHog BatchExport will target.
+    """A model for the destination that a Insights BatchExport will target.
 
     This model answers the question: where are we exporting data? It contains
     all the necessary information to interact with a specific destination. As we
@@ -54,7 +54,7 @@ class BatchExportDestination(UUIDTModel):
     """
 
     class Destination(models.TextChoices):
-        """Enumeration of supported destinations for PostHog BatchExports."""
+        """Enumeration of supported destinations for Insights BatchExports."""
 
         S3 = "S3"
         SNOWFLAKE = "Snowflake"
@@ -109,7 +109,7 @@ class BatchExportDestination(UUIDTModel):
 
 
 class BatchExportRun(UUIDTModel):
-    """A model of a single run of a PostHog BatchExport given a time interval.
+    """A model of a single run of a Insights BatchExport given a time interval.
 
     It is used to keep track of the status and progress of the export
     between the specified time interval, as well as communicating any errors
@@ -185,7 +185,7 @@ BATCH_EXPORT_INTERVALS = [
 
 class BatchExport(ModelActivityMixin, UUIDTModel):
     """
-    Defines the configuration of PostHog to export data to a destination,
+    Defines the configuration of Insights to export data to a destination,
     either on a schedule (via the interval parameter), or manually by a
     "backfill". Specific instances of a unit process of exporting data is called
     a BatchExportRun.
@@ -323,7 +323,7 @@ class BatchExport(ModelActivityMixin, UUIDTModel):
         """Return the offset day for this batch export.
 
         For a weekly schedule, this is the day of the week to start at (0-6, where 0 is Sunday).
-        Sunday is 0 since this is what is used by Temporal and Sunday is also the default week start day in PostHog.
+        Sunday is 0 since this is what is used by Temporal and Sunday is also the default week start day in Insights.
         For all other intervals, this is None.
         """
         if self.interval == "week":

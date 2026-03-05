@@ -15,7 +15,7 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
             <>
                 <Markdown>
                     {dedent`
-                        To send errors directly using the PostHog client, import it and use the \`captureException\` method like this:
+                        To send errors directly using the Insights client, import it and use the \`captureException\` method like this:
                     `}
                 </Markdown>
                 <CodeBlock
@@ -47,7 +47,7 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
                             file: 'server/api/example.js',
                             code: dedent`
                               const runtimeConfig = useRuntimeConfig()
-                              const posthog = new PostHog(
+                              const posthog = new Insights(
                                 runtimeConfig.public.posthogPublicKey,
                                 {
                                   host: runtimeConfig.public.posthogHost,
@@ -105,9 +105,9 @@ export const getNuxt36Steps = (ctx: OnboardingComponentsContext): StepDefinition
         content: (
             <Markdown>
                 {dedent`
-                    Before proceeding, let's make sure exception events are being captured and sent to PostHog. You should see events appear in the activity feed.
+                    Before proceeding, let's make sure exception events are being captured and sent to Insights. You should see events appear in the activity feed.
 
-                    [Check for exceptions in PostHog](https://app.posthog.com/activity/explore)
+                    [Check for exceptions in Insights](https://app.posthog.com/activity/explore)
                 `}
             </Markdown>
         ),

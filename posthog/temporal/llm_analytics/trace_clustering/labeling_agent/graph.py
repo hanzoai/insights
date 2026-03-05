@@ -22,7 +22,7 @@ logger = structlog.get_logger(__name__)
 def _get_llm(model: str, timeout: float) -> ChatOpenAI:
     """Create an OpenAI chat client for the labeling agent."""
     if not settings.DEBUG and not is_cloud():
-        raise Exception("AI features are only available in PostHog Cloud")
+        raise Exception("AI features are only available in Insights Cloud")
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:

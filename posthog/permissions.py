@@ -696,7 +696,7 @@ class AccessControlPermission(ScopeBasePermission):
         return False
 
 
-class PostHogFeatureFlagPermission(BasePermission):
+class InsightsFeatureFlagPermission(BasePermission):
     def has_permission(self, request, view) -> bool:
         user = cast(User, request.user)
         organization = get_organization_from_view(view)
@@ -706,7 +706,7 @@ class PostHogFeatureFlagPermission(BasePermission):
 
         if not flag:
             raise ImproperlyConfigured(
-                "PostHogFeatureFlagPermission requires the view to define the posthog_feature_flag attribute."
+                "InsightsFeatureFlagPermission requires the view to define the posthog_feature_flag attribute."
             )
 
         if isinstance(flag, str):

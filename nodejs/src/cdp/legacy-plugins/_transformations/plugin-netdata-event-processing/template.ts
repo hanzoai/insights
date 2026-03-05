@@ -12,7 +12,7 @@ export const pluginNetdataEventProcessing: LegacyTransformationPlugin = {
         id: 'plugin-plugin-netdata-event-processing',
         name: 'Netdata Event Processing',
         description: 'Event processing for Netdata',
-        icon_url: '/static/hedgehog/builder-hog-01.png',
+        icon_url: '/static/mascot/builder-mascot-01.png',
         category: ['Custom'],
         code_language: 'javascript',
         code: `return event`,

@@ -6,14 +6,14 @@ import { urls } from 'scenes/urls'
 
 import {
     DashboardFilter,
-    HogQLFilters,
-    HogQLVariable,
+    InsightsQLFilters,
+    InsightsQLVariable,
     Node,
     NodeKind,
     ProductKey,
     TileFilters,
 } from '~/queries/schema/schema-general'
-import { isDataTableNode, isDataVisualizationNode, isHogQLQuery } from '~/queries/utils'
+import { isDataTableNode, isDataVisualizationNode, isInsightsQLQuery } from '~/queries/utils'
 
 import {
     DashboardType,
@@ -39,13 +39,13 @@ export const manifest: ProductManifest = {
             query?: Node
             sceneSource?: InsightSceneSource
         } = {}): string => {
-            // Redirect HogQL queries to SQL editor
-            if (isHogQLQuery(query)) {
+            // Redirect InsightsQL queries to SQL editor
+            if (isInsightsQLQuery(query)) {
                 return urls.sqlEditor({ query: query.query })
             }
 
-            // Redirect DataNode and DataViz queries with HogQL source to SQL editor
-            if ((isDataVisualizationNode(query) || isDataTableNode(query)) && isHogQLQuery(query.source)) {
+            // Redirect DataNode and DataViz queries with InsightsQL source to SQL editor
+            if ((isDataVisualizationNode(query) || isDataTableNode(query)) && isInsightsQLQuery(query.source)) {
                 return urls.sqlEditor({ query: query.source.query })
             }
 
@@ -55,11 +55,11 @@ export const manifest: ProductManifest = {
                 ...(sceneSource ? { sceneSource } : {}),
             }).url
         },
-        insightNewHogQL: ({ query, filters }: { query: string; filters?: HogQLFilters }): string =>
+        insightNewInsightsQL: ({ query, filters }: { query: string; filters?: InsightsQLFilters }): string =>
             urls.insightNew({
                 query: {
                     kind: NodeKind.DataTableNode,
-                    source: { kind: 'HogQLQuery', query, filters },
+                    source: { kind: 'InsightsQLQuery', query, filters },
                 } as any,
             }),
         insightEdit: (id: InsightShortId, dashboardId?: number): string =>
@@ -67,7 +67,7 @@ export const manifest: ProductManifest = {
         insightView: (
             id: InsightShortId,
             dashboardId?: number,
-            variablesOverride?: Record<string, HogQLVariable>,
+            variablesOverride?: Record<string, InsightsQLVariable>,
             filtersOverride?: DashboardFilter,
             tileFiltersOverride?: TileFilters
         ): string => {

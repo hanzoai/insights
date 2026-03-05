@@ -3,7 +3,7 @@ import { useValues } from 'kea'
 import { SkeletonLog } from 'lib/components/ActivityLog/ActivityLog'
 import { describerFor } from 'lib/components/ActivityLog/activityLogLogic'
 import { humanize } from 'lib/components/ActivityLog/humanizeActivity'
-import { DetectiveHog } from 'lib/components/hedgehogs'
+import { DetectiveHog } from 'lib/components/mascots'
 
 import { AuditLogTable } from './AuditLogTable'
 import { advancedActivityLogsLogic } from './advancedActivityLogsLogic'

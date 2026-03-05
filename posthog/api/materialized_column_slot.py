@@ -32,7 +32,7 @@ logger = structlog.get_logger(__name__)
 
 
 def get_auto_materialized_property_names() -> set[str]:
-    """Get set of property names that are already auto-materialized by PostHog."""
+    """Get set of property names that are already auto-materialized by Insights."""
     if not EE_AVAILABLE:
         return set()
 
@@ -112,7 +112,7 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         """Get properties that can be materialized for a team.
 
         Only returns custom properties and feature flag properties.
-        Excludes PostHog system properties and properties already auto-materialized.
+        Excludes Insights system properties and properties already auto-materialized.
         """
         already_materialized = MaterializedColumnSlot.objects.filter(team_id=self.team_id).values_list(
             "property_definition_id", flat=True
@@ -131,8 +131,8 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         )
 
         # Filter out:
-        # 1. PostHog system properties (starting with $) except feature flags ($feature/)
-        # 2. Properties already auto-materialized by PostHog
+        # 1. Insights system properties (starting with $) except feature flags ($feature/)
+        # 2. Properties already auto-materialized by Insights
         filtered_properties = [
             prop
             for prop in available_properties
@@ -144,9 +144,9 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
 
     @action(methods=["GET"], detail=False)
     def auto_materialized(self, request, **kwargs):
-        """Get properties that PostHog has automatically materialized.
+        """Get properties that Insights has automatically materialized.
 
-        These are managed by PostHog's automatic materialization system and cannot be modified here.
+        These are managed by Insights's automatic materialization system and cannot be modified here.
         Uses the same cached function that InsightsQL uses for query rewriting.
         """
         if not EE_AVAILABLE:
@@ -190,9 +190,9 @@ class MaterializedColumnSlotViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSe
         if property_definition.property_type not in MATERIALIZABLE_PROPERTY_TYPES:
             return f"Property type '{property_definition.property_type}' cannot be materialized"
         if property_definition.name.startswith("$") and not property_definition.name.startswith("$feature/"):
-            return "PostHog system properties cannot be materialized"
+            return "Insights system properties cannot be materialized"
         if property_definition.name in auto_materialized_names:
-            return f"Property '{property_definition.name}' is already auto-materialized by PostHog"
+            return f"Property '{property_definition.name}' is already auto-materialized by Insights"
         if any(slot.property_definition_id == property_definition.id for slot in existing_slots):
             return "Property is already materialized"
         return None

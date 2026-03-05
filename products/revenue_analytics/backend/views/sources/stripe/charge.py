@@ -1,7 +1,7 @@
 from typing import cast
 
-from posthog.hogql import ast
-from posthog.hogql.database.schema.exchange_rate import EXCHANGE_RATE_DECIMAL_PRECISION, convert_currency_call
+from posthog.insightsql import ast
+from posthog.insightsql.database.schema.exchange_rate import EXCHANGE_RATE_DECIMAL_PRECISION, convert_currency_call
 
 from posthog.temporal.data_imports.sources.stripe.constants import CHARGE_RESOURCE_NAME as STRIPE_CHARGE_RESOURCE_NAME
 

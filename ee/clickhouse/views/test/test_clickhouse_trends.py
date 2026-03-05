@@ -33,7 +33,7 @@ from ee.api.test.base import LicensedTestMixin
 @pytest.mark.ee
 def test_includes_only_intervals_within_range(client: Client):
     """
-    This is the case highlighted by https://github.com/PostHog/posthog/issues/2675
+    This is the case highlighted by https://github.com/Insights/posthog/issues/2675
 
     Here the issue is that we request, for instance, 14 days as the
     date_from, display at weekly intervals but previously we
@@ -51,7 +51,7 @@ def test_includes_only_intervals_within_range(client: Client):
 
     #  I'm creating a cohort here so that I can use as a breakdown, just because
     #  this is what was used demonstrated in
-    #  https://github.com/PostHog/posthog/issues/2675 but it might not be the
+    #  https://github.com/Insights/posthog/issues/2675 but it might not be the
     #  simplest way to reproduce
 
     # "2021-09-19" is a sunday, i.e. beginning of week

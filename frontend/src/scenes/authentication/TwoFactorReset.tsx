@@ -33,7 +33,7 @@ export function TwoFactorReset(): JSX.Element {
         return (
             <BridgePage
                 view="login"
-                hedgehog
+                mascot
                 message={
                     <>
                         Welcome to
@@ -54,7 +54,7 @@ export function TwoFactorReset(): JSX.Element {
         return (
             <BridgePage
                 view="login"
-                hedgehog
+                mascot
                 message={
                     <>
                         Welcome to
@@ -78,7 +78,7 @@ export function TwoFactorReset(): JSX.Element {
         return (
             <BridgePage
                 view="login"
-                hedgehog
+                mascot
                 message={
                     <>
                         Welcome to
@@ -107,7 +107,7 @@ export function TwoFactorReset(): JSX.Element {
     return (
         <BridgePage
             view="login"
-            hedgehog
+            mascot
             message={
                 <>
                     Welcome to

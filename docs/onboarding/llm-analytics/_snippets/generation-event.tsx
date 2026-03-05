@@ -184,7 +184,7 @@ export const GenerationEvent = (): JSX.Element => {
                                         "content": [
                                           {
                                             "type": "text",
-                                            "text": "I can see a hedgehog in the image."
+                                            "text": "I can see a mascot in the image."
                                           },
                                           {
                                             "type": "function",

@@ -11,7 +11,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -46,7 +46,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
             content: (
                 <>
                     <Markdown>
-                        Add your PostHog API key and host to your `.env.local` file and to your hosting provider (e.g.
+                        Add your Insights API key and host to your `.env.local` file and to your hosting provider (e.g.
                         Vercel, Netlify). These values need to start with `NEXT_PUBLIC_` to be accessible on the
                         client-side.
                     </Markdown>
@@ -66,7 +66,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
@@ -119,9 +119,9 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { useEffect } from "react"
 
                                                 import posthog from 'posthog-js'
-                                                import { PostHogProvider as PHProvider } from 'posthog-js/react'
+                                                import { InsightsProvider as PHProvider } from 'posthog-js/react'
 
-                                                export function PostHogProvider({ children }: { children: React.ReactNode }) {
+                                                export function InsightsProvider({ children }: { children: React.ReactNode }) {
                                                   useEffect(() => {
                                                     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
                                                       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
@@ -140,7 +140,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                     ]}
                                 />
                                 <Markdown>
-                                    Then import the `PostHogProvider` component in your `app/layout.tsx` and wrap your
+                                    Then import the `InsightsProvider` component in your `app/layout.tsx` and wrap your
                                     app with it:
                                 </Markdown>
                                 <CodeBlock
@@ -150,15 +150,15 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             file: 'app/layout.tsx',
                                             code: dedent`
                                                 import './globals.css'
-                                                import { PostHogProvider } from './providers'
+                                                import { InsightsProvider } from './providers'
 
                                                 export default function RootLayout({ children }: { children: React.ReactNode }) {
                                                   return (
                                                     <html lang="en">
                                                       <body>
-                                                        <PostHogProvider>
+                                                        <InsightsProvider>
                                                           {children}
-                                                        </PostHogProvider>
+                                                        </InsightsProvider>
                                                       </body>
                                                     </html>
                                                   )
@@ -170,7 +170,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                             </Tab.Panel>
                             <Tab.Panel>
                                 <Markdown>
-                                    For the Pages router, integrate PostHog at the root of your app in `pages/_app.tsx`:
+                                    For the Pages router, integrate Insights at the root of your app in `pages/_app.tsx`:
                                 </Markdown>
                                 <CodeBlock
                                     blocks={[
@@ -181,7 +181,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                 import { useEffect } from 'react'
                                                 import { Router } from 'next/router'
                                                 import posthog from 'posthog-js'
-                                                import { PostHogProvider } from 'posthog-js/react'
+                                                import { InsightsProvider } from 'posthog-js/react'
                                                 import type { AppProps } from 'next/app'
 
                                                 export default function App({ Component, pageProps }: AppProps) {
@@ -197,9 +197,9 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                                   }, [])
 
                                                   return (
-                                                    <PostHogProvider client={posthog}>
+                                                    <InsightsProvider client={posthog}>
                                                       <Component {...pageProps} />
-                                                    </PostHogProvider>
+                                                    </InsightsProvider>
                                                   )
                                                 }
                                             `,
@@ -212,7 +212,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
 
                     <CalloutBox type="fyi" title="Defaults option">
                         <Markdown>
-                            The `defaults` option automatically configures PostHog with recommended settings for new
+                            The `defaults` option automatically configures Insights with recommended settings for new
                             projects. See [SDK defaults](https://posthog.com/docs/libraries/js#sdk-defaults) for
                             details.
                         </Markdown>
@@ -221,7 +221,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
             ),
         },
         {
-            title: 'Accessing PostHog on the client',
+            title: 'Accessing Insights on the client',
             badge: 'recommended',
             content: (
                 <>
@@ -259,7 +259,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 />
                             </Tab.Panel>
                             <Tab.Panel>
-                                <Markdown>Use the `usePostHog` hook to access PostHog in client components:</Markdown>
+                                <Markdown>Use the `useInsights` hook to access Insights in client components:</Markdown>
                                 <CodeBlock
                                     blocks={[
                                         {
@@ -268,10 +268,10 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 'use client'
 
-                                                import { usePostHog } from 'posthog-js/react'
+                                                import { useInsights } from 'posthog-js/react'
 
                                                 export default function CheckoutPage() {
-                                                    const posthog = usePostHog()
+                                                    const posthog = useInsights()
 
                                                     function handlePurchase() {
                                                         posthog.capture('purchase_completed', { amount: 99 })
@@ -328,7 +328,7 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                         ]}
                     />
                     <Markdown>
-                        Then, initialize PostHog in your API route or server action. Choose the method based on your
+                        Then, initialize Insights in your API route or server action. Choose the method based on your
                         router type:
                     </Markdown>
 
@@ -340,8 +340,8 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                         <Tab.Panels>
                             <Tab.Panel>
                                 <Markdown>
-                                    For the App router, you can use PostHog in API routes or server actions. Create a
-                                    new PostHog client instance for each request, or reuse a singleton instance across
+                                    For the App router, you can use Insights in API routes or server actions. Create a
+                                    new Insights client instance for each request, or reuse a singleton instance across
                                     requests:
                                 </Markdown>
                                 <CodeBlock
@@ -350,10 +350,10 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             language: 'typescript',
                                             file: 'app/api/example/route.ts',
                                             code: dedent`
-                                                import { PostHog } from 'posthog-node'
+                                                import { Insights } from 'posthog-node'
 
                                                 export async function POST(request: Request) {
-                                                    const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+                                                    const posthog = new Insights(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
                                                         host: process.env.NEXT_PUBLIC_POSTHOG_HOST
                                                     })
 
@@ -368,7 +368,7 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                         },
                                     ]}
                                 />
-                                <Markdown>You can also use PostHog in server actions:</Markdown>
+                                <Markdown>You can also use Insights in server actions:</Markdown>
                                 <CodeBlock
                                     blocks={[
                                         {
@@ -377,10 +377,10 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 'use server'
 
-                                                import { PostHog } from 'posthog-node'
+                                                import { Insights } from 'posthog-node'
 
                                                 export async function myServerAction() {
-                                                    const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+                                                    const posthog = new Insights(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
                                                         host: process.env.NEXT_PUBLIC_POSTHOG_HOST
                                                     })
 
@@ -397,21 +397,21 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 />
                             </Tab.Panel>
                             <Tab.Panel>
-                                <Markdown>For the Pages router, use PostHog in your API routes:</Markdown>
+                                <Markdown>For the Pages router, use Insights in your API routes:</Markdown>
                                 <CodeBlock
                                     blocks={[
                                         {
                                             language: 'typescript',
                                             file: 'pages/api/example.ts',
                                             code: dedent`
-                                                import { PostHog } from 'posthog-node'
+                                                import { Insights } from 'posthog-node'
                                                 import type { NextApiRequest, NextApiResponse } from 'next'
 
                                                 export default async function handler(
                                                     req: NextApiRequest,
                                                     res: NextApiResponse
                                                 ) {
-                                                    const posthog = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+                                                    const posthog = new Insights(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
                                                         host: process.env.NEXT_PUBLIC_POSTHOG_HOST
                                                     })
 
@@ -436,7 +436,7 @@ export const getNextJSServerSteps = (ctx: OnboardingComponentsContext): StepDefi
                         <Markdown>
                             Always call `await posthog.shutdown()` when you're done with the client to ensure all events
                             are flushed before the request completes. For better performance, consider creating a
-                            singleton PostHog instance that you reuse across requests.
+                            singleton Insights instance that you reuse across requests.
                         </Markdown>
                     </CalloutBox>
                 </>

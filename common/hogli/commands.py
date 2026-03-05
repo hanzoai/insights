@@ -1,4 +1,4 @@
-"""Developer Click commands for PostHog workflows.
+"""Developer Click commands for Insights workflows.
 
 This is the extension point for adding new Click commands to hogli.
 Add your @cli.command() decorated functions here as an alternative to shell scripts.

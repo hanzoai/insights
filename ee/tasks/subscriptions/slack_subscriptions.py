@@ -116,7 +116,7 @@ def _prepare_slack_message(
     first_asset, *other_assets = assets
 
     if is_new_subscription:
-        title = f"This channel has been subscribed to the {resource_info.kind} *{resource_info.name}* on PostHog! 🎉"
+        title = f"This channel has been subscribed to the {resource_info.kind} *{resource_info.name}* on Insights! 🎉"
         title += f"\nThis subscription is {subscription.summary}. The next one will be sent on {subscription.next_delivery_date.strftime('%A %B %d, %Y')}"
     else:
         title = f"Your subscription to the {resource_info.kind} *{resource_info.name}* is ready! 🎉"
@@ -142,7 +142,7 @@ def _prepare_slack_message(
                 "elements": [
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "View in PostHog"},
+                        "text": {"type": "plain_text", "text": "View in Insights"},
                         "url": f"{resource_info.url}?{utm_tags}",
                     },
                     {
@@ -168,7 +168,7 @@ def _prepare_slack_message(
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": f"Showing {len(assets)} of {total_asset_count} Insights. <{resource_info.url}?{utm_tags}|View the rest in PostHog>",
+                            "text": f"Showing {len(assets)} of {total_asset_count} Insights. <{resource_info.url}?{utm_tags}|View the rest in Insights>",
                         },
                     }
                 ]

@@ -28,7 +28,7 @@ jobs:
                       docker/
                       github/
                       hashicorp/
-                      PostHog/
+                      Insights/
                       tailscale/
                       inkeep/
 

@@ -13,7 +13,7 @@ export const getDjangoSteps = (ctx: OnboardingComponentsContext): StepDefinition
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog Python library using pip:</Markdown>
+                    <Markdown>Install the Insights Python library using pip:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -29,12 +29,12 @@ export const getDjangoSteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Set the PostHog API key and host in your `AppConfig` in `apps.py` so that it's available
+                        Set the Insights API key and host in your `AppConfig` in `apps.py` so that it's available
                         everywhere:
                     </Markdown>
                     <CodeBlock

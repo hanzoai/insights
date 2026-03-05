@@ -115,7 +115,7 @@ async def get_all_record_batches_from_queue(queue, produce_task):
 
 
 async def test_record_batch_producer_uses_extra_query_parameters(clickhouse_client):
-    """Test RecordBatch Producer uses a HogQL value."""
+    """Test RecordBatch Producer uses a InsightsQL value."""
     team_id = random.randint(1, 1000000)
     data_interval_end = dt.datetime.fromisoformat("2023-04-25T14:31:00.000000+00:00")
     data_interval_start = dt.datetime.fromisoformat("2023-04-25T14:30:00.000000+00:00")
@@ -143,9 +143,9 @@ async def test_record_batch_producer_uses_extra_query_parameters(clickhouse_clie
         full_range=(data_interval_start, data_interval_end),
         done_ranges=[],
         fields=[
-            {"expression": "JSONExtractInt(properties, %(hogql_val_0)s)", "alias": "custom_prop"},
+            {"expression": "JSONExtractInt(properties, %(insightsql_val_0)s)", "alias": "custom_prop"},
         ],
-        extra_query_parameters={"hogql_val_0": "custom"},
+        extra_query_parameters={"insightsql_val_0": "custom"},
     )
 
     records = await get_all_record_batches_from_queue(queue, producer_task)
@@ -275,68 +275,68 @@ def test_use_distributed_events_recent_table(test_data: dict[str, typing.Any]):
             [
                 {"key": "$browser", "operator": "exact", "type": "event", "value": ["Firefox"]},
             ],
-            """ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_0)s), ''), 'null'), '^"|"$', ''), %(hogql_val_1)s), 0)""",
-            {"hogql_val_0": "$browser", "hogql_val_1": "Firefox"},
+            """ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^"|"$', ''), %(insightsql_val_1)s), 0)""",
+            {"insightsql_val_0": "$browser", "insightsql_val_1": "Firefox"},
         ),
         (
             [
                 {"key": "$current_url", "operator": "icontains", "type": "event", "value": "https://posthog.com"},
             ],
-            """ifNull(ilike(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_0)s), ''), 'null'), '^"|"$', '')), %(hogql_val_1)s), 0)""",
-            {"hogql_val_0": "$current_url", "hogql_val_1": "%https://posthog.com%"},
+            """ifNull(ilike(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^"|"$', '')), %(insightsql_val_1)s), 0)""",
+            {"insightsql_val_0": "$current_url", "insightsql_val_1": "%https://posthog.com%"},
         ),
         (
             [
                 {"key": "$browser", "operator": "exact", "type": "event", "value": ["Firefox"]},
                 {"key": "test", "operator": "exact", "type": "event", "value": ["Test"]},
             ],
-            """and(ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_0)s), ''), 'null'), '^"|"$', ''), %(hogql_val_1)s), 0), ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_2)s), ''), 'null'), '^"|"$', ''), %(hogql_val_3)s), 0))""",
-            {"hogql_val_0": "$browser", "hogql_val_1": "Firefox", "hogql_val_2": "test", "hogql_val_3": "Test"},
+            """and(ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), ''), 'null'), '^"|"$', ''), %(insightsql_val_1)s), 0), ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_2)s), ''), 'null'), '^"|"$', ''), %(insightsql_val_3)s), 0))""",
+            {"insightsql_val_0": "$browser", "insightsql_val_1": "Firefox", "insightsql_val_2": "test", "insightsql_val_3": "Test"},
         ),
         # Feature (subset of event)
         (
             [
                 {"key": "$feature/some-feature", "type": "event", "operator": "exact", "value": ["true"]},
             ],
-            """ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), %(hogql_val_1)s), 0)""",
-            {"hogql_val_0": "$feature/some-feature", "hogql_val_1": "true"},
+            """ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), %(insightsql_val_1)s), 0)""",
+            {"insightsql_val_0": "$feature/some-feature", "insightsql_val_1": "true"},
         ),
         # Person
         (
             [
                 {"key": "$initial_current_url", "type": "person", "operator": "exact", "value": ["http://localhost"]},
             ],
-            """ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(hogql_val_0)s), ''), 'null'), '^"|"$', ''), %(hogql_val_1)s), 0)""",
-            {"hogql_val_0": "$initial_current_url", "hogql_val_1": "http://localhost"},
+            """ifNull(equals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_0)s), ''), 'null'), '^"|"$', ''), %(insightsql_val_1)s), 0)""",
+            {"insightsql_val_0": "$initial_current_url", "insightsql_val_1": "http://localhost"},
         ),
         (
             [
                 {"key": "$initial_current_url", "type": "person", "operator": "is_set", "value": None},
             ],
-            """isNotNull(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(hogql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'))""",
-            {"hogql_val_0": "$initial_current_url"},
+            """isNotNull(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'))""",
+            {"insightsql_val_0": "$initial_current_url"},
         ),
         (
             [
                 {"key": "$initial_current_url", "type": "person", "operator": "regex", "value": ["^http://.*$"]},
             ],
-            """ifNull(match(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(hogql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\')), %(hogql_val_1)s), 0)""",
-            {"hogql_val_0": "$initial_current_url", "hogql_val_1": "^http://.*$"},
+            """ifNull(match(toString(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\')), %(insightsql_val_1)s), 0)""",
+            {"insightsql_val_0": "$initial_current_url", "insightsql_val_1": "^http://.*$"},
         ),
         (
             [
                 {"key": "$created_at", "type": "person", "operator": "between", "value": [0, 1]},
             ],
-            """and(ifNull(greaterOrEquals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(hogql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), 0.0), 0), ifNull(lessOrEquals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(hogql_val_1)s), \'\'), \'null\'), \'^"|"$\', \'\'), 1.0), 0))""",
-            {"hogql_val_0": "$created_at", "hogql_val_1": "$created_at"},
+            """and(ifNull(greaterOrEquals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), 0.0), 0), ifNull(lessOrEquals(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.person_properties, %(insightsql_val_1)s), \'\'), \'null\'), \'^"|"$\', \'\'), 1.0), 0))""",
+            {"insightsql_val_0": "$created_at", "insightsql_val_1": "$created_at"},
         ),
-        # HogQL
+        # InsightsQL
         (
             [
-                {"key": "toInt(properties.$browser_version) * 10 = 1", "type": "hogql", "value": None},
+                {"key": "toInt(properties.$browser_version) * 10 = 1", "type": "insightsql", "value": None},
             ],
-            """ifNull(equals(multiply(accurateCastOrNull(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(hogql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), %(hogql_val_1)s), 10), 1), 0)""",
-            {"hogql_val_0": "$browser_version", "hogql_val_1": "Int64"},
+            """ifNull(equals(multiply(accurateCastOrNull(replaceRegexpAll(nullIf(nullIf(JSONExtractRaw(events.properties, %(insightsql_val_0)s), \'\'), \'null\'), \'^"|"$\', \'\'), %(insightsql_val_1)s), 10), 1), 0)""",
+            {"insightsql_val_0": "$browser_version", "insightsql_val_1": "Int64"},
         ),
     ],
     ids=[
@@ -348,7 +348,7 @@ def test_use_distributed_events_recent_table(test_data: dict[str, typing.Any]):
         "person1",
         "person2",
         "person3",
-        "hogql0",
+        "insightsql0",
     ],
 )
 def test_compose_filters_clause(
@@ -366,15 +366,15 @@ def test_compose_filters_clause(
     "filters",
     (
         [
-            {"key": "event in (select * from events)", "type": "hogql", "value": None},
+            {"key": "event in (select * from events)", "type": "insightsql", "value": None},
         ],
         [
-            {"key": "event =", "type": "hogql", "value": None},
+            {"key": "event =", "type": "insightsql", "value": None},
         ],
     ),
     ids=[
-        "hogql0",
-        "hogql1",
+        "insightsql0",
+        "insightsql1",
     ],
 )
 def test_compose_filters_clause_raises(

@@ -15,7 +15,7 @@ logger = structlog.get_logger(__name__)
 # to know this file exists and we havent figured out why it cant find models
 # inside our `products` folder
 #
-# See https://github.com/PostHog/posthog/pull/32364
+# See https://github.com/Insights/posthog/pull/32364
 class Link(FileSystemSyncMixin, CreatedMetaFields, UpdatedMetaFields, UUIDTModel):
     """
     Links that redirect to a specified destination URL.
@@ -23,7 +23,7 @@ class Link(FileSystemSyncMixin, CreatedMetaFields, UpdatedMetaFields, UUIDTModel
     """
 
     redirect_url = models.URLField(max_length=2048)
-    short_link_domain = models.CharField(max_length=255, help_text="Domain where the short link is hosted, e.g. hog.gg")
+    short_link_domain = models.CharField(max_length=255, help_text="Domain where the short link is hosted, e.g. link.hanzo.ai")
     short_code = models.CharField(
         max_length=255, help_text="The unique code/path that identifies the short link, e.g. 'abc123'"
     )

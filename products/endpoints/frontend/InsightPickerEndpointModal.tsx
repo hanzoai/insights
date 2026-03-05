@@ -11,7 +11,7 @@ import { SavedInsightsTable } from 'scenes/saved-insights/SavedInsightsTable'
 import { addSavedInsightsModalLogic } from 'scenes/saved-insights/addSavedInsightsModalLogic'
 import { urls } from 'scenes/urls'
 
-import { HogQLQuery, InsightQueryNode } from '~/queries/schema/schema-general'
+import { InsightsQLQuery, InsightQueryNode } from '~/queries/schema/schema-general'
 import { isNodeWithSource } from '~/queries/utils'
 import { InsightType, QueryBasedInsightModel } from '~/types'
 
@@ -34,17 +34,17 @@ export function InsightPickerEndpointModal({ tabId }: InsightPickerEndpointModal
     const { closeModal, selectInsight, toggleShowMoreInsightTypes } = useActions(insightPickerEndpointModalLogic)
     const { openCreateFromInsightModal } = useActions(endpointLogic({ tabId }))
 
-    const insightQuery: HogQLQuery | InsightQueryNode | null = selectedInsight?.query
+    const insightQuery: InsightsQLQuery | InsightQueryNode | null = selectedInsight?.query
         ? isNodeWithSource(selectedInsight.query)
-            ? (selectedInsight.query.source as HogQLQuery | InsightQueryNode)
-            : (selectedInsight.query as HogQLQuery | InsightQueryNode)
+            ? (selectedInsight.query.source as InsightsQLQuery | InsightQueryNode)
+            : (selectedInsight.query as InsightsQLQuery | InsightQueryNode)
         : null
 
     const additionalTypes = Object.entries(INSIGHT_TYPES_METADATA).filter(
         ([type, meta]) =>
             meta.inMenu &&
             type !== InsightType.JSON &&
-            type !== InsightType.HOG &&
+            type !== InsightType.SCRIPT &&
             !QUICK_CREATE_TYPES.some((qt) => qt.type === type)
     )
 

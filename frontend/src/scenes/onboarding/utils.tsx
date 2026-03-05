@@ -40,7 +40,7 @@ export const availableOnboardingProducts: AvailableOnboardingProducts = {
     },
     [ProductKey.DATA_WAREHOUSE]: {
         name: 'Data Warehouse',
-        description: 'Query external data alongside your PostHog data',
+        description: 'Query external data alongside your Insights data',
         icon: 'IconDatabase',
         iconColor: 'rgb(133 103 255)',
         breadcrumbsName: 'Data Warehouse',

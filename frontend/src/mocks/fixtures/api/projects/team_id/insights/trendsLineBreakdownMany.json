@@ -2476,7 +2476,7 @@
         "last_name": "User",
         "email": "test@example.com",
         "is_email_verified": true,
-        "hedgehog_config": {
+        "mascot_config": {
             "use_as_profile": true,
             "color": "light",
             "accessories": ["flag", "eyepatch", "parrot"]
@@ -2495,7 +2495,7 @@
         "last_name": "Vandervell",
         "email": "andy@posthog.com",
         "is_email_verified": true,
-        "hedgehog_config": {
+        "mascot_config": {
             "use_as_profile": true,
             "color": "light",
             "accessories": ["flag", "eyepatch", "parrot"]

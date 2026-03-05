@@ -14,7 +14,7 @@ from temporalio.common import RetryPolicy
 
 from posthog.batch_exports.service import BatchExportField, BatchExportInsertInputs, WorkflowsBatchExportInputs
 from posthog.kafka_client.topics import KAFKA_CDP_BACKFILL_EVENTS
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -178,7 +178,7 @@ async def insert_into_kafka_activity_from_stage(inputs: WorkflowsInsertInputs) -
 
 
 @temporalio.workflow.defn(name="workflows-export", failure_exception_types=[temporalio.workflow.NondeterminismError])
-class WorkflowsBatchExportWorkflow(PostHogWorkflow):
+class WorkflowsBatchExportWorkflow(InsightsWorkflow):
     @staticmethod
     def parse_inputs(inputs: list[str]) -> "WorkflowsBatchExportWorkflow":
         """Parse inputs from the management command CLI."""

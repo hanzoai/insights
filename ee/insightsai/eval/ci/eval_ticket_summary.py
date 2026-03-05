@@ -28,17 +28,17 @@ class TicketSummaryQuality(LLMClassifier):
 Required format:
 - Exactly 2 labeled sections separated by a blank line
 - Section 1: "**Issue**:" followed by the user's problem and relevant technical details
-- Section 2: "**Status**:" followed by what PostHog AI attempted and the current state
+- Section 2: "**Status**:" followed by what Insights AI attempted and the current state
 
 Quality criteria:
 1. Has exactly two sections: **Issue:** and **Status:**
 2. Uses third person perspective (refers to "the user" not "you" or "I")
-3. Refers to itself as "PostHog AI" (not "the AI" or "I")
+3. Refers to itself as "Insights AI" (not "the AI" or "I")
 4. Does NOT include bullet points
 5. Does NOT include "Recommended next steps" or similar sections
 6. Plain text only, no markdown formatting beyond the section headers
 7. **Issue:** captures the user's problem and relevant technical details
-8. **Status:** explains what PostHog AI attempted and current state
+8. **Status:** explains what Insights AI attempted and current state
 
 Generated summary:
 <summary>
@@ -120,7 +120,7 @@ async def eval_ticket_summary(call_summarizer, pytestconfig):
                     },
                     {"role": "human", "content": "Still no data showing even with 30 days"},
                 ],
-                expected="Issue section should mention funnel creation, $pageview and purchase_completed events, 'No data' problem. Status section should mention PostHog AI verified events exist, suggested date range changes, issue remains unresolved.",
+                expected="Issue section should mention funnel creation, $pageview and purchase_completed events, 'No data' problem. Status section should mention Insights AI verified events exist, suggested date range changes, issue remains unresolved.",
             ),
             EvalCase(
                 input=[
@@ -141,18 +141,18 @@ async def eval_ticket_summary(call_summarizer, pytestconfig):
                     },
                     {"role": "human", "content": "They're still not showing up"},
                 ],
-                expected="Issue section should mention session recordings, clicks not captured, React application, posthog-js 1.96.0, autocapture enabled. Status section should mention PostHog AI verified settings are correct, SDK initialization checked, issue unresolved.",
+                expected="Issue section should mention session recordings, clicks not captured, React application, posthog-js 1.96.0, autocapture enabled. Status section should mention Insights AI verified settings are correct, SDK initialization checked, issue unresolved.",
             ),
             EvalCase(
                 input=[
-                    {"role": "human", "content": "How do I track revenue in PostHog?"},
+                    {"role": "human", "content": "How do I track revenue in Insights?"},
                     {
                         "role": "assistant",
                         "content": "You can track revenue by capturing events with a revenue property. For example, capture a 'purchase' event with an 'amount' property.",
                     },
                     {"role": "human", "content": "Got it, thanks!"},
                 ],
-                expected="Issue section should mention user asking about revenue tracking. Status section should mention PostHog AI explained how to track revenue with events and properties, question was answered successfully.",
+                expected="Issue section should mention user asking about revenue tracking. Status section should mention Insights AI explained how to track revenue with events and properties, question was answered successfully.",
             ),
             EvalCase(
                 input=[
@@ -179,7 +179,7 @@ async def eval_ticket_summary(call_summarizer, pytestconfig):
                     },
                     {"role": "human", "content": "That worked! Thanks!"},
                 ],
-                expected="Issue section should mention cohort creation error, 'Invalid property type' message, filtering by email with @company.com. Status section should mention PostHog AI suggested using 'contains' filter, issue was resolved.",
+                expected="Issue section should mention cohort creation error, 'Invalid property type' message, filtering by email with @company.com. Status section should mention Insights AI suggested using 'contains' filter, issue was resolved.",
             ),
             EvalCase(
                 input=[
@@ -200,7 +200,7 @@ async def eval_ticket_summary(call_summarizer, pytestconfig):
                     },
                     {"role": "human", "content": "Added that but still not working"},
                 ],
-                expected="Issue section should mention feature flags not working, React Native, posthog-react-native 3.0.0. Status section should mention PostHog AI suggested reloadFeatureFlags(), async loading considerations, issue unresolved.",
+                expected="Issue section should mention feature flags not working, React Native, posthog-react-native 3.0.0. Status section should mention Insights AI suggested reloadFeatureFlags(), async loading considerations, issue unresolved.",
             ),
         ],
         pytestconfig=pytestconfig,

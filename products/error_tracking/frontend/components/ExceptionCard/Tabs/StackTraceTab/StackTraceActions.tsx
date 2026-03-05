@@ -46,7 +46,7 @@ export function StackTraceActions({ issue }: StackTraceActionsProps): JSX.Elemen
             <ButtonPrimitive
                 onClick={() => openMax()}
                 className="px-2 h-[1.4rem]"
-                tooltip="Ask PostHog AI for an explanation of this issue"
+                tooltip="Ask Insights AI for an explanation of this issue"
             >
                 <IconMagicWand />
                 Explain

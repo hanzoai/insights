@@ -6,14 +6,14 @@ import { getFirstTeam, resetTestDatabase } from '~/tests/helpers/sql'
 
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
     createExampleInvocation,
-    createHogExecutionGlobals,
-    createHogFunction,
-    insertHogFunction,
+    createScriptExecutionGlobals,
+    createCustomFunction,
+    insertCustomFunction,
 } from '../_tests/fixtures'
-import { CyclotronJobInvocationHogFunction, HogFunctionInvocationGlobalsWithInputs, HogFunctionType } from '../types'
+import { CyclotronJobInvocationCustomFunction, CustomFunctionInvocationGlobalsWithInputs, CustomFunctionType } from '../types'
 import { CdpCyclotronShadowWorker } from './cdp-cyclotron-shadow-worker.consumer'
 
 jest.setTimeout(1000)
@@ -22,9 +22,9 @@ describe('CdpCyclotronShadowWorker', () => {
     let processor: CdpCyclotronShadowWorker
     let hub: Hub
     let team: Team
-    let fn: HogFunctionType
-    let globals: HogFunctionInvocationGlobalsWithInputs
-    let invocation: CyclotronJobInvocationHogFunction
+    let fn: CustomFunctionType
+    let globals: CustomFunctionInvocationGlobalsWithInputs
+    let invocation: CyclotronJobInvocationCustomFunction
 
     beforeEach(async () => {
         const fixedTime = DateTime.fromObject({ year: 2025, month: 1, day: 1 }, { zone: 'UTC' })
@@ -33,25 +33,25 @@ describe('CdpCyclotronShadowWorker', () => {
         await resetTestDatabase()
         hub = await createHub()
         team = await getFirstTeam(hub)
-        hub.CYCLOTRON_SHADOW_DATABASE_URL = 'postgres://posthog:posthog@localhost:5432/test_cyclotron_shadow'
+        hub.CYCLOTRON_SHADOW_DATABASE_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron_shadow'
 
         processor = new CdpCyclotronShadowWorker(hub)
 
-        fn = await insertHogFunction(
+        fn = await insertCustomFunction(
             hub.postgres,
             team.id,
-            createHogFunction({
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+            createCustomFunction({
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 template_id: 'template-webhook',
             })
         )
 
         globals = {
-            ...createHogExecutionGlobals({}),
+            ...createScriptExecutionGlobals({}),
             inputs: {
-                url: 'https://posthog.com',
+                url: 'https://hanzo.ai',
             },
         }
 
@@ -93,8 +93,8 @@ describe('CdpCyclotronShadowWorker', () => {
     })
 
     it('should skip Kafka monitoring in processBatch', async () => {
-        const monitoringSpy = jest.spyOn(processor['hogFunctionMonitoringService'], 'queueInvocationResults')
-        const flushSpy = jest.spyOn(processor['hogFunctionMonitoringService'], 'flush')
+        const monitoringSpy = jest.spyOn(processor['customFunctionMonitoringService'], 'queueInvocationResults')
+        const flushSpy = jest.spyOn(processor['customFunctionMonitoringService'], 'flush')
         processor['queueInvocationResults'] = jest.fn().mockResolvedValue(undefined)
 
         await processor.processBatch([invocation])
@@ -104,7 +104,7 @@ describe('CdpCyclotronShadowWorker', () => {
     })
 
     it('should skip watcher in processBatch', async () => {
-        const watcherSpy = jest.spyOn(processor['hogWatcher'], 'observeResults')
+        const watcherSpy = jest.spyOn(processor['scriptWatcher'], 'observeResults')
         processor['queueInvocationResults'] = jest.fn().mockResolvedValue(undefined)
 
         await processor.processBatch([invocation])

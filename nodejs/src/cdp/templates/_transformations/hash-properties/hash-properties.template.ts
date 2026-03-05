@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: HogFunctionTemplate = {
     name: 'Hash properties',
     description:
         'Hashes sensitive fields with SHA256 using a salt. This helps protect user privacy while maintaining data consistency.',
-    icon_url: '/static/hedgehog/police-hog.png',
+    icon_url: '/static/mascot/police-mascot.png',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 // Function to hash a value with SHA256
 fun hashValue(value, salt) {

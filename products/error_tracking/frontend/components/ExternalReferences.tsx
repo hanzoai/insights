@@ -150,7 +150,7 @@ const createGitHubIssueForm = (
     onSubmit: onSubmitFormType
 ): void => {
     const posthogUrl = window.location.origin + window.location.pathname
-    const body = issue.description + '\n<br/>\n<br/>\n' + `**PostHog issue:** ${posthogUrl}`
+    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${posthogUrl}`
 
     LemonDialog.openForm({
         title: 'Create GitHub issue',
@@ -189,7 +189,7 @@ const createGitLabIssueForm = (
     onSubmit: onSubmitFormType
 ): void => {
     const posthogUrl = window.location.origin + window.location.pathname
-    const body = issue.description + '\n<br/>\n<br/>\n' + `**PostHog issue:** ${posthogUrl}`
+    const body = issue.description + '\n<br/>\n<br/>\n' + `**Insights issue:** ${posthogUrl}`
 
     LemonDialog.openForm({
         title: 'Create GitLab issue',
@@ -259,7 +259,7 @@ const createJiraIssueForm = (
     onSubmit: onSubmitFormType
 ): void => {
     const posthogUrl = window.location.origin + window.location.pathname
-    const description = issue.description + '\n\n' + `PostHog issue: ${posthogUrl}`
+    const description = issue.description + '\n\n' + `Insights issue: ${posthogUrl}`
 
     LemonDialog.openForm({
         title: 'Create Jira issue',

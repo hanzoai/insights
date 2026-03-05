@@ -114,12 +114,12 @@ if (res.status > 300) {
 
 
 class TemplateSendGridMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/sendgrid-plugin"
+    plugin_url = "https://github.com/Insights/sendgrid-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         sendgridApiKey = obj.config.get("sendgridApiKey", "")

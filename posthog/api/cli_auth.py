@@ -1,7 +1,7 @@
 """
 CLI Authentication API using OAuth2 Device Flow
 
-This implements the device authorization flow (RFC 8628) for the PostHog CLI.
+This implements the device authorization flow (RFC 8628) for the Insights CLI.
 Users can authenticate without copying/pasting API keys.
 
 Flow:

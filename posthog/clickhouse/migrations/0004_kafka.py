@@ -11,8 +11,8 @@ from posthog.models.person.sql import (
 # NOTE: this migration previously created kafka_events and events_mv tables.
 # kafka_events was a Kafka ClickHouse engine table that used Protobuf for
 # serialization. To remove complexity of deployments, Protobuf support has been
-# removed from the PostHog app and the Plugin server. See
-# https://github.com/PostHog/posthog/issues/9207 for detail.
+# removed from the Insights app and the Plugin server. See
+# https://github.com/Insights/posthog/issues/9207 for detail.
 #
 # These have been superseded by kafka_events_json and events_json_mv. However,
 # we can't simply add a DROP TABLE for the old tables as there may still be
@@ -24,7 +24,7 @@ from posthog.models.person.sql import (
 # simply not create them.
 #
 # WARNING: this does however mean that you can arrive at different DB states
-# depending on which versions of PostHog you have run.
+# depending on which versions of Insights you have run.
 operations = [
     run_sql_with_exceptions(KAFKA_PERSONS_TABLE_SQL()),
     run_sql_with_exceptions(KAFKA_PERSONS_DISTINCT_ID_TABLE_SQL()),

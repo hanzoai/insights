@@ -4,7 +4,7 @@ import { CodeSnippet, Language } from 'lib/components/CodeSnippet'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from '~/loadPostHogJS'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
 import SetupWizardBanner from './components/SetupWizardBanner'
 import { JSInstallSnippet } from './js-web'
@@ -28,7 +28,7 @@ function ReactSetupSnippet(): JSX.Element {
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { PostHogProvider } from 'posthog-js/react'
+import { InsightsProvider } from 'posthog-js/react'
 
 const options = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -37,9 +37,9 @@ const options = {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+    <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
       <App />
-    </PostHogProvider>
+    </InsightsProvider>
   </StrictMode>
 )`}
         </CodeSnippet>
@@ -56,7 +56,7 @@ export function SDKInstallReactInstructions({ hideWizard }: { hideWizard?: boole
             <ReactEnvVarsSnippet />
             <h3>Initialize</h3>
             <p>
-                Integrate PostHog at the root of your app (such as <code>main.tsx</code> if you're using Vite).
+                Integrate Insights at the root of your app (such as <code>main.tsx</code> if you're using Vite).
             </p>
             <ReactSetupSnippet />
         </>

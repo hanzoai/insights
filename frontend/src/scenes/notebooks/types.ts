@@ -86,7 +86,7 @@ export type NotebookPopoverVisibility = 'hidden' | 'visible' | 'peek'
 
 export type CustomNotebookNodeAttributes = Record<string, any>
 
-export type CreatePostHogWidgetNodeOptions<T extends CustomNotebookNodeAttributes> = Omit<
+export type CreateInsightsWidgetNodeOptions<T extends CustomNotebookNodeAttributes> = Omit<
     NodeWrapperProps<T>,
     'updateAttributes'
 > & {

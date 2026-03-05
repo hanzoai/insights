@@ -100,7 +100,7 @@ const handleRequest = async (
     //
     // MCP clients sometimes hit OAuth endpoints directly on this server instead of
     // following URLs from the authorization server metadata. We redirect these to
-    // the correct PostHog authorization server for the user's region.
+    // the correct Insights authorization server for the user's region.
     // See: https://github.com/anthropics/claude-code/issues/2267
     const redirect = matchAuthServerRedirect(url.pathname)
     if (redirect) {
@@ -123,7 +123,7 @@ const handleRequest = async (
     // 1. Client connects to MCP server without a token
     // 2. MCP returns 401 with WWW-Authenticate header pointing to this metadata endpoint
     // 3. Client fetches this metadata to discover the authorization server
-    // 4. Client performs OAuth flow with PostHog (US or EU based on region param)
+    // 4. Client performs OAuth flow with Insights (US or EU based on region param)
     // 5. Client reconnects to MCP with the access token
     const wellKnownPrefix = '/.well-known/oauth-protected-resource'
     if (url.pathname.startsWith(wellKnownPrefix)) {
@@ -210,7 +210,7 @@ const handleRequest = async (
     const featuresParam = url.searchParams.get('features')
     const features = featuresParam ? featuresParam.split(',').filter(Boolean) : undefined
 
-    // Region param is used to route API calls to the correct PostHog instance (US or EU).
+    // Region param is used to route API calls to the correct Insights instance (US or EU).
     // This is set by the wizard based on user's cloud region selection during MCP setup.
     const regionParam = url.searchParams.get('region') || undefined
 

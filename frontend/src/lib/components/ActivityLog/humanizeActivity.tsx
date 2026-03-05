@@ -44,11 +44,11 @@ export type ActivityLogItem = {
     detail: ActivityLogDetail
     /** Present if the log is used as a notification. Whether the notification is unread. */
     unread?: boolean
-    /** Whether the activity was initiated by a PostHog staff member impersonating a user. */
+    /** Whether the activity was initiated by an Insights staff member impersonating a user. */
     is_staff?: boolean
-    /** Whether the activity was initiated by the PostHog backend. Example: an exported image when sharing an insight. */
+    /** Whether the activity was initiated by the Insights backend. Example: an exported image when sharing an insight. */
     is_system?: boolean
-    /** Whether a PostHog team member was impersonating the user when this activity was logged. */
+    /** Whether an Insights team member was impersonating the user when this activity was logged. */
     was_impersonated?: boolean
 }
 
@@ -110,7 +110,7 @@ export function humanize(
             logLines.push({
                 email: logItem.was_impersonated ? undefined : logItem.user?.email,
                 name: logItem.was_impersonated
-                    ? `PostHog Support${impersonatedUserName ? ` (as ${impersonatedUserName})` : ''}`
+                    ? `Insights Support${impersonatedUserName ? ` (as ${impersonatedUserName})` : ''}`
                     : impersonatedUserName,
                 isSystem: logItem.is_system,
                 wasImpersonated: logItem.was_impersonated,
@@ -127,11 +127,11 @@ export function humanize(
 
 export function userNameForLogItem(logItem: ActivityLogItem): string {
     if (logItem.is_system) {
-        return 'PostHog'
+        return 'Insights'
     }
     if (logItem.was_impersonated) {
         const impersonatedUserName = logItem.user ? fullName(logItem.user) : 'a user'
-        return `PostHog Support (as ${impersonatedUserName})`
+        return `Insights Support (as ${impersonatedUserName})`
     }
     return logItem.user ? fullName(logItem.user) : 'A user'
 }

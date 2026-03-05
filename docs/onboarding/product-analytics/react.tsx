@@ -48,7 +48,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             content: (
                 <>
                     <Markdown>
-                        Add your PostHog API key and host to your environment variables. For Vite-based React apps, use
+                        Add your Insights API key and host to your environment variables. For Vite-based React apps, use
                         the `VITE_PUBLIC_` prefix:
                     </Markdown>
                     <CodeBlock
@@ -67,12 +67,12 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Wrap your app with the `PostHogProvider` component at the root of your application (such as
+                        Wrap your app with the `InsightsProvider` component at the root of your application (such as
                         `main.tsx` if you're using Vite):
                     </Markdown>
                     <CodeBlock
@@ -85,7 +85,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                     import { createRoot } from 'react-dom/client'
                                     import './index.css'
                                     import App from './App.jsx'
-                                    import { PostHogProvider } from '@posthog/react'
+                                    import { InsightsProvider } from '@posthog/react'
 
                                     const options = {
                                       api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
@@ -94,9 +94,9 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
 
                                     createRoot(document.getElementById('root')).render(
                                       <StrictMode>
-                                        <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
+                                        <InsightsProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={options}>
                                           <App />
-                                        </PostHogProvider>
+                                        </InsightsProvider>
                                       </StrictMode>
                                     )
                                 `,
@@ -105,7 +105,7 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                     />
                     <CalloutBox type="fyi" title="defaults option">
                         <Markdown>
-                            The `defaults` option automatically configures PostHog with recommended settings for new
+                            The `defaults` option automatically configures Insights with recommended settings for new
                             projects. See [SDK defaults](https://posthog.com/docs/libraries/js#sdk-defaults) for
                             details.
                         </Markdown>
@@ -114,13 +114,13 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
             ),
         },
         {
-            title: 'Accessing PostHog in your code',
+            title: 'Accessing Insights in your code',
             badge: 'recommended',
             content: (
                 <>
                     <Markdown>
-                        Use the `usePostHog` hook to access the PostHog instance in any component wrapped by
-                        `PostHogProvider`:
+                        Use the `useInsights` hook to access the Insights instance in any component wrapped by
+                        `InsightsProvider`:
                     </Markdown>
                     <CodeBlock
                         blocks={[
@@ -128,10 +128,10 @@ export const getReactSteps = (ctx: OnboardingComponentsContext): StepDefinition[
                                 language: 'tsx',
                                 file: 'MyComponent.tsx',
                                 code: dedent`
-                                    import { usePostHog } from '@posthog/react'
+                                    import { useInsights } from '@posthog/react'
 
                                     function MyComponent() {
-                                        const posthog = usePostHog()
+                                        const posthog = useInsights()
 
                                         function handleClick() {
                                             posthog.capture('button_clicked', { button_name: 'signup' })

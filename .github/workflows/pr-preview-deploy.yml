@@ -1,6 +1,6 @@
 # This workflow handles deploying a branch to the pull request cluster, for
 # testing purposes. It is locked down so that it can only be used by people who
-# are a member of the PostHog Github org
+# are a member of the Insights Github org
 
 name: PR - Preview Deploy
 

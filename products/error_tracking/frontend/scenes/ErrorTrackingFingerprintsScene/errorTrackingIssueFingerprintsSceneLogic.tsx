@@ -79,7 +79,7 @@ export const errorTrackingIssueFingerprintsSceneLogic = kea<errorTrackingIssueFi
                         issue.first_seen,
                         fingerprints.map((fingerprint) => fingerprint.fingerprint)
                     )
-                    const response = await api.queryHogQL(query, {
+                    const response = await api.queryInsightsQL(query, {
                         scene: 'ErrorTrackingIssueFingerprints',
                         productKey: 'error_tracking',
                     })

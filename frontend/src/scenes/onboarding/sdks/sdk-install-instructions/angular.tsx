@@ -6,7 +6,7 @@ import { featureFlagLogic } from 'lib/logic/featureFlagLogic'
 import { apiHostOrigin } from 'lib/utils/apiHost'
 import { teamLogic } from 'scenes/teamLogic'
 
-import { SDK_DEFAULTS_DATE } from '~/loadPostHogJS'
+import { SDK_DEFAULTS_DATE } from '~/loadInsightsJS'
 
 import { JSInstallSnippet } from './js-web'
 

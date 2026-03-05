@@ -56,12 +56,12 @@ fetch('https://api.engage.so/posthog', {
 
 
 class TemplateEngageMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-engage-so-plugin"
+    plugin_url = "https://github.com/Insights/posthog-engage-so-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         public_key = obj.config.get("publicKey", "")

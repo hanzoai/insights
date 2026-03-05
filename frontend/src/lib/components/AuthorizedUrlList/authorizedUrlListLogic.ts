@@ -157,7 +157,7 @@ export function appEditorUrl(
     }
 ): string {
     const params = buildToolbarParams(options) as Record<string, unknown>
-    // See https://github.com/PostHog/posthog-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
+    // See https://github.com/Insights/posthog-js/blob/f7119c/src/extensions/toolbar.ts#L52 for where these params
     // are passed. `appUrl` is an extra `redirect_to_site` param.
     params['appUrl'] = appUrl
     params['generateOnly'] = options?.generateOnly
@@ -452,7 +452,7 @@ export const authorizedUrlListLogic = kea<authorizedUrlListLogicType>([
             if (manualLaunchParams) {
                 const templateScript = `
                 if (!window?.posthog) {
-                    console.warn('PostHog must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your posthog init code.')
+                    console.warn('Insights must be added to the window object on this page, for this to work. This is normally done in the loaded callback of your posthog init code.')
                 } else {
                     window.posthog.loadToolbar(${manualLaunchParams})
                 }

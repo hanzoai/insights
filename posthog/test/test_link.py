@@ -19,7 +19,7 @@ class TestLinkModel(BaseTest):
         for i in range(5):
             Link.objects.create(
                 redirect_url=f"https://example{i}.com",
-                short_link_domain="hog.gg",
+                short_link_domain="link.hanzo.ai",
                 short_code=f"team1-{i}",
                 team=self.team,
             )
@@ -27,7 +27,7 @@ class TestLinkModel(BaseTest):
         for i in range(3):
             Link.objects.create(
                 redirect_url=f"https://anotherexample{i}.com",
-                short_link_domain="hog.gg",
+                short_link_domain="link.hanzo.ai",
                 short_code=f"team2-{i}",
                 team=self.another_team,
             )
@@ -50,14 +50,14 @@ class TestLinkModel(BaseTest):
     def test_unique_constraint_violation(self):
         # Create a link
         Link.objects.create(
-            redirect_url="https://example.com", short_link_domain="hog.gg", short_code="unique_test", team=self.team
+            redirect_url="https://example.com", short_link_domain="link.hanzo.ai", short_code="unique_test", team=self.team
         )
 
         # Try to create another link with the same domain and code
         with self.assertRaises(Exception):
             Link.objects.create(
                 redirect_url="https://anotherexample.com",
-                short_link_domain="hog.gg",
+                short_link_domain="link.hanzo.ai",
                 short_code="unique_test",
                 team=self.another_team,
             )
@@ -65,7 +65,7 @@ class TestLinkModel(BaseTest):
     def test_unique_constraint_valid_cases(self):
         # Create initial link
         Link.objects.create(
-            redirect_url="https://example.com", short_link_domain="hog.gg", short_code="different_test", team=self.team
+            redirect_url="https://example.com", short_link_domain="link.hanzo.ai", short_code="different_test", team=self.team
         )
 
         # Should be able to create with different domain
@@ -78,5 +78,5 @@ class TestLinkModel(BaseTest):
 
         # Should be able to create with different code
         Link.objects.create(
-            redirect_url="https://example.com", short_link_domain="hog.gg", short_code="different_code", team=self.team
+            redirect_url="https://example.com", short_link_domain="link.hanzo.ai", short_code="different_code", team=self.team
         )

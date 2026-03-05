@@ -73,7 +73,7 @@ export function Customization({
                     <LemonCheckbox
                         label={
                             <div className="flex items-center">
-                                <span>Hide PostHog branding</span>
+                                <span>Hide Insights branding</span>
                             </div>
                         }
                         onChange={(checked) => {

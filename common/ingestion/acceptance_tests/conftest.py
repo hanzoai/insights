@@ -5,14 +5,14 @@ import logging
 
 import pytest
 
-from .api_client import PostHogTestClient
+from .api_client import InsightsTestClient
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope="class")
 def test_client():
-    """Create a PostHog test client instance for each test class."""
+    """Create a Insights test client instance for each test class."""
     # Get configuration from environment
     base_url = os.environ.get("POSTHOG_TEST_BASE_URL", "http://localhost:8010")
     personal_api_key = os.environ.get("POSTHOG_PERSONAL_API_KEY")
@@ -21,7 +21,7 @@ def test_client():
         pytest.skip("POSTHOG_PERSONAL_API_KEY not set - please set it to run acceptance tests")
 
     logger.info("Creating test client with base_url=%s", base_url)
-    client = PostHogTestClient(base_url=base_url, personal_api_key=personal_api_key)
+    client = InsightsTestClient(base_url=base_url, personal_api_key=personal_api_key)
 
     yield client
 
@@ -30,7 +30,7 @@ def test_client():
 
 @pytest.fixture(scope="function")
 def function_test_client():
-    """Create a PostHog test client instance for each individual test (for auth tests)."""
+    """Create a Insights test client instance for each individual test (for auth tests)."""
     # Get configuration from environment
     base_url = os.environ.get("POSTHOG_TEST_BASE_URL", "http://localhost:8010")
     personal_api_key = os.environ.get("POSTHOG_PERSONAL_API_KEY")
@@ -39,7 +39,7 @@ def function_test_client():
         pytest.skip("POSTHOG_PERSONAL_API_KEY not set - please set it to run acceptance tests")
 
     logger.info("Creating function-scoped test client with base_url=%s", base_url)
-    client = PostHogTestClient(base_url=base_url, personal_api_key=personal_api_key)
+    client = InsightsTestClient(base_url=base_url, personal_api_key=personal_api_key)
 
     yield client
 

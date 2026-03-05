@@ -1,4 +1,4 @@
-name: Terragrunt PostHog
+name: Terragrunt Insights
 
 permissions:
     id-token: write
@@ -62,7 +62,7 @@ jobs:
               uses: maheshrayas/action-pr-comment-delete@06d7254b4aeba4491a66a7e0f755b107f7373ccd # v3.0
               with:
                   github_token: '${{ secrets.GITHUB_TOKEN }}'
-                  org: PostHog
+                  org: Insights
                   repo: posthog
                   user: 'github-actions[bot]'
                   issue: '${{ github.event.number }}'
@@ -79,7 +79,7 @@ jobs:
         env:
             TERRAFORM_VERSION: '1.13.0'
             TERRAGRUNT_VERSION: '0.93.12'
-            # PostHog provider auth
+            # Insights provider auth
             POSTHOG_PROVIDER_POSTHOG_API_KEY: ${{ secrets.POSTHOG_PROVIDER_POSTHOG_API_KEY }}
             # Terragrunt S3 backend config (to manage .tfstate)
             POSTHOG_PROVIDER_TF_STATE_BUCKET: ${{ secrets.POSTHOG_PROVIDER_TF_STATE_BUCKET }}

@@ -11,7 +11,7 @@ import type { ContextMillManifest, ResourceManifest } from './manifest-types'
  * Contains manifest.json + individual resource ZIPs
  */
 export const CONTEXT_MILL_URL =
-    'https://github.com/PostHog/context-mill/releases/latest/download/skills-mcp-resources.zip'
+    'https://github.com/Insights/context-mill/releases/latest/download/skills-mcp-resources.zip'
 
 // Cache for context-mill resources ZIP contents
 let cachedResources: Unzipped | null = null
@@ -113,7 +113,7 @@ async function registerContextMillResources(server: McpServer, context: Context)
 }
 
 /**
- * Registers all PostHog resources with the MCP server
+ * Registers all Insights resources with the MCP server
  * Resources are loaded from context-mill's skills-mcp-resources.zip
  */
 export async function registerResources(server: McpServer, context: Context): Promise<void> {

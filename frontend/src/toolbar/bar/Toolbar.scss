@@ -30,7 +30,7 @@
         }
     }
 
-    & + .HedgehogBuddy {
+    & + .MascotBuddy {
         z-index: 2147483020;
     }
 
@@ -152,7 +152,7 @@
     &--minimized {
         width: var(--toolbar-width-minimized); // Account for border
 
-        &.Toolbar--hedgehog-mode {
+        &.Toolbar--mascot-mode {
             transform: var(--toolbar-translate) scale(0);
         }
     }

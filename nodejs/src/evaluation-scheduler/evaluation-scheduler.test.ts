@@ -14,7 +14,7 @@ import {
 
 jest.mock('~/llm-analytics/services/temporal.service')
 jest.mock('~/llm-analytics/services/evaluation-manager.service')
-jest.mock('~/cdp/utils/hog-exec')
+jest.mock('~/cdp/utils/script-exec')
 
 describe('Evaluation Scheduler', () => {
     let hub: Hub
@@ -140,14 +140,14 @@ describe('Evaluation Scheduler', () => {
     })
 
     describe('checkConditionMatch', () => {
-        let mockExecHog: jest.Mock
+        let mockExecScript: jest.Mock
 
         beforeEach(() => {
-            mockExecHog = require('~/cdp/utils/hog-exec').execHog as jest.Mock
+            mockExecScript = require('~/cdp/utils/script-exec').execScript as jest.Mock
         })
 
         it('passes person properties from event to bytecode execution globals', async () => {
-            mockExecHog.mockResolvedValue({ execResult: { result: true } })
+            mockExecScript.mockResolvedValue({ execResult: { result: true } })
 
             const personProperties = { is_internal: true, plan: 'enterprise' }
             const eventProperties = { $ai_model: 'gpt-4' }
@@ -162,7 +162,7 @@ describe('Evaluation Scheduler', () => {
 
             await checkConditionMatch(event, condition)
 
-            expect(mockExecHog).toHaveBeenCalledWith(
+            expect(mockExecScript).toHaveBeenCalledWith(
                 condition.bytecode,
                 expect.objectContaining({
                     globals: expect.objectContaining({
@@ -176,7 +176,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('handles empty person properties gracefully', async () => {
-            mockExecHog.mockResolvedValue({ execResult: { result: true } })
+            mockExecScript.mockResolvedValue({ execResult: { result: true } })
 
             const event = createAiGenerationEvent(teamId, {
                 person_properties: '{}',
@@ -188,7 +188,7 @@ describe('Evaluation Scheduler', () => {
 
             await checkConditionMatch(event, condition)
 
-            expect(mockExecHog).toHaveBeenCalledWith(
+            expect(mockExecScript).toHaveBeenCalledWith(
                 condition.bytecode,
                 expect.objectContaining({
                     globals: expect.objectContaining({
@@ -199,7 +199,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('handles missing person properties gracefully', async () => {
-            mockExecHog.mockResolvedValue({ execResult: { result: true } })
+            mockExecScript.mockResolvedValue({ execResult: { result: true } })
 
             const event = createAiGenerationEvent(teamId)
             // Simulate missing person_properties by setting to undefined
@@ -211,7 +211,7 @@ describe('Evaluation Scheduler', () => {
 
             await checkConditionMatch(event, condition)
 
-            expect(mockExecHog).toHaveBeenCalledWith(
+            expect(mockExecScript).toHaveBeenCalledWith(
                 condition.bytecode,
                 expect.objectContaining({
                     globals: expect.objectContaining({
@@ -224,11 +224,11 @@ describe('Evaluation Scheduler', () => {
 
     describe('EvaluationMatcher', () => {
         let matcher: EvaluationMatcher
-        let mockExecHog: jest.Mock
+        let mockExecScript: jest.Mock
 
         beforeEach(() => {
             matcher = new EvaluationMatcher()
-            mockExecHog = require('~/cdp/utils/hog-exec').execHog as jest.Mock
+            mockExecScript = require('~/cdp/utils/script-exec').execScript as jest.Mock
         })
 
         it('returns disabled when evaluation is not enabled', async () => {
@@ -250,7 +250,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('returns filtered when bytecode returns false', async () => {
-            mockExecHog.mockResolvedValue({
+            mockExecScript.mockResolvedValue({
                 execResult: { result: false },
             })
 
@@ -278,7 +278,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('returns matched when condition matches and user in rollout', async () => {
-            mockExecHog.mockResolvedValue({
+            mockExecScript.mockResolvedValue({
                 execResult: { result: true },
             })
 
@@ -296,7 +296,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('tries multiple conditions until one matches', async () => {
-            mockExecHog
+            mockExecScript
                 .mockResolvedValueOnce({ execResult: { result: false } })
                 .mockResolvedValueOnce({ execResult: { result: true } })
 
@@ -319,7 +319,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('respects rollout percentage', async () => {
-            mockExecHog.mockResolvedValue({
+            mockExecScript.mockResolvedValue({
                 execResult: { result: true },
             })
 
@@ -336,7 +336,7 @@ describe('Evaluation Scheduler', () => {
         })
 
         it('passes person properties to bytecode execution', async () => {
-            mockExecHog.mockResolvedValue({
+            mockExecScript.mockResolvedValue({
                 execResult: { result: true },
             })
 
@@ -353,7 +353,7 @@ describe('Evaluation Scheduler', () => {
 
             await matcher.shouldTriggerEvaluation(event, evaluation)
 
-            expect(mockExecHog).toHaveBeenCalledWith(
+            expect(mockExecScript).toHaveBeenCalledWith(
                 ['_H', 1, 32, true],
                 expect.objectContaining({
                     globals: expect.objectContaining({

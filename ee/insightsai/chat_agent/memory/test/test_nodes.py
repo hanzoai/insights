@@ -240,7 +240,7 @@ class TestMemoryInitializerNode(ClickhouseTestMixin, NonAtomicBaseTest):
 
     async def test_run_with_url_based_initialization(self):
         with patch.object(MemoryInitializerNode, "_model") as model_mock:
-            model_mock.return_value = RunnableLambda(lambda _: "PostHog is a product analytics platform.")
+            model_mock.return_value = RunnableLambda(lambda _: "Insights is a product analytics platform.")
 
             await sync_to_async(self._set_up_pageview_events)()
             node = MemoryInitializerNode(team=self.team, user=self.user)
@@ -251,7 +251,7 @@ class TestMemoryInitializerNode(ClickhouseTestMixin, NonAtomicBaseTest):
             self.assertIsInstance(new_state.messages[0], AssistantMessage)
             self.assertEqual(
                 cast(AssistantMessage, new_state.messages[0]).content,
-                "PostHog is a product analytics platform.",
+                "Insights is a product analytics platform.",
             )
 
             core_memory = await CoreMemory.objects.aget(team=self.team)
@@ -259,7 +259,7 @@ class TestMemoryInitializerNode(ClickhouseTestMixin, NonAtomicBaseTest):
 
     async def test_run_with_app_bundle_id_initialization(self):
         with patch.object(MemoryInitializerNode, "_model") as model_mock:
-            model_mock.return_value = RunnableLambda(lambda _: "PostHog mobile app description.")
+            model_mock.return_value = RunnableLambda(lambda _: "Insights mobile app description.")
 
             await sync_to_async(self._set_up_app_bundle_id_events)()
             node = MemoryInitializerNode(team=self.team, user=self.user)
@@ -279,7 +279,7 @@ class TestMemoryInitializerNode(ClickhouseTestMixin, NonAtomicBaseTest):
             self.assertIsInstance(new_state.messages[0], AssistantMessage)
             self.assertEqual(
                 cast(AssistantMessage, new_state.messages[0]).content,
-                "PostHog mobile app description.",
+                "Insights mobile app description.",
             )
 
             core_memory = await CoreMemory.objects.aget(team=self.team)
@@ -1142,8 +1142,8 @@ class TestMemoryCollectorToolsNode(BaseTest):
 
     async def test_append_when_onboarding_memory_exists(self):
         # Set up existing core memory with data from /init command
-        await self.core_memory.aappend_question_to_initial_text("What does PostHog do?")
-        await self.core_memory.aappend_answer_to_initial_text("PostHog is an analytics platform")
+        await self.core_memory.aappend_question_to_initial_text("What does Insights do?")
+        await self.core_memory.aappend_answer_to_initial_text("Insights is an analytics platform")
         initial_text = self.core_memory.text
 
         state = AssistantState(

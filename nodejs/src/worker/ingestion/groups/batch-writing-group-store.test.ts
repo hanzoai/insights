@@ -322,7 +322,7 @@ describe('BatchWritingGroupStore', () => {
                 insertGroup: jest.fn().mockImplementation(() => {
                     insertCounter++
                     if (insertCounter === 1) {
-                        throw new RaceConditionError('Parallel posthog_group inserts, retry')
+                        throw new RaceConditionError('Parallel insights_group inserts, retry')
                     }
                     return Promise.resolve(1)
                 }),

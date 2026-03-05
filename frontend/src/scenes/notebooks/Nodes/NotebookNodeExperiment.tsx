@@ -11,7 +11,7 @@ import { SummaryTable } from 'scenes/experiments/ExperimentView/SummaryTable'
 import { LegacyResultsQuery, ResultsTag, StatusTag } from 'scenes/experiments/ExperimentView/components'
 import { experimentLogic } from 'scenes/experiments/experimentLogic'
 import { getExperimentStatus } from 'scenes/experiments/experimentsLogic'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { NotebookNodeProps, NotebookNodeType } from '../types'
@@ -109,7 +109,7 @@ type NotebookNodeExperimentAttributes = {
     id: number
 }
 
-export const NotebookNodeExperiment = createPostHogWidgetNode<NotebookNodeExperimentAttributes>({
+export const NotebookNodeExperiment = createInsightsWidgetNode<NotebookNodeExperimentAttributes>({
     nodeType: NotebookNodeType.Experiment,
     titlePlaceholder: 'Experiment',
     Component,

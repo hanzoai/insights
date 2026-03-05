@@ -1,7 +1,7 @@
 import { Hub } from '~/types'
 import { logger } from '~/utils/logger'
 
-import { JWT, PosthogJwtAudience } from '../../utils/jwt-utils'
+import { JWT, InsightsJwtAudience } from '../../utils/jwt-utils'
 import { RecipientManagerRecipient } from '../managers/recipients-manager.service'
 
 export class RecipientTokensService {
@@ -15,7 +15,7 @@ export class RecipientTokensService {
         token: string
     ): { valid: false } | { valid: true; team_id: number; identifier: string } {
         try {
-            const decoded = this.jwt.verify(token, PosthogJwtAudience.SUBSCRIPTION_PREFERENCES, {
+            const decoded = this.jwt.verify(token, InsightsJwtAudience.SUBSCRIPTION_PREFERENCES, {
                 ignoreVerificationErrors: true,
                 maxAge: '7d',
             })
@@ -37,7 +37,7 @@ export class RecipientTokensService {
                 team_id: recipient.team_id,
                 identifier: recipient.identifier,
             },
-            PosthogJwtAudience.SUBSCRIPTION_PREFERENCES,
+            InsightsJwtAudience.SUBSCRIPTION_PREFERENCES,
             { expiresIn: '7d' }
         )
     }

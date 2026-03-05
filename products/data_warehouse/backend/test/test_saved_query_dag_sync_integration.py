@@ -18,7 +18,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             {
                 "name": "dag_sync_create_test",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT 1",
                 },
             },
@@ -42,7 +42,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             {
                 "name": "dag_sync_update_test",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT 1",
                 },
             },
@@ -58,7 +58,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             {
                 "name": "dag_sync_update_test_renamed",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT 2",
                 },
                 "edited_history_id": latest_history_id,
@@ -79,7 +79,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             {
                 "name": "dag_sync_delete_test",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT 1",
                 },
             },
@@ -105,7 +105,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             {
                 "name": "dag_sync_materialize_test",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT 1",
                 },
             },
@@ -132,7 +132,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
             {
                 "name": "dag_sync_revert_test",
                 "query": {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": "SELECT 1",
                 },
             },
@@ -170,7 +170,7 @@ class TestSavedQueryDagSyncIntegration(APIBaseTest):
                 {
                     "name": "dag_sync_failure_test",
                     "query": {
-                        "kind": "HogQLQuery",
+                        "kind": "InsightsQLQuery",
                         "query": "SELECT 1",
                     },
                 },

@@ -1,11 +1,11 @@
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
-from posthog.hogql import ast
-from posthog.hogql.ast import CompareOperationOp
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.helpers.timestamp_visitor import is_simple_timestamp_field_expression
-from posthog.hogql.visitor import CloningVisitor
+from posthog.insightsql import ast
+from posthog.insightsql.ast import CompareOperationOp
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.helpers.timestamp_visitor import is_simple_timestamp_field_expression
+from posthog.insightsql.visitor import CloningVisitor
 
 from posthog.clickhouse.preaggregation.sql import DISTRIBUTED_PREAGGREGATION_RESULTS_TABLE
 from posthog.models import Team
@@ -32,7 +32,7 @@ def _is_person_id_field(field: ast.Field) -> bool:
     )
 
 
-def _is_timestamp_field(expr: ast.Expr, context: HogQLContext) -> bool:
+def _is_timestamp_field(expr: ast.Expr, context: InsightsQLContext) -> bool:
     """Check if an expression is a simple timestamp field."""
     # Use the robust timestamp field detection from timestamp_visitor
     if is_simple_timestamp_field_expression(expr, context):
@@ -87,7 +87,7 @@ def _is_uniq_exact_persons_call(expr: ast.Expr) -> bool:
     return False
 
 
-def _is_to_start_of_day_timestamp(expr: ast.Expr, context: HogQLContext) -> bool:
+def _is_to_start_of_day_timestamp(expr: ast.Expr, context: InsightsQLContext) -> bool:
     """Check if expression is toStartOfDay(timestamp) or toStartOfInterval(timestamp, toIntervalDay(1))."""
     if not isinstance(expr, ast.Call):
         return False
@@ -132,7 +132,7 @@ def _call_to_compare_op(call_name: str) -> CompareOperationOp:
     return mapping.get(call_name, CompareOperationOp.Eq)
 
 
-def _extract_datetime_constant(expr: ast.Expr, context: HogQLContext) -> Optional[datetime]:
+def _extract_datetime_constant(expr: ast.Expr, context: InsightsQLContext) -> Optional[datetime]:
     """Extract a datetime from a constant or wrapped constant expression.
 
     Handles patterns like:
@@ -166,7 +166,7 @@ def _extract_datetime_constant(expr: ast.Expr, context: HogQLContext) -> Optiona
     return None
 
 
-def _is_timestamp_or_start_of_day_timestamp(expr: ast.Expr, context: HogQLContext) -> bool:
+def _is_timestamp_or_start_of_day_timestamp(expr: ast.Expr, context: InsightsQLContext) -> bool:
     """Check if an expression is either a timestamp field or toStartOfDay(timestamp)."""
     # Direct timestamp field
     if _is_timestamp_field(expr, context):
@@ -179,7 +179,7 @@ def _is_timestamp_or_start_of_day_timestamp(expr: ast.Expr, context: HogQLContex
     return False
 
 
-def _extract_timestamp_range(where_exprs: list[ast.Expr], context: HogQLContext) -> Optional[tuple[datetime, datetime]]:
+def _extract_timestamp_range(where_exprs: list[ast.Expr], context: InsightsQLContext) -> Optional[tuple[datetime, datetime]]:
     """
     Extract start and end timestamps from WHERE conditions.
     Handles both:
@@ -266,7 +266,7 @@ def _is_valid_events_from(select_from: Optional[ast.JoinExpr]) -> bool:
     return True
 
 
-def _build_select_aliases(node: ast.SelectQuery, context: HogQLContext) -> dict[Union[str, int], ast.Expr]:
+def _build_select_aliases(node: ast.SelectQuery, context: InsightsQLContext) -> dict[Union[str, int], ast.Expr]:
     """Build a mapping of alias names to their underlying expressions from SELECT."""
     aliases: dict[Union[str, int], ast.Expr] = {}
     if node.select:
@@ -277,7 +277,7 @@ def _build_select_aliases(node: ast.SelectQuery, context: HogQLContext) -> dict[
 
 
 def _resolve_alias_in_group_by(
-    expr: ast.Expr, aliases: dict[Union[str, int], ast.Expr], context: HogQLContext
+    expr: ast.Expr, aliases: dict[Union[str, int], ast.Expr], context: InsightsQLContext
 ) -> ast.Expr:
     """Resolve an alias reference in GROUP BY to its underlying expression."""
     # If it's a single-element field that matches an alias, return the aliased expression
@@ -288,7 +288,7 @@ def _resolve_alias_in_group_by(
     return expr
 
 
-def _is_daily_unique_persons_pageviews_query(node: ast.SelectQuery, context: HogQLContext) -> bool:
+def _is_daily_unique_persons_pageviews_query(node: ast.SelectQuery, context: InsightsQLContext) -> bool:
     """
     Detect if a query matches the pattern:
     SELECT uniqExact(person_id) FROM events WHERE event='$pageview' GROUP BY toStartOfDay(timestamp)
@@ -356,7 +356,7 @@ def _is_daily_unique_persons_pageviews_query(node: ast.SelectQuery, context: Hog
     return True
 
 
-def _build_insert_select_query(node: ast.SelectQuery, context: HogQLContext) -> ast.SelectQuery:
+def _build_insert_select_query(node: ast.SelectQuery, context: InsightsQLContext) -> ast.SelectQuery:
     """
     Build an INSERT SELECT query from the matched query pattern.
 
@@ -485,7 +485,7 @@ def _run_daily_unique_persons_pageviews(
 class Transformer(CloningVisitor):
     """Transform queries to use daily_unique_persons_pageviews table."""
 
-    def __init__(self, context: HogQLContext) -> None:
+    def __init__(self, context: InsightsQLContext) -> None:
         super().__init__()
         self.context = context
 
@@ -544,7 +544,7 @@ class Transformer(CloningVisitor):
             else:
                 select.append(transformed_expr)
 
-        # FROM preaggregation_results (HogQL name, maps to sharded_preaggregation_results in ClickHouse)
+        # FROM preaggregation_results (InsightsQL name, maps to sharded_preaggregation_results in ClickHouse)
         select_from = ast.JoinExpr(
             table=ast.Field(chain=["preaggregation_results"]),
             alias=transformed_node.select_from.alias if transformed_node.select_from else None,

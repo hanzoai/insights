@@ -24,7 +24,7 @@ import {
     WavingHog,
     XRayHog,
     XRayHog2,
-} from 'lib/components/hedgehogs'
+} from 'lib/components/mascots'
 import { useOnMountEffect } from 'lib/hooks/useOnMountEffect'
 
 export type HogComponent = React.ComponentType<{ width: number; height: number }>

@@ -144,12 +144,12 @@ def process_csp_report(request):
     """
     Process a Content Security Policy (CSP) report from a browser.
 
-    Takes the incoming CSP report JSON, formats it as a PostHog event,
+    Takes the incoming CSP report JSON, formats it as a Insights event,
     and returns it for ingestion through the regular event pipeline.
 
     Returns:
         tuple: (csp_report, error_response)
-            - csp_report: The formatted CSP report as a PostHog event, or None if processing failed
+            - csp_report: The formatted CSP report as a Insights event, or None if processing failed
             - error_response: An error response to return to the client if processing failed, or None if successful
     """
     try:

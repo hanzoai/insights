@@ -39,14 +39,14 @@ describe('pixel template', () => {
         )
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
-        expect(response.capturedPostHogEvents).toMatchInlineSnapshot(
+        expect(response.capturedInsightsEvents).toMatchInlineSnapshot(
             `
             [
               {
                 "distinct_id": "hardcoded",
                 "event": "the event",
                 "properties": {
-                  "$hog_function_execution_count": 1,
+                  "$custom_function_execution_count": 1,
                   "query_params": {
                     "other": "other",
                     "params": "2",
@@ -81,7 +81,7 @@ describe('pixel template', () => {
         )
         expect(response.error).toBeUndefined()
         expect(response.finished).toEqual(true)
-        expect(response.capturedPostHogEvents).toEqual([])
+        expect(response.capturedInsightsEvents).toEqual([])
         expect(response.execResult).toEqual(GOOD_RESPONSE)
     })
 })

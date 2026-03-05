@@ -15,7 +15,7 @@ describe('ActionManager', () => {
         hub = await createHub()
         await resetTestDatabase()
 
-        await insertRow(hub.postgres, 'posthog_action', {
+        await insertRow(hub.postgres, 'insights_action', {
             id: ACTION_ID,
             team_id: TEAM_ID,
             name: 'Test Action',
@@ -76,7 +76,7 @@ describe('ActionManager', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE posthog_action SET slack_message_format='test' WHERE id = $1`,
+            `UPDATE insights_action SET slack_message_format='test' WHERE id = $1`,
             [ACTION_ID],
             'testKey'
         )
@@ -141,7 +141,7 @@ describe('ActionManager', () => {
 
         await hub.postgres.query(
             PostgresUse.COMMON_WRITE,
-            `UPDATE posthog_action
+            `UPDATE insights_action
              SET deleted = TRUE
              WHERE id = $1`,
             [ACTION_ID],

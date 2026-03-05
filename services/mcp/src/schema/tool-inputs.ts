@@ -97,7 +97,7 @@ export const ExperimentUpdateInputSchema = z.object({
                     .describe(
                         "Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics"
                     ),
-                event_name: z.string().describe("PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase')"),
+                event_name: z.string().describe("Insights event name (e.g., '$pageview', 'add_to_cart', 'purchase')"),
                 funnel_steps: z
                     .array(z.string())
                     .optional()
@@ -119,7 +119,7 @@ export const ExperimentUpdateInputSchema = z.object({
             z.object({
                 name: z.string().optional().describe('Human-readable metric name'),
                 metric_type: z.enum(['mean', 'funnel', 'ratio']).describe('Metric type'),
-                event_name: z.string().describe('PostHog event name'),
+                event_name: z.string().describe('Insights event name'),
                 funnel_steps: z.array(z.string()).optional().describe('For funnel metrics only: Array of event names'),
                 properties: z
                     .array(PropertyFilter)
@@ -189,7 +189,7 @@ export const ExperimentCreateSchema = z.object({
                 event_name: z
                     .string()
                     .describe(
-                        "REQUIRED for metrics to work: PostHog event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events."
+                        "REQUIRED for metrics to work: Insights event name (e.g., '$pageview', 'add_to_cart', 'purchase'). For funnels, this is the first step. Use '$pageview' if unsure. Search project-property-definitions tool for available events."
                     ),
                 funnel_steps: z
                     .array(z.string())
@@ -224,7 +224,7 @@ export const ExperimentCreateSchema = z.object({
                     .describe(
                         "Metric type: 'mean' for average values, 'funnel' for conversion flows, 'ratio' for comparing two metrics"
                     ),
-                event_name: z.string().describe("REQUIRED: PostHog event name. Use '$pageview' if unsure."),
+                event_name: z.string().describe("REQUIRED: Insights event name. Use '$pageview' if unsure."),
                 funnel_steps: z
                     .array(z.string())
                     .optional()
@@ -333,7 +333,7 @@ export const InsightGetAllSchema = z.object({
     data: ListInsightsSchema.optional(),
 })
 
-export const InsightGenerateHogQLFromQuestionSchema = z.object({
+export const InsightGenerateInsightsQLFromQuestionSchema = z.object({
     question: z
         .string()
         .max(1000)
@@ -481,7 +481,7 @@ export const DemoMcpUiAppsSchema = z.object({
     message: z.string().optional().describe('Optional message to include in the demo data'),
 })
 
-// PostHog AI tools
+// Insights AI tools
 export const ExecuteSQLSchema = z.object({
     query: z.string().min(1).describe('The final SQL query to be executed.'),
     truncate: z

@@ -54,7 +54,7 @@ class SnapshotLoader:
         self.patches: list[Any] = []
 
     async def load_snapshots(self) -> tuple[Organization, User]:
-        self.organization = await Organization.objects.acreate(name="PostHog")
+        self.organization = await Organization.objects.acreate(name="Insights")
         self.user = await sync_to_async(User.objects.create_and_join)(self.organization, "test@posthog.com", "12345678")
 
         for snapshot in self.config.team_snapshots:

@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 
 import structlog
 
-from posthog.cdp.validation import compile_hog
+from posthog.cdp.validation import compile_script
 from posthog.models.custom_functions.custom_function import CustomFunction
 
 logger = structlog.get_logger(__name__)
@@ -67,7 +67,7 @@ class Command(BaseCommand):
             for destination in page.object_list:
                 if destination.hog and replaceOption["from_string"] in destination.hog:
                     destination.hog = destination.hog.replace(replaceOption["from_string"], replaceOption["to_string"])
-                    destination.bytecode = compile_hog(destination.hog, destination.type)
+                    destination.bytecode = compile_script(destination.hog, destination.type)
                     updated_count += 1
                     if not dry_run:
                         destination.save(update_fields=["hog", "bytecode"])

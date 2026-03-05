@@ -3,23 +3,23 @@ import { RedisV2, createRedisV2PoolFromConfig } from '~/common/redis/redis-v2'
 import { KafkaProducerWrapper } from '../../kafka/producer'
 import { HealthCheckResult, Hub, PluginServerService, TeamId } from '../../types'
 import { logger } from '../../utils/logger'
-import { CdpFetchConfig, HogExecutorService, HogExecutorServiceHub } from '../services/hog-executor.service'
-import { HogFlowExecutorService } from '../services/hogflows/hogflow-executor.service'
-import { HogFlowFunctionsService } from '../services/hogflows/hogflow-functions.service'
-import { HogFlowManagerService } from '../services/hogflows/hogflow-manager.service'
+import { CdpFetchConfig, ScriptExecutorService, ScriptExecutorServiceHub } from '../services/script-executor.service'
+import { CustomFlowExecutorService } from '../services/customflows/customflow-executor.service'
+import { CustomFlowFunctionsService } from '../services/customflows/customflow-functions.service'
+import { CustomFlowManagerService } from '../services/customflows/customflow-manager.service'
 import { LegacyPluginExecutorService } from '../services/legacy-plugin-executor.service'
 import { GroupsManagerService, GroupsManagerServiceHub } from '../services/managers/groups-manager.service'
-import { HogFunctionManagerHub, HogFunctionManagerService } from '../services/managers/hog-function-manager.service'
-import { HogFunctionTemplateManagerService } from '../services/managers/hog-function-template-manager.service'
+import { CustomFunctionManagerHub, CustomFunctionManagerService } from '../services/managers/custom-function-manager.service'
+import { CustomFunctionTemplateManagerService } from '../services/managers/custom-function-template-manager.service'
 import { PersonsManagerService } from '../services/managers/persons-manager.service'
 import { RecipientsManagerService } from '../services/managers/recipients-manager.service'
 import { RecipientPreferencesService } from '../services/messaging/recipient-preferences.service'
 import {
-    HogFunctionMonitoringService,
-    HogFunctionMonitoringServiceHub,
-} from '../services/monitoring/hog-function-monitoring.service'
-import { HogMaskerService } from '../services/monitoring/hog-masker.service'
-import { HogWatcherService, HogWatcherServiceHub } from '../services/monitoring/hog-watcher.service'
+    CustomFunctionMonitoringService,
+    CustomFunctionMonitoringServiceHub,
+} from '../services/monitoring/custom-function-monitoring.service'
+import { ScriptMaskerService } from '../services/monitoring/script-masker.service'
+import { ScriptWatcherService, ScriptWatcherServiceHub } from '../services/monitoring/script-watcher.service'
 import { NativeDestinationExecutorService } from '../services/native-destination-executor.service'
 import { SegmentDestinationExecutorService } from '../services/segment-destination-executor.service'
 
@@ -28,10 +28,10 @@ import { SegmentDestinationExecutorService } from '../services/segment-destinati
  * This includes all fields needed by the base consumer and its services.
  */
 export type CdpConsumerBaseHub = CdpFetchConfig &
-    HogFunctionManagerHub &
-    HogExecutorServiceHub &
-    HogFunctionMonitoringServiceHub &
-    HogWatcherServiceHub &
+    CustomFunctionManagerHub &
+    ScriptExecutorServiceHub &
+    CustomFunctionMonitoringServiceHub &
+    ScriptWatcherServiceHub &
     GroupsManagerServiceHub &
     Pick<
         Hub,
@@ -53,7 +53,7 @@ export type CdpConsumerBaseHub = CdpFetchConfig &
         // LegacyPluginExecutorService
         | 'postgres'
         | 'geoipService'
-        // HogFlowManagerService
+        // CustomFlowManagerService
         | 'pubSub'
     >
 
@@ -66,20 +66,20 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
     redis: RedisV2
     isStopping = false
 
-    hogExecutor: HogExecutorService
-    hogFlowExecutor: HogFlowExecutorService
-    hogMasker: HogMaskerService
-    hogWatcher: HogWatcherService
+    scriptExecutor: ScriptExecutorService
+    customFlowExecutor: CustomFlowExecutorService
+    scriptMasker: ScriptMaskerService
+    scriptWatcher: ScriptWatcherService
 
     groupsManager: GroupsManagerService
-    hogFlowManager: HogFlowManagerService
-    hogFunctionManager: HogFunctionManagerService
-    hogFunctionTemplateManager: HogFunctionTemplateManagerService
-    hogFlowFunctionsService: HogFlowFunctionsService
+    customFlowManager: CustomFlowManagerService
+    customFunctionManager: CustomFunctionManagerService
+    customFunctionTemplateManager: CustomFunctionTemplateManagerService
+    customFlowFunctionsService: CustomFlowFunctionsService
     personsManager: PersonsManagerService
     recipientsManager: RecipientsManagerService
 
-    hogFunctionMonitoringService: HogFunctionMonitoringService
+    customFunctionMonitoringService: CustomFunctionMonitoringService
     nativeDestinationExecutorService: NativeDestinationExecutorService
     pluginDestinationExecutorService: LegacyPluginExecutorService
     recipientPreferencesService: RecipientPreferencesService
@@ -103,28 +103,28 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
             poolMinSize: hub.REDIS_POOL_MIN_SIZE,
             poolMaxSize: hub.REDIS_POOL_MAX_SIZE,
         })
-        this.hogFunctionManager = new HogFunctionManagerService(hub)
-        this.hogFlowManager = new HogFlowManagerService(hub.postgres, hub.pubSub)
-        this.hogWatcher = new HogWatcherService(hub, this.redis)
-        this.hogMasker = new HogMaskerService(this.redis)
-        this.hogExecutor = new HogExecutorService(this.hub)
-        this.hogFunctionTemplateManager = new HogFunctionTemplateManagerService(this.hub.postgres)
-        this.hogFlowFunctionsService = new HogFlowFunctionsService(
+        this.customFunctionManager = new CustomFunctionManagerService(hub)
+        this.customFlowManager = new CustomFlowManagerService(hub.postgres, hub.pubSub)
+        this.scriptWatcher = new ScriptWatcherService(hub, this.redis)
+        this.scriptMasker = new ScriptMaskerService(this.redis)
+        this.scriptExecutor = new ScriptExecutorService(this.hub)
+        this.customFunctionTemplateManager = new CustomFunctionTemplateManagerService(this.hub.postgres)
+        this.customFlowFunctionsService = new CustomFlowFunctionsService(
             this.hub.SITE_URL,
-            this.hogFunctionTemplateManager,
-            this.hogExecutor
+            this.customFunctionTemplateManager,
+            this.scriptExecutor
         )
 
         this.recipientsManager = new RecipientsManagerService(this.hub.postgres)
         this.recipientPreferencesService = new RecipientPreferencesService(this.recipientsManager)
-        this.hogFlowExecutor = new HogFlowExecutorService(
-            this.hogFlowFunctionsService,
+        this.customFlowExecutor = new CustomFlowExecutorService(
+            this.customFlowFunctionsService,
             this.recipientPreferencesService
         )
 
         this.personsManager = new PersonsManagerService(this.hub.personRepository)
         this.groupsManager = new GroupsManagerService(this.hub)
-        this.hogFunctionMonitoringService = new HogFunctionMonitoringService(this.hub)
+        this.customFunctionMonitoringService = new CustomFunctionMonitoringService(this.hub)
         this.pluginDestinationExecutorService = new LegacyPluginExecutorService(
             this.hub.postgres,
             this.hub.geoipService
@@ -142,7 +142,7 @@ export abstract class CdpConsumerBase<THub extends CdpConsumerBaseHub = CdpConsu
     }
 
     protected async runWithHeartbeat<T>(func: () => Promise<T> | T): Promise<T> {
-        // Helper function to ensure that looping over lots of hog functions doesn't block up the thread, killing the consumer
+        // Helper function to ensure that looping over lots of custom functions doesn't block up the thread, killing the consumer
         const res = await func()
         this.heartbeat()
         await new Promise((resolve) => process.nextTick(resolve))

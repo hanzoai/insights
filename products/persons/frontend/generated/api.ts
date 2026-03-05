@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 import { apiMutator } from '../../../../frontend/src/lib/api-orval-mutator'
@@ -431,7 +431,7 @@ export const personsBatchByDistinctIdsCreate = async (
 }
 
 /**
- * This endpoint allows you to bulk delete persons, either by the PostHog person IDs or by distinct IDs. You can pass in a maximum of 1000 IDs per call. Only events captured before the request will be deleted.
+ * This endpoint allows you to bulk delete persons, either by the Insights person IDs or by distinct IDs. You can pass in a maximum of 1000 IDs per call. Only events captured before the request will be deleted.
  */
 export const getPersonsBulkDeleteCreateUrl = (projectId: string, params?: PersonsBulkDeleteCreateParams) => {
     const normalizedParams = new URLSearchParams()

@@ -20,11 +20,11 @@ export function CLILive(): JSX.Element {
 
     if (!port) {
         return (
-            <BridgePage view="login" hedgehog>
+            <BridgePage view="login" mascot>
                 <div className="text-center space-y-4">
                     <h2>Missing port parameter</h2>
                     <LemonBanner type="error">
-                        This page should be opened from the PostHog Live TUI. Please run <code>posthog-live</code> in
+                        This page should be opened from the Insights Live TUI. Please run <code>posthog-live</code> in
                         your terminal.
                     </LemonBanner>
                 </div>
@@ -34,7 +34,7 @@ export function CLILive(): JSX.Element {
 
     if (redirected) {
         return (
-            <BridgePage view="login" hedgehog={false}>
+            <BridgePage view="login" mascot={false}>
                 <div className="text-center space-y-4">
                     <h2>Authorization complete</h2>
                     <LemonBanner type="success">
@@ -49,7 +49,7 @@ export function CLILive(): JSX.Element {
 
     if (error) {
         return (
-            <BridgePage view="login" hedgehog>
+            <BridgePage view="login" mascot>
                 <div className="text-center space-y-4">
                     <h2>Authorization failed</h2>
                     <LemonBanner type="error">{error}</LemonBanner>
@@ -60,9 +60,9 @@ export function CLILive(): JSX.Element {
 
     if (projectsLoading || projects.length === 1) {
         return (
-            <BridgePage view="login" hedgehog>
+            <BridgePage view="login" mascot>
                 <div className="text-center space-y-4">
-                    <h2>Authorizing PostHog Live...</h2>
+                    <h2>Authorizing Insights Live...</h2>
                     <SpinnerOverlay />
                 </div>
             </BridgePage>
@@ -72,12 +72,12 @@ export function CLILive(): JSX.Element {
     return (
         <BridgePage
             view="login"
-            hedgehog
+            mascot
             message={
                 <>
                     Authorize
                     <br />
-                    PostHog Live
+                    Insights Live
                 </>
             }
         >

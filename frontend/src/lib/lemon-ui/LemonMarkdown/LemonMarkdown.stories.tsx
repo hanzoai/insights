@@ -99,7 +99,7 @@ Here's our development progress:
 ## Autolink literals
 Visit https://posthog.com for more information about our product.
 
-You can also check out our GitHub repository at https://github.com/PostHog/posthog
+You can also check out our GitHub repository at https://github.com/Insights/posthog
 
 Email us at hello@posthog.com for support.`,
 }
@@ -153,7 +153,7 @@ Contact us at hello@posthog.com for general inquiries.
 For technical support: support@posthog.com
 
 ## Mixed Content
-Our GitHub repository (https://github.com/PostHog/posthog) contains the full source code.
+Our GitHub repository (https://github.com/Insights/posthog) contains the full source code.
 
 For questions, email team@posthog.com or visit https://posthog.com/questions`,
 }

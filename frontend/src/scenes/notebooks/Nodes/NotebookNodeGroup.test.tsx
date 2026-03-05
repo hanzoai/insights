@@ -11,7 +11,7 @@ import { GroupInfo, LifetimeValue, MRR } from './NotebookNodeGroup'
 
 // Mock NodeWrapper to avoid circular dependencies
 jest.mock('./NodeWrapper', () => ({
-    createPostHogWidgetNode: () => ({}),
+    createInsightsWidgetNode: () => ({}),
 }))
 
 // Mocking because it is annoying to mock the hover to assert the tooltip text

@@ -14,7 +14,7 @@ from posthog.temporal.backfill_materialized_property.activities import (
     backfill_materialized_column,
     update_slot_state,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 
 
 @dataclasses.dataclass
@@ -33,7 +33,7 @@ class BackfillMaterializedPropertyInputs:
 
 
 @workflow.defn(name="backfill-materialized-property")
-class BackfillMaterializedPropertyWorkflow(PostHogWorkflow):
+class BackfillMaterializedPropertyWorkflow(InsightsWorkflow):
     """
     Workflow to backfill a materialized property column.
 

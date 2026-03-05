@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: HogFunctionTemplate = {
     name: 'URL Normalization',
     description:
         'Normalizes URLs by replacing dynamic path segments (containing numbers or capital letters) with :id placeholders. This helps group similar URLs together for analysis.',
-    icon_url: '/static/hedgehog/reading-hog.png',
+    icon_url: '/static/mascot/reading-mascot.png',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 
 // Function to normalize a path segment
@@ -160,7 +160,7 @@ for (let propName in urlProperties) {
 }
 
 return normalizedEvent
-// NOTE: This template does not decode percent-encoded segments (e.g., %20 for space) due to Hog limitations.
+// NOTE: This template does not decode percent-encoded segments (e.g., %20 for space) due to Script limitations.
     `,
     inputs_schema: [
         {
