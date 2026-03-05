@@ -52,7 +52,7 @@ For other Linux distros, adjust the steps as needed (e.g. use `dnf` or `pacman` 
 
 Windows isn't supported natively. But, Windows users can run a Linux virtual machine. The latest Ubuntu LTS Desktop is recommended. (Ubuntu Server is not recommended as debugging the frontend will require a browser that can access localhost.)
 
-In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Insights/posthog.com/blob/master/contents/handbook/engineering/developing-locally.md)!
+In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/PostHog/posthog.com/blob/master/contents/handbook/engineering/developing-locally.md)!
 
 ## Option 1: Developing locally
 
@@ -96,7 +96,7 @@ This is the recommended option for most developers.
 Clone the [Insights repo](https://github.com/posthog/posthog). All future commands assume you're inside the `posthog/` folder.
 
 ```bash
-git clone --filter=blob:none https://github.com/Insights/posthog && cd posthog/
+git clone --filter=blob:none https://github.com/PostHog/posthog && cd posthog/
 ```
 
 **Performance tip:** The `--filter=blob:none` flag downloads all commit history and tree structure, but defers file contents (blobs) until needed. This reduces the clone from ~3 GB to a few hundred MB and makes the initial clone **15-17x faster**. You still get full git history for commands like `git log` and `git diff` – blobs are fetched on demand as you use them.
@@ -310,7 +310,7 @@ Backend side flags are only evaluated locally, which requires the `POSTHOG_PERSO
 
 ## Extra: Debugging with VS Code
 
-The Insights repository includes [VS Code launch options for debugging](https://github.com/Insights/posthog/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
+The Insights repository includes [VS Code launch options for debugging](https://github.com/PostHog/posthog/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
 
 > **Note:** You can debug all services using the main "Insights" launch option. If you are running most services with `hogli start` and only want to debug one (e.g. the backend), use `hogli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
 
@@ -441,7 +441,7 @@ When creating a new email, there are a few steps to take. It's important to add 
 
 ## Extra: Developing paid features (Insights employees only)
 
-If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/Insights/billing?tab=readme-ov-file#licensing-your-local-instance).
+If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/PostHog/billing?tab=readme-ov-file#licensing-your-local-instance).
 
 ## Extra: Resetting your local database
 

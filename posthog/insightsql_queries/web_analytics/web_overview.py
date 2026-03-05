@@ -248,7 +248,7 @@ HAVING {inside_start_timestamp_period}
             previous_alias: Optional[str] = None,
             params: Optional[list[ast.Expr]] = None,
         ) -> list[ast.Expr]:
-            # This could also be done using tuples like the stats_table but I will keep the protocol as close as possible: https://github.com/Insights/posthog/blob/26588f3689aa505fbf857afcae4e8bd18cf75606/posthog/insightsql_queries/web_analytics/stats_table.py#L390-L399
+            # This could also be done using tuples like the stats_table but I will keep the protocol as close as possible: https://github.com/PostHog/posthog/blob/26588f3689aa505fbf857afcae4e8bd18cf75606/posthog/insightsql_queries/web_analytics/stats_table.py#L390-L399
             previous_alias = previous_alias or f"previous_{current_alias}"
             return [
                 current_period_aggregate(function_name, column_name, current_alias, params),

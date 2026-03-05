@@ -37,7 +37,7 @@ module = Extension(
 setup(
     name="insightsql_parser",
     version="1.3.14",
-    url="https://github.com/Insights/posthog/tree/master/common/insightsql_parser",
+    url="https://github.com/PostHog/posthog/tree/master/common/insightsql_parser",
     description="InsightsQL parser for internal Insights use",
     author="Insights Inc.",
     author_email="hey@posthog.com",

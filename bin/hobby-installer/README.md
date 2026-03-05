@@ -139,7 +139,7 @@ On an Ubuntu server:
 
 ```bash
 # Download and run
-curl -L https://github.com/Insights/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
+curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
 chmod +x posthog-hobby
 ./posthog-hobby
 ```
@@ -147,7 +147,7 @@ chmod +x posthog-hobby
 For CI/automated deployments:
 
 ```bash
-curl -L https://github.com/Insights/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
+curl -L https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby -o posthog-hobby
 chmod +x posthog-hobby
 ./posthog-hobby --ci --domain your-domain.com
 ```
@@ -164,5 +164,5 @@ The GitHub workflow (`.github/workflows/build-hobby-installer.yml`) does the fol
 
 This means:
 
-- **Stable URL**: `https://github.com/Insights/posthog/releases/download/hobby-latest/posthog-hobby` always points to the latest build
-- **Version history**: All previous builds are available at `https://github.com/Insights/posthog/releases?q=hobby-&expanded=true`
+- **Stable URL**: `https://github.com/PostHog/posthog/releases/download/hobby-latest/posthog-hobby` always points to the latest build
+- **Version history**: All previous builds are available at `https://github.com/PostHog/posthog/releases?q=hobby-&expanded=true`

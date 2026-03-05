@@ -423,6 +423,6 @@ Test coverage:
 
 ## References
 
-- Main clustering issue: [#40787](https://github.com/Insights/posthog/issues/40787)
+- Main clustering issue: [#40787](https://github.com/PostHog/posthog/issues/40787)
 - Trace summarization workflow: `posthog/temporal/llm_analytics/trace_summarization/`
 - Document embeddings: `products/error_tracking/backend/embedding.py`
