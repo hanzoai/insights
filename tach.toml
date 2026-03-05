@@ -24,7 +24,7 @@ depends_on = [
 ]
 
 [[modules]]
-path = "common.hogql_parser"
+path = "common.insightsql_parser"
 depends_on = []
 utility = true
 
