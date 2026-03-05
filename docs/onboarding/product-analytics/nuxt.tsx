@@ -11,7 +11,7 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the PostHog JavaScript library using your package manager:</Markdown>
+                    <Markdown>Install the Insights JavaScript library using your package manager:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -51,7 +51,7 @@ export const getNuxtClientSteps = (ctx: OnboardingComponentsContext): StepDefini
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Add your PostHog API key and host to your `nuxt.config.js` file:</Markdown>
+                    <Markdown>Add your Insights API key and host to your `nuxt.config.js` file:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -161,12 +161,12 @@ export const getNuxtServerSteps = (ctx: OnboardingComponentsContext): StepDefini
                                 language: 'javascript',
                                 file: 'server/api/example.js',
                                 code: dedent`
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
 
                                     export default defineEventHandler(async (event) => {
                                         const runtimeConfig = useRuntimeConfig()
 
-                                        const posthog = new PostHog(
+                                        const posthog = new Insights(
                                             runtimeConfig.public.posthogPublicKey,
                                             { host: runtimeConfig.public.posthogHost }
                                         )

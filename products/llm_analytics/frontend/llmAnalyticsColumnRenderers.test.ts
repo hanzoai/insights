@@ -66,9 +66,9 @@ describe('llmAnalyticsColumnRenderers', () => {
     describe('createPersonFilter', () => {
         it.each<[string, FilterIdentifier, ReturnType<typeof createPersonFilter>]>([
             [
-                'creates HogQL filter for distinct_id type',
+                'creates InsightsQL filter for distinct_id type',
                 { type: 'distinct_id', value: 'user-123' },
-                { type: PropertyFilterType.HogQL, key: "distinct_id == 'user-123'" },
+                { type: PropertyFilterType.InsightsQL, key: "distinct_id == 'user-123'" },
             ],
             [
                 'creates Person property filter for email type',

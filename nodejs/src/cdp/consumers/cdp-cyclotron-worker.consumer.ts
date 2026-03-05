@@ -2,16 +2,16 @@ import { instrumented } from '~/common/tracing/tracing-utils'
 
 import { HealthCheckResult, PluginsServerConfig } from '../../types'
 import { logger } from '../../utils/logger'
-import { captureException } from '../../utils/posthog'
+import { captureException } from '../../utils/insights'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
 import {
     CYCLOTRON_INVOCATION_JOB_QUEUES,
     CyclotronJobInvocation,
-    CyclotronJobInvocationHogFunction,
+    CyclotronJobInvocationCustomFunction,
     CyclotronJobInvocationResult,
     CyclotronJobQueueKind,
 } from '../types'
-import { isLegacyPluginHogFunction, isNativeHogFunction, isSegmentPluginHogFunction } from '../utils'
+import { isLegacyPluginCustomFunction, isNativeCustomFunction, isSegmentPluginCustomFunction } from '../utils'
 import { CdpConsumerBase, CdpConsumerBaseHub } from './cdp-base.consumer'
 
 /**
@@ -23,7 +23,7 @@ export type CdpCyclotronWorkerHub = CdpConsumerBaseHub &
     Pick<PluginsServerConfig, 'CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_KIND'>
 
 /**
- * The future of the CDP consumer. This will be the main consumer that will handle all hog jobs from Cyclotron
+ * The future of the CDP consumer. This will be the main consumer that will handle all script jobs from Cyclotron
  */
 export class CdpCyclotronWorker<
     THub extends CdpCyclotronWorkerHub = CdpCyclotronWorkerHub,
@@ -45,35 +45,35 @@ export class CdpCyclotronWorker<
 
     @instrumented('cdpConsumer.handleEachBatch.executeInvocations')
     public async processInvocations(invocations: CyclotronJobInvocation[]): Promise<CyclotronJobInvocationResult[]> {
-        const loadedInvocations = await this.loadHogFunctions(invocations)
+        const loadedInvocations = await this.loadCustomFunctions(invocations)
 
         return await Promise.all(
             loadedInvocations.map((item) => {
-                if (isNativeHogFunction(item.hogFunction)) {
+                if (isNativeCustomFunction(item.customFunction)) {
                     return this.nativeDestinationExecutorService.execute(item)
-                } else if (isLegacyPluginHogFunction(item.hogFunction)) {
+                } else if (isLegacyPluginCustomFunction(item.customFunction)) {
                     return this.pluginDestinationExecutorService.execute(item)
-                } else if (isSegmentPluginHogFunction(item.hogFunction)) {
+                } else if (isSegmentPluginCustomFunction(item.customFunction)) {
                     return this.segmentDestinationExecutorService.execute(item)
                 } else {
-                    return this.hogExecutor.executeWithAsyncFunctions(item)
+                    return this.scriptExecutor.executeWithAsyncFunctions(item)
                 }
             })
         )
     }
 
-    @instrumented('cdpConsumer.handleEachBatch.loadHogFunctions')
-    protected async loadHogFunctions(
+    @instrumented('cdpConsumer.handleEachBatch.loadCustomFunctions')
+    protected async loadCustomFunctions(
         invocations: CyclotronJobInvocation[]
-    ): Promise<CyclotronJobInvocationHogFunction[]> {
-        const loadedInvocations: CyclotronJobInvocationHogFunction[] = []
+    ): Promise<CyclotronJobInvocationCustomFunction[]> {
+        const loadedInvocations: CyclotronJobInvocationCustomFunction[] = []
         const failedInvocations: CyclotronJobInvocation[] = []
 
         await Promise.all(
             invocations.map(async (item) => {
-                const hogFunction = await this.hogFunctionManager.getHogFunction(item.functionId)
-                if (!hogFunction) {
-                    logger.error('⚠️', 'Error finding hog function', {
+                const customFunction = await this.customFunctionManager.getCustomFunction(item.functionId)
+                if (!customFunction) {
+                    logger.error('⚠️', 'Error finding custom function', {
                         id: item.functionId,
                     })
 
@@ -82,8 +82,8 @@ export class CdpCyclotronWorker<
                     return null
                 }
 
-                if (!hogFunction.enabled || hogFunction.deleted) {
-                    logger.info('⚠️', 'Skipping invocation due to hog function being deleted or disabled', {
+                if (!customFunction.enabled || customFunction.deleted) {
+                    logger.info('⚠️', 'Skipping invocation due to custom function being deleted or disabled', {
                         id: item.functionId,
                     })
 
@@ -94,8 +94,8 @@ export class CdpCyclotronWorker<
 
                 loadedInvocations.push({
                     ...item,
-                    state: item.state as CyclotronJobInvocationHogFunction['state'],
-                    hogFunction,
+                    state: item.state as CyclotronJobInvocationCustomFunction['state'],
+                    customFunction,
                 })
             })
         )
@@ -122,14 +122,14 @@ export class CdpCyclotronWorker<
         const backgroundTask = this.queueInvocationResults(invocationResults).then(() => {
             // NOTE: After this point we parallelize and any issues are logged rather than thrown as retrying now would end up in duplicate messages
             return Promise.allSettled([
-                this.hogFunctionMonitoringService
+                this.customFunctionMonitoringService
                     .queueInvocationResults(invocationResults)
-                    .then(() => this.hogFunctionMonitoringService.flush())
+                    .then(() => this.customFunctionMonitoringService.flush())
                     .catch((err) => {
                         captureException(err)
                         logger.error('Error processing invocation results', { err })
                     }),
-                this.hogWatcher.observeResults(invocationResults).catch((err: any) => {
+                this.scriptWatcher.observeResults(invocationResults).catch((err: any) => {
                     captureException(err)
                     logger.error('Error observing results', { err })
                 }),

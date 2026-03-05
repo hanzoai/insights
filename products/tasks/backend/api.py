@@ -21,7 +21,7 @@ from posthog.api.mixins import validated_request
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.api.utils import ServerTimingsGathered
 from posthog.auth import OAuthAccessTokenAuthentication, PersonalAPIKeyAuthentication
-from posthog.permissions import APIScopePermission, PostHogFeatureFlagPermission
+from posthog.permissions import APIScopePermission, InsightsFeatureFlagPermission
 from posthog.storage import object_storage
 
 from .models import Task, TaskRun
@@ -57,7 +57,7 @@ class TaskViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
     serializer_class = TaskSerializer
     authentication_classes = [SessionAuthentication, PersonalAPIKeyAuthentication, OAuthAccessTokenAuthentication]
-    permission_classes = [IsAuthenticated, APIScopePermission, PostHogFeatureFlagPermission]
+    permission_classes = [IsAuthenticated, APIScopePermission, InsightsFeatureFlagPermission]
     scope_object = "task"
     queryset = Task.objects.all()
     posthog_feature_flag = {
@@ -216,7 +216,7 @@ class TaskRunViewSet(TeamAndOrgViewSetMixin, viewsets.ModelViewSet):
 
     serializer_class = TaskRunDetailSerializer
     authentication_classes = [SessionAuthentication, PersonalAPIKeyAuthentication, OAuthAccessTokenAuthentication]
-    permission_classes = [IsAuthenticated, APIScopePermission, PostHogFeatureFlagPermission]
+    permission_classes = [IsAuthenticated, APIScopePermission, InsightsFeatureFlagPermission]
     scope_object = "task"
     queryset = TaskRun.objects.select_related("task").all()
     posthog_feature_flag = {

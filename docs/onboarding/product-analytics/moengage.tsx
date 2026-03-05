@@ -11,7 +11,7 @@ export const getMoEngageSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             badge: 'required',
             content: (
                 <Markdown>
-                    MoEngage is a customer engagement platform. Follow the [MoEngage PostHog integration
+                    MoEngage is a customer engagement platform. Follow the [MoEngage Insights integration
                     guide](https://posthog.com/docs/libraries/moengage) to set up the connection.
                 </Markdown>
             ),
@@ -21,7 +21,7 @@ export const getMoEngageSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             badge: 'required',
             content: (
                 <>
-                    <Markdown>When prompted, enter your PostHog project API key:</Markdown>
+                    <Markdown>When prompted, enter your Insights project API key:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -33,7 +33,7 @@ export const getMoEngageSteps = (ctx: OnboardingComponentsContext): StepDefiniti
                             },
                         ]}
                     />
-                    <Markdown>Enter your PostHog host:</Markdown>
+                    <Markdown>Enter your Insights host:</Markdown>
                     <CodeBlock
                         blocks={[
                             {
@@ -53,7 +53,7 @@ export const getMoEngageSteps = (ctx: OnboardingComponentsContext): StepDefiniti
             badge: 'recommended',
             content: (
                 <Markdown>
-                    Once configured, MoEngage will send event data to PostHog, allowing you to analyze customer
+                    Once configured, MoEngage will send event data to Insights, allowing you to analyze customer
                     engagement alongside your other product analytics data.
                 </Markdown>
             ),

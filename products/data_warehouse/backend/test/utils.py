@@ -14,7 +14,7 @@ from posthog.settings import (
     XDIST_SUFFIX,
 )
 
-from products.data_warehouse.backend.models import CLICKHOUSE_HOGQL_MAPPING, clean_type
+from products.data_warehouse.backend.models import CLICKHOUSE_INSIGHTSQL_MAPPING, clean_type
 from products.data_warehouse.backend.models.credential import DataWarehouseCredential
 from products.data_warehouse.backend.models.external_data_source import ExternalDataSource
 from products.data_warehouse.backend.models.table import DataWarehouseTable
@@ -85,7 +85,7 @@ def create_data_warehouse_table_from_csv(
     if any(isinstance(value, str) for value in table_columns.values()):
         table_columns = {
             str(key): {
-                "hogql": CLICKHOUSE_HOGQL_MAPPING[clean_type(str(value))].__name__,
+                "insightsql": CLICKHOUSE_INSIGHTSQL_MAPPING[clean_type(str(value))].__name__,
                 "clickhouse": value,
                 "valid": True,
             }

@@ -38,7 +38,7 @@ class TestOrganization(BaseTest):
     @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
     def test_plugins_are_preinstalled_on_self_hosted(self, mock_get):
         with self.is_cloud(False):
-            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/PostHog/helloworldplugin/"]):
+            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Insights/helloworldplugin/"]):
                 new_org, _, _ = Organization.objects.bootstrap(
                     self.user,
                     plugins_access_level=Organization.PluginsAccessLevel.INSTALL,
@@ -51,14 +51,14 @@ class TestOrganization(BaseTest):
         )
         self.assertEqual(mock_get.call_count, 2)
         mock_get.assert_any_call(
-            f"https://github.com/PostHog/helloworldplugin/archive/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}.zip",
+            f"https://github.com/Insights/helloworldplugin/archive/{HELLO_WORLD_PLUGIN_GITHUB_ZIP[0]}.zip",
             headers={},
         )
 
     @mock.patch("requests.get", side_effect=mocked_plugin_requests_get)
     def test_plugins_are_not_preinstalled_on_cloud(self, mock_get):
         with self.is_cloud(True):
-            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/PostHog/helloworldplugin/"]):
+            with self.settings(PLUGINS_PREINSTALLED_URLS=["https://github.com/Insights/helloworldplugin/"]):
                 new_org, _, _ = Organization.objects.bootstrap(
                     self.user,
                     plugins_access_level=Organization.PluginsAccessLevel.INSTALL,

@@ -513,7 +513,7 @@ class SharingViewerPageViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSe
     4. Export downloading - used to download the actual content of an export if requested with the correct extension
     """
 
-    # Only use sharing-specific authentication, ignore regular PostHog auth
+    # Only use sharing-specific authentication, ignore regular Insights auth
     authentication_classes = [SharingPasswordProtectedAuthentication, SharingAccessTokenAuthentication]
     permission_classes = []
     serializer_class = SharingConfigurationSerializer  # Required by DRF but not used in practice

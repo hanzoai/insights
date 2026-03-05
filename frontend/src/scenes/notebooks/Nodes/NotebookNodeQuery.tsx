@@ -8,7 +8,7 @@ import { ScrollableShadows } from 'lib/components/ScrollableShadows/ScrollableSh
 import { insightDataLogic } from 'scenes/insights/insightDataLogic'
 import { insightLogic } from 'scenes/insights/insightLogic'
 import { useSummarizeInsight } from 'scenes/insights/summarizeInsight'
-import { createPostHogWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
+import { createInsightsWidgetNode } from 'scenes/notebooks/Nodes/NodeWrapper'
 import { urls } from 'scenes/urls'
 
 import { Query } from '~/queries/Query/Query'
@@ -269,7 +269,7 @@ export const Settings = ({
     )
 }
 
-export const NotebookNodeQuery = createPostHogWidgetNode<NotebookNodeQueryAttributes>({
+export const NotebookNodeQuery = createInsightsWidgetNode<NotebookNodeQueryAttributes>({
     nodeType: NotebookNodeType.Query,
     titlePlaceholder: 'Query',
     Component,

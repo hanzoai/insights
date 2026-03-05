@@ -51,7 +51,7 @@ import logsQuery from './logs/query'
 import getOrganizationDetails from './organizations/getDetails'
 import getOrganizations from './organizations/getOrganizations'
 import setActiveOrganization from './organizations/setActive'
-// PostHog AI tools
+// Insights AI tools
 import { executeSql, readDataSchema, readDataWarehouseSchema } from './posthogAiTools'
 // Projects
 import eventDefinitions from './projects/eventDefinitions'
@@ -60,7 +60,7 @@ import getProperties from './projects/propertyDefinitions'
 import setActiveProject from './projects/setActive'
 import updateEventDefinition from './projects/updateEventDefinition'
 // Query
-import generateHogQLFromQuestion from './query/generateHogQLFromQuestion'
+import generateInsightsQLFromQuestion from './query/generateInsightsQLFromQuestion'
 import queryRun from './query/run'
 // Search
 import entitySearch from './search/entitySearch'
@@ -130,7 +130,7 @@ const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
     'insight-query': queryInsight,
 
     // Queries
-    'query-generate-hogql-from-question': generateHogQLFromQuestion,
+    'query-generate-insightsql-from-question': generateInsightsQLFromQuestion,
     'query-run': queryRun,
 
     // Dashboards
@@ -167,7 +167,7 @@ const TOOL_MAP: Record<string, () => ToolBase<ZodObjectAny>> = {
     // Demo
     'demo-mcp-ui-apps': demoMcpUiApps,
 
-    // PostHog AI tools
+    // Insights AI tools
     'execute-sql': executeSql,
     'read-data-schema': readDataSchema,
     'read-data-warehouse-schema': readDataWarehouseSchema,

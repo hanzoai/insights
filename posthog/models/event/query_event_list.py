@@ -72,7 +72,7 @@ def query_events_list(
     offset: int = 0,
     time_window_seconds: Optional[int] = None,
 ) -> tuple[list, Optional[int]]:
-    # Note: This code is inefficient and problematic, see https://github.com/PostHog/posthog/issues/13485 for details.
+    # Note: This code is inefficient and problematic, see https://github.com/Insights/posthog/issues/13485 for details.
     # To isolate its impact from rest of the queries its queries are run on different nodes as part of "offline" workloads.
     insightsql_context = InsightsQLContext(within_non_insightsql_query=True, team_id=team.pk, enable_select_queries=True)
 

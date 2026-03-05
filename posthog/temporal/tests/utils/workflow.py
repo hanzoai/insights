@@ -9,7 +9,7 @@ import dataclasses
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.heartbeat_sync import HeartbeaterSync
 from posthog.temporal.common.shutdown import ShutdownMonitor
@@ -90,7 +90,7 @@ class Waiter:
 
 
 @workflow.defn(name="wait")
-class WaitWorkflow(PostHogWorkflow):
+class WaitWorkflow(InsightsWorkflow):
     """A test workflow that simply waits."""
 
     @staticmethod

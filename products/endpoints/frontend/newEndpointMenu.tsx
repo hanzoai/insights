@@ -26,7 +26,7 @@ export function OverlayForNewEndpointMenu(): JSX.Element {
             name: 'SQL-based endpoint',
             description: 'Create an endpoint from a query in the SQL editor.',
             onClick: () => router.actions.push(urls.sqlEditor({ outputTab: OutputTab.Endpoint })),
-            dataAttr: 'new-endpoint-overlay-hogql',
+            dataAttr: 'new-endpoint-overlay-insightsql',
         },
         {
             icon: IconGraph,

@@ -7,7 +7,7 @@ import { LemonButton, LemonInput, LemonSelect } from '@posthog/lemon-ui'
 import { MemberSelect } from 'lib/components/MemberSelect'
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { TZLabel } from 'lib/components/TZLabel'
-import { MicrophoneHog } from 'lib/components/hedgehogs'
+import { MicrophoneHog } from 'lib/components/mascots'
 import { dayjs } from 'lib/dayjs'
 import { LemonTable, LemonTableColumns } from 'lib/lemon-ui/LemonTable'
 import { LemonTag } from 'lib/lemon-ui/LemonTag/LemonTag'
@@ -175,7 +175,7 @@ export function Comments(): JSX.Element {
                         productName="Comments"
                         productKey={ProductKey.COMMENTS}
                         thingName="comment"
-                        description="Comments allow you to provide context and discussions on various elements in PostHog."
+                        description="Comments allow you to provide context and discussions on various elements in Insights."
                         isEmpty={shouldShowEmptyState}
                         customHog={MicrophoneHog}
                     />

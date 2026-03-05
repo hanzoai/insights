@@ -26,7 +26,7 @@ from posthog.batch_exports.service import (
     BatchExportModel,
     S3BatchExportInputs,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -208,7 +208,7 @@ def s3_default_fields() -> list[BatchExportField]:
 
 
 @workflow.defn(name="s3-export", failure_exception_types=[workflow.NondeterminismError])
-class S3BatchExportWorkflow(PostHogWorkflow):
+class S3BatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data into S3.
 
     This Workflow is intended to be executed both manually and by a Temporal Schedule.

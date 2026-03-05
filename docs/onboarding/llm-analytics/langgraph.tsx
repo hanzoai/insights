@@ -9,12 +9,12 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics
                         works best with our Python and Node SDKs.
                     </Markdown>
 
@@ -45,7 +45,7 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
             content: (
                 <>
                     <Markdown>
-                        Install LangGraph and LangChain. PostHog instruments your LLM calls through LangChain-compatible
+                        Install LangGraph and LangChain. Insights instruments your LLM calls through LangChain-compatible
                         callback handlers that LangGraph supports.
                     </Markdown>
 
@@ -71,12 +71,12 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
             ),
         },
         {
-            title: 'Initialize PostHog',
+            title: 'Initialize Insights',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
+                        Initialize Insights with your project API key and host from [your project
                         settings](https://app.posthog.com/settings/project), then create a LangChain `CallbackHandler`.
                     </Markdown>
 
@@ -108,10 +108,10 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                                 language: 'typescript',
                                 file: 'Node',
                                 code: dedent`
-                                    import { PostHog } from 'posthog-node';
+                                    import { Insights } from 'posthog-node';
                                     import { LangChainCallbackHandler } from '@posthog/ai';
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -132,7 +132,7 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
                             LangGraph is built on LangChain, so it supports LangChain-compatible callback handlers.
-                            PostHog's `CallbackHandler` captures `$ai_generation` events and trace hierarchy
+                            Insights's `CallbackHandler` captures `$ai_generation` events and trace hierarchy
                             automatically without proxying your calls.
                         </Markdown>
                     </CalloutBox>
@@ -145,7 +145,7 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
             content: (
                 <>
                     <Markdown>
-                        Pass the `callback_handler` in the `config` when invoking your LangGraph graph. PostHog
+                        Pass the `callback_handler` in the `config` when invoking your LangGraph graph. Insights
                         automatically captures generation events for each LLM call.
                     </Markdown>
 
@@ -212,7 +212,7 @@ export const getLangGraphSteps = (ctx: OnboardingComponentsContext): StepDefinit
 
                     <Markdown>
                         {dedent`
-                            PostHog automatically captures \`$ai_generation\` events and creates a trace hierarchy based on how LangGraph components are nested. You can expect captured events to have the following properties:
+                            Insights automatically captures \`$ai_generation\` events and creates a trace hierarchy based on how LangGraph components are nested. You can expect captured events to have the following properties:
                         `}
                     </Markdown>
 

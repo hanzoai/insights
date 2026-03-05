@@ -1,5 +1,5 @@
 import { LogicWrapper } from 'kea'
-import type { PostHog, PropertyMatchType, SupportedWebVitalsMetrics } from 'posthog-js'
+import type { Insights, PropertyMatchType, SupportedWebVitalsMetrics } from 'posthog-js'
 import { ReactNode } from 'react'
 import { Layout } from 'react-grid-layout'
 
@@ -11,7 +11,7 @@ import { eventWithTime } from '@posthog/rrweb-types'
 import { ChartDataset, ChartType, InteractionItem } from 'lib/Chart'
 import { PaginatedResponse } from 'lib/api'
 import { AlertType } from 'lib/components/Alerts/types'
-import { HedgehogActorOptions } from 'lib/components/HedgehogMode/types'
+import { MascotActorOptions } from 'lib/components/MascotMode/types'
 import { UrlTriggerConfig } from 'lib/components/IngestionControls/types'
 import { JSONContent } from 'lib/components/RichContentEditor/types'
 import { DashboardCompatibleScenes } from 'lib/components/SceneDashboardChoice/sceneDashboardChoiceModalLogic'
@@ -78,8 +78,8 @@ import type {
 } from '~/queries/schema/schema-general'
 import { QueryContext } from '~/queries/types'
 
-import { CyclotronInputType } from 'products/workflows/frontend/Workflows/hogflows/steps/types'
-import { HogFlow } from 'products/workflows/frontend/Workflows/hogflows/types'
+import { CyclotronInputType } from 'products/workflows/frontend/Workflows/customflows/steps/types'
+import { CustomFlow } from 'products/workflows/frontend/Workflows/customflows/types'
 
 import { InferredSelector } from './toolbar/product-tours/elementInference'
 
@@ -308,7 +308,7 @@ interface UserBaseType {
 export interface UserBasicType extends UserBaseType {
     is_email_verified?: any
     id: number
-    hedgehog_config?: MinimalHedgehogConfig
+    mascot_config?: MinimalMascotConfig
     role_at_organization?: string | null
 }
 
@@ -360,13 +360,13 @@ export interface UserType extends UserBaseType {
     has_seen_product_intro_for?: Record<string, boolean>
     scene_personalisation?: SceneDashboardChoice[]
     theme_mode?: UserTheme | null
-    hedgehog_config?: HedgehogConfig
+    mascot_config?: MascotConfig
     allow_sidebar_suggestions?: boolean
     role_at_organization?: UserRole | null
     passkeys_enabled_for_2fa?: boolean
 }
 
-export type HedgehogColorOptions =
+export type MascotColorOptions =
     | 'green'
     | 'red'
     | 'blue'
@@ -378,19 +378,19 @@ export type HedgehogColorOptions =
     | 'invert-hue'
     | 'greyscale'
 
-export type MinimalHedgehogConfig = {
+export type MinimalMascotConfig = {
     use_as_profile: boolean
-    color: HedgehogActorOptions['color']
-    skin: HedgehogActorOptions['skin']
-    accessories: HedgehogActorOptions['accessories']
+    color: MascotActorOptions['color']
+    skin: MascotActorOptions['skin']
+    accessories: MascotActorOptions['accessories']
 }
 
-export type HedgehogConfig = {
+export type MascotConfig = {
     version: 2
     use_as_profile: boolean
     party_mode_enabled: boolean
     enabled: boolean
-    actor_options: HedgehogActorOptions
+    actor_options: MascotActorOptions
 }
 
 export interface NotificationSettings {
@@ -813,7 +813,7 @@ export interface ToolbarParams {
 }
 
 export interface ToolbarProps extends ToolbarParams {
-    posthog?: PostHog
+    posthog?: Insights
     disableExternalStyles?: boolean
 }
 
@@ -1402,7 +1402,7 @@ export interface PersonListParams {
     search?: string
     cohort?: number
     distinct_id?: string
-    include_total?: boolean // PostHog 3000-only
+    include_total?: boolean // Insights 3000-only
     limit?: number
 }
 
@@ -1415,7 +1415,7 @@ export type SearchableEntity =
     | 'event_definition'
     | 'experiment'
     | 'feature_flag'
-    | 'hog_flow'
+    | 'custom_flow'
     | 'notebook'
     | 'property_definition'
     | 'survey'
@@ -1567,7 +1567,7 @@ export interface SavedFunnel extends InsightHistory {
 
 export type BinCountValue = number | typeof BIN_COUNT_AUTO
 
-// https://github.com/PostHog/posthog/blob/master/posthog/constants.py#L106
+// https://github.com/Insights/posthog/blob/master/posthog/constants.py#L106
 export enum StepOrderValue {
     STRICT = 'strict',
     UNORDERED = 'unordered',
@@ -2609,7 +2609,7 @@ export enum InsightType {
     PATHS = 'PATHS',
     JSON = 'JSON',
     SQL = 'SQL',
-    HOG = 'HOG',
+    SCRIPT = 'SCRIPT',
     WEB_ANALYTICS = 'WEB_ANALYTICS',
 }
 
@@ -3063,7 +3063,7 @@ export interface FunnelConversionWindow {
     funnelWindowInterval?: number
 }
 
-// https://github.com/PostHog/posthog/blob/master/posthog/models/filters/mixins/funnel.py#L100
+// https://github.com/Insights/posthog/blob/master/posthog/models/filters/mixins/funnel.py#L100
 export enum FunnelConversionWindowTimeUnit {
     Second = 'second',
     Minute = 'minute',
@@ -3997,7 +3997,7 @@ export interface PreflightStatus {
     initiated: boolean
     /** Org creation is allowed on Cloud OR initiated self-hosted organizations with a license and MULTI_ORG_ENABLED. */
     can_create_org: boolean
-    /** Whether this is PostHog Cloud. */
+    /** Whether this is Insights Cloud. */
     cloud: boolean
     /** Whether this is a managed demo environment. */
     demo: boolean
@@ -4020,9 +4020,9 @@ export interface PreflightStatus {
             client_id?: string
         }
     }
-    /** Whether PostHog is running in settings.DEBUG or settings.E2E_TESTING. */
+    /** Whether Insights is running in settings.DEBUG or settings.E2E_TESTING. */
     is_debug?: boolean
-    /** Whether PostHog is running with settings.TEST. */
+    /** Whether Insights is running with settings.TEST. */
     is_test?: boolean
     licensed_users_available?: number | null
     openai_available?: boolean
@@ -4392,7 +4392,7 @@ export interface CoreFilterDefinition {
     type?: PropertyType
     /** Virtual properties are not "sent as", because they are calculated from other properties or SQL expressions **/
     virtual?: boolean
-    /** whether this is a property PostHog adds to aid with debugging */
+    /** whether this is a property Insights adds to aid with debugging */
     used_for_debug?: boolean
 }
 
@@ -4773,7 +4773,7 @@ export enum EventDefinitionType {
     Event = 'event',
     EventInternal = 'event_internal',
     EventCustom = 'event_custom',
-    EventPostHog = 'event_posthog',
+    EventInsights = 'event_posthog',
 }
 
 export const INTEGRATION_KINDS = [
@@ -5133,7 +5133,7 @@ export enum ActivityScope {
     PLUGIN = 'Plugin',
     PLUGIN_CONFIG = 'PluginConfig',
     CUSTOM_FUNCTION = 'CustomFunction',
-    HOG_FLOW = 'HogFlow',
+    CUSTOM_FLOW = 'CustomFlow',
     DATA_MANAGEMENT = 'DataManagement',
     EVENT_DEFINITION = 'EventDefinition',
     PROPERTY_DEFINITION = 'PropertyDefinition',
@@ -6064,7 +6064,7 @@ export type CustomFunctionType = {
     created_at: string
     updated_at: string
     enabled: boolean
-    hog: string
+    custom_script: string
     execution_order?: number
     inputs_schema?: CyclotronJobInputSchemaType[]
     inputs?: Record<string, CyclotronInputType> | null
@@ -6100,13 +6100,13 @@ export type CustomFunctionSubTemplateIdType =
 
 export type CustomFunctionConfigurationType = Omit<
     CustomFunctionType,
-    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status' | 'hog'
+    'id' | 'created_at' | 'created_by' | 'updated_at' | 'status' | 'custom_script'
 > & {
     hog?: CustomFunctionType['hog'] // In the config it can be empty if using a template
     _create_in_folder?: string | null
 }
-export type HogFlowConfigurationType = Omit<HogFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
-export type CyclotronJobConfigurationType = CustomFunctionConfigurationType | HogFlowConfigurationType
+export type CustomFlowConfigurationType = Omit<CustomFlow, 'id' | 'created_at' | 'created_by' | 'updated_at' | 'status'>
+export type CyclotronJobConfigurationType = CustomFunctionConfigurationType | CustomFlowConfigurationType
 
 export type CustomFunctionSubTemplateType = Pick<
     CustomFunctionType,
@@ -6200,7 +6200,7 @@ export type CyclotronJobInvocationGlobals = {
         headers: Record<string, string>
         ip?: string
     }
-    // For HogFlows, workflow-level variables
+    // For CustomFlows, workflow-level variables
     variables?: Record<string, any>
 }
 
@@ -6426,8 +6426,8 @@ export interface ProductManifest {
 export interface ProjectTreeRef {
     /**
      * Type of file system object.
-     * Use "/" as a separator to add an internal type, e.g. "hog/site_destination".
-     * Search with "hog/" to match all internal types.
+     * Use "/" as a separator to add an internal type, e.g. "script/site_destination".
+     * Search with "script/" to match all internal types.
      */
     type: string
     /**

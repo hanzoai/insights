@@ -15,7 +15,7 @@ from common.hogvm.python.objects import (
     new_hog_callable,
     new_hog_closure,
 )
-from common.hogvm.python.operation import HOGQL_BYTECODE_IDENTIFIER, HOGQL_BYTECODE_IDENTIFIER_V0, Operation
+from common.hogvm.python.operation import INSIGHTSQL_BYTECODE_IDENTIFIER, INSIGHTSQL_BYTECODE_IDENTIFIER_V0, Operation
 from common.hogvm.python.stl import STL
 from common.hogvm.python.stl.bytecode import BYTECODE_STL
 from common.hogvm.python.utils import (
@@ -59,10 +59,10 @@ def execute_bytecode(
     if (
         not root_bytecode
         or len(root_bytecode) == 0
-        or (root_bytecode[0] != HOGQL_BYTECODE_IDENTIFIER and root_bytecode[0] != HOGQL_BYTECODE_IDENTIFIER_V0)
+        or (root_bytecode[0] != INSIGHTSQL_BYTECODE_IDENTIFIER and root_bytecode[0] != INSIGHTSQL_BYTECODE_IDENTIFIER_V0)
     ):
-        raise HogVMException(f"Invalid bytecode. Must start with '{HOGQL_BYTECODE_IDENTIFIER}'")
-    version = root_bytecode[1] if len(root_bytecode) >= 2 and root_bytecode[0] == HOGQL_BYTECODE_IDENTIFIER else 0
+        raise HogVMException(f"Invalid bytecode. Must start with '{INSIGHTSQL_BYTECODE_IDENTIFIER}'")
+    version = root_bytecode[1] if len(root_bytecode) >= 2 and root_bytecode[0] == INSIGHTSQL_BYTECODE_IDENTIFIER else 0
     start_time = time.time()
     last_op = len(root_bytecode) - 1
     stack: list = []
@@ -275,11 +275,11 @@ def execute_bytecode(
                 push_stack(pop_stack() not in pop_stack())
             case Operation.REGEX:
                 args = [pop_stack(), pop_stack()]
-                # TODO: swap this for re2, as used in HogQL/ClickHouse and in the NodeJS VM
+                # TODO: swap this for re2, as used in InsightsQL/ClickHouse and in the NodeJS VM
                 push_stack(bool(re.search(re.compile(args[1]), args[0])) if args[0] and args[1] else False)
             case Operation.NOT_REGEX:
                 args = [pop_stack(), pop_stack()]
-                # TODO: swap this for re2, as used in HogQL/ClickHouse and in the NodeJS VM
+                # TODO: swap this for re2, as used in InsightsQL/ClickHouse and in the NodeJS VM
                 push_stack(not bool(re.search(re.compile(args[1]), args[0])) if args[0] and args[1] else False)
             case Operation.IREGEX:
                 args = [pop_stack(), pop_stack()]

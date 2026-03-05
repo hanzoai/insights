@@ -29,17 +29,17 @@ from products.growth.dags.github_sdk_versions import (
 # RELEASES = FIXTURES / "releases"
 #
 # releases = {
-#     "posthog_js_releases.json": "https://api.github.com/repos/PostHog/posthog-js/releases?per_page=25",
-#     "posthog_js_lite_releases.json": "https://api.github.com/repos/PostHog/posthog-js-lite/releases?per_page=25",
-#     "posthog_python_releases.json": "https://api.github.com/repos/PostHog/posthog-python/releases?per_page=10",
-#     "posthog_flutter_releases.json": "https://api.github.com/repos/PostHog/posthog-flutter/releases?per_page=10",
-#     "posthog_ios_releases.json": "https://api.github.com/repos/PostHog/posthog-ios/releases?per_page=10",
-#     "posthog_android_releases.json": "https://api.github.com/repos/PostHog/posthog-android/releases?per_page=10",
-#     "posthog_go_releases.json": "https://api.github.com/repos/PostHog/posthog-go/releases?per_page=10",
-#     "posthog_dotnet_releases.json": "https://api.github.com/repos/PostHog/posthog-dotnet/releases?per_page=10",
-#     "posthog_elixir_releases.json": "https://api.github.com/repos/PostHog/posthog-elixir/releases?per_page=10",
-#     "posthog_ruby_releases.json": "https://api.github.com/repos/PostHog/posthog-ruby/releases?per_page=10",
-#     "posthog_php_releases.json": "https://api.github.com/repos/PostHog/posthog-php/releases?per_page=10",
+#     "posthog_js_releases.json": "https://api.github.com/repos/Insights/posthog-js/releases?per_page=25",
+#     "posthog_js_lite_releases.json": "https://api.github.com/repos/Insights/posthog-js-lite/releases?per_page=25",
+#     "posthog_python_releases.json": "https://api.github.com/repos/Insights/posthog-python/releases?per_page=10",
+#     "posthog_flutter_releases.json": "https://api.github.com/repos/Insights/posthog-flutter/releases?per_page=10",
+#     "posthog_ios_releases.json": "https://api.github.com/repos/Insights/posthog-ios/releases?per_page=10",
+#     "posthog_android_releases.json": "https://api.github.com/repos/Insights/posthog-android/releases?per_page=10",
+#     "posthog_go_releases.json": "https://api.github.com/repos/Insights/posthog-go/releases?per_page=10",
+#     "posthog_dotnet_releases.json": "https://api.github.com/repos/Insights/posthog-dotnet/releases?per_page=10",
+#     "posthog_elixir_releases.json": "https://api.github.com/repos/Insights/posthog-elixir/releases?per_page=10",
+#     "posthog_ruby_releases.json": "https://api.github.com/repos/Insights/posthog-ruby/releases?per_page=10",
+#     "posthog_php_releases.json": "https://api.github.com/repos/Insights/posthog-php/releases?per_page=10",
 # }
 #
 #

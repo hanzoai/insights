@@ -21,16 +21,16 @@ function HideProperties(): JSX.Element {
     const { hideNullValues } = useValues(userPreferencesLogic)
     const { setHideNullValues } = useActions(userPreferencesLogic)
 
-    const { hidePostHogPropertiesInTable } = useValues(userPreferencesLogic)
-    const { setHidePostHogPropertiesInTable } = useActions(userPreferencesLogic)
+    const { hideInsightsPropertiesInTable } = useValues(userPreferencesLogic)
+    const { setHideInsightsPropertiesInTable } = useActions(userPreferencesLogic)
 
     return (
         <SettingsMenu
             items={[
                 {
-                    label: <>{hidePostHogPropertiesInTable ? <IconCheck /> : <BaseIcon />} Hide PostHog properties</>,
-                    onClick: () => setHidePostHogPropertiesInTable(!hidePostHogPropertiesInTable),
-                    active: hidePostHogPropertiesInTable,
+                    label: <>{hideInsightsPropertiesInTable ? <IconCheck /> : <BaseIcon />} Hide Insights properties</>,
+                    onClick: () => setHideInsightsPropertiesInTable(!hideInsightsPropertiesInTable),
+                    active: hideInsightsPropertiesInTable,
                     disabledReason:
                         hasEventsToDisplay && hasEventsFiltersSelected ? undefined : 'There are no events in the list',
                 },

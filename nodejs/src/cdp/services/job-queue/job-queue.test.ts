@@ -3,8 +3,8 @@ import { DateTime } from 'luxon'
 import { defaultConfig } from '~/config/config'
 import { PluginsServerConfig } from '~/types'
 
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../../_tests/examples'
-import { createHogExecutionGlobals, createHogFunction } from '../../_tests/fixtures'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../../_tests/examples'
+import { createScriptExecutionGlobals, createCustomFunction } from '../../_tests/fixtures'
 import { createInvocation } from '../../utils/invocation-utils'
 import { CyclotronJobQueue, JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS, getProducerMapping } from './job-queue'
 
@@ -12,11 +12,11 @@ describe('CyclotronJobQueue', () => {
     let config: PluginsServerConfig
     let mockConsumeBatch: jest.Mock
 
-    const exampleHogFunction = createHogFunction({
-        name: 'Test hog function',
-        ...HOG_EXAMPLES.simple_fetch,
-        ...HOG_INPUTS_EXAMPLES.simple_fetch,
-        ...HOG_FILTERS_EXAMPLES.no_filters,
+    const exampleCustomFunction = createCustomFunction({
+        name: 'Test custom function',
+        ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+        ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+        ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
     })
 
     beforeEach(() => {
@@ -30,7 +30,7 @@ describe('CyclotronJobQueue', () => {
         })
 
         it('should initialise', () => {
-            const queue = new CyclotronJobQueue(config, 'hog', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
             expect(queue).toBeDefined()
             expect(queue['consumerMode']).toBe('postgres')
         })
@@ -42,7 +42,7 @@ describe('CyclotronJobQueue', () => {
         })
 
         it('should initialise', () => {
-            const queue = new CyclotronJobQueue(config, 'hog', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
             expect(queue).toBeDefined()
             expect(queue['consumerMode']).toBe('kafka')
         })
@@ -53,7 +53,7 @@ describe('CyclotronJobQueue', () => {
             config.CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE = 'kafka'
             config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING = mapping
             config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_TEAM_MAPPING = teamMapping || ''
-            const queue = new CyclotronJobQueue(config, 'hog', mockConsumeBatch)
+            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
             queue['jobQueuePostgres'].startAsProducer = jest.fn()
             queue['jobQueueKafka'].startAsProducer = jest.fn()
             queue['jobQueuePostgres'].queueInvocations = jest.fn()
@@ -62,21 +62,21 @@ describe('CyclotronJobQueue', () => {
         }
 
         it('should start only kafka producer if only kafka is mapped', async () => {
-            const queue = buildQueue('*:kafka,hogflow:kafka')
+            const queue = buildQueue('*:kafka,customflow:kafka')
             await queue.startAsProducer()
             expect(queue['jobQueuePostgres'].startAsProducer).not.toHaveBeenCalled()
             expect(queue['jobQueueKafka'].startAsProducer).toHaveBeenCalled()
         })
 
         it('should start only postgres producer if only postgres is mapped', async () => {
-            const queue = buildQueue('*:postgres,hogflow:postgres')
+            const queue = buildQueue('*:postgres,customflow:postgres')
             await queue.startAsProducer()
             expect(queue['jobQueuePostgres'].startAsProducer).toHaveBeenCalled()
             expect(queue['jobQueueKafka'].startAsProducer).not.toHaveBeenCalled()
         })
 
         it('should start both producers if both are mapped', async () => {
-            const queue = buildQueue('*:postgres,hogflow:kafka')
+            const queue = buildQueue('*:postgres,customflow:kafka')
             await queue.startAsProducer()
             expect(queue['jobQueuePostgres'].startAsProducer).toHaveBeenCalled()
             expect(queue['jobQueueKafka'].startAsProducer).toHaveBeenCalled()
@@ -109,10 +109,10 @@ describe('CyclotronJobQueue', () => {
                     {
                         ...createInvocation(
                             {
-                                ...createHogExecutionGlobals(),
+                                ...createScriptExecutionGlobals(),
                                 inputs: {},
                             },
-                            exampleHogFunction
+                            exampleCustomFunction
                         ),
                         queueScheduledAt: DateTime.now().plus({
                             milliseconds: JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS + 1000,
@@ -148,10 +148,10 @@ describe('CyclotronJobQueue', () => {
                 {
                     ...createInvocation(
                         {
-                            ...createHogExecutionGlobals(),
+                            ...createScriptExecutionGlobals(),
                             inputs: {},
                         },
-                        exampleHogFunction
+                        exampleCustomFunction
                     ),
                     queueScheduledAt: DateTime.now().plus({
                         milliseconds: JOB_SCHEDULED_AT_FUTURE_THRESHOLD_MS - 1000,
@@ -174,8 +174,8 @@ describe('CyclotronJobQueue', () => {
             config.CDP_CYCLOTRON_JOB_QUEUE_CONSUMER_MODE = 'kafka'
             config.CDP_CYCLOTRON_JOB_QUEUE_PRODUCER_MAPPING = '*:kafka'
             config.CDP_CYCLOTRON_SHADOW_WRITE_ENABLED = shadowEnabled
-            config.CYCLOTRON_SHADOW_DATABASE_URL = 'postgres://posthog:posthog@localhost:5432/test_cyclotron_shadow'
-            const queue = new CyclotronJobQueue(config, 'hog', mockConsumeBatch)
+            config.CYCLOTRON_SHADOW_DATABASE_URL = 'postgres://insights:insights@localhost:5432/test_cyclotron_shadow'
+            const queue = new CyclotronJobQueue(config, 'custom_script', mockConsumeBatch)
             queue['jobQueuePostgres'].startAsProducer = jest.fn()
             queue['jobQueueKafka'].startAsProducer = jest.fn()
             queue['jobQueuePostgres'].queueInvocations = jest.fn()
@@ -207,10 +207,10 @@ describe('CyclotronJobQueue', () => {
             const invocations = [
                 createInvocation(
                     {
-                        ...createHogExecutionGlobals(),
+                        ...createScriptExecutionGlobals(),
                         inputs: {},
                     },
-                    exampleHogFunction
+                    exampleCustomFunction
                 ),
             ]
             await queue.queueInvocations(invocations)
@@ -218,7 +218,7 @@ describe('CyclotronJobQueue', () => {
             expect(queue['shadowPostgres']!.queueInvocations).toHaveBeenCalledWith(invocations)
         })
 
-        it('should not shadow write hogflow invocations', async () => {
+        it('should not shadow write customflow invocations', async () => {
             const queue = buildQueue(true)
             await queue.startAsProducer()
 
@@ -226,12 +226,12 @@ describe('CyclotronJobQueue', () => {
                 {
                     ...createInvocation(
                         {
-                            ...createHogExecutionGlobals(),
+                            ...createScriptExecutionGlobals(),
                             inputs: {},
                         },
-                        exampleHogFunction
+                        exampleCustomFunction
                     ),
-                    queue: 'hogflow' as const,
+                    queue: 'customflow' as const,
                 },
             ]
             await queue.queueInvocations(invocations)
@@ -249,10 +249,10 @@ describe('CyclotronJobQueue', () => {
             const invocations = [
                 createInvocation(
                     {
-                        ...createHogExecutionGlobals(),
+                        ...createScriptExecutionGlobals(),
                         inputs: {},
                     },
-                    exampleHogFunction
+                    exampleCustomFunction
                 ),
             ]
 
@@ -269,10 +269,10 @@ describe('CyclotronJobQueue', () => {
             const invocations = [
                 createInvocation(
                     {
-                        ...createHogExecutionGlobals(),
+                        ...createScriptExecutionGlobals(),
                         inputs: {},
                     },
-                    exampleHogFunction
+                    exampleCustomFunction
                 ),
             ]
 
@@ -360,11 +360,11 @@ describe('getProducerMapping', () => {
             },
         ],
         [
-            '*:kafka:0.5,hog:kafka:1,hogflow:postgres:0.1',
+            '*:kafka:0.5,hog:kafka:1,customflow:postgres:0.1',
             {
                 '*': { target: 'kafka', percentage: 0.5 },
-                hog: { target: 'kafka', percentage: 1 },
-                hogflow: { target: 'postgres', percentage: 0.1 },
+                script: { target: 'kafka', percentage: 1 },
+                customflow: { target: 'postgres', percentage: 0.1 },
             },
         ],
     ])('should return the correct mapping for %s', (mapping, expected) => {
@@ -373,17 +373,17 @@ describe('getProducerMapping', () => {
 
     it.each([
         ['*:kafkatypo', 'Invalid mapping: *:kafkatypo - target kafkatypo must be one of postgres, kafka'],
-        ['hog:kafkatypo', 'Invalid mapping: hog:kafkatypo - target kafkatypo must be one of postgres, kafka'],
+        ['hog:kafkatypo', 'Invalid mapping: script:kafkatypo - target kafkatypo must be one of postgres, kafka'],
         [
-            'hog:kafka,hogflow:postgres,*:kafkatypo',
+            'hog:kafka,customflow:postgres,*:kafkatypo',
             'Invalid mapping: *:kafkatypo - target kafkatypo must be one of postgres, kafka',
         ],
         [
             'wrong_queue:kafka',
-            'Invalid mapping: wrong_queue:kafka - queue wrong_queue must be one of *, hog, hogoverflow, hogflow',
+            'Invalid mapping: wrong_queue:kafka - queue wrong_queue must be one of *, hog, scriptoverflow, customflow',
         ],
-        ['hog:kafka:1.1', 'Invalid mapping: hog:kafka:1.1 - percentage 1.1 must be 0 < x <= 1'],
-        ['hog:kafka', 'No mapping for the default queue for example: *:postgres'],
+        ['hog:kafka:1.1', 'Invalid mapping: script:kafka:1.1 - percentage 1.1 must be 0 < x <= 1'],
+        ['custom_script:kafka', 'No mapping for the default queue for example: *:postgres'],
     ])('should throw for bad values for %s', (mapping, error) => {
         expect(() => getProducerMapping(mapping)).toThrow(error)
     })

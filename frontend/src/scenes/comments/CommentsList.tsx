@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 
 import { LemonSkeleton } from '@posthog/lemon-ui'
 
-import { PhonePairHogs } from 'lib/components/hedgehogs'
+import { PhonePairHogs } from 'lib/components/mascots'
 
 import { CommentWithReplies } from './Comment'
 import { CommentsLogicProps, commentsLogic } from './commentsLogic'

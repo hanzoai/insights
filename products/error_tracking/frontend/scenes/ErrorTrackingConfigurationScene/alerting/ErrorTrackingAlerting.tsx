@@ -1,11 +1,11 @@
 import { useFeatureFlag } from 'lib/hooks/useFeatureFlag'
-import { LinkedHogFunctions } from 'scenes/hog-functions/list/LinkedHogFunctions'
+import { LinkedCustomFunctions } from 'scenes/custom-functions/list/LinkedCustomFunctions'
 
 export function ErrorTrackingAlerting(): JSX.Element {
     const hasSpikeAlertingFeatureFlag = useFeatureFlag('ERROR_TRACKING_SPIKE_ALERTING')
 
     return (
-        <LinkedHogFunctions
+        <LinkedCustomFunctions
             type="internal_destination"
             subTemplateIds={[
                 'error-tracking-issue-created',

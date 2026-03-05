@@ -70,12 +70,12 @@ if (res.status >= 200 and res.status < 300) {
 
 
 class TemplateGoogleCloudStorageMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-gcs-plugin"
+    plugin_url = "https://github.com/Insights/posthog-gcs-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         exportEventsToIgnore = [x.strip() for x in obj.config.get("exportEventsToIgnore", "").split(",") if x]

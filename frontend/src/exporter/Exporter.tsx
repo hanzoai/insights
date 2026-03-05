@@ -151,7 +151,7 @@ export function Exporter(props: ExportedData): JSX.Element {
                                 to="https://posthog.com?utm_medium=in-product&utm_campaign=shared-dashboard"
                                 target="_blank"
                             >
-                                PostHog — open-source product analytics
+                                Insights — open-source product analytics
                             </Link>
                         </div>
                     </div>

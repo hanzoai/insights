@@ -84,7 +84,7 @@ export function EventDetails({ event, tableProps }: EventDetailsProps): JSX.Elem
                         return (
                             <div className="mx-3 -mt-4">
                                 <LemonBanner type="info" dismissKey="event-details-exception-properties-why-banner">
-                                    These are the internal properties that PostHog uses to display information about
+                                    These are the internal properties that Insights uses to display information about
                                     exceptions.
                                 </LemonBanner>
                                 <PropertiesTable

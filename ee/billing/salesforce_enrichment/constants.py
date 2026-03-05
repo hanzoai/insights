@@ -112,12 +112,12 @@ SALESFORCE_ACCOUNTS_QUERY = """
 
 METRIC_PERIODS = {"90d": 90, "180d": 180}
 
-# PostHog usage enrichment constants
-POSTHOG_ORG_GROUP_TYPE_INDEX = 0  # Organizations are group_type_index 0 in PostHog's groups table
+# Insights usage enrichment constants
+POSTHOG_ORG_GROUP_TYPE_INDEX = 0  # Organizations are group_type_index 0 in Insights's groups table
 POSTHOG_ORG_ID_FIELD = "Posthog_Org_ID__c"
 POSTHOG_USAGE_ENRICHMENT_BATCH_SIZE = 100
 
-# Salesforce field mappings for PostHog usage signals
+# Salesforce field mappings for usage signals
 # Format: internal_field_name -> salesforce_custom_field_name
 POSTHOG_USAGE_FIELD_MAPPINGS = {
     # Events-based metrics (7-day)

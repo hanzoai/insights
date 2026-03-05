@@ -4,8 +4,8 @@ import { Link } from '@posthog/lemon-ui'
 import { PersonDisplay } from 'scenes/persons/PersonDisplay'
 import { urls } from 'scenes/urls'
 
-import { getHogFlowStep } from '../hogflows/steps/HogFlowSteps'
-import { HogFlow } from '../hogflows/types'
+import { getCustomFlowStep } from '../customflows/steps/CustomFlowSteps'
+import { CustomFlow } from '../customflows/types'
 
 // We pull out actions like [Action:action_function_webhook_13ec288f-10af-4e98-abd4-e2828de3305e] and replace them with a link to the action
 
@@ -16,7 +16,7 @@ const PERSON_REGEX = /\[Person:([a-zA-Z0-9_-]+)\|(.*?)\]/
 const EVENT_REGEX = /\[Event:([a-zA-Z0-9_-]+)\|(.*?)\|(.*?)\]/
 const ACTOR_REGEX = /\[Actor:(.*?)\]/
 
-export const renderWorkflowLogMessage = (workflow: HogFlow, message: string): JSX.Element => {
+export const renderWorkflowLogMessage = (workflow: CustomFlow, message: string): JSX.Element => {
     // Modifies the rendered log message to auto-detect action or person parts and replace them with a link
     const parts = message.split(RICH_LOG_REGEX)
     const elements: (string | JSX.Element)[] = []
@@ -28,7 +28,7 @@ export const renderWorkflowLogMessage = (workflow: HogFlow, message: string): JS
             const actionId = matchesActionRegex[1]
             const action = workflow.actions.find((action) => action.id === actionId)
 
-            const step = action ? getHogFlowStep(action, {}) : undefined
+            const step = action ? getCustomFlowStep(action, {}) : undefined
             const stepName = action?.name || 'Deleted action'
             const stepIcon = step?.icon || <IconTrash />
 

@@ -1,5 +1,5 @@
 INSIGHTSQL_GENERATOR_SYSTEM_PROMPT = """
-You are an expert in writing InsightsQL. InsightsQL is PostHog's variant of SQL that supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
+You are an expert in writing InsightsQL. InsightsQL is Insights's variant of SQL that supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
 You write InsightsQL based on a prompt. You don't help with other knowledge. You are provided with the current InsightsQL query that the user is editing. You have access to the core memory about the user's company and product in the <core_memory> tag. Use this memory in your responses.
 
 CRITICAL - Function name casing:
@@ -163,7 +163,7 @@ SQL expressions can access data like:
 
 Properties can be accessed with dot notation like `person.properties.$initial_browser` which also works for nested or JSON properties. They can also be accessed with bracket notation like `properties['$feature/cool-flag']`.
 
-> **Note:** PostHog's properties always include `$` as a prefix, while custom properties do not (unless you add it).
+> **Note:** Insights's properties always include `$` as a prefix, while custom properties do not (unless you add it).
 
 Property identifiers must be known at query time. For dynamic access, use the JSON manipulation functions from below on the `properties` field directly.
 
@@ -812,7 +812,7 @@ You can find their full definitions in the [ClickHouse documentation](https://cl
 
 # Copied from https://posthog.com/docs/insightsql/aggregations.md
 SQL_SUPPORTED_AGGREGATIONS_DOCS = r"""
-This is an [ever-expanding](https://github.com/PostHog/posthog/blob/dfce91d924fe038568c626416fa23e67d0f0906f/posthog/insightsql/constants.py#L489) list of enabled aggregations.
+This is an [ever-expanding](https://github.com/Insights/posthog/blob/dfce91d924fe038568c626416fa23e67d0f0906f/posthog/insightsql/constants.py#L489) list of enabled aggregations.
 
 You can find their full definitions in the [ClickHouse documentation](https://clickhouse.com/docs/en/sql-reference/aggregate-functions/reference). Additionally, we include a list of popular ones and their uses in the [InsightsQL expressions](/docs/insightsql/expressions#functions-and-aggregations.md) and [SQL insight](/docs/product-analytics/sql#useful-functions.md) documentation.
 

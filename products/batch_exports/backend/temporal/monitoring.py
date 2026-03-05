@@ -10,7 +10,7 @@ from temporalio.common import RetryPolicy
 from posthog.batch_exports.models import BatchExport, BatchExportRun
 from posthog.batch_exports.service import afetch_batch_export_runs_in_range, aupdate_records_total_count
 from posthog.batch_exports.sql import EVENT_COUNT_BY_INTERVAL
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.clickhouse import get_client
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger
@@ -334,7 +334,7 @@ def _log_warning_for_missing_events(batch_export_id: UUID, missing_events: list[
 
 
 @workflow.defn(name="batch-export-monitoring")
-class BatchExportMonitoringWorkflow(PostHogWorkflow):
+class BatchExportMonitoringWorkflow(InsightsWorkflow):
     """Workflow to monitor batch exports.
 
     We have had some issues with batch exports in the past, where some events

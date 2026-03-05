@@ -10,8 +10,8 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.sample_hogql_query = {
-            "kind": "HogQLQuery",
+        self.sample_insightsql_query = {
+            "kind": "InsightsQLQuery",
             "query": "SELECT count(1) FROM events",
         }
 
@@ -20,7 +20,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="basic-endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             description="A basic test endpoint",
             created_by=self.user,
             is_active=True,
@@ -64,7 +64,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         )
 
         query_with_variables = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT * FROM events WHERE properties.$country = {variables.country}",
             "variables": {str(variable.id): {"variableId": str(variable.id), "code_name": "country", "value": "US"}},
         }
@@ -111,7 +111,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
                 )
 
                 query = {
-                    "kind": "HogQLQuery",
+                    "kind": "InsightsQLQuery",
                     "query": f"SELECT * FROM events WHERE x = {{variables.test_{var_type.lower()}}}",
                     "variables": {
                         str(variable.id): {
@@ -144,7 +144,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="refresh-test",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -161,7 +161,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="fields-test",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -181,7 +181,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="filter-test-endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -208,7 +208,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="secure-endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -229,7 +229,7 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         create_endpoint_with_version(
             name="versioned-endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
             current_version=3,
@@ -297,17 +297,17 @@ class TestEndpointOpenAPISpec(ClickhouseTestMixin, APIBaseTest):
         self.assertIn("date_from", variables_schema["properties"])
         self.assertIn("date_to", variables_schema["properties"])
 
-    def test_openapi_spec_hogql_without_variables(self):
-        """Test that HogQL endpoints without variables don't include Variables schema."""
+    def test_openapi_spec_insightsql_without_variables(self):
+        """Test that InsightsQL endpoints without variables don't include Variables schema."""
         create_endpoint_with_version(
-            name="simple-hogql",
+            name="simple-insightsql",
             team=self.team,
-            query={"kind": "HogQLQuery", "query": "SELECT 1"},
+            query={"kind": "InsightsQLQuery", "query": "SELECT 1"},
             created_by=self.user,
             is_active=True,
         )
 
-        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/simple-hogql/openapi.json/")
+        response = self.client.get(f"/api/environments/{self.team.id}/endpoints/simple-insightsql/openapi.json/")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         spec = response.json()

@@ -2,7 +2,7 @@ import { BindLogic, useValues } from 'kea'
 
 import { SpinnerOverlay } from '@posthog/lemon-ui'
 
-import { HogFlowEditor } from './hogflows/HogFlowEditor'
+import { CustomFlowEditor } from './customflows/CustomFlowEditor'
 import { WorkflowLogicProps, workflowLogic } from './workflowLogic'
 
 export function Workflow(props: WorkflowLogicProps): JSX.Element {
@@ -11,7 +11,7 @@ export function Workflow(props: WorkflowLogicProps): JSX.Element {
     return (
         <div className="flex flex-col grow relative border rounded-md">
             <BindLogic logic={workflowLogic} props={props}>
-                {!originalWorkflow && workflowLoading ? <SpinnerOverlay /> : <HogFlowEditor />}
+                {!originalWorkflow && workflowLoading ? <SpinnerOverlay /> : <CustomFlowEditor />}
             </BindLogic>
         </div>
     )

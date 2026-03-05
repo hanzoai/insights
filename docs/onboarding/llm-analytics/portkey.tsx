@@ -8,7 +8,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
@@ -19,7 +19,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
                     </CalloutBox>
 
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK for your language. LLM analytics works
+                        Setting up analytics starts with installing the Insights SDK for your language. LLM analytics works
                         best with our Python and Node SDKs.
                     </Markdown>
 
@@ -49,7 +49,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
             badge: 'required',
             content: (
                 <>
-                    <Markdown>Install the OpenAI and Portkey SDKs. The PostHog SDK instruments your LLM calls by wrapping the OpenAI client. The PostHog SDK **does not** proxy your calls.</Markdown>
+                    <Markdown>Install the OpenAI and Portkey SDKs. The Insights SDK instruments your LLM calls by wrapping the OpenAI client. The Insights SDK **does not** proxy your calls.</Markdown>
 
                     <CodeBlock
                         blocks={[
@@ -73,12 +73,12 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
             ),
         },
         {
-            title: 'Initialize PostHog and Portkey-routed client',
+            title: 'Initialize Insights and Portkey-routed client',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Initialize PostHog with your project API key and host from [your project
+                        Initialize Insights with your project API key and host from [your project
                         settings](https://app.posthog.com/settings/project), then pass it along with the Portkey gateway
                         URL and your Portkey API key to our OpenAI wrapper.
                     </Markdown>
@@ -110,10 +110,10 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 file: 'Node',
                                 code: dedent`
                                     import { OpenAI } from '@posthog/ai'
-                                    import { PostHog } from 'posthog-node'
+                                    import { Insights } from 'posthog-node'
                                     import { PORTKEY_GATEWAY_URL } from 'portkey-ai'
 
-                                    const phClient = new PostHog(
+                                    const phClient = new Insights(
                                       '<ph_project_api_key>',
                                       { host: '<ph_client_api_host>' }
                                     );
@@ -139,7 +139,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
 
                     <CalloutBox type="fyi" icon="IconInfo" title="Proxy note">
                         <Markdown>
-                            These SDKs **do not** proxy your calls. They only fire off an async call to PostHog in the
+                            These SDKs **do not** proxy your calls. They only fire off an async call to Insights in the
                             background to send the data. You can also use LLM analytics with other SDKs or our API, but you
                             will need to capture the data in the right format. See the schema in the [manual capture
                             section](https://posthog.com/docs/llm-analytics/installation/manual-capture) for more details.
@@ -154,7 +154,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
             content: (
                 <>
                     <Markdown>
-                        Now, when you call Portkey with the OpenAI SDK, PostHog automatically captures an
+                        Now, when you call Portkey with the OpenAI SDK, Insights automatically captures an
                         `$ai_generation` event. You can also capture or modify additional properties with the distinct ID,
                         trace ID, properties, groups, and privacy mode parameters.
                     </Markdown>
@@ -168,7 +168,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                     response = client.chat.completions.create(
                                         model="@<integration-slug>/gpt-4o-mini",
                                         messages=[
-                                            {"role": "user", "content": "Tell me a fun fact about hedgehogs"}
+                                            {"role": "user", "content": "Tell me a fun fact about mascots"}
                                         ],
                                         posthog_distinct_id="user_123", # optional
                                         posthog_trace_id="trace_123", # optional
@@ -186,7 +186,7 @@ export const getPortkeySteps = (ctx: OnboardingComponentsContext): StepDefinitio
                                 code: dedent`
                                     const completion = await openai.chat.completions.create({
                                         model: "@<integration-slug>/gpt-4o-mini",
-                                        messages: [{ role: "user", content: "Tell me a fun fact about hedgehogs" }],
+                                        messages: [{ role: "user", content: "Tell me a fun fact about mascots" }],
                                         posthogDistinctId: "user_123", // optional
                                         posthogTraceId: "trace_123", // optional
                                         posthogProperties: { conversation_id: "abc123", paid: true }, // optional

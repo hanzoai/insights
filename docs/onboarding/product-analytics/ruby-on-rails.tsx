@@ -50,7 +50,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                 <>
                     <Markdown>
                         {dedent`
-                            Run the install generator to create the PostHog initializer:
+                            Run the install generator to create the Insights initializer:
                         `}
                     </Markdown>
                     <CodeBlock
@@ -73,7 +73,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
             ),
         },
         {
-            title: 'Configure PostHog',
+            title: 'Configure Insights',
             badge: 'required',
             content: (
                 <>
@@ -88,7 +88,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'ruby',
                                 file: 'config/initializers/posthog.rb',
                                 code: dedent`
-                                    PostHog.init do |config|
+                                    Insights.init do |config|
                                       config.api_key = '<ph_project_api_key>'
                                       config.host = '<ph_client_api_host>'
                                     end
@@ -111,7 +111,7 @@ export const getRubyOnRailsSteps = (ctx: OnboardingComponentsContext): StepDefin
                                 language: 'ruby',
                                 file: 'Ruby',
                                 code: dedent`
-                                    PostHog.capture({
+                                    Insights.capture({
                                         distinct_id: 'user_123',
                                         event: 'button_clicked',
                                         properties: {

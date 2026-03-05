@@ -18,8 +18,8 @@ test.describe('SQL Editor', () => {
 
     test('Run query', async ({ page }) => {
         await expect(page.locator('[data-attr=sql-editor-output-pane-empty-state]')).toBeVisible()
-        await page.locator('[data-attr=hogql-query-editor]').click()
-        await page.locator('[data-attr=hogql-query-editor]').pressSequentially('SELECT 1')
+        await page.locator('[data-attr=insightsql-query-editor]').click()
+        await page.locator('[data-attr=insightsql-query-editor]').pressSequentially('SELECT 1')
         await page.locator('[data-attr=sql-editor-run-button]').click()
 
         // query run
@@ -28,9 +28,9 @@ test.describe('SQL Editor', () => {
 
     test('Save view', async ({ page }) => {
         // Wait for the query editor to be visible and ready
-        await expect(page.locator('[data-attr=hogql-query-editor]')).toBeVisible()
-        await page.locator('[data-attr=hogql-query-editor]').click()
-        await page.locator('[data-attr=hogql-query-editor]').pressSequentially('SELECT 1')
+        await expect(page.locator('[data-attr=insightsql-query-editor]')).toBeVisible()
+        await page.locator('[data-attr=insightsql-query-editor]').click()
+        await page.locator('[data-attr=insightsql-query-editor]').pressSequentially('SELECT 1')
 
         // Wait for save button to be enabled before clicking
         await expect(page.locator('[data-attr=sql-editor-save-view-button]')).toBeEnabled()

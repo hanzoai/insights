@@ -1,7 +1,7 @@
 #
-# Build and push PostHog container images for AI evaluations to AWS ECR
+# Build and push Insights container images for AI evaluations to AWS ECR
 #
-# - posthog_ai_evals_build: build and push the PostHog container image to AWS ECR
+# - posthog_ai_evals_build: build and push the Insights container image to AWS ECR
 #
 name: AI Evals Container Images CD
 
@@ -20,7 +20,7 @@ jobs:
     posthog_ai_evals_build:
         name: Build and push container image
         if: |
-            github.repository == 'PostHog/posthog' && (
+            github.repository == 'Insights/posthog' && (
                 github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'build-ai-evals-image')
             )
         runs-on: depot-ubuntu-latest

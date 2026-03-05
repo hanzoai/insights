@@ -2,7 +2,7 @@ import type { APIRequestContext, Page } from '@playwright/test'
 
 import { expect, test } from '../utils/playwright-test-base'
 
-const VALID_PASSWORD = 'hedgE-hog-123%'
+const VALID_PASSWORD = 'Str0ng-Pass-123%'
 
 const ensureExistingUser = async (request: APIRequestContext, email: string): Promise<void> => {
     await request.post('/api/signup/', {

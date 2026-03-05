@@ -15,7 +15,7 @@ def sync_feature_flags_from_api(
     output_fn: Callable[[str], None] = print,
 ) -> None:
     """
-    Fetch feature flags from the PostHog API and sync them to the database.
+    Fetch feature flags from the Insights API and sync them to the database.
 
     Args:
         distinct_id: The distinct ID for which to evaluate feature flags
@@ -116,7 +116,7 @@ def sync_feature_flags_from_api(
 
 
 class Command(BaseCommand):
-    help = "Sync feature flags by fetching them from the PostHog API"
+    help = "Sync feature flags by fetching them from the Insights API"
 
     def add_arguments(self, parser):
         parser.add_argument(

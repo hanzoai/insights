@@ -1,7 +1,7 @@
 import { GroupTypeIndex, GroupTypeToColumnIndex, ProjectId, Team, TeamId } from '../../types'
 import { timeoutGuard } from '../../utils/db/utils'
 import { LazyLoader } from '../../utils/lazy-loader'
-import { captureTeamEvent } from '../../utils/posthog'
+import { captureTeamEvent } from '../../utils/insights'
 import { TeamManager } from '../../utils/team-manager'
 import { GroupRepository } from './groups/repositories/group-repository.interface'
 

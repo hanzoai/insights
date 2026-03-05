@@ -12,8 +12,8 @@ export const counterRateLimited = new Counter({
     labelNames: ['kind'],
 })
 
-export const counterHogFunctionStateOnEvent = new Counter({
-    name: 'cdp_hog_function_state_on_event',
-    help: 'Metric the state of a hog function that matched an event',
+export const counterCustomFunctionStateOnEvent = new Counter({
+    name: 'cdp_custom_function_state_on_event',
+    help: 'Metric the state of a custom function that matched an event',
     labelNames: ['state', 'kind'],
 })

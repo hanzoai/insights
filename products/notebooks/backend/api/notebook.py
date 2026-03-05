@@ -18,7 +18,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import BaseSerializer
 
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.forbid_destroy_model import ForbidDestroyModel
 from posthog.api.routing import TeamAndOrgViewSetMixin
@@ -208,7 +208,7 @@ class NotebookKernelExecuteSerializer(serializers.Serializer):
     timeout = serializers.FloatField(required=False, min_value=0.1, max_value=120)
 
 
-class NotebookHogQLExecuteSerializer(serializers.Serializer):
+class NotebookInsightsQLExecuteSerializer(serializers.Serializer):
     query = serializers.CharField(allow_blank=True)
 
 
@@ -255,12 +255,12 @@ class NotebookKernelConfigSerializer(serializers.Serializer):
         return attrs
 
 
-def _format_hogql_response_payload(response: Any) -> dict[str, Any]:
+def _format_insightsql_response_payload(response: Any) -> dict[str, Any]:
     if hasattr(response, "model_dump"):
         response_payload = response.model_dump(exclude_none=True)
     else:
         response_payload = response.dict(exclude_none=True)
-    for key in ("clickhouse", "hogql", "timings", "modifiers"):
+    for key in ("clickhouse", "insightsql", "timings", "modifiers"):
         response_payload.pop(key, None)
     return response_payload
 
@@ -604,19 +604,19 @@ class NotebookViewSet(TeamAndOrgViewSetMixin, AccessControlViewSetMixin, ForbidD
 
         return Response(execution.as_dict())
 
-    @action(methods=["POST"], url_path="hogql/execute", detail=True)
-    def hogql_execute(self, request: Request, **kwargs):
-        serializer = NotebookHogQLExecuteSerializer(data=request.data)
+    @action(methods=["POST"], url_path="insightsql/execute", detail=True)
+    def insightsql_execute(self, request: Request, **kwargs):
+        serializer = NotebookInsightsQLExecuteSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         notebook = self._get_notebook_for_kernel()
 
         try:
-            response = execute_hogql_query(query=serializer.validated_data["query"], team=self.team)
+            response = execute_insightsql_query(query=serializer.validated_data["query"], team=self.team)
         except Exception as err:
-            logger.exception("notebook_hogql_execute_failed", notebook_short_id=notebook.short_id)
+            logger.exception("notebook_insightsql_execute_failed", notebook_short_id=notebook.short_id)
             return Response({"error": str(err)}, status=400)
 
-        return Response(_format_hogql_response_payload(response))
+        return Response(_format_insightsql_response_payload(response))
 
     @action(
         methods=["POST"],

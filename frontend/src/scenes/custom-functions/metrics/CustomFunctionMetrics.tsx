@@ -6,9 +6,9 @@ import { AppMetricsFilters } from 'lib/components/AppMetrics/AppMetricsFilters'
 import { AppMetricsTrends } from 'lib/components/AppMetrics/AppMetricsTrends'
 import { appMetricsLogic } from 'lib/components/AppMetrics/appMetricsLogic'
 
-const HOGFUNCTION_METRIC_KEYS = ['succeeded', 'failed', 'filtered', 'disabled_permanently', 'quota_limited'] as const
+const CUSTOMFUNCTION_METRIC_KEYS = ['succeeded', 'failed', 'filtered', 'disabled_permanently', 'quota_limited'] as const
 
-export const HOGFUNCTION_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
+export const CUSTOMFUNCTION_METRICS_INFO: Record<string, { name: string; description: string; color: string }> = {
     succeeded: {
         name: 'Success',
         description: 'Total number of events processed successfully',
@@ -45,7 +45,7 @@ export function CustomFunctionMetrics({ id }: { id: string }): JSX.Element {
         forceParams: {
             appSource: 'custom_function',
             appSourceId: id,
-            metricName: [...HOGFUNCTION_METRIC_KEYS],
+            metricName: [...CUSTOMFUNCTION_METRIC_KEYS],
             breakdownBy: 'metric_name',
         },
     })
@@ -59,15 +59,15 @@ export function CustomFunctionMetrics({ id }: { id: string }): JSX.Element {
             </div>
 
             <div className="flex flex-row gap-2 flex-wrap justify-center">
-                {HOGFUNCTION_METRIC_KEYS.map((key) => (
+                {CUSTOMFUNCTION_METRIC_KEYS.map((key) => (
                     <AppMetricSummary
                         key={key}
-                        name={HOGFUNCTION_METRICS_INFO[key].name}
-                        description={HOGFUNCTION_METRICS_INFO[key].description}
+                        name={CUSTOMFUNCTION_METRICS_INFO[key].name}
+                        description={CUSTOMFUNCTION_METRICS_INFO[key].description}
                         loading={appMetricsTrendsLoading}
                         timeSeries={getSingleTrendSeries(key)}
                         previousPeriodTimeSeries={getSingleTrendSeries(key, true)}
-                        color={HOGFUNCTION_METRICS_INFO[key].color}
+                        color={CUSTOMFUNCTION_METRICS_INFO[key].color}
                         colorIfZero={getColorVar('muted')}
                         hideIfZero={!['succeeded', 'failed', 'filtered'].includes(key)}
                     />

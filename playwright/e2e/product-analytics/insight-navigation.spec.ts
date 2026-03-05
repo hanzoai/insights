@@ -11,7 +11,7 @@ const typeTestCases: { type: InsightType; selector: string }[] = [
     { type: InsightType.PATHS, selector: '.Paths' },
     { type: InsightType.STICKINESS, selector: '.TrendsInsight canvas' },
     { type: InsightType.LIFECYCLE, selector: '.TrendsInsight canvas' },
-    { type: InsightType.SQL, selector: '[data-attr="hogql-query-editor"]' },
+    { type: InsightType.SQL, selector: '[data-attr="insightsql-query-editor"]' },
 ]
 
 typeTestCases.forEach(({ type, selector }) => {

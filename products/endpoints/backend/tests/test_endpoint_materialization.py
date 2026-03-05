@@ -33,8 +33,8 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
 
     def setUp(self):
         super().setUp()
-        self.sample_hogql_query = {
-            "kind": "HogQLQuery",
+        self.sample_insightsql_query = {
+            "kind": "InsightsQLQuery",
             "query": "SELECT event, distinct_id FROM events WHERE event = '$pageview' LIMIT 100",
         }
         # Mock Temporal-related functions to avoid connection errors
@@ -64,7 +64,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="test_materialized_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -113,7 +113,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="test_sync_frequency",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
         version = endpoint.versions.first()
@@ -171,7 +171,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="test_disable_materialization",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
         version = endpoint.versions.first()
@@ -215,7 +215,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
             name="test_variables",
             team=self.team,
             query={
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
                 "query": "SELECT * FROM events WHERE event = {variables.event_name}",
                 # Missing code_name which is required for materialization
                 "variables": {"event_name": {"value": "$pageview"}},
@@ -272,7 +272,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = version.saved_query
         assert saved_query is not None
         assert saved_query.query is not None
-        self.assertEqual(saved_query.query["kind"], "HogQLQuery")
+        self.assertEqual(saved_query.query["kind"], "InsightsQLQuery")
         self.assertIsInstance(saved_query.query["query"], str)
 
     def test_can_materialize_stickiness_query(self):
@@ -311,7 +311,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = version.saved_query
         assert saved_query is not None
         assert saved_query.query is not None
-        self.assertEqual(saved_query.query["kind"], "HogQLQuery")
+        self.assertEqual(saved_query.query["kind"], "InsightsQLQuery")
 
     def test_can_materialize_retention_query(self):
         _create_event(
@@ -357,7 +357,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = version.saved_query
         assert saved_query is not None
         assert saved_query.query is not None
-        self.assertEqual(saved_query.query["kind"], "HogQLQuery")
+        self.assertEqual(saved_query.query["kind"], "InsightsQLQuery")
 
     def test_can_materialize_paths_query(self):
         _create_event(
@@ -395,14 +395,14 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = version.saved_query
         assert saved_query is not None
         assert saved_query.query is not None
-        self.assertEqual(saved_query.query["kind"], "HogQLQuery")
+        self.assertEqual(saved_query.query["kind"], "InsightsQLQuery")
 
     def test_materialization_status_in_response(self):
         """Test that materialization status is included in endpoint response."""
         endpoint = create_endpoint_with_version(
             name="test_status",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
 
@@ -439,7 +439,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="test_status_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
         )
 
@@ -485,11 +485,11 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
     def test_cache_invalidated_after_query_update(self):
         """Test that updating endpoint query invalidates cache for materialized endpoints."""
         initial_query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT 1 as value",
         }
         updated_query = {
-            "kind": "HogQLQuery",
+            "kind": "InsightsQLQuery",
             "query": "SELECT 2 as value",
         }
 
@@ -602,7 +602,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="materialized_filters_endpoint",
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             status=DataWarehouseSavedQuery.Status.COMPLETED,
         )
@@ -616,7 +616,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="materialized_filters_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -637,9 +637,9 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
             format="json",
         )
 
-        # Should fail with 400 since filters_override is not allowed for HogQL endpoints
+        # Should fail with 400 since filters_override is not allowed for InsightsQL endpoints
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("filters_override is not allowed for HogQL endpoints", response.json()["detail"])
+        self.assertIn("filters_override is not allowed for InsightsQL endpoints", response.json()["detail"])
 
     def test_stale_materialized_data_uses_inline_execution(self):
         """Test that stale materialized data triggers inline execution instead of using cached table."""
@@ -648,7 +648,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="stale_data_endpoint",
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             status=DataWarehouseSavedQuery.Status.COMPLETED,
             sync_frequency_interval=timedelta(hours=1),
@@ -665,7 +665,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="stale_data_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -700,7 +700,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="fresh_data_endpoint",
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             status=DataWarehouseSavedQuery.Status.COMPLETED,
             sync_frequency_interval=timedelta(hours=1),
@@ -717,7 +717,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="fresh_data_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -751,7 +751,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="force_mode_endpoint",
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             status=DataWarehouseSavedQuery.Status.COMPLETED,
             sync_frequency_interval=timedelta(hours=1),
@@ -768,7 +768,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="force_mode_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -801,7 +801,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             team=self.team,
             name="direct_mode_endpoint",
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             is_materialized=True,
             status=DataWarehouseSavedQuery.Status.COMPLETED,
             sync_frequency_interval=timedelta(hours=1),
@@ -818,7 +818,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="direct_mode_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -850,7 +850,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         endpoint = create_endpoint_with_version(
             name="non_materialized_endpoint",
             team=self.team,
-            query=self.sample_hogql_query,
+            query=self.sample_insightsql_query,
             created_by=self.user,
             is_active=True,
         )
@@ -869,9 +869,9 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         """Test that insight-based endpoints (TrendsQuery) with breakdowns work when materialized.
 
         This verifies that:
-        1. TrendsQuery is converted to HogQL when materialized
-        2. The saved_query.query contains HogQL, not the original TrendsQuery
-        3. Execution uses saved_query.query (HogQL) instead of version.query (TrendsQuery)
+        1. TrendsQuery is converted to InsightsQL when materialized
+        2. The saved_query.query contains InsightsQL, not the original TrendsQuery
+        3. Execution uses saved_query.query (InsightsQL) instead of version.query (TrendsQuery)
         """
         trends_query_with_breakdown = {
             "kind": "TrendsQuery",
@@ -885,7 +885,7 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
             },
         }
 
-        # Create events so the query runner can generate valid HogQL
+        # Create events so the query runner can generate valid InsightsQL
         _create_event(team=self.team, event="$pageview", distinct_id="user1")
         flush_persons_and_events()
 
@@ -908,20 +908,20 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.json())
 
-        # Verify the saved_query contains HogQL (not TrendsQuery)
+        # Verify the saved_query contains InsightsQL (not TrendsQuery)
         version = endpoint.versions.first()
         version.refresh_from_db()
         self.assertIsNotNone(version.saved_query)
         saved_query = version.saved_query
         assert saved_query is not None
 
-        # The saved_query.query should be HogQL, not TrendsQuery
-        self.assertEqual(saved_query.query["kind"], "HogQLQuery")
+        # The saved_query.query should be InsightsQL, not TrendsQuery
+        self.assertEqual(saved_query.query["kind"], "InsightsQLQuery")
         self.assertIn("query", saved_query.query)
-        # The HogQL should contain the breakdown column
-        hogql_str = saved_query.query["query"].lower()
-        self.assertIn("select", hogql_str)
-        self.assertIn("from", hogql_str)
+        # The InsightsQL should contain the breakdown column
+        insightsql_str = saved_query.query["query"].lower()
+        self.assertIn("select", insightsql_str)
+        self.assertIn("from", insightsql_str)
 
         # The version.query should still be the original TrendsQuery
         self.assertEqual(version.query["kind"], "TrendsQuery")
@@ -949,10 +949,10 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             # Verify the query was executed
             mock_exec.assert_called()
-            # The query should be HogQL selecting from the materialized table
+            # The query should be InsightsQL selecting from the materialized table
             query_request_data = mock_exec.call_args[0][0]
             query_payload = query_request_data["query"]
-            self.assertEqual(query_payload["kind"], "HogQLQuery")
+            self.assertEqual(query_payload["kind"], "InsightsQLQuery")
             query_sql = query_payload["query"].lower()
             # Should select from the materialized table name
             self.assertIn("trends_breakdown_materialized", query_sql)
@@ -960,16 +960,16 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
             self.assertIn("has(breakdown_value", query_sql)
             self.assertIn("chrome", query_sql)
 
-    def test_materialized_hogql_endpoint_with_variable_executes_correctly(self):
-        """Test that HogQL endpoints with variables work when materialized.
+    def test_materialized_insightsql_endpoint_with_variable_executes_correctly(self):
+        """Test that InsightsQL endpoints with variables work when materialized.
 
         Flow:
         1. Create endpoint: SELECT count(), toDate(timestamp) FROM events WHERE event = {variables.event_name} GROUP BY toDate(timestamp)
         2. Materialize: Query transformed to include event column, remove WHERE
         3. Execute with variable: Should filter by event column in materialized table
         """
-        hogql_query_with_variable = {
-            "kind": "HogQLQuery",
+        insightsql_query_with_variable = {
+            "kind": "InsightsQLQuery",
             "query": "SELECT count(), toDate(timestamp) FROM events WHERE event = {variables.event_name} GROUP BY toDate(timestamp)",
             "variables": {
                 "var-event-123": {
@@ -986,9 +986,9 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         flush_persons_and_events()
 
         endpoint = create_endpoint_with_version(
-            name="hogql_variable_materialized",
+            name="insightsql_variable_materialized",
             team=self.team,
-            query=hogql_query_with_variable,
+            query=insightsql_query_with_variable,
             created_by=self.user,
             is_active=True,
         )
@@ -1011,11 +1011,11 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query = version.saved_query
         assert saved_query is not None
 
-        # The saved_query.query should be transformed HogQL:
+        # The saved_query.query should be transformed InsightsQL:
         # - event_name column added to SELECT
         # - WHERE clause removed (or simplified)
         # - GROUP BY includes event_name
-        self.assertEqual(saved_query.query["kind"], "HogQLQuery")
+        self.assertEqual(saved_query.query["kind"], "InsightsQLQuery")
         transformed_sql = saved_query.query["query"].lower()
         # Should have event_name in the query (added as column)
         self.assertIn("event_name", transformed_sql)
@@ -1027,9 +1027,9 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
         saved_query.last_run_at = timezone.now()
         saved_query.table = DataWarehouseTable.objects.create(
             team=self.team,
-            name="hogql_variable_materialized",
+            name="insightsql_variable_materialized",
             format=DataWarehouseTable.TableFormat.Parquet,
-            url_pattern="s3://test-bucket/hogql-variable",
+            url_pattern="s3://test-bucket/insightsql-variable",
         )
         saved_query.save()
 
@@ -1047,11 +1047,11 @@ class TestEndpointMaterialization(ClickhouseTestMixin, APIBaseTest):
             # Verify the query has the variable filter applied
             query_request_data = mock_exec.call_args[0][0]
             query_payload = query_request_data["query"]
-            self.assertEqual(query_payload["kind"], "HogQLQuery")
+            self.assertEqual(query_payload["kind"], "InsightsQLQuery")
             query_sql = query_payload["query"].lower()
 
             # Should select from the materialized table
-            self.assertIn("hogql_variable_materialized", query_sql)
+            self.assertIn("insightsql_variable_materialized", query_sql)
             # Should have WHERE clause with event_name filter
             self.assertIn("where", query_sql)
             self.assertIn("event_name", query_sql)

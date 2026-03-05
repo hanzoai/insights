@@ -1,7 +1,7 @@
 {
     "name": "Intercom",
     "url": "TODO",
-    "description": "Send event data to Intercom on PostHog events.",
+    "description": "Send event data to Intercom on Insights events.",
     "main": "index.ts",
     "config": [
         {
@@ -15,7 +15,7 @@
         },
         {
             "key": "triggeringEvents",
-            "hint": "A comma-separated list of PostHog events you want to send to Intercom (e.g.: '$identify,mycustomevent' ).",
+            "hint": "A comma-separated list of Insights events you want to send to Intercom (e.g.: '$identify,mycustomevent' ).",
             "name": "Triggering events",
             "type": "string",
             "default": "$identify",

@@ -57,7 +57,7 @@ export function NotebookShareModal({ shortId }: NotebookShareModalProps): JSX.El
                     <>
                         <p>
                             <b>Click the button below</b> to copy a direct link to this Notebook. Make sure the person
-                            you share it with has access to this PostHog project.
+                            you share it with has access to this Insights project.
                         </p>
                         <LemonButton
                             type="secondary"

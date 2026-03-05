@@ -7,7 +7,7 @@ export function getReactExample({ surveyId = 'your-survey-id', followUpEnabled }
     return `// requires @posthog/react 1.7.1+ (bundled with posthog-js 1.345.1+)
 import { useThumbSurvey } from 'posthog-js/react/surveys'
 
-function HedgehogBotResponse({ traceId }: { traceId: string }) {
+function MascotBotResponse({ traceId }: { traceId: string }) {
   const { respond, response${followUpEnabled ? ', triggerRef' : ''} } = useThumbSurvey({
     surveyId: '${surveyId}', // ID for the survey you just created
     properties: {
@@ -18,9 +18,9 @@ function HedgehogBotResponse({ traceId }: { traceId: string }) {
 
   return (
     <div>
-      <ChatBubble>You're absolutely right! I should have been using PostHog all along.</ChatBubble>
+      <ChatBubble>You're absolutely right! I should have been using Insights all along.</ChatBubble>
 
-      ${followUpEnabled ? '<div ref={triggerRef}> {/* PostHog followup pop-up anchors to triggerRef */}' : '<div>'}
+      ${followUpEnabled ? '<div ref={triggerRef}> {/* Insights followup pop-up anchors to triggerRef */}' : '<div>'}
         <p>Was this response helpful?</p>
         <button className={response === 'up' ? 'active' : ''} onClick={() => respond('up')}>👍</button>
         <button className={response === 'down' ? 'active' : ''} onClick={() => respond('down')}>👎</button>
@@ -90,7 +90,7 @@ ${generateProps(thumbsProps)}
     if (followUpEnabled) {
         const followUpProps: Prop[] = [
             { key: '$survey_id', value: `'${surveyId}'` },
-            { key: '$survey_response_1', value: "'the AI hallucinated hedgehogs everywhere'" },
+            { key: '$survey_response_1', value: "'the AI hallucinated mascots everywhere'" },
             { key: '$ai_trace_id', value: 'traceId' },
             {
                 key: '$survey_submission_id',

@@ -31,7 +31,7 @@ from posthog.batch_exports.service import (
     BatchExportSchema,
     SnowflakeBatchExportInputs,
 )
-from posthog.temporal.common.base import PostHogWorkflow
+from posthog.temporal.common.base import InsightsWorkflow
 from posthog.temporal.common.heartbeat import Heartbeater
 from posthog.temporal.common.logger import get_logger, get_write_only_logger
 
@@ -859,7 +859,7 @@ class SnowflakeClient:
             CREATE TABLE {if_not_exists} "{table.name}" (
                 {field_ddl}
             )
-            COMMENT = 'PostHog generated table'
+            COMMENT = 'Insights generated table'
             """,
             fetch_results=False,
         )
@@ -1435,7 +1435,7 @@ async def insert_into_snowflake_activity_from_stage(
 
 
 @workflow.defn(name="snowflake-export", failure_exception_types=[workflow.NondeterminismError])
-class SnowflakeBatchExportWorkflow(PostHogWorkflow):
+class SnowflakeBatchExportWorkflow(InsightsWorkflow):
     """A Temporal Workflow to export ClickHouse data into Snowflake.
 
     This Workflow is intended to be executed both manually and by a Temporal

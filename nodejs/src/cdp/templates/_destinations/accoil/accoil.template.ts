@@ -1,18 +1,18 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     status: 'beta',
     free: true,
     type: 'destination',
     id: 'template-accoil',
     name: 'Accoil',
     description:
-        'Pipe PostHog data to Accoil for usage-based account scoring, churn alerts, and expansion insights — automatically shared with Customer Success, Sales, RevOps, and Leadership in tools like Slack and HubSpot.',
+        'Pipe Insights data to Accoil for usage-based account scoring, churn alerts, and expansion insights — automatically shared with Customer Success, Sales, RevOps, and Leadership in tools like Slack and HubSpot.',
     icon_url: '/static/services/accoil.com.png',
     category: ['Analytics'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
-// Skip PostHog internal events that start with $ unless they're in our whitelist
+// Skip Insights internal events that start with $ unless they're in our whitelist
 let allowedSystemEvents := ['$pageview', '$screen', '$identify', '$set', '$groupidentify']
 if (startsWith(event.event, '$') and not (event.event in allowedSystemEvents)) {
     return
@@ -179,7 +179,7 @@ if (res.status >= 400) {
                         properties: [
                             {
                                 key: "event not in ('$identify', '$set', '$pageview', '$screen', '$groupidentify')",
-                                type: 'hogql',
+                                type: 'insightsql',
                             },
                         ],
                     },
@@ -216,7 +216,7 @@ if (res.status >= 400) {
                         properties: [
                             {
                                 key: "event in ('$pageview')",
-                                type: 'hogql',
+                                type: 'insightsql',
                             },
                         ],
                     },
@@ -253,7 +253,7 @@ if (res.status >= 400) {
                         properties: [
                             {
                                 key: "event in ('$screen')",
-                                type: 'hogql',
+                                type: 'insightsql',
                             },
                         ],
                     },
@@ -290,7 +290,7 @@ if (res.status >= 400) {
                         properties: [
                             {
                                 key: "event in ('$identify', '$set')",
-                                type: 'hogql',
+                                type: 'insightsql',
                             },
                         ],
                     },
@@ -368,7 +368,7 @@ if (res.status >= 400) {
                         properties: [
                             {
                                 key: "event in ('$groupidentify')",
-                                type: 'hogql',
+                                type: 'insightsql',
                             },
                         ],
                     },

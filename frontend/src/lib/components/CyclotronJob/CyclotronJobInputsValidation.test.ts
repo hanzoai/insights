@@ -215,7 +215,7 @@ describe('CyclotronJobInputsValidation', () => {
             })
 
             it('should not validate templating for non-liquid languages', () => {
-                const inputs = { template: { value: '{{ invalid }}', templating: 'hog' as const } }
+                const inputs = { template: { value: '{{ invalid }}', templating: 'custom_script' as const } }
                 const schema: CyclotronJobInputSchemaType[] = [{ key: 'template', type: 'string', label: 'Template' }]
 
                 const result = CyclotronJobInputsValidation.validate(inputs, schema)

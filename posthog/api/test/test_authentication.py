@@ -1132,7 +1132,7 @@ class TestPasswordResetAPI(APIBaseTest):
 
         self.assertSetEqual({",".join(outmail.to) for outmail in mail.outbox}, {self.CONFIG_EMAIL})
 
-        self.assertEqual(mail.outbox[0].subject, "Reset your PostHog password")
+        self.assertEqual(mail.outbox[0].subject, "Reset your Insights password")
         self.assertEqual(mail.outbox[0].body, "")  # no plain-text version support yet
 
         html_message = mail.outbox[0].alternatives[0][0]  # type: ignore
@@ -1705,11 +1705,11 @@ class TestTimeSensitivePermissions(APIBaseTest):
             res = self.client.patch("/api/users/@me", payload, format="json")
             assert res.status_code != 403, f"Field update should not require re-authentication, got: {res.json()}"
 
-    def test_user_can_update_hedgehog_config_without_recent_authentication(self):
+    def test_user_can_update_mascot_config_without_recent_authentication(self):
         now = datetime.now()
         with freeze_time(now + timedelta(seconds=settings.SESSION_SENSITIVE_ACTIONS_AGE + 10)):
             res = self.client.patch(
-                "/api/users/@me/hedgehog_config",
+                "/api/users/@me/mascot_config",
                 {"enabled": True, "color": "red"},
                 format="json",
             )

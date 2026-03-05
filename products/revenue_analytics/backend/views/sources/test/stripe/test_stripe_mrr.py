@@ -20,7 +20,7 @@ class TestMRRStripeBuilder(StripeSourceBaseTest):
             expected_prefix = f"stripe.{self.external_data_source.prefix}"
             self.assertBuiltQueryStructure(query, expected_key, expected_prefix)
 
-            query_sql = query.query.to_hogql()
+            query_sql = query.query.to_insightsql()
             self.assertQueryMatchesSnapshot(query_sql, replace_all_numbers=True)
 
     def test_query_structure_contains_required_fields(self):
@@ -29,37 +29,37 @@ class TestMRRStripeBuilder(StripeSourceBaseTest):
 
     def test_mrr_uses_argmax_for_latest_amount(self):
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         self.assertIn("argMax(amount, timestamp)", query_sql)
 
     def test_mrr_filters_for_recurring_only(self):
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         self.assertIn("and(is_recurring,", query_sql)
 
     def test_mrr_groups_by_customer_and_subscription(self):
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         self.assertIn("GROUP BY source_label, customer_id, subscription_id", query_sql)
 
     def test_mrr_unions_revenue_item_and_subscription_queries(self):
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         self.assertIn("UNION ALL", query_sql)
 
     def test_subscription_end_events_have_zero_amount(self):
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         self.assertIn("toDecimal(0,", query_sql)
 
     def test_mrr_references_correct_base_views(self):
         query = build(self.stripe_handle)
-        query_sql = query.query.to_hogql()
+        query_sql = query.query.to_insightsql()
 
         expected_prefix = f"stripe.{self.external_data_source.prefix}"
         self.assertIn(f"`{expected_prefix}.revenue_item_revenue_view`", query_sql)

@@ -1,4 +1,4 @@
-# PostHog AI
+# Insights AI
 
 ## Skills
 

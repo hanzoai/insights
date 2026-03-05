@@ -1,11 +1,11 @@
 ---
 name: query-data
-description: 'MANDATORY first step before any PostHog data retrieval. Must be invoked before using any PostHog MCP data tools. Provides querying guidelines, schema references, and HogQL syntax. Retrieve system data (insights, dashboards, cohorts, feature flags, experiments, surveys, groups, group type mappings, data warehouse tables, teams), analytics data captured with SDKs (events, properties, property values), and connected data warehouse.'
+description: 'MANDATORY first step before any Insights data retrieval. Must be invoked before using any Insights MCP data tools. Provides querying guidelines, schema references, and HogQL syntax. Retrieve system data (insights, dashboards, cohorts, feature flags, experiments, surveys, groups, group type mappings, data warehouse tables, teams), analytics data captured with SDKs (events, properties, property values), and connected data warehouse.'
 ---
 
-# Querying data in PostHog
+# Querying data in Insights
 
-Use the `posthog:execute-sql` MCP tool to execute HogQL queries. HogQL is PostHog's variant of SQL that supports most of ClickHouse SQL. We use terms "HogQL" and "SQL" interchangeably.
+Use the `posthog:execute-sql` MCP tool to execute HogQL queries. HogQL is Insights's variant of SQL that supports most of ClickHouse SQL. We use terms "HogQL" and "SQL" interchangeably.
 
 Do not assume that data exists. Use the SQL tool proactively to find the right data.
 
@@ -19,11 +19,11 @@ Proactively use different search types depending on a task:
 
 ## Data Groups
 
-PostHog has two distinct groups of data you can query:
+Insights has two distinct groups of data you can query:
 
-### 1. System Data (PostHog-Created Data)
+### 1. System Data (Insights-Created Data)
 
-Data created directly in PostHog by users - metadata about PostHog setup.
+Data created directly in Insights by users - metadata about Insights setup.
 
 All system tables are prefixed with `system.`:
 
@@ -54,7 +54,7 @@ SELECT id, name, short_id FROM system.insights WHERE NOT deleted LIMIT 10
 
 #### System Models Reference
 
-Schema reference for PostHog's core system models, organized by domain:
+Schema reference for Insights's core system models, organized by domain:
 
 - [Actions](references/models-actions.md)
 - [Cohorts & Persons](references/models-cohorts.md)
@@ -82,7 +82,7 @@ All entities are scoped by a team by default. You cannot access data of another 
 
 ### 2. Captured Data (Analytics Data)
 
-Data collected via the PostHog SDK - used for analytics.
+Data collected via the Insights SDK - used for analytics.
 
 Table | Description
 `events` | Recorded events from SDKs

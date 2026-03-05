@@ -65,7 +65,7 @@ for (let key, value in attributes) {
 let res := fetch(f'https://{inputs.host}/api/v2/entity', {
     'method': 'POST',
     'headers': {
-        'User-Agent': 'PostHog Customer.io App',
+        'User-Agent': 'Insights Customer.io App',
         'Authorization': f'Basic {base64Encode(f'{inputs.site_id}:{inputs.token}')}',
         'Content-Type': 'application/json'
     },
@@ -221,12 +221,12 @@ if (res.status >= 400) {
 
 
 class TemplateCustomerioMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/customerio-plugin"
+    plugin_url = "https://github.com/Insights/customerio-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         host = obj.config.get("host", "track.customer.io")

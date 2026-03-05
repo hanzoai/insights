@@ -4,7 +4,7 @@
  *   hogli build:openapi
  * Questions or issues? #team-devex on Slack
  *
- * PostHog API - generated
+ * Insights API - generated
  * OpenAPI spec version: 1.0.0
  */
 export interface DateRangeApi {
@@ -285,17 +285,17 @@ export interface FlagPropertyFilterApi {
     value: boolean | string
 }
 
-export type HogQLPropertyFilterApiType = (typeof HogQLPropertyFilterApiType)[keyof typeof HogQLPropertyFilterApiType]
+export type InsightsQLPropertyFilterApiType = (typeof InsightsQLPropertyFilterApiType)[keyof typeof InsightsQLPropertyFilterApiType]
 
-export const HogQLPropertyFilterApiType = {
-    Hogql: 'hogql',
+export const InsightsQLPropertyFilterApiType = {
+    InsightsQL: 'insightsql',
 } as const
 
-export interface HogQLPropertyFilterApi {
+export interface InsightsQLPropertyFilterApi {
     key: string
     /** @nullable */
     label?: string | null
-    type?: HogQLPropertyFilterApiType
+    type?: InsightsQLPropertyFilterApiType
     value?: (string | number | boolean)[] | string | number | boolean | null
 }
 
@@ -390,7 +390,7 @@ export interface RevenueAnalyticsPropertyFilterApi {
     value?: (string | number | boolean)[] | string | number | boolean | null
 }
 
-export interface HogQLFiltersApi {
+export interface InsightsQLFiltersApi {
     dateRange?: DateRangeApi | null
     /** @nullable */
     filterTestAccounts?: boolean | null
@@ -408,7 +408,7 @@ export interface HogQLFiltersApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -419,10 +419,10 @@ export interface HogQLFiltersApi {
         | null
 }
 
-export type HogQLQueryApiKind = (typeof HogQLQueryApiKind)[keyof typeof HogQLQueryApiKind]
+export type InsightsQLQueryApiKind = (typeof InsightsQLQueryApiKind)[keyof typeof InsightsQLQueryApiKind]
 
-export const HogQLQueryApiKind = {
-    HogQLQuery: 'HogQLQuery',
+export const InsightsQLQueryApiKind = {
+    InsightsQLQuery: 'InsightsQLQuery',
 } as const
 
 export type BounceRatePageViewModeApi = (typeof BounceRatePageViewModeApi)[keyof typeof BounceRatePageViewModeApi]
@@ -560,7 +560,7 @@ export const SessionsV2JoinModeApi = {
     Uuid: 'uuid',
 } as const
 
-export interface HogQLQueryModifiersApi {
+export interface InsightsQLQueryModifiersApi {
     /** @nullable */
     bounceRateDurationSeconds?: number | null
     bounceRatePageViewMode?: BounceRatePageViewModeApi | null
@@ -601,7 +601,7 @@ export interface HogQLQueryModifiersApi {
     /** @nullable */
     usePreaggregatedIntermediateResults?: boolean | null
     /**
-     * Try to automatically convert HogQL queries to use preaggregated tables at the AST level *
+     * Try to automatically convert InsightsQL queries to use preaggregated tables at the AST level *
      * @nullable
      */
     usePreaggregatedTableTransforms?: boolean | null
@@ -609,7 +609,7 @@ export interface HogQLQueryModifiersApi {
     useWebAnalyticsPreAggregatedTables?: boolean | null
 }
 
-export interface HogQLNoticeApi {
+export interface InsightsQLNoticeApi {
     /** @nullable */
     end?: number | null
     /** @nullable */
@@ -628,19 +628,19 @@ export const QueryIndexUsageApi = {
     Yes: 'yes',
 } as const
 
-export interface HogQLMetadataResponseApi {
+export interface InsightsQLMetadataResponseApi {
     /** @nullable */
     ch_table_names?: string[] | null
-    errors: HogQLNoticeApi[]
+    errors: InsightsQLNoticeApi[]
     isUsingIndices?: QueryIndexUsageApi | null
     /** @nullable */
     isValid?: boolean | null
-    notices: HogQLNoticeApi[]
+    notices: InsightsQLNoticeApi[]
     /** @nullable */
     query?: string | null
     /** @nullable */
     table_names?: string[] | null
-    warnings: HogQLNoticeApi[]
+    warnings: InsightsQLNoticeApi[]
 }
 
 export interface ClickhouseQueryProgressApi {
@@ -709,7 +709,7 @@ export interface QueryTimingApi {
     t: number
 }
 
-export interface HogQLQueryResponseApi {
+export interface InsightsQLQueryResponseApi {
     /**
      * Executed ClickHouse query
      * @nullable
@@ -733,16 +733,16 @@ export interface HogQLQueryResponseApi {
     /** @nullable */
     hasMore?: boolean | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** @nullable */
     limit?: number | null
     /** Query metadata output */
-    metadata?: HogQLMetadataResponseApi | null
+    metadata?: InsightsQLMetadataResponseApi | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** @nullable */
     offset?: number | null
     /**
@@ -785,7 +785,7 @@ export interface QueryLogTagsApi {
     scene?: string | null
 }
 
-export interface HogQLVariableApi {
+export interface InsightsQLVariableApi {
     code_name: string
     /** @nullable */
     isNull?: boolean | null
@@ -797,39 +797,39 @@ export interface HogQLVariableApi {
  * Constant values that can be referenced with the {placeholder} syntax in the query
  * @nullable
  */
-export type HogQLQueryApiValues = { [key: string]: unknown } | null | null
+export type InsightsQLQueryApiValues = { [key: string]: unknown } | null | null
 
 /**
  * Variables to be substituted into the query
  * @nullable
  */
-export type HogQLQueryApiVariables = { [key: string]: HogQLVariableApi } | null | null
+export type InsightsQLQueryApiVariables = { [key: string]: InsightsQLVariableApi } | null | null
 
-export interface HogQLQueryApi {
+export interface InsightsQLQueryApi {
     /** @nullable */
     explain?: boolean | null
-    filters?: HogQLFiltersApi | null
-    kind?: HogQLQueryApiKind
+    filters?: InsightsQLFiltersApi | null
+    kind?: InsightsQLQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /**
      * Client provided name of the query
      * @nullable
      */
     name?: string | null
     query: string
-    response?: HogQLQueryResponseApi | null
+    response?: InsightsQLQueryResponseApi | null
     tags?: QueryLogTagsApi | null
     /**
      * Constant values that can be referenced with the {placeholder} syntax in the query
      * @nullable
      */
-    values?: HogQLQueryApiValues
+    values?: InsightsQLQueryApiValues
     /**
      * Variables to be substituted into the query
      * @nullable
      */
-    variables?: HogQLQueryApiVariables
+    variables?: InsightsQLQueryApiVariables
     /**
      * version of the node, used for schema migrations
      * @nullable
@@ -846,7 +846,7 @@ export const BreakdownTypeApi = {
     EventMetadata: 'event_metadata',
     Group: 'group',
     Session: 'session',
-    Hogql: 'hogql',
+    InsightsQL: 'insightsql',
     DataWarehouse: 'data_warehouse',
     DataWarehousePersonProperty: 'data_warehouse_person_property',
     RevenueAnalytics: 'revenue_analytics',
@@ -861,7 +861,7 @@ export const MultipleBreakdownTypeApi = {
     EventMetadata: 'event_metadata',
     Group: 'group',
     Session: 'session',
-    Hogql: 'hogql',
+    InsightsQL: 'insightsql',
     RevenueAnalytics: 'revenue_analytics',
 } as const
 
@@ -951,7 +951,7 @@ export interface PropertyGroupFilterValueApi {
         | GroupPropertyFilterApi
         | FeaturePropertyFilterApi
         | FlagPropertyFilterApi
-        | HogQLPropertyFilterApi
+        | InsightsQLPropertyFilterApi
         | EmptyPropertyFilterApi
         | DataWarehousePropertyFilterApi
         | DataWarehousePersonPropertyFilterApi
@@ -980,12 +980,12 @@ export interface TrendsQueryResponseApi {
      */
     hasMore?: boolean | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -1062,7 +1062,7 @@ export const ExperimentMetricMathTypeApi = {
     Avg: 'avg',
     Dau: 'dau',
     UniqueGroup: 'unique_group',
-    Hogql: 'hogql',
+    InsightsQL: 'insightsql',
 } as const
 
 export type CalendarHeatmapMathTypeApi = (typeof CalendarHeatmapMathTypeApi)[keyof typeof CalendarHeatmapMathTypeApi]
@@ -1259,7 +1259,7 @@ export const EventsNodeApiMath = {
     ...ExperimentMetricMathTypeApi,
     ...CalendarHeatmapMathTypeApi,
     unique_group: 'unique_group',
-    hogql: 'hogql',
+    insightsql: 'insightsql',
 } as const
 /**
  * @nullable
@@ -1291,7 +1291,7 @@ export interface EventsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1306,7 +1306,7 @@ export interface EventsNodeApi {
     math?: (typeof EventsNodeApiMath)[keyof typeof EventsNodeApiMath] | null
     math_group_type_index?: MathGroupTypeIndexApi | null
     /** @nullable */
-    math_hogql?: string | null
+    math_insightsql?: string | null
     /** @nullable */
     math_multiplier?: number | null
     /** @nullable */
@@ -1340,7 +1340,7 @@ export interface EventsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1372,7 +1372,7 @@ export const ActionsNodeApiMath = {
     ...ExperimentMetricMathTypeApi,
     ...CalendarHeatmapMathTypeApi,
     unique_group: 'unique_group',
-    hogql: 'hogql',
+    insightsql: 'insightsql',
 } as const
 /**
  * @nullable
@@ -1399,7 +1399,7 @@ export interface ActionsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1413,7 +1413,7 @@ export interface ActionsNodeApi {
     math?: (typeof ActionsNodeApiMath)[keyof typeof ActionsNodeApiMath] | null
     math_group_type_index?: MathGroupTypeIndexApi | null
     /** @nullable */
-    math_hogql?: string | null
+    math_insightsql?: string | null
     /** @nullable */
     math_multiplier?: number | null
     /** @nullable */
@@ -1442,7 +1442,7 @@ export interface ActionsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1474,7 +1474,7 @@ export const DataWarehouseNodeApiMath = {
     ...ExperimentMetricMathTypeApi,
     ...CalendarHeatmapMathTypeApi,
     unique_group: 'unique_group',
-    hogql: 'hogql',
+    insightsql: 'insightsql',
 } as const
 /**
  * @nullable
@@ -1504,7 +1504,7 @@ export interface DataWarehouseNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1519,7 +1519,7 @@ export interface DataWarehouseNodeApi {
     math?: (typeof DataWarehouseNodeApiMath)[keyof typeof DataWarehouseNodeApiMath] | null
     math_group_type_index?: MathGroupTypeIndexApi | null
     /** @nullable */
-    math_hogql?: string | null
+    math_insightsql?: string | null
     /** @nullable */
     math_multiplier?: number | null
     /** @nullable */
@@ -1548,7 +1548,7 @@ export interface DataWarehouseNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1576,7 +1576,7 @@ export const GroupNodeApiMath = {
     ...ExperimentMetricMathTypeApi,
     ...CalendarHeatmapMathTypeApi,
     unique_group: 'unique_group',
-    hogql: 'hogql',
+    insightsql: 'insightsql',
 } as const
 /**
  * @nullable
@@ -1603,7 +1603,7 @@ export interface GroupNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1618,7 +1618,7 @@ export interface GroupNodeApi {
     math?: (typeof GroupNodeApiMath)[keyof typeof GroupNodeApiMath] | null
     math_group_type_index?: MathGroupTypeIndexApi | null
     /** @nullable */
-    math_hogql?: string | null
+    math_insightsql?: string | null
     /** @nullable */
     math_multiplier?: number | null
     /** @nullable */
@@ -1656,7 +1656,7 @@ export interface GroupNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1900,7 +1900,7 @@ export interface TrendsQueryApi {
     interval?: IntervalTypeApi | null
     kind?: TrendsQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Property filters for all series */
     properties?:
         | (
@@ -1915,7 +1915,7 @@ export interface TrendsQueryApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -1968,7 +1968,7 @@ export const FunnelExclusionEventsNodeApiMath = {
     ...ExperimentMetricMathTypeApi,
     ...CalendarHeatmapMathTypeApi,
     unique_group: 'unique_group',
-    hogql: 'hogql',
+    insightsql: 'insightsql',
 } as const
 /**
  * @nullable
@@ -2000,7 +2000,7 @@ export interface FunnelExclusionEventsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2017,7 +2017,7 @@ export interface FunnelExclusionEventsNodeApi {
     math?: (typeof FunnelExclusionEventsNodeApiMath)[keyof typeof FunnelExclusionEventsNodeApiMath] | null
     math_group_type_index?: MathGroupTypeIndexApi | null
     /** @nullable */
-    math_hogql?: string | null
+    math_insightsql?: string | null
     /** @nullable */
     math_multiplier?: number | null
     /** @nullable */
@@ -2051,7 +2051,7 @@ export interface FunnelExclusionEventsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2084,7 +2084,7 @@ export const FunnelExclusionActionsNodeApiMath = {
     ...ExperimentMetricMathTypeApi,
     ...CalendarHeatmapMathTypeApi,
     unique_group: 'unique_group',
-    hogql: 'hogql',
+    insightsql: 'insightsql',
 } as const
 /**
  * @nullable
@@ -2111,7 +2111,7 @@ export interface FunnelExclusionActionsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2127,7 +2127,7 @@ export interface FunnelExclusionActionsNodeApi {
     math?: (typeof FunnelExclusionActionsNodeApiMath)[keyof typeof FunnelExclusionActionsNodeApiMath] | null
     math_group_type_index?: MathGroupTypeIndexApi | null
     /** @nullable */
-    math_hogql?: string | null
+    math_insightsql?: string | null
     /** @nullable */
     math_multiplier?: number | null
     /** @nullable */
@@ -2156,7 +2156,7 @@ export interface FunnelExclusionActionsNodeApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2236,7 +2236,7 @@ export interface FunnelsFilterApi {
     /** @nullable */
     exclusions?: (FunnelExclusionEventsNodeApi | FunnelExclusionActionsNodeApi)[] | null
     /** @nullable */
-    funnelAggregateByHogQL?: string | null
+    funnelAggregateByInsightsQL?: string | null
     /** @nullable */
     funnelFromStep?: number | null
     funnelOrderType?: StepOrderValueApi | null
@@ -2287,12 +2287,12 @@ export interface FunnelsQueryResponseApi {
      */
     error?: string | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -2331,7 +2331,7 @@ export interface FunnelsQueryApi {
     interval?: IntervalTypeApi | null
     kind?: FunnelsQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Property filters for all series */
     properties?:
         | (
@@ -2346,7 +2346,7 @@ export interface FunnelsQueryApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2400,12 +2400,12 @@ export interface RetentionQueryResponseApi {
      */
     error?: string | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -2510,7 +2510,7 @@ export interface RetentionEntityApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2595,7 +2595,7 @@ export interface RetentionQueryApi {
     filterTestAccounts?: boolean | null
     kind?: RetentionQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Property filters for all series */
     properties?:
         | (
@@ -2610,7 +2610,7 @@ export interface RetentionQueryApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2664,7 +2664,7 @@ export const PathTypeApi = {
     Pageview: '$pageview',
     Screen: '$screen',
     CustomEvent: 'custom_event',
-    Hogql: 'hogql',
+    InsightsQL: 'insightsql',
 } as const
 
 export interface PathCleaningFilterApi {
@@ -2711,7 +2711,7 @@ export interface PathsFilterApi {
      */
     pathStartKey?: string | null
     /** @nullable */
-    pathsHogQLExpression?: string | null
+    pathsInsightsQLExpression?: string | null
     /** @nullable */
     showFullUrls?: boolean | null
     /** @nullable */
@@ -2734,12 +2734,12 @@ export interface PathsQueryResponseApi {
      */
     error?: string | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -2774,7 +2774,7 @@ export interface PathsQueryApi {
     funnelPathsFilter?: FunnelPathsFilterApi | null
     kind?: PathsQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Properties specific to the paths insight */
     pathsFilter: PathsFilterApi
     /** Property filters for all series */
@@ -2791,7 +2791,7 @@ export interface PathsQueryApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2831,12 +2831,12 @@ export interface StickinessQueryResponseApi {
      */
     error?: string | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -2920,7 +2920,7 @@ export interface StickinessQueryApi {
     intervalCount?: number | null
     kind?: StickinessQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Property filters for all series */
     properties?:
         | (
@@ -2935,7 +2935,7 @@ export interface StickinessQueryApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -2999,12 +2999,12 @@ export interface LifecycleQueryResponseApi {
      */
     error?: string | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -3041,7 +3041,7 @@ export interface LifecycleQueryApi {
     /** Properties specific to the lifecycle insight */
     lifecycleFilter?: LifecycleFilterApi | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Property filters for all series */
     properties?:
         | (
@@ -3056,7 +3056,7 @@ export interface LifecycleQueryApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -3163,14 +3163,14 @@ export interface WebStatsTableQueryResponseApi {
     /** @nullable */
     hasMore?: boolean | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** @nullable */
     limit?: number | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** @nullable */
     offset?: number | null
     /** Query status indicates whether next to the provided data, a query is still running. */
@@ -3233,7 +3233,7 @@ export interface WebStatsTableQueryApi {
     /** @nullable */
     limit?: number | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** @nullable */
     offset?: number | null
     /** @nullable */
@@ -3302,12 +3302,12 @@ export interface WebOverviewQueryResponseApi {
      */
     error?: string | null
     /**
-     * Generated HogQL query.
+     * Generated InsightsQL query.
      * @nullable
      */
-    hogql?: string | null
+    insightsql?: string | null
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** Query status indicates whether next to the provided data, a query is still running. */
     query_status?: QueryStatusApi | null
     /** The date range used for the query */
@@ -3351,7 +3351,7 @@ export interface WebOverviewQueryApi {
     interval?: IntervalTypeApi | null
     kind?: WebOverviewQueryApiKind
     /** Modifiers used when performing the query */
-    modifiers?: HogQLQueryModifiersApi | null
+    modifiers?: InsightsQLQueryModifiersApi | null
     /** @nullable */
     orderBy?: (typeof WebOverviewQueryApiOrderByItem)[keyof typeof WebOverviewQueryApiOrderByItem][] | null
     properties: (
@@ -3408,7 +3408,7 @@ export interface EndpointRequestApi {
     /** @nullable */
     name?: string | null
     query?:
-        | HogQLQueryApi
+        | InsightsQLQueryApi
         | TrendsQueryApi
         | FunnelsQueryApi
         | RetentionQueryApi
@@ -3430,7 +3430,7 @@ export interface EndpointRequestApi {
 /**
  * Variables to parameterize the endpoint query. The key is the variable name and the value is the variable value.
 
-For HogQL endpoints:   Keys must match a variable `code_name` defined in the query (referenced as `{variables.code_name}`).   Example: `{"event_name": "$pageview"}`
+For InsightsQL endpoints:   Keys must match a variable `code_name` defined in the query (referenced as `{variables.code_name}`).   Example: `{"event_name": "$pageview"}`
 
 For non-materialized insight endpoints (e.g. TrendsQuery):   - `date_from` and `date_to` are built-in variables that filter the date range.     Example: `{"date_from": "2024-01-01", "date_to": "2024-01-31"}`
 
@@ -3463,7 +3463,7 @@ export interface DashboardFilterApi {
               | GroupPropertyFilterApi
               | FeaturePropertyFilterApi
               | FlagPropertyFilterApi
-              | HogQLPropertyFilterApi
+              | InsightsQLPropertyFilterApi
               | EmptyPropertyFilterApi
               | DataWarehousePropertyFilterApi
               | DataWarehousePersonPropertyFilterApi
@@ -3489,7 +3489,7 @@ export interface EndpointRunRequestApi {
      */
     client_query_id?: string | null
     /**
-     * Whether to include debug information (such as the executed HogQL) in the response.
+     * Whether to include debug information (such as the executed InsightsQL) in the response.
      * @nullable
      */
     debug?: boolean | null
@@ -3503,7 +3503,7 @@ export interface EndpointRunRequestApi {
     /**
    * Variables to parameterize the endpoint query. The key is the variable name and the value is the variable value.
 
-For HogQL endpoints:   Keys must match a variable `code_name` defined in the query (referenced as `{variables.code_name}`).   Example: `{"event_name": "$pageview"}`
+For InsightsQL endpoints:   Keys must match a variable `code_name` defined in the query (referenced as `{variables.code_name}`).   Example: `{"event_name": "$pageview"}`
 
 For non-materialized insight endpoints (e.g. TrendsQuery):   - `date_from` and `date_to` are built-in variables that filter the date range.     Example: `{"date_from": "2024-01-01", "date_to": "2024-01-31"}`
 

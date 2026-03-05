@@ -50,7 +50,7 @@ export default function SignupPage(): JSX.Element {
                             <div className="text-center mb-6">
                                 <h1 className="text-3xl font-bold">Create your account</h1>
                                 <p className="text-base-content/70 mt-2">
-                                    Join thousands of hedgehogs sharing files securely
+                                    Join thousands of mascots sharing files securely
                                 </p>
                             </div>
 
@@ -70,7 +70,7 @@ export default function SignupPage(): JSX.Element {
                                         name="name"
                                         value={formData.name}
                                         onChange={handleInputChange}
-                                        placeholder="Enter your hedgehog name"
+                                        placeholder="Enter your mascot name"
                                         className="input input-bordered w-full"
                                         required
                                     />
@@ -85,7 +85,7 @@ export default function SignupPage(): JSX.Element {
                                         name="email"
                                         value={formData.email}
                                         onChange={handleInputChange}
-                                        placeholder="hedgehog@example.com"
+                                        placeholder="mascot@example.com"
                                         className="input input-bordered w-full"
                                         required
                                     />

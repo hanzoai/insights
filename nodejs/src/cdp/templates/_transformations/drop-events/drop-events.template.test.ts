@@ -1,4 +1,4 @@
-import { HogFunctionInvocationGlobals } from '../../../types'
+import { CustomFunctionInvocationGlobals } from '../../../types'
 import { TemplateTester } from '../../test/test-helpers'
 import { template } from './drop-events.template'
 
@@ -20,7 +20,7 @@ describe('drop-events.template', () => {
     }
 
     const tester = new TemplateTester(testTemplate)
-    let mockGlobals: HogFunctionInvocationGlobals
+    let mockGlobals: CustomFunctionInvocationGlobals
 
     beforeEach(async () => {
         await tester.beforeEach()

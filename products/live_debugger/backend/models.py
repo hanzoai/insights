@@ -45,7 +45,7 @@ class BreakpointHit:
 
 class LiveDebuggerBreakpoint(UUIDModel):
     team = models.ForeignKey("posthog.Team", on_delete=models.CASCADE)
-    repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "PostHog/posthog")
+    repository = models.TextField(null=True, blank=True)  # Format: "owner/repo" (e.g., "Insights/posthog")
     filename = models.TextField()
     line_number = models.PositiveIntegerField()
     enabled = models.BooleanField(default=True)
@@ -75,15 +75,15 @@ class LiveDebuggerBreakpoint(UUIDModel):
         cls, team: "Team", breakpoint_ids: Optional[list] = None, limit: int = 100, offset: int = 0
     ) -> list[BreakpointHit]:
         """
-        Query ClickHouse for breakpoint hit events using HogQL.
+        Query ClickHouse for breakpoint hit events using InsightsQL.
 
         Returns a list of BreakpointHit dataclass instances.
         """
-        from posthog.hogql import ast
-        from posthog.hogql.parser import parse_select
-        from posthog.hogql.query import execute_hogql_query
+        from posthog.insightsql import ast
+        from posthog.insightsql.parser import parse_select
+        from posthog.insightsql.query import execute_insightsql_query
 
-        # Build WHERE conditions (team_id filter is automatically added by execute_hogql_query)
+        # Build WHERE conditions (team_id filter is automatically added by execute_insightsql_query)
         where_conditions = [
             "event = {event_name}",
             "timestamp >= now() - INTERVAL 1 HOUR",
@@ -124,7 +124,7 @@ class LiveDebuggerBreakpoint(UUIDModel):
         )
 
         logger.info(f"Executing breakpoint hits query for team_id={team.pk}, limit={limit}, offset={offset}")
-        response = execute_hogql_query(query, team=team)
+        response = execute_insightsql_query(query, team=team)
         results = response.results or []
         logger.info(f"Query returned {len(results)} results")
 

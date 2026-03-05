@@ -4,7 +4,7 @@ import { LemonButton, LemonModal } from '@posthog/lemon-ui'
 
 import { PayGateMini } from 'lib/components/PayGateMini/PayGateMini'
 
-import { LaptopHog3 } from '../hedgehogs'
+import { LaptopHog3 } from '../mascots'
 import { upgradeModalLogic } from './upgradeModalLogic'
 
 export function UpgradeModal(): JSX.Element {

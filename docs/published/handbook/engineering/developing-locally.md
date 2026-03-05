@@ -4,12 +4,12 @@ sidebar: Docs
 showTitle: true
 ---
 
-> ❗️ This guide is intended only for development of PostHog itself. If you're looking to deploy PostHog
-> for your product analytics needs, go to [Self-host PostHog](https://posthog.com/docs/self-host).
+> ❗️ This guide is intended only for development of Insights itself. If you're looking to deploy Insights
+> for your product analytics needs, go to [Self-host Insights](https://posthog.com/docs/self-host).
 
-## What does PostHog look like on the inside?
+## What does Insights look like on the inside?
 
-Before jumping into setup, let's dissect a PostHog.
+Before jumping into setup, let's dissect a Insights.
 
 The app itself is made up of 4 main components that run simultaneously:
 
@@ -36,14 +36,14 @@ These components rely on a few external services:
 - Redis – for caching and inter-service communication
 - Zookeeper – for coordinating Kafka and ClickHouse clusters
 
-When spinning up an instance of PostHog for development, we recommend the following hybrid configuration:
+When spinning up an instance of Insights for development, we recommend the following hybrid configuration:
 
 - External services (ClickHouse, Kafka, PostgreSQL, Redis, etc.) run in Docker via `docker compose`
-- PostHog apps (Django, frontend, plugin-server, Celery) run on the host using `hogli start` (which uses mprocs, a terminal UI, to manage and display logs from all processes simultaneously)
+- Insights apps (Django, frontend, plugin-server, Celery) run on the host using `hogli start` (which uses mprocs, a terminal UI, to manage and display logs from all processes simultaneously)
 
 This approach gives you fast iteration on the code you're developing while keeping infrastructure isolated.
 
-> It is also technically possible to run PostHog in Docker completely, but syncing code changes is then much slower, and for development you need PostHog dependencies installed on the host anyway (such as formatting or typechecking tools).
+> It is also technically possible to run Insights in Docker completely, but syncing code changes is then much slower, and for development you need Insights dependencies installed on the host anyway (such as formatting or typechecking tools).
 > The other way around – everything on the host, is not practical due to significant complexities involved in instantiating Kafka or ClickHouse from scratch.
 
 The instructions here assume you're running macOS or the current Ubuntu Linux LTS (24.04).
@@ -52,7 +52,7 @@ For other Linux distros, adjust the steps as needed (e.g. use `dnf` or `pacman` 
 
 Windows isn't supported natively. But, Windows users can run a Linux virtual machine. The latest Ubuntu LTS Desktop is recommended. (Ubuntu Server is not recommended as debugging the frontend will require a browser that can access localhost.)
 
-In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/PostHog/posthog.com/blob/master/contents/handbook/engineering/developing-locally.md)!
+In case some steps here have fallen out of date, please tell us about it – feel free to [submit a patch](https://github.com/Insights/posthog.com/blob/master/contents/handbook/engineering/developing-locally.md)!
 
 ## Option 1: Developing locally
 
@@ -71,15 +71,15 @@ This is the recommended option for most developers.
     <code>$PATH</code>. Otherwise the command line will not know about packages installed with <code>brew</code>.
 </blockquote>
 
-3. Install [OrbStack](https://orbstack.dev/) – a more performant Docker Desktop alternative – with `brew install orbstack`. Go to OrbStack settings and set the memory usage limit to **at least 4 GB** (or 8 GB if you can afford it) + the CPU usage limit to at least 4 cores (i.e. 400%). You'll want to use Brex for the license if you work at PostHog.
+3. Install [OrbStack](https://orbstack.dev/) – a more performant Docker Desktop alternative – with `brew install orbstack`. Go to OrbStack settings and set the memory usage limit to **at least 4 GB** (or 8 GB if you can afford it) + the CPU usage limit to at least 4 cores (i.e. 400%). You'll want to use Brex for the license if you work at Insights.
 
 4. Continue with [cloning the repository](#cloning-the-repository).
 
 #### Ubuntu
 
-> Note: Importantly, if you're internal to PostHog we are standardised on working on MacOS (not Linux). In part because of SOC2 auditing gains it gives us.
+> Note: Importantly, if you're internal to Insights we are standardised on working on MacOS (not Linux). In part because of SOC2 auditing gains it gives us.
 
-> Note: If you're running PostHog on WSL2, make sure to change $HOST_BIND to 0.0.0.0 and set the debugpy address to 0.0.0.0:5678.
+> Note: If you're running Insights on WSL2, make sure to change $HOST_BIND to 0.0.0.0 and set the debugpy address to 0.0.0.0:5678.
 
 1. Install Docker following the [official Docker installation guide for Ubuntu](https://docs.docker.com/engine/install/ubuntu/).
 
@@ -93,10 +93,10 @@ This is the recommended option for most developers.
 
 #### Cloning the repository
 
-Clone the [PostHog repo](https://github.com/posthog/posthog). All future commands assume you're inside the `posthog/` folder.
+Clone the [Insights repo](https://github.com/posthog/posthog). All future commands assume you're inside the `posthog/` folder.
 
 ```bash
-git clone --filter=blob:none https://github.com/PostHog/posthog && cd posthog/
+git clone --filter=blob:none https://github.com/Insights/posthog && cd posthog/
 ```
 
 **Performance tip:** The `--filter=blob:none` flag downloads all commit history and tree structure, but defers file contents (blobs) until needed. This reduces the clone from ~3 GB to a few hundred MB and makes the initial clone **15-17x faster**. You still get full git history for commands like `git log` and `git diff` – blobs are fetched on demand as you use them.
@@ -114,7 +114,7 @@ Set up your development environment instantly using [Flox](https://flox.dev/).
 
 Flox manages your development environment. The `manifest.toml` file declares all dependencies (similar to `package.json`), and Flox automatically provides the correct versions for your system.
 
-To get PostHog running in a dev environment:
+To get Insights running in a dev environment:
 
 1. Once you have cloned the repo and installed OrbStack, install Flox:
 
@@ -132,11 +132,11 @@ To get PostHog running in a dev environment:
 
    > Note on app dependencies: Python requirements get updated every time the environment is activated (`uv sync` is lightning fast). JS dependencies only get installed if `node_modules/` is not present (`pnpm install` still takes a couple lengthy seconds). Dependencies for other languages currently don't get auto-installed.
 
-3. After successful environment activation, run `hogli start`. This launches the Docker infrastructure and all PostHog processes together via mprocs — a terminal UI that shows logs from every service side by side.
+3. After successful environment activation, run `hogli start`. This launches the Docker infrastructure and all Insights processes together via mprocs — a terminal UI that shows logs from every service side by side.
 
-This is it – you should be seeing the PostHog app at <a href="http://localhost:8010" target="_blank">http://localhost:8010</a>.
+This is it – you should be seeing the Insights app at <a href="http://localhost:8010" target="_blank">http://localhost:8010</a>.
 
-You can now change PostHog in any way you want. See [Project structure](./project-structure) for an intro to the repository's contents. To commit changes, create a new branch based on `master` for your intended change, and develop away.
+You can now change Insights in any way you want. See [Project structure](./project-structure) for an intro to the repository's contents. To commit changes, create a new branch based on `master` for your intended change, and develop away.
 
 ### Customizing which services run
 
@@ -207,7 +207,7 @@ This is a faster option to get up and running if you can't or don't want to set 
 
 1. Create your codespace.
    ![](https://user-images.githubusercontent.com/890921/231489405-cb2010b4-d9e3-4837-bfdf-b2d4ef5c5d0b.png)
-2. Update it to 8-core machine type (the smallest is probably too small to get PostHog running properly).
+2. Update it to 8-core machine type (the smallest is probably too small to get Insights running properly).
    ![](https://user-images.githubusercontent.com/890921/231490278-140f814e-e77b-46d5-9a4f-31c1b1d6956a.png)
 3. Open the codespace, using one of the "Open in" options from the list.
 4. In the codespace, open a terminal window and run `docker compose -f docker-compose.dev.yml up`.
@@ -219,11 +219,11 @@ This is a faster option to get up and running if you can't or don't want to set 
 9. Install [mprocs](https://github.com/pvolok/mprocs#installation) (`cargo install mprocs`)
 10. Run `bin/hogli start` (or just `hogli start` if using Flox).
 11. Open browser to <http://localhost:8010/>.
-12. To get some practical test data into your brand-new instance of PostHog, run `DEBUG=1 ./manage.py generate_demo_data`.
+12. To get some practical test data into your brand-new instance of Insights, run `DEBUG=1 ./manage.py generate_demo_data`.
 
 ## Testing
 
-For a PostHog PR to be merged, all tests must be green, and ideally you should be introducing new ones as well – that's why you must be able to run tests with ease.
+For a Insights PR to be merged, all tests must be green, and ideally you should be introducing new ones as well – that's why you must be able to run tests with ease.
 
 ### Frontend
 
@@ -275,7 +275,7 @@ To see debug logs (such as ClickHouse queries), add argument `--log-cli-level=DE
 
 ### End-to-end
 
-For Playwright end-to-end tests, run `bin/e2e-test-runner`. This will spin up a test instance of PostHog and show you the Playwright interface, from which you'll manually choose tests to run. You'll need `uv` installed (the Python package manager), which you can do so with `brew install uv`. Once you're done, terminate the command with Cmd + C.
+For Playwright end-to-end tests, run `bin/e2e-test-runner`. This will spin up a test instance of Insights and show you the Playwright interface, from which you'll manually choose tests to run. You'll need `uv` installed (the Python package manager), which you can do so with `brew install uv`. Once you're done, terminate the command with Cmd + C.
 
 ## Django migrations
 
@@ -296,13 +296,13 @@ To help with this, we have introduced a tool called [django-linear-migrations](h
 ## Extra: Working with feature flags
 
 When developing locally with environment variable `DEBUG=1` (which enables a setting called `SELF_CAPTURE`),
-all analytics inside your local PostHog instance is based on that instance itself – more specifically, the currently selected project.
+all analytics inside your local Insights instance is based on that instance itself – more specifically, the currently selected project.
 This means that your activity is immediately reflected in the current project, which is potentially useful for testing features
 – for example, which feature flags are currently enabled for your development instance is decided by the project you have open at the very same time.
 
 So, when working with a feature based on feature flag `foo-bar`, [add a feature flag with this key to your local instance](http://localhost:8010/feature_flags/new) and release it there.
 
-If you'd like to have ALL feature flags that exist in PostHog at your disposal right away, run `DEBUG=1 python3 manage.py sync_feature_flags` – they will be added to each project in the instance, fully rolled out by default.
+If you'd like to have ALL feature flags that exist in Insights at your disposal right away, run `DEBUG=1 python3 manage.py sync_feature_flags` – they will be added to each project in the instance, fully rolled out by default.
 
 This command automatically turns any feature flag ending in `_EXPERIMENT` as a multivariate flag with `control` and `test` variants.
 
@@ -310,9 +310,9 @@ Backend side flags are only evaluated locally, which requires the `POSTHOG_PERSO
 
 ## Extra: Debugging with VS Code
 
-The PostHog repository includes [VS Code launch options for debugging](https://github.com/PostHog/posthog/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
+The Insights repository includes [VS Code launch options for debugging](https://github.com/Insights/posthog/blob/master/.vscode/launch.json). Simply go to the `Run and Debug` tab in VS Code, select the desired service you want to debug, and run it. Once it starts up, you can set breakpoints and step through code to see exactly what is happening. There are also debug launch options for frontend and backend tests if you're dealing with a tricky test failure.
 
-> **Note:** You can debug all services using the main "PostHog" launch option. If you are running most services with `hogli start` and only want to debug one (e.g. the backend), use `hogli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
+> **Note:** You can debug all services using the main "Insights" launch option. If you are running most services with `hogli start` and only want to debug one (e.g. the backend), use `hogli dev:setup` to exclude that service so it doesn't conflict with the VS Code debugger.
 
 ## Extra: Debugging the backend in PyCharm
 
@@ -335,7 +335,7 @@ With PyCharm's built in support for Django, it's fairly easy to setup debugging 
 
 1. Instead of manually running `docker compose` you can open the `docker-compose.dev.yml` file and click on the double play icon next to `services`
 2. From the run configurations select:
-   - "PostHog" and click on debug
+   - "Insights" and click on debug
    - "Celery" and click on debug (optional)
    - "Frontend" and click on run
    - "Nodejs services" and click on run
@@ -380,7 +380,7 @@ Emails sent via SMTP are stored in HTML files in `posthog/templates/*/*.html`. T
 
 You can connect to a real slack workspace in your local development setup by adding the required slack environment variables to your `.env` file.
 
-If you're a PostHog employee, you can find the environment variables in 1Password under `Slack config local dev`.
+If you're a Insights employee, you can find the environment variables in 1Password under `Slack config local dev`.
 
 ```.env
 SLACK_APP_CLIENT_ID=
@@ -402,7 +402,7 @@ Jaeger will be available at [http://localhost:16686](http://localhost:16686).
 
 #### Production usage
 
-We send our PostHog Cloud emails via Customer.io using their HTTP API. If Customer.io is not configured but SMTP is, it will fall back to SMTP. We do this so we can continue to support SMTP emails for self-hosted instances.
+We send our Insights Cloud emails via Customer.io using their HTTP API. If Customer.io is not configured but SMTP is, it will fall back to SMTP. We do this so we can continue to support SMTP emails for self-hosted instances.
 
 #### Setting up Customer.io emails
 
@@ -422,7 +422,7 @@ When creating a new email, there are a few steps to take. It's important to add 
 
 1. Create a new template in Customer.io. Ask @joe or @team-platform for help here if needed
 2. Add the new Customer.io template to the `CUSTOMER_IO_TEMPLATE_ID_MAP` in `posthog/email.py`
-3. Create a template in PostHog as an SMTP backup. Make sure the file name matches the key used in the template map.
+3. Create a template in Insights as an SMTP backup. Make sure the file name matches the key used in the template map.
 4. Trigger the email with something like this:
 
    ```python
@@ -439,15 +439,15 @@ When creating a new email, there are a few steps to take. It's important to add 
    message.send()
    ```
 
-## Extra: Developing paid features (PostHog employees only)
+## Extra: Developing paid features (Insights employees only)
 
-If you're a PostHog employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/PostHog/billing?tab=readme-ov-file#licensing-your-local-instance).
+If you're a Insights employee, you can get access to paid features on your local instance to make development easier. [Learn how to do so in our internal billing guide](https://github.com/Insights/billing?tab=readme-ov-file#licensing-your-local-instance).
 
 ## Extra: Resetting your local database
 
 If you need to start fresh with a clean database (for example, if your local data is corrupted or you want to test the initial setup), follow these steps:
 
-1. Stop all PostHog services and remove all Docker volumes:
+1. Stop all Insights services and remove all Docker volumes:
 
    ```bash
    hogli dev:reset
@@ -455,7 +455,7 @@ If you need to start fresh with a clean database (for example, if your local dat
 
    This will remove all data stored in Docker volumes, including your PostgreSQL, ClickHouse, and Redis data.
 
-2. Start PostHog again:
+2. Start Insights again:
 
    ```bash
    hogli start
@@ -463,7 +463,7 @@ If you need to start fresh with a clean database (for example, if your local dat
 
 3. Wait for all migrations to complete. You can monitor the logs to ensure migrations have finished running.
 
-4. Once PostHog is running, click the **generate-demo-data** service in the mprocs terminal UI (you may have to scroll), then type `r` to start the service and generate test data.
+4. Once Insights is running, click the **generate-demo-data** service in the mprocs terminal UI (you may have to scroll), then type `r` to start the service and generate test data.
 
 > **Note:** This process will completely wipe your local database. Make sure you don't have any important local data before proceeding.
 

@@ -18,7 +18,7 @@
                 "last_name": "",
                 "email": "ben@posthog.com",
                 "is_email_verified": true,
-                "hedgehog_config": null,
+                "mascot_config": null,
                 "role_at_organization": "engineering"
             },
             "updated_at": "2025-06-13T10:14:18.599846Z",
@@ -169,7 +169,7 @@
                     "required": true,
                     "secret": false,
                     "hidden": false,
-                    "description": "Select the channel to post to (e.g. #general). The PostHog app must be installed in the workspace.",
+                    "description": "Select the channel to post to (e.g. #general). The Insights app must be installed in the workspace.",
                     "integration_key": "slack_workspace",
                     "integration_field": "slack_channel"
                 },
@@ -178,7 +178,7 @@
                     "key": "icon_emoji",
                     "label": "Emoji icon",
                     "required": false,
-                    "default": ":hedgehog:",
+                    "default": ":mascot:",
                     "secret": false,
                     "hidden": false
                 },
@@ -187,7 +187,7 @@
                     "key": "username",
                     "label": "Bot name",
                     "required": false,
-                    "default": "PostHog",
+                    "default": "Insights",
                     "secret": false,
                     "hidden": false
                 },
@@ -210,7 +210,7 @@
                                 {
                                     "url": "{person.url}",
                                     "text": {
-                                        "text": "View Person in PostHog",
+                                        "text": "View Person in Insights",
                                         "type": "plain_text"
                                     },
                                     "type": "button"
@@ -464,7 +464,7 @@
                         "integration_key": "slack_workspace",
                         "integration_field": "slack_channel",
                         "label": "Channel to post to",
-                        "description": "Select the channel to post to (e.g. #general). The PostHog app must be installed in the workspace.",
+                        "description": "Select the channel to post to (e.g. #general). The Insights app must be installed in the workspace.",
                         "secret": false,
                         "hidden": false,
                         "required": true
@@ -473,7 +473,7 @@
                         "key": "icon_emoji",
                         "type": "string",
                         "label": "Emoji icon",
-                        "default": ":hedgehog:",
+                        "default": ":mascot:",
                         "required": false,
                         "secret": false,
                         "hidden": false
@@ -482,7 +482,7 @@
                         "key": "username",
                         "type": "string",
                         "label": "Bot name",
-                        "default": "PostHog",
+                        "default": "Insights",
                         "required": false,
                         "secret": false,
                         "hidden": false
@@ -506,7 +506,7 @@
                                     {
                                         "url": "{person.url}",
                                         "text": {
-                                            "text": "View Person in PostHog",
+                                            "text": "View Person in Insights",
                                             "type": "plain_text"
                                         },
                                         "type": "button"
@@ -566,7 +566,7 @@
                 "last_name": "",
                 "email": "ben@posthog.com",
                 "is_email_verified": true,
-                "hedgehog_config": null,
+                "mascot_config": null,
                 "role_at_organization": "engineering"
             },
             "updated_at": "2025-06-12T12:17:45.639505Z",

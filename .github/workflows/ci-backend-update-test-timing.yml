@@ -160,4 +160,4 @@ jobs:
                   base: master
                   delete-branch: true
                   reviewers: |
-                      PostHog/team-devex
+                      Insights/team-devex

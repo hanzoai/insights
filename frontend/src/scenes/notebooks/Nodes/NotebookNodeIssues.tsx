@@ -23,7 +23,7 @@ import {
 } from 'products/error_tracking/frontend/scenes/ErrorTrackingScene/tabs/issues/IssuesList'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
-import { createPostHogWidgetNode } from './NodeWrapper'
+import { createInsightsWidgetNode } from './NodeWrapper'
 import { notebookNodeLogic } from './notebookNodeLogic'
 import { getLogicKey } from './utils'
 
@@ -148,7 +148,7 @@ type NotebookNodeIssuesAttributes = {
     tabId: string
 }
 
-export const NotebookNodeIssues = createPostHogWidgetNode<NotebookNodeIssuesAttributes>({
+export const NotebookNodeIssues = createInsightsWidgetNode<NotebookNodeIssuesAttributes>({
     nodeType: NotebookNodeType.Issues,
     titlePlaceholder: 'Issues',
     Component,

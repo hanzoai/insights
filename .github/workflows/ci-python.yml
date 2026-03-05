@@ -1,4 +1,4 @@
-# This workflow runs generic Python tests global to Dagster and PostHog.
+# This workflow runs generic Python tests global to Dagster and Insights.
 name: Python CI
 on:
     push:

@@ -2,7 +2,7 @@ import './ErrorBoundary.scss'
 
 import clsx from 'clsx'
 import { useActions, useValues } from 'kea'
-import { PostHogErrorBoundary, type PostHogErrorBoundaryFallbackProps } from 'posthog-js/react'
+import { InsightsErrorBoundary, type InsightsErrorBoundaryFallbackProps } from 'posthog-js/react'
 
 import { SupportTicketExceptionEvent, supportLogic } from 'lib/components/Support/supportLogic'
 import { LemonBanner } from 'lib/lemon-ui/LemonBanner'
@@ -37,9 +37,9 @@ export function ErrorBoundary({ children, exceptionProps = {}, className }: Erro
     }
 
     return (
-        <PostHogErrorBoundary
+        <InsightsErrorBoundary
             additionalProperties={additionalProperties}
-            fallback={(props: PostHogErrorBoundaryFallbackProps) => {
+            fallback={(props: InsightsErrorBoundaryFallbackProps) => {
                 const rawError = props.error
                 const normalizedError =
                     rawError instanceof Error
@@ -114,7 +114,7 @@ export function ErrorBoundary({ children, exceptionProps = {}, className }: Erro
             }}
         >
             {children}
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }
 
@@ -125,9 +125,9 @@ export function LightErrorBoundary({ children, exceptionProps = {}, className }:
         additionalProperties.team_id = currentTeamId
     }
     return (
-        <PostHogErrorBoundary
+        <InsightsErrorBoundary
             additionalProperties={additionalProperties}
-            fallback={(props: PostHogErrorBoundaryFallbackProps) => {
+            fallback={(props: InsightsErrorBoundaryFallbackProps) => {
                 const rawError = props.error
                 const normalizedError =
                     rawError instanceof Error
@@ -142,6 +142,6 @@ export function LightErrorBoundary({ children, exceptionProps = {}, className }:
             }}
         >
             {children}
-        </PostHogErrorBoundary>
+        </InsightsErrorBoundary>
     )
 }

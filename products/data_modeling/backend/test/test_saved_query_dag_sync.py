@@ -3,7 +3,7 @@ from posthog.test.base import BaseTest
 
 from parameterized import parameterized
 
-from posthog.hogql.errors import QueryError
+from posthog.insightsql.errors import QueryError
 
 from products.data_modeling.backend.models import Edge, Node
 from products.data_modeling.backend.models.node import NodeType
@@ -37,7 +37,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         node = sync_saved_query_to_dag(saved_query)
@@ -53,7 +53,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
 
         node = sync_saved_query_to_dag(saved_query)
@@ -78,7 +78,7 @@ class TestSyncSavedQueryToDag(BaseTest):
             team=self.team,
             query={
                 "query": "SELECT e.*, p.* FROM events e JOIN persons p ON e.person_id = p.id",
-                "kind": "HogQLQuery",
+                "kind": "InsightsQLQuery",
             },
         )
 
@@ -94,7 +94,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
 
         before = sync_saved_query_to_dag(saved_query)
@@ -114,7 +114,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
 
         node = sync_saved_query_to_dag(saved_query)
@@ -126,7 +126,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         self.assertEqual(edge.source.name, "events")
 
         # change to depend on persons instead
-        saved_query.query = {"query": "SELECT * FROM persons", "kind": "HogQLQuery"}
+        saved_query.query = {"query": "SELECT * FROM persons", "kind": "InsightsQLQuery"}
         saved_query.save()
         sync_saved_query_to_dag(saved_query)
 
@@ -139,14 +139,14 @@ class TestSyncSavedQueryToDag(BaseTest):
         upstream_query = DataWarehouseSavedQuery.objects.create(
             name="upstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         upstream_node = sync_saved_query_to_dag(upstream_query)
 
         downstream_query = DataWarehouseSavedQuery.objects.create(
             name="downstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM upstream_view", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM upstream_view", "kind": "InsightsQLQuery"},
         )
         downstream_node = sync_saved_query_to_dag(downstream_query)
 
@@ -157,7 +157,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         query_a = DataWarehouseSavedQuery.objects.create(
             name="view_a",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         # no deps
         node_a = sync_saved_query_to_dag(query_a)
@@ -165,13 +165,13 @@ class TestSyncSavedQueryToDag(BaseTest):
         query_b = DataWarehouseSavedQuery.objects.create(
             name="view_b",
             team=self.team,
-            query={"query": "SELECT * FROM view_a", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM view_a", "kind": "InsightsQLQuery"},
         )
         # depends on a
         sync_saved_query_to_dag(query_b)
 
         # update a to depend on b (cycle)
-        query_a.query = {"query": "SELECT * FROM view_b", "kind": "HogQLQuery"}
+        query_a.query = {"query": "SELECT * FROM view_b", "kind": "InsightsQLQuery"}
         query_a.save()
         sync_saved_query_to_dag(query_a)
 
@@ -188,7 +188,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         empty_query, _ = DataWarehouseSavedQuery.objects.get_or_create(
             name="test_view_empty_query",
             team=self.team,
-            query={"query": "", "kind": "HogQLQuery"},
+            query={"query": "", "kind": "InsightsQLQuery"},
         )
 
         with self.assertRaises(ValueError):
@@ -197,7 +197,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         null_query, _ = DataWarehouseSavedQuery.objects.get_or_create(
             name="test_view_null_query",
             team=self.team,
-            query={"query": None, "kind": "HogQLQuery"},
+            query={"query": None, "kind": "InsightsQLQuery"},
         )
 
         with self.assertRaises(ValueError):
@@ -214,7 +214,7 @@ class TestSyncSavedQueryToDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": query, "kind": "HogQLQuery"},
+            query={"query": query, "kind": "InsightsQLQuery"},
         )
 
         with pytest.raises(QueryError):
@@ -227,7 +227,7 @@ class TestDeleteNodeFromDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(saved_query)
 
@@ -245,7 +245,7 @@ class TestDeleteNodeFromDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         node = sync_saved_query_to_dag(saved_query)
 
@@ -259,7 +259,7 @@ class TestDeleteNodeFromDag(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         # shouldn't raise
         delete_node_from_dag(saved_query)
@@ -268,13 +268,13 @@ class TestDeleteNodeFromDag(BaseTest):
         upstream = DataWarehouseSavedQuery.objects.create(
             name="upstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(upstream)
         downstream = DataWarehouseSavedQuery.objects.create(
             name="downstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM upstream_view", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM upstream_view", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(downstream)
         with self.assertRaises(HasDependentsError):
@@ -284,7 +284,7 @@ class TestDeleteNodeFromDag(BaseTest):
         upstream = DataWarehouseSavedQuery.objects.create(
             name="upstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(upstream)
         delete_node_from_dag(upstream)
@@ -297,7 +297,7 @@ class TestGetDependents(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(saved_query)
         dependents = get_dependent_saved_queries(saved_query)
@@ -307,19 +307,19 @@ class TestGetDependents(BaseTest):
         upstream = DataWarehouseSavedQuery.objects.create(
             name="upstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(upstream)
         downstream1 = DataWarehouseSavedQuery.objects.create(
             name="downstream1",
             team=self.team,
-            query={"query": "SELECT * FROM upstream_view", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM upstream_view", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(downstream1)
         downstream2 = DataWarehouseSavedQuery.objects.create(
             name="downstream2",
             team=self.team,
-            query={"query": "SELECT * FROM upstream_view", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM upstream_view", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(downstream2)
         dependents = get_dependent_saved_queries(upstream)
@@ -332,13 +332,13 @@ class TestGetDependents(BaseTest):
         upstream = DataWarehouseSavedQuery.objects.create(
             name="upstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM events", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM events", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(upstream)
         downstream = DataWarehouseSavedQuery.objects.create(
             name="downstream_view",
             team=self.team,
-            query={"query": "SELECT * FROM upstream_view", "kind": "HogQLQuery"},
+            query={"query": "SELECT * FROM upstream_view", "kind": "InsightsQLQuery"},
         )
         sync_saved_query_to_dag(downstream)
         # soft delete the downstream view
@@ -351,7 +351,7 @@ class TestGetDependents(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         # no node exists
         dependents = get_dependent_saved_queries(saved_query)
@@ -364,7 +364,7 @@ class TestUpdateNodeType(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         node = sync_saved_query_to_dag(saved_query)
         assert node is not None
@@ -380,7 +380,7 @@ class TestUpdateNodeType(BaseTest):
         saved_query = DataWarehouseSavedQuery.objects.create(
             name="test_view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         # shouldn't raise, exception is captured though
         update_node_type(saved_query, NodeType.MAT_VIEW)
@@ -393,7 +393,7 @@ class TestSkipValidation(BaseTest):
         query_a = DataWarehouseSavedQuery.objects.create(
             name="view_a",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         node_a = Node.objects.create(
             team=self.team,
@@ -405,7 +405,7 @@ class TestSkipValidation(BaseTest):
         query_b = DataWarehouseSavedQuery.objects.create(
             name="view_b",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         node_b = Node.objects.create(
             team=self.team,
@@ -438,7 +438,7 @@ class TestSkipValidation(BaseTest):
         query = DataWarehouseSavedQuery.objects.create(
             name="view",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         node_a = Node.objects.create(
             team=self.team,
@@ -451,7 +451,7 @@ class TestSkipValidation(BaseTest):
         query_b = DataWarehouseSavedQuery.objects.create(
             name="view_b",
             team=self.team,
-            query={"query": "SELECT 1", "kind": "HogQLQuery"},
+            query={"query": "SELECT 1", "kind": "InsightsQLQuery"},
         )
         node_b = Node.objects.create(
             team=self.team,

@@ -11,7 +11,7 @@ export type SqlEditorNewTabPreference = 'search' | 'editor'
 export const userPreferencesLogic = kea<userPreferencesLogicType>([
     path(['lib', 'logic', 'userPreferencesLogic']),
     actions({
-        setHidePostHogPropertiesInTable: (enabled: boolean) => ({ enabled }),
+        setHideInsightsPropertiesInTable: (enabled: boolean) => ({ enabled }),
         setHideNullValues: (enabled: boolean) => ({ enabled }),
         setSqlEditorNewTabPreference: (value: SqlEditorNewTabPreference) => ({ value }),
         pinPersonProperty: (prop: string) => ({ prop }),
@@ -24,11 +24,11 @@ export const userPreferencesLogic = kea<userPreferencesLogicType>([
         values: [teamLogic, ['currentTeam']],
     })),
     reducers(({ values }) => ({
-        hidePostHogPropertiesInTable: [
+        hideInsightsPropertiesInTable: [
             false,
             { persist: true },
             {
-                setHidePostHogPropertiesInTable: (_, { enabled }) => enabled,
+                setHideInsightsPropertiesInTable: (_, { enabled }) => enabled,
             },
         ],
         hideNullValues: [true, { persist: true }, { setHideNullValues: (_, { enabled }) => enabled }],

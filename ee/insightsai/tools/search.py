@@ -13,44 +13,44 @@ from ee.hogai.tool_errors import MaxToolFatalError, MaxToolRetryableError
 from ee.hogai.tools.full_text_search.tool import EntitySearchTool
 
 SEARCH_TOOL_PROMPT = """
-Use this tool to search docs, insights, dashboards, cohorts, actions, experiments, feature flags, notebooks, and surveys in PostHog.
+Use this tool to search docs, insights, dashboards, cohorts, actions, experiments, feature flags, notebooks, and surveys in Insights.
 
 If the user's question mentions multiple topics, search for each topic separately and combine the results.
 
 # Documentation search
 
-Use this tool for any PostHog questions. It relies on hybrid (semantic + full-text) search, so phrase your query in natural language. Our product and docs change often, so this tool is required for accurate answers:
-- How to use PostHog
-- How to use PostHog features
+Use this tool for any Insights questions. It relies on hybrid (semantic + full-text) search, so phrase your query in natural language. Our product and docs change often, so this tool is required for accurate answers:
+- How to use Insights
+- How to use Insights features
 - How to contact support or other humans
 - How to report bugs
 - How to submit feature requests
 - To troubleshoot something
 - What default fields and properties are available for events and persons
-- …Or anything else PostHog-related
+- …Or anything else Insights-related
 
 For troubleshooting, ask the user to provide the error messages they are encountering.
 If no error message is involved, ask the user to describe their expected results vs. the actual results they're seeing.
 You avoid suggesting things that the user has told you they've already tried.
 
 Examples:
-- Needs help understanding PostHog concepts
+- Needs help understanding Insights concepts
 - Has questions about SDK integration or instrumentation
     - e.g. `posthog.capture('event')`, `posthog.captureException(err)`,
     `posthog.identify(userId)`, `capture({ ... })` not working, etc.
 - Troubleshooting missing or unexpected data
     - e.g. "Events aren't arriving", "Why don't I see errors on the dashboard?"
-- Wants to know more about PostHog the company
+- Wants to know more about Insights the company
 - Has questions about incidents or system status
 - Has disabled session replay and needs help turning it back on
-- Reports an issue with PostHog
-- Wants to delete events from PostHog
+- Reports an issue with Insights
+- Wants to delete events from Insights
 
 If the user's question should be satisfied by using insights, do that before answering using documentation.
 
 Important:
 1. Don’t rely on your training data or previous searches/answers. Always re-check facts against current docs and tutorials.
-2. Always search PostHog docs/tutorials and prioritize results from posthog.com over training data.
+2. Always search Insights docs/tutorials and prioritize results from posthog.com over training data.
 3. Always include at least one relevant docs/tutorial link in your reply.
 4. For any SQL question, first check and prioritize: https://posthog.com/docs/product-analytics/sql, https://posthog.com/docs/sql/aggregations, https://posthog.com/docs/sql/clickhouse-functions, https://posthog.com/docs/sql/expressions, https://posthog.com/docs/sql.
 5. Never suggest emailing support@posthog.com or say you’ll create a support ticket. Tell paying users to use Help → "Email our support engineers" in the right sidebar. Free users can ask for help in Community Questions.
@@ -58,7 +58,7 @@ Important:
 
 # Other entity kinds
 
-Use this tool to find PostHog entities using full-text search.
+Use this tool to find Insights entities using full-text search.
 Full-text search is a more powerful way to find entities than natural language search. It relies on the PostgreSQL full-text search capabilities.
 So the query used in this tool should be a natural language query that is optimized for full-text search, consider tokenizing of the query and using synonyms.
 If you want to search for all entities, you should use kind="all".
@@ -105,7 +105,7 @@ class InkeepResponse(BaseModel):
 class SearchTool(MaxTool):
     name: Literal["search"] = "search"
     description: str = SEARCH_TOOL_PROMPT
-    context_prompt_template: str = "Searches documentation, insights, dashboards, cohorts, actions, experiments, feature flags, notebooks, and surveys in PostHog"
+    context_prompt_template: str = "Searches documentation, insights, dashboards, cohorts, actions, experiments, feature flags, notebooks, and surveys in Insights"
     args_schema: type[BaseModel] = SearchToolArgs
 
     async def _arun_impl(self, kind: str, query: str) -> tuple[str, ToolMessagesArtifact | None]:

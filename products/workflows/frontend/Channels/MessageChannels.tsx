@@ -4,7 +4,7 @@ import { LemonSkeleton } from '@posthog/lemon-ui'
 
 import { ProductIntroduction } from 'lib/components/ProductIntroduction/ProductIntroduction'
 import { SetupTaskId } from 'lib/components/ProductSetup'
-import { MicrophoneHog } from 'lib/components/hedgehogs'
+import { MicrophoneHog } from 'lib/components/mascots'
 import { EmailIntegrationsList } from 'lib/integrations/EmailIntegrationsList'
 import { IntegrationsList } from 'lib/integrations/IntegrationsList'
 import { integrationsLogic } from 'lib/integrations/integrationsLogic'

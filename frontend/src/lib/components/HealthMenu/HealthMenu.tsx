@@ -90,7 +90,7 @@ const LegacyHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.Ele
                         >
                             <IconCloud />
                         </IconWithBadge>
-                        PostHog status
+                        Insights status
                     </Link>
                 )}
             />
@@ -199,7 +199,7 @@ const UnifiedHealthMenu = ({ iconOnly = false }: { iconOnly?: boolean }): JSX.El
                         >
                             <IconCloud />
                         </IconWithBadge>
-                        PostHog status
+                        Insights status
                     </Link>
                 )}
             />

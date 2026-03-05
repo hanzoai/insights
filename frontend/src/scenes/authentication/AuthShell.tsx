@@ -17,7 +17,7 @@ interface AuthShellProps {
     leftContainerContent?: JSX.Element
     fixedWidth?: boolean
     sideLogo?: boolean
-    showHedgehog?: boolean
+    showMascot?: boolean
     hideFooterForTwig?: boolean
 }
 
@@ -30,7 +30,7 @@ export function AuthShell({
     leftContainerContent,
     fixedWidth,
     sideLogo,
-    showHedgehog,
+    showMascot,
     hideFooterForTwig,
 }: AuthShellProps): JSX.Element {
     const { preflight } = useValues(preflightLogic)
@@ -56,7 +56,7 @@ export function AuthShell({
         )
     }
 
-    return showHedgehog ? (
+    return showMascot ? (
         <BridgePage
             view={view}
             header={header}
@@ -64,7 +64,7 @@ export function AuthShell({
             leftContainerContent={leftContainerContent}
             fixedWidth={fixedWidth}
             sideLogo={sideLogo}
-            hedgehog={true}
+            mascot={true}
             message={message}
         >
             {children}

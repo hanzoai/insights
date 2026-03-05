@@ -32,7 +32,7 @@ class TikTokAdsSource(SimpleSource[TikTokAdsSourceConfig], OAuthMixin):
         return SourceConfig(
             name=SchemaExternalDataSourceType.TIK_TOK_ADS,
             label="TikTok Ads",
-            caption="Collect campaign data, ad performance, and advertising metrics from TikTok Ads. Ensure you have granted PostHog access to your TikTok Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/tiktok-ads).",
+            caption="Collect campaign data, ad performance, and advertising metrics from TikTok Ads. Ensure you have granted Insights access to your TikTok Ads account, learn how to do this in [the documentation](https://posthog.com/docs/cdp/sources/tiktok-ads).",
             betaSource=True,
             iconPath="/static/services/tiktok.png",
             docsUrl="https://posthog.com/docs/cdp/sources/tiktok-ads",

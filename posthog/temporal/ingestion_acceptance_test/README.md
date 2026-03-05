@@ -1,6 +1,6 @@
 # Ingestion Acceptance Tests
 
-End-to-end tests that verify the PostHog ingestion pipeline is functioning correctly. These tests capture real events via the PostHog SDK and query them back via the HogQL API to ensure the full pipeline works as expected.
+End-to-end tests that verify the Insights ingestion pipeline is functioning correctly. These tests capture real events via the Insights SDK and query them back via the HogQL API to ensure the full pipeline works as expected.
 
 ## Goal
 
@@ -28,7 +28,7 @@ Detect ingestion pipeline issues in production before users notice them. The tes
                     ┌───────────────┴───────────────┐
                     ▼                               ▼
            ┌──────────────┐                ┌──────────────┐
-           │ PostHog SDK  │                │  HogQL API   │
+           │ Insights SDK  │                │  HogQL API   │
            │  (capture)   │                │   (query)    │
            └──────────────┘                └──────────────┘
                     │                               │
@@ -65,7 +65,7 @@ class TestExample(AcceptanceTest):
 1. Create a file in `tests/` named `acceptance_test_<feature>.py`
 2. Create a class starting with `Test` that inherits from `AcceptanceTest`
 3. Add methods starting with `test_` for each test case
-4. Use `self.client` for PostHog operations and `self.config` for configuration
+4. Use `self.client` for Insights operations and `self.config` for configuration
 
 **Available client methods:**
 
@@ -87,7 +87,7 @@ All configuration is loaded from environment variables with the `INGESTION_ACCEP
 
 | Variable                | Required | Default | Description                                       |
 | ----------------------- | -------- | ------- | ------------------------------------------------- |
-| `API_HOST`              | Yes      | -       | PostHog API host (e.g., `https://us.posthog.com`) |
+| `API_HOST`              | Yes      | -       | Insights API host (e.g., `https://us.posthog.com`) |
 | `PROJECT_API_KEY`       | Yes      | -       | Project API key for capturing events              |
 | `PROJECT_ID`            | Yes      | -       | Project ID for querying events                    |
 | `PERSONAL_API_KEY`      | Yes      | -       | Personal API key for HogQL queries                |
@@ -115,7 +115,7 @@ ingestion_acceptance_test/
 ├── __init__.py
 ├── __main__.py              # CLI entry point for local runs
 ├── activities.py            # Temporal activity definition
-├── client.py                # PostHog SDK wrapper with HTTP retry and HogQL queries
+├── client.py                # Insights SDK wrapper with HTTP retry and HogQL queries
 ├── config.py                # Pydantic settings for environment config
 ├── results.py               # Test result dataclasses
 ├── runner.py                # Test execution engine

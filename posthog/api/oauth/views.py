@@ -645,7 +645,7 @@ class OAuthAuthorizationServerMetadataView(APIView):
     """
     OAuth 2.0 Authorization Server Metadata (RFC 8414).
 
-    This endpoint enables MCP clients to discover PostHog's OAuth endpoints,
+    This endpoint enables MCP clients to discover Insights's OAuth endpoints,
     including the DCR registration endpoint for dynamic client registration.
 
     Unlike OIDC Discovery (/.well-known/openid-configuration), this endpoint

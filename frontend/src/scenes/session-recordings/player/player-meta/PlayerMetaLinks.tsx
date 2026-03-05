@@ -186,12 +186,12 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
                 icon: <IconBlank />,
             },
             isStandardMode && {
-                label: 'PostHog .json',
+                label: 'Insights .json',
                 status: 'default',
                 icon: <IconDownload />,
                 onClick: () => exportRecordingToFile(),
                 tooltip:
-                    'Export PostHog recording data to a JSON file. This can be loaded later into PostHog for playback.',
+                    'Export Insights recording data to a JSON file. This can be loaded later into Insights for playback.',
                 'data-attr': 'replay-export-posthog-json',
             },
             isStandardMode && {
@@ -208,7 +208,7 @@ const MenuActions = ({ size }: { size: PlayerMetaBreakpoints }): JSX.Element => 
                 onClick: () => exportRecordingToVideoFile(),
                 tooltip: hasReachedExportFullVideoLimit
                     ? 'You have reached your export limit.'
-                    : 'Export PostHog recording data to MP4 video file.',
+                    : 'Export Insights recording data to MP4 video file.',
                 'data-attr': 'replay-export-mp4',
                 className: hasReachedExportFullVideoLimit ? 'replay-export-limit-reached-button' : '',
             },

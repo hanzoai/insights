@@ -4,7 +4,7 @@ import { LegacyDestinationPluginMeta } from '../../types'
 
 export const setupPlugin = async ({ config, global, logger, fetch }: LegacyDestinationPluginMeta): Promise<void> => {
     // With this call we validate the API Key and also we get the list of custom fields, which will be needed
-    // to configure the map between PostHog and Sendgrid.
+    // to configure the map between Insights and Sendgrid.
     const fieldsDefResponse = await fetch('https://api.sendgrid.com/v3/marketing/field_definitions', {
         method: 'GET',
         headers: {
@@ -19,29 +19,29 @@ export const setupPlugin = async ({ config, global, logger, fetch }: LegacyDesti
 
     // Custom fields in Sendgrid have a name and an ID. The name is what users configure when they create a custom field,
     // and ID is automatically assigned by Sendgrid.
-    // In the config of this plugin, users configure the map between PostHog prop names and Sendgrid custom fields names.
-    // Here we resolve the relation and calculate a map between PostHog prop names and Sendgrid custom field IDs.
+    // In the config of this plugin, users configure the map between Insights prop names and Sendgrid custom fields names.
+    // Here we resolve the relation and calculate a map between Insights prop names and Sendgrid custom field IDs.
 
-    let posthogPropsToSendgridCustomFieldNamesMap: any = {}
+    let insightsPropsToSendgridCustomFieldNamesMap: any = {}
     try {
-        posthogPropsToSendgridCustomFieldNamesMap = parseCustomFieldsMap(config.customFields)
+        insightsPropsToSendgridCustomFieldNamesMap = parseCustomFieldsMap(config.customFields)
     } catch (e) {
         logger.error(`Invalid format for custom fields: ${e}`)
         throw new Error('Invalid format for custom fields')
     }
 
-    const posthogPropsToSendgridCustomFieldIDsMap: any = {}
-    for (const [posthogProp, sendgridCustomFieldName] of Object.entries(posthogPropsToSendgridCustomFieldNamesMap)) {
+    const insightsPropsToSendgridCustomFieldIDsMap: any = {}
+    for (const [insightsProp, sendgridCustomFieldName] of Object.entries(insightsPropsToSendgridCustomFieldNamesMap)) {
         const cfIndex: any = Object.keys(fieldsDef.custom_fields || {}).filter(
             (key) => fieldsDef.custom_fields[key].name === sendgridCustomFieldName
         )
         if (cfIndex.length !== 1) {
             throw new Error(`Custom field with name ${sendgridCustomFieldName} is not defined in Sendgrid`)
         }
-        posthogPropsToSendgridCustomFieldIDsMap[posthogProp] = fieldsDef.custom_fields[cfIndex].id
+        insightsPropsToSendgridCustomFieldIDsMap[insightsProp] = fieldsDef.custom_fields[cfIndex].id
     }
 
-    global.customFieldsMap = posthogPropsToSendgridCustomFieldIDsMap
+    global.customFieldsMap = insightsPropsToSendgridCustomFieldIDsMap
 }
 
 export const onEvent = async (

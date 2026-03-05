@@ -15,9 +15,9 @@ from django.utils import timezone
 
 import structlog
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.models import Team, User
 from posthog.redis import get_client
@@ -246,7 +246,7 @@ def build_notebook_sandbox_config(notebook: Notebook) -> SandboxConfig:
 
 class KernelRuntimeService:
     _TYPE_EXPRESSION_PREFIX = "__type__"
-    _HOGQL_QUERY_EXPRESSION_PREFIX = "__hogql_query__"
+    _INSIGHTSQL_QUERY_EXPRESSION_PREFIX = "__insightsql_query__"
     _MODAL_REQUIRED_ENV_VARS = ("MODAL_TOKEN_ID", "MODAL_TOKEN_SECRET")
     _SERVICE_LOCK_TIMEOUT_SECONDS = 30.0
     _HANDLE_LOCK_TIMEOUT_SECONDS = 60.0
@@ -419,8 +419,8 @@ class KernelRuntimeService:
                         "traceback": payload.get("traceback", []),
                     }
                 continue
-            if name.startswith(self._HOGQL_QUERY_EXPRESSION_PREFIX):
-                variable_name = name[len(self._HOGQL_QUERY_EXPRESSION_PREFIX) :]
+            if name.startswith(self._INSIGHTSQL_QUERY_EXPRESSION_PREFIX):
+                variable_name = name[len(self._INSIGHTSQL_QUERY_EXPRESSION_PREFIX) :]
                 if not variable_name:
                     continue
                 if payload.get("status") == "ok":
@@ -453,7 +453,7 @@ class KernelRuntimeService:
                 payload["type"] = type_name
             query_value = query_results.get(name)
             if query_value and payload.get("status") == "ok":
-                payload["hogql_query"] = query_value
+                payload["insightsql_query"] = query_value
         for name, error_payload in type_errors.items():
             if name not in parsed:
                 parsed[name] = error_payload
@@ -462,7 +462,7 @@ class KernelRuntimeService:
                 entry: dict[str, Any] = {"status": "ok", "type": type_name}
                 query_value = query_results.get(name)
                 if query_value:
-                    entry["hogql_query"] = query_value
+                    entry["insightsql_query"] = query_value
                 parsed[name] = entry
         for name, error_payload in query_errors.items():
             if name not in parsed:
@@ -478,7 +478,7 @@ class KernelRuntimeService:
         filtered, _ = parser.feed(text)
         return filtered + parser.flush()
 
-    def _parse_hogql_placeholders_payload(self, payload: Any) -> dict[str, ast.Expr] | None:
+    def _parse_insightsql_placeholders_payload(self, payload: Any) -> dict[str, ast.Expr] | None:
         if not isinstance(payload, dict):
             return None
         placeholders: dict[str, ast.Expr] = {}
@@ -486,7 +486,7 @@ class KernelRuntimeService:
             if not isinstance(name, str) or not isinstance(entry, dict):
                 continue
             placeholder_type = entry.get("type")
-            if placeholder_type == "hogql_query":
+            if placeholder_type == "insightsql_query":
                 query = entry.get("query")
                 if isinstance(query, str) and query.strip():
                     placeholders[name] = parse_select(query)
@@ -506,7 +506,7 @@ class KernelRuntimeService:
             )
             return
 
-        call = payload.get("call") or "hogql_execute"
+        call = payload.get("call") or "insightsql_execute"
         query = payload.get("query")
         response_path = payload.get("response_path")
         placeholders_payload = payload.get("placeholders")
@@ -541,7 +541,7 @@ class KernelRuntimeService:
             )
             return
 
-        if call != "hogql_execute":
+        if call != "insightsql_execute":
             logger.warning(
                 "notebook_bridge_unsupported_call",
                 call=call,
@@ -551,16 +551,16 @@ class KernelRuntimeService:
             response_payload = {"error": f"Unsupported notebook bridge call: {call}"}
         else:
             try:
-                placeholders = self._parse_hogql_placeholders_payload(placeholders_payload)
-                response = execute_hogql_query(query=query, team=team, placeholders=placeholders)
+                placeholders = self._parse_insightsql_placeholders_payload(placeholders_payload)
+                response = execute_insightsql_query(query=query, team=team, placeholders=placeholders)
                 if hasattr(response, "model_dump"):
                     response_payload = response.model_dump(exclude_none=True)
                 else:
                     response_payload = response.dict(exclude_none=True)
                 if "clickhouse" in response_payload:
                     del response_payload["clickhouse"]
-                if "hogql" in response_payload:
-                    del response_payload["hogql"]
+                if "insightsql" in response_payload:
+                    del response_payload["insightsql"]
                 if "timings" in response_payload:
                     del response_payload["timings"]
                 if "modifiers" in response_payload:
@@ -627,8 +627,8 @@ class KernelRuntimeService:
         expressions: dict[str, str] = {}
         for name in variable_names:
             expressions[f"{self._TYPE_EXPRESSION_PREFIX}{name}"] = f"type({name}).__name__"
-            expressions[f"{self._HOGQL_QUERY_EXPRESSION_PREFIX}{name}"] = (
-                f"{name}._query if type({name}).__name__ == 'HogQLLazyFrame' else None"
+            expressions[f"{self._INSIGHTSQL_QUERY_EXPRESSION_PREFIX}{name}"] = (
+                f"{name}._query if type({name}).__name__ == 'InsightsQLLazyFrame' else None"
             )
         return expressions
 
@@ -944,12 +944,12 @@ class KernelRuntimeService:
             "    while offset < len(data):\n"
             "        written = os.write(1, data[offset:])\n"
             "        if written <= 0:\n"
-            "            raise RuntimeError('Failed to write HogQL request')\n"
+            "            raise RuntimeError('Failed to write InsightsQL request')\n"
             "        offset += written\n"
             "\n"
-            '_HOGQL_PLACEHOLDER_PATTERN = re.compile(r"\\{([A-Za-z_][\\w$]*)\\}")\n'
+            '_INSIGHTSQL_PLACEHOLDER_PATTERN = re.compile(r"\\{([A-Za-z_][\\w$]*)\\}")\n'
             "\n"
-            "def _find_hogql_placeholders(query: str) -> list[str]:\n"
+            "def _find_insightsql_placeholders(query: str) -> list[str]:\n"
             "    if not query:\n"
             "        return []\n"
             "\n"
@@ -970,61 +970,61 @@ class KernelRuntimeService:
             "    # Find placeholders in the cleaned query\n"
             "    seen = set()\n"
             "    names = []\n"
-            "    for match in _HOGQL_PLACEHOLDER_PATTERN.finditer(query):\n"
+            "    for match in _INSIGHTSQL_PLACEHOLDER_PATTERN.finditer(query):\n"
             "        name = match.group(1)\n"
             "        if name and name not in seen:\n"
             "            seen.add(name)\n"
             "            names.append(name)\n"
             "    return names\n"
             "\n"
-            "def _hogql_execute_raw(\n"
+            "def _insightsql_execute_raw(\n"
             "    query: str, *, timeout: float | None = 30.0, placeholders: dict[str, Any] | None = None\n"
             ") -> Any:\n"
             "    if not isinstance(query, str):\n"
             "        raise ValueError('query must be a string')\n"
-            "    fd, response_path = tempfile.mkstemp(prefix='hogql_response_', suffix='.json')\n"
+            "    fd, response_path = tempfile.mkstemp(prefix='insightsql_response_', suffix='.json')\n"
             "    os.close(fd)\n"
             "    os.unlink(response_path)\n"
-            "    payload = {'call': 'hogql_execute', 'query': query, 'response_path': response_path}\n"
+            "    payload = {'call': 'insightsql_execute', 'query': query, 'response_path': response_path}\n"
             "    if placeholders:\n"
             "        payload['placeholders'] = placeholders\n"
             "    _notebook_bridge_write(payload)\n"
             "    start_time = time.monotonic()\n"
             "    while not os.path.exists(response_path):\n"
             "        if timeout is not None and time.monotonic() - start_time > timeout:\n"
-            "            raise TimeoutError('Timed out waiting for HogQL response')\n"
+            "            raise TimeoutError('Timed out waiting for InsightsQL response')\n"
             "        time.sleep(0.1)\n"
             "    expected_length: int | None = None\n"
             "    data = b''\n"
             "    with open(response_path, 'rb') as response_file:\n"
             "        header = response_file.readline()\n"
             "        if not header:\n"
-            "            raise RuntimeError('Empty HogQL response')\n"
+            "            raise RuntimeError('Empty InsightsQL response')\n"
             "        try:\n"
             "            expected_length = int(header.strip() or b'0')\n"
             "        except ValueError:\n"
-            "            raise RuntimeError('Invalid HogQL response length')\n"
+            "            raise RuntimeError('Invalid InsightsQL response length')\n"
             "        while expected_length is not None and len(data) < expected_length:\n"
             "            chunk = response_file.read(expected_length - len(data))\n"
             "            if chunk:\n"
             "                data += chunk\n"
             "                continue\n"
             "            if timeout is not None and time.monotonic() - start_time > timeout:\n"
-            "                raise TimeoutError('Timed out reading HogQL response')\n"
+            "                raise TimeoutError('Timed out reading InsightsQL response')\n"
             "            time.sleep(0.1)\n"
             "    try:\n"
             "        os.unlink(response_path)\n"
             "    except Exception:\n"
             "        pass\n"
             "    if expected_length is None or len(data) != expected_length:\n"
-            "        raise RuntimeError('Incomplete HogQL response')\n"
+            "        raise RuntimeError('Incomplete InsightsQL response')\n"
             "    text = data.decode('utf-8')\n"
             "    try:\n"
             "        return json.loads(text)\n"
             "    except Exception:\n"
             "        return text\n"
             "\n"
-            "class HogQLLazyFrame:\n"
+            "class InsightsQLLazyFrame:\n"
             "    def __init__(\n"
             "        self, query: str, *, timeout: float | None = 30.0, placeholders: list[str] | None = None\n"
             "    ) -> None:\n"
@@ -1038,8 +1038,8 @@ class KernelRuntimeService:
             "\n"
             "    def _get_response(self) -> dict[str, Any] | str:\n"
             "        if self._response is None:\n"
-            "            placeholders = _resolve_hogql_placeholders(self._placeholders) if self._placeholders else None\n"
-            "            self._response = _hogql_execute_raw(self._query, timeout=self._timeout, placeholders=placeholders)\n"
+            "            placeholders = _resolve_insightsql_placeholders(self._placeholders) if self._placeholders else None\n"
+            "            self._response = _insightsql_execute_raw(self._query, timeout=self._timeout, placeholders=placeholders)\n"
             "        return self._response\n"
             "\n"
             "    def to_json(self) -> dict[str, Any] | str:\n"
@@ -1053,7 +1053,7 @@ class KernelRuntimeService:
             "            if isinstance(response, dict) and response.get('error'):\n"
             "                raise RuntimeError(response['error'])\n"
             "            if not isinstance(response, dict):\n"
-            "                raise RuntimeError('Unexpected HogQL response type')\n"
+            "                raise RuntimeError('Unexpected InsightsQL response type')\n"
             "            results = response.get('results') or []\n"
             "            columns = response.get('columns') or []\n"
             "            self._dataframe = pd.DataFrame(results, columns=columns)\n"
@@ -1075,7 +1075,7 @@ class KernelRuntimeService:
             "        self.to_df().__setitem__(key, value)\n"
             "\n"
             "    def __repr__(self) -> str:\n"
-            '        return f"HogQLLazyFrame(query={self._query!r})"\n'
+            '        return f"InsightsQLLazyFrame(query={self._query!r})"\n'
             "\n"
             "    def __str__(self) -> str:\n"
             "        return str(self.to_df())\n"
@@ -1095,30 +1095,30 @@ class KernelRuntimeService:
             "    def _ipython_display_(self) -> None:\n"
             "        return self.to_df()._ipython_display_()\n"
             "\n"
-            "def _serialize_hogql_placeholder(value: Any) -> dict[str, Any]:\n"
-            "    if isinstance(value, HogQLLazyFrame):\n"
-            "        return {'type': 'hogql_query', 'query': value._query}\n"
+            "def _serialize_insightsql_placeholder(value: Any) -> dict[str, Any]:\n"
+            "    if isinstance(value, InsightsQLLazyFrame):\n"
+            "        return {'type': 'insightsql_query', 'query': value._query}\n"
             "    if isinstance(value, (str, int, float, bool)) or value is None:\n"
             "        return {'type': 'constant', 'value': value}\n"
             "    if isinstance(value, (list, tuple)):\n"
             "        return {'type': 'constant', 'value': list(value)}\n"
             "    if isinstance(value, dict):\n"
             "        return {'type': 'constant', 'value': value}\n"
-            "    raise ValueError(f'Unsupported HogQL placeholder type: {type(value).__name__}')\n"
+            "    raise ValueError(f'Unsupported InsightsQL placeholder type: {type(value).__name__}')\n"
             "\n"
-            "def _resolve_hogql_placeholders(names: list[str]) -> dict[str, Any]:\n"
+            "def _resolve_insightsql_placeholders(names: list[str]) -> dict[str, Any]:\n"
             "    placeholders: dict[str, Any] = {}\n"
             "    for name in names:\n"
             "        if name not in globals():\n"
-            "            raise KeyError(f\"HogQL placeholder '{name}' is not defined.\")\n"
-            "        placeholders[name] = _serialize_hogql_placeholder(globals()[name])\n"
+            "            raise KeyError(f\"InsightsQL placeholder '{name}' is not defined.\")\n"
+            "        placeholders[name] = _serialize_insightsql_placeholder(globals()[name])\n"
             "    return placeholders\n"
             "\n"
-            "def hogql_execute(\n"
+            "def insightsql_execute(\n"
             "    query: str, *, timeout: float | None = 30.0, placeholders: Sequence[str] | None = None\n"
-            ") -> HogQLLazyFrame:\n"
-            "    placeholder_list = _find_hogql_placeholders(query) if placeholders is None else list(placeholders)\n"
-            "    return HogQLLazyFrame(query, timeout=timeout, placeholders=placeholder_list)\n"
+            ") -> InsightsQLLazyFrame:\n"
+            "    placeholder_list = _find_insightsql_placeholders(query) if placeholders is None else list(placeholders)\n"
+            "    return InsightsQLLazyFrame(query, timeout=timeout, placeholders=placeholder_list)\n"
         )
 
     def _reuse_kernel_handle_for_backend(

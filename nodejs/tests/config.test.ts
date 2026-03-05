@@ -29,23 +29,23 @@ describe('config', () => {
     })
 
     describe('DATABASE_URL', () => {
-        test('Error if DATABASE_URL is not set AND POSTHOG_DB_NAME is not set', () => {
+        test('Error if DATABASE_URL is not set AND INSIGHTS_DB_NAME is not set', () => {
             const env = {
                 DATABASE_URL: '',
-                POSTHOG_DB_NAME: '',
+                INSIGHTS_DB_NAME: '',
             }
             expect(() => overrideWithEnv(getDefaultConfig(), env)).toThrow(
-                'You must specify either DATABASE_URL or the database options POSTHOG_DB_NAME, POSTHOG_DB_USER, POSTHOG_DB_PASSWORD, POSTHOG_POSTGRES_HOST, POSTHOG_POSTGRES_PORT!'
+                'You must specify either DATABASE_URL or the database options INSIGHTS_DB_NAME, INSIGHTS_DB_USER, INSIGHTS_DB_PASSWORD, INSIGHTS_POSTGRES_HOST, INSIGHTS_POSTGRES_PORT!'
             )
         })
 
         test('Set DATABASE_URL to a string composed of URL-encoded connection options if DATABASE_URL is not explictly set', () => {
             const env = {
                 DATABASE_URL: '',
-                POSTHOG_DB_NAME: 'mydb',
-                POSTHOG_DB_USER: 'user1@domain',
-                POSTHOG_DB_PASSWORD: 'strong?password',
-                POSTHOG_POSTGRES_HOST: 'my.host',
+                INSIGHTS_DB_NAME: 'mydb',
+                INSIGHTS_DB_USER: 'user1@domain',
+                INSIGHTS_DB_PASSWORD: 'strong?password',
+                INSIGHTS_POSTGRES_HOST: 'my.host',
             }
             const config = overrideWithEnv(getDefaultConfig(), env)
             expect(config.DATABASE_URL).toEqual('postgres://user1%40domain:strong%3Fpassword@my.host:5432/mydb')
@@ -54,10 +54,10 @@ describe('config', () => {
         test('DATABASE_URL takes precedence to individual config options', () => {
             const env = {
                 DATABASE_URL: 'my_db_url',
-                POSTHOG_DB_NAME: 'mydb',
-                POSTHOG_DB_USER: 'user1',
-                POSTHOG_DB_PASSWORD: 'strongpassword',
-                POSTHOG_POSTGRES_HOST: 'my.host',
+                INSIGHTS_DB_NAME: 'mydb',
+                INSIGHTS_DB_USER: 'user1',
+                INSIGHTS_DB_PASSWORD: 'strongpassword',
+                INSIGHTS_POSTGRES_HOST: 'my.host',
             }
             const config = overrideWithEnv(getDefaultConfig(), env)
             expect(config.DATABASE_URL).toEqual('my_db_url')

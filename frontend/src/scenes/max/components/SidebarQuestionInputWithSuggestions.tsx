@@ -39,8 +39,8 @@ export function SidebarQuestionInputWithSuggestions({
 
     const tip =
         !coreMemoryLoading && !coreMemory?.text
-            ? 'Tip: Run /init to initialize PostHog AI in this project'
-            : 'Try PostHog AI for…'
+            ? 'Tip: Run /init to initialize Insights AI in this project'
+            : 'Try Insights AI for…'
 
     return (
         <DismissableLayer
@@ -70,14 +70,14 @@ export function SidebarQuestionInputWithSuggestions({
                             size="xsmall"
                             type="secondary"
                             icon={<IconGear />}
-                            tooltip="Edit PostHog AI memory"
+                            tooltip="Edit Insights AI memory"
                         />,
                     ]}
                 />
             </div>
             {isRemovingSidePanelFlag && (
                 <LemonModal
-                    title="PostHog AI memory"
+                    title="Insights AI memory"
                     isOpen={settingsModalOpen}
                     onClose={() => setSettingsModalOpen(false)}
                     width="40rem"

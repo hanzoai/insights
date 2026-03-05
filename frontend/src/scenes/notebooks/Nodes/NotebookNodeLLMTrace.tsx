@@ -27,7 +27,7 @@ import { llmAnalyticsSharedLogic } from 'products/llm_analytics/frontend/llmAnal
 import { llmAnalyticsTracesTabLogic } from 'products/llm_analytics/frontend/tabs/llmAnalyticsTracesTabLogic'
 
 import { NotebookNodeAttributeProperties, NotebookNodeProps, NotebookNodeType } from '../types'
-import { createPostHogWidgetNode } from './NodeWrapper'
+import { createInsightsWidgetNode } from './NodeWrapper'
 import { notebookNodeLogic } from './notebookNodeLogic'
 import { getLogicKey } from './utils'
 
@@ -174,7 +174,7 @@ type NotebookNodeLLMTraceAttributes = {
     tabId: string
 }
 
-export const NotebookNodeLLMTrace = createPostHogWidgetNode<NotebookNodeLLMTraceAttributes>({
+export const NotebookNodeLLMTrace = createInsightsWidgetNode<NotebookNodeLLMTraceAttributes>({
     nodeType: NotebookNodeType.LLMTrace,
     titlePlaceholder: 'Traces',
     Component,

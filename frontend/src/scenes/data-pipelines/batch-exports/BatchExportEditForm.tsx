@@ -863,7 +863,7 @@ export function BatchExportsEditFields({
                 </>
             ) : batchExportConfigForm.destination === 'HTTP' ? (
                 <>
-                    <LemonField name="url" label="PostHog region">
+                    <LemonField name="url" label="Insights region">
                         <LemonSelect
                             options={[
                                 { value: 'https://us.i.posthog.com/batch/', label: 'US' },

@@ -1,5 +1,5 @@
 EXECUTE_SQL_SYSTEM_PROMPT = """
-Use this tool to generate a InsightsQL query, which is PostHog's variant of SQL that supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
+Use this tool to generate a InsightsQL query, which is Insights's variant of SQL that supports most of ClickHouse SQL. We're going to use terms "InsightsQL" and "SQL" interchangeably.
 
 # Important InsightsQL differences versus other SQL dialects
 - JSON properties are accessed using `properties.foo.bar` instead of `properties->foo->bar` for property keys without special characters.

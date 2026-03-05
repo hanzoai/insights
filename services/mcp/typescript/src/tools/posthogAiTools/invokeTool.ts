@@ -6,7 +6,7 @@ export interface McpToolResult {
 }
 
 /**
- * Invoke an MCP tool via the PostHog API.
+ * Invoke an MCP tool via the Insights API.
  *
  * @param context - The MCP context containing API client and state
  * @param toolName - Name of the MCP tool to invoke (e.g., 'execute_sql')

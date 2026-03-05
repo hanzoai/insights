@@ -40,7 +40,7 @@ export const isTestEnv = (): boolean => determineNodeEnv() === NodeEnv.Test
 export const isDevEnv = (): boolean => determineNodeEnv() === NodeEnv.Development
 export const isProdEnv = (): boolean => determineNodeEnv() === NodeEnv.Production
 
-// Keep this in sync with is_cloud() in posthog/cloud_utils.py.
+// Keep this in sync with is_cloud() in insights/cloud_utils.py.
 // "dev" refers to the hosted development environment, not local development (which is "local").
 export const isCloud = (): boolean =>
     ['EU', 'US', 'DEV', 'E2E'].includes((process.env.CLOUD_DEPLOYMENT ?? '').toUpperCase())

@@ -25,7 +25,7 @@ export function AndroidSnippet({ flagKey, variant }: SnippetProps): JSX.Element 
     return (
         <>
             <CodeSnippet language={Language.Kotlin} wrap>
-                {`if (PostHog.getFeatureFlag("${flagKey}") == "${variant}") {
+                {`if (Insights.getFeatureFlag("${flagKey}") == "${variant}") {
     // do something
 } else {
     // It's a good idea to let control variant always be the default behaviour,
@@ -40,7 +40,7 @@ export function IOSSnippet({ flagKey, variant }: SnippetProps): JSX.Element {
     return (
         <>
             <CodeSnippet language={Language.Swift} wrap>
-                {`if (PostHogSDK.shared.getFeatureFlag("${flagKey}") as? String == "${variant}") {
+                {`if (InsightsSDK.shared.getFeatureFlag("${flagKey}") as? String == "${variant}") {
     // do something
 } else {
     // It's a good idea to let control variant always be the default behaviour,
@@ -108,15 +108,15 @@ function App() {
 }
 
 // Method two: using the feature flags component
-import { PostHogFeature } from 'posthog-js/react'
+import { InsightsFeature } from 'posthog-js/react'
 
 function App() {
     return (
-        <PostHogFeature flag='${flagKey}' match='${variant}'>
+        <InsightsFeature flag='${flagKey}' match='${variant}'>
             <div>
                 {/* the component to show */}
             </div>
-        </PostHogFeature>
+        </InsightsFeature>
     )
 }
 
@@ -146,7 +146,7 @@ export function PHPSnippet({ flagKey, variant }: SnippetProps): JSX.Element {
     return (
         <>
             <CodeSnippet language={Language.PHP} wrap>
-                {`if (PostHog::getFeatureFlag('${flagKey}', 'user distinct id') == '${variant}') {
+                {`if (Insights::getFeatureFlag('${flagKey}', 'user distinct id') == '${variant}') {
     // Do something differently for this user
 } else {
     // It's a good idea to let control variant always be the default behaviour,

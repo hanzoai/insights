@@ -23,9 +23,9 @@ from rest_framework import exceptions, serializers, status, viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from posthog.hogql import ast
-from posthog.hogql.parser import parse_select
-from posthog.hogql.query import execute_hogql_query
+from posthog.insightsql import ast
+from posthog.insightsql.parser import parse_select
+from posthog.insightsql.query import execute_insightsql_query
 
 from posthog.api.routing import TeamAndOrgViewSetMixin
 from posthog.clickhouse.client.connection import Workload
@@ -188,7 +188,7 @@ def fetch_log_by_uuid(team: Team, uuid: str, timestamp: str) -> dict | None:
             "timestamp": ast.Constant(value=timestamp),
         },
     )
-    response = execute_hogql_query(
+    response = execute_insightsql_query(
         query_type="LogExplainQuery",
         query=query,
         team=team,

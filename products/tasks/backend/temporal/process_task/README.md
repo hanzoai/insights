@@ -5,7 +5,7 @@ Cloud runs are AI agents that execute code tasks in isolated sandboxes. A user c
 ## Architecture
 
 ```text
-                                     PostHog API
+                                     Insights API
                                     ┌─────────────┐
                   POST /run         │ TaskViewSet  │
 User ─────────────────────────────►│   .run()     │
@@ -48,7 +48,7 @@ User ─────────────────────────
 
 ## Components
 
-### PostHog API
+### Insights API
 
 `backend/api.py` — `TaskViewSet.run` creates a `TaskRun` (status=QUEUED) and calls `execute_task_processing_workflow()` which starts the Temporal workflow. `TaskRunViewSet.partial_update` handles status transitions and signals the Temporal workflow on terminal statuses via `_signal_workflow_completion`.
 
@@ -82,8 +82,8 @@ Environment variables consumed inside the sandbox:
 | Variable                   | Purpose                                              |
 | -------------------------- | ---------------------------------------------------- |
 | `GITHUB_TOKEN`             | GitHub installation access token for repo operations |
-| `POSTHOG_PERSONAL_API_KEY` | OAuth access token (6h TTL) for PostHog API          |
-| `POSTHOG_API_URL`          | PostHog instance URL                                 |
+| `POSTHOG_PERSONAL_API_KEY` | OAuth access token (6h TTL) for Insights API          |
+| `POSTHOG_API_URL`          | Insights instance URL                                 |
 | `POSTHOG_PROJECT_ID`       | Team ID for API scoping                              |
 | `JWT_PUBLIC_KEY`           | Public key for verifying sandbox connection tokens   |
 
@@ -126,7 +126,7 @@ Per-team configuration for sandbox execution: network access level (trusted/full
 | Array OAuth app | Region-specific client IDs (US/EU/DEV) in `backend/temporal/oauth.py`. Creates scoped OAuth tokens with 6h expiry |
 | Sandbox JWT     | RS256 tokens from `backend/services/connection_token.py`. 24h expiry, audience `posthog:sandbox_connection`       |
 | GitHub App      | Installation access tokens via the team's GitHub integration                                                      |
-| API permissions | `PostHogFeatureFlagPermission` + `APIScopePermission` on all endpoints                                            |
+| API permissions | `InsightsFeatureFlagPermission` + `APIScopePermission` on all endpoints                                            |
 
 ## Sandbox providers
 
@@ -151,7 +151,7 @@ SANDBOX_API_URL=https://your-subdomain.ngrok.dev
 
 Get tokens from [modal.com](https://modal.com).
 
-`SANDBOX_API_URL` is the URL the Modal sandbox uses to call back to your local PostHog instance. Since Modal runs in the cloud, it can't reach `localhost`. Use a tunnel like ngrok to expose your local Django server:
+`SANDBOX_API_URL` is the URL the Modal sandbox uses to call back to your local Insights instance. Since Modal runs in the cloud, it can't reach `localhost`. Use a tunnel like ngrok to expose your local Django server:
 
 ```bash
 ngrok http 8000

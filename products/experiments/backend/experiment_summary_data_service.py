@@ -27,10 +27,10 @@ from posthog.schema import (
 )
 
 from posthog.clickhouse.client.connection import Workload
-from posthog.hogql_queries.experiments.experiment_exposures_query_runner import ExperimentExposuresQueryRunner
-from posthog.hogql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
-from posthog.hogql_queries.experiments.utils import get_experiment_stats_method
-from posthog.hogql_queries.query_runner import ExecutionMode
+from posthog.insightsql_queries.experiments.experiment_exposures_query_runner import ExperimentExposuresQueryRunner
+from posthog.insightsql_queries.experiments.experiment_query_runner import ExperimentQueryRunner
+from posthog.insightsql_queries.experiments.utils import get_experiment_stats_method
+from posthog.insightsql_queries.query_runner import ExecutionMode
 from posthog.models import Experiment
 from posthog.sync import database_sync_to_async
 

@@ -23,7 +23,7 @@ import { getCoreFilterDefinition } from '~/taxonomy/helpers'
 import {
     KNOWN_PROMOTED_PROPERTY_PARENTS,
     POSTHOG_EVENT_PROMOTED_PROPERTIES,
-    isPostHogProperty,
+    isInsightsProperty,
 } from '~/taxonomy/taxonomy'
 import { CORE_FILTER_DEFINITIONS_BY_GROUP, PROPERTY_KEYS } from '~/taxonomy/taxonomy'
 import { PropertyDefinitionType, PropertyType } from '~/types'
@@ -83,7 +83,7 @@ function ValueDisplay({
     const { describeProperty } = useValues(propertyDefinitionsModel)
 
     const [editing, setEditing] = useState(false)
-    // Can edit if a key and edit callback is set, the property is custom (i.e. not PostHog), and the value is in the root of the object (i.e. no nested objects)
+    // Can edit if a key and edit callback is set, the property is custom (i.e. not Insights), and the value is in the root of the object (i.e. no nested objects)
     const canEdit = rootKey && !PROPERTY_KEYS.includes(rootKey) && (!nestingLevel || nestingLevel <= 1) && onEdit
 
     const textBasedTypes = ['string', 'number', 'bigint'] // Values that are edited with a text box
@@ -196,7 +196,7 @@ interface PropertiesTableType extends BasePropertyType {
     embedded?: boolean
     onDelete?: (key: string) => void
     className?: string
-    /* only event types are detected and so describe-able. see https://github.com/PostHog/posthog/issues/9245 */
+    /* only event types are detected and so describe-able. see https://github.com/Insights/posthog/issues/9245 */
     useDetectedPropertyType?: boolean
     tableProps?: Partial<LemonTableProps<Record<string, any>>>
     highlightedKeys?: string[]
@@ -226,8 +226,8 @@ export function PropertiesTable({
     parent,
 }: PropertiesTableType): JSX.Element {
     const [searchTerm, setSearchTerm] = useState('')
-    const { hidePostHogPropertiesInTable, hideNullValues } = useValues(userPreferencesLogic)
-    const { setHidePostHogPropertiesInTable, setHideNullValues } = useActions(userPreferencesLogic)
+    const { hideInsightsPropertiesInTable, hideNullValues } = useValues(userPreferencesLogic)
+    const { setHideInsightsPropertiesInTable, setHideNullValues } = useActions(userPreferencesLogic)
     const { isCloudOrDev } = useValues(preflightLogic)
     const { featureFlags } = useValues(featureFlagLogic)
 
@@ -301,8 +301,8 @@ export function PropertiesTable({
                 if (hideNullValues && value === null) {
                     return false
                 }
-                if (hidePostHogPropertiesInTable) {
-                    return !isPostHogProperty(key, isCloudOrDev)
+                if (hideInsightsPropertiesInTable) {
+                    return !isInsightsProperty(key, isCloudOrDev)
                 }
                 return true
             })
@@ -316,7 +316,7 @@ export function PropertiesTable({
             })
         }
         return entries
-    }, [properties, sortProperties, searchTerm, hidePostHogPropertiesInTable, hideNullValues]) // oxlint-disable-line react-hooks/exhaustive-deps
+    }, [properties, sortProperties, searchTerm, hideInsightsPropertiesInTable, hideNullValues]) // oxlint-disable-line react-hooks/exhaustive-deps
 
     if (Array.isArray(properties)) {
         return (
@@ -512,10 +512,10 @@ export function PropertiesTable({
                             {filterable && (
                                 <>
                                     <LemonCheckbox
-                                        checked={hidePostHogPropertiesInTable}
-                                        label="Hide PostHog properties"
+                                        checked={hideInsightsPropertiesInTable}
+                                        label="Hide Insights properties"
                                         bordered
-                                        onChange={setHidePostHogPropertiesInTable}
+                                        onChange={setHideInsightsPropertiesInTable}
                                     />
 
                                     <LemonCheckbox
@@ -541,14 +541,14 @@ export function PropertiesTable({
                     className={className}
                     emptyState={
                         <>
-                            {hidePostHogPropertiesInTable || searchTerm ? (
+                            {hideInsightsPropertiesInTable || searchTerm ? (
                                 <span className="flex gap-2">
                                     <span>No properties found</span>
                                     <LemonButton
                                         noPadding
                                         onClick={() => {
                                             setSearchTerm('')
-                                            setHidePostHogPropertiesInTable(false)
+                                            setHideInsightsPropertiesInTable(false)
                                             setHideNullValues(false)
                                         }}
                                     >

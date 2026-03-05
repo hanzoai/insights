@@ -1,5 +1,5 @@
-from posthog.hogql import ast
-from posthog.hogql.database.models import (
+from posthog.insightsql import ast
+from posthog.insightsql.database.models import (
     BooleanDatabaseField,
     DatabaseField,
     DateDatabaseField,
@@ -1142,7 +1142,7 @@ external_tables: dict[str, dict[str, DatabaseField]] = {
     },
 }
 
-HOGQL_FIELD_DLT_TYPE_MAP = {
+INSIGHTSQL_FIELD_DLT_TYPE_MAP = {
     StringDatabaseField: "text",
     IntegerDatabaseField: "bigint",
     BooleanDatabaseField: "bool",
@@ -1158,7 +1158,7 @@ def get_dlt_mapping_for_external_table(table):
     return {
         field.name: {
             "name": field.name,
-            "data_type": HOGQL_FIELD_DLT_TYPE_MAP[type(field)],
+            "data_type": INSIGHTSQL_FIELD_DLT_TYPE_MAP[type(field)],
             "nullable": True,
         }
         for _, field in external_tables[table].items()

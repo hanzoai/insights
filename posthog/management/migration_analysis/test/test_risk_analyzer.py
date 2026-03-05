@@ -1021,9 +1021,9 @@ class TestCreateModelOperations:
         assert len(migration_risk.policy_violations) == 0
 
     def test_create_model_with_autofield(self):
-        """CreateModel with AutoField violates UUID policy (for PostHog apps only)."""
+        """CreateModel with AutoField violates UUID policy (for Insights apps only)."""
         mock_migration = MagicMock()
-        mock_migration.app_label = "posthog"  # Use PostHog app to trigger policy
+        mock_migration.app_label = "posthog"  # Use Insights app to trigger policy
         mock_migration.name = "0001_test"
         mock_migration.operations = [
             create_mock_operation(
@@ -1044,9 +1044,9 @@ class TestCreateModelOperations:
         assert "AutoField" in migration_risk.policy_violations[0]
 
     def test_create_model_with_bigautofield(self):
-        """CreateModel with BigAutoField violates UUID policy (for PostHog apps only)."""
+        """CreateModel with BigAutoField violates UUID policy (for Insights apps only)."""
         mock_migration = MagicMock()
-        mock_migration.app_label = "posthog"  # Use PostHog app to trigger policy
+        mock_migration.app_label = "posthog"  # Use Insights app to trigger policy
         mock_migration.name = "0001_test"
         mock_migration.operations = [
             create_mock_operation(
@@ -1355,7 +1355,7 @@ class TestCombinationRisks:
         # Create the SeparateDatabaseAndState operation like 0948
         state_op1 = create_mock_operation(
             migrations.AddField,
-            model_name="hogfunction",
+            model_name="customfunction",
             name="batch_export",
             field=models.ForeignKey("batchexport", null=True, blank=True, on_delete=models.SET_NULL),
         )
@@ -1368,7 +1368,7 @@ class TestCombinationRisks:
 
         db_op = create_mock_operation(
             migrations.RunSQL,
-            sql='ALTER TABLE "posthog_hogfunction" ADD COLUMN "batch_export_id" uuid NULL;',
+            sql='ALTER TABLE "posthog_customfunction" ADD COLUMN "batch_export_id" uuid NULL;',
         )
 
         separate_op = create_mock_operation(
@@ -1691,7 +1691,7 @@ class TestAtomicFalsePolicy:
 
         migration_risk = self.analyzer.analyze_migration(mock_migration, "some_third_party_app/migrations/0001_test.py")
 
-        # Should not have atomic-related warnings (not a PostHog app)
+        # Should not have atomic-related warnings (not a Insights app)
         assert not any("atomic=False" in v for v in migration_risk.policy_violations)
 
     def test_atomic_default_true_no_warning(self):

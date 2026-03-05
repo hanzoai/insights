@@ -108,7 +108,7 @@ fetch('https://api.avo.app/inspector/posthog/v1/track', {
             "type": "string",
             "label": "App name",
             "description": "App name",
-            "default": "PostHog",
+            "default": "Insights",
             "secret": False,
             "required": False,
         },
@@ -135,17 +135,17 @@ fetch('https://api.avo.app/inspector/posthog/v1/track', {
 
 
 class TemplateAvoMigrator(CustomFunctionTemplateMigrator):
-    plugin_url = "https://github.com/PostHog/posthog-avo-plugin"
+    plugin_url = "https://github.com/Insights/posthog-avo-plugin"
 
     @classmethod
     def migrate(cls, obj):
         hf = deepcopy(dataclasses.asdict(template))
-        hf["hog"] = hf["code"]
+        hf["custom_script"] = hf["code"]
         del hf["code"]
 
         apiKey = obj.config.get("avoApiKey", "")
         environment = obj.config.get("environment", "dev")
-        appName = obj.config.get("appName", "PostHog")
+        appName = obj.config.get("appName", "Insights")
         excludeEvents = obj.config.get("excludeEvents", "")
         includeEvents = obj.config.get("includeEvents", "")
         excludeProperties = obj.config.get("excludeProperties", "")

@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
                                 blank=True, default=list, help_text="List of all external tables", null=True
                             ),
                         ),
-                        ("query", models.JSONField(blank=True, default=dict, help_text="HogQL query", null=True)),
+                        ("query", models.JSONField(blank=True, default=dict, help_text="InsightsQL query", null=True)),
                         (
                             "status",
                             models.CharField(
@@ -594,7 +594,7 @@ class Migration(migrations.Migration):
                                 default=posthog.models.utils.UUIDT, editable=False, primary_key=True, serialize=False
                             ),
                         ),
-                        ("query", models.JSONField(blank=True, default=dict, help_text="HogQL query draft")),
+                        ("query", models.JSONField(blank=True, default=dict, help_text="InsightsQL query draft")),
                         (
                             "name",
                             models.CharField(blank=True, help_text="Name of the draft", max_length=255, null=True),

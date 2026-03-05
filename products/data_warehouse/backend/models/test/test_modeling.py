@@ -3,7 +3,7 @@ from posthog.test.base import BaseTest
 
 from parameterized import parameterized
 
-from posthog.hogql.errors import QueryError
+from posthog.insightsql.errors import QueryError
 
 from posthog.models import DataWarehouseTable
 
@@ -88,7 +88,7 @@ class TestModelPath(BaseTest):
         self.assertIn([saved_query.id.hex], paths)
 
     def test_create_from_posthog_root_nodes_query(self):
-        """Test creation of a model path from a query that reads from PostHog root tables."""
+        """Test creation of a model path from a query that reads from Insights root tables."""
         query = """\
           select
             events.event,

@@ -32,7 +32,7 @@ jest.mock('../../utils/logger', () => ({
     },
 }))
 
-jest.mock('../../utils/posthog', () => ({
+jest.mock('../../utils/insights', () => ({
     captureException: jest.fn(),
 }))
 

@@ -11,7 +11,7 @@ import { WelcomeLogo } from 'scenes/authentication/WelcomeLogo'
 
 import { Region } from '~/types'
 
-import { LaptopHog4, LaptopHogEU } from '../hedgehogs'
+import { LaptopHog4, LaptopHogEU } from '../mascots'
 
 export type BridgePageCommonProps = {
     children?: React.ReactNode
@@ -26,18 +26,18 @@ export type BridgePageCommonProps = {
     style?: React.CSSProperties
 }
 
-interface NoHedgehogProps extends BridgePageCommonProps {
-    hedgehog?: false
+interface NoMascotProps extends BridgePageCommonProps {
+    mascot?: false
     message?: never
 }
 
-interface YesHedgehogProps extends BridgePageCommonProps {
-    hedgehog: true
+interface YesMascotProps extends BridgePageCommonProps {
+    mascot: true
     message?: React.ReactNode
 }
 
-// Only allow setting of the hog message when a hog actually exists
-type BridgePageProps = NoHedgehogProps | YesHedgehogProps
+// Only allow setting of the mascot message when a mascot actually exists
+type BridgePageProps = NoMascotProps | YesMascotProps
 
 export function BridgePage({
     children,
@@ -49,7 +49,7 @@ export function BridgePage({
     sideLogo = false,
     fixedWidth = true,
     leftContainerContent,
-    hedgehog = false,
+    mascot = false,
     theme = 'default',
     style,
 }: BridgePageProps): JSX.Element {
@@ -74,7 +74,7 @@ export function BridgePage({
             style={style}
         >
             <div className="BridgePage__main">
-                {leftContainerContent || hedgehog ? (
+                {leftContainerContent || mascot ? (
                     <div className="BridgePage__left-wrapper">
                         <div className="BridgePage__left">
                             {!noLogo && sideLogo && (
@@ -83,7 +83,7 @@ export function BridgePage({
                                 </div>
                             )}
                             {leftContainerContent}
-                            {hedgehog && (
+                            {mascot && (
                                 <div className="BridgePage__left__art">
                                     {preflight?.region === Region.EU ? (
                                         <LaptopHogEU alt="" draggable="false" />

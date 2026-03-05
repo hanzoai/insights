@@ -15,7 +15,7 @@ import { LemonButton } from 'lib/lemon-ui/LemonButton'
 import { LemonDivider } from 'lib/lemon-ui/LemonDivider'
 import { LemonTabs } from 'lib/lemon-ui/LemonTabs'
 import { LemonTag } from 'lib/lemon-ui/LemonTag'
-import { Link, PostHogComDocsURL } from 'lib/lemon-ui/Link/Link'
+import { Link, InsightsComDocsURL } from 'lib/lemon-ui/Link/Link'
 import { Popover } from 'lib/lemon-ui/Popover'
 import { IconLink, IconOpenInNew, IconTableChart } from 'lib/lemon-ui/icons'
 import { FeatureFlagsSet, featureFlagLogic } from 'lib/logic/featureFlagLogic'
@@ -357,7 +357,7 @@ export const WebTabs = ({
 }
 
 export interface LearnMorePopoverProps {
-    url?: PostHogComDocsURL
+    url?: InsightsComDocsURL
     title: string
     description: string | JSX.Element
 }
@@ -673,7 +673,7 @@ const getEmptyOnboardingContent = (
                     thingName="event"
                     isEmpty={true}
                     titleOverride="Nothing to investigate yet!"
-                    description="Install PostHog on your site or app to start capturing events. Head to the installation guide to get set up in just a few minutes."
+                    description="Install Insights on your site or app to start capturing events. Head to the installation guide to get set up in just a few minutes."
                     actionElementOverride={
                         <div className="flex items-center gap-2">
                             <LemonButton

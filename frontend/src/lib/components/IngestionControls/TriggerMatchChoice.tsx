@@ -65,7 +65,7 @@ export function MatchTypeSelect(): JSX.Element {
 export function MatchTypeTag(): JSX.Element {
     const { matchType } = useValues(ingestionControlsLogic)
 
-    // Let's follow PostHog style of AND / OR from funnels
+    // Let's follow Insights style of AND / OR from funnels
     return (
         <LemonTag type="danger" className="my-2 mr-2">
             {matchType === 'any' ? 'OR' : 'AND'}

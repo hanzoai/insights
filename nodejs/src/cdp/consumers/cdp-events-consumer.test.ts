@@ -1,23 +1,23 @@
 import { mockProducerObserver } from '../../../tests/helpers/mocks/producer.mock'
 
-import { HogFlow } from '~/schema/hogflow'
+import { CustomFlow } from '~/schema/customflow'
 
 import { createOrganization, createTeam, getFirstTeam, getTeam, resetTestDatabase } from '../../../tests/helpers/sql'
 import { Hub, Team } from '../../types'
 import { closeHub, createHub } from '../../utils/db/hub'
-import { FixtureHogFlowBuilder } from '../_tests/builders/hogflow.builder'
-import { HOG_EXAMPLES, HOG_FILTERS_EXAMPLES, HOG_INPUTS_EXAMPLES } from '../_tests/examples'
+import { FixtureCustomFlowBuilder } from '../_tests/builders/customflow.builder'
+import { CUSTOM_SCRIPT_EXAMPLES, CUSTOM_SCRIPT_FILTERS_EXAMPLES, CUSTOM_SCRIPT_INPUTS_EXAMPLES } from '../_tests/examples'
 import {
-    insertHogFunction as _insertHogFunction,
-    createHogExecutionGlobals,
+    insertCustomFunction as _insertCustomFunction,
+    createScriptExecutionGlobals,
     createIncomingEvent,
     createInternalEvent,
     createKafkaMessage,
 } from '../_tests/fixtures'
-import { insertHogFlow as _insertHogFlow } from '../_tests/fixtures-hogflows'
+import { insertCustomFlow as _insertCustomFlow } from '../_tests/fixtures-customflows'
 import { CyclotronJobQueue } from '../services/job-queue/job-queue'
-import { HogWatcherState } from '../services/monitoring/hog-watcher.service'
-import { HogFunctionInvocationGlobals, HogFunctionType } from '../types'
+import { ScriptWatcherState } from '../services/monitoring/script-watcher.service'
+import { CustomFunctionInvocationGlobals, CustomFunctionType } from '../types'
 import { CdpEventsConsumer } from './cdp-events.consumer'
 import { CdpInternalEventsConsumer } from './cdp-internal-event.consumer'
 
@@ -29,21 +29,21 @@ jest.setTimeout(1000)
 describe.each([
     [CdpEventsConsumer.name, CdpEventsConsumer, 'destination' as const],
     [CdpInternalEventsConsumer.name, CdpInternalEventsConsumer, 'internal_destination' as const],
-])('%s', (_name, Consumer, hogType) => {
+])('%s', (_name, Consumer, scriptType) => {
     let processor: CdpEventsConsumer | CdpInternalEventsConsumer
     let hub: Hub
     let team: Team
     let team2: Team
     let mockQueueInvocations: jest.Mock
 
-    const insertHogFunction = async (hogFunction: Partial<HogFunctionType>) => {
-        const teamId = hogFunction.team_id ?? team.id
-        const item = await _insertHogFunction(hub.postgres, teamId, {
-            ...hogFunction,
-            type: hogType,
+    const insertCustomFunction = async (customFunction: Partial<CustomFunctionType>) => {
+        const teamId = customFunction.team_id ?? team.id
+        const item = await _insertCustomFunction(hub.postgres, teamId, {
+            ...customFunction,
+            type: scriptType,
         })
         // Trigger the reload that django would do
-        processor['hogFunctionManager']['onHogFunctionsReloaded'](teamId, [item.id])
+        processor['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [item.id])
         return item
     }
 
@@ -91,12 +91,12 @@ describe.each([
     })
 
     describe('team filtering', () => {
-        it('should not parse events for teams without hog functions', async () => {
-            await insertHogFunction({
+        it('should not parse events for teams without custom functions', async () => {
+            await insertCustomFunction({
                 team_id: team.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                ...HOG_FILTERS_EXAMPLES.no_filters,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
             })
 
             const events =
@@ -113,11 +113,11 @@ describe.each([
             expect(invocations).toHaveLength(1)
             expect(invocations[0].project.id).toBe(team.id)
 
-            await insertHogFunction({
+            await insertCustomFunction({
                 team_id: team2.id,
-                ...HOG_EXAMPLES.simple_fetch,
-                ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                ...HOG_FILTERS_EXAMPLES.no_filters,
+                ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
             })
 
             const invocations2 = await processor._parseKafkaBatch(events)
@@ -127,24 +127,24 @@ describe.each([
 
     describe('general event processing', () => {
         describe('common processing', () => {
-            let fnFetchNoFilters: HogFunctionType
-            let fnPrinterPageviewFilters: HogFunctionType
-            let globals: HogFunctionInvocationGlobals
+            let fnFetchNoFilters: CustomFunctionType
+            let fnPrinterPageviewFilters: CustomFunctionType
+            let globals: CustomFunctionInvocationGlobals
 
             beforeEach(async () => {
-                fnFetchNoFilters = await insertHogFunction({
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.no_filters,
+                fnFetchNoFilters = await insertCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
                 })
 
-                fnPrinterPageviewFilters = await insertHogFunction({
-                    ...HOG_EXAMPLES.input_printer,
-                    ...HOG_INPUTS_EXAMPLES.secret_inputs,
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                fnPrinterPageviewFilters = await insertCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
-                globals = createHogExecutionGlobals({
+                globals = createScriptExecutionGlobals({
                     project: {
                         id: team.id,
                     } as any,
@@ -152,17 +152,17 @@ describe.each([
                         uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                         event: '$pageview',
                         properties: {
-                            $current_url: 'https://posthog.com',
+                            $current_url: 'https://hanzo.ai',
                             $lib_version: '1.0.0',
                         },
                     } as any,
                 })
             })
 
-            const matchInvocation = (hogFunction: HogFunctionType, globals: HogFunctionInvocationGlobals) => {
+            const matchInvocation = (customFunction: CustomFunctionType, globals: CustomFunctionInvocationGlobals) => {
                 return {
-                    hogFunction: {
-                        id: hogFunction.id,
+                    customFunction: {
+                        id: customFunction.id,
                     },
                     state: {
                         globals: {
@@ -205,14 +205,14 @@ describe.each([
                     expect.arrayContaining([
                         expect.objectContaining({
                             value: expect.objectContaining({
-                                app_source: 'hog_function',
+                                app_source: 'custom_function',
                                 app_source_id: fnFetchNoFilters.id,
                                 metric_name: 'triggered',
                             }),
                         }),
                         expect.objectContaining({
                             value: expect.objectContaining({
-                                app_source: 'hog_function',
+                                app_source: 'custom_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
                                 metric_name: 'triggered',
                             }),
@@ -221,11 +221,11 @@ describe.each([
                 )
 
                 // Billing is per-event, not per-destination: 1 event → 2 destinations = 1 billable_invocation
-                if (hogType === 'destination') {
+                if (scriptType === 'destination') {
                     const billingMetrics = metrics.filter((m: any) => m.value.metric_name === 'billable_invocation')
                     expect(billingMetrics).toHaveLength(1)
                     expect(billingMetrics[0].value).toMatchObject({
-                        app_source: 'hog_function',
+                        app_source: 'custom_function',
                         app_source_id: '_event_trigger',
                         instance_id: globals.event.uuid,
                         metric_kind: 'billing',
@@ -254,7 +254,7 @@ describe.each([
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnPrinterPageviewFilters.id,
                             count: 1,
                             metric_kind: 'other',
@@ -267,7 +267,7 @@ describe.each([
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'other',
@@ -277,14 +277,14 @@ describe.each([
                         },
                     },
                     // Billing is per-event: 1 event → 1 destination = 1 billable_invocation
-                    ...(hogType !== 'destination'
+                    ...(scriptType !== 'destination'
                         ? []
                         : [
                               {
                                   key: expect.any(String),
                                   topic: 'datastore_app_metrics2_test',
                                   value: {
-                                      app_source: 'hog_function',
+                                      app_source: 'custom_function',
                                       app_source_id: '_event_trigger',
                                       instance_id: globals.event.uuid,
                                       count: 1,
@@ -299,8 +299,8 @@ describe.each([
             })
 
             it('should filter out functions that are disabled', async () => {
-                await processor.hogWatcher.forceStateChange(fnFetchNoFilters, HogWatcherState.disabled)
-                await processor.hogWatcher.forceStateChange(fnPrinterPageviewFilters, HogWatcherState.disabled)
+                await processor.scriptWatcher.forceStateChange(fnFetchNoFilters, ScriptWatcherState.disabled)
+                await processor.scriptWatcher.forceStateChange(fnPrinterPageviewFilters, ScriptWatcherState.disabled)
 
                 const { invocations } = await processor.processBatch([globals])
 
@@ -311,7 +311,7 @@ describe.each([
                     {
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnFetchNoFilters.id,
                             count: 1,
                             metric_kind: 'failure',
@@ -322,7 +322,7 @@ describe.each([
                     {
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: fnPrinterPageviewFilters.id,
                             count: 1,
                             metric_kind: 'failure',
@@ -333,10 +333,10 @@ describe.each([
                 ])
             })
 
-            if (hogType === 'destination') {
+            if (scriptType === 'destination') {
                 it('should bill once per event, not per destination (multiple events)', async () => {
                     // Create a second event with different UUID
-                    const globals2 = createHogExecutionGlobals({
+                    const globals2 = createScriptExecutionGlobals({
                         project: {
                             id: team.id,
                         } as any,
@@ -344,7 +344,7 @@ describe.each([
                             uuid: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
                             event: '$pageview',
                             properties: {
-                                $current_url: 'https://posthog.com',
+                                $current_url: 'https://hanzo.ai',
                                 $lib_version: '1.0.0',
                             },
                         } as any,
@@ -387,28 +387,28 @@ describe.each([
         })
 
         describe('quota limiting', () => {
-            let fnFetchNoFilters: HogFunctionType
-            let fnPrinterPageviewFilters: HogFunctionType
-            let globals: HogFunctionInvocationGlobals
+            let fnFetchNoFilters: CustomFunctionType
+            let fnPrinterPageviewFilters: CustomFunctionType
+            let globals: CustomFunctionInvocationGlobals
 
             beforeEach(async () => {
                 // Create functions for team2 (no data_pipelines feature)
-                fnFetchNoFilters = await insertHogFunction({
+                fnFetchNoFilters = await insertCustomFunction({
                     team_id: team2.id,
-                    ...HOG_EXAMPLES.simple_fetch,
-                    ...HOG_INPUTS_EXAMPLES.simple_fetch,
-                    ...HOG_FILTERS_EXAMPLES.no_filters,
+                    ...CUSTOM_SCRIPT_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.simple_fetch,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters,
                 })
 
-                fnPrinterPageviewFilters = await insertHogFunction({
+                fnPrinterPageviewFilters = await insertCustomFunction({
                     team_id: team2.id,
-                    ...HOG_EXAMPLES.input_printer,
-                    ...HOG_INPUTS_EXAMPLES.secret_inputs,
-                    ...HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
+                    ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter,
                 })
 
                 // Globals for team2 (without data_pipelines)
-                globals = createHogExecutionGlobals({
+                globals = createScriptExecutionGlobals({
                     project: {
                         id: team2.id,
                     } as any,
@@ -416,7 +416,7 @@ describe.each([
                         uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                         event: '$pageview',
                         properties: {
-                            $current_url: 'https://posthog.com',
+                            $current_url: 'https://hanzo.ai',
                             $lib_version: '1.0.0',
                         },
                     } as any,
@@ -442,7 +442,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'hog_function',
+                                app_source: 'custom_function',
                                 app_source_id: fnFetchNoFilters.id,
                                 count: 1,
                                 metric_kind: 'failure',
@@ -453,7 +453,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'hog_function',
+                                app_source: 'custom_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
                                 count: 1,
                                 metric_kind: 'failure',
@@ -482,7 +482,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'hog_function',
+                                app_source: 'custom_function',
                                 app_source_id: fnFetchNoFilters.id,
                                 count: 1,
                                 metric_kind: 'other',
@@ -493,7 +493,7 @@ describe.each([
                         expect.objectContaining({
                             topic: 'datastore_app_metrics2_test',
                             value: expect.objectContaining({
-                                app_source: 'hog_function',
+                                app_source: 'custom_function',
                                 app_source_id: fnPrinterPageviewFilters.id,
                                 count: 1,
                                 metric_kind: 'other',
@@ -507,10 +507,10 @@ describe.each([
         })
 
         describe('filtering errors', () => {
-            let globals: HogFunctionInvocationGlobals
+            let globals: CustomFunctionInvocationGlobals
 
             beforeEach(() => {
-                globals = createHogExecutionGlobals({
+                globals = createScriptExecutionGlobals({
                     project: {
                         id: team.id,
                     } as any,
@@ -518,7 +518,7 @@ describe.each([
                         uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                         event: '$pageview',
                         properties: {
-                            $current_url: 'https://posthog.com',
+                            $current_url: 'https://hanzo.ai',
                             $lib_version: '1.0.0',
                         },
                     } as any,
@@ -526,10 +526,10 @@ describe.each([
             })
 
             it('should filter out functions that error while filtering', async () => {
-                const erroringFunction = await insertHogFunction({
-                    ...HOG_EXAMPLES.input_printer,
-                    ...HOG_INPUTS_EXAMPLES.secret_inputs,
-                    ...HOG_FILTERS_EXAMPLES.broken_filters,
+                const erroringFunction = await insertCustomFunction({
+                    ...CUSTOM_SCRIPT_EXAMPLES.input_printer,
+                    ...CUSTOM_SCRIPT_INPUTS_EXAMPLES.secret_inputs,
+                    ...CUSTOM_SCRIPT_FILTERS_EXAMPLES.broken_filters,
                 })
                 await processor.processBatch([globals])
                 expect(mockProducerObserver.getProducedKafkaMessages()).toMatchObject([
@@ -537,7 +537,7 @@ describe.each([
                         key: expect.any(String),
                         topic: 'datastore_app_metrics2_test',
                         value: {
-                            app_source: 'hog_function',
+                            app_source: 'custom_function',
                             app_source_id: erroringFunction.id,
                             count: 1,
                             metric_kind: 'other',
@@ -550,7 +550,7 @@ describe.each([
                         topic: 'log_entries_test',
                         value: {
                             message:
-                                'Error filtering event b3a1fe86-b10c-43cc-acaf-d208977608d0: Invalid HogQL bytecode, stack is empty, can not pop',
+                                'Error filtering event b3a1fe86-b10c-43cc-acaf-d208977608d0: Invalid InsightsQL bytecode, stack is empty, can not pop',
                         },
                     },
                 ])
@@ -559,17 +559,17 @@ describe.each([
     })
 })
 
-describe('hog flow processing', () => {
+describe('custom flow processing', () => {
     let processor: CdpEventsConsumer | CdpInternalEventsConsumer
     let hub: Hub
     let team: Team
 
-    const insertHogFlow = async (hogFlow: HogFlow) => {
-        const teamId = hogFlow.team_id ?? team.id
+    const insertCustomFlow = async (customFlow: CustomFlow) => {
+        const teamId = customFlow.team_id ?? team.id
 
-        const item = await _insertHogFlow(hub.postgres, hogFlow)
+        const item = await _insertCustomFlow(hub.postgres, customFlow)
         // Trigger the reload that django would do
-        processor['hogFunctionManager']['onHogFunctionsReloaded'](teamId, [item.id])
+        processor['customFunctionManager']['onCustomFunctionsReloaded'](teamId, [item.id])
         return item
     }
 
@@ -605,11 +605,11 @@ describe('hog flow processing', () => {
         jest.useRealTimers()
     })
 
-    describe('createHogFlowInvocations', () => {
-        let globals: HogFunctionInvocationGlobals
+    describe('createCustomFlowInvocations', () => {
+        let globals: CustomFunctionInvocationGlobals
 
         beforeEach(() => {
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -617,24 +617,24 @@ describe('hog flow processing', () => {
                     uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                     event: '$pageview',
                     properties: {
-                        $current_url: 'https://posthog.com',
+                        $current_url: 'https://hanzo.ai',
                         $lib_version: '1.0.0',
                     },
                 } as any,
             })
         })
 
-        it('should not create hog flow invocations with no filters', async () => {
-            const hogFlow = new FixtureHogFlowBuilder().withTeamId(team.id).build()
-            hogFlow.trigger = {} as any
-            await insertHogFlow(hogFlow)
+        it('should not create custom flow invocations with no filters', async () => {
+            const customFlow = new FixtureCustomFlowBuilder().withTeamId(team.id).build()
+            customFlow.trigger = {} as any
+            await insertCustomFlow(customFlow)
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
             expect(invocations).toHaveLength(0)
         })
 
-        it('should not create hog flow invocations with webhook triggers', async () => {
-            const hogFlow = new FixtureHogFlowBuilder()
+        it('should not create custom flow invocations with webhook triggers', async () => {
+            const customFlow = new FixtureCustomFlowBuilder()
                 .withTeamId(team.id)
                 .withSimpleWorkflow({
                     trigger: {
@@ -644,26 +644,26 @@ describe('hog flow processing', () => {
                     },
                 })
                 .build()
-            await insertHogFlow(hogFlow)
+            await insertCustomFlow(customFlow)
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
             expect(invocations).toHaveLength(0)
         })
 
-        it('should create hog flow invocations with matching filters', async () => {
-            const hogFlow = await insertHogFlow(
-                new FixtureHogFlowBuilder()
+        it('should create custom flow invocations with matching filters', async () => {
+            const customFlow = await insertCustomFlow(
+                new FixtureCustomFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                            filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                         },
                     })
                     .build()
             )
 
-            const noInvocations = await processor['createHogFlowInvocations']([
+            const noInvocations = await processor['createCustomFlowInvocations']([
                 {
                     ...globals,
                     event: {
@@ -675,15 +675,15 @@ describe('hog flow processing', () => {
 
             expect(noInvocations).toHaveLength(0)
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: hogFlow.id,
-                hogFlow: {
-                    id: hogFlow.id,
+                functionId: customFlow.id,
+                customFlow: {
+                    id: customFlow.id,
                 },
                 id: expect.any(String),
-                queue: 'hogflow',
+                queue: 'customflow',
                 queuePriority: 1,
                 state: {
                     event: globals.event,
@@ -693,20 +693,20 @@ describe('hog flow processing', () => {
             })
         })
 
-        it('should not produce billable_invocation metrics for hog flow invocations', async () => {
-            await insertHogFlow(
-                new FixtureHogFlowBuilder()
+        it('should not produce billable_invocation metrics for custom flow invocations', async () => {
+            await insertCustomFlow(
+                new FixtureCustomFlowBuilder()
                     .withTeamId(team.id)
                     .withSimpleWorkflow({
                         trigger: {
                             type: 'event',
-                            filters: HOG_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
+                            filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.pageview_or_autocapture_filter.filters ?? {},
                         },
                     })
                     .build()
             )
 
-            await processor['createHogFlowInvocations']([globals])
+            await processor['createCustomFlowInvocations']([globals])
 
             const producedMetrics =
                 mockProducerObserver.getProducedKafkaMessagesForTopic('datastore_app_metrics2_test')
@@ -722,11 +722,11 @@ describe('hog flow processing', () => {
         })
     })
 
-    describe('quota limiting for hog flows', () => {
-        let globals: HogFunctionInvocationGlobals
+    describe('quota limiting for custom flows', () => {
+        let globals: CustomFunctionInvocationGlobals
 
         beforeEach(() => {
-            globals = createHogExecutionGlobals({
+            globals = createScriptExecutionGlobals({
                 project: {
                     id: team.id,
                 } as any,
@@ -734,7 +734,7 @@ describe('hog flow processing', () => {
                     uuid: 'b3a1fe86-b10c-43cc-acaf-d208977608d0',
                     event: '$pageview',
                     properties: {
-                        $current_url: 'https://posthog.com',
+                        $current_url: 'https://hanzo.ai',
                         $lib_version: '1.0.0',
                     },
                 } as any,
@@ -749,8 +749,8 @@ describe('hog flow processing', () => {
                     return resource === 'workflow_emails'
                 })
 
-            const hogFlow = await insertHogFlow(
-                new FixtureHogFlowBuilder()
+            const customFlow = await insertCustomFlow(
+                new FixtureCustomFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -758,7 +758,7 @@ describe('hog flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: HOG_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             sendEmail: {
@@ -783,7 +783,7 @@ describe('hog flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
 
             // Should have no invocations returned due to quota limiting
             expect(invocations).toHaveLength(0)
@@ -799,7 +799,7 @@ describe('hog flow processing', () => {
             )
 
             // Flush metrics so we can assert them down below
-            await processor['hogFunctionMonitoringService'].flush()
+            await processor['customFunctionMonitoringService'].flush()
 
             // Should have queued a quota limited metric
             const producedMetrics =
@@ -808,8 +808,8 @@ describe('hog flow processing', () => {
                 expect.arrayContaining([
                     expect.objectContaining({
                         value: expect.objectContaining({
-                            app_source: 'hog_flow',
-                            app_source_id: hogFlow.id,
+                            app_source: 'custom_flow',
+                            app_source_id: customFlow.id,
                             metric_kind: 'failure',
                             metric_name: 'quota_limited',
                         }),
@@ -826,8 +826,8 @@ describe('hog flow processing', () => {
                     return resource === 'workflow_destinations_dispatched'
                 })
 
-            await insertHogFlow(
-                new FixtureHogFlowBuilder()
+            await insertCustomFlow(
+                new FixtureCustomFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -835,7 +835,7 @@ describe('hog flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: HOG_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             delay: {
@@ -860,7 +860,7 @@ describe('hog flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
 
             expect(invocations).toHaveLength(0)
             expect((processor as any).hub.quotaLimiting.isTeamQuotaLimited).toHaveBeenCalledWith(
@@ -873,8 +873,8 @@ describe('hog flow processing', () => {
             // Mock quota limiting for both
             ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(true)
 
-            const hogFlow = await insertHogFlow(
-                new FixtureHogFlowBuilder()
+            const customFlow = await insertCustomFlow(
+                new FixtureCustomFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -882,7 +882,7 @@ describe('hog flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: HOG_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             delay: {
@@ -907,14 +907,14 @@ describe('hog flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
 
             // Should process the workflow since it doesn't have email or destination actions
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: hogFlow.id,
-                hogFlow: {
-                    id: hogFlow.id,
+                functionId: customFlow.id,
+                customFlow: {
+                    id: customFlow.id,
                 },
             })
         })
@@ -923,8 +923,8 @@ describe('hog flow processing', () => {
             // No quota limits
             ;(processor as any).hub.quotaLimiting.isTeamQuotaLimited = jest.fn().mockResolvedValue(false)
 
-            const hogFlow = await insertHogFlow(
-                new FixtureHogFlowBuilder()
+            const customFlow = await insertCustomFlow(
+                new FixtureCustomFlowBuilder()
                     .withTeamId(team.id)
                     .withWorkflow({
                         actions: {
@@ -932,7 +932,7 @@ describe('hog flow processing', () => {
                                 type: 'trigger',
                                 config: {
                                     type: 'event',
-                                    filters: HOG_FILTERS_EXAMPLES.no_filters.filters ?? {},
+                                    filters: CUSTOM_SCRIPT_FILTERS_EXAMPLES.no_filters.filters ?? {},
                                 },
                             },
                             sendEmail: {
@@ -957,13 +957,13 @@ describe('hog flow processing', () => {
                     .build()
             )
 
-            const invocations = await processor['createHogFlowInvocations']([globals])
+            const invocations = await processor['createCustomFlowInvocations']([globals])
 
             expect(invocations).toHaveLength(1)
             expect(invocations[0]).toMatchObject({
-                functionId: hogFlow.id,
-                hogFlow: {
-                    id: hogFlow.id,
+                functionId: customFlow.id,
+                customFlow: {
+                    id: customFlow.id,
                 },
             })
         })

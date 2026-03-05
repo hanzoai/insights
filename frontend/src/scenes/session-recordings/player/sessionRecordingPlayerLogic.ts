@@ -1530,13 +1530,13 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
         },
         loadSnapshotsForSourceFailure: () => {
             if (Object.keys(values.sessionPlayerData.snapshotsByWindowId).length === 0) {
-                console.error('PostHog Recording Playback Error: No snapshots loaded')
+                console.error('Insights Recording Playback Error: No snapshots loaded')
                 actions.setPlayerError('loadSnapshotsForSourceFailure')
             }
         },
         loadSnapshotSourcesFailure: () => {
             if (Object.keys(values.sessionPlayerData.snapshotsByWindowId).length === 0) {
-                console.error('PostHog Recording Playback Error: No snapshots loaded')
+                console.error('Insights Recording Playback Error: No snapshots loaded')
                 actions.setPlayerError('loadSnapshotSourcesFailure')
             }
         },
@@ -1905,7 +1905,7 @@ export const sessionRecordingPlayerLogic = kea<sessionRecordingPlayerLogicType>(
                 openBillingPopupModal({
                     title: 'Unlock recording exports',
                     description:
-                        'Export recordings to a file that can be stored wherever you like and loaded back into PostHog for playback at any time.',
+                        'Export recordings to a file that can be stored wherever you like and loaded back into Insights for playback at any time.',
                 })
                 return
             }

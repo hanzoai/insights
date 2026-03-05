@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: true,
     status: 'stable',
     type: 'transformation',
@@ -8,9 +8,9 @@ export const template: HogFunctionTemplate = {
     name: 'Filter Bot Events',
     description:
         'Filters out events from known bot user agents. This transformation will drop the event if a bot is detected.',
-    icon_url: '/static/hedgehog/builder-hog-01.png',
+    icon_url: '/static/mascot/builder-mascot-01.png',
     category: ['Custom'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 // Get the user agent value
 let user_agent := event.properties[inputs.userAgent]
@@ -79,7 +79,7 @@ return event
             type: 'boolean',
             label: 'Filter out known bot user agents',
             description:
-                "Filter out known bot user agents using PostHog's known bot user agents list. This is kept up to date dynamically.",
+                "Filter out known bot user agents using Insights's known bot user agents list. This is kept up to date dynamically.",
             default: true,
             secret: false,
             required: true,
@@ -98,7 +98,7 @@ return event
             type: 'boolean',
             label: 'Filter out known bot ips',
             description:
-                "Filter out known bot ips using PostHog's known bot ips list. This is kept up to date dynamically.",
+                "Filter out known bot ips using Insights's known bot ips list. This is kept up to date dynamically.",
             default: true,
             secret: false,
             required: true,

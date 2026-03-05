@@ -58,7 +58,7 @@ export function ErrorTrackingScene(): JSX.Element {
 
     useOnMountEffect(() => {
         const utmSource = new URLSearchParams(window.location.search).get('utm_source')
-        api.hogFunctions
+        api.customFunctions
             .list({
                 types: ['internal_destination'],
                 filter_groups: ERROR_TRACKING_ALERT_FILTER_GROUPS,
@@ -191,7 +191,7 @@ const IngestionStatusCheck = (): JSX.Element | null => {
             <p>
                 To use the Error tracking product, please{' '}
                 <Link to="https://posthog.com/docs/error-tracking/installation">
-                    enable exception capture within the PostHog SDK
+                    enable exception capture within the Insights SDK
                 </Link>{' '}
                 (otherwise it'll be a little empty!)
             </p>

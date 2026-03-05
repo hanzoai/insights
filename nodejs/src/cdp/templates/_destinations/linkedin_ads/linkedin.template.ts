@@ -1,6 +1,6 @@
-import { HogFunctionTemplate } from '~/cdp/types'
+import { CustomFunctionTemplate } from '~/cdp/types'
 
-export const template: HogFunctionTemplate = {
+export const template: CustomFunctionTemplate = {
     free: false,
     status: 'alpha',
     type: 'destination',
@@ -9,7 +9,7 @@ export const template: HogFunctionTemplate = {
     description: 'Send conversion events to LinkedIn Ads',
     icon_url: '/static/services/linkedin.png',
     category: ['Advertisement'],
-    code_language: 'hog',
+    code_language: 'custom_script',
     code: `
 let body := {
     'conversion': f'urn:lla:llaPartnerConversion:{inputs.conversionRuleId}',

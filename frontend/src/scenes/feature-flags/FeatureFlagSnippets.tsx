@@ -122,7 +122,7 @@ export function PHPSnippet({
     localEvaluation,
     samplePropertyName,
 }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'PostHog::'
+    const clientSuffix = 'Insights::'
 
     const flagFunction = multivariant ? 'getFeatureFlag' : 'isFeatureEnabled'
 
@@ -510,7 +510,7 @@ if ("example-variant".equals(flagValue)) {
 }
 
 export function AndroidSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'PostHog.'
+    const clientSuffix = 'Insights.'
 
     if (payload) {
         return (
@@ -559,7 +559,7 @@ export function FlutterSnippet({ flagKey, multivariant, payload }: FeatureFlagSn
 }
 
 export function iOSSnippet({ flagKey, multivariant, payload }: FeatureFlagSnippet): JSX.Element {
-    const clientSuffix = 'PostHogSDK.shared.'
+    const clientSuffix = 'InsightsSDK.shared.'
 
     if (payload) {
         return (

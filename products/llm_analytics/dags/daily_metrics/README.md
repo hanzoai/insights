@@ -152,7 +152,7 @@ docker exec posthog-clickhouse-1 clickhouse-client --query \
   "SELECT * FROM llma_metrics_daily WHERE date = today() FORMAT Pretty"
 ```
 
-Or use HogQL in PostHog UI:
+Or use HogQL in Insights UI:
 
 ```sql
 SELECT

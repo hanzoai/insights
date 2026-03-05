@@ -739,7 +739,7 @@ def update_all_orgs_billing_quotas(
     quota_limited_orgs: dict[str, dict[str, int]] = {x.value: {} for x in QuotaResource}
     quota_limiting_suspended_orgs: dict[str, dict[str, int]] = {x.value: {} for x in QuotaResource}
 
-    # Get the current quota limits so we can track to PostHog if it changes
+    # Get the current quota limits so we can track to Insights if it changes
     orgs_with_changes = set()
     previously_quota_limited_team_tokens: dict[str, list[str]] = {x.value: [] for x in QuotaResource}
 

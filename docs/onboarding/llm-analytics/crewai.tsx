@@ -9,13 +9,13 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
 
     return [
         {
-            title: 'Install the PostHog SDK',
+            title: 'Install the Insights SDK',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Setting up analytics starts with installing the PostHog SDK. CrewAI uses LLM under the hood,
-                        and PostHog integrates with LLM's callback system.
+                        Setting up analytics starts with installing the Insights SDK. CrewAI uses LLM under the hood,
+                        and Insights integrates with LLM's callback system.
                     </Markdown>
 
                     <CodeBlock
@@ -33,7 +33,7 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Install CrewAI. PostHog instruments your LLM calls through LLM's callback system that CrewAI
+                        Install CrewAI. Insights instruments your LLM calls through LLM's callback system that CrewAI
                         uses natively.
                     </Markdown>
 
@@ -47,13 +47,13 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             ),
         },
         {
-            title: 'Configure PostHog with LLM',
+            title: 'Configure Insights with LLM',
             badge: 'required',
             content: (
                 <>
                     <Markdown>
-                        Set your PostHog project API key and host as environment variables, then configure LLM to
-                        use PostHog as a callback handler. You can find your API key in [your project
+                        Set your Insights project API key and host as environment variables, then configure LLM to
+                        use Insights as a callback handler. You can find your API key in [your project
                         settings](https://app.posthog.com/settings/project).
                     </Markdown>
 
@@ -64,11 +64,11 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                             import llm
                             from crewai import Agent, Task, Crew
 
-                            # Set PostHog environment variables
+                            # Set Insights environment variables
                             os.environ["POSTHOG_API_KEY"] = "<ph_project_api_key>"
                             os.environ["POSTHOG_API_URL"] = "<ph_client_api_host>"
 
-                            # Enable PostHog callbacks in LLM
+                            # Enable Insights callbacks in LLM
                             llm.success_callback = ["posthog"]
                             llm.failure_callback = ["posthog"]
                         `}
@@ -76,7 +76,7 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
 
                     <CalloutBox type="fyi" icon="IconInfo" title="How this works">
                         <Markdown>
-                            CrewAI uses LLM under the hood for LLM provider access. By configuring PostHog as a
+                            CrewAI uses LLM under the hood for LLM provider access. By configuring Insights as a
                             LLM callback, all LLM calls made through CrewAI are automatically captured as
                             `$ai_generation` events without proxying your calls.
                         </Markdown>
@@ -90,7 +90,7 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
             content: (
                 <>
                     <Markdown>
-                        Run your CrewAI agents as normal. PostHog automatically captures generation events for each LLM
+                        Run your CrewAI agents as normal. Insights automatically captures generation events for each LLM
                         call.
                     </Markdown>
 
@@ -99,12 +99,12 @@ export const getCrewAISteps = (ctx: OnboardingComponentsContext): StepDefinition
                         code={dedent`
                             researcher = Agent(
                                 role="Researcher",
-                                goal="Find interesting facts about hedgehogs",
+                                goal="Find interesting facts about mascots",
                                 backstory="You are an expert wildlife researcher.",
                             )
 
                             task = Task(
-                                description="Research three fun facts about hedgehogs.",
+                                description="Research three fun facts about mascots.",
                                 expected_output="A list of three fun facts.",
                                 agent=researcher,
                             )

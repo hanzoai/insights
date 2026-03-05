@@ -66,7 +66,7 @@ export interface AnimatedLogomarkProps {
 }
 
 /**
- * Animated PostHog logomark that jumps continuously while `animate` is true.
+ * Animated Insights logomark that jumps continuously while `animate` is true.
  *
  * When `animate` becomes false, the animation completes its current cycle before
  * stopping - it won't cut off mid-jump.

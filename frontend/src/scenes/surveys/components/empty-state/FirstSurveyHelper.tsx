@@ -3,7 +3,7 @@ import { useActions, useValues } from 'kea'
 import { IconBell, IconGraph, IconRocket, IconTarget } from '@posthog/icons'
 import { LemonButton, Link } from '@posthog/lemon-ui'
 
-import { ProfessorHog } from 'lib/components/hedgehogs'
+import { ProfessorHog } from 'lib/components/mascots'
 import { LaunchSurveyButton } from 'scenes/surveys/components/LaunchSurveyButton'
 import { SurveyEditSection, surveyLogic } from 'scenes/surveys/surveyLogic'
 import { surveysLogic } from 'scenes/surveys/surveysLogic'

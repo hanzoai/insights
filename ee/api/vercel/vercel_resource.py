@@ -236,7 +236,7 @@ class VercelResourceViewSet(VercelRegionProxyMixin, VercelErrorResponseMixin, vi
         Handle Vercel-initiated secrets rotation request.
         https://vercel.com/docs/integrations/create-integration/marketplace-api#rotate-secrets
 
-        Returns the current secrets without rotating the PostHog API key, since
+        Returns the current secrets without rotating the Insights API key, since
         the key is embedded in customer SDK code and rotating it would break
         existing integrations.
         """

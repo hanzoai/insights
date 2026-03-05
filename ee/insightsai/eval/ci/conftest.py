@@ -20,7 +20,7 @@ from ee.hogai.artifacts.utils import unwrap_visualization_artifact_content
 from ee.hogai.chat_agent import AssistantGraph
 from ee.hogai.django_checkpoint.checkpointer import DjangoCheckpointer
 
-# We want the PostHog set_up_evals fixture here
+# We want the Insights set_up_evals fixture here
 from ee.hogai.eval.conftest import set_up_evals  # noqa: F401
 from ee.hogai.eval.scorers import PlanAndQueryOutput
 from ee.hogai.utils.types import AssistantNodeName, AssistantState

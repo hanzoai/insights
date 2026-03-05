@@ -3,11 +3,11 @@ import uuid
 import typing
 import datetime as dt
 
-from posthog.hogql.context import HogQLContext
-from posthog.hogql.database.database import Database
-from posthog.hogql.hogql import ast
-from posthog.hogql.printer import prepare_ast_for_printing, print_prepared_ast
-from posthog.hogql.visitor import clone_expr
+from posthog.insightsql.context import InsightsQLContext
+from posthog.insightsql.database.database import Database
+from posthog.insightsql.insightsql import ast
+from posthog.insightsql.printer import prepare_ast_for_printing, print_prepared_ast
+from posthog.insightsql.visitor import clone_expr
 
 from posthog.batch_exports.service import BatchExportModel, BatchExportSchema
 from posthog.clickhouse import query_tagging
@@ -34,10 +34,10 @@ class RecordBatchModel(abc.ABC):
         self.team_id = team_id
         self.batch_export_id = batch_export_id
 
-    async def get_hogql_context(self) -> HogQLContext:
-        """Return a HogQLContext to generate a ClickHouse query."""
+    async def get_insightsql_context(self) -> InsightsQLContext:
+        """Return a InsightsQLContext to generate a ClickHouse query."""
         team = await Team.objects.aget(id=self.team_id)
-        context = HogQLContext(
+        context = InsightsQLContext(
             team=team,
             team_id=team.id,
             enable_select_queries=True,
@@ -83,11 +83,11 @@ class RecordBatchModel(abc.ABC):
 class SessionsRecordBatchModel(RecordBatchModel):
     """A model to produce record batches from the sessions table."""
 
-    def get_hogql_query(
+    def get_insightsql_query(
         self, data_interval_start: dt.datetime | None, data_interval_end: dt.datetime
     ) -> ast.SelectQuery:
-        """Return the HogQLQuery used for the sessions model."""
-        hogql_query = clone_expr(sql.SELECT_FROM_SESSIONS_HOGQL)
+        """Return the InsightsQLQuery used for the sessions model."""
+        insightsql_query = clone_expr(sql.SELECT_FROM_SESSIONS_INSIGHTSQL)
 
         where_and = ast.And(
             exprs=[
@@ -101,7 +101,7 @@ class SessionsRecordBatchModel(RecordBatchModel):
                     left=ast.Field(chain=["_inserted_at"]),
                     right=ast.Constant(value=data_interval_end),
                 ),
-                # include $end_timestamp because hogql uses this to add a where clause to the inner query
+                # include $end_timestamp because insightsql uses this to add a where clause to the inner query
                 ast.CompareOperation(
                     op=ast.CompareOperationOp.Lt,
                     left=ast.Field(chain=["$end_timestamp"]),
@@ -117,7 +117,7 @@ class SessionsRecordBatchModel(RecordBatchModel):
                         left=ast.Field(chain=["_inserted_at"]),
                         right=ast.Constant(value=data_interval_start),
                     ),
-                    # include $end_timestamp because hogql uses this to add a where clause to the inner query
+                    # include $end_timestamp because insightsql uses this to add a where clause to the inner query
                     ast.CompareOperation(
                         op=ast.CompareOperationOp.GtEq,
                         left=ast.Field(chain=["$end_timestamp"]),
@@ -126,24 +126,24 @@ class SessionsRecordBatchModel(RecordBatchModel):
                 ]
             )
 
-        hogql_query.where = where_and
+        insightsql_query.where = where_and
 
-        return hogql_query
+        return insightsql_query
 
     async def as_query_with_parameters(
         self, data_interval_start: dt.datetime | None, data_interval_end: dt.datetime
     ) -> tuple[Query, QueryParameters]:
         """Produce a printed query and any necessary ClickHouse query parameters."""
-        hogql_query = self.get_hogql_query(data_interval_start, data_interval_end)
-        context = await self.get_hogql_context()
+        insightsql_query = self.get_insightsql_query(data_interval_start, data_interval_end)
+        context = await self.get_insightsql_context()
 
-        prepared_hogql_query = await database_sync_to_async(prepare_ast_for_printing)(
-            hogql_query, context=context, dialect="clickhouse", stack=[]
+        prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
+            insightsql_query, context=context, dialect="clickhouse", stack=[]
         )
-        assert prepared_hogql_query is not None
+        assert prepared_insightsql_query is not None
         context.output_format = "ArrowStream"
         printed = print_prepared_ast(
-            prepared_hogql_query,
+            prepared_insightsql_query,
             context=context,
             dialect="clickhouse",
             stack=[],
@@ -160,15 +160,15 @@ class SessionsRecordBatchModel(RecordBatchModel):
         num_partitions: int,
     ) -> tuple[Query, QueryParameters]:
         """Produce a printed query and any necessary ClickHouse query parameters."""
-        hogql_query = self.get_hogql_query(data_interval_start, data_interval_end)
-        context = await self.get_hogql_context()
+        insightsql_query = self.get_insightsql_query(data_interval_start, data_interval_end)
+        context = await self.get_insightsql_context()
 
-        prepared_hogql_query = await database_sync_to_async(prepare_ast_for_printing)(
-            hogql_query, context=context, dialect="clickhouse", stack=[]
+        prepared_insightsql_query = await database_sync_to_async(prepare_ast_for_printing)(
+            insightsql_query, context=context, dialect="clickhouse", stack=[]
         )
-        assert prepared_hogql_query is not None
+        assert prepared_insightsql_query is not None
         printed = print_prepared_ast(
-            prepared_hogql_query,
+            prepared_insightsql_query,
             context=context,
             dialect="clickhouse",
             stack=[],
