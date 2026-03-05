@@ -5,7 +5,7 @@ from insights.test.base import APIBaseTest, ClickhouseTestMixin
 from django.test import override_settings
 
 from insights.schema import (
-    HogLanguage,
+    InsightsLanguage,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
     InsightsQLQuery,
@@ -27,7 +27,7 @@ class TestMetadata(ClickhouseTestMixin, APIBaseTest):
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
                 kind="InsightsQLMetadata",
-                language=HogLanguage.HOG_QL_EXPR,
+                language=InsightsLanguage.INSIGHTS_QL_EXPR,
                 query=query,
                 sourceQuery=InsightsQLQuery(query=f"select * from {table}"),
                 response=None,
@@ -39,7 +39,7 @@ class TestMetadata(ClickhouseTestMixin, APIBaseTest):
     def _select(self, query: str, modifiers: Optional[InsightsQLQueryModifiers] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=HogLanguage.HOG_QL, query=query, response=None, modifiers=modifiers
+                kind="InsightsQLMetadata", language=InsightsLanguage.INSIGHTS_QL, query=query, response=None, modifiers=modifiers
             ),
             team=self.team,
         )
@@ -47,14 +47,14 @@ class TestMetadata(ClickhouseTestMixin, APIBaseTest):
     def _program(self, query: str, globals: Optional[dict] = None) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
             query=InsightsQLMetadata(
-                kind="InsightsQLMetadata", language=HogLanguage.HOG, query=query, globals=globals, response=None
+                kind="InsightsQLMetadata", language=InsightsLanguage.INSIGHTS_SCRIPT, query=query, globals=globals, response=None
             ),
             team=self.team,
         )
 
     def _template(self, query: str) -> InsightsQLMetadataResponse:
         return get_insightsql_metadata(
-            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=HogLanguage.HOG_TEMPLATE, query=query, response=None),
+            query=InsightsQLMetadata(kind="InsightsQLMetadata", language=InsightsLanguage.INSIGHTS_TEMPLATE, query=query, response=None),
             team=self.team,
         )
 

@@ -1,6 +1,6 @@
 import { actions, afterMount, connect, kea, listeners, path, reducers, selectors } from 'kea'
 import { windowValues } from 'kea-window-values'
-import { Insights } from 'posthog-js'
+import { PostHog } from 'posthog-js'
 
 import { InsightsAppToolbarEvent } from 'lib/components/IframedToolbarBrowser/utils'
 
@@ -337,7 +337,7 @@ export const toolbarLogic = kea<toolbarLogicType>([
 
         piiWarning: [
             (s) => [s.posthog, s.piiMaskingEnabled],
-            (posthog: Insights | null, piiMaskingEnabled: boolean) => {
+            (posthog: PostHog | null, piiMaskingEnabled: boolean) => {
                 if (!posthog || !piiMaskingEnabled) {
                     return null
                 }

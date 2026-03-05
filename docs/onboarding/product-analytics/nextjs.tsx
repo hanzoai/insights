@@ -259,7 +259,7 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                 />
                             </Tab.Panel>
                             <Tab.Panel>
-                                <Markdown>Use the `useInsights` hook to access Insights in client components:</Markdown>
+                                <Markdown>Use the `usePostHog` hook to access Insights in client components:</Markdown>
                                 <CodeBlock
                                     blocks={[
                                         {
@@ -268,10 +268,10 @@ export const getNextJSClientSteps = (ctx: OnboardingComponentsContext): StepDefi
                                             code: dedent`
                                                 'use client'
 
-                                                import { useInsights } from 'posthog-js/react'
+                                                import { usePostHog } from 'posthog-js/react'
 
                                                 export default function CheckoutPage() {
-                                                    const posthog = useInsights()
+                                                    const posthog = usePostHog()
 
                                                     function handlePurchase() {
                                                         posthog.capture('purchase_completed', { amount: 99 })

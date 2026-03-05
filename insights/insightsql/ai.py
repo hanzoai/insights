@@ -249,12 +249,12 @@ def hit_openai(messages, user, posthog_properties=None) -> tuple[str, int, int]:
     return content, prompt_tokens, completion_tokens
 
 
-IDENTITY_MESSAGE_HOG = """Hog is Insights's own programming language. You write Custom code based on a prompt. You don't help with other knowledge.
+IDENTITY_MESSAGE_SCRIPT = """Insights Script is Insights's own programming language. You write Custom code based on a prompt. You don't help with other knowledge.
 
-Here is the Hog standard library. Dont use any other functions since they are not supported in Hog:
+Here is the Insights Script standard library. Dont use any other functions since they are not supported in Insights Script:
 
-Hog's standard library
-Hog's standard library includes the following functions and will expand. To see the the most update-to-date list, check the Python VM's stl/__init__.py file.
+Insights Script's standard library
+Insights Script's standard library includes the following functions and will expand. To see the the most update-to-date list, check the Python VM's stl/__init__.py file.
 
 Type conversion
 toString(arg: any): string
@@ -333,13 +333,13 @@ md5Hex(arg: string): string
 sha256Hex(arg: string): string
 sha256HmacChainHex(arg: string[]): string
 
-Here are examples of the syntax. Do not use any other functions since they are not supported in Hog:
+Here are examples of the syntax. Do not use any other functions since they are not supported in Insights Script:
 
 Syntax
 Comments
-Hog comments start with //. You can also use SQL style comments with -- or C++ style multi line blocks with /*.
+Insights Script comments start with //. You can also use SQL style comments with -- or C++ style multi line blocks with /*.
 
-// Hog comments start with //
+// Insights Script comments start with //
 -- You can also use SQL style comments with --
 /* or C++ style multi line
 blocks */
@@ -369,7 +369,7 @@ print('string' !~* 'I.G$') // false, case insensitive
 Arrays
 Supports both dot notation and bracket notation.
 
-Arrays in Hog (and our SQL flavor) are 1-indexed!
+Arrays in Insights Script (and our SQL flavor) are 1-indexed!
 
 let myArray := [1,2,3]
 print(myArray.2) // prints 2
@@ -377,7 +377,7 @@ print(myArray[2]) // prints 2
 Tuples
 Supports both dot notation and bracket notation.
 
-Tuples in Hog (and our SQL flavor) are 1-indexed!
+Tuples in Insights Script (and our SQL flavor) are 1-indexed!
 
 let myTuple := (1,2,3)
 print(myTuple.2) // prints 2
@@ -414,7 +414,7 @@ print(addNumbers(1, 2))
 
 let square := (a) -> a * a
 print(square(4))
-See Hog's standard library for a list of built-in functions.
+See Insights Script's standard library for a list of built-in functions.
 
 Logic
 
@@ -453,21 +453,21 @@ for (let food, value in arr) {
     print(food, value)
 }
 
-Here are some more rules around Hog:
+Here are some more rules around Insights Script:
 
 Here are a few key differences compared to other programming languages:
 
-- Variable assignment in Hog is done with the := operator, as = and == are both used for equality comparisons in SQL
+- Variable assignment in Insights Script is done with the := operator, as = and == are both used for equality comparisons in SQL
 - You must type out and, or and not. Currently && and ! raise syntax errors, whereas || is used as the string concatenation operator.
-- All arrays in Hog start from index 1. Yes, for real. Trust us, we know. However that's how SQL has always worked, so we adopted it.
+- All arrays in Insights Script start from index 1. Yes, for real. Trust us, we know. However that's how SQL has always worked, so we adopted it.
 - The easiest way to debug your code is to print() the variables in question, and then check the logs.
 - Strings must always be written with 'single quotes'. You may use f-string templates like f'Hello {name}'.
-- Never use arr[a:b]; Hog does not support slice syntax. Use substring(str, offset, length) for strings.
-- delete does not work in Hog.
+- Never use arr[a:b]; Insights Script does not support slice syntax. Use substring(str, offset, length) for strings.
+- delete does not work in Insights Script.
 
 """
 
-HOG_EXAMPLE_MESSAGE = """
+SCRIPT_EXAMPLE_MESSAGE = """
 Here are some valid Custom code examples:
 // Example 1: PII Data Hashing
 // Get the properties to hash from inputs and split by comma
@@ -752,8 +752,8 @@ return returnEvent"""
 TRANSFORMATION_LIMITATIONS_MESSAGE = """Insights Transformations can only modify individual incoming events. They cannot access or read person properties, historical data, or global state, because they run before person resolution. Their only purpose is to transform the structure of a single event (e.g., add properties, rename fields, enrich data) before ingestion. This means they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
 DESTINATION_LIMITATIONS_MESSAGE = """Insights Destinations have access to the event properties, including person properties and group properties. Just like Transformations they cannot perform logic that depends on previous values, such as incrementing a count or checking if a property already exists."""
 
-HOG_GRAMMAR_MESSAGE = """
-Here is the grammar for Hog:
+SCRIPT_GRAMMAR_MESSAGE = """
+Here is the grammar for Insights Script:
 parser grammar InsightsQLParser;
 options {
     tokenVocab = InsightsQLLexer;
@@ -1035,7 +1035,7 @@ stringContents : STRING_ESCAPE_TRIGGER columnExpr RBRACE | STRING_TEXT;
 // We will need to add F' to the start of the string to change the lexer's mode.
 fullTemplateString: QUOTE_SINGLE_TEMPLATE_FULL stringContentsFull* EOF ;
 stringContentsFull : FULL_STRING_ESCAPE_TRIGGER columnExpr RBRACE | FULL_STRING_TEXT;
-Leave out all comment string and return the hog code nicely formatted.
+Leave out all comment string and return the script code nicely formatted.
 These functions are not available in the current version of InsightsQL (NEVER USE THEM):
 - break
 - continue
@@ -2853,12 +2853,12 @@ Return ONLY the JSON object inside <filters> tags. Do not add any other text or 
 
 INSIGHTS_FUNCTION_INPUTS_SYSTEM_PROMPT = """You are an expert at creating input variable schemas for Insights custom functions.
 
-Your task is to analyze the hog code and create appropriate input variable schemas based on the instructions.
-CRITICAL: You must extract the EXACT variable names used in the hog code. Look for patterns like:
+Your task is to analyze the script code and create appropriate input variable schemas based on the instructions.
+CRITICAL: You must extract the EXACT variable names used in the script code. Look for patterns like:
 - inputs.variableName
 - inputs['variableName']
 - inputs["variableName"]
-The "key" field in the schema MUST match exactly what is used in the hog code after "inputs.". For example:
+The "key" field in the schema MUST match exactly what is used in the script code after "inputs.". For example:
 - If code uses inputs.propertiesToRedact, the key must be "propertiesToRedact" (NOT "properties_to_redact")
 - If code uses inputs.webhookUrl, the key must be "webhookUrl" (NOT "webhook_url")
 - If code uses inputs.api_key, the key must be "api_key" (NOT "apiKey")
@@ -2866,7 +2866,7 @@ The "key" field in the schema MUST match exactly what is used in the hog code af
 Return ONLY a valid JSON array of input schema objects inside <inputs_schema> tags."""
 
 INPUT_SCHEMA_TYPES_MESSAGE = """Input schema format should be a list of objects with these fields:
-- key: string (EXACT variable name as used in hog code, preserve camelCase/snake_case)
+- key: string (EXACT variable name as used in script code, preserve camelCase/snake_case)
 - type: string (one of: string, number, boolean, dictionary, choice, json, integration, integration_field, email)
 - label: string (human readable label)
 - description: string (description of what this input is for)

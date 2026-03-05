@@ -1,4 +1,4 @@
-import posthog, { Insights } from 'posthog-js'
+import posthog, { PostHog } from 'posthog-js'
 
 import { EventType, eventWithTime, fullSnapshotEvent } from '@posthog/rrweb-types'
 
@@ -417,7 +417,7 @@ function isLengthPrefixedSnappy(uint8Data: Uint8Array): boolean {
     return true
 }
 
-const lengthPrefixedSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: Insights): Promise<string> => {
+const lengthPrefixedSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: PostHog): Promise<string> => {
     const workerManager = getDecompressionWorkerManager(posthogInstance)
 
     // Phase 1: Parse and collect all compressed blocks
@@ -475,7 +475,7 @@ const lengthPrefixedSnappyDecompress = async (uint8Data: Uint8Array, posthogInst
     return decompressedParts.join('\n')
 }
 
-const rawSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: Insights): Promise<string> => {
+const rawSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: PostHog): Promise<string> => {
     const workerManager = getDecompressionWorkerManager(posthogInstance)
 
     const decompressedData = await workerManager.decompress(uint8Data, { isParallel: false })
@@ -485,7 +485,7 @@ const rawSnappyDecompress = async (uint8Data: Uint8Array, posthogInstance?: Insi
 }
 
 function reportParseStats(
-    posthogInstance: Insights | undefined,
+    posthogInstance: PostHog | undefined,
     snapshotCount: number,
     parseDuration: number,
     lineCount: number,
@@ -506,7 +506,7 @@ function reportParseStats(
 export const parseEncodedSnapshots = async (
     items: (RecordingSnapshot | EncodedRecordingSnapshot | string)[] | ArrayBuffer | Uint8Array,
     sessionId: string,
-    posthogInstance?: Insights,
+    posthogInstance?: PostHog,
     registerWindowId?: RegisterWindowIdCallback
 ): Promise<RecordingSnapshot[]> => {
     const startTime = performance.now()

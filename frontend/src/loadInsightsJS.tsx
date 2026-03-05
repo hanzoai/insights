@@ -1,4 +1,4 @@
-import posthog, { InsightsInterface } from 'posthog-js'
+import posthog, { PostHogInterface } from 'posthog-js'
 import { sampleOnProperty } from 'posthog-js/lib/src/extensions/sampling'
 
 import { FEATURE_FLAGS } from 'lib/constants'
@@ -13,7 +13,7 @@ const shouldDefer = (): boolean => {
     return sampleOnProperty(sessionId, 0.5)
 }
 
-const shouldTrackFramerate = (loadedInstance: InsightsInterface): boolean => {
+const shouldTrackFramerate = (loadedInstance: PostHogInterface): boolean => {
     return (
         !!window.POSTHOG_APP_CONTEXT?.preflight?.is_debug ||
         (!!loadedInstance.getFeatureFlag(FEATURE_FLAGS.TRACK_REACT_FRAMERATE) &&

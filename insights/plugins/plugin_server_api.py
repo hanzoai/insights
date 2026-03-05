@@ -43,7 +43,7 @@ def reload_insights_functions_on_workers(team_id: int, insights_function_ids: li
 
 
 def reload_insights_flows_on_workers(team_id: int, insights_flow_ids: list[str]):
-    logger.info(f"Reloading hog flows {insights_flow_ids} on workers")
+    logger.info(f"Reloading insights flows {insights_flow_ids} on workers")
     publish_message("reload-hog-flows", {"teamId": team_id, "insightsFlowIds": insights_flow_ids})
 
 
@@ -67,8 +67,8 @@ def populate_plugin_capabilities_on_workers(plugin_id: str):
     publish_message("populate-plugin-capabilities", {"pluginId": plugin_id})
 
 
-def create_hog_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
-    logger.info(f"Creating hog invocation test for custom function {insights_function_id} on workers")
+def create_script_invocation_test(team_id: int, insights_function_id: str, payload: dict) -> requests.Response:
+    logger.info(f"Creating script invocation test for custom function {insights_function_id} on workers")
     return requests.post(
         CDP_API_URL + f"/api/projects/{team_id}/insights_functions/{insights_function_id}/invocations",
         json=payload,
@@ -77,7 +77,7 @@ def create_hog_invocation_test(team_id: int, insights_function_id: str, payload:
 
 
 def create_insights_flow_invocation_test(team_id: int, insights_flow_id: str, payload: dict) -> requests.Response:
-    logger.info(f"Creating hog flow invocation test for hog flow {insights_flow_id} on workers")
+    logger.info(f"Creating insights flow invocation test for flow {insights_flow_id} on workers")
     return requests.post(
         CDP_API_URL + f"/api/projects/{team_id}/insights_flows/{insights_flow_id}/invocations",
         json=payload,

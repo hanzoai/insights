@@ -563,7 +563,7 @@ class TestBytecode(BaseTest):
         )
 
     def test_bytecode_execute(self):
-        # Test a simple operations. The Hog execution itself is tested under common/hogvm/python/
+        # Test a simple operations. The script execution itself is tested under common/hogvm/python/
         self.assertEqual(execute_hog("1 + 2", team=self.team).result, 3)
         self.assertEqual(
             execute_hog(

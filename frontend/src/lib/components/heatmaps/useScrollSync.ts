@@ -1,4 +1,4 @@
-import { Insights } from 'posthog-js'
+import { PostHog } from 'posthog-js'
 import { useEffect, useRef } from 'react'
 
 import { toolbarConfigLogic } from '~/toolbar/toolbarConfigLogic'
@@ -16,7 +16,7 @@ export function useScrollSync(enabled: boolean = true): {
             return
         }
 
-        let posthogInstance: Insights | null = null
+        let posthogInstance: PostHog | null = null
         try {
             posthogInstance = toolbarConfigLogic.values.posthog
         } catch {

@@ -4,7 +4,7 @@ from typing import ClassVar, Optional, Union, cast
 from opentelemetry import trace
 
 from insights.schema import (
-    HogLanguage,
+    InsightsLanguage,
     InsightsQLFilters,
     InsightsQLMetadata,
     InsightsQLMetadataResponse,
@@ -315,7 +315,7 @@ class InsightsQLQueryExecutor:
                 from insights.insightsql.metadata import get_insightsql_metadata
 
                 self.metadata = get_insightsql_metadata(
-                    InsightsQLMetadata(language=HogLanguage.HOG_QL, query=self.insightsql, debug=True),
+                    InsightsQLMetadata(language=InsightsLanguage.INSIGHTS_QL, query=self.insightsql, debug=True),
                     self.team,
                     self.select_query,
                     self.clickhouse_prepared_ast,

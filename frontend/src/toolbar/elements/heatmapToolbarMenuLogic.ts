@@ -3,7 +3,7 @@ import { loaders } from 'kea-loaders'
 import { encodeParams } from 'kea-router'
 import { subscriptions } from 'kea-subscriptions'
 import { windowValues } from 'kea-window-values'
-import { Insights } from 'posthog-js'
+import { PostHog } from 'posthog-js'
 import { collectAllElementsDeep, querySelectorAllDeep } from 'query-selector-shadow-dom'
 
 import { elementToSelector } from 'lib/actionUtils'
@@ -310,7 +310,7 @@ export const heatmapToolbarMenuLogic = kea<heatmapToolbarMenuLogicType>([
 
         scrollDepthPosthogJsError: [
             (s) => [s.posthog],
-            (posthog: Insights | null): 'version' | 'disabled' | null => {
+            (posthog: PostHog | null): 'version' | 'disabled' | null => {
                 if (!posthog) {
                     return null
                 }
